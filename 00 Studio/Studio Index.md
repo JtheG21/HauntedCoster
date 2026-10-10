@@ -31,7 +31,7 @@ tags:
 - `99 Templates/`: `T - *` templates
 
 ## Needs human attention
-- **Approve:** [[EXP-0001-M2-Validation-Experiments]]
+- **Approve:** [[03 Roadmap]] (M2–M8) · M2 tasks (start with [[TASK-0002-Ability-Framework]] and [[TASK-0009-Multi-Client-Test-Harness]]) · [[EXP-0001-M2-Validation-Experiments]]
 - The 2-player test for [[TASK-0001-Collectible-Pickup]] ([[TEST-20261010-01]])
 
 ## All notes

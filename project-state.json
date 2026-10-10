@@ -4,12 +4,22 @@
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "default.project.json",
   "dispatch_mode": "dry-run",
-  "updated": "2026-10-10T14:13:59",
+  "updated": "2026-10-10T16:35:16",
   "task_counts": {
-    "done": 1
+    "done": 1,
+    "proposed": 8
   },
   "ready": [],
-  "needs_human": [],
+  "needs_human": [
+    "TASK-0002",
+    "TASK-0003",
+    "TASK-0004",
+    "TASK-0005",
+    "TASK-0006",
+    "TASK-0007",
+    "TASK-0008",
+    "TASK-0009"
+  ],
   "api_spend_this_month_usd": 0.0,
   "active_game": "GAME-001",
   "conventions": "00 Studio/Obsidian Conventions.md"

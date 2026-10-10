@@ -11,7 +11,7 @@ tags:
 ---
 # GAME-001: Rival Realms (working title; repo name Rg1)
 
-**Phase:** M1 → M2: design approved, roadmap next · **Code:** `src/` (Rojo 7.7.0) · **Task status:** `tasks/queue.json`
+**Phase:** M2 planning: [[03 Roadmap]] proposed, 8 tasks proposed · **Code:** `src/` (Rojo 7.7.0) · **Task status:** `tasks/queue.json`
 
 ## Documents
 [[01 Game Design]] · [[02 Technical Architecture]] · [[03 Roadmap]]
@@ -20,6 +20,14 @@ tags:
 | Task | Status | Audit |
 |---|---|---|
 | [[TASK-0001-Collectible-Pickup]] | done | [[AUD-20261010-TASK-0001-01]] (pass) |
+| [[TASK-0002-Ability-Framework]] | proposed | — |
+| [[TASK-0003-Factions-And-Echo-Clone]] | proposed | — |
+| [[TASK-0004-Ki-Burst]] | proposed | — |
+| [[TASK-0005-Convergence-Gate]] | proposed | — |
+| [[TASK-0006-Match-Flow-And-Onboarding]] | proposed | — |
+| [[TASK-0007-Ring-Out-Finale]] | proposed | — |
+| [[TASK-0008-Prototype-Telemetry]] | proposed | — |
+| [[TASK-0009-Multi-Client-Test-Harness]] | proposed | — |
 
 ## Research (M1)
 - [[RSH-20261010-Candidate-Comparison]]: decided (A)
