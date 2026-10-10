@@ -4,21 +4,23 @@
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "default.project.json",
   "dispatch_mode": "dry-run",
-  "updated": "2026-10-10T16:35:16",
+  "updated": "2026-10-10T16:37:54",
   "task_counts": {
     "done": 1,
-    "proposed": 8
+    "ready": 2,
+    "proposed": 6
   },
-  "ready": [],
-  "needs_human": [
+  "ready": [
     "TASK-0002",
+    "TASK-0009"
+  ],
+  "needs_human": [
     "TASK-0003",
     "TASK-0004",
     "TASK-0005",
     "TASK-0006",
     "TASK-0007",
-    "TASK-0008",
-    "TASK-0009"
+    "TASK-0008"
   ],
   "api_spend_this_month_usd": 0.0,
   "active_game": "GAME-001",

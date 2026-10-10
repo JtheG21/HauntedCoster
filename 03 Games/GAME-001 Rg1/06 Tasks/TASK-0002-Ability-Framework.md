@@ -3,7 +3,7 @@ id: TASK-0002
 title: Ability Framework
 type: task
 project: GAME-001
-status: proposed
+status: ready
 priority: high
 risk: medium
 owner: executor

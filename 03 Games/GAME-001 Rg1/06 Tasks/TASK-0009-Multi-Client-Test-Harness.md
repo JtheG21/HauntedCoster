@@ -3,7 +3,7 @@ id: TASK-0009
 title: Multi-Client Test Harness
 type: task
 project: GAME-001
-status: proposed
+status: ready
 priority: medium
 risk: low
 owner: executor

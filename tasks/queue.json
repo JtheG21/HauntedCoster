@@ -78,7 +78,7 @@
       "id": "TASK-0002",
       "title": "Ability Framework",
       "project": "GAME-001",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0002-Ability-Framework",
@@ -89,6 +89,15 @@
         "Requests during cooldown, over the rate limit (>5/s), with wrong types or unknown ids are rejected and don't error",
         "Pure rules have passing specs (cooldown boundary, rate limit, NaN/nil args)",
         "`scripts/check.sh` passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-10T16:37:54",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
@@ -210,7 +219,7 @@
       "id": "TASK-0009",
       "title": "Multi-Client Test Harness",
       "project": "GAME-001",
-      "status": "proposed",
+      "status": "ready",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0009-Multi-Client-Test-Harness",
@@ -219,6 +228,15 @@
         "A documented procedure that a human can run in \u22645 min, or an automated method that Claude can run",
         "[[TEST-20261010-02]] executed with it (pass or a filed BUG)",
         "Any tool needing install is listed for approval, not installed"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-10T16:37:54",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     }
   ]
