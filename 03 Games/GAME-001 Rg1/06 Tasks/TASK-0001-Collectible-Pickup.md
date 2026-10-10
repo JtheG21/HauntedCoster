@@ -93,7 +93,7 @@ Low risk: no persistence and no remotes. The main thing to check is the debounce
 
 ## Outcome
 Merged to `main` on 2026-10-10 (merge approved by jg). Audit [[AUD-20261010-TASK-0001-01]]: pass (4 minor, 3 nit).
-- 2-player simultaneous-touch test: not confirmed before merge. Still open.
+- 2-player simultaneous-touch test: not confirmed before merge. Automated attempt blocked on 2026-10-10. Manual procedure in [[TEST-20261010-02]].
 - Follow-ups (not done yet): pickup rate/teleport limits, tighter `MaxPickupDistance`, a portable type-check (skip should not count as PASS), `CanQuery=false` on hidden coins.
 - Playtest: [[TEST-20261010-01]] · System: [[SYS-Collectible-Service]]
 - Lessons: [[LES-0002-Typed-Test-Context]] · Retrospective: [[RETRO-M0-Workflow-Foundation]]

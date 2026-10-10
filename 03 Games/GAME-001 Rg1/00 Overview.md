@@ -25,11 +25,12 @@ tags:
 - [[SYS-Collectible-Service]]
 
 ## Playtests
-- [[TEST-20261010-01]]: TASK-0001, single player, Studio MCP
+- [[TEST-20261010-01]]: TASK-0001, single player, Studio MCP (pass)
+- [[TEST-20261010-02]]: TASK-0001, two players (**blocked**: automation unavailable, manual steps ready)
 
 ## Retrospectives
 - [[RETRO-M0-Workflow-Foundation]]
 
 ## Open items
-- The 2-player simultaneous-touch test for TASK-0001 hasn't been done yet.
+- The 2-player simultaneous-touch test for TASK-0001 is blocked on manual execution: [[TEST-20261010-02]]
 - Hardening follow-ups from the audit (not yet a task).
