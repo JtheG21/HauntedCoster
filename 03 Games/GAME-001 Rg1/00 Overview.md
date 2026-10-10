@@ -9,9 +9,9 @@ updated: 2026-10-10
 tags:
   - game/overview
 ---
-# GAME-001: Rg1 (working title)
+# GAME-001: Rival Realms (working title; repo name Rg1)
 
-**Phase:** M0 done → M1 Concept · **Code:** `src/` (Rojo 7.7.0) · **Task status:** `tasks/queue.json`
+**Phase:** M1: direction approved, design v0.1 proposed · **Code:** `src/` (Rojo 7.7.0) · **Task status:** `tasks/queue.json`
 
 ## Documents
 [[01 Game Design]] · [[02 Technical Architecture]] · [[03 Roadmap]]
@@ -22,7 +22,16 @@ tags:
 | [[TASK-0001-Collectible-Pickup]] | done | [[AUD-20261010-TASK-0001-01]] (pass) |
 
 ## Research (M1)
-- [[RSH-20261010-Candidate-Comparison]]: **awaiting your decision** (top two: co-op physics obby, co-op anomaly horror)
+- [[RSH-20261010-Candidate-Comparison]]: decided (A)
+- [[RSH-20261010-Anime-IP-And-Demand]]
+
+## Decisions
+- [[ADR-0002-Game-Direction]]: approved
+- [[ADR-0003-Original-Factions-IP-Policy]]: **proposed**
+
+## Design & validation
+- [[01 Game Design]] v0.1: **proposed**
+- [[EXP-0001-M2-Validation-Experiments]]: **proposed**
 - Baseline: [[RSH-20261010-Roblox-Platform-Economics]]
 
 ## Systems

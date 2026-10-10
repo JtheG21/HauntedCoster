@@ -3,7 +3,7 @@ id: RSH-20261010-Candidate-Comparison
 title: M1 Candidate Comparison
 type: research
 project: GAME-001
-status: proposed
+status: done
 confidence: low
 created: 2026-10-10
 updated: 2026-10-10
@@ -17,7 +17,7 @@ related:
   - "[[RSH-20261010-Roblox-Platform-Economics]]"
   - "[[00 Overview]]"
 ---
-# M1 candidate comparison: **awaiting human decision**
+# M1 candidate comparison: **decided**
 
 > These scores are structured judgment based on public snapshots, **not a market forecast**. CCU and visits are third-party readings that change daily, and none of them measure profit. The status stays `proposed` until you pick a direction.
 
@@ -72,3 +72,6 @@ Considered and dropped early (no note): a cozy grow/farm sim (Grow a Garden need
 
 ## Decision required
 Pick A, B, or "spike both, then decide". This note stays `proposed` until then.
+
+## Decision (2026-10-10)
+The user chose **A**, as an anime-inspired variant with rivals who must cooperate and a last-one-standing finale. See [[ADR-0002-Game-Direction]]. B, C and D are archived. This note isn't edited further.

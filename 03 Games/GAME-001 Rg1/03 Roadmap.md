@@ -19,8 +19,9 @@ tags:
 
 ## M1: Concept (next)
 - [x] Research 4 candidate concepts + platform baseline (`RSH-` notes, 2026-10-10). Ranking in [[RSH-20261010-Candidate-Comparison]]
-- [ ] **Human decision:** pick a direction (A, B, or spike both)
-- [ ] Pick a core loop, write [[01 Game Design]] v0.1, human approval
+- [x] Direction chosen: anime-inspired rival co-op physics obby ([[ADR-0002-Game-Direction]])
+- [ ] **Human approval:** [[01 Game Design]] v0.1, [[ADR-0003-Original-Factions-IP-Policy]], [[EXP-0001-M2-Validation-Experiments]]
+- [ ] Production roadmap M2–M8 with tasks (Phase 5, after approval)
 
 ## M2: Vertical slice
 - [ ] Core loop playable in Studio

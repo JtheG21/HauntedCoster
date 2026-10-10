@@ -14,4 +14,4 @@ One `EXP-####` note per hypothesis or experiment (template `T - Monetization Exp
 
 | Experiment | Game | Status | Result |
 |---|---|---|---|
-| *(none yet)* | | | |
+| [[EXP-0001-M2-Validation-Experiments]] (part E: cosmetic interest, no purchases) | GAME-001 | proposed | — |
