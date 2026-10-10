@@ -3,7 +3,7 @@ id: TASK-0002
 title: Ability Framework
 type: task
 project: GAME-001
-status: in_review
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -88,5 +88,6 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 
 ## Audits
 - [[AUD-20261010-TASK-0002-01]]: attempt 1, **pass** (4 minor, 2 nit)
+- [[AUD-20261010-TASK-0002-02]]: attempt 2 (revision 1 delta), **pass**: F1–F5 fixed. New: N1 minor (Dash force/seated not run in Play), N2–N4 nits
 
 ## Outcome

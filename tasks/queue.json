@@ -78,7 +78,7 @@
       "id": "TASK-0002",
       "title": "Ability Framework",
       "project": "GAME-001",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0002-Ability-Framework",
@@ -133,6 +133,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T16:59:34",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -152,6 +158,11 @@
           "time": "2026-10-10T16:44:05",
           "result": "pass",
           "report": "06 QA/AUD-20261010-TASK-0002-01.md"
+        },
+        {
+          "time": "2026-10-10T16:59:34",
+          "result": "pass",
+          "report": "06 QA/AUD-20261010-TASK-0002-02.md"
         }
       ],
       "revisions": 1
