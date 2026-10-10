@@ -48,7 +48,6 @@ tags:
 ## Playtests
 - [[TEST-20261010-01]]: TASK-0001, single player, Studio MCP (pass)
 - [[TEST-20261010-02]]: TASK-0001, two players, **pass** (automated through StudioTestService)
-- [[TEST-20261010-03]]: TASK-0002 ability framework, single player, pass
 
 ## Retrospectives
 - [[RETRO-M0-Workflow-Foundation]]

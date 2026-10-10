@@ -58,7 +58,7 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 
 **Results:** [[TEST-20261010-02]] **passed** in 2 consecutive automated runs (4/4 race rounds exactly 1 reward, 0 duplicates, legit 1/1). Early round-1 misses were diagnosed as a harness readiness artifact ([[LES-0004-Wait-For-Client-Physics]]).
 
-**Check results:** `scripts/check.sh` ALL CHECKS PASSED.
+**Check results:** `scripts/check.sh` ALL CHECKS PASSED on the code. **Correction:** commit `6c9ff2d` and the `record-exec` were made while the vault check was failing (a broken link to TEST-20261010-03, which lives on the TASK-0002 branch). The chained command didn't stop on the failure. Fixed in the next commit, and check.sh is green again. Process fix: gate commits on `scripts/check.sh` exit status, not on filtered output.
 
 **Incidents:** `rojo serve` crashed on a branch switch ([[LES-0003-Rojo-Crash-On-Branch-Switch]]). A double test run in one MCP call timed out, and Studio recovered when the session ended.
 
