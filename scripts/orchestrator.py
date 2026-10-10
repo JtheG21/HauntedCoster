@@ -26,6 +26,8 @@ STATES = {
 }
 TERMINAL = {"done", "archived"}
 NEEDS_HUMAN = ("proposed", "approved", "blocked")
+GEN_START = "<!-- orchestrator:generated:start -->"
+GEN_END = "<!-- orchestrator:generated:end -->"
 RISKS = {"low", "medium", "high"}
 ID_RE = re.compile(r"^TASK-\d{4}$")
 REQUIRED = ("id", "title", "status", "risk", "depends_on", "acceptance_criteria")
@@ -332,10 +334,13 @@ class Project:
     def report(self) -> Path:
         today = dt.date.today().isoformat()
         stamp = today.replace("-", "")
-        lines = [
+        header = [
             "---", f"id: HLT-{stamp}", f"title: Health report {today}", "type: health", "status: done",
             f"created: {today}", f"updated: {today}", "tags:", "  - workflow/health", "---",
             f"# Health report: {today}", "",
+        ]
+        lines = [
+            GEN_START, f"## Task snapshot (generated {now()})", "",
             "| Task | Title | Status | Risk | Revisions |", "|---|---|---|---|---|",
         ]
         for t in self.tasks:
@@ -348,10 +353,22 @@ class Project:
         subs = sum(1 for e in ledger if e.get("kind") == "subscription")
         lines += ["", "## Usage",
                   f"- API spend this month: ${self.api_spend():.2f} / ${float(self.budget.get('monthly_limit_usd', 0)):.2f}",
-                  f"- Subscription sessions logged: {subs}", "", "Related: [[Studio Index]]"]
+                  f"- Subscription sessions logged: {subs}", GEN_END]
+        block = "\n".join(lines)
         out = self.reviews_dir / f"HLT-{stamp}.md"
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text("\n".join(lines) + "\n")
+        if out.exists():
+            # Never discard hand-written content: replace only the generated block, or append it.
+            text = out.read_text()
+            if GEN_START in text and GEN_END in text:
+                head, rest = text.split(GEN_START, 1)
+                text = head + block + rest.split(GEN_END, 1)[1]
+            else:
+                text = text.rstrip("\n") + "\n\n" + block + "\n"
+            text = re.sub(r"^updated:.*$", f"updated: {today}", text, count=1, flags=re.M)
+            out.write_text(text)
+        else:
+            out.write_text("\n".join(header) + "\n" + block + "\n\nRelated: [[Studio Index]]\n")
         self._write_state()
         return out
 

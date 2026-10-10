@@ -186,6 +186,18 @@ class TestBudgetAndDispatch(Base):
         with self.assertRaises(orch.OrchestratorError):
             p.dispatch("TASK-0001", "executor", live=True)
 
+    def test_report_preserves_handwritten_content(self):
+        reviews = self.root / "08 Reviews"
+        reviews.mkdir()
+        self.cli("report")
+        path = next(reviews.glob("HLT-*.md"))
+        path.write_text(path.read_text() + "\n## Baseline audit\nhand-written\n")
+        self.cli("report")
+        self.cli("report")
+        text = path.read_text()
+        self.assertIn("hand-written", text)
+        self.assertEqual(text.count(orch.GEN_START), 1)
+
     def test_report_and_state(self):
         code, out = self.cli("report")
         self.assertEqual(code, 0, out)

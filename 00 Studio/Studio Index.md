@@ -16,7 +16,7 @@ tags:
 ## Active games
 | ID | Game | Phase | Overview |
 |---|---|---|---|
-| GAME-001 | Rg1 (working title) | M1 Concept | [[00 Overview]] |
+| GAME-001 | Rival Realms (working title) | M2: prototype planning | [[00 Overview]] |
 
 ## Folders
 - `01 Inbox/`: raw ideas, waiting to be triaged
@@ -31,8 +31,8 @@ tags:
 - `99 Templates/`: `T - *` templates
 
 ## Needs human attention
+- **Approve:** [[EXP-0001-M2-Validation-Experiments]]
 - The 2-player test for [[TASK-0001-Collectible-Pickup]] ([[TEST-20261010-01]])
-- Set Obsidian → Settings → Templates → folder to `99 Templates`
 
 ## All notes
 ![[Notes.base]]

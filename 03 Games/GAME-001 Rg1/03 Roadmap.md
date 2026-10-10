@@ -18,8 +18,11 @@ tags:
 - [x] Obsidian conventions adopted ([[Obsidian Conventions]])
 
 ## M1: Concept (next)
-- [ ] Research 2–3 reference games (`RSH-` notes)
-- [ ] Pick a core loop, write [[01 Game Design]] v0.1, human approval
+- [x] Research 4 candidate concepts + platform baseline (`RSH-` notes, 2026-10-10). Ranking in [[RSH-20261010-Candidate-Comparison]]
+- [x] Direction chosen: anime-inspired rival co-op physics obby ([[ADR-0002-Game-Direction]])
+- [x] Design v0.1 and IP policy approved (2026-10-10)
+- [ ] [[EXP-0001-M2-Validation-Experiments]] still `proposed`
+- [ ] Production roadmap M2–M8 with tasks (Phase 5, after approval)
 
 ## M2: Vertical slice
 - [ ] Core loop playable in Studio
