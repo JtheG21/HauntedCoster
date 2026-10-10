@@ -1,0 +1,24 @@
+# Project place file
+/Rg1.rbxlx
+
+# Roblox Studio lock files
+/*.rbxlx.lock
+/*.rbxl.lock
+
+sourcemap.json
+
+# Obsidian local/per-machine state (plugin code + settings may hold keys)
+.obsidian/workspace*.json
+.obsidian/plugins/
+Chats/
+Agents/Memories/
+
+# Secrets and local-only files
+.env
+.env.*
+!.env.example
+
+# Python / OS
+__pycache__/
+*.pyc
+.DS_Store
