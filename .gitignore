@@ -22,4 +22,4 @@ Agents/Memories/
 __pycache__/
 *.pyc
 .DS_Store
-reports/prompts/
+tasks/prompts/

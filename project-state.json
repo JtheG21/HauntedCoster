@@ -1,6 +1,6 @@
 {
   "project": "Rg1",
-  "phase": "M0 workflow foundation",
+  "phase": "M1 concept",
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "default.project.json",
   "dispatch_mode": "dry-run",
@@ -10,5 +10,7 @@
   },
   "ready": [],
   "needs_human": [],
-  "api_spend_this_month_usd": 0.0
+  "api_spend_this_month_usd": 0.0,
+  "active_game": "GAME-001",
+  "conventions": "00 Studio/Obsidian Conventions.md"
 }

@@ -1,0 +1,48 @@
+filters:
+  and:
+    - 'file.ext == "md"'
+    - 'type'
+    - 'type != "index"'
+    - '!file.inFolder("99 Templates")'
+views:
+  - type: table
+    name: All notes
+    groupBy:
+      property: type
+      direction: ASC
+    order:
+      - file.name
+      - status
+      - project
+      - updated
+  - type: table
+    name: Open tasks
+    filters:
+      and:
+        - 'type == "task"'
+        - 'status != "done"'
+        - 'status != "archived"'
+    order:
+      - file.name
+      - status
+      - priority
+      - project
+  - type: table
+    name: Audits
+    filters:
+      and:
+        - 'type == "audit"'
+    order:
+      - file.name
+      - task_id
+      - verdict
+      - created
+  - type: table
+    name: Lessons
+    filters:
+      and:
+        - 'type == "lesson"'
+    order:
+      - file.name
+      - category
+      - updated

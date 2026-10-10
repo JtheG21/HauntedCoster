@@ -2,13 +2,14 @@
   "version": 1,
   "tasks": [
     {
-      "id": "T-001",
+      "id": "TASK-0001",
       "title": "Prototype: server-authoritative collectible pickup + leaderstats",
+      "project": "GAME-001",
       "status": "done",
       "risk": "low",
       "depends_on": [],
       "branch": "task/T-001-collectibles",
-      "spec": "tasks/specs/T-001.md",
+      "note": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0001-Collectible-Pickup.md",
       "acceptance_criteria": [
         "Each player gets leaderstats.Coins = 0 on join",
         "Server spawns N collectibles from shared config in a Workspace folder",
@@ -48,6 +49,12 @@
           "from": "awaiting_merge",
           "to": "done",
           "note": "merge approved by jg"
+        },
+        {
+          "time": "2026-10-10T14:40:00",
+          "from": "done",
+          "to": "done",
+          "note": "renamed T-001 -> TASK-0001 under Obsidian conventions; earlier history uses the old status names (approved=ready, in_audit=in_review, awaiting_merge=approved)"
         }
       ],
       "executions": [
@@ -61,10 +68,11 @@
         {
           "time": "2026-10-10T14:12:51",
           "result": "pass",
-          "report": "reports/audits/T-001-attempt1.md"
+          "report": "06 QA/AUD-20261010-TASK-0001-01.md"
         }
       ],
-      "merge_approved_by": "jg"
+      "merge_approved_by": "jg",
+      "migrated_from": "T-001"
     }
   ]
 }

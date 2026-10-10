@@ -12,9 +12,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import orchestrator as orch  # noqa: E402
 
 
-def task(tid, status="proposed", deps=None):
-    return {"id": tid, "title": f"Task {tid}", "status": status, "risk": "low",
-            "depends_on": deps or [], "branch": f"task/{tid}", "acceptance_criteria": ["works"]}
+def task(tid, status="proposed", deps=None, note=None):
+    t = {"id": tid, "title": f"Task {tid}", "status": status, "risk": "low",
+         "depends_on": deps or [], "branch": f"task/{tid}", "acceptance_criteria": ["works"]}
+    if note:
+        t["note"] = note
+    return t
 
 
 class Base(unittest.TestCase):
@@ -22,16 +25,19 @@ class Base(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
         (self.root / "tasks").mkdir()
-        (self.root / "workflow").mkdir()
+        (self.root / "00 Studio").mkdir()
+        (self.root / "06 QA").mkdir()
+        for i in range(3):
+            (self.root / "06 QA" / f"a{i}.md").write_text("audit")
         self.write_budget({"monthly_limit_usd": 10, "per_task_limit_usd": 3, "max_revisions": 2,
                            "dispatch_mode": "dry-run"})
-        self.write_queue([task("T-001"), task("T-002", deps=["T-001"])])
+        self.write_queue([task("TASK-0001"), task("TASK-0002", deps=["TASK-0001"])])
 
     def tearDown(self):
         self.tmp.cleanup()
 
     def write_budget(self, b):
-        (self.root / "workflow" / "budget.json").write_text(json.dumps(b))
+        (self.root / "00 Studio" / "budget.json").write_text(json.dumps(b))
 
     def write_queue(self, tasks):
         (self.root / "tasks" / "queue.json").write_text(json.dumps({"version": 1, "tasks": tasks}))
@@ -51,15 +57,15 @@ class TestValidation(Base):
         self.assertEqual(self.proj().validate(), [])
 
     def test_unknown_dep_bad_status_and_duplicate(self):
-        bad = task("T-003", status="weird", deps=["T-999"])
-        self.write_queue([task("T-001"), task("T-001"), bad])
+        bad = task("TASK-0003", status="weird", deps=["TASK-9999"])
+        self.write_queue([task("TASK-0001"), task("TASK-0001"), bad])
         errors = "\n".join(self.proj().validate())
         self.assertIn("duplicate id", errors)
         self.assertIn("invalid status", errors)
-        self.assertIn("unknown task T-999", errors)
+        self.assertIn("unknown task TASK-9999", errors)
 
     def test_cycle_detected(self):
-        self.write_queue([task("T-001", deps=["T-002"]), task("T-002", deps=["T-001"])])
+        self.write_queue([task("TASK-0001", deps=["TASK-0002"]), task("TASK-0002", deps=["TASK-0001"])])
         self.assertTrue(any("cycle" in e for e in self.proj().validate()))
 
     def test_invalid_json_reported(self):
@@ -73,91 +79,119 @@ class TestWorkflow(Base):
     def test_cannot_start_without_approval(self):
         p = self.proj()
         with self.assertRaises(orch.OrchestratorError):
-            p.start("T-001")
+            p.start("TASK-0001")
 
     def test_dependencies_gate_start(self):
         p = self.proj()
-        p.approve("T-002", "jg")
+        p.approve("TASK-0002", "jg")
         with self.assertRaises(orch.OrchestratorError):
-            p.start("T-002")
+            p.start("TASK-0002")
 
     def test_happy_path(self):
         p = self.proj()
-        p.approve("T-001", "jg")
-        p.start("T-001")
-        p.record_exec("T-001", "pass", "checks ok")
-        p.record_audit("T-001", "pass", "reports/audits/T-001-attempt1.md")
-        self.assertEqual(p.task("T-001")["status"], "awaiting_merge")
-        p.approve_merge("T-001", "jg")
+        p.approve("TASK-0001", "jg")
+        p.start("TASK-0001")
+        p.record_exec("TASK-0001", "pass", "checks ok")
+        p.record_audit("TASK-0001", "pass", "06 QA/a0.md")
+        self.assertEqual(p.task("TASK-0001")["status"], "approved")
+        p.approve_merge("TASK-0001", "jg")
         p.save()
-        self.assertEqual(self.proj().task("T-001")["status"], "done")
+        self.assertEqual(self.proj().task("TASK-0001")["status"], "done")
         self.assertEqual([t["id"] for t in self.proj().ready()], [])
 
     def test_revision_limit_blocks(self):
         p = self.proj()
-        p.approve("T-001", "jg")
+        p.approve("TASK-0001", "jg")
         for attempt in range(3):
-            p.start("T-001")
-            p.record_exec("T-001", "pass", "")
-            p.record_audit("T-001", "fail", f"a{attempt}.md")
-        t = p.task("T-001")
+            p.start("TASK-0001")
+            p.record_exec("TASK-0001", "pass", "")
+            p.record_audit("TASK-0001", "fail", f"06 QA/a{attempt}.md")
+        t = p.task("TASK-0001")
         self.assertEqual(t["status"], "blocked")
         self.assertEqual(t["revisions"], 3)
         with self.assertRaises(orch.OrchestratorError):
-            p.start("T-001")
+            p.start("TASK-0001")
 
     def test_audit_cannot_be_skipped(self):
         p = self.proj()
-        p.approve("T-001", "jg")
-        p.start("T-001")
+        p.approve("TASK-0001", "jg")
+        p.start("TASK-0001")
         with self.assertRaises(orch.OrchestratorError):
-            p.approve_merge("T-001", "jg")
+            p.approve_merge("TASK-0001", "jg")
 
     def test_unblock_resets(self):
         p = self.proj()
-        t = p.task("T-001")
+        t = p.task("TASK-0001")
         t["status"], t["revisions"] = "blocked", 3
-        p.unblock("T-001", "approved", "jg")
-        self.assertEqual((t["status"], t["revisions"]), ("approved", 0))
+        p.unblock("TASK-0001", "ready", "jg")
+        self.assertEqual((t["status"], t["revisions"]), ("ready", 0))
+
+
+class TestNoteSync(Base):
+    def setUp(self):
+        super().setUp()
+        self.note = self.root / "TASK-0001-X.md"
+        self.note.write_text("---\nid: TASK-0001\nstatus: proposed\nupdated: 2000-01-01\n---\n# Body\n")
+        self.write_queue([task("TASK-0001", note="TASK-0001-X.md")])
+
+    def test_transition_updates_note(self):
+        p = self.proj()
+        p.approve("TASK-0001", "jg")
+        text = self.note.read_text()
+        self.assertIn("status: ready", text)
+        self.assertNotIn("2000-01-01", text)
+        self.assertTrue(text.endswith("# Body\n"))
+
+    def test_missing_note_is_validation_error(self):
+        self.note.unlink()
+        self.assertTrue(any("note not found" in e for e in self.proj().validate()))
+
+    def test_audit_report_must_exist(self):
+        p = self.proj()
+        p.approve("TASK-0001", "jg")
+        p.start("TASK-0001")
+        p.record_exec("TASK-0001", "pass", "")
+        with self.assertRaises(orch.OrchestratorError):
+            p.record_audit("TASK-0001", "pass", "06 QA/missing.md")
 
 
 class TestBudgetAndDispatch(Base):
     def test_api_limit_stops_start(self):
         p = self.proj()
-        p.approve("T-001", "jg")
-        p.record_usage("T-001", "api", "executor", 10.0, None, 1000, "m", "")
+        p.approve("TASK-0001", "jg")
+        p.record_usage("TASK-0001", "api", "executor", 10.0, None, 1000, "m", "")
         with self.assertRaises(orch.OrchestratorError) as cm:
-            p.start("T-001")
+            p.start("TASK-0001")
         self.assertIn("monthly API limit", str(cm.exception))
 
     def test_subscription_usage_not_counted_as_spend(self):
         p = self.proj()
-        p.record_usage("T-001", "subscription", "executor", None, 5.0, None, "m", "")
+        p.record_usage("TASK-0001", "subscription", "executor", None, 5.0, None, "m", "")
         self.assertEqual(p.api_spend(), 0)
 
     def test_dispatch_dry_run_writes_prompt_only(self):
         p = self.proj()
-        p.approve("T-001", "jg")
-        p.start("T-001")
-        msg = p.dispatch("T-001", "executor", live=False)
+        p.approve("TASK-0001", "jg")
+        p.start("TASK-0001")
+        msg = p.dispatch("TASK-0001", "executor", live=False)
         self.assertIn("[dry-run]", msg)
-        prompt = (self.root / "reports" / "prompts" / "T-001-executor.md").read_text()
-        self.assertIn("workflow/roles/executor.md", prompt)
+        prompt = (self.root / "tasks" / "prompts" / "TASK-0001-executor.md").read_text()
+        self.assertIn("04 Agents/Executor.md", prompt)
         self.assertFalse((self.root / "tasks" / "usage-ledger.jsonl").exists())
 
     def test_live_dispatch_refused(self):
         p = self.proj()
-        p.approve("T-001", "jg")
-        p.start("T-001")
+        p.approve("TASK-0001", "jg")
+        p.start("TASK-0001")
         with self.assertRaises(orch.OrchestratorError):
-            p.dispatch("T-001", "executor", live=True)
+            p.dispatch("TASK-0001", "executor", live=True)
 
     def test_report_and_state(self):
         code, out = self.cli("report")
         self.assertEqual(code, 0, out)
         state = json.loads((self.root / "project-state.json").read_text())
-        self.assertIn("T-001", state["needs_human"])
-        self.assertTrue(list((self.root / "reports" / "health").glob("progress-*.md")))
+        self.assertIn("TASK-0001", state["needs_human"])
+        self.assertTrue(list((self.root / "08 Reviews").glob("HLT-*.md")))
 
 
 if __name__ == "__main__":
