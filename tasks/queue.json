@@ -78,7 +78,7 @@
       "id": "TASK-0002",
       "title": "Ability Framework",
       "project": "GAME-001",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0002-Ability-Framework",
@@ -127,6 +127,12 @@
           "from": "changes_requested",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-10T16:57:53",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
       "executions": [
@@ -134,6 +140,11 @@
           "time": "2026-10-10T16:41:02",
           "result": "pass",
           "notes": "check.sh green; specs 16/0; TEST-20261010-03 probes rejected; 2nd-client view untested"
+        },
+        {
+          "time": "2026-10-10T16:57:53",
+          "result": "pass",
+          "notes": "rev1: check.sh green; AbilityRules specs 7/7 (injected); service runtime pending integration probe"
         }
       ],
       "audits": [
