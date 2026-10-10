@@ -3,7 +3,7 @@ id: TASK-0002
 title: Ability Framework
 type: task
 project: GAME-001
-status: ready
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -51,6 +51,29 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 
 ---
 ## Implementation record
+*Executor (Claude Code, main session), 2026-10-10, branch `task/TASK-0002-Ability-Framework`*
+
+**Files changed**
+- `src/shared/AbilityConfig.luau` (new): remote name, rate limit (5 per 1 s), Dash cooldown 1 s, speed 60, duration 0.2 s
+- `src/shared/AbilityRules.luau` (new): pure `validateRequest`, `checkRate` (sliding window, bounded memory), `canActivate`, `horizontalDirection`
+- `src/server/Services/AbilityService.luau` (new): server-created remote, registry with an optional `canUse` (for factions later), rate → validate → eligibility → cooldown → character checks, handler in `pcall`, rejection counter attribute `AbilityRejections`, throttled warnings
+- `src/server/Abilities/Dash.luau` (new): test ability. **One more file than the spec listed:** it sets the `Abilities/<Name>.luau` pattern that TASK-0003/0004 use
+- `src/client/AbilityInput.luau` (new): `ContextActionService` key plus touch button per ability. **Deviation:** a ModuleScript required from `init.client.luau` rather than a nested `.client.luau` LocalScript (consistent with the server pattern)
+- `src/server/init.server.luau`, `src/client/init.client.luau`: start the services
+- `tests/luau/AbilityRules.spec.luau` (new): 7 tests
+
+**Design decisions**
+- **Clients send only an ability id.** Direction, force and targets are always decided on the server.
+- The rate limit is checked **first** and counts rejected requests, so spam is cheap to drop.
+- The cooldown is committed before the handler runs, so a yielding handler can't be re-entered.
+- **Replication finding (spike, R2):** the player's client owns its character's physics, so the server adds a short-lived `LinearVelocity` constraint instead of writing velocity. The owning client simulates it, and the server observed the displacement. This is the pattern for movement abilities. Pushable objects get their own ownership decision in TASK-0004.
+
+**Check results**
+- `scripts/check.sh`: ALL CHECKS PASSED (StyLua, Selene, types: no type errors, Rojo build, JSON, queue, vault 0/0, 30 Python tests)
+- Luau specs: `[TestRunner] 16 passed, 0 failed`
+- Playtest and exploit probes: [[TEST-20261010-03]]. All probes rejected, no errors.
+
+**Not yet verified:** a second client seeing the Dash (needs [[TASK-0009-Multi-Client-Test-Harness]]); the touch button on a real device.
 
 ## Audits
 
