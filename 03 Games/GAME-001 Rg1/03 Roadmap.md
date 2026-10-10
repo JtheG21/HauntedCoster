@@ -18,7 +18,8 @@ tags:
 - [x] Obsidian conventions adopted ([[Obsidian Conventions]])
 
 ## M1: Concept (next)
-- [ ] Research 2–3 reference games (`RSH-` notes)
+- [x] Research 4 candidate concepts + platform baseline (`RSH-` notes, 2026-10-10). Ranking in [[RSH-20261010-Candidate-Comparison]]
+- [ ] **Human decision:** pick a direction (A, B, or spike both)
 - [ ] Pick a core loop, write [[01 Game Design]] v0.1, human approval
 
 ## M2: Vertical slice

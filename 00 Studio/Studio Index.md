@@ -31,8 +31,8 @@ tags:
 - `99 Templates/`: `T - *` templates
 
 ## Needs human attention
+- **M1 direction decision:** [[RSH-20261010-Candidate-Comparison]]
 - The 2-player test for [[TASK-0001-Collectible-Pickup]] ([[TEST-20261010-01]])
-- Set Obsidian → Settings → Templates → folder to `99 Templates`
 
 ## All notes
 ![[Notes.base]]

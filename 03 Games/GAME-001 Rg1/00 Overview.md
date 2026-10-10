@@ -21,6 +21,10 @@ tags:
 |---|---|---|
 | [[TASK-0001-Collectible-Pickup]] | done | [[AUD-20261010-TASK-0001-01]] (pass) |
 
+## Research (M1)
+- [[RSH-20261010-Candidate-Comparison]]: **awaiting your decision** (top two: co-op physics obby, co-op anomaly horror)
+- Baseline: [[RSH-20261010-Roblox-Platform-Economics]]
+
 ## Systems
 - [[SYS-Collectible-Service]]
 
