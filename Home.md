@@ -15,7 +15,7 @@ tags: [dashboard]
 - Budget policy: `workflow/budget.json`
 
 ## Active tasks
-- [[T-001]]: collectible pickup prototype *(proposed, awaiting approval)*
+- [[T-001]]: collectible pickup prototype *(approved)*
 
 ## Notes by type
 ![[Notes.base]]
