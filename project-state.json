@@ -4,13 +4,13 @@
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "default.project.json",
   "dispatch_mode": "dry-run",
-  "updated": "2026-10-10T14:07:14",
+  "updated": "2026-10-10T14:12:52",
   "task_counts": {
-    "approved": 1
+    "awaiting_merge": 1
   },
-  "ready": [
+  "ready": [],
+  "needs_human": [
     "T-001"
   ],
-  "needs_human": [],
   "api_spend_this_month_usd": 0.0
 }

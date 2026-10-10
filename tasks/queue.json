@@ -4,7 +4,7 @@
     {
       "id": "T-001",
       "title": "Prototype: server-authoritative collectible pickup + leaderstats",
-      "status": "approved",
+      "status": "awaiting_merge",
       "risk": "low",
       "depends_on": [],
       "branch": "task/T-001-collectibles",
@@ -24,6 +24,38 @@
           "from": "proposed",
           "to": "approved",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-10T14:09:32",
+          "from": "approved",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-10T14:11:20",
+          "from": "in_progress",
+          "to": "in_audit",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T14:12:51",
+          "from": "in_audit",
+          "to": "awaiting_merge",
+          "note": "audit passed"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-10T14:11:20",
+          "result": "pass",
+          "notes": "check.sh green; Luau specs 9/0; Studio playtest AC1-4 pass; 2-player race untested"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-10T14:12:51",
+          "result": "pass",
+          "report": "reports/audits/T-001-attempt1.md"
         }
       ]
     }
