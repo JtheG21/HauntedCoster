@@ -73,6 +73,153 @@
       ],
       "merge_approved_by": "jg",
       "migrated_from": "T-001"
+    },
+    {
+      "id": "TASK-0002",
+      "title": "Ability Framework",
+      "project": "GAME-001",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [],
+      "branch": "task/TASK-0002-Ability-Framework",
+      "note": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0002-Ability-Framework.md",
+      "acceptance_criteria": [
+        "The server creates the remote. Clients can't create or replace it",
+        "Activating Dash with the keybind or touch button moves the character on the server, visible to other clients",
+        "Requests during cooldown, over the rate limit (>5/s), with wrong types or unknown ids are rejected and don't error",
+        "Pure rules have passing specs (cooldown boundary, rate limit, NaN/nil args)",
+        "`scripts/check.sh` passes"
+      ]
+    },
+    {
+      "id": "TASK-0003",
+      "title": "Factions and Echo Clone",
+      "project": "GAME-001",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0002"
+      ],
+      "branch": "task/TASK-0003-Factions-And-Echo-Clone",
+      "note": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0003-Factions-And-Echo-Clone.md",
+      "acceptance_criteria": [
+        "Auto-balance keeps faction counts within 1 of each other",
+        "Only Shinobi players can activate Echo Clone (server-checked)",
+        "The clone holds a pressure plate active for exactly its duration (6 s \u00b10.2 s), then despawns",
+        "Max 1 clone per player. Clones are cleaned up on leave or respawn",
+        "Specs for balance rules pass. `check.sh` passes"
+      ]
+    },
+    {
+      "id": "TASK-0004",
+      "title": "Ki Burst",
+      "project": "GAME-001",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0002"
+      ],
+      "branch": "task/TASK-0004-Ki-Burst",
+      "note": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0004-Ki-Burst.md",
+      "acceptance_criteria": [
+        "Only Ki players can activate it. The charge time is measured on the **server**, so a client can't claim a full charge",
+        "CrackedWall in range breaks once and respawns after 10 s",
+        "HeavyBlock moves the same way for all clients. Its network owner is the server (verified with `GetNetworkOwner`)",
+        "Knockback math specs pass. `check.sh` passes",
+        "The decision on network ownership is recorded in the implementation record (input for an ADR if non-trivial)"
+      ]
+    },
+    {
+      "id": "TASK-0005",
+      "title": "Convergence Gate",
+      "project": "GAME-001",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0003",
+        "TASK-0004"
+      ],
+      "branch": "task/TASK-0005-Convergence-Gate",
+      "note": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0005-Convergence-Gate.md",
+      "acceptance_criteria": [
+        "The gate opens only when both required powers have been applied within a 10 s window",
+        "If only one faction is in the match, requirements drop to that faction's power plus the shrine",
+        "Each player passing an opened gate gets exactly 1 Echo charge per opening power (server inventory)",
+        "The shrine bypass opens 20 s after the first player arrives if the gate is still closed",
+        "Specs pass. `check.sh` passes"
+      ]
+    },
+    {
+      "id": "TASK-0006",
+      "title": "Match Flow and Onboarding",
+      "project": "GAME-001",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0002"
+      ],
+      "branch": "task/TASK-0006-Match-Flow-And-Onboarding",
+      "note": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0006-Match-Flow-And-Onboarding.md",
+      "acceptance_criteria": [
+        "State transitions follow MatchRules only (spec-covered). An invalid transition is rejected",
+        "Players joining mid-match wait in the lobby. Players leaving don't break the round",
+        "A first-time player is sent through the trial and prompted to use their power",
+        "A match with 1 player can run end to end (solo testing)",
+        "`check.sh` passes"
+      ]
+    },
+    {
+      "id": "TASK-0007",
+      "title": "Ring-Out Finale",
+      "project": "GAME-001",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0003",
+        "TASK-0004",
+        "TASK-0006"
+      ],
+      "branch": "task/TASK-0007-Ring-Out-Finale",
+      "note": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0007-Ring-Out-Finale.md",
+      "acceptance_criteria": [
+        "Falling below the arena, or out of bounds, eliminates a player once (server-detected)",
+        "The last remaining player wins Combat. A simultaneous last elimination is a draw (spec-covered)",
+        "Speed = first obby finisher, Teamwork = most gate contributions. Ties are handled deterministically",
+        "Knockback is applied on the server only. A client can't apply force to others",
+        "`check.sh` passes"
+      ]
+    },
+    {
+      "id": "TASK-0008",
+      "title": "Prototype Telemetry",
+      "project": "GAME-001",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0006"
+      ],
+      "branch": "task/TASK-0008-Prototype-Telemetry",
+      "note": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0008-Prototype-Telemetry.md",
+      "acceptance_criteria": [
+        "Each match prints one structured summary line (JSON) with the listed metrics",
+        "No usernames or user ids in logs (anonymised per-match index)",
+        "Aggregation specs pass. `check.sh` passes"
+      ]
+    },
+    {
+      "id": "TASK-0009",
+      "title": "Multi-Client Test Harness",
+      "project": "GAME-001",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0009-Multi-Client-Test-Harness",
+      "note": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0009-Multi-Client-Test-Harness.md",
+      "acceptance_criteria": [
+        "A documented procedure that a human can run in \u22645 min, or an automated method that Claude can run",
+        "[[TEST-20261010-02]] executed with it (pass or a filed BUG)",
+        "Any tool needing install is listed for approval, not installed"
+      ]
     }
   ]
 }
