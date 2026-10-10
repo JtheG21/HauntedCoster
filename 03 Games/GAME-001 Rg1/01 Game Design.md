@@ -3,7 +3,7 @@ id: GAME-001-DESIGN
 title: Game Design
 type: design
 project: GAME-001
-status: proposed
+status: approved
 version: 0.1
 created: 2026-10-10
 updated: 2026-10-10
@@ -14,9 +14,9 @@ related:
   - "[[ADR-0003-Original-Factions-IP-Policy]]"
   - "[[EXP-0001-M2-Validation-Experiments]]"
 ---
-# Game design v0.1: **proposed, awaiting approval**
+# Game design v0.1: **approved** (user, 2026-10-10)
 
-> Direction approved ([[ADR-0002-Game-Direction]]). Everything below is a **proposal** until you approve it. Working title: **"Rival Realms"** (placeholder, no franchise names; see [[ADR-0003-Original-Factions-IP-Policy]]).
+> Direction approved ([[ADR-0002-Game-Direction]]). Approved as written on 2026-10-10. Changes need a new version plus approval. Working title: **"Rival Realms"** (placeholder, no franchise names; see [[ADR-0003-Original-Factions-IP-Policy]]).
 
 ## Pitch
 Four rival power factions race through a physics obby. You can't finish without a rival's power, and the more you work together, the stronger everyone gets for the final **last-one-standing** brawl. Every match settles "**which power is strongest?**" across **Speed, Teamwork and Combat**, and the results add up into a live global Faction War.
@@ -87,7 +87,7 @@ Primitive art, no saving, no monetization, no Faction War. One course: race sect
 ## Scope re-assessment (honest)
 This is **bigger than candidate A** as scored: 4 ability kits plus PvP were explicitly deprioritised earlier as netcode-heavy. Mitigations: a **ring-out** finale instead of hit-point combo combat (it needs much less precise hit registration), powers that serve double duty (obby and fight), and a 2-faction prototype first. Rough effort (unvalidated): M2 prototype about 2–3 weeks part-time; M3 first playable about 6–10 weeks.
 
-## Open questions (need your input)
+## Open questions (design approved as-is; proposed defaults apply until changed)
 1. Faction names and visual identity: placeholders are fine for M2.
 2. Players per match: 4–8 proposed.
 3. Should Echo charges *replace* or *add to* your own power in the finale? (Proposed: add.)

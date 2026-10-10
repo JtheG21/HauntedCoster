@@ -11,7 +11,7 @@ tags:
 ---
 # GAME-001: Rival Realms (working title; repo name Rg1)
 
-**Phase:** M1: direction approved, design v0.1 proposed · **Code:** `src/` (Rojo 7.7.0) · **Task status:** `tasks/queue.json`
+**Phase:** M1 → M2: design approved, roadmap next · **Code:** `src/` (Rojo 7.7.0) · **Task status:** `tasks/queue.json`
 
 ## Documents
 [[01 Game Design]] · [[02 Technical Architecture]] · [[03 Roadmap]]
@@ -27,10 +27,10 @@ tags:
 
 ## Decisions
 - [[ADR-0002-Game-Direction]]: approved
-- [[ADR-0003-Original-Factions-IP-Policy]]: **proposed**
+- [[ADR-0003-Original-Factions-IP-Policy]]: approved
 
 ## Design & validation
-- [[01 Game Design]] v0.1: **proposed**
+- [[01 Game Design]] v0.1: approved
 - [[EXP-0001-M2-Validation-Experiments]]: **proposed**
 - Baseline: [[RSH-20261010-Roblox-Platform-Economics]]
 

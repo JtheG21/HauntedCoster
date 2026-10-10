@@ -16,7 +16,7 @@ tags:
 ## Active games
 | ID | Game | Phase | Overview |
 |---|---|---|---|
-| GAME-001 | Rival Realms (working title) | M1: design proposed | [[00 Overview]] |
+| GAME-001 | Rival Realms (working title) | M2: prototype planning | [[00 Overview]] |
 
 ## Folders
 - `01 Inbox/`: raw ideas, waiting to be triaged
@@ -31,7 +31,7 @@ tags:
 - `99 Templates/`: `T - *` templates
 
 ## Needs human attention
-- **Approve:** [[01 Game Design]] v0.1 · [[ADR-0003-Original-Factions-IP-Policy]] · [[EXP-0001-M2-Validation-Experiments]]
+- **Approve:** [[EXP-0001-M2-Validation-Experiments]]
 - The 2-player test for [[TASK-0001-Collectible-Pickup]] ([[TEST-20261010-01]])
 
 ## All notes

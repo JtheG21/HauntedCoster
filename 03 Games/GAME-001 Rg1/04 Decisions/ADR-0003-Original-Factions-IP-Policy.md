@@ -3,9 +3,9 @@ id: ADR-0003
 title: Original Factions IP Policy
 type: adr
 project: GAME-001
-status: proposed
-approved_by:
-approved_on:
+status: approved
+approved_by: jg
+approved_on: 2026-10-10
 created: 2026-10-10
 updated: 2026-10-10
 tags:
@@ -24,7 +24,7 @@ The four named franchises are owned IP. On Roblox, anime games have been taken d
 2. "Letter-swapped" names that keep the likenesses: common, still recognisably copied, and a medium to high risk.
 3. **Original factions built on genre archetypes** (ninja, energy warrior, pirate, spirit swordsman), with our own names, designs, ability names, VFX colours and sounds. Players draw the comparison themselves.
 
-## Decision (proposed; needs approval)
+## Decision (approved by the user in chat, 2026-10-10)
 Option 3. Specifically:
 - No franchise **names, character names or likenesses, logos, signature technique names, music or quotes**, in game, title, thumbnail, description or tags.
 - Archetype-level inspiration is fine (ninjas cloning themselves, energy blasts, stretchy grabs, spirit swords are genre-wide tropes). Exact distinctive combinations are not (a specific costume, hairstyle and move set).
