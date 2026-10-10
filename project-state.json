@@ -1,0 +1,16 @@
+{
+  "project": "Rg1",
+  "phase": "M0 workflow foundation",
+  "vault": "/Users/jg/Desktop/Rg1",
+  "rojo_project": "default.project.json",
+  "dispatch_mode": "dry-run",
+  "updated": "2026-10-10T13:58:31",
+  "task_counts": {
+    "proposed": 1
+  },
+  "ready": [],
+  "needs_human": [
+    "T-001"
+  ],
+  "api_spend_this_month_usd": 0.0
+}

@@ -1,0 +1,17 @@
+{
+  "currency": "USD",
+  "monthly_limit_usd": 50,
+  "monthly_target_usd": 20,
+  "per_task_limit_usd": 3,
+  "max_revisions": 2,
+  "paid_api_requires_approval": true,
+  "paid_api_enabled": false,
+  "dispatch_mode": "dry-run",
+  "default_model_tier": "standard",
+  "escalation_policy": "Use a stronger model only after one failed attempt on a medium/high-risk task, and record the reason in the usage ledger.",
+  "notes": [
+    "Subscription usage (Claude Code plan) and metered API usage are tracked separately. Only the 'api' kind counts toward monthly_limit_usd.",
+    "Subscription usage is recorded as message/turn estimates, for awareness only.",
+    "No polling loops and no autonomous dispatch. dispatch_mode 'live' needs explicit human approval and a confirmed invocation method."
+  ]
+}

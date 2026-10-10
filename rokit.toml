@@ -1,0 +1,6 @@
+# Project toolchain pinned for Rokit (https://github.com/rojo-rbx/rokit).
+# Versions are already cached in ~/.rokit/tool-storage.
+[tools]
+rojo = "rojo-rbx/rojo@7.7.0"
+stylua = "johnnymorganz/stylua@2.5.2"
+luau-lsp = "johnnymorganz/luau-lsp@1.63.0"

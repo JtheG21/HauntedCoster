@@ -1,0 +1,402 @@
+#!/usr/bin/env python3
+"""Lightweight task orchestrator for the Rg1 workflow (standard library only).
+
+Tracks tasks in tasks/queue.json, enforces approval gates and revision limits,
+records a usage ledger, updates project-state.json and writes Markdown reports.
+It never calls an AI itself: `dispatch` builds the prompt and, in dry-run mode
+(the only mode currently enabled), prints what it would run.
+
+Run `python3 scripts/orchestrator.py --help` for commands.
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import json
+import re
+import sys
+from pathlib import Path
+
+STATES = {
+    "proposed", "approved", "in_progress", "in_audit", "revision",
+    "awaiting_merge", "blocked", "done", "cancelled",
+}
+TERMINAL = {"done", "cancelled"}
+RISKS = {"low", "medium", "high"}
+ID_RE = re.compile(r"^T-\d{3,}$")
+REQUIRED = ("id", "title", "status", "risk", "depends_on", "acceptance_criteria")
+USAGE_KINDS = {"subscription", "api"}
+
+
+class OrchestratorError(Exception):
+    pass
+
+
+def now() -> str:
+    return dt.datetime.now().isoformat(timespec="seconds")
+
+
+class Project:
+    def __init__(self, root: Path):
+        self.root = root
+        self.queue_path = root / "tasks" / "queue.json"
+        self.budget_path = root / "workflow" / "budget.json"
+        self.state_path = root / "project-state.json"
+        self.ledger_path = root / "tasks" / "usage-ledger.jsonl"
+        self.reports_dir = root / "reports"
+        self.queue = self._load(self.queue_path, {"version": 1, "tasks": []})
+        self.budget = self._load(self.budget_path, {})
+
+    @staticmethod
+    def _load(path: Path, default):
+        if not path.exists():
+            return default
+        try:
+            return json.loads(path.read_text())
+        except json.JSONDecodeError as e:
+            raise OrchestratorError(f"{path}: invalid JSON ({e})") from e
+
+    def save(self) -> None:
+        self.queue_path.write_text(json.dumps(self.queue, indent=2) + "\n")
+        self._write_state()
+
+    # ---- lookup / validation -------------------------------------------
+    @property
+    def tasks(self) -> list[dict]:
+        return self.queue.get("tasks", [])
+
+    def task(self, task_id: str) -> dict:
+        for t in self.tasks:
+            if t.get("id") == task_id:
+                return t
+        raise OrchestratorError(f"unknown task {task_id}")
+
+    def validate(self) -> list[str]:
+        errors: list[str] = []
+        ids = [t.get("id") for t in self.tasks]
+        seen: set = set()
+        for t in self.tasks:
+            tid = t.get("id", "?")
+            for key in REQUIRED:
+                if key not in t:
+                    errors.append(f"{tid}: missing '{key}'")
+            if not ID_RE.match(str(tid)):
+                errors.append(f"{tid}: id must look like T-001")
+            if tid in seen:
+                errors.append(f"{tid}: duplicate id")
+            seen.add(tid)
+            if t.get("status") not in STATES:
+                errors.append(f"{tid}: invalid status '{t.get('status')}'")
+            if t.get("risk") not in RISKS:
+                errors.append(f"{tid}: invalid risk '{t.get('risk')}'")
+            if not t.get("acceptance_criteria"):
+                errors.append(f"{tid}: needs at least one acceptance criterion")
+            for dep in t.get("depends_on", []):
+                if dep not in ids:
+                    errors.append(f"{tid}: depends on unknown task {dep}")
+        errors += self._cycles()
+        for key in ("monthly_limit_usd", "max_revisions"):
+            if key not in self.budget:
+                errors.append(f"budget.json: missing '{key}'")
+        return errors
+
+    def _cycles(self) -> list[str]:
+        graph = {t.get("id"): t.get("depends_on", []) for t in self.tasks}
+        visiting, done, errors = set(), set(), []
+
+        def visit(node, path):
+            if node in done or node not in graph:
+                return
+            if node in visiting:
+                errors.append("dependency cycle: " + " -> ".join(path + [node]))
+                return
+            visiting.add(node)
+            for dep in graph[node]:
+                visit(dep, path + [node])
+            visiting.discard(node)
+            done.add(node)
+
+        for node in graph:
+            visit(node, [])
+        return errors
+
+    def require_valid(self) -> None:
+        errors = self.validate()
+        if errors:
+            raise OrchestratorError("queue invalid:\n  " + "\n  ".join(errors))
+
+    # ---- budget / usage --------------------------------------------------
+    def ledger(self) -> list[dict]:
+        if not self.ledger_path.exists():
+            return []
+        return [json.loads(line) for line in self.ledger_path.read_text().splitlines() if line.strip()]
+
+    def api_spend(self, month: str | None = None, task_id: str | None = None) -> float:
+        month = month or dt.date.today().strftime("%Y-%m")
+        total = 0.0
+        for e in self.ledger():
+            if e.get("kind") != "api" or not e.get("time", "").startswith(month):
+                continue
+            if task_id and e.get("task") != task_id:
+                continue
+            total += float(e.get("cost_usd") or e.get("est_cost_usd") or 0)
+        return round(total, 4)
+
+    def budget_block_reason(self, task_id: str) -> str | None:
+        limit = float(self.budget.get("monthly_limit_usd", 0))
+        spent = self.api_spend()
+        if limit and spent >= limit:
+            return f"monthly API limit reached (${spent:.2f} / ${limit:.2f})"
+        per_task = float(self.budget.get("per_task_limit_usd", 0))
+        task_spent = self.api_spend(task_id=task_id)
+        if per_task and task_spent >= per_task:
+            return f"per-task API limit reached for {task_id} (${task_spent:.2f} / ${per_task:.2f})"
+        return None
+
+    # ---- transitions -----------------------------------------------------
+    def _move(self, t: dict, new: str, note: str) -> None:
+        old = t["status"]
+        t["status"] = new
+        t.setdefault("history", []).append({"time": now(), "from": old, "to": new, "note": note})
+
+    def _expect(self, t: dict, *states: str) -> None:
+        if t["status"] not in states:
+            raise OrchestratorError(f"{t['id']} is '{t['status']}', expected one of {sorted(states)}")
+
+    def deps_done(self, t: dict) -> bool:
+        return all(self.task(d)["status"] == "done" for d in t.get("depends_on", []))
+
+    def ready(self) -> list[dict]:
+        return [t for t in self.tasks
+                if t["status"] in ("approved", "revision") and self.deps_done(t)]
+
+    def approve(self, task_id: str, by: str) -> None:
+        t = self.task(task_id)
+        self._expect(t, "proposed")
+        t["approved_by"] = by
+        self._move(t, "approved", f"plan approved by {by}")
+
+    def start(self, task_id: str) -> None:
+        t = self.task(task_id)
+        self._expect(t, "approved", "revision")
+        if not self.deps_done(t):
+            raise OrchestratorError(f"{task_id}: dependencies not done: {t['depends_on']}")
+        reason = self.budget_block_reason(task_id)
+        if reason:
+            raise OrchestratorError(f"{task_id}: {reason}")
+        self._move(t, "in_progress", "started")
+
+    def _fail(self, t: dict, note: str) -> None:
+        t["revisions"] = t.get("revisions", 0) + 1
+        limit = int(self.budget.get("max_revisions", 2))
+        if t["revisions"] > limit:
+            self._move(t, "blocked", f"{note}; revision limit {limit} exceeded, needs human")
+        else:
+            self._move(t, "revision", f"{note}; revision {t['revisions']}/{limit}")
+
+    def record_exec(self, task_id: str, result: str, notes: str) -> None:
+        t = self.task(task_id)
+        self._expect(t, "in_progress")
+        t.setdefault("executions", []).append({"time": now(), "result": result, "notes": notes})
+        if result == "pass":
+            self._move(t, "in_audit", "execution checks passed")
+        else:
+            self._fail(t, "execution checks failed")
+
+    def record_audit(self, task_id: str, result: str, report: str) -> None:
+        t = self.task(task_id)
+        self._expect(t, "in_audit")
+        t.setdefault("audits", []).append({"time": now(), "result": result, "report": report})
+        if result == "pass":
+            self._move(t, "awaiting_merge", "audit passed")
+        else:
+            self._fail(t, "audit failed")
+
+    def approve_merge(self, task_id: str, by: str) -> None:
+        t = self.task(task_id)
+        self._expect(t, "awaiting_merge")
+        t["merge_approved_by"] = by
+        self._move(t, "done", f"merge approved by {by}")
+
+    def unblock(self, task_id: str, to: str, by: str) -> None:
+        t = self.task(task_id)
+        self._expect(t, "blocked")
+        if to not in ("approved", "proposed", "cancelled"):
+            raise OrchestratorError("unblock target must be approved, proposed or cancelled")
+        t["revisions"] = 0
+        self._move(t, to, f"unblocked by {by}")
+
+    def cancel(self, task_id: str, by: str) -> None:
+        t = self.task(task_id)
+        if t["status"] in TERMINAL:
+            raise OrchestratorError(f"{task_id} already {t['status']}")
+        self._move(t, "cancelled", f"cancelled by {by}")
+
+    def record_usage(self, task_id: str, kind: str, role: str, cost_usd: float | None,
+                     est_cost_usd: float | None, tokens: int | None, model: str, note: str) -> dict:
+        self.task(task_id)
+        if kind not in USAGE_KINDS:
+            raise OrchestratorError(f"kind must be one of {sorted(USAGE_KINDS)}")
+        entry = {"time": now(), "task": task_id, "kind": kind, "role": role, "model": model,
+                 "cost_usd": cost_usd, "est_cost_usd": est_cost_usd, "tokens": tokens, "note": note}
+        self.ledger_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.ledger_path.open("a") as f:
+            f.write(json.dumps(entry) + "\n")
+        return entry
+
+    # ---- dispatch (dry-run) ---------------------------------------------
+    def build_prompt(self, t: dict, role: str) -> str:
+        spec = t.get("spec", f"tasks/specs/{t['id']}.md")
+        lines = [
+            f"You are the {role.upper()} for task {t['id']}: {t['title']}.",
+            f"Follow workflow/roles/{role}.md exactly. Read CLAUDE.md and {spec}.",
+            "Read only the files listed in the spec unless blocked; do not scan the whole repo.",
+        ]
+        if role == "executor":
+            lines.append(f"Work on branch {t.get('branch', 'task/' + t['id'])}. Run scripts/check.sh before finishing.")
+        if role == "auditor":
+            lines.append(f"Audit `git diff main...{t.get('branch')}` against the acceptance criteria.")
+        if t.get("audits") and role == "executor":
+            lines.append(f"Address findings in {t['audits'][-1]['report']}.")
+        return "\n".join(lines) + "\n"
+
+    def dispatch(self, task_id: str, role: str, live: bool) -> str:
+        t = self.task(task_id)
+        expected = {"executor": ("in_progress",), "auditor": ("in_audit",),
+                    "planner": ("proposed",), "researcher": ("proposed",)}[role]
+        self._expect(t, *expected)
+        reason = self.budget_block_reason(task_id)
+        if reason:
+            raise OrchestratorError(reason)
+        prompt = self.build_prompt(t, role)
+        out = self.reports_dir / "prompts" / f"{task_id}-{role}.md"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(prompt)
+        if live or self.budget.get("dispatch_mode") == "live":
+            raise OrchestratorError("live dispatch is not enabled yet: run the prompt manually in Claude Code")
+        rel = out.relative_to(self.root)
+        return (f"[dry-run] prompt written to {rel}\n"
+                f"[dry-run] would run (subscription, interactive): claude \"$(cat {rel})\"\n"
+                f"[dry-run] no AI call made; nothing recorded in the ledger")
+
+    # ---- state & reports -------------------------------------------------
+    def counts(self) -> dict:
+        c: dict = {}
+        for t in self.tasks:
+            c[t["status"]] = c.get(t["status"], 0) + 1
+        return c
+
+    def _write_state(self) -> None:
+        state = self._load(self.state_path, {})
+        state.update({
+            "updated": now(),
+            "task_counts": self.counts(),
+            "ready": [t["id"] for t in self.ready()],
+            "needs_human": [t["id"] for t in self.tasks
+                            if t["status"] in ("proposed", "awaiting_merge", "blocked")],
+            "api_spend_this_month_usd": self.api_spend(),
+        })
+        self.state_path.write_text(json.dumps(state, indent=2) + "\n")
+
+    def report(self) -> Path:
+        today = dt.date.today().isoformat()
+        lines = [
+            "---", "type: health", f"date: {today}", "tags: [report]", "---",
+            f"# Progress report: {today}", "",
+            "| Task | Title | Status | Risk | Revisions |", "|---|---|---|---|---|",
+        ]
+        for t in self.tasks:
+            lines.append(f"| {t['id']} | {t['title']} | {t['status']} | {t['risk']} | {t.get('revisions', 0)} |")
+        needs = [t for t in self.tasks if t["status"] in ("proposed", "awaiting_merge", "blocked")]
+        lines += ["", "## Needs human"]
+        lines += [f"- {t['id']} ({t['status']})" for t in needs] or ["- nothing"]
+        ledger = self.ledger()
+        subs = sum(1 for e in ledger if e.get("kind") == "subscription")
+        lines += ["", "## Usage",
+                  f"- API spend this month: ${self.api_spend():.2f} / ${float(self.budget.get('monthly_limit_usd', 0)):.2f}",
+                  f"- Subscription sessions logged: {subs}", "", "Related: [[Home]]"]
+        out = self.reports_dir / "health" / f"progress-{today}.md"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text("\n".join(lines) + "\n")
+        self._write_state()
+        return out
+
+
+def main(argv: list[str] | None = None) -> int:
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
+    sub = p.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("validate", help="validate queue.json and budget.json")
+    sub.add_parser("status", help="list tasks")
+    sub.add_parser("next", help="show tasks ready to start")
+    sub.add_parser("report", help="write reports/health/progress-<date>.md and update project-state.json")
+    for name in ("approve", "approve-merge", "cancel"):
+        s = sub.add_parser(name)
+        s.add_argument("id")
+        s.add_argument("--by", required=True, help="name of the human approving")
+    s = sub.add_parser("start"); s.add_argument("id")
+    s = sub.add_parser("unblock"); s.add_argument("id"); s.add_argument("--to", required=True); s.add_argument("--by", required=True)
+    s = sub.add_parser("record-exec"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--notes", default="")
+    s = sub.add_parser("record-audit"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--report", required=True)
+    s = sub.add_parser("record-usage"); s.add_argument("id"); s.add_argument("--kind", choices=sorted(USAGE_KINDS), required=True)
+    s.add_argument("--role", default=""); s.add_argument("--model", default=""); s.add_argument("--cost-usd", type=float)
+    s.add_argument("--est-cost-usd", type=float); s.add_argument("--tokens", type=int); s.add_argument("--note", default="")
+    s = sub.add_parser("dispatch", help="build role prompt (dry-run only for now)")
+    s.add_argument("id"); s.add_argument("--role", choices=["executor", "auditor", "planner", "researcher"], required=True)
+    s.add_argument("--live", action="store_true", help="not enabled yet")
+    a = p.parse_args(argv)
+
+    try:
+        proj = Project(a.root)
+        if a.cmd == "validate":
+            errors = proj.validate()
+            for e in errors:
+                print("ERROR", e)
+            print(f"{len(proj.tasks)} tasks, {len(errors)} errors")
+            return 1 if errors else 0
+        proj.require_valid()
+        if a.cmd == "status":
+            for t in proj.tasks:
+                deps = ",".join(t["depends_on"]) or "-"
+                print(f"{t['id']:7} {t['status']:15} {t['risk']:6} deps={deps:10} {t['title']}")
+            print(f"API spend this month: ${proj.api_spend():.2f}")
+            return 0
+        if a.cmd == "next":
+            ready = proj.ready()
+            for t in ready:
+                block = proj.budget_block_reason(t["id"])
+                print(f"{t['id']} ({t['status']}): {t['title']}" + (f"  [BLOCKED: {block}]" if block else ""))
+            if not ready:
+                print("nothing ready (approve a proposed task, or finish dependencies)")
+            return 0
+        if a.cmd == "report":
+            print(f"wrote {proj.report().relative_to(proj.root)}")
+            return 0
+        if a.cmd == "dispatch":
+            print(proj.dispatch(a.id, a.role, a.live))
+            return 0
+        if a.cmd == "record-usage":
+            print(json.dumps(proj.record_usage(a.id, a.kind, a.role, a.cost_usd, a.est_cost_usd, a.tokens, a.model, a.note)))
+            proj._write_state()
+            return 0
+        actions = {
+            "approve": lambda: proj.approve(a.id, a.by),
+            "approve-merge": lambda: proj.approve_merge(a.id, a.by),
+            "cancel": lambda: proj.cancel(a.id, a.by),
+            "start": lambda: proj.start(a.id),
+            "unblock": lambda: proj.unblock(a.id, a.to, a.by),
+            "record-exec": lambda: proj.record_exec(a.id, a.result, a.notes),
+            "record-audit": lambda: proj.record_audit(a.id, a.result, a.report),
+        }
+        actions[a.cmd]()
+        proj.save()
+        print(f"{a.id} -> {proj.task(a.id)['status']}")
+        return 0
+    except OrchestratorError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

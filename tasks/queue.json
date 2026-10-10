@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "Prototype: server-authoritative collectible pickup + leaderstats",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/T-001-collectibles",
+      "spec": "tasks/specs/T-001.md",
+      "acceptance_criteria": [
+        "Each player gets leaderstats.Coins = 0 on join",
+        "Server spawns N collectibles from shared config in a Workspace folder",
+        "Touch by a character awards CoinValue once, server-side, and the coin respawns after RespawnSeconds",
+        "Touches from non-characters, dead humanoids, or distances greater than MaxPickupDistance are ignored",
+        "Pure award/validation logic lives in src/shared and has passing tests in tests/luau",
+        "scripts/check.sh passes"
+      ]
+    }
+  ]
+}
