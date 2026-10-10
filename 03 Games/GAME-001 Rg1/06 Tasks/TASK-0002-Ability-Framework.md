@@ -3,7 +3,7 @@ id: TASK-0002
 title: Ability Framework
 type: task
 project: GAME-001
-status: in_review
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -76,5 +76,6 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 **Not yet verified:** a second client seeing the Dash (needs [[TASK-0009-Multi-Client-Test-Harness]]); the touch button on a real device.
 
 ## Audits
+- [[AUD-20261010-TASK-0002-01]]: attempt 1, **pass** (4 minor, 2 nit)
 
 ## Outcome
