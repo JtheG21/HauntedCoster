@@ -5,6 +5,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local AbilityConfig = require(Shared:WaitForChild("AbilityConfig"))
@@ -13,8 +14,10 @@ local AbilityRules = require(Shared:WaitForChild("AbilityRules"))
 export type Handler = (player: Player, character: Model, root: BasePart) -> ()
 export type Registration = {
 	handler: Handler,
-	-- Optional eligibility check (e.g. faction). Return false to reject.
+	-- Optional eligibility check (e.g. faction). Return true to allow. Must not yield; errors count as a rejection.
 	canUse: ((player: Player) -> boolean)?,
+	-- Abilities are rejected while the character is seated unless this is true.
+	allowSeated: boolean?,
 }
 
 type PlayerState = {
@@ -29,6 +32,8 @@ local AbilityService = {}
 local registry: { [string]: Registration } = {}
 local states: { [Player]: PlayerState } = {}
 local started = false
+-- Server-only diagnostics (ServerStorage doesn't replicate): attribute `Rejections_<UserId>`.
+local diagnostics: Folder? = nil
 
 local function getState(player: Player): PlayerState
 	local state = states[player]
@@ -41,8 +46,10 @@ end
 
 local function reject(player: Player, state: PlayerState, reason: string)
 	state.rejections += 1
-	-- Readable from tests and telemetry without requiring this module (which may load a separate copy).
-	player:SetAttribute("AbilityRejections", state.rejections)
+	-- Server-only counter for tests and telemetry. Not on the Player, which would replicate to every client.
+	if diagnostics then
+		diagnostics:SetAttribute(`Rejections_{player.UserId}`, state.rejections)
+	end
 	local now = os.clock()
 	if now - state.lastWarn >= AbilityConfig.WarnIntervalSeconds then
 		state.lastWarn = now
@@ -51,6 +58,10 @@ local function reject(player: Player, state: PlayerState, reason: string)
 end
 
 local function onRequest(player: Player, abilityId: unknown, ...: unknown)
+	-- A request can arrive after PlayerRemoving; don't recreate state for a player who left.
+	if player.Parent ~= Players then
+		return
+	end
 	local state = getState(player)
 	local now = os.clock()
 
@@ -81,9 +92,17 @@ local function onRequest(player: Player, abilityId: unknown, ...: unknown)
 	end
 
 	local canUse = registration.canUse
-	if canUse and not canUse(player) then
-		reject(player, state, "not_eligible")
-		return
+	if canUse then
+		local called, eligible = pcall(function()
+			return canUse(player)
+		end)
+		if not called then
+			reject(player, state, "eligibility_error")
+			return
+		elseif eligible ~= true then
+			reject(player, state, "not_eligible")
+			return
+		end
 	end
 
 	local ready, cooldownReason = AbilityRules.canActivate({
@@ -101,6 +120,10 @@ local function onRequest(player: Player, abilityId: unknown, ...: unknown)
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	if not (character and humanoid and humanoid.Health > 0 and root and root:IsA("BasePart")) then
 		reject(player, state, "no_character")
+		return
+	end
+	if humanoid.SeatPart ~= nil and registration.allowSeated ~= true then
+		reject(player, state, "seated")
 		return
 	end
 
@@ -131,6 +154,14 @@ function AbilityService.start()
 		return
 	end
 	started = true
+
+	local folder = ServerStorage:FindFirstChild("AbilityDiagnostics")
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "AbilityDiagnostics"
+		folder.Parent = ServerStorage
+	end
+	diagnostics = folder :: Folder
 
 	-- The server owns the remote. Any pre-existing instance with the same name is replaced.
 	local existing = ReplicatedStorage:FindFirstChild(AbilityConfig.RemoteName)

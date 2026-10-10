@@ -29,7 +29,7 @@ function Dash.handler(_player: Player, _character: Model, root: BasePart)
 	velocity.PrimaryTangentAxis = Vector3.new(1, 0, 0)
 	velocity.SecondaryTangentAxis = Vector3.new(0, 0, 1)
 	velocity.PlaneVelocity = Vector2.new(direction.X, direction.Z) * AbilityConfig.Dash.Speed
-	velocity.MaxForce = math.huge
+	velocity.MaxForce = AbilityConfig.Dash.MaxForce
 	velocity.Parent = root
 
 	task.delay(AbilityConfig.Dash.Duration, function()

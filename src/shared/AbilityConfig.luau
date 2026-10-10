@@ -26,6 +26,8 @@ local AbilityConfig = table.freeze({
 	Dash = table.freeze({
 		Speed = 60, -- studs/second, horizontal
 		Duration = 0.2, -- seconds the velocity constraint stays active
+		-- Finite cap so a dash can't fling heavy assemblies (about 20x a default character's need).
+		MaxForce = 40000,
 	}),
 })
 
