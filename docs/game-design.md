@@ -18,6 +18,6 @@ TBD
 ## MVP scope
 | Feature | Priority | Status |
 |---|---|---|
-| Prototype: collectible pickup + leaderstats (T-001) | workflow test | proposed |
+| Prototype: collectible pickup + leaderstats (T-001) | workflow test | done |
 
 Related: [[architecture]] · [[roadmap]] · [[monetization]] · [[Home]]

@@ -13,7 +13,8 @@ tags: [architecture]
 ## Services / modules
 | Module | Side | Responsibility | Remotes |
 |---|---|---|---|
-| *(none yet; T-001 adds CollectibleService)* | | | |
+| CollectibleService (`src/server/Services`) | Server | Leaderstats Coins, coin spawn, validated Touched pickup, respawn | none (physics only) |
+| CollectibleRules / CollectibleConfig (`src/shared`) | Shared | Pure pickup rules, tuning values | n/a |
 
 ## Remotes & trust boundary
 Clients send requests, never results. The server validates every argument and rate-limits.

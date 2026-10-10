@@ -8,7 +8,7 @@ tags: [roadmap]
 ## M0: Workflow foundation (current)
 - [x] Environment audit, repo structure, roles, templates, orchestrator (dry-run)
 - [x] Rojo ↔ Studio sync verified (2026-10-10, Rojo 7.7.0, smoke spec 2/2)
-- [ ] T-001 prototype runs end to end through the workflow
+- [x] T-001 prototype runs end to end through the workflow (2026-10-10)
 
 ## M1: Concept
 - [ ] Research 2–3 reference games

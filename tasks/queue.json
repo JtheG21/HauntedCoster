@@ -4,7 +4,7 @@
     {
       "id": "T-001",
       "title": "Prototype: server-authoritative collectible pickup + leaderstats",
-      "status": "awaiting_merge",
+      "status": "done",
       "risk": "low",
       "depends_on": [],
       "branch": "task/T-001-collectibles",
@@ -42,6 +42,12 @@
           "from": "in_audit",
           "to": "awaiting_merge",
           "note": "audit passed"
+        },
+        {
+          "time": "2026-10-10T14:13:46",
+          "from": "awaiting_merge",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -57,7 +63,8 @@
           "result": "pass",
           "report": "reports/audits/T-001-attempt1.md"
         }
-      ]
+      ],
+      "merge_approved_by": "jg"
     }
   ]
 }
