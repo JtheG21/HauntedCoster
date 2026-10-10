@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Lightweight task orchestrator for the Rg1 workflow (standard library only).
 
-Tracks tasks in tasks/queue.json, enforces approval gates and revision limits,
-records a usage ledger, updates project-state.json and writes Markdown reports.
+Tracks tasks in tasks/queue.json (authoritative), mirrors each task's status into
+its Obsidian note, enforces approval gates and revision limits, records a usage
+ledger, updates project-state.json and writes Markdown health reports.
+Statuses follow 00 Studio/Obsidian Conventions.md.
 It never calls an AI itself: `dispatch` builds the prompt and, in dry-run mode
 (the only mode currently enabled), prints what it would run.
 
@@ -19,12 +21,13 @@ import sys
 from pathlib import Path
 
 STATES = {
-    "proposed", "approved", "in_progress", "in_audit", "revision",
-    "awaiting_merge", "blocked", "done", "cancelled",
+    "inbox", "research", "proposed", "ready", "in_progress", "blocked",
+    "in_review", "changes_requested", "approved", "done", "archived",
 }
-TERMINAL = {"done", "cancelled"}
+TERMINAL = {"done", "archived"}
+NEEDS_HUMAN = ("proposed", "approved", "blocked")
 RISKS = {"low", "medium", "high"}
-ID_RE = re.compile(r"^T-\d{3,}$")
+ID_RE = re.compile(r"^TASK-\d{4}$")
 REQUIRED = ("id", "title", "status", "risk", "depends_on", "acceptance_criteria")
 USAGE_KINDS = {"subscription", "api"}
 
@@ -41,10 +44,11 @@ class Project:
     def __init__(self, root: Path):
         self.root = root
         self.queue_path = root / "tasks" / "queue.json"
-        self.budget_path = root / "workflow" / "budget.json"
+        self.budget_path = root / "00 Studio" / "budget.json"
         self.state_path = root / "project-state.json"
         self.ledger_path = root / "tasks" / "usage-ledger.jsonl"
-        self.reports_dir = root / "reports"
+        self.reviews_dir = root / "08 Reviews"
+        self.prompts_dir = root / "tasks" / "prompts"
         self.queue = self._load(self.queue_path, {"version": 1, "tasks": []})
         self.budget = self._load(self.budget_path, {})
 
@@ -82,7 +86,7 @@ class Project:
                 if key not in t:
                     errors.append(f"{tid}: missing '{key}'")
             if not ID_RE.match(str(tid)):
-                errors.append(f"{tid}: id must look like T-001")
+                errors.append(f"{tid}: id must look like TASK-0001")
             if tid in seen:
                 errors.append(f"{tid}: duplicate id")
             seen.add(tid)
@@ -95,6 +99,9 @@ class Project:
             for dep in t.get("depends_on", []):
                 if dep not in ids:
                     errors.append(f"{tid}: depends on unknown task {dep}")
+            note = t.get("note")
+            if note and not (self.root / note).exists():
+                errors.append(f"{tid}: note not found: {note}")
         errors += self._cycles()
         for key in ("monthly_limit_usd", "max_revisions"):
             if key not in self.budget:
@@ -159,6 +166,28 @@ class Project:
         old = t["status"]
         t["status"] = new
         t.setdefault("history", []).append({"time": now(), "from": old, "to": new, "note": note})
+        self._sync_note(t)
+
+    def _sync_note(self, t: dict) -> None:
+        """Mirror status/updated into the task note's frontmatter (queue is authoritative)."""
+        rel = t.get("note")
+        if not rel:
+            return
+        path = self.root / rel
+        if not path.exists():
+            raise OrchestratorError(f"{t['id']}: note not found: {rel}")
+        text = path.read_text()
+        m = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+        if not m:
+            raise OrchestratorError(f"{rel}: no frontmatter")
+        fm = m.group(1)
+        today = dt.date.today().isoformat()
+        for key, value in (("status", t["status"]), ("updated", today)):
+            if re.search(rf"^{key}:.*$", fm, re.M):
+                fm = re.sub(rf"^{key}:.*$", f"{key}: {value}", fm, count=1, flags=re.M)
+            else:
+                fm += f"\n{key}: {value}"
+        path.write_text(f"---\n{fm}\n---\n" + text[m.end():])
 
     def _expect(self, t: dict, *states: str) -> None:
         if t["status"] not in states:
@@ -169,17 +198,17 @@ class Project:
 
     def ready(self) -> list[dict]:
         return [t for t in self.tasks
-                if t["status"] in ("approved", "revision") and self.deps_done(t)]
+                if t["status"] in ("ready", "changes_requested") and self.deps_done(t)]
 
     def approve(self, task_id: str, by: str) -> None:
         t = self.task(task_id)
         self._expect(t, "proposed")
         t["approved_by"] = by
-        self._move(t, "approved", f"plan approved by {by}")
+        self._move(t, "ready", f"plan approved by {by}")
 
     def start(self, task_id: str) -> None:
         t = self.task(task_id)
-        self._expect(t, "approved", "revision")
+        self._expect(t, "ready", "changes_requested")
         if not self.deps_done(t):
             raise OrchestratorError(f"{task_id}: dependencies not done: {t['depends_on']}")
         reason = self.budget_block_reason(task_id)
@@ -193,45 +222,47 @@ class Project:
         if t["revisions"] > limit:
             self._move(t, "blocked", f"{note}; revision limit {limit} exceeded, needs human")
         else:
-            self._move(t, "revision", f"{note}; revision {t['revisions']}/{limit}")
+            self._move(t, "changes_requested", f"{note}; revision {t['revisions']}/{limit}")
 
     def record_exec(self, task_id: str, result: str, notes: str) -> None:
         t = self.task(task_id)
         self._expect(t, "in_progress")
         t.setdefault("executions", []).append({"time": now(), "result": result, "notes": notes})
         if result == "pass":
-            self._move(t, "in_audit", "execution checks passed")
+            self._move(t, "in_review", "execution checks passed")
         else:
             self._fail(t, "execution checks failed")
 
     def record_audit(self, task_id: str, result: str, report: str) -> None:
         t = self.task(task_id)
-        self._expect(t, "in_audit")
+        self._expect(t, "in_review")
+        if not (self.root / report).exists():
+            raise OrchestratorError(f"audit report not found: {report}")
         t.setdefault("audits", []).append({"time": now(), "result": result, "report": report})
         if result == "pass":
-            self._move(t, "awaiting_merge", "audit passed")
+            self._move(t, "approved", "audit passed; merge needs human approval")
         else:
             self._fail(t, "audit failed")
 
     def approve_merge(self, task_id: str, by: str) -> None:
         t = self.task(task_id)
-        self._expect(t, "awaiting_merge")
+        self._expect(t, "approved")
         t["merge_approved_by"] = by
         self._move(t, "done", f"merge approved by {by}")
 
     def unblock(self, task_id: str, to: str, by: str) -> None:
         t = self.task(task_id)
         self._expect(t, "blocked")
-        if to not in ("approved", "proposed", "cancelled"):
-            raise OrchestratorError("unblock target must be approved, proposed or cancelled")
+        if to not in ("ready", "proposed", "archived"):
+            raise OrchestratorError("unblock target must be ready, proposed or archived")
         t["revisions"] = 0
         self._move(t, to, f"unblocked by {by}")
 
-    def cancel(self, task_id: str, by: str) -> None:
+    def archive(self, task_id: str, by: str) -> None:
         t = self.task(task_id)
         if t["status"] in TERMINAL:
             raise OrchestratorError(f"{task_id} already {t['status']}")
-        self._move(t, "cancelled", f"cancelled by {by}")
+        self._move(t, "archived", f"archived by {by}")
 
     def record_usage(self, task_id: str, kind: str, role: str, cost_usd: float | None,
                      est_cost_usd: float | None, tokens: int | None, model: str, note: str) -> dict:
@@ -247,10 +278,10 @@ class Project:
 
     # ---- dispatch (dry-run) ---------------------------------------------
     def build_prompt(self, t: dict, role: str) -> str:
-        spec = t.get("spec", f"tasks/specs/{t['id']}.md")
+        note = t.get("note", f"(task note for {t['id']})")
         lines = [
             f"You are the {role.upper()} for task {t['id']}: {t['title']}.",
-            f"Follow workflow/roles/{role}.md exactly. Read CLAUDE.md and {spec}.",
+            f"Follow '04 Agents/{role.capitalize()}.md' exactly. Read CLAUDE.md and '{note}'.",
             "Read only the files listed in the spec unless blocked; do not scan the whole repo.",
         ]
         if role == "executor":
@@ -258,19 +289,19 @@ class Project:
         if role == "auditor":
             lines.append(f"Audit `git diff main...{t.get('branch')}` against the acceptance criteria.")
         if t.get("audits") and role == "executor":
-            lines.append(f"Address findings in {t['audits'][-1]['report']}.")
+            lines.append(f"Address findings in '{t['audits'][-1]['report']}'.")
         return "\n".join(lines) + "\n"
 
     def dispatch(self, task_id: str, role: str, live: bool) -> str:
         t = self.task(task_id)
-        expected = {"executor": ("in_progress",), "auditor": ("in_audit",),
-                    "planner": ("proposed",), "researcher": ("proposed",)}[role]
+        expected = {"executor": ("in_progress",), "auditor": ("in_review",),
+                    "planner": ("proposed",), "researcher": ("proposed", "research")}[role]
         self._expect(t, *expected)
         reason = self.budget_block_reason(task_id)
         if reason:
             raise OrchestratorError(reason)
         prompt = self.build_prompt(t, role)
-        out = self.reports_dir / "prompts" / f"{task_id}-{role}.md"
+        out = self.prompts_dir / f"{task_id}-{role}.md"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(prompt)
         if live or self.budget.get("dispatch_mode") == "live":
@@ -293,30 +324,32 @@ class Project:
             "updated": now(),
             "task_counts": self.counts(),
             "ready": [t["id"] for t in self.ready()],
-            "needs_human": [t["id"] for t in self.tasks
-                            if t["status"] in ("proposed", "awaiting_merge", "blocked")],
+            "needs_human": [t["id"] for t in self.tasks if t["status"] in NEEDS_HUMAN],
             "api_spend_this_month_usd": self.api_spend(),
         })
         self.state_path.write_text(json.dumps(state, indent=2) + "\n")
 
     def report(self) -> Path:
         today = dt.date.today().isoformat()
+        stamp = today.replace("-", "")
         lines = [
-            "---", "type: health", f"date: {today}", "tags: [report]", "---",
-            f"# Progress report: {today}", "",
+            "---", f"id: HLT-{stamp}", f"title: Health report {today}", "type: health", "status: done",
+            f"created: {today}", f"updated: {today}", "tags:", "  - workflow/health", "---",
+            f"# Health report: {today}", "",
             "| Task | Title | Status | Risk | Revisions |", "|---|---|---|---|---|",
         ]
         for t in self.tasks:
-            lines.append(f"| {t['id']} | {t['title']} | {t['status']} | {t['risk']} | {t.get('revisions', 0)} |")
-        needs = [t for t in self.tasks if t["status"] in ("proposed", "awaiting_merge", "blocked")]
+            name = Path(t["note"]).stem if t.get("note") else t["id"]
+            lines.append(f"| [[{name}]] | {t['title']} | {t['status']} | {t['risk']} | {t.get('revisions', 0)} |")
+        needs = [t for t in self.tasks if t["status"] in NEEDS_HUMAN]
         lines += ["", "## Needs human"]
         lines += [f"- {t['id']} ({t['status']})" for t in needs] or ["- nothing"]
         ledger = self.ledger()
         subs = sum(1 for e in ledger if e.get("kind") == "subscription")
         lines += ["", "## Usage",
                   f"- API spend this month: ${self.api_spend():.2f} / ${float(self.budget.get('monthly_limit_usd', 0)):.2f}",
-                  f"- Subscription sessions logged: {subs}", "", "Related: [[Home]]"]
-        out = self.reports_dir / "health" / f"progress-{today}.md"
+                  f"- Subscription sessions logged: {subs}", "", "Related: [[Studio Index]]"]
+        out = self.reviews_dir / f"HLT-{stamp}.md"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text("\n".join(lines) + "\n")
         self._write_state()
@@ -330,8 +363,8 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("validate", help="validate queue.json and budget.json")
     sub.add_parser("status", help="list tasks")
     sub.add_parser("next", help="show tasks ready to start")
-    sub.add_parser("report", help="write reports/health/progress-<date>.md and update project-state.json")
-    for name in ("approve", "approve-merge", "cancel"):
+    sub.add_parser("report", help="write 08 Reviews/HLT-<date>.md and update project-state.json")
+    for name in ("approve", "approve-merge", "archive"):
         s = sub.add_parser(name)
         s.add_argument("id")
         s.add_argument("--by", required=True, help="name of the human approving")
@@ -359,7 +392,7 @@ def main(argv: list[str] | None = None) -> int:
         if a.cmd == "status":
             for t in proj.tasks:
                 deps = ",".join(t["depends_on"]) or "-"
-                print(f"{t['id']:7} {t['status']:15} {t['risk']:6} deps={deps:10} {t['title']}")
+                print(f"{t['id']:9} {t['status']:15} {t['risk']:6} deps={deps:10} {t['title']}")
             print(f"API spend this month: ${proj.api_spend():.2f}")
             return 0
         if a.cmd == "next":
@@ -383,7 +416,7 @@ def main(argv: list[str] | None = None) -> int:
         actions = {
             "approve": lambda: proj.approve(a.id, a.by),
             "approve-merge": lambda: proj.approve_merge(a.id, a.by),
-            "cancel": lambda: proj.cancel(a.id, a.by),
+            "archive": lambda: proj.archive(a.id, a.by),
             "start": lambda: proj.start(a.id),
             "unblock": lambda: proj.unblock(a.id, a.to, a.by),
             "record-exec": lambda: proj.record_exec(a.id, a.result, a.notes),
