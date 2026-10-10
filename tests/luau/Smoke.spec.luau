@@ -1,6 +1,8 @@
 --!strict
 -- Confirms the test pipeline (Rojo sync + runner) works. Safe to keep.
-return function(t)
+local TestRunner = require(script.Parent.TestRunner)
+
+return function(t: TestRunner.T)
 	t.test("runner executes specs", function()
 		t.eq(1 + 1, 2)
 	end)

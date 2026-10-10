@@ -4,7 +4,7 @@
     {
       "id": "T-001",
       "title": "Prototype: server-authoritative collectible pickup + leaderstats",
-      "status": "approved",
+      "status": "in_progress",
       "risk": "low",
       "depends_on": [],
       "branch": "task/T-001-collectibles",
@@ -24,6 +24,12 @@
           "from": "proposed",
           "to": "approved",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-10T14:09:32",
+          "from": "approved",
+          "to": "in_progress",
+          "note": "started"
         }
       ]
     }

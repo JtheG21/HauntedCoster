@@ -18,7 +18,7 @@ function TestRunner.run(): (number, number)
 		if child:IsA("ModuleScript") and child.Name:match("%.spec$") then
 			local t: T = {
 				test = function(name, fn)
-					local ok, err = pcall(fn)
+					local ok, err = pcall(fn :: any)
 					if ok then
 						passed += 1
 					else
