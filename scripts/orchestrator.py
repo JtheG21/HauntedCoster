@@ -108,6 +108,14 @@ class Project:
         for key in ("monthly_limit_usd", "max_revisions"):
             if key not in self.budget:
                 errors.append(f"budget.json: missing '{key}'")
+        if self.ledger_path.exists():
+            for n, line in enumerate(self.ledger_path.read_text().splitlines(), 1):
+                if not line.strip():
+                    continue
+                try:
+                    json.loads(line)
+                except json.JSONDecodeError:
+                    errors.append(f"usage-ledger.jsonl line {n}: not valid JSON (merge conflict marker?)")
         return errors
 
     def _cycles(self) -> list[str]:

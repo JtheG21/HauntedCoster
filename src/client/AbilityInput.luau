@@ -14,14 +14,21 @@ function AbilityInput.start()
 	local remote = ReplicatedStorage:WaitForChild(AbilityConfig.RemoteName) :: RemoteEvent
 
 	for abilityId, def in AbilityConfig.Abilities do
+		local keyCode = def.keyCode
+		if keyCode == nil then
+			continue -- fired only as another ability's release
+		end
+		local releaseId = def.releaseId
 		local actionName = `Ability_{abilityId}`
 		ContextActionService:BindAction(actionName, function(_, inputState)
 			if inputState == Enum.UserInputState.Begin then
 				remote:FireServer(abilityId)
+			elseif inputState == Enum.UserInputState.End and releaseId then
+				remote:FireServer(releaseId)
 			end
 			return Enum.ContextActionResult.Sink
-		end, true, def.keyCode)
-		ContextActionService:SetTitle(actionName, def.label)
+		end, true, keyCode)
+		ContextActionService:SetTitle(actionName, def.label or abilityId)
 	end
 end
 

@@ -64,6 +64,10 @@ class TestValidation(Base):
         self.assertIn("invalid status", errors)
         self.assertIn("unknown task TASK-9999", errors)
 
+    def test_corrupt_ledger_is_validation_error(self):
+        (self.root / "tasks" / "usage-ledger.jsonl").write_text('{"ok": 1}\n<<<<<<< HEAD\n')
+        self.assertTrue(any("usage-ledger" in e for e in self.proj().validate()))
+
     def test_cycle_detected(self):
         self.write_queue([task("TASK-0001", deps=["TASK-0002"]), task("TASK-0002", deps=["TASK-0001"])])
         self.assertTrue(any("cycle" in e for e in self.proj().validate()))
