@@ -28,6 +28,7 @@ jobs:
       - name: Install Selene 0.31.0
         run: |
           curl -sSfL -o "$RUNNER_TEMP/selene.zip" https://github.com/Kampfkarren/selene/releases/download/0.31.0/selene-0.31.0-linux.zip
+          mkdir -p "$HOME/.local/bin"
           unzip -q "$RUNNER_TEMP/selene.zip" -d "$HOME/.local/bin"
           chmod +x "$HOME/.local/bin/selene"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
