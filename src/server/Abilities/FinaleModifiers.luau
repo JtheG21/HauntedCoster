@@ -22,15 +22,35 @@ local FinaleService = require(Services.FinaleService)
 
 local FinaleModifiers = {}
 
+-- Latest push per target, so an earlier push's ownership hand-back never cuts a newer push short.
+local pushTokens: { [Player]: number } = {}
+
 local function push(target: Player, direction: Vector3, speed: number)
 	local character = target.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	if not (root and root:IsA("BasePart")) then
 		return
 	end
-	-- Same replication approach as Dash: the target's client owns its character, so the server adds a
-	-- short-lived constraint that the owning client simulates.
+	-- The server takes over the target's physics for the push (TASK-0007 rev 1). A short constraint
+	-- simulated by the target's own client was missed whenever that client hitched for longer than the
+	-- push, and a client could also delete it locally. Ownership goes back to the player afterwards.
 	local config = FinaleConfig.Knockback
+	local token = (pushTokens[target] or 0) + 1
+	pushTokens[target] = token
+	pcall(function()
+		root:SetNetworkOwner(nil)
+	end)
+	task.delay(config.ServerOwnSeconds, function()
+		if pushTokens[target] ~= token then
+			return
+		end
+		pushTokens[target] = nil
+		if target.Parent ~= nil and root.Parent ~= nil then
+			pcall(function()
+				root:SetNetworkOwner(target)
+			end)
+		end
+	end)
 	local attachment = Instance.new("Attachment")
 	attachment.Name = "KnockbackAttachment"
 	attachment.Parent = root

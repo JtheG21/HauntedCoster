@@ -18,6 +18,9 @@ local ResultRules = require(Shared:WaitForChild("ResultRules"))
 local FinaleService = {}
 
 local active = false
+-- Set once the finale is decided (audit F1): no more eliminations, knockback, guards or spends, so
+-- the results are read from a frozen snapshot no matter when MatchService asks for them.
+local concluded = false
 local startedAt = 0
 local starters = 0
 local alive: { [Player]: boolean } = {}
@@ -127,8 +130,30 @@ local function isOut(player: Player): boolean
 	)
 end
 
+local function conclude()
+	if active and not concluded then
+		concluded = true
+		table.clear(guards)
+		for player in alive do
+			if player.Parent == Players then
+				player:SetAttribute("FinaleGuard", nil)
+			end
+		end
+	end
+end
+
+local function checkConcluded()
+	if
+		active
+		and not concluded
+		and ResultRules.finaleOver(starters, aliveCount(), os.clock() - startedAt, FinaleConfig.MaxSeconds)
+	then
+		conclude()
+	end
+end
+
 local function poll()
-	if not active then
+	if not active or concluded or os.clock() - startedAt < FinaleConfig.StartGraceSeconds then
 		return
 	end
 	local batch = {}
@@ -146,6 +171,7 @@ local function poll()
 		end
 		publishRemaining()
 	end
+	checkConcluded()
 	local now = os.clock()
 	for player, expiry in guards do
 		if now >= expiry then
@@ -165,18 +191,27 @@ function FinaleService.begin(players: { Player })
 	lastOut = {}
 	starters = 0
 	active = true
+	concluded = false
 	startedAt = os.clock()
 	local c = center()
 	for i, player in players do
 		if player.Parent ~= Players then
 			continue
 		end
+		names[player.UserId] = player.DisplayName
+		-- A player who is dead or respawning when the course ends doesn't start the finale (audit F4):
+		-- counting them would eliminate them on the first poll and hand a rival an instant win.
+		local character = player.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if not (humanoid and humanoid.Health > 0) then
+			alive[player] = false
+			player:SetAttribute("FinaleAlive", false)
+			continue
+		end
 		starters += 1
 		alive[player] = true
 		player:SetAttribute("FinaleAlive", true)
-		names[player.UserId] = player.DisplayName
 		local spawn = FinaleConfig.Spawns[((i - 1) % #FinaleConfig.Spawns) + 1]
-		local character = player.Character
 		if character then
 			character:PivotTo(CFrame.lookAt(c + spawn, Vector3.new(c.X, c.Y + spawn.Y, c.Z)))
 		end
@@ -188,22 +223,25 @@ function FinaleService.isActive(): boolean
 	return active
 end
 
+-- Alive and still able to act (false once the finale is decided).
 function FinaleService.isAlive(player: Player): boolean
-	return active and alive[player] == true
+	return active and not concluded and alive[player] == true
 end
 
 function FinaleService.isOver(): boolean
-	return ResultRules.finaleOver(starters, aliveCount(), os.clock() - startedAt, FinaleConfig.MaxSeconds)
+	checkConcluded() -- also covers the time limit
+	return concluded
 end
 
 -- Where a match player should respawn during the finale.
 function FinaleService.respawn(player: Player)
-	if alive[player] then
+	if alive[player] and not concluded then
 		-- A respawn means the old character died before the poll saw it.
 		lastOut = { player.UserId }
 		eliminate(player)
 		publishRemaining()
-	else
+		checkConcluded()
+	elseif not alive[player] then
 		toSpectate(player)
 	end
 end
@@ -267,7 +305,7 @@ function FinaleService.results(finishOrder: { Player }): string
 	end
 	local speed = nameOf(ResultRules.speed(order)) or "nobody finished"
 	local teamwork = nameOf(ResultRules.teamwork(contributions, order)) or "no gate help"
-	local combat = ResultRules.combat(survivors, lastOut)
+	local combat = ResultRules.combat(survivors, lastOut, starters)
 	local combatText
 	if combat.winner then
 		combatText = nameOf(combat.winner) :: string
@@ -289,6 +327,7 @@ end
 -- Ends the finale and clears per-match state (match end).
 function FinaleService.reset()
 	active = false
+	concluded = false
 	for player in alive do
 		if player.Parent == Players then
 			player:SetAttribute("FinaleAlive", nil)
@@ -322,6 +361,7 @@ function FinaleService.start()
 		alive[player] = nil
 		guards[player] = nil
 		publishRemaining()
+		checkConcluded()
 	end)
 	task.spawn(function()
 		while true do

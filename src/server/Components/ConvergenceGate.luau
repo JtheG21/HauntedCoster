@@ -59,7 +59,7 @@ end
 local presentProvider: () -> { Player } = function()
 	return Players:GetPlayers()
 end
-local contributionListener: (player: Player) -> () = function(_player: Player) end
+local contributionListeners: { (player: Player) -> () } = {}
 
 local function presentFactions(): { string }
 	local present = {}
@@ -157,7 +157,9 @@ local function step(gate: BasePart, now: number)
 		for id in helpers do
 			local helper = Players:GetPlayerByUserId(id)
 			if helper then
-				contributionListener(helper)
+				for _, listener in contributionListeners do
+					task.spawn(listener, helper)
+				end
 			end
 		end
 		state.cloneOwner = nil
@@ -226,9 +228,14 @@ function ConvergenceGate.setPresentProvider(provider: () -> { Player })
 end
 
 -- Called (in its own thread) for each player whose power helped open a gate (Teamwork; TASK-0007).
-function ConvergenceGate.onContribution(listener: (player: Player) -> ())
-	contributionListener = function(player: Player)
-		task.spawn(listener, player)
+-- Returns a function that removes the listener (tests use it so they don't leak listeners).
+function ConvergenceGate.onContribution(listener: (player: Player) -> ()): () -> ()
+	table.insert(contributionListeners, listener)
+	return function()
+		local index = table.find(contributionListeners, listener)
+		if index then
+			table.remove(contributionListeners, index)
+		end
 	end
 end
 

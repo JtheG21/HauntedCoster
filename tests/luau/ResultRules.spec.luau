@@ -28,13 +28,13 @@ return function(t: TestRunner.T)
 	end)
 
 	t.test("the last player standing wins combat", function()
-		local r = ResultRules.combat({ 7 }, { 3 })
+		local r = ResultRules.combat({ 7 }, { 3 }, 2)
 		t.eq(r.winner, 7)
 		t.eq(#r.draw, 0)
 	end)
 
 	t.test("a simultaneous last elimination is a draw", function()
-		local r = ResultRules.combat({}, { 9, 4 })
+		local r = ResultRules.combat({}, { 9, 4 }, 2)
 		t.eq(r.winner, nil)
 		t.eq(#r.draw, 2)
 		t.eq(r.draw[1], 4) -- sorted, so the result never depends on table order
@@ -42,14 +42,20 @@ return function(t: TestRunner.T)
 	end)
 
 	t.test("several survivors at the time limit share a draw", function()
-		local r = ResultRules.combat({ 5, 2, 8 }, {})
+		local r = ResultRules.combat({ 5, 2, 8 }, {}, 3)
 		t.eq(r.winner, nil)
 		t.eq(table.concat(r.draw, ","), "2,5,8")
 	end)
 
 	t.test("a solo player who falls wins nothing", function()
-		local r = ResultRules.combat({}, { 1 })
+		local r = ResultRules.combat({}, { 1 }, 1)
 		t.eq(r.winner, nil)
+		t.eq(#r.draw, 0)
+	end)
+
+	t.test("in a multi-player finale a single last-out player never yields 'nobody' (audit F1)", function()
+		local r = ResultRules.combat({}, { 6 }, 2)
+		t.eq(r.winner, 6)
 		t.eq(#r.draw, 0)
 	end)
 

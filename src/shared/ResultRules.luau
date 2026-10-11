@@ -30,12 +30,16 @@ function ResultRules.finaleOver(starters: number, alive: number, elapsed: number
 end
 
 -- Combat result. `survivors` are still in when the finale ends; `lastOut` are the players eliminated
--- in the final elimination poll (eliminated together).
+-- in the final elimination poll (eliminated together); `starters` is how many began the finale.
 -- One survivor wins. Several survivors (time ran out) share a draw. No survivors: the players who
--- went out together in the last poll share a draw, unless only one player ever took part (no winner).
-function ResultRules.combat(survivors: { number }, lastOut: { number }): Combat
+-- went out together last share a draw; a single last-out player outlasted everyone else and wins if
+-- others took part (audit F1), but a solo player who falls wins nothing.
+function ResultRules.combat(survivors: { number }, lastOut: { number }, starters: number): Combat
 	if #survivors == 1 then
 		return { winner = survivors[1], draw = {} }
+	end
+	if #survivors == 0 and #lastOut == 1 and starters >= 2 then
+		return { winner = lastOut[1], draw = {} }
 	end
 	local pool = if #survivors > 1 then survivors elseif #lastOut > 1 then lastOut else {}
 	local draw = table.clone(pool)

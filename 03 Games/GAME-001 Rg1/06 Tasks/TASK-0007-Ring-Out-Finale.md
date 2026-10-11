@@ -3,7 +3,7 @@ id: TASK-0007
 title: Ring-Out Finale
 type: task
 project: GAME-001
-status: in_review
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -76,5 +76,6 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 **Check results:** `scripts/check.sh` ALL CHECKS PASSED. Specs 57/0 (fresh session). Playtest [[TEST-20261010-11]] (solo plus a 2-client `FinaleRingOut` pass; the failed runs are listed there).
 
 ## Audits
+- [[AUD-20261010-TASK-0007-01]]: attempt 1, **fail** (1 major, 5 minor, 3 nit). Major F1: the finale keeps eliminating after it is decided, so a second fall 0.1 s later overwrites the result ("nobody survived" instead of the last player standing).
 
 ## Outcome

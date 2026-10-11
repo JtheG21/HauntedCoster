@@ -5,6 +5,9 @@
 local FinaleConfig = table.freeze({
 	MaxSeconds = 60, -- the finale ends early once one player (or nobody) is left
 	PollSeconds = 0.1, -- eliminations found in the same poll are simultaneous
+	-- No eliminations right after the teleport onto the deck: a client can still report its old
+	-- (course-level) position for a moment, which would read as a ring-out (found in TASK-0007 rev 1).
+	StartGraceSeconds = 1.0,
 
 	-- Arena (greybox). Centre X/Z = MatchConfig.Zones.Finale; the deck top sits at TopY.
 	TopY = 60,
@@ -32,6 +35,9 @@ local FinaleConfig = table.freeze({
 		MaxSpeed = 95, -- ... at full charge
 		UpSpeed = 30, -- lift so the target leaves the ground
 		Duration = 0.2,
+		-- The server simulates the target's character for this long (the push plus the start of the
+		-- flight), then hands it back. A client-simulated push was missed in about 3 of 8 test runs.
+		ServerOwnSeconds = 0.6,
 		MaxForce = 60000,
 	}),
 	EchoBurstFraction = 0.6, -- a borrowed (Echo) Ki Burst hits like a 60% charge
