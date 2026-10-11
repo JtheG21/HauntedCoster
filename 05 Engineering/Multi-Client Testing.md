@@ -34,6 +34,8 @@ print(game:GetService("HttpService"):JSONEncode(r))
 | Scenario | Checks | Last result |
 |---|---|---|
 | `CollectibleRace` | Simultaneous touch → exactly 1 reward. Legit pickups work | ✅ 2026-10-10 ([[TEST-20261010-02]]) |
+| `FactionBalance` | Auto-balance within 1, everyone assigned (`players`, `timeout` args) | ✅ 3 clients, 2026-10-10 ([[TEST-20261010-05]]) |
 
 ## Limits
+- **On this 8 GB Mac, 3 clients is the practical maximum.** 4 clients didn't all join within 30 s (about 77 MB free). Give `timeout` ≥ 50 for 3 clients (they joined in about 22 s).
 Everything runs on one machine, so there's no real network latency. Mobile still needs a real device. The DevForum reports `EndTest` bugs in some Studio versions. Here the sessions closed by themselves.

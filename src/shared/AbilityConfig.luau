@@ -21,13 +21,24 @@ local AbilityConfig = table.freeze({
 			keyCode = Enum.KeyCode.Q,
 			label = "Dash",
 		}),
+		EchoClone = table.freeze({
+			cooldown = 8.0,
+			keyCode = Enum.KeyCode.E,
+			label = "Clone",
+		}),
 	}) :: { [string]: AbilityDef },
 
 	Dash = table.freeze({
 		Speed = 60, -- studs/second, horizontal
 		Duration = 0.2, -- seconds the velocity constraint stays active
-		-- Finite cap so a dash can't fling heavy assemblies (about 20x a default character's need).
+		-- Finite cap so a dash can't fling heavy assemblies. Gives the full dash at character mass 11.8 (TEST-20261010-04).
 		MaxForce = 40000,
+	}),
+
+	EchoClone = table.freeze({
+		Duration = 6, -- seconds the clone exists (and holds a plate)
+		Size = Vector3.new(2, 5, 1),
+		Transparency = 0.5,
 	}),
 })
 
