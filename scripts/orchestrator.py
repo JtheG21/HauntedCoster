@@ -246,6 +246,12 @@ class Project:
         else:
             self._fail(t, "audit failed")
 
+    def request_changes(self, task_id: str, by: str, reason: str) -> None:
+        """Human sends an audited (or in-review) task back for fixes. Counts as a revision."""
+        t = self.task(task_id)
+        self._expect(t, "in_review", "approved")
+        self._fail(t, f"changes requested by {by}: {reason}")
+
     def approve_merge(self, task_id: str, by: str) -> None:
         t = self.task(task_id)
         self._expect(t, "approved")
@@ -386,6 +392,8 @@ def main(argv: list[str] | None = None) -> int:
         s.add_argument("id")
         s.add_argument("--by", required=True, help="name of the human approving")
     s = sub.add_parser("start"); s.add_argument("id")
+    s = sub.add_parser("request-changes", help="HUMAN: send an in_review/approved task back for fixes (counts as a revision)")
+    s.add_argument("id"); s.add_argument("--by", required=True); s.add_argument("--reason", required=True)
     s = sub.add_parser("unblock"); s.add_argument("id"); s.add_argument("--to", required=True); s.add_argument("--by", required=True)
     s = sub.add_parser("record-exec"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--notes", default="")
     s = sub.add_parser("record-audit"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--report", required=True)
@@ -436,6 +444,7 @@ def main(argv: list[str] | None = None) -> int:
             "archive": lambda: proj.archive(a.id, a.by),
             "start": lambda: proj.start(a.id),
             "unblock": lambda: proj.unblock(a.id, a.to, a.by),
+            "request-changes": lambda: proj.request_changes(a.id, a.by, a.reason),
             "record-exec": lambda: proj.record_exec(a.id, a.result, a.notes),
             "record-audit": lambda: proj.record_audit(a.id, a.result, a.report),
         }

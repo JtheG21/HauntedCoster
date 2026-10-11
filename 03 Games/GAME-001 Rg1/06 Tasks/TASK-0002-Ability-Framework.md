@@ -3,7 +3,7 @@ id: TASK-0002
 title: Ability Framework
 type: task
 project: GAME-001
-status: ready
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -51,7 +51,43 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 
 ---
 ## Implementation record
+*Executor (Claude Code, main session), 2026-10-10, branch `task/TASK-0002-Ability-Framework`*
+
+**Files changed**
+- `src/shared/AbilityConfig.luau` (new): remote name, rate limit (5 per 1 s), Dash cooldown 1 s, speed 60, duration 0.2 s
+- `src/shared/AbilityRules.luau` (new): pure `validateRequest`, `checkRate` (sliding window, bounded memory), `canActivate`, `horizontalDirection`
+- `src/server/Services/AbilityService.luau` (new): server-created remote, registry with an optional `canUse` (for factions later), rate → validate → eligibility → cooldown → character checks, handler in `pcall`, rejection counter attribute `AbilityRejections`, throttled warnings
+- `src/server/Abilities/Dash.luau` (new): test ability. **One more file than the spec listed:** it sets the `Abilities/<Name>.luau` pattern that TASK-0003/0004 use
+- `src/client/AbilityInput.luau` (new): `ContextActionService` key plus touch button per ability. **Deviation:** a ModuleScript required from `init.client.luau` rather than a nested `.client.luau` LocalScript (consistent with the server pattern)
+- `src/server/init.server.luau`, `src/client/init.client.luau`: start the services
+- `tests/luau/AbilityRules.spec.luau` (new): 7 tests
+
+**Design decisions**
+- **Clients send only an ability id.** Direction, force and targets are always decided on the server.
+- The rate limit is checked **first** and counts rejected requests, so spam is cheap to drop.
+- The cooldown is committed before the handler runs, so a yielding handler can't be re-entered.
+- **Replication finding (spike, R2):** the player's client owns its character's physics, so the server adds a short-lived `LinearVelocity` constraint instead of writing velocity. The owning client simulates it, and the server observed the displacement. This is the pattern for movement abilities. Pushable objects get their own ownership decision in TASK-0004.
+
+**Check results**
+- `scripts/check.sh`: ALL CHECKS PASSED (StyLua, Selene, types: no type errors, Rojo build, JSON, queue, vault 0/0, 30 Python tests)
+- Luau specs: `[TestRunner] 16 passed, 0 failed`
+- Playtest and exploit probes: [[TEST-20261010-03]]. All probes rejected, no errors.
+
+**Not yet verified:** a second client seeing the Dash (needs [[TASK-0009-Multi-Client-Test-Harness]]); the touch button on a real device.
+
+### Revision 1: audit follow-ups (requested by jg, 2026-10-10)
+- **F1:** the rejection counter moved off the replicated Player attribute to a server-only `ServerStorage.AbilityDiagnostics` attribute `Rejections_<UserId>`
+- **F2:** `canUse` runs in `pcall`. An error counts as a rejection (`eligibility_error`), and the type documents "must not yield"
+- **F3:** `Dash.MaxForce = 40000` (config) replaces `math.huge`. Abilities are rejected while seated (`humanoid.SeatPart`) unless the registration sets `allowSeated`
+- **F4:** specs add NaN, boolean and Vector3 ids → `bad_type`
+- **F5 (nit):** requests after the player has left return early, with no state recreated
+- **Tooling (outside scope, disclosed):** `orchestrator.py request-changes` (in_review/approved → changes_requested, counts as a revision) plus 1 test, needed to route this post-audit change honestly
+
+**Checks:** `scripts/check.sh` ALL CHECKS PASSED (31 Python tests). Luau `AbilityRules` specs **7/7** in Studio, run by loading the branch's files into a temporary ServerStorage folder (Studio was synced to another branch). The folder was removed afterwards.
+**Not runtime-tested yet:** F1/F2/F3/F5 service behaviour in a Play session, because Studio isn't synced to this branch. **Plan:** after merge, add an `AbilityProbe` multi-client scenario (see the multi-client testing how-to added by TASK-0009) covering the 2nd-client Dash view (AC2), the seated rejection and the diagnostics counter.
 
 ## Audits
+- [[AUD-20261010-TASK-0002-01]]: attempt 1, **pass** (4 minor, 2 nit)
+- [[AUD-20261010-TASK-0002-02]]: attempt 2 (revision 1 delta), **pass**: F1–F5 fixed. New: N1 minor (Dash force/seated not run in Play), N2–N4 nits
 
 ## Outcome

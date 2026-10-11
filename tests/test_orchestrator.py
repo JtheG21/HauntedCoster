@@ -112,6 +112,18 @@ class TestWorkflow(Base):
         with self.assertRaises(orch.OrchestratorError):
             p.start("TASK-0001")
 
+    def test_request_changes_after_pass(self):
+        p = self.proj()
+        p.approve("TASK-0001", "jg")
+        p.start("TASK-0001")
+        p.record_exec("TASK-0001", "pass", "")
+        p.record_audit("TASK-0001", "pass", "06 QA/a0.md")
+        p.request_changes("TASK-0001", "jg", "fix minors")
+        t = p.task("TASK-0001")
+        self.assertEqual((t["status"], t["revisions"]), ("changes_requested", 1))
+        with self.assertRaises(orch.OrchestratorError):
+            p.request_changes("TASK-0001", "jg", "again")  # not allowed from changes_requested
+
     def test_audit_cannot_be_skipped(self):
         p = self.proj()
         p.approve("TASK-0001", "jg")

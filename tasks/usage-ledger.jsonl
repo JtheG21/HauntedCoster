@@ -1,2 +1,5 @@
 {"time": "2026-10-10T14:12:51", "task": "TASK-0001", "kind": "subscription", "role": "auditor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": 75177, "note": "fresh subagent audit"}
 {"time": "2026-10-10T14:12:52", "task": "TASK-0001", "kind": "subscription", "role": "executor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": null, "note": "main session: implement + Studio playtest"}
+{"time": "2026-10-10T16:44:05", "task": "TASK-0002", "kind": "subscription", "role": "auditor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": 82963, "note": "fresh-context subagent in worktree"}
+{"time": "2026-10-10T16:44:05", "task": "TASK-0002", "kind": "subscription", "role": "executor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": null, "note": "main session: implement + Studio MCP playtest"}
+{"time": "2026-10-10T16:59:34", "task": "TASK-0002", "kind": "subscription", "role": "auditor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": null, "note": "attempt 2 delta audit, fresh subagent"}

@@ -78,7 +78,7 @@
       "id": "TASK-0002",
       "title": "Ability Framework",
       "project": "GAME-001",
-      "status": "ready",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0002-Ability-Framework",
@@ -97,8 +97,75 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-10T16:37:58",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-10T16:41:02",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T16:44:05",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-10T16:56:32",
+          "from": "approved",
+          "to": "changes_requested",
+          "note": "changes requested by jg: fix audit minors F1-F4 (+F5) before merge; revision 1/2"
+        },
+        {
+          "time": "2026-10-10T16:56:32",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-10T16:57:53",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T16:59:34",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
-      ]
+      ],
+      "executions": [
+        {
+          "time": "2026-10-10T16:41:02",
+          "result": "pass",
+          "notes": "check.sh green; specs 16/0; TEST-20261010-03 probes rejected; 2nd-client view untested"
+        },
+        {
+          "time": "2026-10-10T16:57:53",
+          "result": "pass",
+          "notes": "rev1: check.sh green; AbilityRules specs 7/7 (injected); service runtime pending integration probe"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-10T16:44:05",
+          "result": "pass",
+          "report": "06 QA/AUD-20261010-TASK-0002-01.md"
+        },
+        {
+          "time": "2026-10-10T16:59:34",
+          "result": "pass",
+          "report": "06 QA/AUD-20261010-TASK-0002-02.md"
+        }
+      ],
+      "revisions": 1
     },
     {
       "id": "TASK-0003",
