@@ -17,6 +17,13 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 - Run `scripts/check.sh` before any AI review. Read only the files a task needs; don't scan the whole repo.
 - Never read, print or store credentials (`.env`, keys) in code or notes.
 
+## Session and delegation budget
+- One primary agent. No subagents for reads, simple edits, single checks or note upkeep.
+- At most one audit subagent per task (not one per batch of tasks) unless the user authorizes more. It returns verdict + findings + file:line only.
+- Delta re-audits after a revision may use `model: sonnet`. First audits of security, networking or DataStore code stay on Opus.
+- Don't poll with `sleep`. Use background runs and wait for the notification.
+- When the objective changes, or context passes ~150k, write a ≤20-line handoff in the task note and start a fresh session.
+
 ## Third-party skills (project-local, `.claude/skills/`)
 - Installed: `roblox-map` (map and course layout plus playability prover) and `roblox-sfx` (Creator Store sound sourcing). Source, commit and licence: `.claude/skills/PROVENANCE.md` and `05 Engineering/External Skills.md`.
 - They are **tools under this workflow**, not a second workflow: results feed a `TASK-` note, and `tasks/queue.json` stays authoritative.
