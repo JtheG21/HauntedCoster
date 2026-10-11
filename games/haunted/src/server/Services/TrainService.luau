@@ -42,11 +42,26 @@ local GLOW = Color3.fromRGB(170, 110, 255)
 
 local started = false
 local trains: { [number]: PlotTrain } = {}
-local lastPaid: { [Player]: number } = {}
+-- Keyed by UserId so leaving and rejoining doesn't reset the paid-ride cooldown.
+local lastPaid: { [number]: number } = {}
 local rideCallbacks: { (Player, number) -> () } = {}
 
 function TrainService.onRideCompleted(cb: (Player, number) -> ())
 	table.insert(rideCallbacks, cb)
+end
+
+-- Unseat whoever is in `seat`. The character is client-simulated, so setting Humanoid.Sit from the server
+-- isn't reliable; destroying the seat's weld (server-owned) always frees them.
+local function unseat(seat: Seat)
+	local occupant = seat.Occupant
+	local weld = seat:FindFirstChild("SeatWeld")
+	if weld then
+		weld:Destroy()
+	end
+	if occupant then
+		occupant.Sit = false
+		occupant.Jump = true
+	end
 end
 
 local function starterPoints(): { TrackRules.P }
@@ -88,6 +103,8 @@ local function buildCart(parent: Instance): (Model, Seat)
 		return s
 	end
 	local front = seat("FrontSeat", -1.2)
+	-- Touch-sitting is off for the owner's seat; TrainService enables it only for the owner's ride.
+	front.Disabled = true
 	local back = seat("GuestSeat", 1.6)
 	back:SetAttribute("Guest", true)
 	Build.part({
@@ -302,6 +319,50 @@ local function rebuild(index: number, points: { TrackRules.P }, pieces: { TrackR
 	prompt.Triggered:Connect(function(player)
 		TrainService.ride(player, index)
 	end)
+	-- The guest seat is boarded with its own prompt, not by touch: the cart parks on the station, so a
+	-- touch seat sat down anyone walking up to ride (found in the hands-on playtest, TEST-20261011-03).
+	local guest = cart:FindFirstChild("GuestSeat")
+	if guest and guest:IsA("Seat") then
+		guest.Disabled = true
+		local hop = Instance.new("ProximityPrompt")
+		hop.Name = "RideAlong"
+		hop.ActionText = "Hop in"
+		hop.ObjectText = "Guest seat"
+		hop.KeyboardKeyCode = Enum.KeyCode.R
+		hop.GamepadKeyCode = Enum.KeyCode.ButtonY
+		hop.MaxActivationDistance = 8
+		hop.RequiresLineOfSight = false
+		hop.Parent = guest
+		hop.Triggered:Connect(function(player)
+			local character = player.Character
+			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+			if humanoid and humanoid.Health > 0 and not guest.Occupant and not humanoid.SeatPart then
+				guest:Sit(humanoid)
+			end
+		end)
+	end
+	-- The front seat belongs to the plot owner: anyone else who walks into it is ejected, so nobody can
+	-- block the owner's ride. (The guest seat is open to anyone for ride-alongs.)
+	front:GetPropertyChangedSignal("Occupant"):Connect(function()
+		local occupant = front.Occupant
+		if not occupant then
+			return
+		end
+		local owner = PlotService.ownerOf(index)
+		local who = Players:GetPlayerFromCharacter(occupant.Parent)
+		if who ~= owner then
+			-- Deferred: the engine is still parenting the SeatWeld while this signal fires, so destroying
+			-- it here is refused ("tried to set the parent of SeatWeld to NULL") and the griefer stays seated.
+			task.defer(function()
+				if front.Occupant == occupant then
+					unseat(front)
+				end
+			end)
+			if who then
+				StateService.toast(who, "That's the owner's seat. Hop in the back to ride along!", "info")
+			end
+		end
+	end)
 end
 
 local function exhibitInputs(profile: ProfileRules.Profile): { TrackRules.ExhibitInput }
@@ -364,9 +425,22 @@ function TrainService.ride(player: Player, index: number)
 		t.prompt.Enabled = false
 	end
 	cartAt(t, 0)
-	seat:Sit(humanoid)
-	task.wait(0.4)
+	if seat.Occupant and seat.Occupant ~= humanoid then
+		unseat(seat)
+		task.wait(0.1)
+	end
+	seat.Disabled = false
+	-- Roblox briefly refuses to re-seat a humanoid that just jumped out of a seat, so retry a few times.
+	for _ = 1, 5 do
+		if seat.Occupant == humanoid or humanoid.Health <= 0 then
+			break
+		end
+		humanoid.Sit = false
+		seat:Sit(humanoid)
+		task.wait(0.4)
+	end
 	if seat.Occupant ~= humanoid then
+		seat.Disabled = true
 		t.riding = false
 		if t.prompt then
 			t.prompt.Enabled = true
@@ -401,11 +475,11 @@ function TrainService.ride(player: Player, index: number)
 	-- Eject riders and park the cart.
 	for _, s in (t.cart and t.cart:GetChildren() or {}) :: { Instance } do
 		if s:IsA("Seat") and s.Occupant then
-			s.Occupant.Sit = false
-			s.Occupant.Jump = true
+			unseat(s)
 		end
 	end
 	task.wait(0.2)
+	seat.Disabled = true
 	cartAt(t, 0)
 	t.riding = false
 	if t.prompt then
@@ -421,12 +495,12 @@ function TrainService.ride(player: Player, index: number)
 		return
 	end
 	local now = os.clock()
-	if lastPaid[player] and now - lastPaid[player] < Economy.RideCooldownSeconds then
-		local left = math.ceil(Economy.RideCooldownSeconds - (now - lastPaid[player]))
+	if lastPaid[player.UserId] and now - lastPaid[player.UserId] < Economy.RideCooldownSeconds then
+		local left = math.ceil(Economy.RideCooldownSeconds - (now - lastPaid[player.UserId]))
 		StateService.toast(player, `What a ride! The guests need {left}s before the next paid ride.`, "info")
 		return
 	end
-	lastPaid[player] = now
+	lastPaid[player.UserId] = now
 	local tier = Economy.HouseTiers[profile.houseTier + 1]
 	local pay = TrackRules.payout(t.sampled, t.pieces, tier.rideMultiplier, exhibitInputs(profile))
 	local firstRide = profile.stats.rides == 0
@@ -527,7 +601,6 @@ function TrainService.start()
 		StateService.markDirty(player)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
-		lastPaid[player] = nil
 		local index = player:GetAttribute("PlotIndex")
 		if type(index) == "number" then
 			task.defer(function()
@@ -545,7 +618,7 @@ function TrainService.start()
 		local i = PlotService.plotIndex(player)
 		local t = i and trains[i]
 		snap.riding = t ~= nil and t.riding
-		local last = lastPaid[player]
+		local last = lastPaid[player.UserId]
 		snap.rideCooldown = if last then math.max(0, Economy.RideCooldownSeconds - (os.clock() - last)) else 0
 	end)
 end

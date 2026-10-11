@@ -52,6 +52,9 @@ type Carry = {
 	returnSeconds: number,
 	cage: BasePart?,
 	conns: { RBXScriptConnection },
+	lastPos: Vector3?, -- server-side speed check (WalkSpeed lives on the client-owned character)
+	lastAt: number,
+	strikes: number,
 }
 
 local started = false
@@ -102,6 +105,8 @@ local function clearCarry(player: Player)
 	StateService.markDirty(player)
 end
 
+local checkCarrySpeed: (Player, Carry, number) -> ()
+
 local function escape(player: Player, why: string)
 	local c = carries[player]
 	if not c then
@@ -120,6 +125,64 @@ local function escape(player: Player, why: string)
 			"error"
 		)
 	end
+end
+
+-- The carry slowdown is a WalkSpeed value on a character the client simulates, so an exploiter could
+-- undo it. Measure horizontal speed on the server; repeated speeding drops the capture.
+local SPEED_TOLERANCE = 1.35
+local SPEED_STRIKES = 3
+
+checkCarrySpeed = function(player: Player, c: Carry, now: number)
+	local root = rootOf(player)
+	if not root then
+		return
+	end
+	local pos = root.Position
+	local last = c.lastPos
+	local dt = now - c.lastAt
+	c.lastPos = pos
+	c.lastAt = now
+	if not last or dt <= 0 then
+		return
+	end
+	local profile = PlayerDataService.get(player)
+	local allowed = EconomyRules.walkSpeed(if profile then profile.speedLevel else 0, true)
+	local flat = Vector3.new(pos.X - last.X, 0, pos.Z - last.Z).Magnitude
+	if flat > allowed * dt * SPEED_TOLERANCE + 2 then
+		c.strikes += 1
+		if c.strikes >= SPEED_STRIKES then
+			escape(player, "The jar shattered as you sped off!")
+		end
+	else
+		c.strikes = math.max(0, c.strikes - 1)
+	end
+end
+
+-- Server-initiated moves (tests, future teleports) must not count as speeding.
+function CaptureService.noteTeleport(player: Player)
+	local c = carries[player]
+	if c then
+		c.lastPos = nil
+	end
+end
+
+-- Studio test helper: make the current carry's timer run out on the next tick (real timeout path).
+function CaptureService.expireCarryForTest(player: Player)
+	local c = carries[player]
+	if c then
+		c.deadline = os.clock()
+	end
+end
+
+-- Number of monsters of a species currently being carried (counts toward spawn caps).
+function CaptureService.carriedCount(speciesId: string): number
+	local n = 0
+	for _, c in carries do
+		if c.species == speciesId then
+			n += 1
+		end
+	end
+	return n
 end
 
 local function makeCage(player: Player, speciesId: string, variantId: string): BasePart?
@@ -165,6 +228,9 @@ local function startCarry(player: Player, speciesId: string, variantId: string)
 		returnSeconds = tuning.returnSeconds,
 		cage = makeCage(player, speciesId, variantId),
 		conns = {},
+		lastPos = nil,
+		lastAt = os.clock(),
+		strikes = 0,
 	}
 	carries[player] = c
 	local character = player.Character
@@ -280,7 +346,9 @@ local function onCaptureRelease(player: Player): { [string]: any }
 		return { outcome = "cancelled" }
 	end
 	-- Judge from the server's clock, compensating for the round trip.
-	local latency = math.clamp(player:GetNetworkPing() * 2, 0, 0.4)
+	-- GetNetworkPing is already a round trip (client display starts half a trip late, the press arrives half
+	-- a trip late), so subtract it once.
+	local latency = math.clamp(player:GetNetworkPing(), 0, 0.3)
 	local elapsed = now - s.startedAt - latency
 	local hit = CaptureRules.judge(elapsed, s.period, s.zoneCenter, s.zoneWidth, CaptureRules.LatencySlack)
 	local outcome
@@ -429,11 +497,18 @@ function CaptureService.start()
 			for player, c in carries do
 				if now >= c.deadline then
 					escape(player, "Time's up!")
+				else
+					checkCarrySpeed(player, c, now)
 				end
 			end
 			for player, s in sessions do
+				local character = player.Character
+				local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 				if now - s.startedAt > CaptureRules.SessionTimeout then
 					endSession(player, "timeout")
+				elseif not humanoid or humanoid.Health <= 0 then
+					-- Dying (or despawning) mid-capture frees the monster straight away.
+					endSession(player, "cancelled")
 				end
 			end
 		end

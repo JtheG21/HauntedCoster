@@ -61,6 +61,7 @@ return function(_args: any): { [string]: any }
 
 	local function tp(pos: Vector3)
 		character:PivotTo(CFrame.new(pos + Vector3.new(0, 3, 0)))
+		CaptureService.noteTeleport(player) -- server moves aren't speeding
 		task.wait(0.3)
 	end
 
@@ -114,7 +115,7 @@ return function(_args: any): { [string]: any }
 				break
 			end
 			tgt = r.zoneCenter or tgt
-			task.wait(0.25)
+			task.wait(CaptureRules.MinReleaseGap + 0.05)
 		end
 		return r
 	end
@@ -170,14 +171,14 @@ return function(_args: any): { [string]: any }
 	-- Purchases
 	local purchase = EconomyService.purchase
 	profile.coins = 10
-	local okLow, whyLow = purchase(player, "house")
+	local okLow, whyLow = purchase(player, "house", profile.houseTier)
 	check("house purchase rejected without funds", okLow == false and profile.houseTier == 0, whyLow)
-	local okBad = purchase(player, "freeMoney")
+	local okBad = purchase(player, "freeMoney", 0)
 	check("unknown item rejected", okBad == false)
 	-- TEST SHORTCUT: grant coins to skip saving up
 	profile.coins = 400
 	task.wait(0.6) -- purchase rate limit
-	local okSpeed = purchase(player, "speed")
+	local okSpeed = purchase(player, "speed", profile.speedLevel)
 	check(
 		"speed upgrade purchased",
 		okSpeed == true and profile.speedLevel == 1 and profile.coins >= 325 and profile.coins < 335,
@@ -189,13 +190,23 @@ return function(_args: any): { [string]: any }
 		humanoid.WalkSpeed
 	)
 	task.wait(0.6)
-	local okHouse = purchase(player, "house")
+	local coinsBeforeDup = profile.coins
+	local okDup = purchase(player, "speed", 0) -- a repeated click still carrying the old level
+	check(
+		"duplicate purchase (stale level) rejected",
+		okDup == false and profile.speedLevel == 1 and profile.coins == coinsBeforeDup
+	)
+	task.wait(0.6)
+	local okHouse = purchase(player, "house", profile.houseTier)
 	-- Passive income keeps ticking, so allow a few coins above the exact 75 left after paying.
 	check(
 		"house tier 1 purchased",
 		okHouse == true and profile.houseTier == 1 and profile.coins >= 75 and profile.coins < 85,
 		profile.coins
 	)
+
+	local houseFolder = Workspace.Plots[`Plot{plotIndex}`]:FindFirstChild("House")
+	check("house model rebuilt for tier 1", houseFolder ~= nil and houseFolder:FindFirstChild("Manor") ~= nil)
 
 	-- Track editor
 	local submit = TrainService.submitRoute
@@ -235,7 +246,21 @@ return function(_args: any): { [string]: any }
 	local pay = TrainService.payoutPreview(player)
 	check("exhibit near track counts toward payout", pay ~= nil and pay.counted >= 1, pay and pay.counted)
 
-	-- Ride
+	-- Ride: leaving the seat mid-ride cancels with no payout
+	tp(home + Vector3.new(custom[1].x, 0, custom[1].z))
+	local coinsBeforeCancel = profile.coins
+	task.spawn(TrainService.ride, player, plotIndex)
+	task.wait(2.5)
+	humanoid.Sit = false
+	humanoid.Jump = true
+	task.wait(1.5)
+	check(
+		"leaving the seat mid-ride pays nothing",
+		profile.coins == coinsBeforeCancel and profile.stats.rides == 0,
+		profile.coins - coinsBeforeCancel
+	)
+	task.wait(1)
+
 	local coinsBeforeRide = profile.coins
 	tp(home + Vector3.new(custom[1].x, 0, custom[1].z))
 	TrainService.ride(player, plotIndex)
@@ -256,6 +281,17 @@ return function(_args: any): { [string]: any }
 	tp((World.landmarkById("BellTower") :: any).position + Vector3.new(0, 0, 8))
 	LandmarkService.investigate(player, "BellTower")
 	check("bell tower clue after first ride", profile.flags.bellClue == true)
+	-- The clue must actually bring the Bell Wraith, even though Gentlemen filled the Crypt long before
+	-- (1-in-3 roll per 4 s spawn tick, so 60 s fails by chance about 0.2% of the time).
+	local wraithAt = os.clock()
+	while not Workspace.Monsters:FindFirstChild("BellWraith") and os.clock() - wraithAt < 60 do
+		task.wait(1)
+	end
+	check(
+		"Bell Wraith spawns in the Crypt after the clue",
+		Workspace.Monsters:FindFirstChild("BellWraith") ~= nil,
+		string.format("%.0fs", os.clock() - wraithAt)
+	)
 
 	-- Escape never touches owned monsters
 	local ownedBefore = #profile.owned
@@ -273,8 +309,54 @@ return function(_args: any): { [string]: any }
 		end
 	end
 
+	-- After respawning: home spawn and speed upgrade still applied
+	local newChar = player.Character
+	local t1 = os.clock()
+	while (newChar == character or not newChar) and os.clock() - t1 < 10 do
+		task.wait(0.2)
+		newChar = player.Character
+	end
+	if newChar and newChar ~= character then
+		character = newChar
+		humanoid = newChar:WaitForChild("Humanoid") :: Humanoid
+		root = newChar:WaitForChild("HumanoidRootPart") :: BasePart
+		task.wait(1.5)
+		check(
+			"respawn keeps speed upgrade",
+			math.abs(humanoid.WalkSpeed - (Economy.BaseWalkSpeed + Economy.SpeedPerLevel)) < 0.01,
+			humanoid.WalkSpeed
+		)
+		check(
+			"respawn lands at home",
+			(Vector3.new(root.Position.X, 0, root.Position.Z) - Vector3.new(home.X, 0, home.Z)).Magnitude < 60,
+			root.Position
+		)
+	else
+		check("character respawned", false)
+	end
+
+	-- Timeout path: the real timer expiry releases only the carried monster, coins untouched
+	local third = findMonster("Wisp") or findMonster("Hound")
+	if third and third.PrimaryPart then
+		tp(third.PrimaryPart.Position - Vector3.new(0, 3, 0) + Vector3.new(4, 0, 0))
+		local r3 = catch(third)
+		if r3 and r3.outcome == "success" then
+			local ownedB, coinsB = #profile.owned, profile.coins
+			CaptureService.expireCarryForTest(player)
+			task.wait(0.6)
+			check("timer expiry = escape", not CaptureService.isCarrying(player))
+			check(
+				"timeout kept owned monsters and coins",
+				#profile.owned == ownedB and profile.coins >= coinsB,
+				`{#profile.owned} {profile.coins - coinsB}`
+			)
+		else
+			check("third capture succeeded", false, r3 and (r3.outcome or r3.reason))
+		end
+	end
+
 	task.wait(2)
-	check("tutorial advanced past the bell step", profile.tutorialStep >= 12, profile.tutorialStep)
+	check("tutorial complete after the bell step (12 steps)", profile.tutorialStep >= 13, profile.tutorialStep)
 
 	local failed = 0
 	for _, c in checks do

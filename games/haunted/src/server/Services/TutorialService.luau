@@ -11,13 +11,13 @@ local TutorialRules = require(Shared:WaitForChild("Rules"):WaitForChild("Tutoria
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local StateService = require(script.Parent.StateService)
 local CaptureService = require(script.Parent.CaptureService)
+local PlotService = require(script.Parent.PlotService)
 
 local TutorialService = {}
 
-local WELCOME_SECONDS = 10
+local NEAR_STATION_STUDS = 20
 
 local started = false
-local joinedAt: { [Player]: number } = {}
 
 local function count(t: { [string]: boolean }): number
 	local n = 0
@@ -35,8 +35,16 @@ local function ctxFor(player: Player): TutorialRules.Ctx?
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local pos = if root and root:IsA("BasePart") then root.Position else nil
+	local index = PlotService.plotIndex(player)
+	local plot = index and PlotService.plotModel(index)
+	local track = plot and plot:FindFirstChild("Track")
+	local station = track and track:FindFirstChild("Station")
 	return {
-		nearTrain = os.clock() - (joinedAt[player] or os.clock()) > WELCOME_SECONDS,
+		nearTrain = pos ~= nil
+			and station ~= nil
+			and station:IsA("BasePart")
+			and (station.Position - pos).Magnitude <= NEAR_STATION_STUDS,
+		viewedCollection = profile.flags.journalOpened == true or profile.flags.mansionOpened == true,
 		inGraveyard = pos ~= nil and World.inRect(World.Graveyard.rect, pos.X, pos.Z),
 		clueCount = count(profile.journal.clues),
 		angelClue = profile.journal.clues.Angel == true,
@@ -81,11 +89,7 @@ function TutorialService.start()
 		return
 	end
 	started = true
-	PlayerDataService.onLoaded(function(player)
-		joinedAt[player] = os.clock()
-	end)
 	Players.PlayerRemoving:Connect(function(player)
-		joinedAt[player] = nil
 		lastHint[player] = nil
 	end)
 	StateService.addProvider(function(player, snap)

@@ -1,11 +1,15 @@
 --!strict
 -- Control-point track editor (unlocked by the Restored Manor tier). Top-down camera over the plot;
--- tap/click to add a point after the selected one, tap a point to select it, then Move/Delete or add a
+-- mouse, touch or gamepad cursor. Tap/click to add a point after the selected one, tap a point to select it, then Move/Delete or add a
 -- special piece. The live preview uses the same TrackRules the server validates with; the server
 -- re-validates on Confirm and keeps the last valid route if anything is wrong.
 
+local ContextActionService = game:GetService("ContextActionService")
+local ProximityPromptService = game:GetService("ProximityPromptService")
+local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
@@ -37,6 +41,10 @@ local inputConn: RBXScriptConnection? = nil
 local savedCameraType: Enum.CameraType = Enum.CameraType.Custom
 local origin = Vector3.zero
 local busy = false
+local cursor: TextLabel
+local cursorPos = Vector2.zero
+local stick = Vector2.zero
+local padConn: RBXScriptConnection? = nil
 
 local function plotOrigin(): Vector3?
 	local snap = State.snap
@@ -279,12 +287,128 @@ local function setPiece(kind: string)
 	redraw()
 end
 
+local function doMove()
+	if selected then
+		mode = "move"
+		redraw()
+	else
+		toast("Select a point first.", "error")
+	end
+end
+
+local function doDelete()
+	if selected then
+		table.remove(points, selected)
+		selected = nil
+		mode = "add"
+		redraw()
+	end
+end
+
+local function doConfirm()
+	if busy then
+		return
+	end
+	busy = true
+	local pts, pieces = toRoute()
+	local ok, reason = State.invoke("SubmitRoute", pts, pieces)
+	busy = false
+	if ok then
+		TrackEditor.close()
+	else
+		toast(`Route rejected: {reason or "unknown"}. Your last valid route is unchanged.`, "error")
+	end
+end
+
+-- Gamepad: the left stick moves an on-screen cursor, A taps at it, Y = Move, X = Delete,
+-- D-pad left/right cycles the selected point, Start confirms, B exits.
+local function bindGamepad()
+	local cam = Workspace.CurrentCamera
+	if cam then
+		cursorPos = cam.ViewportSize / 2
+	end
+	ContextActionService:BindActionAtPriority(
+		"HauntedEditorPad",
+		function(_, state, input)
+			if input.KeyCode == Enum.KeyCode.Thumbstick1 then
+				stick = Vector2.new(input.Position.X, -input.Position.Y)
+				if stick.Magnitude < 0.15 then
+					stick = Vector2.zero
+				end
+				return Enum.ContextActionResult.Sink
+			end
+			if state ~= Enum.UserInputState.Begin then
+				return Enum.ContextActionResult.Sink
+			end
+			local key = input.KeyCode
+			if key == Enum.KeyCode.ButtonA then
+				onTap(cursorPos)
+			elseif key == Enum.KeyCode.ButtonY then
+				doMove()
+			elseif key == Enum.KeyCode.ButtonX then
+				doDelete()
+			elseif key == Enum.KeyCode.DPadRight or key == Enum.KeyCode.DPadLeft then
+				if #points > 0 then
+					local step = if key == Enum.KeyCode.DPadRight then 1 else -1
+					selected = ((selected or 0) - 1 + step) % #points + 1
+					mode = "add"
+					redraw()
+				end
+			elseif key == Enum.KeyCode.ButtonStart then
+				task.spawn(doConfirm)
+			elseif key == Enum.KeyCode.ButtonB then
+				TrackEditor.close()
+			end
+			return Enum.ContextActionResult.Sink
+		end,
+		false,
+		Enum.ContextActionPriority.High.Value + 20,
+		Enum.KeyCode.Thumbstick1,
+		Enum.KeyCode.ButtonA,
+		Enum.KeyCode.ButtonB,
+		Enum.KeyCode.ButtonX,
+		Enum.KeyCode.ButtonY,
+		Enum.KeyCode.DPadLeft,
+		Enum.KeyCode.DPadRight,
+		Enum.KeyCode.ButtonStart
+	)
+	padConn = RunService.RenderStepped:Connect(function(dt)
+		local view = Workspace.CurrentCamera and Workspace.CurrentCamera.ViewportSize or Vector2.new(800, 600)
+		cursorPos = Vector2.new(
+			math.clamp(cursorPos.X + stick.X * 500 * dt, 0, view.X),
+			math.clamp(cursorPos.Y + stick.Y * 500 * dt, 0, view.Y)
+		)
+		cursor.Visible = UserInputService.GamepadEnabled
+		-- The cursor label lives under the scaled ScreenGui; convert pixels to its coordinate space.
+		local scale = 1
+		local uiScale = cursor.Parent and cursor.Parent:FindFirstChildOfClass("UIScale")
+		if uiScale then
+			scale = uiScale.Scale
+		end
+		local inset = GuiService:GetGuiInset()
+		cursor.Position = UDim2.fromOffset(cursorPos.X / scale, (cursorPos.Y - inset.Y) / scale)
+	end)
+end
+
+local function unbindGamepad()
+	ContextActionService:UnbindAction("HauntedEditorPad")
+	if padConn then
+		padConn:Disconnect()
+		padConn = nil
+	end
+	stick = Vector2.zero
+	if cursor then
+		cursor.Visible = false
+	end
+end
+
 function TrackEditor.close()
 	if not editing then
 		return
 	end
 	editing = false
 	panel.Visible = false
+	ProximityPromptService.Enabled = true
 	if preview then
 		preview:Destroy()
 		preview = nil
@@ -293,6 +417,7 @@ function TrackEditor.close()
 		inputConn:Disconnect()
 		inputConn = nil
 	end
+	unbindGamepad()
 	local cam = Workspace.CurrentCamera
 	if cam then
 		cam.CameraType = savedCameraType
@@ -330,6 +455,8 @@ function TrackEditor.open()
 		cam.CFrame = CFrame.lookAt(center + Vector3.new(0, 78, 26), center)
 	end
 	panel.Visible = true
+	-- World prompts (e.g. the station's Ride prompt) would sit over the top-down view and swallow taps.
+	ProximityPromptService.Enabled = false
 	inputConn = UserInputService.InputBegan:Connect(function(input, processed)
 		if processed or not editing then
 			return
@@ -338,9 +465,14 @@ function TrackEditor.open()
 			input.UserInputType == Enum.UserInputType.MouseButton1
 			or input.UserInputType == Enum.UserInputType.Touch
 		then
-			onTap(Vector2.new(input.Position.X, input.Position.Y))
+			-- Mouse/touch positions exclude the top-bar inset; groundHit takes viewport points (like the
+			-- gamepad cursor), so add the inset back or taps land several studs above the cursor.
+			local inset = GuiService:GetGuiInset()
+			local pos: Vector3 = input.Position
+			onTap(Vector2.new(pos.X, pos.Y + inset.Y))
 		end
 	end)
+	bindGamepad()
 	redraw()
 end
 
@@ -386,22 +518,8 @@ function TrackEditor.mount(gui: ScreenGui, toastFn: (string, string?) -> ())
 	)
 	Theme.list(row2, 6, true)
 	local small = { Size = UDim2.fromOffset(104, 36), TextSize = 14 }
-	Theme.button(row1, "Move", function()
-		if selected then
-			mode = "move"
-			redraw()
-		else
-			toast("Select a point first.", "error")
-		end
-	end, small)
-	Theme.button(row1, "Delete", function()
-		if selected then
-			table.remove(points, selected)
-			selected = nil
-			mode = "add"
-			redraw()
-		end
-	end, small)
+	Theme.button(row1, "Move", doMove, small)
+	Theme.button(row1, "Delete", doDelete, small)
 	Theme.button(row1, "Deselect", function()
 		selected = nil
 		mode = "add"
@@ -421,20 +539,23 @@ function TrackEditor.mount(gui: ScreenGui, toastFn: (string, string?) -> ())
 		selected = nil
 		redraw()
 	end, small)
-	Theme.button(row2, "Confirm", function()
-		if busy then
-			return
-		end
-		busy = true
-		local pts, pieces = toRoute()
-		local ok, reason = State.invoke("SubmitRoute", pts, pieces)
-		busy = false
-		if ok then
-			TrackEditor.close()
-		else
-			toast(`Route rejected: {reason or "unknown"}. Your last valid route is unchanged.`, "error")
-		end
-	end, { Size = UDim2.fromOffset(150, 36), BackgroundColor3 = Color3.fromRGB(60, 140, 80) })
+	Theme.button(
+		row2,
+		"Confirm",
+		doConfirm,
+		{ Size = UDim2.fromOffset(150, 36), BackgroundColor3 = Color3.fromRGB(60, 140, 80) }
+	)
+	cursor = Theme.label(gui, "+", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Size = UDim2.fromOffset(40, 40),
+		Font = Theme.Bold,
+		TextSize = 40,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextColor3 = Color3.fromRGB(255, 230, 80),
+		TextStrokeTransparency = 0.2,
+		Visible = false,
+		ZIndex = 7,
+	})
 	Theme.button(row2, "Undo changes", function()
 		loadSaved()
 		redraw()

@@ -3,7 +3,7 @@ id: TASK-0011
 title: Haunted Scaffold and Player Data
 type: task
 project: GAME-002
-status: in_review
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -19,6 +19,7 @@ related:
   - "[[GAME-002 Haunted Collector/01 Game Design]]"
   - "[[GAME-002 Haunted Collector/02 Technical Architecture]]"
   - "[[ADR-0005-Haunted-Collector-Direction]]"
+  - "[[ADR-0006-M1-Tuning-And-Scope-Decisions]]"
 ---
 # TASK-0011: Haunted Scaffold and Player Data
 
@@ -63,8 +64,38 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 - **Not yet verified with a player:** the `FullLoop` play scenario is written but hasn't run (the Studio window didn't load the place). The ACs below stay unchecked until it has run.
 - Systems: [[SYS-Haunted-Player-Data]], [[SYS-Haunted-Capture-Loop]], [[SYS-Haunted-Ghost-Train]].
 
+### Revision 1 (2026-10-11): audit fixes, work in progress
+All eight attempt-1 audits failed ([[AUD-20261011-TASK-0011-01]] … [[AUD-20261011-TASK-0018-01]]). The fixes are committed on this branch and **not merged**:
+- Saving: BindToClose waits for in-flight and queued saves; a newer-schema profile loads read-only and is never written; a missing or foreign lock aborts the save; the lock is released if the player leaves mid-load; plot assignment retries.
+- Purchases carry the expected level, so a double-click buys only once.
+- Capture: slack 0.04 s, ping counted once, min gap 0.35 s, retuned zones (spec: mashing is unreliable and gets harder with rarity); variant roll moved to shared code with a spec; the session ends on death; escaped respawns and rares respect caps; server-side carry speed check.
+- Train: the owner seat is disabled outside rides and griefers are unseated through the SeatWeld; seating retries; the cooldown is keyed by UserId; track clearance check. Bell Wraith spawns only when someone has the clue and is hidden locally for others. Gamepad controls in the editor and for the light.
+- New tests: Variants.spec, extra Capture/Track/Tutorial specs (46/0); scenarios FullLoop **55/55**, Reachability **11/11**, ExploitProbe **11/11**, CrossPlot (2 clients) last finished run 11/12. The seat failure was fixed afterwards, and that run was interrupted before completing, so **CrossPlot still needs a re-run**.
+
+**Next session:** re-run CrossPlot; update the design note for changed numbers, the Ashen rule and tutorial deviations; link the audits from the task notes; record-exec, then a fresh attempt-02 audit. Still needs a human: a hands-on §20 playtest, real-DataStore persistence (needs publishing), Lighting.Technology.
+
+### Revision 1, continued (2026-10-11, second session)
+- **Decisions:** jg settled the open questions in [[ADR-0006-M1-Tuning-And-Scope-Decisions]]:
+  - Code economy values are official.
+  - Ashen is Crypt-only.
+  - Memory-only saving is accepted for M1, and the rejoin test moves to M2.
+  - Walk-through plus Reachability replaces the prover.
+  - The tutorial must follow brief §12.
+
+  [[GAME-002 Haunted Collector/01 Game Design]] is now v0.2.
+- **Tutorial:** 12 steps, one to one with §12. Step 1 finishes on reaching the station; step 8 finishes on opening the Mansion or Journal (`mansionOpened` flag via `Ack`). The spec is table-driven over every step.
+- **Fixes found by the Studio runs:**
+  - CrossPlot failed 11/12 (a griefer stayed in the owner's seat because the SeatWeld was destroyed inside the Occupant signal); the ejection is now deferred.
+  - The hands-on run [[TEST-20261011-03]] found the track editor's tap offset (major), the Bell Wraith never spawning in a full Crypt (major), guest-seat touch-sitting, Inspect/Investigate sharing E, and world prompts covering the editor. All were fixed, with a FullLoop check for the Wraith.
+- **Evidence on the final code:** [[TEST-20261011-04]].
+- **Merged `main`** (reference-first docs) into this branch with no conflicts.
+- **Still not covered:** real DataStore persistence (M2 per ADR-0006), touch and gamepad hardware, human feel and pacing, Lighting.Technology.
+
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261011-TASK-0011-01]]: fail (2 major), revision 1
+- [[AUD-20261011-TASK-0011-02]]: pass (0 major, 4 minor, 1 nit) on `5878f6d`. Open minors: no spec for `isNewerSchema` or the repaired-field list; the schema-bump rule for new nested keys isn't written down; BindToClose doesn't wait for a lock release still loading at shutdown; real DataStore rejoin is unverified (M2, ADR-0006).
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** approved for merge by jg on 2026-10-11 (`approve-merge`) after [[AUD-20261011-TASK-0011-02]] passed. Scaffold, plots, memory-safe player data, and the scenario harness ([[TEST-20261011-03]], [[TEST-20261011-04]]).
+- **Lesson:** run one Rojo server, matched to its place ([[LES-0003-Rojo-Crash-On-Branch-Switch]]).
+- **Follow-ups:** real DataStore rejoin test (M2, [[ADR-0006-M1-Tuning-And-Scope-Decisions]]); specs for `isNewerSchema` and the repaired-field list; write down the schema-bump rule for new nested keys; BindToClose wait for loading-player lock release.

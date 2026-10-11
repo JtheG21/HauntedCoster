@@ -13,6 +13,7 @@ local Track = {
 	QualityMin = 0.9,
 	QualityMax = 1.25,
 	MaxPieces = 3,
+	MinClearance = 4, -- studs between parts of the track that aren't next to each other along the loop
 	Pieces = {
 		ScareArch = { label = "Scare Arch", quality = 0.06 },
 		FogTunnel = { label = "Fog Tunnel", quality = 0.05 },

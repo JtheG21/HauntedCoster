@@ -56,6 +56,13 @@ return function(t: TestRunner.T)
 		t.eq(v.reason, "The track crosses itself")
 	end)
 
+	t.test("near-parallel passes rejected by clearance", function()
+		-- A thin U: the return leg runs 3 studs from the outbound leg (no crossing, but overlapping track).
+		local pts = { { x = -10, z = -36 }, { x = 40, z = -36 }, { x = 40, z = -33 }, { x = -10, z = -33 } }
+		local v = TrackRules.validate(pts, {}, bounds)
+		t.eq(v.ok, false)
+	end)
+
 	t.test("points too close rejected", function()
 		local pts = starter()
 		table.insert(pts, 2, { x = pts[1].x + 1, z = pts[1].z })

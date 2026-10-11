@@ -156,6 +156,19 @@ function TrackRules.validate(points: any, pieces: any, bounds: Rect): Validation
 			end
 		end
 	end
+	-- Clearance: samples far apart along the loop must also be far apart in space (no overlapping or
+	-- near-parallel passes, which the crossing test alone doesn't catch).
+	local spacing = Track.SampleSpacing
+	local skip = math.ceil((Track.MinClearance * 2) / spacing)
+	for i = 1, m do
+		for j = i + skip, m do
+			if m - (j - i) > skip then
+				if dist(sp[i], sp[j]) < Track.MinClearance then
+					return { ok = false, reason = "Two parts of the track pass too close together" }
+				end
+			end
+		end
+	end
 	return { ok = true, sampled = sampled }
 end
 

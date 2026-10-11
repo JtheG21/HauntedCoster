@@ -717,7 +717,7 @@
       "id": "TASK-0011",
       "title": "Haunted Scaffold and Player Data",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "done",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0011-Haunted-Scaffold-And-Player-Data",
@@ -750,6 +750,36 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T11:10:36",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-11T11:10:36",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T16:23:33",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T16:28:10",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-11T16:31:40",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -757,8 +787,27 @@
           "time": "2026-10-11T11:00:14",
           "result": "pass",
           "notes": "check.sh green; specs 37/0; FullLoop play scenario 48/48 (TEST-20261011-02); prototype commit 17cb5ae also carries TASK-0012..0018 code; no audit yet; merged to main at user request 2026-10-11"
+        },
+        {
+          "time": "2026-10-11T16:23:33",
+          "result": "pass",
+          "notes": "revision 1 at 5ffa3cc: check.sh green; specs 48/0; FullLoop 56/56, Reachability 11/11, ExploitProbe 11/11, CrossPlot 12/12 (TEST-20261011-04); fresh-profile real-client run TEST-20261011-03 (5 bugs found and fixed); decisions ADR-0006"
         }
-      ]
+      ],
+      "audits": [
+        {
+          "time": "2026-10-11T11:10:36",
+          "result": "fail",
+          "report": "06 QA/AUD-20261011-TASK-0011-01.md"
+        },
+        {
+          "time": "2026-10-11T16:28:10",
+          "result": "pass",
+          "report": "06 QA/AUD-20261011-TASK-0011-02.md"
+        }
+      ],
+      "revisions": 1,
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0012",
