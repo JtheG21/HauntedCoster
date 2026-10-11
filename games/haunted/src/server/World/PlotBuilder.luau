@@ -55,7 +55,8 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 	})
 	plot.PrimaryPart = base
 	-- Low border wall with a front opening facing the avenue/graveyard
-	local hx, hz = size.X / 2, size.Y / 2
+	-- Walls are inset half a stud so neighbouring plots' boundary walls don't overlap (z-fighting).
+	local hx, hz = size.X / 2 - 0.5, size.Y / 2 - 0.5
 	for _, seg in
 		{
 			{ Vector3.new(-hx, 0, hz), Vector3.new(hx, 0, hz) },
@@ -67,10 +68,12 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 	do
 		local a, b = origin + seg[1], origin + seg[2]
 		local mid = (a + b) / 2
+		-- Side walls (along Z) are a little taller so the overlapping corner tops don't z-fight.
+		local h = if math.abs(a.X - b.X) < 0.01 then 1.7 else 1.6
 		Build.part({
 			name = "Border",
-			size = Vector3.new(1, 1.6, (b - a).Magnitude),
-			cframe = CFrame.lookAt(Vector3.new(mid.X, 0.8, mid.Z), Vector3.new(b.X, 0.8, b.Z)),
+			size = Vector3.new(1, h, (b - a).Magnitude),
+			cframe = CFrame.lookAt(Vector3.new(mid.X, h / 2, mid.Z), Vector3.new(b.X, h / 2, b.Z)),
 			color = C.border,
 			material = Enum.Material.Cobblestone,
 			parent = plot,
@@ -97,7 +100,7 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 	local rune = Build.part({
 		name = "PenRune",
 		size = Vector3.new(6, 0.1, 6),
-		cframe = CFrame.new(penPos + Vector3.new(0, 0.45, 0)),
+		cframe = CFrame.new(penPos + Vector3.new(0, 0.47, 0)), -- clear of the pad top (0.40)
 		color = C.purple,
 		material = Enum.Material.Neon,
 		collide = false,
@@ -110,7 +113,7 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 		if i ~= 0 then -- front side (+Z after rotation 0) left open
 			Build.part({
 				name = "PenBars",
-				size = Vector3.new(ps, 4, 0.3),
+				size = Vector3.new(ps - 0.4, 4, 0.3), -- shorter than the pen so corner bars don't overlap
 				cframe = cf,
 				color = C.iron,
 				material = Enum.Material.DiamondPlate,

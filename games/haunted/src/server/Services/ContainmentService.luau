@@ -143,6 +143,9 @@ local function onSetExhibit(player: Player, slot: any, uid: any): (boolean, stri
 	return true, nil
 end
 
+-- Shared by the SetExhibit remote and the Studio test scenarios.
+ContainmentService.setExhibit = onSetExhibit
+
 local function grantOffline(player: Player)
 	local profile = PlayerDataService.get(player)
 	if not profile then

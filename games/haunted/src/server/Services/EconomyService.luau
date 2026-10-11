@@ -60,6 +60,9 @@ local function onPurchase(player: Player, item: any): (boolean, string?)
 	return true, nil
 end
 
+-- Shared by the Purchase remote and the Studio test scenarios.
+EconomyService.purchase = onPurchase
+
 function EconomyService.start()
 	if started then
 		return

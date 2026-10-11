@@ -195,10 +195,13 @@ local function rebuild(index: number, points: { TrackRules.P }, pieces: { TrackR
 		local len = (b - a).Magnitude
 		if len > 0.05 then
 			local cf = CFrame.lookAt((a + b) / 2, b)
+			-- Neighbouring rail segments overlap slightly to hide gaps on bends; alternate their
+			-- thickness so the overlapping faces are never coplanar (z-fighting on straights).
+			local thick = if i % 2 == 0 then 0.3 else 0.34
 			for _, side in { -1.1, 1.1 } do
 				Build.part({
 					name = "Rail",
-					size = Vector3.new(0.3, 0.3, len + 0.2),
+					size = Vector3.new(thick, thick, len + 0.2),
 					cframe = cf * CFrame.new(side, 0, 0),
 					color = RAIL_COLOR,
 					material = Enum.Material.Metal,
@@ -208,7 +211,7 @@ local function rebuild(index: number, points: { TrackRules.P }, pieces: { TrackR
 			end
 			Build.part({
 				name = "Tie",
-				size = Vector3.new(3.4, 0.25, 0.7),
+				size = Vector3.new(3.4, if i % 2 == 0 then 0.25 else 0.28, 0.7), -- alternate: ties overlap on tight bends
 				cframe = cf * CFrame.new(0, -0.25, 0),
 				color = TIE_COLOR,
 				material = Enum.Material.Wood,
@@ -501,6 +504,9 @@ local function onSubmitRoute(player: Player, points: any, pieces: any): (boolean
 	StateService.toast(player, "Route saved! Ride it to see your new payout.", "success")
 	return true, nil
 end
+
+-- Shared by the SubmitRoute remote and the Studio test scenarios.
+TrainService.submitRoute = onSubmitRoute
 
 function TrainService.refresh(player: Player)
 	StateService.markDirty(player)

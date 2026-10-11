@@ -91,9 +91,22 @@ local function spawnAtHome(player: Player, character: Model)
 		return
 	end
 	local root = character:WaitForChild("HumanoidRootPart", 10)
-	if root and root:IsA("BasePart") and character.Parent then
-		local pos = World.PlotCenters[i] + World.Plot.spawn
-		character:PivotTo(CFrame.lookAt(pos, pos + Vector3.new(0, 0, -1)))
+	if not (root and root:IsA("BasePart")) then
+		return
+	end
+	local pos = World.PlotCenters[i] + World.Plot.spawn
+	local target = CFrame.lookAt(pos, pos + Vector3.new(0, 0, -1))
+	-- Roblox places a new character at a SpawnLocation just after CharacterAdded fires, which would undo
+	-- an immediate teleport. Move after that has happened, and re-check once in case it was late.
+	for _, delay in { 0.2, 0.8 } do
+		task.wait(delay)
+		if character.Parent == nil or player.Character ~= character then
+			return
+		end
+		local flat = Vector3.new(root.Position.X - pos.X, 0, root.Position.Z - pos.Z)
+		if flat.Magnitude > 20 then
+			character:PivotTo(target)
+		end
 	end
 end
 

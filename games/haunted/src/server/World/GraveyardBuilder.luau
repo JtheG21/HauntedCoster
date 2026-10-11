@@ -43,6 +43,8 @@ local function lantern(parent: Instance, x: number, z: number)
 	Build.light(head, C.lantern, 22, 1.6)
 end
 
+local placedPosts: { [string]: boolean } = {}
+
 local function fenceLine(parent: Instance, a: Vector3, b: Vector3)
 	local dir = b - a
 	local len = dir.Magnitude
@@ -53,7 +55,12 @@ local function fenceLine(parent: Instance, a: Vector3, b: Vector3)
 	local n = math.max(1, math.floor(len / 4))
 	for i = 0, n do
 		local p = a + unit * (len * i / n)
-		Build.block(parent, "FencePost", Vector3.new(0.4, 6, 0.4), p.X, 0, p.Z, C.iron, Enum.Material.Metal)
+		-- Fence lines share corner endpoints; skip a post already placed there (coincident = z-fighting).
+		local key = `{math.floor(p.X * 10 + 0.5)}:{math.floor(p.Z * 10 + 0.5)}`
+		if not placedPosts[key] then
+			placedPosts[key] = true
+			Build.block(parent, "FencePost", Vector3.new(0.4, 6, 0.4), p.X, 0, p.Z, C.iron, Enum.Material.Metal)
+		end
 	end
 	for _, h in { 2, 5 } do
 		local mid = (a + b) / 2
@@ -153,7 +160,7 @@ local function mausoleum(parent: Instance, x: number, z: number, scale: number, 
 		Build.block(
 			parent,
 			"Column",
-			Vector3.new(1, 9 * s, 1),
+			Vector3.new(1, 9 * s + 0.6, 1), -- reaches into the roof so its top isn't level with the body
 			x + dx * s,
 			1,
 			z + 4.6 * s,
@@ -258,10 +265,12 @@ local function crypt(parent: Instance): BasePart
 	local function wall(a: Vector3, b: Vector3)
 		local mid = (a + b) / 2
 		local len = (b - a).Magnitude
+		-- North/south walls are 0.2 taller so overlapping corner tops never share a plane.
+		local wh = if math.abs(a.Z - b.Z) < 0.01 then h + 0.2 else h
 		Build.part({
 			name = "CryptWall",
-			size = Vector3.new(2, h, len + 2),
-			cframe = CFrame.lookAt(Vector3.new(mid.X, h / 2, mid.Z), Vector3.new(b.X, h / 2, b.Z)),
+			size = Vector3.new(2, wh, len + 2),
+			cframe = CFrame.lookAt(Vector3.new(mid.X, wh / 2, mid.Z), Vector3.new(b.X, wh / 2, b.Z)),
 			color = C.darkStone,
 			material = Enum.Material.Cobblestone,
 			parent = parent,
@@ -345,7 +354,18 @@ local function setupLighting()
 	end
 end
 
+-- A Baseplate left by a mis-synced project (e.g. GAME-001's Rojo tree) sits exactly at ground level and
+-- z-fights with our ground everywhere. This game owns its Workspace, so remove it.
+local function removeStrayBaseplate(parent: Instance)
+	local stray = parent:FindFirstChild("Baseplate")
+	if stray and stray:IsA("BasePart") then
+		warn("[World] removed a stray Workspace.Baseplate (it z-fights with the graveyard ground)")
+		stray:Destroy()
+	end
+end
+
 function GraveyardBuilder.build(parent: Instance): Result
+	removeStrayBaseplate(parent)
 	setupLighting()
 	local folder = Instance.new("Folder")
 	folder.Name = "Graveyard"
@@ -387,7 +407,8 @@ function GraveyardBuilder.build(parent: Instance): Result
 		Vector3.new(310, 0, 30),
 		12,
 		C.cobble,
-		Enum.Material.Cobblestone
+		Enum.Material.Cobblestone,
+		0.09 -- above the LanternRoad where they cross (no shared top face)
 	)
 	for z = 20, g.gate.Z + 10, -26 do
 		lantern(deco, -7, z)
@@ -412,7 +433,7 @@ function GraveyardBuilder.build(parent: Instance): Result
 		7,
 		C.cobble,
 		Enum.Material.Cobblestone,
-		0.1
+		0.13 -- above MainPath at the crossing
 	)
 	Build.strip(
 		folder,
@@ -422,7 +443,7 @@ function GraveyardBuilder.build(parent: Instance): Result
 		6,
 		C.cobble,
 		Enum.Material.Cobblestone,
-		0.1
+		0.16 -- above MainPath where it branches off
 	)
 	Build.strip(
 		folder,
