@@ -14,6 +14,8 @@ related:
   - "[[AUD-20261011-TASK-0014-01]]"
   - "[[AUD-20261011-TASK-0015-01]]"
   - "[[AUD-20261011-TASK-0018-01]]"
+  - "[[AUD-20261011-TASK-0012-03]]"
+  - "[[TEST-20261011-05]]"
 created: 2026-10-11
 updated: 2026-10-11
 tags:
@@ -47,9 +49,14 @@ Approved by jg on 2026-10-11 (Claude Code session, chat answers).
 4. **Persistence: memory-only is acceptable for M1.** M1 can close without a real DataStore rejoin test. The game must keep reporting memory-only mode honestly. A rejoin and persistence test in a private, API-enabled test place moves to M2 and is required before any public release. Nothing is published for this.
 5. **TASK-0012 AC1: walk-through instead of the prover.** The `Reachability` play scenario plus a recorded walk-through (plots → every zone → back, including the shortcut; the Crypt is blocked while gated) replace the `roblox-map` prover report.
 
+### Addendum (approved by jg on 2026-10-11, chat answer after [[AUD-20261011-TASK-0012-03]])
+6. **TASK-0012 AC2: dark-section readability accepted.** jg reviewed the [[TEST-20261011-05]] captures of Mausoleum Hollow and accepts them as readable for M1. The flashlight toggle evidence is F, the HUD button (mouse) and a virtual gamepad on DPadDown.
+7. **Physical-device checks move to M2.** A physical controller and a real or emulated touch device are required in M2 before public play, covering the flashlight (TASK-0012 AC2) and **the touch track editor (TASK-0017 AC2)**, including taps near the mobile thumbstick and jump areas. For M1, TASK-0017 AC2 is judged on mouse and gamepad-cursor evidence.
+
 Bell Wraith spawning only for clue holders follows the approved design and needed no new decision. Revision 1 implemented it.
 
 ## Consequences
 - [[GAME-002 Haunted Collector/01 Game Design]] goes to v0.2 with these values. Its status stays `proposed`, because the roadmap and design as a whole still need jg's approval.
 - TASK-0012 AC1, TASK-0018 AC2 and the persistence parts of TASK-0011 and TASK-0017 AC4 are judged against this ADR in the attempt-2 audits.
 - M2 must add a persistence (rejoin) test task before any public play.
+- M2 must add a physical-device task (controller and touch, flashlight and track editor) before any public play.
