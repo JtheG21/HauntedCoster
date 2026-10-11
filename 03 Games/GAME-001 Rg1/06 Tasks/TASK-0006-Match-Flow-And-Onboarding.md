@@ -3,7 +3,7 @@ id: TASK-0006
 title: Match Flow and Onboarding
 type: task
 project: GAME-001
-status: in_review
+status: approved
 priority: high
 risk: low
 owner: executor
@@ -71,5 +71,6 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 **Check results:** `scripts/check.sh` ALL CHECKS PASSED. Specs 46/0 (fresh session). Playtest [[TEST-20261010-10]].
 
 ## Audits
+- [[AUD-20261010-TASK-0006-01]]: attempt 1, **pass** (6 minor, 4 nit). Minors: respawn in Results goes to CourseStart; trial player respawns at default spawn; trial prompt goes stale after a rebalance; gate reset ignores occupants and clone consumption; dead players miss the snapshot and the countdown flaps with MinPlayers > 1; scope or CLAUDE.md on a task branch
 
 ## Outcome
