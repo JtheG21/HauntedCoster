@@ -341,7 +341,7 @@
       "id": "TASK-0005",
       "title": "Convergence Gate",
       "project": "GAME-001",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0003",
@@ -355,6 +355,15 @@
         "Each player passing an opened gate gets exactly 1 Echo charge per opening power (server inventory)",
         "The shrine bypass opens 20 s after the first player arrives if the gate is still closed",
         "Specs pass. `check.sh` passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-10T19:11:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
