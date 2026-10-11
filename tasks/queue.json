@@ -178,7 +178,7 @@
       "id": "TASK-0003",
       "title": "Factions and Echo Clone",
       "project": "GAME-001",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0002"
@@ -191,13 +191,22 @@
         "The clone holds a pressure plate active for exactly its duration (6 s \u00b10.2 s), then despawns",
         "Max 1 clone per player. Clones are cleaned up on leave or respawn",
         "Specs for balance rules pass. `check.sh` passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-10T17:03:09",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
       "id": "TASK-0004",
       "title": "Ki Burst",
       "project": "GAME-001",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0002"
@@ -210,6 +219,15 @@
         "HeavyBlock moves the same way for all clients. Its network owner is the server (verified with `GetNetworkOwner`)",
         "Knockback math specs pass. `check.sh` passes",
         "The decision on network ownership is recorded in the implementation record (input for an ADR if non-trivial)"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-10T17:03:09",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {

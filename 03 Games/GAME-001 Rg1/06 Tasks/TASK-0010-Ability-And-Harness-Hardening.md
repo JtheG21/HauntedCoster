@@ -26,7 +26,7 @@ Close the remaining minor and nit findings from [[AUD-20261010-TASK-0002-02]] (N
 
 ## Scope
 - **In:** the items in the acceptance criteria.
-- **Out:** new gameplay. TASK-0002 N1 (Dash force and seated run in Play) is recorded as evidence on `main` without code changes (TEST-20261010-04, pending).
+- **Out:** new gameplay. TASK-0002 N1 (Dash force and seated run in Play) is recorded as evidence on `main` without code changes ([[TEST-20261010-04]]).
 
 ## Files expected to change
 - `tests/luau/multiclient/AbilityProbe.luau` (new)

@@ -91,3 +91,4 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 - [[AUD-20261010-TASK-0002-02]]: attempt 2 (revision 1 delta), **pass**: F1–F5 fixed. New: N1 minor (Dash force/seated not run in Play), N2–N4 nits
 
 ## Outcome
+Merged to `main` on 2026-10-10 (merge approved by jg). Audits: attempt 1 pass, attempt 2 (revision 1) pass. Audit N1 runtime evidence: [[TEST-20261010-04]] (force cap and seated rejection confirmed). Still open: the AC2 second-client view and the remaining nits are in [[TASK-0010-Ability-And-Harness-Hardening]].

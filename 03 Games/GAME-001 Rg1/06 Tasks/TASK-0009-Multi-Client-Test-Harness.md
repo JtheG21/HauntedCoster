@@ -66,3 +66,4 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 - [[AUD-20261010-TASK-0009-01]]: attempt 1, **pass** (5 minor, 4 nit). Follow-ups are tracked for a hardening task
 
 ## Outcome
+Merged to `main` on 2026-10-10 (merge approved by jg). Audit attempt 1 pass. Follow-ups in [[TASK-0010-Ability-And-Harness-Hardening]]. The multi-client blocker from M0 is resolved: [[Multi-Client Testing]].
