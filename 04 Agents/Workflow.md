@@ -4,7 +4,7 @@ title: Workflow
 type: agent
 status: approved
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-11
 tags:
   - workflow/process
 ---
@@ -31,6 +31,11 @@ Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, proposed) → [HUMAN
 | `done` / `archived` | Terminal | | |
 
 `max_revisions` (default 2) is in `00 Studio/budget.json`. Going past it blocks the task. Nothing retries automatically.
+
+## Merge procedure (human-approved merges only)
+1. Use a dedicated worktree of `main` (never the Rojo-watched main checkout). If it doesn't exist, create it: `git worktree add <wt> main`.
+2. Guard and merge in one chain: `scripts/preflight.sh --root <wt> --branch main --clean && git -C <wt> merge --no-ff <task-branch> -m "..."`. If preflight fails, **stop**; don't retry anywhere else.
+3. Only after the merge commit exists on `main` (`git -C <wt> log -1`), run `orchestrator.py approve-merge` **in that worktree**, then the post-merge notes, `check.sh`, and a commit (again behind preflight).
 
 ## Isolation
 - One Git branch per task, from an up-to-date `main`. Workflow and doc changes use `chore/<slug>` branches.

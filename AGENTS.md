@@ -5,7 +5,7 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 ## Project map
 - Game code: `src/server|shared|client` (Luau). Rojo (`default.project.json`) syncs it with `tests/luau` to Studio. **Only these reach the game.**
 - Machine state, which is authoritative for task status: `tasks/queue.json`, `tasks/usage-ledger.jsonl`, `project-state.json`. Policy: `00 Studio/budget.json`.
-- Tools: `scripts/check.sh` (all cheap checks), `scripts/orchestrator.py` (task gates), `scripts/validate_vault.py` (note conventions), `scripts/typecheck.sh`.
+- Tools: `scripts/check.sh` (all cheap checks), `scripts/orchestrator.py` (task gates), `scripts/validate_vault.py` (note conventions), `scripts/typecheck.sh`, `scripts/preflight.sh` (read-only Git checkout guard).
 - The vault is this repo. Notes go in numbered folders (`00 Studio` … `99 Templates`). The current game is `03 Games/GAME-001 Rg1/`.
 - **Do not edit:** `Agents/`, `Chats/` (the Smart Second Brain plugin), `.obsidian/` (plugin settings).
 
@@ -16,6 +16,12 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 - At most 2 revision attempts per task. Then stop and report.
 - Run `scripts/check.sh` before any AI review. Read only the files a task needs; don't scan the whole repo.
 - Never read, print or store credentials (`.env`, keys) in code or notes.
+
+## Git safety (added 2026-10-11 after a merge ran in the wrong checkout)
+- Before any switch, merge, rebase, cherry-pick, reset, clean, commit, push or branch deletion, run `scripts/preflight.sh --root <checkout> --branch <expected>` and chain the operation with `&&`. Address the checkout explicitly (`git -C <checkout>`); never rely on the current directory.
+- If the intended checkout or worktree is missing or stale, **stop** and re-discover it. Never fall back to whatever directory is current.
+- The main checkout (`~/Desktop/Rg1`) is watched by Rojo: don't switch it to a branch that deletes watched folders (LES-0003). Merge in a dedicated worktree of `main`.
+- Never discard unrelated or user edits (e.g. `Untitled.canvas`), force-push, or delete untracked files without explicit authorization.
 
 ## Third-party skills (project-local, `.claude/skills/`)
 - Installed: `roblox-map` (map and course layout plus playability prover) and `roblox-sfx` (Creator Store sound sourcing). Source, commit and licence: `.claude/skills/PROVENANCE.md` and `05 Engineering/External Skills.md`.
