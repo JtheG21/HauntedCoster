@@ -3,7 +3,7 @@ id: TASK-0012
 title: Graveyard and Landmarks
 type: task
 project: GAME-002
-status: changes_requested
+status: in_review
 priority: high
 risk: low
 owner: executor

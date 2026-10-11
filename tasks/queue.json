@@ -813,7 +813,7 @@
       "id": "TASK-0012",
       "title": "Graveyard and Landmarks",
       "project": "GAME-002",
-      "status": "changes_requested",
+      "status": "in_review",
       "risk": "low",
       "depends_on": [
         "TASK-0011"
@@ -871,6 +871,18 @@
           "from": "in_review",
           "to": "changes_requested",
           "note": "audit failed; revision 2/2"
+        },
+        {
+          "time": "2026-10-11T16:37:45",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T16:37:45",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
       "executions": [
@@ -883,6 +895,11 @@
           "time": "2026-10-11T16:33:02",
           "result": "pass",
           "notes": "Revision 1 at 5878f6d"
+        },
+        {
+          "time": "2026-10-11T16:37:45",
+          "result": "pass",
+          "notes": "Revision 2: TEST-20261011-05, Reachability 14/14, FullLoop 56/56"
         }
       ],
       "audits": [
