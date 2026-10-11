@@ -178,7 +178,7 @@
       "id": "TASK-0003",
       "title": "Factions and Echo Clone",
       "project": "GAME-001",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [
         "TASK-0002"
@@ -223,6 +223,12 @@
           "from": "changes_requested",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-10T17:16:22",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
       "executions": [
@@ -230,6 +236,11 @@
           "time": "2026-10-10T17:07:49",
           "result": "pass",
           "notes": "check.sh green; specs 22/0; TEST-20261010-05 (clone 6.02s, Ki rejected, respawn cleanup, 3-client balance)"
+        },
+        {
+          "time": "2026-10-10T17:16:22",
+          "result": "pass",
+          "notes": "rev1: rebalance verified 3 clients; doors fixed; specs 31/0 fresh session"
         }
       ],
       "audits": [
