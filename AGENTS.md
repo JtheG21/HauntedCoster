@@ -31,6 +31,13 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 - `roblox-map` runs with `~/.venvs/roblox-skills/bin/python`. **Never run its Studio bootstrap against the Rg1 place** (it deletes the Rojo-managed Baseplate). Decision: ADR-0004 (approved).
 - Not installed on purpose: `create-roblox-game`, `roblox-build-orchestrator` and the pack's agents (competing orchestrator, Opus-only agents, a Studio guard that doesn't match our MCP name).
 
+## Reference-first development
+- Reference material lives in `10 References/` (UI, Map, Sounds, Vfx, Misc, Code). Code references: `10 References/06 Code/Reference_Code/Reference_Code_Index.md`, plus one guide per repo (`SODT-RC-1`, `Npc_template`, `vfx_template`; all public on GitHub under JtheG21).
+- Before implementing a substantial new system, search the index, then the most relevant repos, and **open the actual matching source files**. Decide which patterns are reusable, which need adapting, and which are unsuitable. Report the key repo/file paths and compatibility notes briefly (in the task note or plan) before writing code.
+- Don't copy whole systems, don't assume a reference is correct because it exists, and don't import its game-specific balance, assets, hierarchy or packages (SODT uses Wally; Rg1 doesn't). Rg1's architecture and server-authority rules win.
+- If GitHub can't be reached, say so and use only verified local material. Clone only outside the vault (see the index).
+- After successful work, add genuinely reusable, verified lessons to the matching repo guide. Never modify or push to the reference repos unless explicitly authorized.
+
 ## Obsidian knowledge management protocol
 1. Before creating a note, search for its ID, title and related notes (`grep -rl "id: TASK-0001"`). Update the existing note instead of making a duplicate.
 2. Use the folder structure, filename patterns, YAML schema and controlled statuses in `00 Studio/Obsidian Conventions.md`.
