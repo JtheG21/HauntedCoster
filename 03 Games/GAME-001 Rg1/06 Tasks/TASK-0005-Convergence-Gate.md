@@ -3,7 +3,7 @@ id: TASK-0005
 title: Convergence Gate
 type: task
 project: GAME-001
-status: in_review
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -83,6 +83,8 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 **Checks:** `scripts/check.sh` ALL CHECKS PASSED. Specs 39/0 (fresh session). Playtest [[TEST-20261010-09]].
 
 ## Audits
+- [[AUD-20261010-TASK-0005-02]]: attempt 2 (revision 1), **pass**: F1 fixed. N1 minor (a player inside the barrier holds it open), N2–N4 nits (pre-opening exclusion untested, stale presentAtOpen, no per-match reset)
 - [[AUD-20261010-TASK-0005-01]]: attempt 1, **fail**. Major F1: a clone that stays on the plate is never consumed, so a second Ki hit reopens the gate and Echoes are farmed. Minors: Echoes for players already in the pass zone or repeat openings (F2), shrine cycles and solid-on-player (F3), ambiguous AC2 (F5), state machine untested (F6)
 
 ## Outcome
+Merged to `main` on 2026-10-10 (merge approved by jg). Carried forward: **per-match reset** of awards, shrine and Echoes, plus match-scoped "present factions" → [[TASK-0006-Match-Flow-And-Onboarding]]; N1 (cap how long a player inside the barrier can hold it open) and N2/N3 → hardening. **Still awaiting the user's confirmation:** F5 single-faction behaviour, one award per player per gate, the shrine staying open (implemented, not formally approved).
