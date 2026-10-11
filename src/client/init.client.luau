@@ -5,3 +5,6 @@ AbilityInput.start()
 
 local GateHud = require(script.GateHud)
 GateHud.start()
+
+local MatchHud = require(script.MatchHud)
+MatchHud.start()

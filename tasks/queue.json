@@ -438,7 +438,7 @@
       "id": "TASK-0006",
       "title": "Match Flow and Onboarding",
       "project": "GAME-001",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "low",
       "depends_on": [
         "TASK-0002"
@@ -459,6 +459,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-10T19:34:26",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ]
     },

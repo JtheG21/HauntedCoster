@@ -53,9 +53,15 @@ local function gatePowers(gate: BasePart): { string }
 	return table.clone(GateConfig.DefaultPowers :: { string })
 end
 
+-- Which players count as "present" for gate requirements. Default: everyone in the server;
+-- MatchService narrows it to the current match (TASK-0006).
+local presentProvider: () -> { Player } = function()
+	return Players:GetPlayers()
+end
+
 local function presentFactions(): { string }
 	local present = {}
-	for _, player in Players:GetPlayers() do
+	for _, player in presentProvider() do
 		local faction = player:GetAttribute(FactionConfig.AttributeName)
 		if typeof(faction) == "string" and not table.find(present, faction) then
 			table.insert(present, faction)
@@ -187,6 +193,17 @@ local function step(gate: BasePart, now: number)
 		setBlocked(bypass, not state.shrineOpen)
 	end
 	gate:SetAttribute("ShrineOpen", state.shrineOpen)
+end
+
+function ConvergenceGate.setPresentProvider(provider: () -> { Player })
+	presentProvider = provider
+end
+
+-- Clears every gate's per-match state (awards, shrine, inputs). Called at match start.
+function ConvergenceGate.resetAll()
+	for gate in states do
+		states[gate] = nil
+	end
 end
 
 function ConvergenceGate.start()

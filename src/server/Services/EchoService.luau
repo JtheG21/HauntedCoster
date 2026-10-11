@@ -27,10 +27,10 @@ end
 
 -- Clears a player's charges (match end; TASK-0006).
 function EchoService.reset(player: Player)
-	local bag = inventory[player]
-	if bag then
-		for power in bag do
-			player:SetAttribute(`Echo_{power}`, nil)
+	-- Clear every Echo_ attribute, not only tracked ones, so the HUD can never show stale charges.
+	for name in player:GetAttributes() do
+		if string.sub(name, 1, 5) == "Echo_" then
+			player:SetAttribute(name, nil)
 		end
 	end
 	inventory[player] = nil

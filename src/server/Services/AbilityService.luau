@@ -30,6 +30,7 @@ type PlayerState = {
 local AbilityService = {}
 
 local registry: { [string]: Registration } = {}
+local activatedListeners: { (player: Player, abilityId: string) -> () } = {}
 local states: { [Player]: PlayerState } = {}
 local started = false
 -- Server-only diagnostics (ServerStorage doesn't replicate): attribute `Rejections_<UserId>`.
@@ -134,7 +135,16 @@ local function onRequest(player: Player, abilityId: unknown, ...: unknown)
 	end)
 	if not success then
 		warn(`[AbilityService] {id} handler error for {player.Name}: {err}`)
+		return
 	end
+	for _, listener in activatedListeners do
+		task.spawn(listener, player, id)
+	end
+end
+
+-- Called (in its own thread) after an ability ran successfully. Used by onboarding (TASK-0006).
+function AbilityService.onActivated(listener: (player: Player, abilityId: string) -> ())
+	table.insert(activatedListeners, listener)
 end
 
 function AbilityService.register(abilityId: string, registration: Registration)
