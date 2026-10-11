@@ -25,7 +25,7 @@ tags:
 | [[TASK-0004-Ki-Burst]] | done | [[AUD-20261010-TASK-0004-01]] (pass) |
 | [[TASK-0005-Convergence-Gate]] | done | [[AUD-20261010-TASK-0005-01]] (fail), [[AUD-20261010-TASK-0005-02]] (pass) |
 | [[TASK-0006-Match-Flow-And-Onboarding]] | done | [[AUD-20261010-TASK-0006-01]] (pass) |
-| [[TASK-0007-Ring-Out-Finale]] | proposed | — |
+| [[TASK-0007-Ring-Out-Finale]] | done | [[AUD-20261010-TASK-0007-01]] (fail), [[AUD-20261010-TASK-0007-02]] (pass) |
 | [[TASK-0008-Prototype-Telemetry]] | proposed | — |
 | [[TASK-0009-Multi-Client-Test-Harness]] | done | [[AUD-20261010-TASK-0009-01]] (pass) |
 | [[TASK-0010-Ability-And-Harness-Hardening]] | proposed | — |
@@ -60,6 +60,7 @@ tags:
 - [[TEST-20261010-08]]: TASK-0005 Convergence Gate (2 clients + real abilities), pass
 - [[TEST-20261010-09]]: TASK-0005 revision 1 (exploit regression), pass
 - [[TEST-20261010-10]]: TASK-0006 match flow and onboarding (solo loops + join/leave), pass
+- [[TEST-20261010-11]]: TASK-0007 ring-out finale (solo + 2 clients, all runs listed), pass
 
 ## Retrospectives
 - [[RETRO-M0-Workflow-Foundation]]

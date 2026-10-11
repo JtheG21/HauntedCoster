@@ -505,7 +505,7 @@
       "id": "TASK-0007",
       "title": "Ring-Out Finale",
       "project": "GAME-001",
-      "status": "approved",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0003",
@@ -564,6 +564,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-10T21:17:07",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -590,7 +596,8 @@
           "report": "06 QA/AUD-20261010-TASK-0007-02.md"
         }
       ],
-      "revisions": 1
+      "revisions": 1,
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0008",
@@ -687,6 +694,13 @@
         "CollectibleRace: touches counted per player; legit-round waitFor result checked; unknown approach rejected",
         "AbilityService: diagnostics attribute cleared on PlayerRemoving; folder cast made sound",
         "orchestrator request-changes: tests cover in_review start state, CLI wiring and the revision-limit-to-blocked path",
+        "Finale (AUD-0007-02 F1): survivors snapshotted at conclusion; a player leaving after the finale is decided can't change Combat",
+        "Finale (AUD-0007-02 F3): ring-out check starts once a player has been seen on the deck (capped), replacing the fixed 1 s grace",
+        "Finale (AUD-0007-01 F3): server-side position sanity check (a target can't teleport back after a knockback); character no-collide group in the arena; exploit probe recorded",
+        "Finale (AUD-0007-02 nits): ownership hand-back failure logged; contribution listeners iterated over a copy; solo finale when a rival was dead at course end resolved",
+        "Match flow (AUD-0006-01): respawn during Results, trial respawn at the trial pad, trial prompt refreshed after a rebalance, gate reset respects occupants and clone consumption, dead players in the snapshot, countdown hysteresis when MinPlayers > 1",
+        "Evidence (AUD-0007-01 F6 / AUD-0007-02 F4): a 3-client finale run; G/V Echo spends through the real remote; a mid-finale leave and respawn; root-cause note on AddPlayers sessions",
+        "Leftover minors from AUD-0003/0004/0005 reviewed at task start; each fixed or explicitly deferred with a reason",
         "scripts/check.sh passes"
       ]
     }

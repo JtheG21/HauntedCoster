@@ -22,6 +22,7 @@ tags:
 | [[SYS-Collectible-Service]] | Server + Shared | Leaderstats Coins, coin spawn, validated Touched pickup, respawn | none (physics only) |
 | MatchService + `MatchRules` (TASK-0006) | Server + Shared | Match state machine (only `setState` writes, via `MatchRules.transition`), match snapshot, finish order, teleports | none; publishes `MatchState`, `PhaseEndsAt`, `LastResults`, `InMatch` attributes |
 | TrialService (TASK-0006) | Server | Session-only onboarding trial, first-power timing, eligibility for the first match | none; listens to `AbilityService.onActivated` |
+| FinaleService + `ResultRules` + FinaleModifiers (TASK-0007) | Server + Shared | Ring-out arena, one-time eliminations, freeze at conclusion, server-simulated knockback (temporary network ownership), guards, Echo spends, Teamwork tally, category results | none new; abilities `EchoBurst`/`EchoGuard` via `AbilityRemote`; publishes `FinaleRemaining`, `FinaleAlive`, `FinaleGuard`, `Result_*` |
 
 ## Remotes & trust boundary
 Clients send requests, never results. The server validates every argument and rate-limits.

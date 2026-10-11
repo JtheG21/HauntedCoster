@@ -3,7 +3,7 @@ id: TASK-0007
 title: Ring-Out Finale
 type: task
 project: GAME-001
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -89,3 +89,4 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 - [[AUD-20261010-TASK-0007-02]]: attempt 2, **pass** (4 minor, 3 nit). F1 resolved. New minors: a winner leaving in the ≤0.2 s before results are read can flip Combat (snapshot survivors at conclusion); deferrals not yet recorded in TASK-0010; the fixed 1 s start grace; failed AddPlayers runs without a root cause. Nits: silent ownership hand-back pcall, solo finale when a rival was dead at course end, listener loop over a live list. All go to TASK-0010.
 
 ## Outcome
+Merged to `main` on 2026-10-10 (merge approved by jg) after audit attempt 2 passed. The placeholder finale is replaced by the ring-out arena: one-time server-detected eliminations, freeze at conclusion, server-simulated knockback, guards, Echo spends (G/V), and Speed/Teamwork/Combat results with a results panel. Deferred items are recorded in [[TASK-0010-Ability-And-Harness-Hardening]]. Open: the human accepts audit F3 (exploit hardening) as deferred for M2 (no public play).
