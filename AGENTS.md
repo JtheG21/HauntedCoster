@@ -17,6 +17,13 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 - Run `scripts/check.sh` before any AI review. Read only the files a task needs; don't scan the whole repo.
 - Never read, print or store credentials (`.env`, keys) in code or notes.
 
+## Third-party skills (project-local, `.claude/skills/`)
+- Installed: `roblox-map` (map and course layout plus playability prover) and `roblox-sfx` (Creator Store sound sourcing). Source, commit and licence: `.claude/skills/PROVENANCE.md` and `05 Engineering/External Skills.md`.
+- They are **tools under this workflow**, not a second workflow: results feed a `TASK-` note, and `tasks/queue.json` stays authoritative.
+- They never publish, upload (no `ROBLOX_API_KEY`), or write to Studio outside an approved task. Offline plan, prove and report runs are always fine.
+- `roblox-map` runs with `~/.venvs/roblox-skills/bin/python`. **Never run its Studio bootstrap against the Rg1 place** (it deletes the Rojo-managed Baseplate). Decision: ADR-0004 (approved).
+- Not installed on purpose: `create-roblox-game`, `roblox-build-orchestrator` and the pack's agents (competing orchestrator, Opus-only agents, a Studio guard that doesn't match our MCP name).
+
 ## Obsidian knowledge management protocol
 1. Before creating a note, search for its ID, title and related notes (`grep -rl "id: TASK-0001"`). Update the existing note instead of making a duplicate.
 2. Use the folder structure, filename patterns, YAML schema and controlled statuses in `00 Studio/Obsidian Conventions.md`.

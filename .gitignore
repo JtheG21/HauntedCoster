@@ -26,3 +26,7 @@ tasks/prompts/
 
 # Claude Code agent worktrees (temporary)
 .claude/worktrees/
+
+# Third-party Claude skills: personal settings and generated output
+.claude/skills/*/LOCAL.md
+.claude/skills/*/work/
