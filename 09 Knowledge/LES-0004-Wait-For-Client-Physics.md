@@ -18,14 +18,14 @@ tags:
 ## Problem
 In automated 2-client tests, the first server-teleported touch never registered (0 touches), but later rounds worked.
 
-## Root cause
+## Root cause (likely; n=2 validation)
 Right after joining, a test client didn't simulate its character yet. The character sat motionless exactly at the teleport point (0.0 studs drift), so no contact events fired. Clients own their characters' physics, and the server can't produce touches for a character that isn't simulating.
 
 ## Solution
 Before asserting, lift each character and wait until it falls (`root.Position.Y` drops). Then run the scenario.
 
 ## Validation
-2 consecutive runs passed 4/4 rounds after the fix ([[TEST-20261010-02]]).
+2 consecutive runs passed 4/4 rounds after the fix ([[TEST-20261010-02]]). **Caveat** ([[AUD-20261010-TASK-0009-01]]): the earlier `settle` change landed in the same session, and no run tested the readiness wait on its own. A `settle`-only run still missed round 1 (0 touches, 0.0 drift), which supports this cause but doesn't prove it.
 
 ## Where this applies
 Every multi-client scenario, and any server logic that assumes newly joined characters respond to physics right away.

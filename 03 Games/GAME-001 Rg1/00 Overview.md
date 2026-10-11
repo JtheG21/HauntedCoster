@@ -20,14 +20,15 @@ tags:
 | Task | Status | Audit |
 |---|---|---|
 | [[TASK-0001-Collectible-Pickup]] | done | [[AUD-20261010-TASK-0001-01]] (pass) |
-| [[TASK-0002-Ability-Framework]] | proposed | — |
+| [[TASK-0002-Ability-Framework]] | done | [[AUD-20261010-TASK-0002-01]], [[AUD-20261010-TASK-0002-02]] (pass) |
 | [[TASK-0003-Factions-And-Echo-Clone]] | proposed | — |
 | [[TASK-0004-Ki-Burst]] | proposed | — |
 | [[TASK-0005-Convergence-Gate]] | proposed | — |
 | [[TASK-0006-Match-Flow-And-Onboarding]] | proposed | — |
 | [[TASK-0007-Ring-Out-Finale]] | proposed | — |
 | [[TASK-0008-Prototype-Telemetry]] | proposed | — |
-| [[TASK-0009-Multi-Client-Test-Harness]] | proposed | — |
+| [[TASK-0009-Multi-Client-Test-Harness]] | done | [[AUD-20261010-TASK-0009-01]] (pass) |
+| [[TASK-0010-Ability-And-Harness-Hardening]] | proposed | — |
 
 ## Research (M1)
 - [[RSH-20261010-Candidate-Comparison]]: decided (A)
@@ -42,12 +43,16 @@ tags:
 - [[EXP-0001-M2-Validation-Experiments]]: **proposed**
 - Baseline: [[RSH-20261010-Roblox-Platform-Economics]]
 
+## Engineering
+- [[Multi-Client Testing]]: automated 2–8 client tests
+
 ## Systems
 - [[SYS-Collectible-Service]]
 
 ## Playtests
 - [[TEST-20261010-01]]: TASK-0001, single player, Studio MCP (pass)
 - [[TEST-20261010-02]]: TASK-0001, two players, **pass** (automated through StudioTestService)
+- [[TEST-20261010-03]]: TASK-0002 ability framework, single player, pass
 
 ## Retrospectives
 - [[RETRO-M0-Workflow-Foundation]]

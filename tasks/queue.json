@@ -78,7 +78,7 @@
       "id": "TASK-0002",
       "title": "Ability Framework",
       "project": "GAME-001",
-      "status": "approved",
+      "status": "done",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0002-Ability-Framework",
@@ -139,6 +139,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-10T17:01:50",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -165,7 +171,8 @@
           "report": "06 QA/AUD-20261010-TASK-0002-02.md"
         }
       ],
-      "revisions": 1
+      "revisions": 1,
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0003",
@@ -286,7 +293,7 @@
       "id": "TASK-0009",
       "title": "Multi-Client Test Harness",
       "project": "GAME-001",
-      "status": "approved",
+      "status": "done",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0009-Multi-Client-Test-Harness",
@@ -321,6 +328,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-10T17:01:50",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -336,6 +349,25 @@
           "result": "pass",
           "report": "06 QA/AUD-20261010-TASK-0009-01.md"
         }
+      ],
+      "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0010",
+      "title": "Ability and Harness Hardening",
+      "project": "GAME-001",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0010-Ability-And-Harness-Hardening",
+      "note": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0010-Ability-And-Harness-Hardening.md",
+      "acceptance_criteria": [
+        "AbilityProbe multi-client scenario: client 2 observes client 1's Dash displacement (closes TASK-0002 AC2)",
+        "StudioTestHook: JSONEncode wrapped in pcall; EndTest always called; scenario timeout (default 45 s); double start() guarded",
+        "CollectibleRace: touches counted per player; legit-round waitFor result checked; unknown approach rejected",
+        "AbilityService: diagnostics attribute cleared on PlayerRemoving; folder cast made sound",
+        "orchestrator request-changes: tests cover in_review start state, CLI wiring and the revision-limit-to-blocked path",
+        "scripts/check.sh passes"
       ]
     }
   ]
