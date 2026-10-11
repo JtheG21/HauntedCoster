@@ -3,7 +3,7 @@ id: TASK-0007
 title: Ring-Out Finale
 type: task
 project: GAME-001
-status: in_progress
+status: in_review
 priority: high
 risk: medium
 owner: executor
@@ -74,6 +74,15 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 - Faction points from results are not written (M4 Faction War).
 
 **Check results:** `scripts/check.sh` ALL CHECKS PASSED. Specs 57/0 (fresh session). Playtest [[TEST-20261010-11]] (solo plus a 2-client `FinaleRingOut` pass; the failed runs are listed there).
+
+**Revision 1** (after [[AUD-20261010-TASK-0007-01]], 2026-10-10)
+- **F1 (major), fixed:** `FinaleService` concludes once `finaleOver` is true (in the poll, on a respawn elimination, on a leave, or at the time limit): no more eliminations, guards, knockback or Echo spends (`isAlive` is false once concluded), so results come from a frozen snapshot. `ResultRules.combat` takes `starters`; a single last-out player in a 2+ player finale wins. New spec plus a scenario regression step.
+- **F2 (minor), mostly fixed:** the freeze also covers the Results phase. The TASK-0006 "respawn during Results goes to CourseStart" item stays with TASK-0010.
+- **F4 (minor), fixed:** players dead or respawning when the course ends don't start the finale (they spectate).
+- **Nit 7, fixed:** `ConvergenceGate.onContribution` keeps a listener list and returns a disconnect; the scenario disconnects its test listener.
+- **Found during re-testing, fixed:** (a) `StartGraceSeconds = 1.0`: no eliminations right after the teleport onto the deck (a client's stale course-level position read as a ring-out); (b) knockback is server-simulated: the server owns the target's root for 0.6 s (`ServerOwnSeconds`), because a client-simulated 0.2 s push was missed in about 3 of 8 runs. This also partly addresses F3 (the target can't delete the push locally).
+- **Deferred to TASK-0010:** F3 remainder (server-side position sanity check, a no-collide group before public play, the exploit probe), F6 evidence gaps, nits 8 and 9.
+- Scenario: landing checks, diagnostics, AddPlayers fallback removed (it produced inconsistent sessions). Evidence: [[TEST-20261010-11]] (rev 1 section, every run listed).
 
 ## Audits
 - [[AUD-20261010-TASK-0007-01]]: attempt 1, **fail** (1 major, 5 minor, 3 nit). Major F1: the finale keeps eliminating after it is decided, so a second fall 0.1 s later overwrites the result ("nobody survived" instead of the last player standing).
