@@ -20,6 +20,8 @@ tags:
 | System | Side | Responsibility | Remotes |
 |---|---|---|---|
 | [[SYS-Collectible-Service]] | Server + Shared | Leaderstats Coins, coin spawn, validated Touched pickup, respawn | none (physics only) |
+| MatchService + `MatchRules` (TASK-0006) | Server + Shared | Match state machine (only `setState` writes, via `MatchRules.transition`), match snapshot, finish order, teleports | none; publishes `MatchState`, `PhaseEndsAt`, `LastResults`, `InMatch` attributes |
+| TrialService (TASK-0006) | Server | Session-only onboarding trial, first-power timing, eligibility for the first match | none; listens to `AbilityService.onActivated` |
 
 ## Remotes & trust boundary
 Clients send requests, never results. The server validates every argument and rate-limits.

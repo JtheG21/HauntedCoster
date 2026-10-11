@@ -438,7 +438,7 @@
       "id": "TASK-0006",
       "title": "Match Flow and Onboarding",
       "project": "GAME-001",
-      "status": "approved",
+      "status": "done",
       "risk": "low",
       "depends_on": [
         "TASK-0002"
@@ -477,6 +477,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-10T19:49:03",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -492,7 +498,8 @@
           "result": "pass",
           "report": "06 QA/AUD-20261010-TASK-0006-01.md"
         }
-      ]
+      ],
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0007",

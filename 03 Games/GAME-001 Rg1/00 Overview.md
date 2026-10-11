@@ -24,7 +24,7 @@ tags:
 | [[TASK-0003-Factions-And-Echo-Clone]] | done | [[AUD-20261010-TASK-0003-01]] (fail), [[AUD-20261010-TASK-0003-02]] (pass) |
 | [[TASK-0004-Ki-Burst]] | done | [[AUD-20261010-TASK-0004-01]] (pass) |
 | [[TASK-0005-Convergence-Gate]] | done | [[AUD-20261010-TASK-0005-01]] (fail), [[AUD-20261010-TASK-0005-02]] (pass) |
-| [[TASK-0006-Match-Flow-And-Onboarding]] | proposed | — |
+| [[TASK-0006-Match-Flow-And-Onboarding]] | done | [[AUD-20261010-TASK-0006-01]] (pass) |
 | [[TASK-0007-Ring-Out-Finale]] | proposed | — |
 | [[TASK-0008-Prototype-Telemetry]] | proposed | — |
 | [[TASK-0009-Multi-Client-Test-Harness]] | done | [[AUD-20261010-TASK-0009-01]] (pass) |
@@ -59,9 +59,10 @@ tags:
 - [[TEST-20261010-07]]: TASK-0003 revision 1 (rebalance, doors), pass after fix
 - [[TEST-20261010-08]]: TASK-0005 Convergence Gate (2 clients + real abilities), pass
 - [[TEST-20261010-09]]: TASK-0005 revision 1 (exploit regression), pass
+- [[TEST-20261010-10]]: TASK-0006 match flow and onboarding (solo loops + join/leave), pass
 
 ## Retrospectives
 - [[RETRO-M0-Workflow-Foundation]]
 
 ## Open items
-- Hardening follow-ups from the audit (not yet a task).
+- Hardening follow-ups from the audits (TASK-0003/0004/0005/0006 minors) go into [[TASK-0010-Ability-And-Harness-Hardening]] (proposed).

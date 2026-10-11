@@ -3,7 +3,7 @@ id: TASK-0006
 title: Match Flow and Onboarding
 type: task
 project: GAME-001
-status: approved
+status: done
 priority: high
 risk: low
 owner: executor
@@ -74,3 +74,4 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 - [[AUD-20261010-TASK-0006-01]]: attempt 1, **pass** (6 minor, 4 nit). Minors: respawn in Results goes to CourseStart; trial player respawns at default spawn; trial prompt goes stale after a rebalance; gate reset ignores occupants and clone consumption; dead players miss the snapshot and the countdown flaps with MinPlayers > 1; scope or CLAUDE.md on a task branch
 
 ## Outcome
+Merged to `main` on 2026-10-10 (merge approved by jg). Match loop Lobby → Countdown → Course → Finale (placeholder) → Results → Lobby runs server-side through `MatchRules.transition`; the onboarding trial gates first-match entry. Audit minors 1–6 carry into [[TASK-0010-Ability-And-Harness-Hardening]]. Finale placeholder is replaced by [[TASK-0007-Ring-Out-Finale]].
