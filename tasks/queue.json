@@ -438,7 +438,7 @@
       "id": "TASK-0006",
       "title": "Match Flow and Onboarding",
       "project": "GAME-001",
-      "status": "proposed",
+      "status": "ready",
       "risk": "low",
       "depends_on": [
         "TASK-0002"
@@ -451,6 +451,15 @@
         "A first-time player is sent through the trial and prompted to use their power",
         "A match with 1 player can run end to end (solo testing)",
         "`check.sh` passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-10T19:34:24",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
