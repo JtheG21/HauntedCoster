@@ -29,13 +29,29 @@ local function isActivator(part: BasePart): boolean
 	return humanoid ~= nil and humanoid.Health > 0
 end
 
-local function setDoor(plate: BasePart, open: boolean)
+local function linkedDoor(plate: BasePart): BasePart?
 	local link = plate:FindFirstChild("Door")
 	local door = if link and link:IsA("ObjectValue") then link.Value else nil
-	if door and door:IsA("BasePart") then
-		door.CanCollide = not open
-		door.Transparency = if open then 0.8 else 0
+	return if door and door:IsA("BasePart") then door else nil
+end
+
+-- A door is open while ANY plate linked to it is active (several plates may share one door).
+local function refreshDoor(door: BasePart, ignore: Instance?)
+	local open = false
+	for _, instance in CollectionService:GetTagged(PressurePlate.PlateTag) do
+		if
+			instance ~= ignore
+			and instance:IsA("BasePart")
+			and instance:IsDescendantOf(Workspace)
+			and instance:GetAttribute("Active") == true
+			and linkedDoor(instance) == door
+		then
+			open = true
+			break
+		end
 	end
+	door.CanCollide = not open
+	door.Transparency = if open then 0.8 else 0
 end
 
 local function evaluate(plate: BasePart)
@@ -54,7 +70,10 @@ local function evaluate(plate: BasePart)
 	end
 	if plate:GetAttribute("Active") ~= active then
 		plate:SetAttribute("Active", active)
-		setDoor(plate, active)
+		local door = linkedDoor(plate)
+		if door then
+			refreshDoor(door)
+		end
 	end
 end
 
@@ -63,6 +82,15 @@ function PressurePlate.start()
 		return
 	end
 	started = true
+	-- A plate removed (untagged or destroyed) while active must not leave its door open.
+	CollectionService:GetInstanceRemovedSignal(PressurePlate.PlateTag):Connect(function(instance)
+		if instance:IsA("BasePart") then
+			local door = linkedDoor(instance)
+			if door then
+				refreshDoor(door, instance)
+			end
+		end
+	end)
 	task.spawn(function()
 		while true do
 			for _, instance in CollectionService:GetTagged(PressurePlate.PlateTag) do

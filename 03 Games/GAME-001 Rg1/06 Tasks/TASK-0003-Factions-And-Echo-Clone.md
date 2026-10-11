@@ -3,7 +3,7 @@ id: TASK-0003
 title: Factions and Echo Clone
 type: task
 project: GAME-001
-status: in_review
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -72,5 +72,6 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 **Check results:** `scripts/check.sh` ALL CHECKS PASSED. Luau specs 22/0. Playtest [[TEST-20261010-05]].
 
 ## Audits
+- [[AUD-20261010-TASK-0003-01]]: attempt 1, **fail**. Major: no rebalance after leaves (gates become unsolvable). Minors: E-key/ProximityPrompt clash, shared-door conflict, specs miss service and leave paths, playtest on an uncommitted tree
 
 ## Outcome

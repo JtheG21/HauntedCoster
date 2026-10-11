@@ -16,7 +16,7 @@ local abilities: { [string]: AbilityDef } = {
 	},
 	EchoClone = {
 		cooldown = 8.0,
-		keyCode = Enum.KeyCode.E,
+		keyCode = Enum.KeyCode.F, -- not E: E is the default ProximityPrompt key
 		label = "Clone",
 	},
 	-- Ki Burst is hold-to-charge: key down sends KiCharge, key up sends KiBurst. The server times
