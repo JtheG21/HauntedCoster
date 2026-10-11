@@ -2,7 +2,7 @@
   "project": "Rg1",
   "phase": "GAME-002 M1: MVP loop",
   "vault": "/Users/jg/Desktop/Rg1",
-  "rojo_project": "default.project.json",
+  "rojo_project": "haunted.project.json",
   "dispatch_mode": "dry-run",
   "updated": "2026-10-11T16:31:40",
   "task_counts": {
@@ -19,5 +19,6 @@
   ],
   "api_spend_this_month_usd": 0.0,
   "active_game": "GAME-002",
-  "conventions": "00 Studio/Obsidian Conventions.md"
+  "conventions": "00 Studio/Obsidian Conventions.md",
+  "rojo_place": "HauntedCollector.rbxl"
 }

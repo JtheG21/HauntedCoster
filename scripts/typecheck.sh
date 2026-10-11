@@ -2,8 +2,13 @@
 # Luau type check (strict). Uses the Roblox type definitions downloaded by the VS Code Luau-LSP extension.
 set -eu
 cd "$(dirname "$0")/.."
-defs="$HOME/Library/Application Support/Code/User/globalStorage/johnnymorganz.luau-lsp/globalTypes.PluginSecurity.d.luau"
-if [ ! -f "$defs" ]; then echo "SKIP: Roblox type definitions not found (open the project in VS Code once)"; exit 0; fi
+defs="${LUAU_DEFS:-$HOME/Library/Application Support/Code/User/globalStorage/johnnymorganz.luau-lsp/globalTypes.PluginSecurity.d.luau}"
+if [ ! -f "$defs" ]; then
+	# A skipped type check is not a pass. CI (or anyone who needs a real result) sets TYPECHECK_REQUIRED=1.
+	if [ "${TYPECHECK_REQUIRED:-0}" = "1" ]; then echo "FAIL: Roblox type definitions not found and TYPECHECK_REQUIRED=1"; exit 1; fi
+	echo "SKIP: Roblox type definitions not found (open the project in VS Code once). Types were NOT checked."
+	exit 0
+fi
 fail=0
 # GAME-001 (default.project.json)
 rojo sourcemap default.project.json -o sourcemap.json >/dev/null
