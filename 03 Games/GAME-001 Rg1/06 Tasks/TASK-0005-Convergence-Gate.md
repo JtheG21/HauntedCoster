@@ -3,7 +3,7 @@ id: TASK-0005
 title: Convergence Gate
 type: task
 project: GAME-001
-status: in_review
+status: changes_requested
 priority: high
 risk: medium
 owner: executor
@@ -71,5 +71,6 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 **Check results:** `scripts/check.sh` ALL CHECKS PASSED. Specs 37/0 (fresh session). Playtest [[TEST-20261010-08]] (2-client scenario passed twice, real abilities and shrine verified).
 
 ## Audits
+- [[AUD-20261010-TASK-0005-01]]: attempt 1, **fail**. Major F1: a clone that stays on the plate is never consumed, so a second Ki hit reopens the gate and Echoes are farmed. Minors: Echoes for players already in the pass zone or repeat openings (F2), shrine cycles and solid-on-player (F3), ambiguous AC2 (F5), state machine untested (F6)
 
 ## Outcome
