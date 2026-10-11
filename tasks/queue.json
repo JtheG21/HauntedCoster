@@ -505,7 +505,7 @@
       "id": "TASK-0007",
       "title": "Ring-Out Finale",
       "project": "GAME-001",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0003",
@@ -520,6 +520,15 @@
         "Speed = first obby finisher, Teamwork = most gate contributions. Ties are handled deterministically",
         "Knockback is applied on the server only. A client can't apply force to others",
         "`check.sh` passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-10T19:49:45",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
