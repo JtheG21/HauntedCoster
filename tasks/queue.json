@@ -341,7 +341,7 @@
       "id": "TASK-0005",
       "title": "Convergence Gate",
       "project": "GAME-001",
-      "status": "ready",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [
         "TASK-0003",
@@ -363,8 +363,69 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-10T19:11:07",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-10T19:23:18",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T19:26:39",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-10T19:26:42",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-10T19:31:06",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T19:33:51",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
-      ]
+      ],
+      "executions": [
+        {
+          "time": "2026-10-10T19:23:18",
+          "result": "pass",
+          "notes": "check.sh green; specs 37/0; GateCoop 2-client pass x2; real clone/Ki/shrine verified (TEST-20261010-08)"
+        },
+        {
+          "time": "2026-10-10T19:31:06",
+          "result": "pass",
+          "notes": "rev1: F1-F4 fixed; GateCoop regression pass (74s); specs 39/0; shrine stays open"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-10T19:26:39",
+          "result": "fail",
+          "report": "06 QA/AUD-20261010-TASK-0005-01.md"
+        },
+        {
+          "time": "2026-10-10T19:33:51",
+          "result": "pass",
+          "report": "06 QA/AUD-20261010-TASK-0005-02.md"
+        }
+      ],
+      "revisions": 1
     },
     {
       "id": "TASK-0006",

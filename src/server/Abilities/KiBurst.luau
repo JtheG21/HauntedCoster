@@ -3,6 +3,7 @@
 -- Charge time is measured on the server between the KiCharge and KiBurst requests.
 -- Breaks CrackedWalls (above a charge threshold) and pushes HeavyBlocks.
 
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
@@ -12,6 +13,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local AbilityConfig = require(Shared:WaitForChild("AbilityConfig"))
 local FactionConfig = require(Shared:WaitForChild("FactionConfig"))
 local KnockbackRules = require(Shared:WaitForChild("KnockbackRules"))
+local GateConfig = require(Shared:WaitForChild("GateConfig"))
 
 local Components = script.Parent.Parent.Components
 local CrackedWall = require(Components.CrackedWall)
@@ -69,7 +71,13 @@ function KiBurst.burstHandler(player: Player, character: Model, root: BasePart)
 		if not KnockbackRules.inFront(origin, look, part.Position, config.Range) then
 			continue
 		end
-		if CrackedWall.isWall(part) then
+		if CollectionService:HasTag(part, GateConfig.KiTargetTag) then
+			-- Convergence Gate input: a strong enough burst counts as applying the Ki power.
+			-- Checked first on purpose: a Ki target is never also treated as a wall or heavy block.
+			if fraction >= config.WallBreakFraction then
+				part:SetAttribute("LastKiHit", os.clock())
+			end
+		elseif CrackedWall.isWall(part) then
 			if fraction >= config.WallBreakFraction and CrackedWall.tryBreak(part, config.WallRespawnSeconds) then
 				walls += 1
 			end
