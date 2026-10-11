@@ -6,3 +6,5 @@
 {"time": "2026-10-10T17:00:56", "task": "TASK-0009", "kind": "subscription", "role": "auditor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": null, "note": "fresh subagent in worktree"}
 {"time": "2026-10-10T17:00:56", "task": "TASK-0009", "kind": "subscription", "role": "executor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": null, "note": "main session: harness + 7 Studio multi-client runs"}
 {"time": "2026-10-10T17:12:31", "task": "TASK-0003", "kind": "subscription", "role": "auditor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": 81677, "note": "attempt 1 (fail)"}
+{"time": "2026-10-10T17:18:50", "task": "TASK-0003", "kind": "subscription", "role": "auditor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": null, "note": "attempt 2 delta audit"}
+{"time": "2026-10-10T17:18:50", "task": "TASK-0003", "kind": "subscription", "role": "executor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": null, "note": "main session: implement, revision 1, Studio + 3-client runs"}

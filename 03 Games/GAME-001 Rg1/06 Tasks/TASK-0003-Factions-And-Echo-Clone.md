@@ -3,7 +3,7 @@ id: TASK-0003
 title: Factions and Echo Clone
 type: task
 project: GAME-001
-status: in_review
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -76,13 +76,14 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 - **Minor 2:** Echo Clone moved from **E to F** (E is the default ProximityPrompt key). Faction-aware input is still M3
 - **Minor 3:** doors open while **any** linked plate is active. Removing an active plate closes its door (cached plate→door; a bug in the first revision attempt was found by playtest and fixed)
 - **Minor 4:** +3 `rebalanceMove` specs, plus the `FactionRebalance` multi-client scenario (a real leave via Kick)
-- **Nit 8:** a live clone is removed when the owner's faction changes. **Nit 9:** the new scenario uses FactionConfig and FactionRules
+- **Nit 8:** a live clone is removed when the owner's faction changes. **Nit 9 (partial, corrected per [[AUD-20261010-TASK-0003-02]]):** the *new* `FactionRebalance` scenario uses FactionConfig and FactionRules, but `FactionBalance.luau` still hardcodes them (deferred)
 - **Minor 5:** evidence taken against committed builds with hashes ([[TEST-20261010-07]])
 - Not addressed (nits, logged for a hardening task): 6 (OverlapParams per tick), 7 (clone CanQuery)
 
 **Checks:** `scripts/check.sh` ALL CHECKS PASSED. Specs **31/0 in a fresh session**. Playtest [[TEST-20261010-07]]. Lesson [[LES-0005-Edit-Mode-Require-Cache]].
 
 ## Audits
+- [[AUD-20261010-TASK-0003-02]]: attempt 2 (revision 1), **pass**: major fixed. Nits: rebalance overrides `setFaction` (guard in TASK-0006), a re-linked or moved active plate leaves its old door open, FactionBalance hardcodes names
 - [[AUD-20261010-TASK-0003-01]]: attempt 1, **fail**. Major: no rebalance after leaves (gates become unsolvable). Minors: E-key/ProximityPrompt clash, shared-door conflict, specs miss service and leave paths, playtest on an uncommitted tree
 
 ## Outcome
