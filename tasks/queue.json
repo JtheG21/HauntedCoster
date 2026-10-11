@@ -341,7 +341,7 @@
       "id": "TASK-0005",
       "title": "Convergence Gate",
       "project": "GAME-001",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [
         "TASK-0003",
@@ -363,6 +363,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-10T19:11:07",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ]
     },

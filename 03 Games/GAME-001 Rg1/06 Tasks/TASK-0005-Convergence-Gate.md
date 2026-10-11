@@ -3,7 +3,7 @@ id: TASK-0005
 title: Convergence Gate
 type: task
 project: GAME-001
-status: ready
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -53,6 +53,22 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 
 ---
 ## Implementation record
+*Executor (Claude Code, main session), 2026-10-10, branch `task/TASK-0005-Convergence-Gate`*
+
+**Files changed**
+- `src/shared/GateRules.luau` (new): pure `requirements`, `canOpen` (window, NaN or future guard), `shrineDue`, `awardFor`
+- `src/server/Components/ConvergenceGate.luau` (new): 10 Hz loop over tagged gates; inputs via ObjectValue links (ShinobiPlate, KiTarget, PassZone, ApproachZone, Bypass); consumes inputs on opening; awards Echoes once per player per opening; Echo Shrine fallback; publishes `Required`, `State`, `ShrineAt` and `ShrineOpen` attributes
+- `src/server/Services/EchoService.luau` (new): server inventory plus read-only `Echo_<Power>` Player attributes. `reset` for match end (TASK-0006)
+- `src/client/GateHud.luau` (new; a ModuleScript like the other client modules, instead of `GateHud.client.luau`): billboard with needs, open state and shrine
+- `tests/luau/GateRules.spec.luau` (new, 6 tests)
+- **Outside the listed files (needed):** `src/shared/GateConfig.luau` (new tuning), `PressurePlate.luau` (`ClonePresent` attribute: only a clone counts as the Shinobi power, not a player standing), `KiBurst.luau` (tagged `KiTarget` hit above the wall-break threshold sets `LastKiHit`), both `init` scripts, and test fixtures `tests/luau/multiclient/GateFixture.luau` and `GateCoop.luau`
+
+**Design decisions**
+- Abilities and gates are decoupled through **server-set attributes** (`ClonePresent`, `LastKiHit`), so new factions plug in by setting an attribute.
+- "Factions present" means everyone in the server for now. TASK-0006 will scope it to the match.
+- Inputs are consumed when a gate opens, so one application can't keep reopening it.
+
+**Check results:** `scripts/check.sh` ALL CHECKS PASSED. Specs 37/0 (fresh session). Playtest [[TEST-20261010-08]] (2-client scenario passed twice, real abilities and shrine verified).
 
 ## Audits
 

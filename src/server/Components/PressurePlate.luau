@@ -64,12 +64,18 @@ local function evaluate(plate: BasePart)
 	local center = plate.CFrame * CFrame.new(0, plate.Size.Y / 2 + DETECT_HEIGHT / 2, 0)
 	local size = Vector3.new(plate.Size.X, DETECT_HEIGHT, plate.Size.Z)
 
-	local active = false
+	local active, clonePresent = false, false
 	for _, part in Workspace:GetPartBoundsInBox(center, size, params) do
 		if isActivator(part) then
 			active = true
-			break
+			if CollectionService:HasTag(part, PressurePlate.ActivatorTag) then
+				clonePresent = true -- an Echo Clone, not just a player (Convergence Gates need this)
+				break
+			end
 		end
+	end
+	if plate:GetAttribute("ClonePresent") ~= clonePresent then
+		plate:SetAttribute("ClonePresent", clonePresent)
 	end
 	local door = linkedDoor(plate)
 	plateDoors[plate] = door

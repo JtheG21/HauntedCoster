@@ -22,6 +22,19 @@ related:
 local r = game:GetService("StudioTestService"):ExecuteMultiplayerTestAsync(2, { scenario = "CollectibleRace", rounds = 4 })
 print(game:GetService("HttpService"):JSONEncode(r))
 ```
+- **Runs over about 50 s: start them in the background** and poll for the result, because the MCP request times out:
+```lua
+-- start (returns immediately)
+local SS = game:GetService("ServerStorage")
+SS:SetAttribute("MC_Status", "running")
+task.spawn(function()
+	local ok, r = pcall(function() return game:GetService("StudioTestService"):ExecuteMultiplayerTestAsync(2, { scenario = "GateCoop", timeout = 60 }) end)
+	SS:SetAttribute("MC_Result", ok and game:GetService("HttpService"):JSONEncode(r) or tostring(r))
+	SS:SetAttribute("MC_Status", "done")
+end)
+-- later: read SS:GetAttribute("MC_Status"), SS:GetAttribute("MC_Result")
+```
+- Client joins are slow and occasionally fail on this Mac (2 clients took 20–45 s, and once 1 never joined within 45 s). Use `timeout` 60 and retry once before suspecting the code.
 - One test per call. The Studio MCP request **times out** if a call runs two sessions back to back (seen once, then recovered after the session ended).
 - Keep each scenario under about 45 s.
 
@@ -35,6 +48,7 @@ print(game:GetService("HttpService"):JSONEncode(r))
 |---|---|---|
 | `CollectibleRace` | Simultaneous touch → exactly 1 reward. Legit pickups work | ✅ 2026-10-10 ([[TEST-20261010-02]]) |
 | `FactionRebalance` | Leaves trigger a rebalance; every faction stays represented | ✅ 3 clients, 2026-10-10 ([[TEST-20261010-07]]) |
+| `GateCoop` | Convergence Gate: one power or stale power stays closed, both open it, 1 Echo per power per player, recloses (`checkClose`) | ✅ 2 clients, 2026-10-10 ([[TEST-20261010-08]]) |
 | `FactionBalance` | Auto-balance within 1, everyone assigned (`players`, `timeout` args) | ✅ 3 clients, 2026-10-10 ([[TEST-20261010-05]]) |
 
 ## Running Luau specs
