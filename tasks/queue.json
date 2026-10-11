@@ -178,7 +178,7 @@
       "id": "TASK-0003",
       "title": "Factions and Echo Clone",
       "project": "GAME-001",
-      "status": "changes_requested",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [
         "TASK-0002"
@@ -217,6 +217,12 @@
           "from": "in_review",
           "to": "changes_requested",
           "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-10T17:12:33",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [

@@ -23,7 +23,7 @@ local AbilityConfig = table.freeze({
 		}),
 		EchoClone = table.freeze({
 			cooldown = 8.0,
-			keyCode = Enum.KeyCode.E,
+			keyCode = Enum.KeyCode.F, -- not E: E is the default ProximityPrompt key
 			label = "Clone",
 		}),
 	}) :: { [string]: AbilityDef },

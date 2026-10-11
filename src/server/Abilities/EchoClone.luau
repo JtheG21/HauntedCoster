@@ -81,6 +81,9 @@ function EchoClone.start()
 		player.CharacterRemoving:Connect(function()
 			removeClone(player)
 		end)
+		player:GetAttributeChangedSignal(FactionConfig.AttributeName):Connect(function()
+			removeClone(player)
+		end)
 	end
 	Players.PlayerAdded:Connect(watch)
 	for _, player in Players:GetPlayers() do

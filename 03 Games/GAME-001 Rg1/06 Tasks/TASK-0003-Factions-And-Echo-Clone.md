@@ -3,7 +3,7 @@ id: TASK-0003
 title: Factions and Echo Clone
 type: task
 project: GAME-001
-status: changes_requested
+status: in_progress
 priority: high
 risk: medium
 owner: executor
