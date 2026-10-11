@@ -3,7 +3,7 @@ id: TASK-0007
 title: Ring-Out Finale
 type: task
 project: GAME-001
-status: in_review
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -86,5 +86,6 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 
 ## Audits
 - [[AUD-20261010-TASK-0007-01]]: attempt 1, **fail** (1 major, 5 minor, 3 nit). Major F1: the finale keeps eliminating after it is decided, so a second fall 0.1 s later overwrites the result ("nobody survived" instead of the last player standing).
+- [[AUD-20261010-TASK-0007-02]]: attempt 2, **pass** (4 minor, 3 nit). F1 resolved. New minors: a winner leaving in the ≤0.2 s before results are read can flip Combat (snapshot survivors at conclusion); deferrals not yet recorded in TASK-0010; the fixed 1 s start grace; failed AddPlayers runs without a root cause. Nits: silent ownership hand-back pcall, solo finale when a rival was dead at course end, listener loop over a live list. All go to TASK-0010.
 
 ## Outcome

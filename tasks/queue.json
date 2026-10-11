@@ -505,7 +505,7 @@
       "id": "TASK-0007",
       "title": "Ring-Out Finale",
       "project": "GAME-001",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [
         "TASK-0003",
@@ -558,6 +558,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T21:16:35",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -577,6 +583,11 @@
           "time": "2026-10-10T20:35:55",
           "result": "fail",
           "report": "06 QA/AUD-20261010-TASK-0007-01.md"
+        },
+        {
+          "time": "2026-10-10T21:16:35",
+          "result": "pass",
+          "report": "06 QA/AUD-20261010-TASK-0007-02.md"
         }
       ],
       "revisions": 1
