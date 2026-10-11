@@ -3,7 +3,7 @@ id: TASK-0004
 title: Ki Burst
 type: task
 project: GAME-001
-status: in_review
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -67,5 +67,6 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 **Check results:** `scripts/check.sh` ALL CHECKS PASSED. Specs 28/0. Playtest [[TEST-20261010-06]].
 
 ## Audits
+- [[AUD-20261010-TASK-0004-01]]: attempt 1, **pass** (8 minor, 3 nit). Notable minors: wall range uses the part centre (F1), pushes de-duplicated per part, not per assembly (F2), restore resets CanQuery to true (F3), charge not cleared on death or faction change (F7), release fires after an unregistered key-down (F8). Proposed for a hardening task
 
 ## Outcome
