@@ -329,7 +329,13 @@ local function rebuild(index: number, points: { TrackRules.P }, pieces: { TrackR
 		local owner = PlotService.ownerOf(index)
 		local who = Players:GetPlayerFromCharacter(occupant.Parent)
 		if who ~= owner then
-			unseat(front)
+			-- Deferred: the engine is still parenting the SeatWeld while this signal fires, so destroying
+			-- it here is refused ("tried to set the parent of SeatWeld to NULL") and the griefer stays seated.
+			task.defer(function()
+				if front.Occupant == occupant then
+					unseat(front)
+				end
+			end)
 			if who then
 				StateService.toast(who, "That's the owner's seat. Hop in the back to ride along!", "info")
 			end

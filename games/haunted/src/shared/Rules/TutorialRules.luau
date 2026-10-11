@@ -10,6 +10,7 @@ local TutorialRules = {}
 
 export type Ctx = {
 	nearTrain: boolean,
+	viewedCollection: boolean,
 	inGraveyard: boolean,
 	clueCount: number,
 	angelClue: boolean,
@@ -32,9 +33,10 @@ export type Step = { id: string, text: string, done: (Ctx) -> boolean, alt: ((Ct
 local tier1 = Economy.HouseTiers[2]
 
 TutorialRules.Steps = {
+	-- 1-12 follow brief §12 (INBOX-20261011-Haunted-Collector-Brief) one to one.
 	{
 		id = "welcome",
-		text = "Welcome home! That rickety Ghost Train is yours. Fill it with monsters to make it worth riding.",
+		text = "Welcome home! Walk over to your Ghost Train station. Fill the train with monsters to make it worth riding.",
 		done = function(c)
 			return c.nearTrain or c.inGraveyard or c.owned > 0 or c.clueCount > 0
 		end,
@@ -61,15 +63,22 @@ TutorialRules.Steps = {
 		end,
 	},
 	{
+		id = "meter",
+		text = "Press Try Capture. A needle sweeps the meter: press CATCH while it is inside the green zone.",
+		done = function(c)
+			return c.captureTried or c.carrying or c.owned > 0
+		end,
+	},
+	{
 		id = "capture",
-		text = "Press Try Capture, then CATCH when the needle is inside the green zone.",
+		text = "Catch it! A successful catch starts the trip home: a timer starts and you move slower.",
 		done = function(c)
 			return c.carrying or c.owned > 0
 		end,
 	},
 	{
 		id = "return",
-		text = "Run it home before the timer runs out (carrying slows you), then Secure it at your pen.",
+		text = "Run it home before the timer runs out, then Secure it at your pen.",
 		done = function(c)
 			return c.owned > 0
 		end,
@@ -81,36 +90,29 @@ TutorialRules.Steps = {
 		end,
 	},
 	{
+		id = "collection",
+		text = "It's settling in and will soon earn coins. Open the Mansion menu (M) or the Journal (J) to see your collection and income.",
+		done = function(c)
+			return c.viewedCollection or c.speedLevel >= 1 or c.houseTier >= 1
+		end,
+	},
+	{
 		id = "firstUpgrade",
-		text = `It's settling in and will soon earn coins. Save {Economy.SpeedLevelCosts[1]} for a Speed upgrade (Mansion menu).`,
+		text = `Save {Economy.SpeedLevelCosts[1]} coins and buy a Speed upgrade in the Mansion menu.`,
 		done = function(c)
 			return c.speedLevel >= 1 or c.houseTier >= 1
 		end,
 	},
 	{
-		id = "tier1",
-		text = `Restore your house ({tier1.cost} coins, Mansion menu) to unlock the Track Editor.`,
-		done = function(c)
-			return c.houseTier >= 1
-		end,
-	},
-	{
 		id = "editor",
-		text = "Press Edit Track: reshape your route and Confirm it.",
+		text = `Restore your house ({tier1.cost} coins, Mansion menu) to unlock the Track Editor, then press Edit Track and Confirm a route.`,
 		done = function(c)
 			return c.routeCustom
 		end,
 	},
 	{
-		id = "exhibit",
-		text = "Put a monster on an exhibit near the track (Mansion > Exhibits). Exhibits boost ride payouts.",
-		done = function(c)
-			return c.exhibits > 0
-		end,
-	},
-	{
 		id = "ride",
-		text = "Ride your Ghost Train at the station to earn the payout.",
+		text = "Ride your Ghost Train at the station to earn the payout. Monsters on exhibits near the track raise it.",
 		done = function(c)
 			return c.rides > 0
 		end,
@@ -122,16 +124,10 @@ TutorialRules.Steps = {
 			return c.bellClue
 		end,
 	},
-	{
-		id = "rare",
-		text = "Catch the Bell Wraith in the Sealed Crypt (needs 3 landmarks and a Restored house).",
-		done = function(c)
-			return c.caughtRare
-		end,
-	},
 } :: { Step }
 
-TutorialRules.CompleteText = "Keep hunting: rare variants, the Sealed Crypt and a Grand Mansion await."
+TutorialRules.CompleteText =
+	"The bell points to the Sealed Crypt: investigate 3 landmarks and Restore your house to enter, and find the Bell Wraith."
 
 function TutorialRules.advance(step: number, ctx: Ctx): number
 	local s = math.max(1, step)

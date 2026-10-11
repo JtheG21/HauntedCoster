@@ -314,6 +314,7 @@ function MansionUI.open(which: string?)
 		tab = which
 	end
 	render(true)
+	task.spawn(State.invoke, "Ack", "mansion")
 end
 
 function MansionUI.close()

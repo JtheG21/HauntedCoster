@@ -345,7 +345,7 @@ return function(_args: any): { [string]: any }
 	end
 
 	task.wait(2)
-	check("tutorial advanced past the bell step", profile.tutorialStep >= 12, profile.tutorialStep)
+	check("tutorial complete after the bell step (12 steps)", profile.tutorialStep >= 13, profile.tutorialStep)
 
 	local failed = 0
 	for _, c in checks do

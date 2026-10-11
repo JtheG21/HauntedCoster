@@ -51,9 +51,10 @@ end)
 
 -- UI-only acknowledgements (never grant rewards).
 Remotes.func("Ack").OnServerInvoke = function(player, what)
-	if what == "journal" and Remotes.allow(player, "Ack", 1, 3) then
+	local flag = if what == "journal" then "journalOpened" elseif what == "mansion" then "mansionOpened" else nil
+	if flag and Remotes.allow(player, "Ack", 1, 3) then
 		PlayerDataService.update(player, function(p)
-			p.flags.journalOpened = true
+			p.flags[flag] = true
 		end)
 	end
 	return nil

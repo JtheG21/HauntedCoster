@@ -50,6 +50,7 @@ local KNOWN_FLAGS = {
 	routeCustom = true,
 	captureTried = true,
 	journalOpened = true,
+	mansionOpened = true,
 }
 
 function ProfileRules.default(): Profile
