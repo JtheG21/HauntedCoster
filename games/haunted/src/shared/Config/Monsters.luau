@@ -81,9 +81,11 @@ Monsters.Species = {
 Monsters.Order = { "Wisp", "Hound", "Gentleman", "BellWraith" }
 
 Monsters.Capture = {
-	Common = { period = 1.6, zoneWidth = 0.24, hitsNeeded = 1, missesAllowed = 3, returnSeconds = 75 },
-	Uncommon = { period = 1.3, zoneWidth = 0.18, hitsNeeded = 2, missesAllowed = 3, returnSeconds = 90 },
-	Rare = { period = 1.1, zoneWidth = 0.14, hitsNeeded = 3, missesAllowed = 4, returnSeconds = 120 },
+	-- Tuned so blind mashing succeeds roughly 50% / 30% / 10% (Common / Uncommon / Rare) while a timed press
+	-- is reliable (see CaptureRules.spec "mashing" test).
+	Common = { period = 1.6, zoneWidth = 0.2, hitsNeeded = 1, missesAllowed = 2, returnSeconds = 75 },
+	Uncommon = { period = 1.2, zoneWidth = 0.14, hitsNeeded = 2, missesAllowed = 3, returnSeconds = 90 },
+	Rare = { period = 1.0, zoneWidth = 0.1, hitsNeeded = 3, missesAllowed = 3, returnSeconds = 120 },
 } :: { [Rarity]: CaptureTuning }
 
 Monsters.RarityColor = {

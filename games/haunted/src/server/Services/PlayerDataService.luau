@@ -26,6 +26,8 @@ local PlayerDataService = {}
 local STORE_NAME = "HauntedCollector_Profiles_v1"
 local AUTOSAVE_SECONDS = 60
 local LOCK_STALE_SECONDS = 120
+-- Wait up to LOCK_WAIT_TRIES x 5 s for another server to release a live lock, then take it over (the
+-- other server's later saves then abort because the lock is no longer theirs).
 local LOCK_WAIT_TRIES = 6
 local RETRIES = 4
 
@@ -81,6 +83,8 @@ end
 local function keyFor(player: Player): string
 	return `p_{player.UserId}`
 end
+
+local releaseLock: (Player) -> ()
 
 local function deepCopy<T>(v: T): T
 	if type(v) ~= "table" then
@@ -177,7 +181,9 @@ local function saveNow(player: Player, release: boolean)
 		local ok, err = pcall(function()
 			ds:UpdateAsync(keyFor(player), function(old: any)
 				local rec = if type(old) == "table" then old else {}
-				if type(rec.lock) == "table" and rec.lock.job ~= jobId then
+				-- Our session always holds the lock between load and release. A missing or foreign lock means
+				-- another server took the profile over, so writing would overwrite newer progress.
+				if type(rec.lock) ~= "table" or rec.lock.job ~= jobId then
 					lost = true
 					return nil
 				end
@@ -211,6 +217,24 @@ local function saveNow(player: Player, release: boolean)
 	end
 end
 
+-- Clears our session lock without writing the profile (used when we must not save it).
+releaseLock = function(player: Player)
+	local ds = getStore()
+	if not ds then
+		return
+	end
+	local jobId = if game.JobId ~= "" then game.JobId else "studio"
+	pcall(function()
+		ds:UpdateAsync(keyFor(player), function(old: any)
+			if type(old) == "table" and type(old.lock) == "table" and old.lock.job == jobId then
+				old.lock = nil
+				return old
+			end
+			return nil
+		end)
+	end)
+end
+
 local function onPlayerAdded(player: Player)
 	if sessions[player] then
 		return
@@ -226,7 +250,17 @@ local function onPlayerAdded(player: Player)
 	sessions[player] = session
 	local mode, raw = loadRecord(player)
 	if not player.Parent then
+		if mode == "saved" then
+			task.spawn(releaseLock, player)
+		end
 		return
+	end
+	if mode == "saved" and ProfileRules.isNewerSchema(raw) then
+		-- Saved by a newer game version: play with a cleaned copy but never write it back, so this
+		-- (older) server can't strip fields it doesn't understand. The newer server will save it.
+		warn(`[PlayerData] {player.Name}'s profile has a newer schema; this server won't save it`)
+		mode = "readonly"
+		task.spawn(releaseLock, player)
 	end
 	local now = os.time()
 	local profile, repaired = ProfileRules.sanitize(raw, now)
@@ -275,16 +309,26 @@ function PlayerDataService.start()
 		end
 	end)
 	game:BindToClose(function()
-		local pending = 0
-		for player in sessions do
-			pending += 1
-			task.spawn(function()
-				saveNow(player, true)
-				pending -= 1
-			end)
+		-- Snapshot the sessions: PlayerRemoving may clear the map while we wait.
+		local list: { Session } = {}
+		for player, session in sessions do
+			table.insert(list, session)
+			task.spawn(saveNow, player, true)
 		end
+		-- saveNow only queues when a save is already in flight (e.g. the leave save), so wait until every
+		-- session has finished both its in-flight and its queued save, or has released its lock.
 		local deadline = os.clock() + 25
-		while pending > 0 and os.clock() < deadline do
+		while os.clock() < deadline do
+			local busy = false
+			for _, session in list do
+				if session.persistence == "saved" and (session.saving or session.queued or not session.released) then
+					busy = true
+					break
+				end
+			end
+			if not busy then
+				break
+			end
 			task.wait(0.1)
 		end
 	end)

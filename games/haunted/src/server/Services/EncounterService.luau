@@ -69,13 +69,16 @@ local function pickWeighted(weights: { [string]: number }): string?
 end
 
 function EncounterService.rollVariant(zoneId: string, roll: Random): string
-	for _, v in Variants.List do
-		local allowed = v.zones == nil or table.find(v.zones, zoneId) ~= nil
-		if allowed and roll:NextNumber() < v.chance then
-			return v.id
-		end
-	end
-	return Variants.Normal
+	return Variants.roll(zoneId, roll)
+end
+
+-- Extra count of a species outside the world (e.g. being carried home), wired from CaptureService.
+local outsideCount: (string) -> number = function(_speciesId: string)
+	return 0
+end
+
+function EncounterService.setOutsideCounter(fn: (string) -> number)
+	outsideCount = fn
 end
 
 local function randomPoint(zone: World.Zone): Vector3
@@ -204,6 +207,16 @@ function EncounterService.spawn(speciesId: string, variantId: string, zoneId: st
 	return e
 end
 
+local function anyoneHasFlag(flag: string): boolean
+	for _, player in Players:GetPlayers() do
+		local profile = PlayerDataService.get(player)
+		if profile and profile.flags[flag] then
+			return true
+		end
+	end
+	return false
+end
+
 local function aliveOf(speciesId: string): number
 	local n = 0
 	for _, e in encounters do
@@ -219,7 +232,11 @@ local function fillZones()
 		if countIn(zone.id) < zone.maxMonsters then
 			local speciesId = pickWeighted(zone.spawns)
 			local species = speciesId and Monsters.Species[speciesId]
-			if species and species.maxAlive and aliveOf(species.id) >= species.maxAlive then
+			if species and species.maxAlive and aliveOf(species.id) + outsideCount(species.id) >= species.maxAlive then
+				speciesId = nil
+			end
+			-- Special encounters (the Bell Wraith) only appear once someone here has earned the clue.
+			if species and species.requiresFlag and not anyoneHasFlag(species.requiresFlag) then
 				speciesId = nil
 			end
 			if speciesId then
@@ -263,12 +280,17 @@ end
 
 -- An escaped capture runs back to a zone where its species lives (ADR-0005).
 function EncounterService.respawnEscaped(speciesId: string, variantId: string)
+	local species = Monsters.Species[speciesId]
+	if species and species.maxAlive and aliveOf(speciesId) + outsideCount(speciesId) >= species.maxAlive then
+		return
+	end
 	for _, zone in World.Zones do
-		if zone.spawns[speciesId] then
+		if zone.spawns[speciesId] and countIn(zone.id) < zone.maxMonsters then
 			EncounterService.spawn(speciesId, variantId, zone.id)
 			return
 		end
 	end
+	-- Every zone is full: the spawner will repopulate later.
 end
 
 function EncounterService.start()

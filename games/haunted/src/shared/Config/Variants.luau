@@ -46,6 +46,17 @@ function Variants.multiplier(variantId: string): number
 	return if v then v.incomeMultiplier else 1
 end
 
+-- Rolls a variant for a monster spawning in `zoneId`. Zone-restricted variants only roll in their zones.
+function Variants.roll(zoneId: string, rng: Random): string
+	for _, v in Variants.List do
+		local allowed = v.zones == nil or table.find(v.zones, zoneId) ~= nil
+		if allowed and rng:NextNumber() < v.chance then
+			return v.id
+		end
+	end
+	return Variants.Normal
+end
+
 function Variants.label(variantId: string): string?
 	local v = Variants.ById[variantId]
 	return if v then v.label else nil

@@ -36,6 +36,8 @@ EconomyService.start()
 TrainService.start()
 TutorialService.start()
 
+-- Monsters being carried home still count toward rare spawn caps.
+EncounterService.setOutsideCounter(CaptureService.carriedCount)
 -- Securing a monster updates the pen and the train's payout preview.
 CaptureService.onSecured(function(player)
 	ContainmentService.refreshVisuals(player)

@@ -3,7 +3,7 @@ id: TASK-0011
 title: Haunted Scaffold and Player Data
 type: task
 project: GAME-002
-status: in_review
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -63,8 +63,18 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 - **Not yet verified with a player:** the `FullLoop` play scenario is written but hasn't run (the Studio window didn't load the place). The ACs below stay unchecked until it has run.
 - Systems: [[SYS-Haunted-Player-Data]], [[SYS-Haunted-Capture-Loop]], [[SYS-Haunted-Ghost-Train]].
 
+### Revision 1 (2026-10-11): audit fixes, work in progress
+All eight attempt-1 audits failed ([[AUD-20261011-TASK-0011-01]] … [[AUD-20261011-TASK-0018-01]]). The fixes are committed on this branch and **not merged**:
+- Saving: BindToClose waits for in-flight and queued saves; a newer-schema profile loads read-only and is never written; a missing or foreign lock aborts the save; the lock is released if the player leaves mid-load; plot assignment retries.
+- Purchases carry the expected level, so a double-click buys only once.
+- Capture: slack 0.04 s, ping counted once, min gap 0.35 s, retuned zones (spec: mashing is unreliable and gets harder with rarity); variant roll moved to shared code with a spec; the session ends on death; escaped respawns and rares respect caps; server-side carry speed check.
+- Train: the owner seat is disabled outside rides and griefers are unseated through the SeatWeld; seating retries; the cooldown is keyed by UserId; track clearance check. Bell Wraith spawns only when someone has the clue and is hidden locally for others. Gamepad controls in the editor and for the light.
+- New tests: Variants.spec, extra Capture/Track/Tutorial specs (46/0); scenarios FullLoop **55/55**, Reachability **11/11**, ExploitProbe **11/11**, CrossPlot (2 clients) last finished run 11/12. The seat failure was fixed afterwards, and that run was interrupted before completing, so **CrossPlot still needs a re-run**.
+
+**Next session:** re-run CrossPlot; update the design note for changed numbers, the Ashen rule and tutorial deviations; link the audits from the task notes; record-exec, then a fresh attempt-02 audit. Still needs a human: a hands-on §20 playtest, real-DataStore persistence (needs publishing), Lighting.Technology.
+
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261011-TASK-0011-01]]: fail (2 major), revision 1 in progress
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*

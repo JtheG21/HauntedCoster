@@ -132,6 +132,11 @@ function ProfileRules.sanitizeRoute(v: any): Route?
 	return { points = points, pieces = pieces }
 end
 
+-- True when stored data was written by a newer schema than this server understands.
+function ProfileRules.isNewerSchema(raw: any): boolean
+	return type(raw) == "table" and type(raw.schema) == "number" and raw.schema > ProfileRules.Schema
+end
+
 -- Returns a fully valid profile built from untrusted data, plus a list of repaired field names.
 function ProfileRules.sanitize(raw: any, now: number): (Profile, { string })
 	local repaired: { string } = {}
@@ -236,6 +241,7 @@ function ProfileRules.sanitize(raw: any, now: number): (Profile, { string })
 			if
 				type(e) == "table"
 				and type(e.slot) == "number"
+				and e.slot % 1 == 0
 				and e.slot >= 1
 				and e.slot <= slots
 				and not usedSlot[e.slot]

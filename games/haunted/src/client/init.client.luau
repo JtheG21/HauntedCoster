@@ -38,6 +38,7 @@ end
 
 State.start()
 LocalWorld.start()
+require(script.DevProbe).start() -- Studio-only; inert unless a test arms it
 
 local function closeMenus()
 	MansionUI.close()
@@ -85,7 +86,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.F then
+	if input.KeyCode == Enum.KeyCode.F or input.KeyCode == Enum.KeyCode.DPadUp then
 		LocalWorld.toggleLight()
 	elseif input.KeyCode == Enum.KeyCode.J then
 		JournalUI.toggle()

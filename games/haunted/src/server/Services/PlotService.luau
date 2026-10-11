@@ -103,8 +103,10 @@ local function spawnAtHome(player: Player, character: Model)
 		if character.Parent == nil or player.Character ~= character then
 			return
 		end
-		local flat = Vector3.new(root.Position.X - pos.X, 0, root.Position.Z - pos.Z)
-		if flat.Magnitude > 20 then
+		-- Only correct a character Roblox left on the avenue spawn; never undo a move made since.
+		local avenue = Vector3.new(0, 0, 40)
+		local fromAvenue = Vector3.new(root.Position.X - avenue.X, 0, root.Position.Z - avenue.Z)
+		if fromAvenue.Magnitude < 15 then
 			character:PivotTo(target)
 		end
 	end
@@ -114,7 +116,11 @@ local function assign(player: Player)
 	if byPlayer[player] then
 		return
 	end
-	local profile = PlayerDataService.waitFor(player)
+	-- Keep waiting for the profile for as long as the player stays (a slow load must not leave them plotless).
+	local profile = nil
+	while player.Parent and not profile do
+		profile = PlayerDataService.waitFor(player, 30)
+	end
 	if not profile or not player.Parent then
 		return
 	end

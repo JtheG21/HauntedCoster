@@ -22,7 +22,9 @@ function EconomyService.onTierChanged(cb: (Player, number) -> ())
 	table.insert(tierCallbacks, cb)
 end
 
-local function onPurchase(player: Player, item: any): (boolean, string?)
+-- `expected` is the level/tier the client saw when it pressed the button. A repeated click (or a queued
+-- duplicate request) arrives with a stale value and is rejected, so one click buys exactly one level.
+local function onPurchase(player: Player, item: any, expected: any): (boolean, string?)
 	if not Remotes.allow(player, "Purchase", 2, 3) then
 		return false, "Slow down"
 	end
@@ -35,6 +37,10 @@ local function onPurchase(player: Player, item: any): (boolean, string?)
 	end
 	if not PlotService.plotIndex(player) then
 		return false, "You need a home plot"
+	end
+	local current = if item == "speed" then profile.speedLevel else profile.houseTier
+	if type(expected) ~= "number" or expected ~= current then
+		return false, "Already upgraded"
 	end
 	-- Validate and apply in one synchronous step (no yield between the check and the charge).
 	local ok, reason = EconomyRules.purchase(profile, item)

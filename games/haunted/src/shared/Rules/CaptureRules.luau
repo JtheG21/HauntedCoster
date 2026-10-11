@@ -4,8 +4,8 @@
 
 local CaptureRules = {}
 
-CaptureRules.LatencySlack = 0.09 -- seconds of extra forgiveness either side of the press
-CaptureRules.MinReleaseGap = 0.2 -- seconds between counted releases (anti-spam)
+CaptureRules.LatencySlack = 0.04 -- seconds of extra forgiveness either side of the press (jitter only)
+CaptureRules.MinReleaseGap = 0.35 -- seconds between counted releases (anti-spam; mashing still burns misses)
 CaptureRules.SessionTimeout = 20
 
 -- Needle position in [0, 1]: a triangle wave, 0 -> 1 -> 0 every `period` seconds.

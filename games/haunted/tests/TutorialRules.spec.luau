@@ -55,6 +55,39 @@ return function(t: TestRunner.T)
 		t.eq(TutorialRules.advance(6, ctx({ carrying = false })), 6)
 	end)
 
+	t.test("late steps advance one at a time", function()
+		local base = { owned = 1, clueCount = 1, seenCount = 1 }
+		local function with(extra: { [string]: any }): TutorialRules.Ctx
+			local c: { [string]: any } = table.clone(base)
+			for k, v in extra do
+				c[k] = v
+			end
+			return ctx(c)
+		end
+		t.eq(TutorialRules.advance(7, with({})), 7)
+		t.eq(TutorialRules.advance(7, with({ speedLevel = 1 })), 8)
+		t.eq(TutorialRules.advance(8, with({ speedLevel = 1, houseTier = 1 })), 9)
+		t.eq(TutorialRules.advance(9, with({ houseTier = 1, routeCustom = true })), 10)
+		t.eq(TutorialRules.advance(10, with({ houseTier = 1, routeCustom = true, exhibits = 1 })), 11)
+		t.eq(TutorialRules.advance(11, with({ houseTier = 1, routeCustom = true, exhibits = 1, rides = 1 })), 12)
+		t.eq(
+			TutorialRules.advance(
+				12,
+				with({ houseTier = 1, routeCustom = true, exhibits = 1, rides = 1, bellClue = true })
+			),
+			13
+		)
+	end)
+
+	t.test("resume: a saved step is kept until its condition is met, never reset", function()
+		-- Rejoining at step 9 with no route yet stays on 9 (not back to 1) and shows the editor hint.
+		local c = ctx({ owned = 1, houseTier = 1 })
+		t.eq(TutorialRules.advance(9, c), 9)
+		t.truthy(string.find(TutorialRules.hint(9, c), "Edit Track", 1, true) ~= nil)
+		-- A saved step beyond the end shows the completion text.
+		t.eq(TutorialRules.hint(99, c), TutorialRules.CompleteText)
+	end)
+
 	t.test("completed tutorial returns the completion hint", function()
 		local done = ctx({
 			owned = 2,

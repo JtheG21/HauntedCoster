@@ -53,9 +53,19 @@ local function exhibitSlotOf(snap: { [string]: any }, uid: string): number?
 	return nil
 end
 
+local buying = false
+
 local function buy(item: string)
-	local ok, reason = State.invoke("Purchase", item)
-	if not ok then
+	-- One request at a time, carrying the level we saw, so double-clicks can't buy two levels.
+	local snap = State.snap
+	if buying or not snap then
+		return
+	end
+	buying = true
+	local expected = if item == "speed" then snap.speedLevel else snap.houseTier
+	local ok, reason = State.invoke("Purchase", item, expected)
+	buying = false
+	if not ok and reason ~= "Already upgraded" then
 		toast(reason or "Can't buy that", "error")
 	end
 end

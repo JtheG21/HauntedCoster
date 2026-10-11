@@ -176,7 +176,18 @@ local function updateMonsterMarkers()
 		if m:IsA("Model") then
 			local speciesId = m:GetAttribute("Species")
 			local species = type(speciesId) == "string" and Monsters.Species[speciesId] or nil
-			local known = species ~= nil and clues[species.clueLandmark] == true
+			-- A special encounter stays invisible (and un-inspectable) for players without its clue.
+			local hidden = species ~= nil
+				and species.requiresFlag ~= nil
+				and not (snap.flags and snap.flags[species.requiresFlag])
+			for _, d in m:GetDescendants() do
+				if d:IsA("BasePart") then
+					d.LocalTransparencyModifier = if hidden then 1 else 0
+				elseif d:IsA("ProximityPrompt") or d:IsA("Light") or d:IsA("Sparkles") then
+					d.Enabled = not hidden
+				end
+			end
+			local known = species ~= nil and clues[species.clueLandmark] == true and not hidden
 			local existing = m:FindFirstChild("ClueMarker")
 			if known and not existing and species then
 				local h = Instance.new("Highlight")
