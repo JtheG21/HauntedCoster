@@ -3,7 +3,7 @@ id: TASK-0011
 title: Haunted Scaffold and Player Data
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -93,6 +93,7 @@ All eight attempt-1 audits failed ([[AUD-20261011-TASK-0011-01]] … [[AUD-20261
 
 ## Audits
 - [[AUD-20261011-TASK-0011-01]]: fail (2 major), revision 1
+- [[AUD-20261011-TASK-0011-02]]: pass (0 major, 4 minor, 1 nit) on `5878f6d`. Open minors: no spec for `isNewerSchema` or the repaired-field list; the schema-bump rule for new nested keys isn't written down; BindToClose doesn't wait for a lock release still loading at shutdown; real DataStore rejoin is unverified (M2, ADR-0006).
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*
