@@ -3,7 +3,7 @@ id: TASK-0005
 title: Convergence Gate
 type: task
 project: GAME-001
-status: changes_requested
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -69,6 +69,18 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 - Inputs are consumed when a gate opens, so one application can't keep reopening it.
 
 **Check results:** `scripts/check.sh` ALL CHECKS PASSED. Specs 37/0 (fresh session). Playtest [[TEST-20261010-08]] (2-client scenario passed twice, real abilities and shrine verified).
+
+### Revision 1 (after [[AUD-20261010-TASK-0005-01]] fail)
+- **F1 (major) fixed:** new pure rule `GateRules.cloneInput`. A clone counts only when it **arrives** after the last opening; the clone that opened the gate is consumed until it leaves (+2 specs; the 2-client regression keeps the clone on the plate)
+- **F2 fixed:** players already in the PassZone when the gate opens earn nothing; **one Echo award per player per gate** (reset per match in TASK-0006)
+- **F3 fixed:** the shrine bypass **stays open** once triggered (no cycling); the gate never turns solid while a player is inside it
+- **F4 fixed:** `HasBypass` attribute; the HUD only mentions the shrine when the gate has one
+- **F6 addressed:** the state-machine path is covered by the 2-client scenario (exploit, re-open, no farming, closing always checked) plus the pure `cloneInput` specs
+- **F7/F8:** window comment corrected; the Ki-target ordering is documented in KiBurst
+- `ShrineOpenSeconds` removed from GateConfig (no longer used)
+- **F5 (needs a human reading, not changed):** current behaviour is that with only one faction present, the gate opens with **that faction's power alone**, and the shrine stays available as a fallback. This matches design v0.1 ("gates only ask for powers present in the match"). Flagged to the user for confirmation.
+
+**Checks:** `scripts/check.sh` ALL CHECKS PASSED. Specs 39/0 (fresh session). Playtest [[TEST-20261010-09]].
 
 ## Audits
 - [[AUD-20261010-TASK-0005-01]]: attempt 1, **fail**. Major F1: a clone that stays on the plate is never consumed, so a second Ki hit reopens the gate and Echoes are farmed. Minors: Echoes for players already in the pass zone or repeat openings (F2), shrine cycles and solid-on-player (F3), ambiguous AC2 (F5), state machine untested (F6)

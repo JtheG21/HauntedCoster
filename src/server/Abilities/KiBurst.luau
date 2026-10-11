@@ -73,6 +73,7 @@ function KiBurst.burstHandler(player: Player, character: Model, root: BasePart)
 		end
 		if CollectionService:HasTag(part, GateConfig.KiTargetTag) then
 			-- Convergence Gate input: a strong enough burst counts as applying the Ki power.
+			-- Checked first on purpose: a Ki target is never also treated as a wall or heavy block.
 			if fraction >= config.WallBreakFraction then
 				part:SetAttribute("LastKiHit", os.clock())
 			end

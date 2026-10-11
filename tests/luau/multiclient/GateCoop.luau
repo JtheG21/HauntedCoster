@@ -74,7 +74,7 @@ return function(args: { [string]: any }): { [string]: any }
 		return g.gate:GetAttribute("State") == "open"
 	end, 2)
 	result.barrierPassable = g.gate.CanCollide == false
-	clone:Destroy()
+	-- The clone deliberately STAYS on the plate (audit F1 regression): a later Ki hit must not reopen.
 
 	-- 4. Both players walk through the pass zone (twice): exactly 1 charge per power each.
 	for i, player in players do
@@ -97,18 +97,41 @@ return function(args: { [string]: any }): { [string]: any }
 	end
 	result.charges = charges
 
-	-- 5. Optional (adds about 9 s; the MCP call can time out): the gate closes again after
-	-- OpenSeconds and the consumed inputs don't reopen it. Also covered by single-player Play tests.
-	if args.checkClose == true then
-		result.closedAgain = waitFor(function()
-			return g.gate:GetAttribute("State") == "closed"
-		end, 10)
-		task.wait(1)
-		result.staysClosed = g.gate:GetAttribute("State") == "closed"
-	else
-		result.closedAgain, result.staysClosed = true, true
-		result.closeChecked = false
+	-- 5. While open, a fresh Ki hit arrives with the SAME clone still on the plate. After closing,
+	-- the gate must stay closed (the clone was consumed). Launch this scenario in the background.
+	g.kiTarget:SetAttribute("LastKiHit", os.clock())
+	for i, player in players do
+		(player.Character :: Model):PivotTo(CFrame.new(g.approach.Position + Vector3.new(i * 3 - 4, 0, -4)))
 	end
+	result.closedAgain = waitFor(function()
+		return g.gate:GetAttribute("State") == "closed"
+	end, 10)
+	g.kiTarget:SetAttribute("LastKiHit", os.clock())
+	task.wait(1.5)
+	result.noReopenWithSameClone = g.gate:GetAttribute("State") == "closed"
+	result.staysClosed = result.noReopenWithSameClone
+
+	-- 6. The clone leaves and a clone arrives again with a fresh Ki hit: it opens again, but players
+	-- who already earned at this gate get nothing more (one award per player per gate).
+	clone:Destroy()
+	task.wait(0.4)
+	local clone2 = GateFixture.fakeClone(g)
+	g.kiTarget:SetAttribute("LastKiHit", os.clock())
+	result.reopenedWithNewClone = waitFor(function()
+		return g.gate:GetAttribute("State") == "open"
+	end, 2)
+	for i, player in players do
+		(player.Character :: Model):PivotTo(CFrame.new(g.passZone.Position + Vector3.new(i * 3 - 4, 0, 0)))
+	end
+	task.wait(1)
+	local noFarm = true
+	for _, player in players do
+		if (player:GetAttribute("Echo_Shinobi") or 0) ~= 1 or (player:GetAttribute("Echo_Ki") or 0) ~= 1 then
+			noFarm = false
+		end
+	end
+	result.noEchoFarming = noFarm
+	clone2:Destroy()
 	g.folder:Destroy()
 
 	result.ok = result.required == "Shinobi,Ki"
@@ -118,6 +141,8 @@ return function(args: { [string]: any }): { [string]: any }
 		and result.barrierPassable
 		and exact
 		and result.closedAgain
-		and result.staysClosed
+		and result.noReopenWithSameClone
+		and result.reopenedWithNewClone
+		and result.noEchoFarming
 	return result
 end

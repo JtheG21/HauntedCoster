@@ -46,4 +46,25 @@ return function(t: TestRunner.T)
 		first[1] = "changed"
 		t.eq(BOTH[1], "Shinobi", "award list is a copy")
 	end)
+
+	t.test("clone input: a consumed clone that stays never counts again (audit F1)", function()
+		local seenAt, consumed = GateRules.cloneInput(true, false, nil, 10)
+		t.eq(seenAt, 10)
+		-- gate opens: consumed = true, seenAt cleared
+		seenAt, consumed = nil, true
+		for now = 11, 30 do
+			seenAt, consumed = GateRules.cloneInput(true, consumed, seenAt, now)
+			t.eq(seenAt, nil, "still the same clone")
+		end
+		-- clone leaves, then a clone arrives again
+		seenAt, consumed = GateRules.cloneInput(false, consumed, seenAt, 31)
+		t.eq(consumed, false)
+		seenAt, consumed = GateRules.cloneInput(true, consumed, seenAt, 32)
+		t.eq(seenAt, 32)
+	end)
+
+	t.test("clone input: leaving keeps the last time for the window", function()
+		local seenAt = GateRules.cloneInput(false, false, 50, 55)
+		t.eq(seenAt, 50)
+	end)
 end

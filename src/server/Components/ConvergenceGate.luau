@@ -27,12 +27,13 @@ local ConvergenceGate = {}
 
 type GateState = {
 	openUntil: number,
-	openingId: number,
 	openingPowers: { string },
-	awarded: { [Player]: number }, -- player -> openingId already awarded
+	awarded: { [Player]: boolean }, -- one Echo award per player per gate (audit F2; reset per match later)
+	presentAtOpen: { [Player]: boolean }, -- players already in the PassZone when it opened don't earn
 	firstArrival: number?,
-	shrineUntil: number,
+	shrineOpen: boolean, -- once triggered the bypass stays open (audit F3: no cycling)
 	cloneSeenAt: number?,
+	cloneConsumed: boolean, -- audit F1: the clone that opened the gate never counts again
 }
 
 local states: { [BasePart]: GateState } = {}
@@ -89,12 +90,13 @@ local function getState(gate: BasePart): GateState
 	if not state then
 		state = {
 			openUntil = 0,
-			openingId = 0,
 			openingPowers = {},
 			awarded = {},
+			presentAtOpen = {},
 			firstArrival = nil,
-			shrineUntil = 0,
+			shrineOpen = false,
 			cloneSeenAt = nil,
+			cloneConsumed = false,
 		}
 		states[gate] = state
 		setBlocked(gate, true)
@@ -110,9 +112,9 @@ local function step(gate: BasePart, now: number)
 
 	-- Gather when each power was last applied.
 	local plate = linked(gate, "ShinobiPlate")
-	if plate and plate:GetAttribute("ClonePresent") == true then
-		state.cloneSeenAt = now
-	end
+	local clonePresent = plate ~= nil and plate:GetAttribute("ClonePresent") == true
+	state.cloneSeenAt, state.cloneConsumed =
+		GateRules.cloneInput(clonePresent, state.cloneConsumed, state.cloneSeenAt, now)
 	local kiTarget = linked(gate, "KiTarget")
 	local kiHit = if kiTarget then kiTarget:GetAttribute("LastKiHit") else nil
 	local lastApplied: { [string]: number } = {}
@@ -123,38 +125,49 @@ local function step(gate: BasePart, now: number)
 		lastApplied.Ki = kiHit
 	end
 
+	local passZone = linked(gate, "PassZone")
 	local isOpen = now < state.openUntil
 	if not isOpen and GateRules.canOpen(required, lastApplied, now, GateConfig.ApplyWindowSeconds) then
-		state.openingId += 1
 		state.openingPowers = table.clone(required)
 		state.openUntil = now + GateConfig.OpenSeconds
 		state.firstArrival = nil
-		-- Consume the inputs so one application can't reopen the gate forever.
+		-- Consume the inputs: the Ki hit is cleared and the current clone is spent (it must leave and
+		-- a clone must arrive again to count).
 		state.cloneSeenAt = nil
+		state.cloneConsumed = clonePresent
 		if kiTarget then
 			kiTarget:SetAttribute("LastKiHit", nil)
+		end
+		-- Players already past the gate when it opens didn't pass through it.
+		state.presentAtOpen = {}
+		if passZone then
+			for _, player in playersIn(passZone) do
+				state.presentAtOpen[player] = true
+			end
 		end
 		isOpen = true
 	end
 
-	if isOpen then
-		local passZone = linked(gate, "PassZone")
-		if passZone then
-			for _, player in playersIn(passZone) do
-				local already = state.awarded[player] == state.openingId
-				for _, power in GateRules.awardFor(state.openingPowers, already) do
+	if isOpen and passZone then
+		for _, player in playersIn(passZone) do
+			if not state.presentAtOpen[player] then
+				for _, power in GateRules.awardFor(state.openingPowers, state.awarded[player] == true) do
 					EchoService.add(player, power)
 				end
-				state.awarded[player] = state.openingId
+				state.awarded[player] = true
 			end
 		end
+	end
+	-- Never turn solid on top of a player (audit F3): stay open while someone is inside the barrier.
+	if not isOpen and gate.CanCollide == false and #playersIn(gate) > 0 then
+		isOpen = true
 	end
 	setBlocked(gate, not isOpen)
 	gate:SetAttribute("State", if isOpen then "open" else "closed")
 
 	-- Echo Shrine fallback.
 	local approach = linked(gate, "ApproachZone")
-	if not isOpen and state.firstArrival == nil and approach and #playersIn(approach) > 0 then
+	if not isOpen and not state.shrineOpen and state.firstArrival == nil and approach and #playersIn(approach) > 0 then
 		state.firstArrival = now
 	end
 	gate:SetAttribute(
@@ -162,14 +175,18 @@ local function step(gate: BasePart, now: number)
 		if state.firstArrival then state.firstArrival + GateConfig.ShrineDelaySeconds else nil
 	)
 	local bypass = linked(gate, "Bypass")
-	if GateRules.shrineDue(state.firstArrival, isOpen, now, GateConfig.ShrineDelaySeconds) then
-		state.shrineUntil = now + GateConfig.ShrineOpenSeconds
-		state.firstArrival = nil
+	gate:SetAttribute("HasBypass", bypass ~= nil)
+	if
+		bypass
+		and not state.shrineOpen
+		and GateRules.shrineDue(state.firstArrival, isOpen, now, GateConfig.ShrineDelaySeconds)
+	then
+		state.shrineOpen = true -- stays open for the rest of the match (no cycling)
 	end
 	if bypass then
-		setBlocked(bypass, now >= state.shrineUntil)
+		setBlocked(bypass, not state.shrineOpen)
 	end
-	gate:SetAttribute("ShrineOpen", now < state.shrineUntil)
+	gate:SetAttribute("ShrineOpen", state.shrineOpen)
 end
 
 function ConvergenceGate.start()

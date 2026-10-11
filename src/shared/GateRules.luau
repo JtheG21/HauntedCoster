@@ -53,4 +53,17 @@ function GateRules.awardFor(openingPowers: { string }, alreadyAwarded: boolean):
 	return table.clone(openingPowers)
 end
 
+-- Shinobi clone input (audit F1). A clone counts only when it ARRIVES after the last opening:
+-- once an opening consumes it, the same clone standing on the plate never counts again; it must
+-- leave and come back. Returns the new (seenAt, consumed).
+function GateRules.cloneInput(present: boolean, consumed: boolean, seenAt: number?, now: number): (number?, boolean)
+	if not present then
+		return seenAt, false
+	end
+	if consumed then
+		return nil, true
+	end
+	return now, false
+end
+
 return GateRules

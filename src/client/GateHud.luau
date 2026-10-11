@@ -29,6 +29,9 @@ local function describe(gate: BasePart): string
 		end
 	end
 	local needs = if #names > 0 then "Needs: " .. table.concat(names, " + ") else "Needs: Echo Shrine"
+	if gate:GetAttribute("HasBypass") ~= true then
+		return needs
+	end
 	if gate:GetAttribute("ShrineOpen") == true then
 		return needs .. "\nEcho Shrine path is OPEN"
 	end
