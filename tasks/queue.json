@@ -341,7 +341,7 @@
       "id": "TASK-0005",
       "title": "Convergence Gate",
       "project": "GAME-001",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [
         "TASK-0003",
@@ -369,6 +369,19 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-10T19:23:18",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-10T19:23:18",
+          "result": "pass",
+          "notes": "check.sh green; specs 37/0; GateCoop 2-client pass x2; real clone/Ki/shrine verified (TEST-20261010-08)"
         }
       ]
     },
