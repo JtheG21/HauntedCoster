@@ -26,6 +26,14 @@ export type Callbacks = {
 local player = Players.LocalPlayer
 local toastHolder: Frame
 local editorButton: TextButton
+local lightButton: TextButton? = nil
+
+-- Keeps the Light button label in step however the light was toggled (button, F or DPadUp).
+function Hud.setLight(on: boolean)
+	if lightButton then
+		lightButton.Text = if on then "Light: ON" else "Light: OFF"
+	end
+end
 
 function Hud.toast(text: string, kind: string?)
 	if not toastHolder then
@@ -208,10 +216,8 @@ function Hud.mount(gui: ScreenGui, cb: Callbacks)
 	})
 	local bl = Theme.list(bar2, 8, true)
 	bl.HorizontalAlignment = Enum.HorizontalAlignment.Right
-	local lightButton: TextButton
 	lightButton = Theme.button(bar2, "Light: ON", function()
-		local on = cb.toggleLight()
-		lightButton.Text = if on then "Light: ON" else "Light: OFF"
+		Hud.setLight(cb.toggleLight())
 	end, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 1 })
 	Theme.button(bar2, "Journal", cb.openJournal, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 2 })
 	Theme.button(bar2, "Mansion", cb.openMansion, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 3 })

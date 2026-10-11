@@ -87,7 +87,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 		return
 	end
 	if input.KeyCode == Enum.KeyCode.F or input.KeyCode == Enum.KeyCode.DPadUp then
-		LocalWorld.toggleLight()
+		Hud.setLight(LocalWorld.toggleLight())
 	elseif input.KeyCode == Enum.KeyCode.J then
 		JournalUI.toggle()
 	elseif input.KeyCode == Enum.KeyCode.M then
