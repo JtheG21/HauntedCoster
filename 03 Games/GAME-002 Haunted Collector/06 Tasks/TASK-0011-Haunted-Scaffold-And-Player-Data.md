@@ -3,7 +3,7 @@ id: TASK-0011
 title: Haunted Scaffold and Player Data
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -96,4 +96,6 @@ All eight attempt-1 audits failed ([[AUD-20261011-TASK-0011-01]] … [[AUD-20261
 - [[AUD-20261011-TASK-0011-02]]: pass (0 major, 4 minor, 1 nit) on `5878f6d`. Open minors: no spec for `isNewerSchema` or the repaired-field list; the schema-bump rule for new nested keys isn't written down; BindToClose doesn't wait for a lock release still loading at shutdown; real DataStore rejoin is unverified (M2, ADR-0006).
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** approved for merge by jg on 2026-10-11 (`approve-merge`) after [[AUD-20261011-TASK-0011-02]] passed. Scaffold, plots, memory-safe player data, and the scenario harness ([[TEST-20261011-03]], [[TEST-20261011-04]]).
+- **Lesson:** run one Rojo server, matched to its place ([[LES-0003-Rojo-Crash-On-Branch-Switch]]).
+- **Follow-ups:** real DataStore rejoin test (M2, [[ADR-0006-M1-Tuning-And-Scope-Decisions]]); specs for `isNewerSchema` and the repaired-field list; write down the schema-bump rule for new nested keys; BindToClose wait for loading-player lock release.
