@@ -3,7 +3,7 @@ id: TASK-0003
 title: Factions and Echo Clone
 type: task
 project: GAME-001
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -87,3 +87,4 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 - [[AUD-20261010-TASK-0003-01]]: attempt 1, **fail**. Major: no rebalance after leaves (gates become unsolvable). Minors: E-key/ProximityPrompt clash, shared-door conflict, specs miss service and leave paths, playtest on an uncommitted tree
 
 ## Outcome
+Merged to `main` on 2026-10-10 (merge approved by jg) after revision 1. Remaining nits (`setFaction` guard vs rebalance, re-linked door, FactionBalance names, OverlapParams per tick, clone CanQuery) are candidates for a hardening task.

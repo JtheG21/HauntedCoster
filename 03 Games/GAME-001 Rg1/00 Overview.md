@@ -21,8 +21,8 @@ tags:
 |---|---|---|
 | [[TASK-0001-Collectible-Pickup]] | done | [[AUD-20261010-TASK-0001-01]] (pass) |
 | [[TASK-0002-Ability-Framework]] | done | [[AUD-20261010-TASK-0002-01]], [[AUD-20261010-TASK-0002-02]] (pass) |
-| [[TASK-0003-Factions-And-Echo-Clone]] | proposed | — |
-| [[TASK-0004-Ki-Burst]] | proposed | — |
+| [[TASK-0003-Factions-And-Echo-Clone]] | done | [[AUD-20261010-TASK-0003-01]] (fail), [[AUD-20261010-TASK-0003-02]] (pass) |
+| [[TASK-0004-Ki-Burst]] | done | [[AUD-20261010-TASK-0004-01]] (pass) |
 | [[TASK-0005-Convergence-Gate]] | proposed | — |
 | [[TASK-0006-Match-Flow-And-Onboarding]] | proposed | — |
 | [[TASK-0007-Ring-Out-Finale]] | proposed | — |
@@ -53,6 +53,10 @@ tags:
 - [[TEST-20261010-01]]: TASK-0001, single player, Studio MCP (pass)
 - [[TEST-20261010-02]]: TASK-0001, two players, **pass** (automated through StudioTestService)
 - [[TEST-20261010-03]]: TASK-0002 ability framework, single player, pass
+- [[TEST-20261010-04]]: TASK-0002 N1 (Dash force cap, seated rejection), pass
+- [[TEST-20261010-05]]: TASK-0003 factions and Echo Clone, pass
+- [[TEST-20261010-06]]: TASK-0004 Ki Burst, pass
+- [[TEST-20261010-07]]: TASK-0003 revision 1 (rebalance, doors), pass after fix
 
 ## Retrospectives
 - [[RETRO-M0-Workflow-Foundation]]

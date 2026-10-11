@@ -4,16 +4,13 @@
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "default.project.json",
   "dispatch_mode": "dry-run",
-  "updated": "2026-10-10T17:16:34",
+  "updated": "2026-10-10T19:00:36",
   "task_counts": {
-    "done": 3,
-    "in_progress": 1,
-    "approved": 1,
+    "done": 5,
     "proposed": 5
   },
   "ready": [],
   "needs_human": [
-    "TASK-0004",
     "TASK-0005",
     "TASK-0006",
     "TASK-0007",

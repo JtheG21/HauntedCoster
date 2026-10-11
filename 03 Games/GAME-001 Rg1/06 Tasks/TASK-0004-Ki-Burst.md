@@ -3,7 +3,7 @@ id: TASK-0004
 title: Ki Burst
 type: task
 project: GAME-001
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -70,3 +70,4 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 - [[AUD-20261010-TASK-0004-01]]: attempt 1, **pass** (8 minor, 3 nit). Notable minors: wall range uses the part centre (F1), pushes de-duplicated per part, not per assembly (F2), restore resets CanQuery to true (F3), charge not cleared on death or faction change (F7), release fires after an unregistered key-down (F8). Proposed for a hardening task
 
 ## Outcome
+Merged to `main` on 2026-10-10 (merge approved by jg). Built stacked on TASK-0003. Audit minors F1–F8 are candidates for a hardening task (wall range by centre, per-assembly push dedupe, CanQuery restore, stale charge, release without key-down).
