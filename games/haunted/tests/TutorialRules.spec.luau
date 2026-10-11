@@ -1,0 +1,73 @@
+--!strict
+local TestRunner = require(script.Parent.TestRunner)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TutorialRules = require(ReplicatedStorage.Shared.Rules.TutorialRules)
+
+return function(t: TestRunner.T)
+	local function ctx(over: { [string]: any }?): TutorialRules.Ctx
+		local c: { [string]: any } = {
+			nearTrain = false,
+			inGraveyard = false,
+			clueCount = 0,
+			angelClue = false,
+			seenCount = 0,
+			captureTried = false,
+			carrying = false,
+			owned = 0,
+			speedLevel = 0,
+			houseTier = 0,
+			routeCustom = false,
+			exhibits = 0,
+			rides = 0,
+			bellHint = false,
+			bellClue = false,
+			caughtRare = false,
+		}
+		for k, v in (over or {}) :: { [string]: any } do
+			c[k] = v
+		end
+		return c :: any
+	end
+
+	t.test("fresh player starts at step 1", function()
+		t.eq(TutorialRules.advance(1, ctx()), 1)
+	end)
+
+	t.test("each step advances in order", function()
+		t.eq(TutorialRules.advance(1, ctx({ nearTrain = true })), 2)
+		t.eq(TutorialRules.advance(2, ctx({ inGraveyard = true })), 3)
+		t.eq(TutorialRules.advance(3, ctx({ angelClue = true, clueCount = 1 })), 4)
+		t.eq(TutorialRules.advance(4, ctx({ clueCount = 1, seenCount = 1 })), 5)
+		t.eq(TutorialRules.advance(5, ctx({ clueCount = 1, seenCount = 1, carrying = true })), 6)
+	end)
+
+	t.test("owning a monster skips the whole early tutorial", function()
+		t.eq(TutorialRules.advance(1, ctx({ owned = 1 })), 7)
+	end)
+
+	t.test("buying tier 1 directly skips the speed step", function()
+		t.eq(TutorialRules.advance(7, ctx({ owned = 1, houseTier = 1 })), 9)
+	end)
+
+	t.test("escape during return shows a recovery hint, not a dead end", function()
+		local hint = TutorialRules.hint(6, ctx({ carrying = false }))
+		t.truthy(string.find(hint, "got away", 1, true) ~= nil)
+		t.eq(TutorialRules.advance(6, ctx({ carrying = false })), 6)
+	end)
+
+	t.test("completed tutorial returns the completion hint", function()
+		local done = ctx({
+			owned = 2,
+			houseTier = 1,
+			speedLevel = 1,
+			routeCustom = true,
+			exhibits = 1,
+			rides = 1,
+			bellClue = true,
+			caughtRare = true,
+		})
+		local s = TutorialRules.advance(1, done)
+		t.eq(s, #TutorialRules.Steps + 1)
+		t.eq(TutorialRules.hint(s, done), TutorialRules.CompleteText)
+	end)
+end

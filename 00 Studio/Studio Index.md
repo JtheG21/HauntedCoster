@@ -4,7 +4,7 @@ title: Studio Index
 type: index
 status: in_progress
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-11
 tags:
   - studio/index
 ---
@@ -16,7 +16,8 @@ tags:
 ## Active games
 | ID | Game | Phase | Overview |
 |---|---|---|---|
-| GAME-001 | Rival Realms (working title) | M2: prototype planning | [[00 Overview]] |
+| GAME-001 | Rival Realms (working title) | Paused, source material (2026-10-11) | [[GAME-001 Rg1/00 Overview]] |
+| GAME-002 | Haunted Collector (working title) | **Primary.** M1: MVP loop, TASK-0011 ready | [[GAME-002 Haunted Collector/00 Overview]] |
 
 ## Folders
 - `01 Inbox/`: raw ideas, waiting to be triaged
@@ -31,7 +32,8 @@ tags:
 - `99 Templates/`: `T - *` templates
 
 ## Needs human attention
-- **Approve:** [[03 Roadmap]] (M2–M8) · M2 tasks (start with [[TASK-0002-Ability-Framework]] and [[TASK-0009-Multi-Client-Test-Harness]]) · [[EXP-0001-M2-Validation-Experiments]]
+- **Approve (GAME-002):** [[GAME-002 Haunted Collector/03 Roadmap]] · TASK-0012 to TASK-0018 plans
+- **Approve:** [[GAME-001 Rg1/03 Roadmap]] (M2–M8) · M2 tasks (start with [[TASK-0002-Ability-Framework]] and [[TASK-0009-Multi-Client-Test-Harness]]) · [[EXP-0001-M2-Validation-Experiments]]
 - The 2-player test for [[TASK-0001-Collectible-Pickup]] ([[TEST-20261010-01]])
 
 ## All notes

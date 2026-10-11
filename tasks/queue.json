@@ -712,6 +712,264 @@
         "Leftover minors from AUD-0003/0004/0005 reviewed at task start; each fixed or explicitly deferred with a reason",
         "scripts/check.sh passes"
       ]
+    },
+    {
+      "id": "TASK-0011",
+      "title": "Haunted Scaffold and Player Data",
+      "project": "GAME-002",
+      "status": "in_review",
+      "risk": "medium",
+      "depends_on": [],
+      "branch": "task/TASK-0011-Haunted-Scaffold-And-Player-Data",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0011-Haunted-Scaffold-And-Player-Data.md",
+      "acceptance_criteria": [
+        "`rojo build haunted.project.json` succeeds and check.sh covers both projects (GAME-001 checks unchanged and still pass)",
+        "On join a player gets a validated default or loaded Profile v1 and a free home plot; plot released on leave",
+        "Saves use UpdateAsync with a session lock, retry with backoff, and run on leave, on a 60 s autosave and in BindToClose; overlapping saves are serialized",
+        "Malformed or out-of-range saved values are clamped or reset per field and logged; unknown fields are preserved (no data loss on migration)",
+        "With DataStores unavailable the game runs in memory-only mode with a visible banner; never reported as persisted",
+        "ProfileRules (validate/clamp/migrate) have passing specs",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:16:29",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T11:00:14",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-11T11:00:14",
+          "result": "pass",
+          "notes": "check.sh green; specs 37/0; FullLoop play scenario 48/48 (TEST-20261011-02); prototype commit 17cb5ae also carries TASK-0012..0018 code; no audit yet; merged to main at user request 2026-10-11"
+        }
+      ]
+    },
+    {
+      "id": "TASK-0012",
+      "title": "Graveyard and Landmarks",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0011"
+      ],
+      "branch": "task/TASK-0012-Graveyard-And-Landmarks",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0012-Graveyard-And-Landmarks.md",
+      "acceptance_criteria": [
+        "roblox-map prover report: every zone reachable from the plots, no stuck pockets, Sealed Crypt unreachable while gated",
+        "Flashlight works on PC/mobile/gamepad without battery; paths and obstacles readable in the dark section (screenshot evidence)",
+        "Investigating a landmark (server distance check, once per player) adds its clue to the profile and a marker; repeat gives no duplicate",
+        "Sealed Crypt gate shows its requirement text and opens only when the server says the requirement is met",
+        "Shortcut unlocks from its landmark and persists",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:04",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ]
+    },
+    {
+      "id": "TASK-0013",
+      "title": "Monsters and Capture",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0011",
+        "TASK-0012"
+      ],
+      "branch": "task/TASK-0013-Monsters-And-Capture",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0013-Monsters-And-Capture.md",
+      "acceptance_criteria": [
+        "Monsters spawn only inside their zone and stay inside it; variant roll uses config chance and is visibly distinct and labelled",
+        "Inspect shows name, rarity, variant and estimated income before capture",
+        "Capture success/failure decided on the server from its own timing; forged/early/late/spammed release remotes are rejected (exploit probe recorded)",
+        "Difficulty (zone width, speed) comes from rarity config",
+        "CaptureRules and variant roll have passing specs",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ]
+    },
+    {
+      "id": "TASK-0014",
+      "title": "Return Trip and Containment",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0013"
+      ],
+      "branch": "task/TASK-0014-Return-Trip-And-Containment",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0014-Return-Trip-And-Containment.md",
+      "acceptance_criteria": [
+        "Successful capture starts the visible timer and slows the carrier; speed restored on secure/escape/leave",
+        "Timeout or death while carrying releases only the carried capture; owned roster and coins untouched (test)",
+        "Securing works only at the player's own pad within range and adds exactly one owned monster",
+        "Income starts after acclimation, at config rate x variant multiplier, credited by the server only",
+        "First secure grants the onboarding reward once",
+        "IncomeRules have passing specs; a 2-client run shows no cross-plot securing",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ]
+    },
+    {
+      "id": "TASK-0015",
+      "title": "House Tiers and Upgrades",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0014"
+      ],
+      "branch": "task/TASK-0015-House-Tiers-And-Upgrades",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0015-House-Tiers-And-Upgrades.md",
+      "acceptance_criteria": [
+        "Purchases succeed only with funds and requirements; insufficient funds/locked show a reason; duplicate/spam purchase charged once",
+        "Tier change visibly rebuilds the house and persists; tier 1 sets the editor and crypt unlock flags",
+        "Speed upgrade applies on spawn and respawn",
+        "Offline income: tier 2 only, capped, ignores future/invalid timestamps (spec)",
+        "First upgrade reachable from one secured common in about 2 minutes with draft numbers (measured)",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ]
+    },
+    {
+      "id": "TASK-0016",
+      "title": "Starter Ghost Train",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0011",
+        "TASK-0014"
+      ],
+      "branch": "task/TASK-0016-Starter-Ghost-Train",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0016-Starter-Ghost-Train.md",
+      "acceptance_criteria": [
+        "Starter train visible on arrival and rideable before any unlock",
+        "Cart follows the route by server CFrame; ride ends at the route end; leaving the seat cancels with no payout",
+        "Payout computed server-side from tier, exhibits in range (rarity/variant weighted) and route quality; cooldown blocks spam; breakdown shown",
+        "Only own monsters can be assigned to own slots",
+        "TrackRules sampling and payout have passing specs",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ]
+    },
+    {
+      "id": "TASK-0017",
+      "title": "Track Editor",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0015",
+        "TASK-0016"
+      ],
+      "branch": "task/TASK-0017-Track-Editor",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0017-Track-Editor.md",
+      "acceptance_criteria": [
+        "Editor only opens with the tier-1 unlock (server-checked)",
+        "Points can be added, moved and removed with mouse and touch; preview updates",
+        "Server rejects too few/many points, length out of range, out-of-plot points, self-overlap; reason shown; last valid route kept",
+        "Confirmed route rebuilds track, persists and is restored after rejoin",
+        "Route quality modifier stays within config range (spec)",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ]
+    },
+    {
+      "id": "TASK-0018",
+      "title": "Journal, Tutorial and Rare Clue",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0012",
+        "TASK-0013",
+        "TASK-0014",
+        "TASK-0015",
+        "TASK-0016",
+        "TASK-0017"
+      ],
+      "branch": "task/TASK-0018-Journal-Tutorial-And-Rare-Clue",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0018-Journal-Tutorial-And-Rare-Clue.md",
+      "acceptance_criteria": [
+        "Journal shows known/unknown entries and clues consistent with the profile; completion gives trophies only",
+        "Tutorial follows brief \u00a712, resumes after rejoin, and auto-advances if the step is already satisfied (spec covers every step)",
+        "After the first paid ride the Bell Tower clue points to the Bell Wraith; it spawns only in the Sealed Crypt once the condition is met",
+        "A TEST- note records a fresh-profile run of the full brief \u00a720 journey, with times; persistence result stated honestly",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ]
     }
   ]
 }
