@@ -30,3 +30,8 @@ tasks/prompts/
 # Third-party Claude skills: personal settings and generated output
 .claude/skills/*/LOCAL.md
 .claude/skills/*/work/
+
+# GAME-002 built place and sourcemap
+/HauntedCollector.rbxl
+/HauntedCollector.rbxl.lock
+haunted-sourcemap.json

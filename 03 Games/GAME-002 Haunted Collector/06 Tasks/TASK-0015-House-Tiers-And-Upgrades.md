@@ -3,7 +3,7 @@ id: TASK-0015
 title: House Tiers and Upgrades
 type: task
 project: GAME-002
-status: proposed
+status: ready
 priority: high
 risk: low
 owner: executor

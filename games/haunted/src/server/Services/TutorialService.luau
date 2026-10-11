@@ -1,0 +1,112 @@
+--!strict
+-- Drives the first-session tutorial (TutorialRules) from live player state, persists the step,
+-- and exposes the current hint to the client snapshot. Never blocks normal play.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local World = require(Shared:WaitForChild("Config"):WaitForChild("World"))
+local TutorialRules = require(Shared:WaitForChild("Rules"):WaitForChild("TutorialRules"))
+local PlayerDataService = require(script.Parent.PlayerDataService)
+local StateService = require(script.Parent.StateService)
+local CaptureService = require(script.Parent.CaptureService)
+
+local TutorialService = {}
+
+local WELCOME_SECONDS = 10
+
+local started = false
+local joinedAt: { [Player]: number } = {}
+
+local function count(t: { [string]: boolean }): number
+	local n = 0
+	for _ in t do
+		n += 1
+	end
+	return n
+end
+
+local function ctxFor(player: Player): TutorialRules.Ctx?
+	local profile = PlayerDataService.get(player)
+	if not profile then
+		return nil
+	end
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local pos = if root and root:IsA("BasePart") then root.Position else nil
+	return {
+		nearTrain = os.clock() - (joinedAt[player] or os.clock()) > WELCOME_SECONDS,
+		inGraveyard = pos ~= nil and World.inRect(World.Graveyard.rect, pos.X, pos.Z),
+		clueCount = count(profile.journal.clues),
+		angelClue = profile.journal.clues.Angel == true,
+		seenCount = count(profile.journal.seen),
+		captureTried = profile.flags.captureTried == true,
+		carrying = CaptureService.isCarrying(player),
+		owned = #profile.owned,
+		speedLevel = profile.speedLevel,
+		houseTier = profile.houseTier,
+		routeCustom = profile.flags.routeCustom == true,
+		exhibits = #profile.exhibits,
+		rides = profile.stats.rides,
+		bellHint = profile.flags.bellHint == true,
+		bellClue = profile.flags.bellClue == true,
+		caughtRare = profile.journal.caught.BellWraith == true,
+	}
+end
+
+local lastHint: { [Player]: string } = {}
+
+local function tick(player: Player)
+	local profile = PlayerDataService.get(player)
+	local ctx = ctxFor(player)
+	if not (profile and ctx) then
+		return
+	end
+	local step = TutorialRules.advance(profile.tutorialStep, ctx)
+	if step ~= profile.tutorialStep then
+		PlayerDataService.update(player, function(p)
+			p.tutorialStep = step
+		end)
+	end
+	local hint = TutorialRules.hint(step, ctx)
+	if hint ~= lastHint[player] then
+		lastHint[player] = hint
+		StateService.markDirty(player)
+	end
+end
+
+function TutorialService.start()
+	if started then
+		return
+	end
+	started = true
+	PlayerDataService.onLoaded(function(player)
+		joinedAt[player] = os.clock()
+	end)
+	Players.PlayerRemoving:Connect(function(player)
+		joinedAt[player] = nil
+		lastHint[player] = nil
+	end)
+	StateService.addProvider(function(player, snap)
+		local profile = PlayerDataService.get(player)
+		local ctx = ctxFor(player)
+		if profile and ctx then
+			snap.tutorial = {
+				step = profile.tutorialStep,
+				total = #TutorialRules.Steps,
+				hint = TutorialRules.hint(profile.tutorialStep, ctx),
+			}
+		end
+	end)
+	task.spawn(function()
+		while true do
+			task.wait(1)
+			for _, player in Players:GetPlayers() do
+				task.spawn(tick, player)
+			end
+		end
+	end)
+end
+
+return TutorialService

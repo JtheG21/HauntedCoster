@@ -3,7 +3,7 @@ id: TASK-0011
 title: Haunted Scaffold and Player Data
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: high
 risk: medium
 owner: executor

@@ -3,7 +3,7 @@ id: TASK-0013
 title: Monsters and Capture
 type: task
 project: GAME-002
-status: proposed
+status: ready
 priority: high
 risk: medium
 owner: executor

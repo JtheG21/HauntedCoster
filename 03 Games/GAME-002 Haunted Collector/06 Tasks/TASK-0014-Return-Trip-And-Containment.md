@@ -3,7 +3,7 @@ id: TASK-0014
 title: Return Trip and Containment
 type: task
 project: GAME-002
-status: proposed
+status: ready
 priority: high
 risk: medium
 owner: executor

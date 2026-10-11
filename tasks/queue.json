@@ -717,7 +717,7 @@
       "id": "TASK-0011",
       "title": "Haunted Scaffold and Player Data",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0011-Haunted-Scaffold-And-Player-Data",
@@ -738,6 +738,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ]
     },
@@ -745,7 +751,7 @@
       "id": "TASK-0012",
       "title": "Graveyard and Landmarks",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "low",
       "depends_on": [
         "TASK-0011"
@@ -759,13 +765,22 @@
         "Sealed Crypt gate shows its requirement text and opens only when the server says the requirement is met",
         "Shortcut unlocks from its landmark and persists",
         "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:04",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
       "id": "TASK-0013",
       "title": "Monsters and Capture",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0011",
@@ -780,13 +795,22 @@
         "Difficulty (zone width, speed) comes from rarity config",
         "CaptureRules and variant roll have passing specs",
         "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
       "id": "TASK-0014",
       "title": "Return Trip and Containment",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0013"
@@ -801,13 +825,22 @@
         "First secure grants the onboarding reward once",
         "IncomeRules have passing specs; a 2-client run shows no cross-plot securing",
         "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
       "id": "TASK-0015",
       "title": "House Tiers and Upgrades",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "low",
       "depends_on": [
         "TASK-0014"
@@ -821,13 +854,22 @@
         "Offline income: tier 2 only, capped, ignores future/invalid timestamps (spec)",
         "First upgrade reachable from one secured common in about 2 minutes with draft numbers (measured)",
         "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
       "id": "TASK-0016",
       "title": "Starter Ghost Train",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0011",
@@ -842,13 +884,22 @@
         "Only own monsters can be assigned to own slots",
         "TrackRules sampling and payout have passing specs",
         "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
       "id": "TASK-0017",
       "title": "Track Editor",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0015",
@@ -863,13 +914,22 @@
         "Confirmed route rebuilds track, persists and is restored after rejoin",
         "Route quality modifier stays within config range (spec)",
         "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
       "id": "TASK-0018",
       "title": "Journal, Tutorial and Rare Clue",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "low",
       "depends_on": [
         "TASK-0012",
@@ -887,6 +947,15 @@
         "After the first paid ride the Bell Tower clue points to the Bell Wraith; it spawns only in the Sealed Crypt once the condition is met",
         "A TEST- note records a fresh-profile run of the full brief \u00a720 journey, with times; persistence result stated honestly",
         "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T09:24:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     }
   ]

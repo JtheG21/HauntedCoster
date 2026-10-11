@@ -3,7 +3,7 @@ id: TASK-0018
 title: Journal, Tutorial and Rare Clue
 type: task
 project: GAME-002
-status: proposed
+status: ready
 priority: high
 risk: low
 owner: executor
