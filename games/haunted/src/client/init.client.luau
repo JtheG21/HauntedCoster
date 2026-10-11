@@ -86,7 +86,7 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	if processed then
 		return
 	end
-	if input.KeyCode == Enum.KeyCode.F or input.KeyCode == Enum.KeyCode.DPadUp then
+	if input.KeyCode == Enum.KeyCode.F or input.KeyCode == Enum.KeyCode.DPadDown then -- DPadUp is reserved by Roblox (TEST-20261011-05)
 		Hud.setLight(LocalWorld.toggleLight())
 	elseif input.KeyCode == Enum.KeyCode.J then
 		JournalUI.toggle()

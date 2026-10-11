@@ -28,7 +28,7 @@ local toastHolder: Frame
 local editorButton: TextButton
 local lightButton: TextButton? = nil
 
--- Keeps the Light button label in step however the light was toggled (button, F or DPadUp).
+-- Keeps the Light button label in step however the light was toggled (button, F or DPadDown).
 function Hud.setLight(on: boolean)
 	if lightButton then
 		lightButton.Text = if on then "Light: ON" else "Light: OFF"

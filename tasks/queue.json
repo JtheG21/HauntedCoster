@@ -813,7 +813,7 @@
       "id": "TASK-0012",
       "title": "Graveyard and Landmarks",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "changes_requested",
       "risk": "low",
       "depends_on": [
         "TASK-0011"
@@ -835,8 +835,69 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 2/2"
         }
-      ]
+      ],
+      "executions": [
+        {
+          "time": "2026-10-11T16:33:02",
+          "result": "pass",
+          "notes": "Revision-0 build merged with TASK-0011 (PR #2); see TEST-20261011-03/04"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "result": "pass",
+          "notes": "Revision 1 at 5878f6d"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-11T16:33:02",
+          "result": "fail",
+          "report": "06 QA/AUD-20261011-TASK-0012-01.md"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "result": "fail",
+          "report": "06 QA/AUD-20261011-TASK-0012-02.md"
+        }
+      ],
+      "revisions": 2
     },
     {
       "id": "TASK-0013",
