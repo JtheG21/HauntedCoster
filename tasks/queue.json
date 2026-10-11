@@ -225,7 +225,7 @@
       "id": "TASK-0004",
       "title": "Ki Burst",
       "project": "GAME-001",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [
         "TASK-0002"
@@ -246,6 +246,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-10T17:08:26",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ]
     },
