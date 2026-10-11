@@ -1,2 +1,4 @@
 {"time": "2026-10-10T14:12:51", "task": "TASK-0001", "kind": "subscription", "role": "auditor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": 75177, "note": "fresh subagent audit"}
 {"time": "2026-10-10T14:12:52", "task": "TASK-0001", "kind": "subscription", "role": "executor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": null, "note": "main session: implement + Studio playtest"}
+{"time": "2026-10-10T17:00:56", "task": "TASK-0009", "kind": "subscription", "role": "auditor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": null, "note": "fresh subagent in worktree"}
+{"time": "2026-10-10T17:00:56", "task": "TASK-0009", "kind": "subscription", "role": "executor", "model": "", "cost_usd": null, "est_cost_usd": null, "tokens": null, "note": "main session: harness + 7 Studio multi-client runs"}

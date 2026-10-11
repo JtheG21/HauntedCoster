@@ -219,7 +219,7 @@
       "id": "TASK-0009",
       "title": "Multi-Client Test Harness",
       "project": "GAME-001",
-      "status": "in_review",
+      "status": "approved",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0009-Multi-Client-Test-Harness",
@@ -248,6 +248,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T17:00:56",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -255,6 +261,13 @@
           "time": "2026-10-10T16:55:42",
           "result": "pass",
           "notes": "check.sh green; CollectibleRace 2 consecutive passes (4/4, 0 dup)"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-10T17:00:56",
+          "result": "pass",
+          "report": "06 QA/AUD-20261010-TASK-0009-01.md"
         }
       ]
     }

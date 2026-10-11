@@ -3,7 +3,7 @@ id: TASK-0009
 title: Multi-Client Test Harness
 type: task
 project: GAME-001
-status: in_review
+status: approved
 priority: medium
 risk: low
 owner: executor
@@ -63,5 +63,6 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 **Incidents:** `rojo serve` crashed on a branch switch ([[LES-0003-Rojo-Crash-On-Branch-Switch]]). A double test run in one MCP call timed out, and Studio recovered when the session ended.
 
 ## Audits
+- [[AUD-20261010-TASK-0009-01]]: attempt 1, **pass** (5 minor, 4 nit). Follow-ups are tracked for a hardening task
 
 ## Outcome
