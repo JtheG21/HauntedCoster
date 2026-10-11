@@ -717,7 +717,7 @@
       "id": "TASK-0011",
       "title": "Haunted Scaffold and Player Data",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0011-Haunted-Scaffold-And-Player-Data",
@@ -744,6 +744,19 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-11T11:00:14",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-11T11:00:14",
+          "result": "pass",
+          "notes": "check.sh green; specs 37/0; FullLoop play scenario 48/48 (TEST-20261011-02); prototype commit 17cb5ae also carries TASK-0012..0018 code; no audit yet; merged to main at user request 2026-10-11"
         }
       ]
     },
