@@ -29,3 +29,29 @@ AbilityService.register("KiBurst", { handler = KiBurst.burstHandler, canUse = Fa
 EchoClone.start()
 KiBurst.start()
 AbilityService.start()
+
+-- Match flow and onboarding (TASK-0006)
+local MatchService = require(script.Services.MatchService)
+local TrialService = require(script.Services.TrialService)
+TrialService.setTeleporter(MatchService.teleport)
+MatchService.setEligibility(TrialService.isDone)
+AbilityService.onActivated(TrialService.onAbility)
+-- Gates only count factions in the current match; faction switches only for players not in a match.
+ConvergenceGate.setPresentProvider(function()
+	return if MatchService.getState() == "Lobby" or MatchService.getState() == "Countdown"
+		then game:GetService("Players"):GetPlayers()
+		else MatchService.getMatchPlayers()
+end)
+FactionService.setSwitchGuard(function(player)
+	return not MatchService.isInMatch(player)
+end)
+-- Per-match reset: Echoes, gate awards and shrines start fresh each match.
+MatchService.onMatchStart(function()
+	for _, player in game:GetService("Players"):GetPlayers() do
+		EchoService.reset(player)
+	end
+	ConvergenceGate.resetAll()
+end)
+MatchService.onMatchEnd(FactionService.rebalance)
+TrialService.start()
+MatchService.start()

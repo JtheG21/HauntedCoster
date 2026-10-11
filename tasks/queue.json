@@ -438,7 +438,7 @@
       "id": "TASK-0006",
       "title": "Match Flow and Onboarding",
       "project": "GAME-001",
-      "status": "ready",
+      "status": "approved",
       "risk": "low",
       "depends_on": [
         "TASK-0002"
@@ -459,6 +459,38 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-10T19:34:26",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-10T19:43:03",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T19:45:44",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-10T19:43:03",
+          "result": "pass",
+          "notes": "check.sh green; specs 46/0; 2 solo loops + trial power/timeout + echo reset; MatchJoinLeave 2-client pass"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-10T19:45:44",
+          "result": "pass",
+          "report": "06 QA/AUD-20261010-TASK-0006-01.md"
         }
       ]
     },

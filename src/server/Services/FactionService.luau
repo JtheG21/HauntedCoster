@@ -15,6 +15,10 @@ local FactionService = {}
 
 local started = false
 local joinOrder: { [Player]: number } = {}
+-- Whether a player may be switched by a rebalance right now (MatchService: lobby players only).
+local switchGuard: (player: Player) -> boolean = function(_player: Player)
+	return true
+end
 local joinCounter = 0
 
 local function counts(except: Player?): { [string]: number }
@@ -44,8 +48,10 @@ end
 
 -- After a leave, move the most recent joiners from the largest to the smallest faction until
 -- counts are within 1. Keeps every faction's powers available (gates need them).
-local function rebalance(leaving: Player)
-	joinOrder[leaving] = nil
+local function rebalance(leaving: Player?)
+	if leaving then
+		joinOrder[leaving] = nil
+	end
 	for _ = 1, #Players:GetPlayers() do
 		local from, to = FactionRules.rebalanceMove(counts(leaving), FactionConfig.Active)
 		if not from or not to then
@@ -53,7 +59,11 @@ local function rebalance(leaving: Player)
 		end
 		local candidate: Player? = nil
 		for _, player in Players:GetPlayers() do
-			if player ~= leaving and player:GetAttribute(FactionConfig.AttributeName) == from then
+			if
+				player ~= leaving
+				and player:GetAttribute(FactionConfig.AttributeName) == from
+				and switchGuard(player)
+			then
 				if candidate == nil or (joinOrder[player] or 0) > (joinOrder[candidate] or 0) then
 					candidate = player
 				end
@@ -64,6 +74,15 @@ local function rebalance(leaving: Player)
 		end
 		candidate:SetAttribute(FactionConfig.AttributeName, to)
 	end
+end
+
+function FactionService.setSwitchGuard(guard: (player: Player) -> boolean)
+	switchGuard = guard
+end
+
+-- Re-run the balance now (e.g. after a match ends, when in-match players become switchable again).
+function FactionService.rebalance()
+	rebalance(nil)
 end
 
 function FactionService.getFaction(player: Player): string?

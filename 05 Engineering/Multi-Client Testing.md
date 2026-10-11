@@ -39,6 +39,7 @@ end)
 - Keep each scenario under about 45 s.
 
 ## Scenario rules
+0. Scenarios run inside the game's server, so `require` of a service returns the **live** instance (e.g. `TrialService.complete`). That's useful for setup, but drive the behaviour under test through real inputs or signals.
 1. Wait for `players` to join **and for each character to simulate** (lift it, wait for it to fall). See [[LES-0004-Wait-For-Client-Physics]].
 2. Move characters with server `PivotTo`. For touch-based logic, drop them from about 4 studs above the target (physical contact).
 3. Return measurements, not just pass/fail (counts, traces), so failures can be diagnosed.
@@ -48,6 +49,7 @@ end)
 |---|---|---|
 | `CollectibleRace` | Simultaneous touch → exactly 1 reward. Legit pickups work | ✅ 2026-10-10 ([[TEST-20261010-02]]) |
 | `FactionRebalance` | Leaves trigger a rebalance; every faction stays represented | ✅ 3 clients, 2026-10-10 ([[TEST-20261010-07]]) |
+| `MatchJoinLeave` | Mid-match joiner waits in the lobby; the match player leaving → lobby; the joiner gets the next countdown (uses `AddPlayers`, shares module state with real services) | ✅ 2026-10-10 ([[TEST-20261010-10]]) |
 | `GateCoop` | Convergence Gate: one power or stale power stays closed, both open it, 1 Echo per power per player, recloses (`checkClose`) | ✅ 2 clients, 2026-10-10 ([[TEST-20261010-08]]) |
 | `FactionBalance` | Auto-balance within 1, everyone assigned (`players`, `timeout` args) | ✅ 3 clients, 2026-10-10 ([[TEST-20261010-05]]) |
 
