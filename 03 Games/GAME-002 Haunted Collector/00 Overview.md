@@ -11,7 +11,7 @@ tags:
 ---
 # GAME-002: Haunted Collector (working title)
 
-**Phase:** M1, the playable MVP loop. **This is the studio's primary game** (user, 2026-10-11). GAME-001 is source material. **Playable prototype built** (commit 17cb5ae, not yet player-tested). **Code:** `games/haunted/` with `haunted.project.json`, synced to a separate place ([[ADR-0005-Haunted-Collector-Direction]]). **Task status:** `tasks/queue.json`
+**Phase:** M1, the playable MVP loop. **This is the studio's primary game** (user, 2026-10-11). GAME-001 is source material. **Playable prototype built**; the automated FullLoop play test passes 48/48 ([[TEST-20261011-02]]). **Code:** `games/haunted/` with `haunted.project.json`, synced to a separate place ([[ADR-0005-Haunted-Collector-Direction]]). **Task status:** `tasks/queue.json`
 
 Pitch: hunt strange creatures in a dark graveyard, risk the trip home, and turn your collection into a rideable haunted train attraction you design yourself.
 
@@ -39,12 +39,12 @@ Pitch: hunt strange creatures in a dark graveyard, risk the trip home, and turn 
 6. Automated: `game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "FullLoop" })` from the command bar (Edit mode) prints PASS/FAIL per check. Unit specs: `require(game.TestService.Tests.TestRunner).run()`.
 
 ## Systems
-[[SYS-Haunted-Player-Data]] · [[SYS-Haunted-Capture-Loop]] · [[SYS-Haunted-Ghost-Train]] · Playtests: [[TEST-20261011-01]]
+[[SYS-Haunted-Player-Data]] · [[SYS-Haunted-Capture-Loop]] · [[SYS-Haunted-Ghost-Train]] · Playtests: [[TEST-20261011-01]] · [[TEST-20261011-02]] (FullLoop 48/48)
 
 ## Decisions
 - [[ADR-0005-Haunted-Collector-Direction]]: approved (jg, 2026-10-11)
 
 ## Needs human review
 - Review the draft economy numbers in the design note. They are guesses until playtested.
-- Run the FullLoop scenario and a manual playtest (the Studio window didn't load the place during the build session).
+- Hands-on playtest by the user. Keep the GAME-001 `rojo serve` away from this place (it injected a Baseplate that caused z-fighting).
 - ADR-0005 open question 4 (migrating the old links).
