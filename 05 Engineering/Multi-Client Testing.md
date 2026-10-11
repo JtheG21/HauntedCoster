@@ -34,7 +34,11 @@ print(game:GetService("HttpService"):JSONEncode(r))
 | Scenario | Checks | Last result |
 |---|---|---|
 | `CollectibleRace` | Simultaneous touch → exactly 1 reward. Legit pickups work | ✅ 2026-10-10 ([[TEST-20261010-02]]) |
+| `FactionRebalance` | Leaves trigger a rebalance; every faction stays represented | ✅ 3 clients, 2026-10-10 ([[TEST-20261010-07]]) |
 | `FactionBalance` | Auto-balance within 1, everyone assigned (`players`, `timeout` args) | ✅ 3 clients, 2026-10-10 ([[TEST-20261010-05]]) |
+
+## Running Luau specs
+Run them in a **fresh Play session (Server data model)**, not Edit mode. Edit mode caches modules ([[LES-0005-Edit-Mode-Require-Cache]]).
 
 ## Limits
 - **On this 8 GB Mac, 3 clients is the practical maximum.** 4 clients didn't all join within 30 s (about 77 MB free). Give `timeout` ≥ 50 for 3 clients (they joined in about 22 s).

@@ -71,6 +71,17 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 
 **Check results:** `scripts/check.sh` ALL CHECKS PASSED. Luau specs 22/0. Playtest [[TEST-20261010-05]].
 
+### Revision 1 (after [[AUD-20261010-TASK-0003-01]] fail)
+- **Major fixed:** `FactionService` rebalances on `PlayerRemoving` (pure `FactionRules.rebalanceMove`). It moves the most recent joiner from the largest to the smallest faction until counts are within 1
+- **Minor 2:** Echo Clone moved from **E to F** (E is the default ProximityPrompt key). Faction-aware input is still M3
+- **Minor 3:** doors open while **any** linked plate is active. Removing an active plate closes its door (cached plate→door; a bug in the first revision attempt was found by playtest and fixed)
+- **Minor 4:** +3 `rebalanceMove` specs, plus the `FactionRebalance` multi-client scenario (a real leave via Kick)
+- **Nit 8:** a live clone is removed when the owner's faction changes. **Nit 9:** the new scenario uses FactionConfig and FactionRules
+- **Minor 5:** evidence taken against committed builds with hashes ([[TEST-20261010-07]])
+- Not addressed (nits, logged for a hardening task): 6 (OverlapParams per tick), 7 (clone CanQuery)
+
+**Checks:** `scripts/check.sh` ALL CHECKS PASSED. Specs **31/0 in a fresh session**. Playtest [[TEST-20261010-07]]. Lesson [[LES-0005-Edit-Mode-Require-Cache]].
+
 ## Audits
 - [[AUD-20261010-TASK-0003-01]]: attempt 1, **fail**. Major: no rebalance after leaves (gates become unsolvable). Minors: E-key/ProximityPrompt clash, shared-door conflict, specs miss service and leave paths, playtest on an uncommitted tree
 
