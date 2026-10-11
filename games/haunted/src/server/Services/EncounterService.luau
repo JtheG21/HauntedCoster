@@ -184,6 +184,10 @@ function EncounterService.spawn(speciesId: string, variantId: string, zoneId: st
 	prompt.ObjectText = (Variants.label(variantId) and (Variants.label(variantId) :: string) .. " " or "")
 		.. species.name
 	prompt.HoldDuration = 0
+	-- Its own key: monsters roam past landmarks, and with both on E only one prompt shows, so a nearby
+	-- monster hid the landmark's Investigate prompt (hands-on playtest, TEST-20261011-03).
+	prompt.KeyboardKeyCode = Enum.KeyCode.R
+	prompt.GamepadKeyCode = Enum.KeyCode.ButtonY
 	prompt.MaxActivationDistance = 16
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = root
@@ -229,19 +233,23 @@ end
 
 local function fillZones()
 	for _, zone in World.Zones do
-		if countIn(zone.id) < zone.maxMonsters then
-			local speciesId = pickWeighted(zone.spawns)
-			local species = speciesId and Monsters.Species[speciesId]
-			if species and species.maxAlive and aliveOf(species.id) + outsideCount(species.id) >= species.maxAlive then
+		local speciesId = pickWeighted(zone.spawns)
+		local species = speciesId and Monsters.Species[speciesId]
+		if species and species.maxAlive and aliveOf(species.id) + outsideCount(species.id) >= species.maxAlive then
+			speciesId = nil
+		end
+		if species and species.requiresFlag then
+			-- Special encounters (the Bell Wraith) only appear once someone here has earned the clue. They
+			-- ignore the zone cap: ordinary monsters fill the zone before anyone has the clue and never
+			-- despawn, so a capped special would never get a slot (hands-on playtest, TEST-20261011-03).
+			if not anyoneHasFlag(species.requiresFlag) then
 				speciesId = nil
 			end
-			-- Special encounters (the Bell Wraith) only appear once someone here has earned the clue.
-			if species and species.requiresFlag and not anyoneHasFlag(species.requiresFlag) then
-				speciesId = nil
-			end
-			if speciesId then
-				EncounterService.spawn(speciesId, EncounterService.rollVariant(zone.id, rng), zone.id)
-			end
+		elseif countIn(zone.id) >= zone.maxMonsters then
+			speciesId = nil
+		end
+		if speciesId then
+			EncounterService.spawn(speciesId, EncounterService.rollVariant(zone.id, rng), zone.id)
 		end
 	end
 end

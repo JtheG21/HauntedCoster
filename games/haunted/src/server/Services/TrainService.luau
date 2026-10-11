@@ -319,8 +319,30 @@ local function rebuild(index: number, points: { TrackRules.P }, pieces: { TrackR
 	prompt.Triggered:Connect(function(player)
 		TrainService.ride(player, index)
 	end)
+	-- The guest seat is boarded with its own prompt, not by touch: the cart parks on the station, so a
+	-- touch seat sat down anyone walking up to ride (found in the hands-on playtest, TEST-20261011-03).
+	local guest = cart:FindFirstChild("GuestSeat")
+	if guest and guest:IsA("Seat") then
+		guest.Disabled = true
+		local hop = Instance.new("ProximityPrompt")
+		hop.Name = "RideAlong"
+		hop.ActionText = "Hop in"
+		hop.ObjectText = "Guest seat"
+		hop.KeyboardKeyCode = Enum.KeyCode.R
+		hop.GamepadKeyCode = Enum.KeyCode.ButtonY
+		hop.MaxActivationDistance = 8
+		hop.RequiresLineOfSight = false
+		hop.Parent = guest
+		hop.Triggered:Connect(function(player)
+			local character = player.Character
+			local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+			if humanoid and humanoid.Health > 0 and not guest.Occupant and not humanoid.SeatPart then
+				guest:Sit(humanoid)
+			end
+		end)
+	end
 	-- The front seat belongs to the plot owner: anyone else who walks into it is ejected, so nobody can
-	-- block the owner's ride. (The guest seat stays open for ride-alongs.)
+	-- block the owner's ride. (The guest seat is open to anyone for ride-alongs.)
 	front:GetPropertyChangedSignal("Occupant"):Connect(function()
 		local occupant = front.Occupant
 		if not occupant then

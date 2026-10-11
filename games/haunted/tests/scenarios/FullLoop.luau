@@ -281,6 +281,17 @@ return function(_args: any): { [string]: any }
 	tp((World.landmarkById("BellTower") :: any).position + Vector3.new(0, 0, 8))
 	LandmarkService.investigate(player, "BellTower")
 	check("bell tower clue after first ride", profile.flags.bellClue == true)
+	-- The clue must actually bring the Bell Wraith, even though Gentlemen filled the Crypt long before
+	-- (1-in-3 roll per 4 s spawn tick, so 60 s fails by chance about 0.2% of the time).
+	local wraithAt = os.clock()
+	while not Workspace.Monsters:FindFirstChild("BellWraith") and os.clock() - wraithAt < 60 do
+		task.wait(1)
+	end
+	check(
+		"Bell Wraith spawns in the Crypt after the clue",
+		Workspace.Monsters:FindFirstChild("BellWraith") ~= nil,
+		string.format("%.0fs", os.clock() - wraithAt)
+	)
 
 	-- Escape never touches owned monsters
 	local ownedBefore = #profile.owned

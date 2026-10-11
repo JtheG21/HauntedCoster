@@ -19,6 +19,7 @@ related:
   - "[[GAME-002 Haunted Collector/01 Game Design]]"
   - "[[GAME-002 Haunted Collector/02 Technical Architecture]]"
   - "[[ADR-0005-Haunted-Collector-Direction]]"
+  - "[[ADR-0006-M1-Tuning-And-Scope-Decisions]]"
 ---
 # TASK-0011: Haunted Scaffold and Player Data
 
@@ -73,8 +74,25 @@ All eight attempt-1 audits failed ([[AUD-20261011-TASK-0011-01]] … [[AUD-20261
 
 **Next session:** re-run CrossPlot; update the design note for changed numbers, the Ashen rule and tutorial deviations; link the audits from the task notes; record-exec, then a fresh attempt-02 audit. Still needs a human: a hands-on §20 playtest, real-DataStore persistence (needs publishing), Lighting.Technology.
 
+### Revision 1, continued (2026-10-11, second session)
+- **Decisions:** jg settled the open questions in [[ADR-0006-M1-Tuning-And-Scope-Decisions]]:
+  - Code economy values are official.
+  - Ashen is Crypt-only.
+  - Memory-only saving is accepted for M1, and the rejoin test moves to M2.
+  - Walk-through plus Reachability replaces the prover.
+  - The tutorial must follow brief §12.
+
+  [[GAME-002 Haunted Collector/01 Game Design]] is now v0.2.
+- **Tutorial:** 12 steps, one to one with §12. Step 1 finishes on reaching the station; step 8 finishes on opening the Mansion or Journal (`mansionOpened` flag via `Ack`). The spec is table-driven over every step.
+- **Fixes found by the Studio runs:**
+  - CrossPlot failed 11/12 (a griefer stayed in the owner's seat because the SeatWeld was destroyed inside the Occupant signal); the ejection is now deferred.
+  - The hands-on run [[TEST-20261011-03]] found the track editor's tap offset (major), the Bell Wraith never spawning in a full Crypt (major), guest-seat touch-sitting, Inspect/Investigate sharing E, and world prompts covering the editor. All were fixed, with a FullLoop check for the Wraith.
+- **Evidence on the final code:** [[TEST-20261011-04]].
+- **Merged `main`** (reference-first docs) into this branch with no conflicts.
+- **Still not covered:** real DataStore persistence (M2 per ADR-0006), touch and gamepad hardware, human feel and pacing, Lighting.Technology.
+
 ## Audits
-- [[AUD-20261011-TASK-0011-01]]: fail (2 major), revision 1 in progress
+- [[AUD-20261011-TASK-0011-01]]: fail (2 major), revision 1
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*

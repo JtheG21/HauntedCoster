@@ -5,6 +5,7 @@
 -- re-validates on Confirm and keeps the last valid route if anything is wrong.
 
 local ContextActionService = game:GetService("ContextActionService")
+local ProximityPromptService = game:GetService("ProximityPromptService")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -407,6 +408,7 @@ function TrackEditor.close()
 	end
 	editing = false
 	panel.Visible = false
+	ProximityPromptService.Enabled = true
 	if preview then
 		preview:Destroy()
 		preview = nil
@@ -453,6 +455,8 @@ function TrackEditor.open()
 		cam.CFrame = CFrame.lookAt(center + Vector3.new(0, 78, 26), center)
 	end
 	panel.Visible = true
+	-- World prompts (e.g. the station's Ride prompt) would sit over the top-down view and swallow taps.
+	ProximityPromptService.Enabled = false
 	inputConn = UserInputService.InputBegan:Connect(function(input, processed)
 		if processed or not editing then
 			return
@@ -461,7 +465,11 @@ function TrackEditor.open()
 			input.UserInputType == Enum.UserInputType.MouseButton1
 			or input.UserInputType == Enum.UserInputType.Touch
 		then
-			onTap(Vector2.new(input.Position.X, input.Position.Y))
+			-- Mouse/touch positions exclude the top-bar inset; groundHit takes viewport points (like the
+			-- gamepad cursor), so add the inset back or taps land several studs above the cursor.
+			local inset = GuiService:GetGuiInset()
+			local pos: Vector3 = input.Position
+			onTap(Vector2.new(pos.X, pos.Y + inset.Y))
 		end
 	end)
 	bindGamepad()
