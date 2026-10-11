@@ -178,7 +178,7 @@
       "id": "TASK-0003",
       "title": "Factions and Echo Clone",
       "project": "GAME-001",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [
         "TASK-0002"
@@ -229,6 +229,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T17:18:50",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -248,6 +254,11 @@
           "time": "2026-10-10T17:12:31",
           "result": "fail",
           "report": "06 QA/AUD-20261010-TASK-0003-01.md"
+        },
+        {
+          "time": "2026-10-10T17:18:50",
+          "result": "pass",
+          "report": "06 QA/AUD-20261010-TASK-0003-02.md"
         }
       ],
       "revisions": 1
