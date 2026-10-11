@@ -14,6 +14,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
+local StudioTestService = game:GetService("StudioTestService")
 
 local Server = ServerScriptService:WaitForChild("Server")
 local Services = Server:WaitForChild("Services")
@@ -52,10 +53,18 @@ return function(args: { [string]: any }): { [string]: any }
 	MatchService.setEligibility(function(_player: Player)
 		return false
 	end)
-	if not waitFor(function()
+	local function enough(): boolean
 		return #Players:GetPlayers() >= wanted
-	end, timeout) then
-		return { ok = false, error = `only {#Players:GetPlayers()} joined` }
+	end
+	-- Client joins are flaky on this Mac (Multi-Client Testing): after 30 s, ask Studio for the
+	-- missing players from inside the test, then wait for the rest of the timeout.
+	local addedPlayers = false
+	if not waitFor(enough, math.min(30, timeout)) then
+		addedPlayers = true
+		StudioTestService:AddPlayers(wanted - #Players:GetPlayers())
+	end
+	if not waitFor(enough, math.max(timeout - 30, 20)) then
+		return { ok = false, error = `only {#Players:GetPlayers()} joined (AddPlayers used: {addedPlayers})` }
 	end
 	local players = Players:GetPlayers()
 	for _, player in players do
@@ -79,7 +88,7 @@ return function(args: { [string]: any }): { [string]: any }
 		end
 	end
 	local p1, p2 = players[1], players[2]
-	local result: { [string]: any } = {}
+	local result: { [string]: any } = { addedPlayers = addedPlayers }
 
 	local zone = MatchConfig.Zones.Finale
 	local c = Vector3.new(zone.X, FinaleConfig.TopY, zone.Z)
