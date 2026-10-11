@@ -16,6 +16,7 @@ local PressurePlate = require(script.Parent.Parent.Components.PressurePlate)
 local EchoClone = {}
 
 local clones: { [Player]: BasePart } = {}
+local onClone: ((player: Player) -> ())? = nil
 local started = false
 
 local function removeClone(player: Player)
@@ -65,6 +66,14 @@ function EchoClone.handler(player: Player, _character: Model, root: BasePart)
 			clone:Destroy()
 		end
 	end)
+	if onClone then
+		onClone(player)
+	end
+end
+
+-- Extra effect after each clone (the finale guard; TASK-0007).
+function EchoClone.setOnClone(callback: (player: Player) -> ())
+	onClone = callback
 end
 
 -- Test/diagnostic helper.

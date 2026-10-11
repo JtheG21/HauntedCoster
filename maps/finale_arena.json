@@ -1,0 +1,23 @@
+{
+  "name": "FinaleArena",
+  "profile": "default",
+  "source": "TASK-0007 ring-out finale arena (Rg1). Arena-local coordinates: deck top at y=0. In game the arena is placed with its deck top at world y=60 over the Finale zone (MatchConfig.Zones.Finale X/Z), so the ring-out height y=-20 here is world y=40.",
+  "note": "Flat floating deck plus four low step-up bumps. Ki Burst knockback (and Echo bursts) push rivals off the open edge. Stock R15 movement; Dash is horizontal only, so a player below the deck top cannot get back.",
+  "ground_is_parts": "a floating finale deck over open void; falling below it is the elimination",
+  "open_edges": "ring-out arena: the open edge is the whole point, there is no wall",
+  "volume": {"bounds": [[-60, -40, -60], [60, 30, 60]], "killPlane": -30, "ringOutOffset": 10, "lift": 8},
+  "parts": [
+    {"id": "Deck", "size": [56, 4, 56], "pos": [0, -2, 0], "roles": ["arena_floor", "ringout_edge"]},
+    {"id": "Bump", "size": [6, 2, 6], "pos": [14, 1, 0], "ring": 4, "grounded": true, "roles": ["arena_floor"],
+     "note": "2 studs = one auto-step, so it never blocks movement; it only breaks up straight-line pushes"}
+  ],
+  "spawns": [[0, 3, 20], [20, 3, 0], [0, 3, -20], [-20, 3, 0], [14, 3, 14], [-14, 3, -14], [14, 3, -14], [-14, 3, 14]],
+  "intent": {
+    "reachable": ["Deck", "Bump*"],
+    "transit": [],
+    "reachableOnlyBy": {},
+    "ringOut": {"counterplay": "none", "minWindow": 0.0, "from": ["Deck"],
+                "note": "Knocked off = eliminated (TASK-0007 AC1). Recovery is only possible while still above the deck top (the knockback's upward arc), which the server does not need to model."}
+  },
+  "sightlines": {"minClearFraction": 0.0, "maxClearFraction": 1.0, "note": "open arena by design; every rival should be visible"}
+}

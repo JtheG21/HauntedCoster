@@ -65,17 +65,23 @@ local function evaluate(plate: BasePart)
 	local size = Vector3.new(plate.Size.X, DETECT_HEIGHT, plate.Size.Z)
 
 	local active, clonePresent = false, false
+	local cloneOwner: number? = nil
 	for _, part in Workspace:GetPartBoundsInBox(center, size, params) do
 		if isActivator(part) then
 			active = true
 			if CollectionService:HasTag(part, PressurePlate.ActivatorTag) then
 				clonePresent = true -- an Echo Clone, not just a player (Convergence Gates need this)
+				local owner = part:GetAttribute("OwnerUserId")
+				cloneOwner = if typeof(owner) == "number" then owner else nil -- Teamwork credit (TASK-0007)
 				break
 			end
 		end
 	end
 	if plate:GetAttribute("ClonePresent") ~= clonePresent then
 		plate:SetAttribute("ClonePresent", clonePresent)
+	end
+	if plate:GetAttribute("CloneOwner") ~= cloneOwner then
+		plate:SetAttribute("CloneOwner", cloneOwner)
 	end
 	local door = linkedDoor(plate)
 	plateDoors[plate] = door

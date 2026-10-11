@@ -505,7 +505,7 @@
       "id": "TASK-0007",
       "title": "Ring-Out Finale",
       "project": "GAME-001",
-      "status": "ready",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [
         "TASK-0003",
@@ -528,8 +528,69 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-10T19:49:53",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-10T20:30:56",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T20:35:55",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-10T20:35:59",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-10T21:11:18",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-10T21:16:35",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
-      ]
+      ],
+      "executions": [
+        {
+          "time": "2026-10-10T20:30:56",
+          "result": "pass",
+          "notes": "check.sh pass; specs 57/0; solo loop + 2-client FinaleRingOut ok (TEST-20261010-11)"
+        },
+        {
+          "time": "2026-10-10T21:11:18",
+          "result": "pass",
+          "notes": "rev 1: F1 freeze + starters, F4, nit 7, start grace, server-simulated knockback; specs 58/0; FinaleRingOut 3/3 normal-join passes (TEST-20261010-11)"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-10T20:35:55",
+          "result": "fail",
+          "report": "06 QA/AUD-20261010-TASK-0007-01.md"
+        },
+        {
+          "time": "2026-10-10T21:16:35",
+          "result": "pass",
+          "report": "06 QA/AUD-20261010-TASK-0007-02.md"
+        }
+      ],
+      "revisions": 1
     },
     {
       "id": "TASK-0008",

@@ -15,12 +15,22 @@ local MatchRules = require(Shared:WaitForChild("MatchRules"))
 
 local MatchService = {}
 
+-- The finale phase (TASK-0007, FinaleService). Without one, the Finale is a timed placeholder.
+export type Finale = {
+	begin: (players: { Player }) -> (),
+	isOver: () -> boolean,
+	results: (finishOrder: { Player }) -> string, -- one-line summary for LastResults
+	respawn: (player: Player) -> (),
+	maxSeconds: number,
+}
+
 local state = "Lobby"
 local phaseStarted = 0
 local inMatch: { [Player]: boolean } = {}
 local finishOrder: { Player } = {}
 local matchStartListeners: { () -> () } = {}
 local matchEndListeners: { () -> () } = {}
+local finale: Finale? = nil
 local eligibility: (player: Player) -> boolean = function(_player: Player)
 	return true
 end
@@ -172,20 +182,28 @@ local function tick()
 			endMatch()
 			setState("Lobby")
 		elseif MatchRules.courseOver(finishedCount, #list, elapsed, MatchConfig.CourseMaxSeconds) then
-			for i, player in list do
-				teleport(player, "Finale", i)
+			if finale then
+				finale.begin(list)
+			else
+				for i, player in list do
+					teleport(player, "Finale", i)
+				end
 			end
-			setState("Finale", MatchConfig.FinaleSeconds)
+			setState("Finale", if finale then finale.maxSeconds else MatchConfig.FinaleSeconds)
 		end
 	elseif state == "Finale" then
+		local over = if finale then finale.isOver() else elapsed >= MatchConfig.FinaleSeconds
 		if #matchList() == 0 then
 			endMatch()
 			setState("Lobby")
-		elseif elapsed >= MatchConfig.FinaleSeconds then
+		elseif over then
 			local first = finishOrder[1]
 			ReplicatedStorage:SetAttribute(
 				"LastResults",
-				if first then `Speed: {first.DisplayName} finished first` else "Speed: nobody finished"
+				if finale
+					then finale.results(finishOrder)
+					elseif first then `Speed: {first.DisplayName} finished first`
+					else "Speed: nobody finished"
 			)
 			setState("Results", MatchConfig.ResultsSeconds)
 		end
@@ -222,6 +240,10 @@ function MatchService.onMatchStart(listener: () -> ())
 	table.insert(matchStartListeners, listener)
 end
 
+function MatchService.setFinale(newFinale: Finale)
+	finale = newFinale
+end
+
 function MatchService.onMatchEnd(listener: () -> ())
 	table.insert(matchEndListeners, listener)
 end
@@ -252,7 +274,9 @@ function MatchService.start()
 	local function watch(player: Player)
 		player.CharacterAdded:Connect(function()
 			task.defer(function()
-				if inMatch[player] then
+				if inMatch[player] and state == "Finale" and finale then
+					finale.respawn(player)
+				elseif inMatch[player] then
 					teleport(player, if state == "Finale" then "Finale" else "CourseStart")
 				elseif eligibility(player) then
 					teleport(player, "Lobby")

@@ -6,6 +6,7 @@ status: approved
 category: bug-pattern
 evidence:
   - "2026-10-10: after Rojo synced 3 new FactionRules specs, Edit-mode TestRunner reported 28/0 twice (stale); a fresh Play server data model reported 31/0"
+  - "2026-10-10 (TASK-0007 rev 1): during a live Finale, FinaleService required through MCP execute_luau (Server data model) reported isActive=false while the game had begun the finale and eliminated the player; the in-game FinaleRingOut scenario saw the real state"
 applies_to:
   - tests/luau
   - Studio MCP execute_luau
@@ -27,6 +28,9 @@ Run Luau specs in a **fresh Play (or Run) session**, in the Server data model: `
 
 ## Validation
 The same code reported 28/0 in Edit mode and **31/0** in a fresh Play session ([[TEST-20261010-07]]).
+
+## Related: MCP code gets its own module instances
+Even in a Play session, a module required from MCP `execute_luau` is a **separate instance** from the one the game's scripts use, so its state is empty: it read `FinaleService.isActive() == false` mid-finale ([[TEST-20261010-11]]). Pure modules (specs) are fine. To check live service state, read the attributes the services publish, or run the check inside the game as a multi-client scenario (`StudioTestHook` requires it from game context).
 
 ## Where this applies
 All `tests/luau` runs, and any Edit-mode `execute_luau` that requires project modules after they changed.

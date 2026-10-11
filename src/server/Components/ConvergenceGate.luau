@@ -34,6 +34,7 @@ type GateState = {
 	shrineOpen: boolean, -- once triggered the bypass stays open (audit F3: no cycling)
 	cloneSeenAt: number?,
 	cloneConsumed: boolean, -- audit F1: the clone that opened the gate never counts again
+	cloneOwner: number?, -- UserId of the clone that supplied the Shinobi input (Teamwork credit)
 }
 
 local states: { [BasePart]: GateState } = {}
@@ -58,6 +59,7 @@ end
 local presentProvider: () -> { Player } = function()
 	return Players:GetPlayers()
 end
+local contributionListeners: { (player: Player) -> () } = {}
 
 local function presentFactions(): { string }
 	local present = {}
@@ -103,6 +105,7 @@ local function getState(gate: BasePart): GateState
 			shrineOpen = false,
 			cloneSeenAt = nil,
 			cloneConsumed = false,
+			cloneOwner = nil,
 		}
 		states[gate] = state
 		setBlocked(gate, true)
@@ -121,6 +124,10 @@ local function step(gate: BasePart, now: number)
 	local clonePresent = plate ~= nil and plate:GetAttribute("ClonePresent") == true
 	state.cloneSeenAt, state.cloneConsumed =
 		GateRules.cloneInput(clonePresent, state.cloneConsumed, state.cloneSeenAt, now)
+	if clonePresent and state.cloneSeenAt and plate then
+		local owner = plate:GetAttribute("CloneOwner")
+		state.cloneOwner = if typeof(owner) == "number" then owner else state.cloneOwner
+	end
 	local kiTarget = linked(gate, "KiTarget")
 	local kiHit = if kiTarget then kiTarget:GetAttribute("LastKiHit") else nil
 	local lastApplied: { [string]: number } = {}
@@ -136,6 +143,26 @@ local function step(gate: BasePart, now: number)
 	if not isOpen and GateRules.canOpen(required, lastApplied, now, GateConfig.ApplyWindowSeconds) then
 		state.openingPowers = table.clone(required)
 		state.openUntil = now + GateConfig.OpenSeconds
+		-- Teamwork credit (TASK-0007): whoever supplied a required power, once per opening.
+		local helpers: { [number]: boolean } = {}
+		for _, power in required do
+			local id = if power == "Shinobi"
+				then state.cloneOwner
+				elseif power == "Ki" and kiTarget then kiTarget:GetAttribute("LastKiHitBy")
+				else nil
+			if typeof(id) == "number" then
+				helpers[id] = true
+			end
+		end
+		for id in helpers do
+			local helper = Players:GetPlayerByUserId(id)
+			if helper then
+				for _, listener in contributionListeners do
+					task.spawn(listener, helper)
+				end
+			end
+		end
+		state.cloneOwner = nil
 		state.firstArrival = nil
 		-- Consume the inputs: the Ki hit is cleared and the current clone is spent (it must leave and
 		-- a clone must arrive again to count).
@@ -143,6 +170,7 @@ local function step(gate: BasePart, now: number)
 		state.cloneConsumed = clonePresent
 		if kiTarget then
 			kiTarget:SetAttribute("LastKiHit", nil)
+			kiTarget:SetAttribute("LastKiHitBy", nil)
 		end
 		-- Players already past the gate when it opens didn't pass through it.
 		state.presentAtOpen = {}
@@ -197,6 +225,18 @@ end
 
 function ConvergenceGate.setPresentProvider(provider: () -> { Player })
 	presentProvider = provider
+end
+
+-- Called (in its own thread) for each player whose power helped open a gate (Teamwork; TASK-0007).
+-- Returns a function that removes the listener (tests use it so they don't leak listeners).
+function ConvergenceGate.onContribution(listener: (player: Player) -> ()): () -> ()
+	table.insert(contributionListeners, listener)
+	return function()
+		local index = table.find(contributionListeners, listener)
+		if index then
+			table.remove(contributionListeners, index)
+		end
+	end
 end
 
 -- Clears every gate's per-match state (awards, shrine, inputs). Called at match start.

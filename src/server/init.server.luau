@@ -22,10 +22,22 @@ local AbilityService = require(script.Services.AbilityService)
 local Dash = require(script.Abilities.Dash)
 local EchoClone = require(script.Abilities.EchoClone)
 local KiBurst = require(script.Abilities.KiBurst)
+local FinaleService = require(script.Services.FinaleService)
+local FinaleModifiers = require(script.Abilities.FinaleModifiers)
 AbilityService.register("Dash", { handler = Dash.handler })
 AbilityService.register("EchoClone", { handler = EchoClone.handler, canUse = FactionService.requires("Shinobi") })
 AbilityService.register("KiCharge", { handler = KiBurst.chargeHandler, canUse = FactionService.requires("Ki") })
 AbilityService.register("KiBurst", { handler = KiBurst.burstHandler, canUse = FactionService.requires("Ki") })
+AbilityService.register(
+	"EchoBurst",
+	{ handler = FinaleModifiers.echoBurstHandler, canUse = FinaleModifiers.canSpend("Ki") }
+)
+AbilityService.register(
+	"EchoGuard",
+	{ handler = FinaleModifiers.echoGuardHandler, canUse = FinaleModifiers.canSpend("Shinobi") }
+)
+KiBurst.setOnBurst(FinaleModifiers.onKiBurst)
+EchoClone.setOnClone(FinaleModifiers.onEchoClone)
 EchoClone.start()
 KiBurst.start()
 AbilityService.start()
@@ -51,7 +63,25 @@ MatchService.onMatchStart(function()
 		EchoService.reset(player)
 	end
 	ConvergenceGate.resetAll()
+	FinaleService.resetContributions()
 end)
 MatchService.onMatchEnd(FactionService.rebalance)
+
+-- Ring-out finale and category results (TASK-0007)
+MatchService.setFinale({
+	begin = FinaleService.begin,
+	isOver = FinaleService.isOver,
+	results = FinaleService.results,
+	respawn = FinaleService.respawn,
+	maxSeconds = require(game:GetService("ReplicatedStorage").Shared.FinaleConfig).MaxSeconds,
+})
+MatchService.onMatchEnd(FinaleService.reset)
+-- Teamwork only counts gate help from players in the current match.
+ConvergenceGate.onContribution(function(player)
+	if MatchService.isInMatch(player) then
+		FinaleService.recordContribution(player)
+	end
+end)
+FinaleService.start()
 TrialService.start()
 MatchService.start()

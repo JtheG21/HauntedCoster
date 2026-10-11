@@ -61,8 +61,10 @@ function MatchHud.start()
 		local template = if typeof(state) == "string" then PHASE_TEXT[state] else nil
 		local text = if template then string.format(template, remaining) else "..."
 		if state == "Results" then
+			-- The ResultsHud panel shows the categories; the banner only falls back to the summary line.
 			local results = ReplicatedStorage:GetAttribute("LastResults")
-			text = if typeof(results) == "string" then "Results: " .. results else text
+			local hasPanel = ReplicatedStorage:GetAttribute("Result_Combat") ~= nil
+			text = if hasPanel or typeof(results) ~= "string" then text else "Results: " .. results
 		elseif state ~= "Lobby" and state ~= "Countdown" and player:GetAttribute("InMatch") ~= true then
 			text = "Match in progress: you'll join the next one"
 		end

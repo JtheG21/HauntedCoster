@@ -30,6 +30,17 @@ local abilities: { [string]: AbilityDef } = {
 	KiBurst = {
 		cooldown = 3.0,
 	},
+	-- Echo spends (TASK-0007): finale only, any faction, one Echo charge each.
+	EchoBurst = {
+		cooldown = 1.0,
+		keyCode = Enum.KeyCode.G,
+		label = "Echo Ki",
+	},
+	EchoGuard = {
+		cooldown = 1.0,
+		keyCode = Enum.KeyCode.V,
+		label = "Echo Guard",
+	},
 }
 for _, def in abilities do
 	table.freeze(def)
