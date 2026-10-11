@@ -22,6 +22,7 @@ local HeavyBlock = require(Components.HeavyBlock)
 local KiBurst = {}
 
 local chargeStarts: { [Player]: number } = {}
+local onBurst: ((player: Player, root: BasePart, fraction: number) -> ())? = nil
 local started = false
 
 local function flash(position: Vector3, fraction: number)
@@ -76,6 +77,7 @@ function KiBurst.burstHandler(player: Player, character: Model, root: BasePart)
 			-- Checked first on purpose: a Ki target is never also treated as a wall or heavy block.
 			if fraction >= config.WallBreakFraction then
 				part:SetAttribute("LastKiHit", os.clock())
+				part:SetAttribute("LastKiHitBy", player.UserId) -- Teamwork credit (TASK-0007)
 			end
 		elseif CrackedWall.isWall(part) then
 			if fraction >= config.WallBreakFraction and CrackedWall.tryBreak(part, config.WallRespawnSeconds) then
@@ -94,6 +96,14 @@ function KiBurst.burstHandler(player: Player, character: Model, root: BasePart)
 	record(player, "KiFraction", fraction)
 	record(player, "KiWalls", walls)
 	record(player, "KiBlocks", blocks)
+	if onBurst then
+		onBurst(player, root, fraction)
+	end
+end
+
+-- Extra effect after each burst, with the server-measured charge (the finale knockback; TASK-0007).
+function KiBurst.setOnBurst(callback: (player: Player, root: BasePart, fraction: number) -> ())
+	onBurst = callback
 end
 
 function KiBurst.start()

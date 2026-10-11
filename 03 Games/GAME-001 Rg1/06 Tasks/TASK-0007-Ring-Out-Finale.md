@@ -3,7 +3,7 @@ id: TASK-0007
 title: Ring-Out Finale
 type: task
 project: GAME-001
-status: ready
+status: in_progress
 priority: high
 risk: medium
 owner: executor
