@@ -3,7 +3,7 @@ id: TASK-0008
 title: Prototype Telemetry
 type: task
 project: GAME-001
-status: proposed
+status: ready
 priority: medium
 risk: low
 owner: executor

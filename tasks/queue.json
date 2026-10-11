@@ -603,7 +603,7 @@
       "id": "TASK-0008",
       "title": "Prototype Telemetry",
       "project": "GAME-001",
-      "status": "proposed",
+      "status": "ready",
       "risk": "low",
       "depends_on": [
         "TASK-0006"
@@ -614,6 +614,15 @@
         "Each match prints one structured summary line (JSON) with the listed metrics",
         "No usernames or user ids in logs (anonymised per-match index)",
         "Aggregation specs pass. `check.sh` passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-10T21:17:58",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
       ]
     },
     {
