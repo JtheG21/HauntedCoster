@@ -60,6 +60,13 @@ local presentProvider: () -> { Player } = function()
 	return Players:GetPlayers()
 end
 local contributionListeners: { (player: Player) -> () } = {}
+local eventListeners: { (kind: string, waitSeconds: number?) -> () } = {}
+
+local function notifyEvent(kind: string, waitSeconds: number?)
+	for _, listener in eventListeners do
+		task.spawn(listener, kind, waitSeconds)
+	end
+end
 
 local function presentFactions(): { string }
 	local present = {}
@@ -143,6 +150,7 @@ local function step(gate: BasePart, now: number)
 	if not isOpen and GateRules.canOpen(required, lastApplied, now, GateConfig.ApplyWindowSeconds) then
 		state.openingPowers = table.clone(required)
 		state.openUntil = now + GateConfig.OpenSeconds
+		notifyEvent("opened", if state.firstArrival then now - state.firstArrival else nil)
 		-- Teamwork credit (TASK-0007): whoever supplied a required power, once per opening.
 		local helpers: { [number]: boolean } = {}
 		for _, power in required do
@@ -216,6 +224,7 @@ local function step(gate: BasePart, now: number)
 		and GateRules.shrineDue(state.firstArrival, isOpen, now, GateConfig.ShrineDelaySeconds)
 	then
 		state.shrineOpen = true -- stays open for the rest of the match (no cycling)
+		notifyEvent("shrine", if state.firstArrival then now - state.firstArrival else nil)
 	end
 	if bypass then
 		setBlocked(bypass, not state.shrineOpen)
@@ -225,6 +234,12 @@ end
 
 function ConvergenceGate.setPresentProvider(provider: () -> { Player })
 	presentProvider = provider
+end
+
+-- Called (in its own thread) when a gate opens ("opened") or its shrine bypass opens ("shrine"), with the
+-- seconds since the first player arrived at it, if known (telemetry; TASK-0008).
+function ConvergenceGate.onEvent(listener: (kind: string, waitSeconds: number?) -> ())
+	table.insert(eventListeners, listener)
 end
 
 -- Called (in its own thread) for each player whose power helped open a gate (Teamwork; TASK-0007).

@@ -28,6 +28,15 @@ local lastOut: { number } = {} -- UserIds eliminated in the most recent eliminat
 local guards: { [Player]: number } = {} -- guard expiry (os.clock)
 local contributions: { [number]: number } = {}
 local names: { [number]: string } = {}
+
+export type Outcome = {
+	speed: number?,
+	teamwork: number?,
+	combatWinner: number?,
+	combatDraw: { number },
+	eliminations: number,
+}
+local lastOutcome: Outcome? = nil
 local started = false
 
 local function center(): Vector3
@@ -303,9 +312,24 @@ function FinaleService.results(finishOrder: { Player }): string
 	local function nameOf(id: number?): string?
 		return if id then names[id] or `#{id}` else nil
 	end
-	local speed = nameOf(ResultRules.speed(order)) or "nobody finished"
-	local teamwork = nameOf(ResultRules.teamwork(contributions, order)) or "no gate help"
+	local speedId = ResultRules.speed(order)
+	local teamworkId = ResultRules.teamwork(contributions, order)
+	local speed = nameOf(speedId) or "nobody finished"
+	local teamwork = nameOf(teamworkId) or "no gate help"
 	local combat = ResultRules.combat(survivors, lastOut, starters)
+	local eliminations = 0
+	for _, isAlive in alive do
+		if isAlive == false then
+			eliminations += 1
+		end
+	end
+	lastOutcome = {
+		speed = speedId,
+		teamwork = teamworkId,
+		combatWinner = combat.winner,
+		combatDraw = table.clone(combat.draw),
+		eliminations = eliminations,
+	}
 	local combatText
 	if combat.winner then
 		combatText = nameOf(combat.winner) :: string
@@ -322,6 +346,11 @@ function FinaleService.results(finishOrder: { Player }): string
 	ReplicatedStorage:SetAttribute("Result_Teamwork", teamwork)
 	ReplicatedStorage:SetAttribute("Result_Combat", combatText)
 	return `Speed: {speed} · Teamwork: {teamwork} · Combat: {combatText}`
+end
+
+-- The UserId-level outcome of the last `results` call (telemetry; TASK-0008). Nil before any results.
+function FinaleService.getLastOutcome(): Outcome?
+	return lastOutcome
 end
 
 -- Ends the finale and clears per-match state (match end).
@@ -343,6 +372,7 @@ end
 
 -- Clears the Teamwork tally (match start).
 function FinaleService.resetContributions()
+	lastOutcome = nil
 	table.clear(contributions)
 	table.clear(names)
 	ReplicatedStorage:SetAttribute("Result_Speed", nil)

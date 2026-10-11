@@ -83,5 +83,18 @@ ConvergenceGate.onContribution(function(player)
 	end
 end)
 FinaleService.start()
+
+-- Prototype telemetry for EXP-0001 (TASK-0008): one anonymised summary line per match.
+local TelemetryService = require(script.Services.TelemetryService)
+TelemetryService.start({
+	getMatchPlayers = MatchService.getMatchPlayers,
+	getFinishOrder = MatchService.getFinishOrder,
+	getOutcome = FinaleService.getLastOutcome,
+	getRejections = AbilityService.getRejectionCount,
+})
+MatchService.onStateChanged(TelemetryService.onMatchState)
+EchoService.onEvent(TelemetryService.onEcho)
+ConvergenceGate.onEvent(TelemetryService.onGate)
+
 TrialService.start()
 MatchService.start()

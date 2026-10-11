@@ -3,7 +3,7 @@ id: TASK-0008
 title: Prototype Telemetry
 type: task
 project: GAME-001
-status: ready
+status: in_review
 priority: medium
 risk: low
 owner: executor
@@ -48,6 +48,20 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 
 ---
 ## Implementation record
+*Executor (Claude Code, main session), 2026-10-10, branch `task/TASK-0008-Prototype-Telemetry`*
+
+**Files changed**
+- `src/shared/TelemetryRules.luau` (new): `summarize` (count, median, max; ignores NaN and inf), `anonymize` (UserId → P1..Pn by match order), `buildSummary` (the per-match table; no ids or names)
+- `src/server/Services/TelemetryService.luau` (new): opens a record when the Course starts and emits `[Telemetry] {json}` when the match returns to the Lobby. Collects: first power time (from the trial, once per player), trial timeouts, gate opens and wait times, shrine opens, Echo earned and spent per power, course, finale and total seconds, finishers, Speed/Teamwork/Combat (anonymised, with faction), eliminations, server script errors (`ScriptContext.Error`), ability rejections. Keeps the last 50 lines in memory (`getSummaries`)
+- `tests/luau/TelemetryRules.spec.luau` (new, 6 tests)
+- **Outside the listed files, declared (event hooks only, no behaviour change):** `MatchService.onStateChanged`, `EchoService.onEvent` (earned/spent), `ConvergenceGate.onEvent` (opened/shrine with wait seconds), `FinaleService.getLastOutcome`, `init.server.luau` wiring
+
+**Design decisions**
+- **Nothing leaves the server.** Lines go to the server output only. `AnalyticsService` custom events (optional in the task) are deliberately not used: the prototype doesn't need them, and sending data off-server is a decision for a later, approved milestone.
+- Each player's onboarding result is reported once, in the first match they play, so first-power stats aren't double-counted.
+- A leaver's ability rejections aren't counted (AbilityService clears the counter on leave).
+
+**Check results:** `scripts/check.sh` ALL CHECKS PASSED. Specs 64/0 (fresh session). Playtest [[TEST-20261010-12]] (2 solo matches, summary lines copied verbatim).
 
 ## Audits
 

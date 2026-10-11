@@ -31,6 +31,7 @@ local finishOrder: { Player } = {}
 local matchStartListeners: { () -> () } = {}
 local matchEndListeners: { () -> () } = {}
 local finale: Finale? = nil
+local stateListeners: { (state: string) -> () } = {}
 local eligibility: (player: Player) -> boolean = function(_player: Player)
 	return true
 end
@@ -89,6 +90,9 @@ local function setState(to: string, duration: number?): boolean
 	phaseStarted = os.clock()
 	ReplicatedStorage:SetAttribute("MatchState", state)
 	ReplicatedStorage:SetAttribute("PhaseEndsAt", if duration then Workspace:GetServerTimeNow() + duration else nil)
+	for _, listener in stateListeners do
+		task.spawn(listener, state)
+	end
 	return true
 end
 
@@ -238,6 +242,11 @@ end
 
 function MatchService.onMatchStart(listener: () -> ())
 	table.insert(matchStartListeners, listener)
+end
+
+-- Called (in its own thread) after every state change (telemetry; TASK-0008).
+function MatchService.onStateChanged(listener: (state: string) -> ())
+	table.insert(stateListeners, listener)
 end
 
 function MatchService.setFinale(newFinale: Finale)

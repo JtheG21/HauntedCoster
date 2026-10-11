@@ -8,6 +8,13 @@ local Players = game:GetService("Players")
 local EchoService = {}
 
 local inventory: { [Player]: { [string]: number } } = {}
+local listeners: { (player: Player, power: string, kind: string) -> () } = {}
+
+local function notify(player: Player, power: string, kind: string)
+	for _, listener in listeners do
+		task.spawn(listener, player, power, kind)
+	end
+end
 local started = false
 
 function EchoService.add(player: Player, power: string, amount: number?)
@@ -18,6 +25,12 @@ function EchoService.add(player: Player, power: string, amount: number?)
 	end
 	bag[power] = (bag[power] or 0) + (amount or 1)
 	player:SetAttribute(`Echo_{power}`, bag[power])
+	notify(player, power, "earned")
+end
+
+-- Called (in its own thread) when a charge is earned or spent; kind is "earned" or "spent" (TASK-0008).
+function EchoService.onEvent(listener: (player: Player, power: string, kind: string) -> ())
+	table.insert(listeners, listener)
 end
 
 function EchoService.get(player: Player, power: string): number
@@ -34,6 +47,7 @@ function EchoService.spend(player: Player, power: string): boolean
 	end
 	bag[power] = count - 1
 	player:SetAttribute(`Echo_{power}`, if count - 1 > 0 then count - 1 else nil)
+	notify(player, power, "spent")
 	return true
 end
 
