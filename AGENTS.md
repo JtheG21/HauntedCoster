@@ -3,10 +3,12 @@
 This is the permanent instruction file. `CLAUDE.md` imports it. Role details live in `04 Agents/` (the only copy), naming and metadata in `00 Studio/Obsidian Conventions.md`, and the process in `04 Agents/Workflow.md`.
 
 ## Project map
-- Game code: `src/server|shared|client` (Luau). Rojo (`default.project.json`) syncs it with `tests/luau` to Studio. **Only these reach the game.**
+- **Active game: GAME-002 Haunted Collector** (`03 Games/GAME-002 Haunted Collector/`). Code: `games/haunted/src/server|shared|client` and `games/haunted/tests`, synced by **`haunted.project.json`** into the separate `HauntedCollector.rbxl` place. **Only these reach that game.**
+- Paused: GAME-001 Rg1 (`03 Games/GAME-001 Rg1/`), code in `src/` and `tests/luau`, synced by `default.project.json` into the Rg1 place. It is source material only. Don't change it unless a task says so.
+- **One Rojo server, matched to its place.** Before connecting Studio, check what is serving (`ps aux | grep "rojo serve"`). Never connect a `default.project.json` server to the Haunted Collector place or the reverse: it pulls the other game's Baseplate, Lighting and scripts into the place ([[TEST-20261011-02]]). Switching branches under a running server can crash Rojo ([[LES-0003-Rojo-Crash-On-Branch-Switch]]); use a git worktree for other branches.
 - Machine state, which is authoritative for task status: `tasks/queue.json`, `tasks/usage-ledger.jsonl`, `project-state.json`. Policy: `00 Studio/budget.json`.
 - Tools: `scripts/check.sh` (all cheap checks), `scripts/orchestrator.py` (task gates), `scripts/validate_vault.py` (note conventions), `scripts/typecheck.sh`.
-- The vault is this repo. Notes go in numbered folders (`00 Studio` … `99 Templates`). The current game is `03 Games/GAME-001 Rg1/`.
+- The vault is this repo. Notes go in numbered folders (`00 Studio` … `99 Templates`). Game notes live in `03 Games/<GAME-ID> <Name>/`.
 - **Do not edit:** `Agents/`, `Chats/` (the Smart Second Brain plugin), `.obsidian/` (plugin settings).
 
 ## Safety rules
@@ -28,7 +30,7 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 - Installed: `roblox-map` (map and course layout plus playability prover) and `roblox-sfx` (Creator Store sound sourcing). Source, commit and licence: `.claude/skills/PROVENANCE.md` and `05 Engineering/External Skills.md`.
 - They are **tools under this workflow**, not a second workflow: results feed a `TASK-` note, and `tasks/queue.json` stays authoritative.
 - They never publish, upload (no `ROBLOX_API_KEY`), or write to Studio outside an approved task. Offline plan, prove and report runs are always fine.
-- `roblox-map` runs with `~/.venvs/roblox-skills/bin/python`. **Never run its Studio bootstrap against the Rg1 place** (it deletes the Rojo-managed Baseplate). Decision: ADR-0004 (approved).
+- `roblox-map` runs with `~/.venvs/roblox-skills/bin/python`. **Never run its Studio bootstrap against the Rg1 or Haunted Collector place** (it deletes Rojo-managed content). Decision: ADR-0004 (approved).
 - Not installed on purpose: `create-roblox-game`, `roblox-build-orchestrator` and the pack's agents (competing orchestrator, Opus-only agents, a Studio guard that doesn't match our MCP name).
 
 ## Reference-first development

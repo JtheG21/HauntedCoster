@@ -1,0 +1,45 @@
+# Runs scripts/check.sh (format, lint, strict types, both Rojo builds, JSON, queue, vault, Python tests)
+# on every PR and on pushes to main. Luau specs and play scenarios still need Studio (see README).
+name: check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Installs rojo, stylua and luau-lsp at the versions pinned in rokit.toml.
+      - uses: CompeyDev/setup-rokit@1d9390883f7ebce19d48f5b8d006e11d387c92ab # v0.2.1
+        with:
+          cache: "true"
+
+      - name: Install Selene 0.31.0
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/selene.zip" https://github.com/Kampfkarren/selene/releases/download/0.31.0/selene-0.31.0-linux.zip
+          mkdir -p "$HOME/.local/bin"
+          unzip -q "$RUNNER_TEMP/selene.zip" -d "$HOME/.local/bin"
+          chmod +x "$HOME/.local/bin/selene"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Same definitions the VS Code extension downloads, pinned to the luau-lsp version in rokit.toml.
+      - name: Fetch Roblox type definitions
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/globalTypes.PluginSecurity.d.luau" https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/1.63.0/scripts/globalTypes.PluginSecurity.d.luau
+          echo "LUAU_DEFS=$RUNNER_TEMP/globalTypes.PluginSecurity.d.luau" >> "$GITHUB_ENV"
+
+      - name: scripts/check.sh
+        env:
+          TYPECHECK_REQUIRED: "1"
+        run: scripts/check.sh
