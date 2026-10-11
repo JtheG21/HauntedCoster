@@ -16,6 +16,9 @@ local POLL_SECONDS = 0.1
 local DETECT_HEIGHT = 3
 
 local started = false
+-- Last known door per plate. On removal the plate's "Door" link may already be torn down,
+-- so the removal handler uses this cache (found by playtest, TEST-20261010-07).
+local plateDoors: { [BasePart]: BasePart? } = {}
 
 local function isActivator(part: BasePart): boolean
 	if CollectionService:HasTag(part, PressurePlate.ActivatorTag) then
@@ -68,9 +71,10 @@ local function evaluate(plate: BasePart)
 			break
 		end
 	end
+	local door = linkedDoor(plate)
+	plateDoors[plate] = door
 	if plate:GetAttribute("Active") ~= active then
 		plate:SetAttribute("Active", active)
-		local door = linkedDoor(plate)
 		if door then
 			refreshDoor(door)
 		end
@@ -85,7 +89,8 @@ function PressurePlate.start()
 	-- A plate removed (untagged or destroyed) while active must not leave its door open.
 	CollectionService:GetInstanceRemovedSignal(PressurePlate.PlateTag):Connect(function(instance)
 		if instance:IsA("BasePart") then
-			local door = linkedDoor(instance)
+			local door = plateDoors[instance] or linkedDoor(instance)
+			plateDoors[instance] = nil
 			if door then
 				refreshDoor(door, instance)
 			end
