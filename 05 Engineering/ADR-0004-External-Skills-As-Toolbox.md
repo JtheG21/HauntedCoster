@@ -2,9 +2,9 @@
 id: ADR-0004
 title: External Skills As Toolbox
 type: adr
-status: proposed
-approved_by:
-approved_on:
+status: approved
+approved_by: jg
+approved_on: 2026-10-10
 created: 2026-10-10
 updated: 2026-10-10
 tags:
@@ -23,7 +23,7 @@ The SyphoDev skill pack includes its own end-to-end orchestrator (`create-roblox
 3. **Install only specialist skills, project-local and pinned, and drive them from our own tasks, gates and vault.**
 
 ## Decision
-*(Proposed. Mark approved only after explicit approval.)* Option 3. One orchestrator (`scripts/orchestrator.py` plus `tasks/queue.json`) owns status, gates, retries and memory. External skills produce artifacts that feed `TASK-` notes, never publish or upload, and touch Studio only inside approved tasks.
+**Approved by the user in chat, 2026-10-10.** Option 3. One orchestrator (`scripts/orchestrator.py` plus `tasks/queue.json`) owns status, gates, retries and memory. External skills produce artifacts that feed `TASK-` notes, never publish or upload, and touch Studio only inside approved tasks.
 
 ## Consequences
 We give up the pack's end-to-end automation. In exchange: no competing state, and our human gates and audits stay intact. Each new skill gets a short audit and a pinned commit before install.

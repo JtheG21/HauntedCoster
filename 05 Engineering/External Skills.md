@@ -2,7 +2,7 @@
 id: ENG-External-Skills
 title: External Skills
 type: index
-status: in_progress
+status: approved
 created: 2026-10-10
 updated: 2026-10-10
 tags:
@@ -18,7 +18,7 @@ related:
 ## Installed (project-local, `.claude/skills/`, user-approved 2026-10-10)
 | Skill | Why | Dependencies | Status |
 |---|---|---|---|
-| `roblox-map` | Map and course layout from a JSON spec, plus a **playability prover** (jump reach, falls, sightlines, ring-out windows). Fits obby sections and the ring-out finale | Python + numpy, scipy, Pillow | Copied. **Python dependencies not installed** (awaiting approval) |
+| `roblox-map` | Map and course layout from a JSON spec, plus a **playability prover** (jump reach, falls, sightlines, ring-out windows). Fits obby sections and the ring-out finale | Python + numpy, scipy, Pillow | **Ready.** Python env `~/.venvs/roblox-skills` (numpy, scipy, Pillow, user-approved 2026-10-10). Offline smoke test OK (see below) |
 | `roblox-sfx` | Sound sourcing from the Creator Store by asset id, verified in Studio, no API key | Python standard library | Copied. Ready |
 
 ## Deliberately not installed
@@ -33,6 +33,10 @@ related:
 
 ## Security sweep (2026-10-10)
 No `eval`/`exec` and nothing obfuscated (the `b64decode` hits decode API image responses). Deletes only touch temp or stale outputs. Network calls go to apis.roblox.com (toolbox search, asset upload), Kaggle, Hugging Face, Cloudflare, Pollinations and PyTorch downloads. Remote GPU steps `pip install` large packages there. Keys are read from env vars only. Installers only copy files, but agents are overwritten without a backup.
+
+## Smoke test (2026-10-10, offline)
+`build_map.py specs/duel_arena.json --out ~/Roblox-Work/Rg1/map/smoke-duel`: plan PNG and `report.json` written, no Studio contact. The prover **failed the bundled example on P9 ring-out counterplay** ("a player punted off Ledge1 gets 0.02s of control, needs 1.00s") and computed the fix (kill plane at y ≤ -159). That shows the check works and is directly relevant to the ring-out finale (TASK-0007).
+**Caution found:** the Studio bootstrap `luau/build.lua` removes the place's SpawnLocation and Baseplate. It's guarded in `roblox-map/LOCAL.md` (never against the Rg1 place).
 
 ## Local changes
 `roblox-sfx/SKILL.md` line 131: `cd` path changed to the project-local folder. See `.claude/skills/PROVENANCE.md`.
