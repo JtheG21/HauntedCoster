@@ -3,7 +3,7 @@ id: TASK-0006
 title: Match Flow and Onboarding
 type: task
 project: GAME-001
-status: in_progress
+status: in_review
 priority: high
 risk: low
 owner: executor
