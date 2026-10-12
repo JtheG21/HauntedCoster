@@ -1928,6 +1928,172 @@
       ],
       "revisions": 0,
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0025",
+      "title": "Clue Hunting Removal",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [],
+      "branch": "task/TASK-0025-Clue-Hunting-Removal",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0025-Clue-Hunting-Removal.md",
+      "acceptance_criteria": [
+        "No landmark shows an Investigate prompt. Nothing writes `journal.clues` or sets `shortcut`, `bellHint` or `bellClue`. There is no server eject loop.",
+        "Crypt entry and Bell Wraith capture follow the rule jg approves in ADR-0007. The Bell Wraith spawns without any clue, is visible to everyone, and keeps `maxAlive = 1`. Ashen still rolls only in the Crypt zone.",
+        "The west shortcut is open without a flag, and the first ride gives no bell clue or toast.",
+        "Monster highlight and name markers appear for species the player has inspected (`journal.seen`).",
+        "The journal still lists species and variants. The Clues card, the landmark counter and the Grave Scholar trophy are gone.",
+        "The tutorial keeps 12 steps and none needs an investigation (step 3 explore, step 12 the rare's lair). Saved step numbers keep their meaning, and the skip-forward checks still prevent it from blocking play.",
+        "A profile containing `journal.clues` and the three old flags sanitizes without loss (spec).",
+        "The specs plus FullLoop, Reachability, ExploitProbe and CrossPlot (2 players) pass in Studio. LandmarkStart is retired.",
+        "`scripts/check.sh` passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0026",
+      "title": "Radial Plot Layout",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "depends_on": [
+        "TASK-0025"
+      ],
+      "branch": "task/TASK-0026-Radial-Plot-Layout",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0026-Radial-Plot-Layout.md",
+      "acceptance_criteria": [
+        "Six plots sit 60\u00b0 apart. Each plot's local -Z points at the hub, and the front gate opens onto the ring road.",
+        "No code adds a plot-local offset to a plot centre directly (grep). All conversions use the shared transform.",
+        "The `PlotLayout` spec proves:",
+        "Saved and starter routes build, validate, ride and pay on every plot. The editor places points where the player taps on a rotated plot (CrossPlot or FullLoop check on a non-axis-aligned plot).",
+        "Securing works only at the player's own pen, at its new world position. Plot ownership and the cross-plot checks still hold (CrossPlot 2 players).",
+        "The cemetery module stays inside its footprint. Reachability proves:",
+        "FullLoop, ExploitProbe and the specs pass. `scripts/check.sh` passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0027",
+      "title": "Habitat Modules and Blockouts",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0026"
+      ],
+      "branch": "task/TASK-0027-Habitat-Modules-And-Blockouts",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0027-Habitat-Modules-And-Blockouts.md",
+      "acceptance_criteria": [
+        "All four modules pass the validator, and a deliberately broken module fails it (spec).",
+        "Reachability runs for each module: every zone centre and landmark is reachable from every gate, and the gates stay clear.",
+        "`deactivate \u2192 activate` leaves no wild encounter, prompt or geometry from the old module, and the new module spawns only its roster (scenario).",
+        "Each habitat is readable as itself in Studio captures (ground, silhouettes, landmarks), recorded in a `TEST-` note for jg's review.",
+        "FullLoop passes with the cemetery active. `scripts/check.sh` passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0028",
+      "title": "Cemetery Vignette and Atmosphere",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0027"
+      ],
+      "branch": "task/TASK-0028-Cemetery-Vignette-And-Atmosphere",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0028-Cemetery-Vignette-And-Atmosphere.md",
+      "acceptance_criteria": [
+        "Looking up reads purple. The haze is green-tinted. Surfaces aren't globally tinted purple (no ColorCorrection tint carries the look).",
+        "With the flashlight off, Studio captures from the ring road, a hub gate and the vignette path show the path, landmarks and a monster at 40+ studs. jg confirms readability.",
+        "The Angel and Bell Tower have distinct, readable silhouettes from 80+ studs, and the paths stay clear for movement (Reachability passes).",
+        "Lights are budgeted: shadows only on a few key lights, with the local light count recorded. No noticeable frame drop in a Studio play capture.",
+        "`scripts/check.sh` and FullLoop pass."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0029",
+      "title": "Habitat Rotation",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "depends_on": [
+        "TASK-0027"
+      ],
+      "branch": "task/TASK-0029-Habitat-Rotation",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0029-Habitat-Rotation.md",
+      "acceptance_criteria": [
+        "Specs show the schedule is deterministic across servers (same clock \u2192 same habitat), with correct boundaries (warning at T-60, closing at T-15, swap at T-0), wrap-around, and config changes that apply without touching test settings.",
+        "A swap while a player carries keeps the carry (same species, variant and deadline). Securing after the swap adds exactly one monster.",
+        "A swap during an open meter session cancels it cleanly. No monster is created, and no claim or prompt is left behind.",
+        "A swap during an escape chase follows the approved policy. The fleeing capture is neither duplicated nor silently deleted, and the chase or loss is reported to the player.",
+        "Players still inside are handled per policy, and nobody ends up inside new geometry (scenario check).",
+        "Capture starts are refused while closing, and normal play resumes after the swap.",
+        "FullLoop, CrossPlot and ExploitProbe pass. `scripts/check.sh` passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0030",
+      "title": "House and Train Presentation",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0026"
+      ],
+      "branch": "task/TASK-0030-House-And-Train-Presentation",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0030-House-And-Train-Presentation.md",
+      "acceptance_criteria": [
+        "Each tier is visibly bigger and richer than the last, built from the same material palette on all six plots. Captures for jg's review.",
+        "No new scenery inside the track bounds or the exhibit range rings, or blocking the pen, station or plot entrance. A spec checks the decoration boxes against the bounds.",
+        "The part count per tier is recorded, and a house rebuild on upgrade stays under the agreed budget.",
+        "FullLoop and CrossPlot pass. `scripts/check.sh` passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0031",
+      "title": "Failed-Capture Retaliation",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0027"
+      ],
+      "branch": "task/TASK-0031-Failed-Capture-Retaliation",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0031-Failed-Capture-Retaliation.md",
+      "acceptance_criteria": [
+        "Only the failing player is targeted. At most N pursuers (config), all within the join radius and the active habitat. Pursuers never leave the habitat footprint.",
+        "A catch knocks the player down for the configured time with no health loss. The player can move again afterwards, and the same pursuer can't chain-knockdown (cooldown).",
+        "Pursuit ends on timeout, distance, death, leaving or a swap. Pursuers return to roaming, and no state leaks (scenario).",
+        "Round 20 behaviour outside the approved trigger (startle hop, misses carried over) is unchanged. The ChaseRules and CaptureRules specs pass.",
+        "FullLoop, ExploitProbe and CrossPlot pass. `scripts/check.sh` passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
     }
   ]
 }
