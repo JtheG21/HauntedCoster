@@ -161,7 +161,7 @@ function Settlement.build(def: Habitats.Habitat): Kit.Result
 			furrow.CanCollide = false
 		end
 	end
-	Kit.scatter(def, rng, 7, 6, function(x, z)
+	Kit.scatter(def, rng, 7, 7, function(x, z)
 		if Kit.clearOfZoneCentres(def, x, z, 10) then
 			cottage(deco, rng, x, z)
 		end
@@ -187,6 +187,7 @@ function Settlement.build(def: Habitats.Habitat): Kit.Result
 		end
 	end)
 	Kit.darkCandles(deco, def, rng, Color3.fromRGB(255, 190, 110))
+	Kit.mist(model, Random.new(77), 24, Color3.fromRGB(130, 220, 150))
 	return { model = model, landmarkAnchors = anchors, cryptGate = nil }
 end
 

@@ -182,7 +182,7 @@ function Woodland.build(def: Habitats.Habitat): Kit.Result
 			boulder(deco, rng, x, z)
 		end
 	end)
-	Kit.scatter(def, rng, 6, 5, function(x, z)
+	Kit.scatter(def, rng, 6, 8, function(x, z)
 		if open(x, z) then
 			fallenLog(deco, rng, x, z)
 		end
@@ -194,6 +194,7 @@ function Woodland.build(def: Habitats.Habitat): Kit.Result
 	Props.deadTree(deco, rng, 20, -60)
 	Props.deadTree(deco, rng, -20, -60)
 	Kit.darkCandles(deco, def, rng, Color3.fromRGB(120, 255, 150))
+	Kit.mist(model, Random.new(77), 24, Color3.fromRGB(110, 230, 150))
 	return { model = model, landmarkAnchors = anchors, cryptGate = nil }
 end
 

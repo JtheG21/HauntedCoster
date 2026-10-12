@@ -3,7 +3,7 @@ id: TASK-0028
 title: Cemetery Vignette and Atmosphere
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: medium
 risk: low
 owner: executor
@@ -49,6 +49,21 @@ The world's visual signature (a purple sky, green-tinted haze and warm orange pa
 
 ---
 ## Implementation record
+- **References used** (opened the images in `10 References/02 Map`):
+  - Reference 3: violet sky with stars over dark silhouettes, glowing pale-green ground, warm carved-pumpkin glows → the purple sky, the green ground mist and the pumpkins.
+  - Reference 7: a winding dirt path framed by a fence, chunky stones → edge stones and the framing fences.
+  - Qualities only; nothing copied.
+- **Decisions:**
+  - Roblox's `Atmosphere.Color` tints both the sky and the distance haze, so one colour can't make a purple sky and a green haze at once. The sky carries the purple. The green comes from low, see-through mist discs (`Kit.mist`) in every module. No ColorCorrection tint.
+  - Twilight (ClockTime 19.2) with a raised OutdoorAmbient gives readable ground without the flashlight and no orange sunlight.
+  - Lamp family: an iron post with an arm and a hanging orange glass lantern. Only 3 lights cast shadows (two Angel lanterns, the bell).
+- **Built:**
+  - `Atmosphere.Config` and `apply()` (now sets values on existing instances too).
+  - Detailed Weeping Angel (plinth, robe, bowed head with hands over the face, three-layer wings) and Bell Tower (buttresses, open belfry, lit bell, stepped spire with cross).
+  - Kit pieces in `Props`: lantern, pumpkin, edge stones, moss patch, cemetery gate arch, ruined wall, candles, roots on dead trees.
+  - Cemetery: mossy ground, ground mist, and the vignette (`vignette()` in `Habitats/Cemetery`): the gate arch on the South Path, framing fences, edge stones on the South Path and the Old Rows loop, moss, pumpkins, candles, ruined masonry. The grave grid and trees keep clear of it.
+  - `Kit.freeGround` checks a prop's reach against the gate corridors ([[AUD-20261012-TASK-0027-01]] finding 1); logs and cottages got larger clearances.
+- **Evidence:** [[TEST-20261012-04]].
 
 ## Audits
 

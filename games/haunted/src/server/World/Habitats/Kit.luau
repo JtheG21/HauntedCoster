@@ -123,13 +123,25 @@ local function inCrypt(def: Habitats.Habitat, x: number, z: number, margin: numb
 	return x > r.x1 - margin and x < r.x2 + margin and z > r.z1 - margin and z < r.z2 + margin
 end
 
+-- Clear of every gate corridor by `margin` studs: the centre and four points around it (a prop's reach), so
+-- long scenery never pokes into a corridor (AUD-20261012-TASK-0027-01 finding 1).
+local function clearOfCorridors(x: number, z: number, margin: number): boolean
+	for _, o in { { 0, 0 }, { margin, 0 }, { -margin, 0 }, { 0, margin }, { 0, -margin } } do
+		if HabitatRules.inGateCorridor(x + o[1], z + o[2]) then
+			return false
+		end
+	end
+	return true
+end
+
 -- Free ground for scenery: in the footprint, off the plaza and paths, clear of gates, landmarks and crypt.
+-- `clearance` is the prop's reach from its centre.
 function Kit.freeGround(def: Habitats.Habitat, x: number, z: number, clearance: number): boolean
 	local plaza = def.plaza
 	return HabitatRules.inFootprint(x, z, 5)
 		and not (plaza and World.hubDistance(x, z) < plaza.radius + clearance + 2)
 		and HabitatRules.pathClearance(def, x, z) > clearance
-		and not HabitatRules.inGateCorridor(x, z)
+		and clearOfCorridors(x, z, clearance)
 		and not nearLandmark(def, x, z, 11)
 		and not inCrypt(def, x, z, 6)
 end
@@ -167,6 +179,33 @@ function Kit.scatter(
 		end
 	end
 	return placed
+end
+
+-- Low green ground mist (TASK-0028): soft, overlapping, see-through discs that never collide or block a
+-- raycast. The sky carries the purple (Atmosphere), the mist carries the green (map reference 3).
+function Kit.mist(parent: Instance, rng: Random, count: number, color: Color3)
+	local folder = Build.folder(parent, "Mist")
+	local r = World.Hub.moduleRadius - 10
+	for _ = 1, count do
+		local radius = rng:NextNumber(10, 22)
+		local x, z = rng:NextNumber(-r, r), rng:NextNumber(-r, r)
+		if World.hubDistance(x, z) < r then
+			local thickness = rng:NextNumber(0.6, 1.6)
+			local disc = Build.part({
+				name = "Mist",
+				size = Vector3.new(thickness, radius * 2, radius * 2),
+				cframe = CFrame.new(x, 0.3 + thickness / 2, z) * CFrame.Angles(0, 0, math.rad(90)),
+				color = color,
+				material = Enum.Material.SmoothPlastic,
+				shape = Enum.PartType.Cylinder,
+				transparency = 0.9,
+				collide = false,
+				parent = folder,
+			})
+			disc.CanQuery = false
+			disc.CanTouch = false
+		end
+	end
 end
 
 -- Cold candles in dark zones, so they stay dark but navigable.

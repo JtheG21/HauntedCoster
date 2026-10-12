@@ -15,24 +15,215 @@ Props.C = {
 	iron = Color3.fromRGB(25, 25, 28),
 	cobble = Color3.fromRGB(82, 80, 84),
 	wood = Color3.fromRGB(70, 52, 38),
-	lantern = Color3.fromRGB(255, 170, 80),
+	lantern = Color3.fromRGB(205, 82, 18), -- warm orange glass; Neon brightens it (TASK-0028)
+	lanternLight = Color3.fromRGB(255, 145, 70),
+	pumpkin = Color3.fromRGB(214, 98, 24),
+	moss = Color3.fromRGB(52, 78, 50),
+	marble = Color3.fromRGB(205, 205, 210),
 	ghost = Color3.fromRGB(140, 120, 255),
 }
 local C = Props.C
 
-function Props.lantern(parent: Instance, x: number, z: number, y: number?)
+-- The lamp family (TASK-0028): an iron post with a short arm and a hanging glass lantern. `shadows` is for
+-- the few key lights only (the light budget allows shadows on a handful).
+function Props.lantern(parent: Instance, x: number, z: number, y: number?, shadows: boolean?)
 	local base = y or 0
-	Build.block(parent, "LanternPost", Vector3.new(0.5, 7, 0.5), x, base, z, C.iron, Enum.Material.Metal)
+	Build.block(parent, "LanternPost", Vector3.new(0.5, 8, 0.5), x, base, z, C.iron, Enum.Material.Metal)
+	Build.part({
+		name = "LanternArm",
+		size = Vector3.new(0.3, 0.3, 1.6),
+		cframe = CFrame.new(x, base + 7.8, z + 0.7),
+		color = C.iron,
+		material = Enum.Material.Metal,
+		collide = false,
+		parent = parent,
+	})
+	Build.part({
+		name = "LanternCap",
+		size = Vector3.new(1.3, 0.4, 1.3),
+		cframe = CFrame.new(x, base + 7.4, z + 1.3) * CFrame.Angles(0, math.rad(45), 0),
+		color = C.iron,
+		material = Enum.Material.Metal,
+		collide = false,
+		parent = parent,
+	})
 	local head = Build.part({
 		name = "Lantern",
-		size = Vector3.new(1.2, 1.4, 1.2),
-		cframe = CFrame.new(x, base + 7.6, z),
+		size = Vector3.new(0.9, 1.2, 0.9),
+		cframe = CFrame.new(x, base + 6.6, z + 1.3),
 		color = C.lantern,
 		material = Enum.Material.Neon,
 		collide = false,
 		parent = parent,
 	})
-	Build.light(head, C.lantern, 22, 1.6)
+	Build.light(head, C.lanternLight, 30, 2.6, shadows)
+end
+
+-- A carved pumpkin with a warm glow (map reference 3). No light of its own unless `lit`, to keep the budget.
+function Props.pumpkin(parent: Instance, x: number, z: number, size: number, yaw: number, lit: boolean?)
+	local body = Build.part({
+		name = "Pumpkin",
+		size = Vector3.new(size, size, size),
+		cframe = CFrame.new(x, size * 0.42, z) * CFrame.Angles(0, math.rad(yaw), 0),
+		color = C.pumpkin,
+		material = Enum.Material.SmoothPlastic,
+		shape = Enum.PartType.Ball,
+		collide = false,
+		parent = parent,
+	})
+	Build.part({
+		name = "PumpkinStem",
+		size = Vector3.new(0.25, size * 0.3, 0.25),
+		cframe = body.CFrame * CFrame.new(0, size * 0.55, 0),
+		color = Color3.fromRGB(60, 80, 40),
+		material = Enum.Material.Wood,
+		collide = false,
+		parent = parent,
+	})
+	-- The face: two eyes and a mouth on the front (-Z) side.
+	for _, f in { { -0.2, 0.12, 0.16 }, { 0.2, 0.12, 0.16 }, { 0, -0.12, 0.42 } } do
+		Build.part({
+			name = "PumpkinFace",
+			size = Vector3.new(size * f[3], size * 0.14, 0.1),
+			cframe = body.CFrame * CFrame.new(size * f[1], size * f[2], -size * 0.49),
+			color = Color3.fromRGB(255, 190, 80),
+			material = Enum.Material.Neon,
+			collide = false,
+			parent = parent,
+		})
+	end
+	if lit then
+		Build.light(body, C.lanternLight, 10, 1)
+	end
+end
+
+-- Low edge stones along both sides of a path segment (path edges in the kit).
+function Props.curbStones(parent: Instance, a: Vector3, b: Vector3, width: number, rng: Random)
+	local d = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+	local len = d.Magnitude
+	if len < 1 then
+		return
+	end
+	local unit = d / len
+	local perp = Vector3.new(-unit.Z, 0, unit.X)
+	for side = -1, 1, 2 do
+		local t = 1.5
+		while t < len - 1.5 do
+			local p = a + unit * t + perp * side * (width / 2 + 0.5)
+			local shade = rng:NextNumber(0.8, 1.1)
+			Build.part({
+				name = "EdgeStone",
+				size = Vector3.new(rng:NextNumber(0.8, 1.3), rng:NextNumber(0.35, 0.6), rng:NextNumber(1.2, 2)),
+				cframe = CFrame.lookAt(Vector3.new(p.X, 0.2, p.Z), Vector3.new(p.X, 0.2, p.Z) + unit)
+					* CFrame.Angles(0, math.rad(rng:NextNumber(-10, 10)), 0),
+				color = Color3.new(C.stone.R * shade, C.stone.G * shade, C.stone.B * shade),
+				material = Enum.Material.Slate,
+				collide = false,
+				parent = parent,
+			})
+			t += rng:NextNumber(2.4, 3.4)
+		end
+	end
+end
+
+-- A mossy grass patch on the ground (soft ground transitions beside paths).
+function Props.mossPatch(parent: Instance, x: number, z: number, radius: number, top: number)
+	return Props.disc(parent, "Moss", Vector3.new(x, 0, z), radius, top, C.moss, Enum.Material.Grass)
+end
+
+-- A spiked iron arch over a path: two stone pillars with caps and lamps, and an iron arch between them.
+-- `centre` is on the path; the arch spans `width` across `facing` (the direction along the path).
+function Props.cemeteryGate(parent: Instance, centre: Vector3, facing: Vector3, width: number)
+	local unit = Vector3.new(facing.X, 0, facing.Z).Unit
+	local perp = Vector3.new(-unit.Z, 0, unit.X)
+	for side = -1, 1, 2 do
+		local p = centre + perp * side * (width / 2 + 1)
+		Build.block(parent, "GatePillar", Vector3.new(2, 9, 2), p.X, 0, p.Z, C.darkStone, Enum.Material.Slate)
+		Build.block(parent, "GatePillarCap", Vector3.new(2.6, 0.8, 2.6), p.X, 9, p.Z, C.stone, Enum.Material.Slate)
+		Props.lantern(parent, p.X + perp.X * side * 1.6, p.Z + perp.Z * side * 1.6)
+	end
+	local top = centre + Vector3.new(0, 10.5, 0)
+	Build.part({
+		name = "GateArch",
+		size = Vector3.new(0.5, 0.5, width + 2),
+		cframe = CFrame.lookAt(top, top + perp),
+		color = C.iron,
+		material = Enum.Material.Metal,
+		collide = false,
+		parent = parent,
+	})
+	for i = -3, 3 do
+		local p = top + perp * (i * (width / 7))
+		Build.part({
+			name = "GateSpike",
+			size = Vector3.new(0.25, 1.4 - math.abs(i) * 0.12, 0.25),
+			cframe = CFrame.new(p + Vector3.new(0, 0.8, 0)),
+			color = C.iron,
+			material = Enum.Material.Metal,
+			collide = false,
+			parent = parent,
+		})
+	end
+end
+
+-- A broken stretch of old wall (ruined masonry): uneven blocks, one fallen.
+function Props.ruinedWall(parent: Instance, rng: Random, x: number, z: number, yaw: number)
+	local cf = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(yaw), 0)
+	for i = -2, 2 do
+		local h = rng:NextNumber(1.5, 5)
+		Build.part({
+			name = "RuinBlock",
+			size = Vector3.new(2, h, 1.4),
+			cframe = cf * CFrame.new(i * 2.05, h / 2, 0),
+			color = C.darkStone,
+			material = Enum.Material.Cobblestone,
+			parent = parent,
+		})
+	end
+	Build.part({
+		name = "RuinFallen",
+		size = Vector3.new(2, 1.2, 1.4),
+		cframe = cf
+			* CFrame.new(rng:NextNumber(-3, 3), 0.6, 2.4)
+			* CFrame.Angles(0, math.rad(rng:NextNumber(0, 60)), 0),
+		color = C.darkStone,
+		material = Enum.Material.Cobblestone,
+		parent = parent,
+	})
+end
+
+-- A few candles of different heights on a grave or a step.
+function Props.candles(parent: Instance, rng: Random, x: number, z: number, lit: boolean)
+	local tallest: Part? = nil
+	for i = 1, 3 do
+		local h = rng:NextNumber(0.6, 1.4)
+		local c = Build.block(
+			parent,
+			"Candle",
+			Vector3.new(0.3, h, 0.3),
+			x + rng:NextNumber(-0.6, 0.6),
+			0,
+			z + rng:NextNumber(-0.6, 0.6),
+			Color3.fromRGB(235, 225, 200),
+			Enum.Material.SmoothPlastic
+		)
+		c.CanCollide = false
+		Build.part({
+			name = "Flame",
+			size = Vector3.new(0.18, 0.3, 0.18),
+			cframe = c.CFrame * CFrame.new(0, h / 2 + 0.15, 0),
+			color = C.lantern,
+			material = Enum.Material.Neon,
+			collide = false,
+			parent = parent,
+		})
+		if i == 1 then
+			tallest = c
+		end
+	end
+	if lit and tallest then
+		Build.light(tallest, C.lanternLight, 9, 0.9)
+	end
 end
 
 -- An iron fence between a and b with an invisible collider (rails alone have gaps). `posts` remembers
@@ -104,6 +295,21 @@ end
 function Props.deadTree(parent: Instance, rng: Random, x: number, z: number)
 	local h = rng:NextNumber(10, 16)
 	Build.block(parent, "Trunk", Vector3.new(1.4, h, 1.4), x, 0, z, Color3.fromRGB(45, 35, 30), Enum.Material.Wood)
+	-- Roots splaying into the ground (kit: trees and roots)
+	for i = 0, 2 do
+		local a = math.rad(i * 120 + rng:NextNumber(-20, 20))
+		Build.part({
+			name = "Root",
+			size = Vector3.new(0.7, 0.7, 3.2),
+			cframe = CFrame.new(x + math.sin(a) * 1.4, 0.3, z + math.cos(a) * 1.4)
+				* CFrame.Angles(0, a, 0)
+				* CFrame.Angles(math.rad(14), 0, 0),
+			color = Color3.fromRGB(45, 35, 30),
+			material = Enum.Material.Wood,
+			collide = false,
+			parent = parent,
+		})
+	end
 	for i = 1, 3 do
 		local y = h * rng:NextNumber(0.55, 0.95)
 		local yaw = rng:NextNumber(0, 360)
@@ -160,32 +366,52 @@ function Props.mausoleum(parent: Instance, x: number, z: number, scale: number, 
 	return base
 end
 
+-- The Weeping Angel (TASK-0028): a stepped plinth, a flared robe, a bowed head with both hands over the
+-- face, and tall folded wings, so the silhouette reads from 80+ studs. Faces south (+Z), towards the main
+-- gate path. Two shadow-casting lanterns light it (key lights).
 function Props.angel(parent: Instance, pos: Vector3): BasePart
 	local x, z = pos.X, pos.Z
-	local anchor = Build.block(parent, "AngelPedestal", Vector3.new(5, 3, 5), x, 0, z, C.darkStone, Enum.Material.Slate)
-	local white = Color3.fromRGB(205, 205, 210)
-	Build.block(parent, "AngelRobe", Vector3.new(2.6, 5, 2), x, 3, z, white, Enum.Material.Marble)
-	Build.part({
-		name = "AngelHead",
-		size = Vector3.new(1.6, 1.6, 1.6),
-		cframe = CFrame.new(x, 9, z) * CFrame.Angles(math.rad(25), 0, 0),
-		color = white,
-		material = Enum.Material.Marble,
-		shape = Enum.PartType.Ball,
-		parent = parent,
-	})
-	for _, side in { -1, 1 } do
-		Build.part({
-			name = "AngelWing",
-			size = Vector3.new(0.4, 5, 3),
-			cframe = CFrame.new(x + side * 1.8, 7, z + 1.2) * CFrame.Angles(math.rad(-20), math.rad(side * 30), 0),
-			color = white,
+	local anchor =
+		Build.block(parent, "AngelPedestal", Vector3.new(8, 1.2, 8), x, 0, z, C.darkStone, Enum.Material.Slate)
+	Build.block(parent, "AngelStep", Vector3.new(6, 1.2, 6), x, 1.2, z, C.stone, Enum.Material.Slate)
+	Build.block(parent, "AngelPlinth", Vector3.new(4, 2.6, 4), x, 2.4, z, C.darkStone, Enum.Material.Marble)
+	local function piece(name: string, size: Vector3, cf: CFrame, shape: Enum.PartType?)
+		return Build.part({
+			name = name,
+			size = size,
+			cframe = cf,
+			color = C.marble,
 			material = Enum.Material.Marble,
+			shape = shape,
 			parent = parent,
 		})
 	end
-	Props.lantern(parent, x + 5, z + 3)
-	Props.lantern(parent, x - 5, z + 3)
+	local base = CFrame.new(x, 5, z) -- top of the plinth
+	piece("AngelRobeHem", Vector3.new(3.4, 1.6, 2.8), base * CFrame.new(0, 0.8, 0))
+	piece("AngelRobe", Vector3.new(2.8, 4.4, 2.2), base * CFrame.new(0, 3.8, 0))
+	piece("AngelChest", Vector3.new(2.4, 2, 1.8), base * CFrame.new(0, 6.6, 0.1) * CFrame.Angles(math.rad(-10), 0, 0))
+	piece("AngelHead", Vector3.new(1.5, 1.5, 1.5), base * CFrame.new(0, 8.2, 0.5), Enum.PartType.Ball)
+	for side = -1, 1, 2 do
+		-- Forearms raised so the hands cover the face (the weeping pose)
+		piece(
+			"AngelArm",
+			Vector3.new(0.6, 2.4, 0.6),
+			base * CFrame.new(side * 0.9, 7.3, 0.9) * CFrame.Angles(math.rad(35), 0, math.rad(side * -25))
+		)
+		piece("AngelHand", Vector3.new(0.6, 0.8, 0.4), base * CFrame.new(side * 0.35, 8.3, 1.25))
+		-- Wings: three overlapping feathered slabs per side, swept back and up
+		for i = 0, 2 do
+			piece(
+				"AngelWing",
+				Vector3.new(0.35, 6 - i * 1.4, 2.4 - i * 0.4),
+				base
+					* CFrame.new(side * (1.3 + i * 0.25), 7 + i * 0.6, -1.1 - i * 0.5)
+					* CFrame.Angles(math.rad(-18 - i * 8), math.rad(side * (28 + i * 6)), math.rad(side * -6))
+			)
+		end
+	end
+	Props.lantern(parent, x + 5.5, z + 4, nil, true)
+	Props.lantern(parent, x - 5.5, z + 4, nil, true)
 	return anchor
 end
 
@@ -227,21 +453,94 @@ function Props.well(parent: Instance, pos: Vector3): BasePart
 	return anchor
 end
 
+-- The Bell Tower (TASK-0028): a buttressed stone shaft, an open belfry with four corner piers and arches,
+-- the bell lit warm inside (the one shadow-casting light up high), and a steep stepped spire - a tall,
+-- distinct silhouette from anywhere in the cemetery.
 function Props.bellTower(parent: Instance, pos: Vector3): BasePart
 	local x, z = pos.X, pos.Z
-	local anchor = Build.block(parent, "TowerBase", Vector3.new(8, 2, 8), x, 0, z, C.darkStone, Enum.Material.Slate)
-	Build.block(parent, "Tower", Vector3.new(6, 26, 6), x, 2, z, C.stone, Enum.Material.Cobblestone)
-	Build.block(parent, "TowerTop", Vector3.new(8, 1, 8), x, 28, z, C.darkStone, Enum.Material.Slate)
+	local anchor = Build.block(parent, "TowerBase", Vector3.new(10, 2, 10), x, 0, z, C.darkStone, Enum.Material.Slate)
+	Build.block(parent, "Tower", Vector3.new(7, 22, 7), x, 2, z, C.stone, Enum.Material.Cobblestone)
+	for _, c in { { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } } do
+		-- Buttresses: stepped blocks at each corner
+		Build.block(
+			parent,
+			"Buttress",
+			Vector3.new(2, 10, 2),
+			x + c[1] * 4,
+			2,
+			z + c[2] * 4,
+			C.darkStone,
+			Enum.Material.Slate
+		)
+		Build.block(
+			parent,
+			"ButtressTop",
+			Vector3.new(1.4, 6, 1.4),
+			x + c[1] * 3.8,
+			12,
+			z + c[2] * 3.8,
+			C.darkStone,
+			Enum.Material.Slate
+		)
+		-- Belfry piers
+		Build.block(
+			parent,
+			"BelfryPier",
+			Vector3.new(1.4, 7, 1.4),
+			x + c[1] * 3,
+			24,
+			z + c[2] * 3,
+			C.stone,
+			Enum.Material.Cobblestone
+		)
+	end
+	Build.block(parent, "BelfryFloor", Vector3.new(8, 0.6, 8), x, 23.4, z, C.darkStone, Enum.Material.Slate)
+	for _, d in { { 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 } } do
+		Build.block(
+			parent,
+			"BelfryArch",
+			if d[1] == 0 then Vector3.new(6, 1.2, 1.2) else Vector3.new(1.2, 1.2, 6),
+			x + d[1] * 3,
+			29.6,
+			z + d[2] * 3,
+			C.stone,
+			Enum.Material.Cobblestone
+		)
+	end
+	Build.block(parent, "BelfryRoof", Vector3.new(8.4, 0.8, 8.4), x, 31, z, C.darkStone, Enum.Material.Slate)
+	for i = 0, 4 do
+		local w = 7 - i * 1.5
+		Build.part({
+			name = "Spire",
+			size = Vector3.new(w, 2.2, w),
+			cframe = CFrame.new(x, 32.9 + i * 2.2, z) * CFrame.Angles(0, math.rad(45), 0),
+			color = Color3.fromRGB(58, 50, 70),
+			material = Enum.Material.Slate,
+			parent = parent,
+		})
+	end
+	Build.block(parent, "SpireCross", Vector3.new(0.3, 2.4, 0.3), x, 43.9, z, C.iron, Enum.Material.Metal)
 	local bell = Build.part({
 		name = "Bell",
 		size = Vector3.new(3, 3, 3),
-		cframe = CFrame.new(x, 31, z),
+		cframe = CFrame.new(x, 27, z),
 		color = Color3.fromRGB(180, 140, 60),
 		material = Enum.Material.Metal,
 		shape = Enum.PartType.Ball,
 		parent = parent,
 	})
-	Build.light(bell, Color3.fromRGB(255, 200, 90), 30, 1.2)
+	Build.light(bell, Color3.fromRGB(255, 190, 90), 34, 1.4, true)
+	Build.block(
+		parent,
+		"TowerDoor",
+		Vector3.new(3, 5, 0.4),
+		x,
+		2,
+		z + 3.6,
+		Color3.fromRGB(30, 22, 18),
+		Enum.Material.Wood
+	)
+	Props.lantern(parent, x + 2.6, z + 6)
 	return anchor
 end
 

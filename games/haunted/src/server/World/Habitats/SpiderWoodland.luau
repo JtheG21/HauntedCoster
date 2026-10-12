@@ -143,6 +143,7 @@ function SpiderWoodland.build(def: Habitats.Habitat): Kit.Result
 		end
 	end)
 	Kit.darkCandles(deco, def, rng, Color3.fromRGB(200, 60, 60))
+	Kit.mist(model, Random.new(77), 24, Color3.fromRGB(120, 220, 160))
 	return { model = model, landmarkAnchors = anchors, cryptGate = nil }
 end
 
