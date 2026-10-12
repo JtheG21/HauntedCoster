@@ -1,0 +1,6 @@
+{
+	"luau-lsp.sourcemap.enabled": true,
+	"luau-lsp.sourcemap.autogenerate": true,
+	"luau-lsp.sourcemap.rojoProjectFile": "haunted.project.json",
+	"luau-lsp.sourcemap.sourcemapFile": "sourcemap.json"
+}

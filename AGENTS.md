@@ -8,6 +8,7 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 - **One Rojo server, matched to its place.** Before connecting Studio, check what is serving (`ps aux | grep "rojo serve"`). Never connect a `default.project.json` server to the Haunted Collector place or the reverse: it pulls the other game's Baseplate, Lighting and scripts into the place ([[TEST-20261011-02]]). Switching branches under a running server can crash Rojo ([[LES-0003-Rojo-Crash-On-Branch-Switch]]); use a git worktree for other branches.
 - Machine state, which is authoritative for task status: `tasks/queue.json`, `tasks/usage-ledger.jsonl`, `project-state.json`. Policy: `00 Studio/budget.json`.
 - Tools: `scripts/check.sh` (all cheap checks), `scripts/orchestrator.py` (task gates), `scripts/validate_vault.py` (note conventions), `scripts/typecheck.sh`.
+- Roblox API reference: a local clone of `Roblox/creator-docs` at `~/Code/creator-docs` (outside the vault; refresh with `git -C ~/Code/creator-docs pull`). Before using an engine API you aren't sure of, grep `content/en-us/reference/engine/{classes,datatypes,enums}/<Name>.yaml`. If the clone is missing, say so; don't guess.
 - The vault is this repo. Notes go in numbered folders (`00 Studio` … `99 Templates`). Game notes live in `03 Games/<GAME-ID> <Name>/`.
 - **Do not edit:** `Agents/`, `Chats/` (the Smart Second Brain plugin), `.obsidian/` (plugin settings).
 

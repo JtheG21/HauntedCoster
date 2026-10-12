@@ -19,11 +19,15 @@ In Studio: open the **local `HauntedCollector.rbxl`** place (first time: `rojo b
 
 ```bash
 scripts/check.sh                                   # format, lint, types, build, JSON, queue, vault, Python tests
+scripts/install-hooks.sh                           # once per clone: pre-commit StyLua+Selene, build stamp on commit/checkout
+scripts/stamp.sh                                   # refresh the build stamp before a Play test
 python3 scripts/orchestrator.py status             # task list
 python3 scripts/orchestrator.py next               # what's ready
 python3 scripts/validate_vault.py                  # note conventions + links + queue/note sync
 python3 scripts/orchestrator.py report             # 08 Reviews/HLT-<date>.md
 ```
+
+**Is Studio running your code?** Both boot scripts print `[HauntedCollector] server build <sha> <time>` / `client build ...`. It must match `cat games/haunted/src/shared/BuildStamp.txt`; if not, the sync is stale. VS Code's luau-lsp reads `sourcemap.json`, which is GAME-002 (`.vscode/settings.json`); GAME-001 type checks use `game001-sourcemap.json`.
 
 ## Task lifecycle (see [[Workflow]])
 ```bash
