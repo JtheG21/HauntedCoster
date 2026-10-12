@@ -1590,7 +1590,7 @@
       "id": "TASK-0019",
       "title": "Persistence and Rejoin Test",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "high",
       "depends_on": [],
       "branch": "task/TASK-0019-Persistence-And-Rejoin-Test",
@@ -1627,6 +1627,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-12T14:24:35",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -1643,7 +1649,8 @@
           "report": "06 QA/AUD-20261012-TASK-0019-01.md"
         }
       ],
-      "revisions": 0
+      "revisions": 0,
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0020",

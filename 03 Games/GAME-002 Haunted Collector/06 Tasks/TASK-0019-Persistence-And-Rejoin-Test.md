@@ -3,7 +3,7 @@ id: TASK-0019
 title: Persistence and Rejoin Test
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: high
 owner: executor
@@ -67,4 +67,11 @@ Proposed in [[RETRO-M1-Playable-MVP-Loop]]; created as `ready` with jg's approva
 - [[AUD-20261012-TASK-0019-01]]: pass (3 minor, 2 nit; minors 3 and 4 and nit 6 fixed, minor 2 accepted as intentional).
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Merge** approved by jg in chat on 2026-10-12 ("merge it and do the pending tasks"). Merged through PR #29.
+- **Result:** real saving works. Every saved value survives leave and rejoin; leaving and shutdown both save and release the lock; a second server can't load a held profile; a server that lost its lock writes nothing. The lock transforms are now pure and spec-tested.
+- **Intentional change:** a clamped `tutorialStep` is now listed in the repaired-fields warning (warn only; [[AUD-20261012-TASK-0019-01]] finding 2).
+- **Lessons:** the game changes some values on its own (the tutorial advances, `sanitize` marks owned species caught), so a persistence check must compare with what was actually saved, not with what the test set.
+- **Follow-ups:**
+  - Adding a species, variant or flag must bump `ProfileRules.Schema` and migrate in `sanitize` (rule in [[SYS-Haunted-Player-Data]]).
+  - A true two-server lock test needs a live, running experience; only simulated here.
+  - TASK-0021 (anti-cheat hardening) was waiting on this task and is now unblocked.
