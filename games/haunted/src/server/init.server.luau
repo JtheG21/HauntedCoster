@@ -2,10 +2,14 @@
 -- GAME-002 Haunted Collector: server entry point. Builds the world, then starts services in
 -- dependency order. Cross-service hooks are wired here so services don't require each other in cycles.
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Remotes = require(script.Remotes)
-local GraveyardBuilder = require(script.World.GraveyardBuilder)
+local HubBuilder = require(script.World.HubBuilder)
+local CemeteryBuilder = require(script.World.Habitats.Cemetery)
+local Habitats = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("Habitats"))
+local HabitatRules = require(ReplicatedStorage.Shared:WaitForChild("Rules"):WaitForChild("HabitatRules"))
 local Services = script.Services
 
 local PlayerDataService = require(Services.PlayerDataService)
@@ -19,7 +23,16 @@ local EconomyService = require(Services.EconomyService)
 local TrainService = require(Services.TrainService)
 local TutorialService = require(Services.TutorialService)
 
-GraveyardBuilder.build(Workspace)
+-- The persistent outer world, then the active habitat module inside the hub wall (ADR-0007).
+local hub = HubBuilder.build(Workspace)
+for _, problem in HabitatRules.validate(Habitats.active()) do
+	warn(`[Habitats] {problem}`)
+end
+local habitatFolder = Instance.new("Folder")
+habitatFolder.Name = "Habitat"
+habitatFolder.Parent = Workspace
+CemeteryBuilder.build(Habitats.active()).model.Parent = habitatFolder
+HubBuilder.setGateLabel(hub, Habitats.active().name)
 
 require(script.StudioTestHook).start()
 

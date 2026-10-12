@@ -7,7 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
 local Monsters = require(Config:WaitForChild("Monsters"))
 local Variants = require(Config:WaitForChild("Variants"))
-local World = require(Config:WaitForChild("World"))
+local Habitats = require(Config:WaitForChild("Habitats"))
 local Theme = require(script.Parent.Theme)
 local State = require(script.Parent.Parent.State)
 
@@ -48,7 +48,7 @@ end
 -- Names of the zones where `species` spawns, for the unknown-creature hint.
 local function habitatsOf(species: string): string
 	local names = {}
-	for _, zone in World.Zones do
+	for _, zone in Habitats.active().zones do
 		if zone.spawns[species] then
 			table.insert(names, zone.name)
 		end
@@ -60,7 +60,7 @@ end
 -- zone-only variants exactly for the species that can roll them.
 local function spawnsIn(species: string, zoneIds: { string }): boolean
 	for _, zoneId in zoneIds do
-		local zone = World.zoneById(zoneId)
+		local zone = Habitats.zoneById(zoneId)
 		if zone and zone.spawns[species] then
 			return true
 		end

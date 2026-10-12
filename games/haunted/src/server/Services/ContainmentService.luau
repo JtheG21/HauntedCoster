@@ -31,15 +31,22 @@ function ContainmentService.onExhibitsChanged(cb: () -> ())
 	table.insert(exhibitChanged, cb)
 end
 
-local function placeModel(parent: Instance, speciesId: string, variantId: string, pos: Vector3, scale: number)
+-- `facing` is the world direction the model looks (the plot's front, towards the hub).
+local function placeModel(
+	parent: Instance,
+	speciesId: string,
+	variantId: string,
+	pos: Vector3,
+	scale: number,
+	facing: Vector3
+)
 	local model = MonsterModels.build(speciesId, variantId)
 	local species = Monsters.Species[speciesId]
 	if scale ~= 1 then
 		model:ScaleTo(scale)
 	end
-	model:PivotTo(
-		CFrame.lookAt(pos + Vector3.new(0, species.hover * scale, 0), pos + Vector3.new(0, species.hover * scale, -10))
-	)
+	local at = pos + Vector3.new(0, species.hover * scale, 0)
+	model:PivotTo(CFrame.lookAt(at, at + facing))
 	model.Parent = parent
 end
 
@@ -51,7 +58,7 @@ function ContainmentService.refreshVisuals(player: Player)
 	if not (i and profile and plot) then
 		return
 	end
-	local origin = World.PlotCenters[i]
+	local facing = World.plotDirToWorld(i, Vector3.new(0, 0, -1))
 	local pen = plot:FindFirstChild("Pen")
 	local residents = pen and pen:FindFirstChild("Residents")
 	if residents then
@@ -62,8 +69,8 @@ function ContainmentService.refreshVisuals(player: Player)
 				shown += 1
 				local col = (shown - 1) % 3
 				local row = math.floor((shown - 1) / 3)
-				local pos = origin + World.Plot.pen + Vector3.new(-4.5 + col * 4.5, 0.4, -3 + row * 5)
-				placeModel(residents, m.species, m.variant, pos, 0.55)
+				local pos = World.plotToWorld(i, World.Plot.pen + Vector3.new(-4.5 + col * 4.5, 0.4, -3 + row * 5))
+				placeModel(residents, m.species, m.variant, pos, 0.55, facing)
 			end
 		end
 	end
@@ -99,7 +106,7 @@ function ContainmentService.refreshVisuals(player: Player)
 					local holder = Instance.new("Folder")
 					holder.Name = "Display"
 					holder.Parent = ped
-					placeModel(holder, m.species, m.variant, ped.Position + Vector3.new(0, 0.5, 0), 0.8)
+					placeModel(holder, m.species, m.variant, ped.Position + Vector3.new(0, 0.5, 0), 0.8, facing)
 				end
 			end
 		end

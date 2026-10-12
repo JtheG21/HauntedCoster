@@ -39,17 +39,21 @@ local mode: "add" | "move" = "add"
 local preview: Folder? = nil
 local inputConn: RBXScriptConnection? = nil
 local savedCameraType: Enum.CameraType = Enum.CameraType.Custom
-local origin = Vector3.zero
+local frame = CFrame.identity -- the plot's frame: points are plot-local (World.plotFrame)
 local busy = false
 local cursor: TextLabel
 local cursorPos = Vector2.zero
 local stick = Vector2.zero
 local padConn: RBXScriptConnection? = nil
 
-local function plotOrigin(): Vector3?
+local function plotFrame(): CFrame?
 	local snap = State.snap
 	local idx = snap and snap.plotIndex
-	return if idx then World.PlotCenters[idx] else nil
+	return if idx then World.plotFrame(idx) else nil
+end
+
+local function toWorld(x: number, y: number, z: number): Vector3
+	return frame:PointToWorldSpace(Vector3.new(x, y, z))
 end
 
 local function loadStarter()
@@ -131,7 +135,7 @@ local function redraw()
 		Vector3.new(b.x1, y, b.z2),
 	}
 	for i = 1, 4 do
-		local a, c = origin + corners[i], origin + corners[i % 4 + 1]
+		local a, c = frame:PointToWorldSpace(corners[i]), frame:PointToWorldSpace(corners[i % 4 + 1])
 		part(
 			folder,
 			Vector3.new(0.4, 0.2, (c - a).Magnitude),
@@ -145,14 +149,14 @@ local function redraw()
 	local color = if v.ok then Color3.fromRGB(120, 255, 150) else Color3.fromRGB(255, 90, 90)
 	local sp = sampled.points
 	for i = 1, #sp do
-		local a = origin + Vector3.new(sp[i].x, 1.6, sp[i].z)
-		local c = origin + Vector3.new(sp[i % #sp + 1].x, 1.6, sp[i % #sp + 1].z)
+		local a = toWorld(sp[i].x, 1.6, sp[i].z)
+		local c = toWorld(sp[i % #sp + 1].x, 1.6, sp[i % #sp + 1].z)
 		if (c - a).Magnitude > 0.05 then
 			part(folder, Vector3.new(0.5, 0.3, (c - a).Magnitude), CFrame.lookAt((a + c) / 2, c), color)
 		end
 	end
 	for i, p in points do
-		local pos = origin + Vector3.new(p.x, 2.2, p.z)
+		local pos = toWorld(p.x, 2.2, p.z)
 		local col = if i == selected
 			then Color3.fromRGB(255, 230, 80)
 			elseif p.kind then Color3.fromRGB(255, 120, 220)
@@ -182,7 +186,7 @@ local function redraw()
 		local ring = part(
 			folder,
 			Vector3.new(0.2, Economy.ExhibitRange * 2, Economy.ExhibitRange * 2),
-			CFrame.new(origin + Vector3.new(lp.X, 0.3, lp.Z)) * CFrame.Angles(0, 0, math.rad(90)),
+			CFrame.new(toWorld(lp.X, 0.3, lp.Z)) * CFrame.Angles(0, 0, math.rad(90)),
 			if inRange then Color3.fromRGB(120, 255, 150) else Color3.fromRGB(140, 140, 160),
 			Enum.PartType.Cylinder
 		)
@@ -237,7 +241,8 @@ local function onTap(screenPos: Vector2)
 	if not hit then
 		return
 	end
-	local lx, lz = hit.X - origin.X, hit.Z - origin.Z
+	local l = frame:PointToObjectSpace(hit)
+	local lx, lz = l.X, l.Z
 	local b = World.Plot.trackBounds
 	-- Select an existing point if the tap is close to one.
 	for i, p in points do
@@ -482,7 +487,7 @@ function TrackEditor.open()
 		return
 	end
 	local snap = State.snap
-	local o = plotOrigin()
+	local o = plotFrame()
 	if not snap or not o then
 		toast("Your plot isn't ready yet.", "error")
 		return
@@ -499,7 +504,7 @@ function TrackEditor.open()
 		toast("Secure your monster first: its return timer keeps running.", "error")
 		return
 	end
-	origin = o
+	frame = o
 	editing = true
 	loadSaved()
 	mode = "add"
@@ -507,9 +512,10 @@ function TrackEditor.open()
 	if cam then
 		savedCameraType = cam.CameraType
 		local b = World.Plot.trackBounds
-		local center = origin + Vector3.new((b.x1 + b.x2) / 2, 0, (b.z1 + b.z2) / 2)
+		local center = toWorld((b.x1 + b.x2) / 2, 0, (b.z1 + b.z2) / 2)
 		cam.CameraType = Enum.CameraType.Scriptable
-		cam.CFrame = CFrame.lookAt(center + Vector3.new(0, 78, 26), center)
+		-- Above and behind the build area in plot space, so the plot reads the same way on every plot.
+		cam.CFrame = CFrame.lookAt(center + frame:VectorToWorldSpace(Vector3.new(0, 78, 26)), center)
 	end
 	panel.Visible = true
 	-- World prompts (e.g. the station's Ride prompt) would sit over the top-down view and swallow taps.

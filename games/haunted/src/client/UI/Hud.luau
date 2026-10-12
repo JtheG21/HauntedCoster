@@ -10,6 +10,7 @@ local Workspace = game:GetService("Workspace")
 
 local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
 local World = require(Config:WaitForChild("World"))
+local Habitats = require(Config:WaitForChild("Habitats"))
 local Economy = require(Config:WaitForChild("Economy"))
 local Theme = require(script.Parent.Theme)
 local State = require(script.Parent.Parent.State)
@@ -77,13 +78,12 @@ function Hud.toast(text: string, kind: string?)
 end
 
 local function zoneAt(pos: Vector3): string?
-	for _, z in World.Zones do
-		if World.inRect(z.rect, pos.X, pos.Z) then
-			return z.name .. (if z.dark then " (dark)" else "")
-		end
+	local z = Habitats.zoneAt(pos.X, pos.Z)
+	if z then
+		return z.name .. (if z.dark then " (dark)" else "")
 	end
-	if World.inRect(World.Graveyard.rect, pos.X, pos.Z) then
-		return "Old Graveyard"
+	if World.inHub(pos.X, pos.Z) then
+		return Habitats.active().name
 	end
 	return nil
 end
@@ -270,7 +270,7 @@ function Hud.mount(gui: ScreenGui, cb: Callbacks)
 			bar.BackgroundColor3 = if frac < 0.3 then Theme.Colors.bad else Theme.Colors.good
 			local idx = snap and snap.plotIndex
 			if idx then
-				local home = World.PlotCenters[idx] + World.Plot.pen
+				local home = World.plotToWorld(idx, World.Plot.pen)
 				local dist = (Vector3.new(home.X, 0, home.Z) - Vector3.new(root.Position.X, 0, root.Position.Z)).Magnitude
 				homeText.Text = `Home pen: {math.floor(dist)} studs (follow your beacon)`
 				local cam = Workspace.CurrentCamera

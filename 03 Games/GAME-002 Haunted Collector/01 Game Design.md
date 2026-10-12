@@ -31,7 +31,14 @@ Roblox players aged about 9–15 who like collection, tycoon and light spooky th
 Explore → inspect a monster (rarity, value, variant) → capture meter → carry it home under a timer while slowed → secure it in containment → acclimation → passive income → buy a speed upgrade or house tier → the editor unlocks and the Sealed Crypt opens → edit the route and place exhibits → ride → server payout → hunt again, now for the crypt's rare. (v0.4: clue hunting removed, [[ADR-0007-World-Retrofit-Direction]].)
 
 ## Systems (MVP)
-- **Map:** one compact graveyard next to a row of home plots. Areas: Gate path (lit, tutorial), Old Rows (ordinary), Mausoleum Hollow (dark), and the **Sealed Crypt** (gated: it opens at house tier 1, the Restored Manor; better spawns and the rare). Five landmarks (Weeping Angel, Bell Tower, Broken Hearse, Hollow Mausoleum, Old Well) are scenery and navigation points. They have no prompts and give no clues (v0.4). The west gap by the Old Well is always open. *M3 replaces this layout with radial plots and rotating habitats ([[ADR-0007-World-Retrofit-Direction]]).*
+- **Map (M3, [[ADR-0007-World-Retrofit-Direction]]):** six home plots in a ring around a central hunting area, each plot's entrance facing it. A ring road joins the plots, and a hub wall with three gates (one between each pair of plots, so every plot is equally far from one) encloses the active habitat. The first habitat is the **Ghost Cemetery**:
+  - Angel's Rest, a lit central plaza at the Weeping Angel (tutorial Wisps).
+  - Old Rows (ordinary).
+  - Mausoleum Hollow (dark).
+  - The **Sealed Crypt** beside the Bell Tower (gated: it opens at house tier 1, the Restored Manor; better spawns and the rare).
+  - Winding gate paths, plus two side routes: the Old Rows loop and the Hollow walk.
+  - The landmarks are scenery and navigation points, with no prompts or clues (v0.4).
+  - Three more habitats and rotation follow in TASK-0027 and TASK-0029.
 - **Flashlight:** a client SpotLight tool, always on, with no battery. Darkness comes from Lighting and Atmosphere, kept readable with lanterns and silhouettes along the paths. A home beacon is visible from the graveyard.
 - **Roster (4):** Wisp (ghost, common), Stitched Hound (distorted animal, common), Hollow Gentleman (unsettling figure, uncommon), Bell Wraith (bizarre, rare: it lives only in the Sealed Crypt, at most one per server, and needs a Restored Manor to capture; v0.4). Each is a placeholder model built from parts with a distinct silhouette.
 - **Variants:** a colour or particle overlay on the base model. The natural variant "Spectral" rolls 10% anywhere, ×1.5 income. The special **"Ashen"** variant is environmental: it rolls 30% only for monsters spawning in the Sealed Crypt, ×1.75 income ([[ADR-0006-M1-Tuning-And-Scope-Decisions]]).

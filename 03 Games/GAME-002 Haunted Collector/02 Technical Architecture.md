@@ -21,7 +21,7 @@ The server is authoritative. Code lives in `games/haunted/src/{server,shared,cli
 | System | Side | Responsibility | Remotes |
 |---|---|---|---|
 | PlayerDataService | S | Load/save profile (UpdateAsync, session lock, retries, schema version, migration that never drops fields), in-memory fallback flagged in the UI | — |
-| PlotService | S | Assign/release home plots, ownership checks, plot bounds | — |
+| PlotService | S | Assign/release home plots, ownership checks, plot bounds (in plot-local space) | — |
 | ~~LandmarkService~~ | — | Removed with clue hunting ([[TASK-0025-Clue-Hunting-Removal]], [[ADR-0007-World-Retrofit-Direction]]). Landmarks are scenery. Crypt access is the pure rule `EconomyRules.cryptOpen(houseTier)`; EconomyService adds `cryptOpen` to the snapshot and CaptureService refuses captures in gated zones below it | — |
 | EncounterService | S | Spawn and roam monsters in zones, roll variants, inspect payload; startle hops and fleeing escaped captures | — |
 | CaptureService | S | Capture sessions, server-timed meter, carry state, return timer, escape chase and grab | `Capture` (start/release), `Grab` prompt |
@@ -32,6 +32,12 @@ The server is authoritative. Code lives in `games/haunted/src/{server,shared,cli
 | Client UI | C | HUD, inspect card, meter, roster, journal, upgrades, editor, ride | — |
 | `shared/Config/*` | Sh | MonsterDefs, VariantDefs, Economy, Track, Zones: every tunable | — |
 | `shared/Rules/*` | Sh | Pure functions: payout, route validation, capture timing, income | — |
+
+## World layout (M3, [[ADR-0007-World-Retrofit-Direction]])
+- `shared/Config/World`: the hub (wall r 115, footprint r 112, ring road r 120–132, gates at 0°/120°/240°) and the plot ring (centres at r 185, angles 30° + 60k). Each plot has a frame, `World.plotFrame(i)`, whose -Z faces the hub. Every plot-local point or direction goes through `plotToWorld`, `worldToPlot` or `plotDirToWorld`. Plot geometry is built at local coordinates and placed with `Build.toFrame`. Saved routes and `TrackRules` stay plot-local, so they're unchanged.
+- `shared/Config/Habitats`: the module contract (zones, landmarks, paths, one path per gate, plaza, crypt, starter) and the Ghost Cemetery. `Habitats.active()` is the live module; TASK-0027 adds the other three and swapping.
+- `shared/Rules/HabitatRules`: pure footprint, corridor and path checks, plus `validate` (warnings at server start).
+- `server/World`: `HubBuilder` (persistent ground, ring road, hub wall and gates, spokes, lights), `Atmosphere` (lighting), `Props` (the shared prop kit) and `Habitats/Cemetery` (the module builder). Workspace holds `World`, `Habitat/<id>`, `Plots` and `Monsters`.
 
 ## Remotes & trust boundary
 - Clients send **intents only**: start capture, release time, investigate, secure, purchase id, route control points, ride start, exhibit slot assignment.

@@ -11,6 +11,7 @@ local Workspace = game:GetService("Workspace")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = Shared:WaitForChild("Config")
 local World = require(Config:WaitForChild("World"))
+local Habitats = require(Config:WaitForChild("Habitats"))
 local Monsters = require(Config:WaitForChild("Monsters"))
 local Variants = require(Config:WaitForChild("Variants"))
 local ChaseRules = require(Shared:WaitForChild("Rules"):WaitForChild("ChaseRules"))
@@ -96,7 +97,7 @@ local function randomPoint(zone: World.Zone): Vector3
 end
 
 local function roam(e: Encounter)
-	local zone = World.zoneById(e.zone)
+	local zone = Habitats.zoneById(e.zone)
 	local species = Monsters.Species[e.species]
 	if not zone or not species then
 		return
@@ -136,7 +137,7 @@ end
 local function inspectPayload(e: Encounter, player: Player): { [string]: any }
 	local species = Monsters.Species[e.species]
 	local profile = PlayerDataService.get(player)
-	local zone = World.zoneById(e.zone)
+	local zone = Habitats.zoneById(e.zone)
 	local locked: string? = nil
 	if zone and zone.gated and not (profile and EconomyRules.cryptOpen(profile.houseTier)) then
 		locked = "Restore your house to capture monsters in the Sealed Crypt."
@@ -175,7 +176,7 @@ local function onInspect(e: Encounter, player: Player)
 end
 
 function EncounterService.spawn(speciesId: string, variantId: string, zoneId: string, at: Vector3?): Encounter?
-	local zone = World.zoneById(zoneId)
+	local zone = Habitats.zoneById(zoneId)
 	local species = Monsters.Species[speciesId]
 	if not zone or not species then
 		return nil
@@ -236,7 +237,7 @@ local function aliveOf(speciesId: string): number
 end
 
 local function fillZones()
-	for _, zone in World.Zones do
+	for _, zone in Habitats.active().zones do
 		local speciesId = pickWeighted(zone.spawns)
 		local species = speciesId and Monsters.Species[speciesId]
 		if species and species.maxAlive and aliveOf(species.id) + outsideCount(species.id) >= species.maxAlive then
@@ -305,7 +306,7 @@ end
 -- A missed capture press startles the monster: it hops away inside its zone and can't be captured again
 -- until it settles. The capturing player keeps the claim during the hop, then the monster roams again.
 function EncounterService.startle(e: Encounter, from: Vector3)
-	local zone = World.zoneById(e.zone)
+	local zone = Habitats.zoneById(e.zone)
 	if not e.alive or not zone then
 		return
 	end
@@ -344,7 +345,7 @@ function EncounterService.spawnFleeing(
 		return nil
 	end
 	local habitat: string? = nil
-	for _, zone in World.Zones do
+	for _, zone in Habitats.active().zones do
 		if zone.spawns[speciesId] then
 			habitat = zone.id
 			break
@@ -384,7 +385,7 @@ function EncounterService.respawnEscaped(speciesId: string, variantId: string)
 	if species and species.maxAlive and aliveOf(speciesId) + outsideCount(speciesId) >= species.maxAlive then
 		return
 	end
-	for _, zone in World.Zones do
+	for _, zone in Habitats.active().zones do
 		-- A capped rare skips the zone cap, as in fillZones.
 		if zone.spawns[speciesId] and ((species and species.maxAlive) or countIn(zone.id) < zone.maxMonsters) then
 			EncounterService.spawn(speciesId, variantId, zone.id)
@@ -402,8 +403,11 @@ function EncounterService.start()
 	folder = Instance.new("Folder")
 	folder.Name = "Monsters"
 	folder.Parent = Workspace
-	-- Initial population: guarantee a Wisp by the gate for the tutorial.
-	EncounterService.spawn("Wisp", Variants.Normal, "Gate", Vector3.new(14, 0, -182))
+	-- Initial population: the habitat's guaranteed monster for the tutorial (a Wisp by the Weeping Angel).
+	local starter = Habitats.active().starter
+	if starter then
+		EncounterService.spawn(starter.species, Variants.Normal, starter.zone, starter.at)
+	end
 	for _ = 1, 3 do
 		fillZones()
 	end

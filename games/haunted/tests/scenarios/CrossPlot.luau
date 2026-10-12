@@ -11,7 +11,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Workspace = game:GetService("Workspace")
 
 local World = require(ReplicatedStorage.Shared.Config.World)
-local CaptureRules = require(ReplicatedStorage.Shared.Rules.CaptureRules)
+local Variants = require(ReplicatedStorage.Shared.Config.Variants)
 local Services = ServerScriptService:WaitForChild("Server"):WaitForChild("Services")
 local PlayerDataService = require(Services.PlayerDataService) :: any
 local PlotService = require(Services.PlotService) :: any
@@ -42,7 +42,10 @@ return function(args: any): { [string]: any }
 	local list = Players:GetPlayers()
 	check("two players joined", #list >= 2, #list)
 	if #list < 2 then
-		return finish()
+		-- Harness problem, not a game failure: the caller reruns once instead of spending a revision.
+		local r: any = finish()
+		r.infra = true
+		return r
 	end
 	local a, b = list[1], list[2]
 	local pa, pb = PlayerDataService.waitFor(a, 30), PlayerDataService.waitFor(b, 30)
@@ -66,65 +69,18 @@ return function(args: any): { [string]: any }
 		CaptureService.noteTeleport(p)
 		task.wait(0.4)
 	end
-	local function catch(p: Player, target: Model): any
-		local s = CaptureService.requestStart(p, target)
-		if not s.ok then
-			return s
-		end
-		local st = os.clock()
-		local tgt = s.zoneCenter
-		local r: any = nil
-		for _ = 1, 3 do
-			local dl = os.clock() + s.period * 2
-			while os.clock() < dl do
-				if math.abs(CaptureRules.needle(os.clock() - st, s.period) - tgt) < 0.02 then
-					break
-				end
-				task.wait()
-			end
-			r = CaptureService.requestRelease(p)
-			if r.outcome ~= "hit" then
-				break -- success, or a miss/flee/cancel that ended the session
-			end
-			tgt = r.zoneCenter or tgt
-			task.wait(CaptureRules.MinReleaseGap + 0.05)
-		end
-		return r
-	end
-	local function monster(skip: { [Model]: boolean }?): Model?
-		for _, m in Workspace.Monsters:GetChildren() do
-			local zone = m:GetAttribute("Zone")
-			if (zone == "Gate" or zone == "OldRows") and not (skip and skip[m :: Model]) then
-				return m :: Model
-			end
-		end
-		return nil
-	end
-	-- A timed release can still miss under multiplayer load (three Studio processes on one machine), and a
-	-- miss startles the monster: try up to three monsters before reporting a failed capture.
+	-- Ownership is what this scenario tests, so captures skip the timed minigame: it missed under multiplayer
+	-- load (three Studio processes on one machine) and failed runs for reasons unrelated to plots. FullLoop
+	-- covers the real capture path.
 	local function captureOne(p: Player): any
-		local tried: { [Model]: boolean } = {}
-		local r: any = nil
-		for _ = 1, 3 do
-			local m = monster(tried)
-			if not (m and m.PrimaryPart) then
-				break
-			end
-			tried[m] = true
-			tp(p, m.PrimaryPart.Position - Vector3.new(0, 3, 0) + Vector3.new(4, 0, 0))
-			r = catch(p, m)
-			if r and r.outcome == "success" then
-				break
-			end
-			task.wait(1)
-		end
-		return r
+		CaptureService.carryForTest(p, "Wisp", Variants.Normal)
+		return { outcome = if CaptureService.isCarrying(p) then "success" else "no carry" }
 	end
 
 	-- B secures one monster first (so B has something to protect).
 	local rb = captureOne(b)
 	check("B captured a monster", rb and rb.outcome == "success", rb and (rb.outcome or rb.reason))
-	tp(b, World.PlotCenters[ib] + World.Plot.pen)
+	tp(b, World.plotToWorld(ib, World.Plot.pen))
 	CaptureService.secure(b, ib)
 	check("B owns one monster", #pb.owned == 1, #pb.owned)
 	if #pb.owned ~= 1 then
@@ -135,11 +91,11 @@ return function(args: any): { [string]: any }
 	task.wait(1)
 	local ra = captureOne(a)
 	check("A captured a monster", ra and ra.outcome == "success", ra and (ra.outcome or ra.reason))
-	tp(a, World.PlotCenters[ib] + World.Plot.pen)
+	tp(a, World.plotToWorld(ib, World.Plot.pen))
 	CaptureService.secure(a, ib)
 	check("A can't secure at B's pen", #pa.owned == 0 and CaptureService.isCarrying(a), #pa.owned)
 	check("B's roster untouched", #pb.owned == 1, #pb.owned)
-	tp(a, World.PlotCenters[ia] + World.Plot.pen)
+	tp(a, World.plotToWorld(ia, World.Plot.pen))
 	CaptureService.secure(a, ia)
 	check("A secures at own pen", #pa.owned == 1, #pa.owned)
 
@@ -166,9 +122,16 @@ return function(args: any): { [string]: any }
 				seatedSeen = true
 			end
 		end)
+		-- Touch: A drops onto B's parked (disabled) seat and isn't seated (AUD-20261012-TASK-0025-02 N1).
 		tp(a, front.Position)
-		-- Enabled (as during a ride): A does get seated, and the guard ejects A. Tested first, while A has
-		-- never sat in this seat: right after an ejection the engine refuses to re-seat A for a while.
+		task.wait(1)
+		check(
+			"touching B's parked front seat doesn't seat A",
+			not seatedSeen and front.Occupant ~= humA,
+			`seatedSeen={seatedSeen} occupant={front.Occupant}`
+		)
+		-- Enabled (as during a ride): A does get seated, and the guard ejects A. Tested before any forced
+		-- seating: right after an ejection the engine refuses to re-seat A for a while.
 		front.Disabled = false
 		front:Sit(humA)
 		task.wait(1)
@@ -189,7 +152,7 @@ return function(args: any): { [string]: any }
 		check("B's cart found", false)
 	end
 	local coinsB = pb.coins
-	tp(b, World.PlotCenters[ib] + Vector3.new(World.Plot.starterRoute[1].X, 0, World.Plot.starterRoute[1].Y))
+	tp(b, World.plotToWorld(ib, Vector3.new(World.Plot.starterRoute[1].X, 0, World.Plot.starterRoute[1].Y)))
 	TrainService.ride(b, ib)
 	check("B rode and was paid despite A", pb.coins > coinsB and pb.stats.rides == 1, pb.coins - coinsB)
 	local _ = ca
