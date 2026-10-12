@@ -39,6 +39,7 @@ local swapping = false
 local lastPhase: string? = nil
 local swapCount = 0
 local swapCallbacks: { (string, string) -> () } = {}
+local failedSlot: number? = nil -- a slot whose swap failed is skipped, not retried every tick
 
 -- The schedule now (the live config unless a Studio test run passed overrides).
 function RotationService.state(now: number?): RotationRules.State
@@ -89,26 +90,38 @@ local function evacuate(): number
 	return moved
 end
 
--- The swap itself. Runs on its own thread; the tick loop waits for it.
-function RotationService.swap(nextId: string)
+-- The swap itself. Runs on its own thread; the tick loop waits for it. Every step runs protected, and the
+-- fog, the closing flag and the swapping flag are always reset, so a failing step can't leave the server
+-- foggy or refusing captures (AUD-20261012-TASK-0029-01). Returns whether the new module is active.
+function RotationService.swap(nextId: string): boolean
 	if swapping or not Habitats.ById[nextId] then
-		return
+		return false
 	end
 	swapping = true
 	local fromId = HabitatService.activeId() or "?"
 	Workspace:SetAttribute(HabitatState.Attr.fog, true)
-	task.wait(FOG_IN)
-	CaptureService.cancelAllSessions()
-	evacuate()
-	HabitatService.activate(nextId)
-	CaptureService.followSwap()
-	swapCount += 1
-	for _, fn in swapCallbacks do
-		task.spawn(fn, fromId, nextId)
+	local ok, err = pcall(function()
+		task.wait(FOG_IN)
+		CaptureService.cancelAllSessions()
+		evacuate()
+		if not HabitatService.activate(nextId) then
+			error(`could not activate {nextId}`)
+		end
+		CaptureService.followSwap()
+	end)
+	if ok then
+		swapCount += 1
+		for _, fn in swapCallbacks do
+			task.spawn(fn, fromId, nextId)
+		end
+		task.wait(FOG_HOLD)
+	else
+		warn(`[RotationService] swap {fromId} -> {nextId} failed: {err}`)
 	end
-	task.wait(FOG_HOLD)
 	Workspace:SetAttribute(HabitatState.Attr.fog, false)
+	CaptureService.setClosing(false) -- the next tick recomputes it
 	swapping = false
+	return ok
 end
 
 local function tick()
@@ -116,8 +129,12 @@ local function tick()
 		return
 	end
 	local st = RotationService.state()
-	if st.id ~= HabitatService.activeId() then
-		task.spawn(RotationService.swap, st.id)
+	if st.id ~= HabitatService.activeId() and st.slot ~= failedSlot then
+		task.spawn(function()
+			if not RotationService.swap(st.id) then
+				failedSlot = st.slot
+			end
+		end)
 		return
 	end
 	CaptureService.setClosing(st.phase == "closing")

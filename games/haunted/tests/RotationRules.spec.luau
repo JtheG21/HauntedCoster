@@ -28,22 +28,32 @@ return function(t: TestRunner.T)
 		t.eq(RotationRules.at(now).id, RotationRules.at(now + 0).id)
 	end)
 
-	t.test("boundaries: open, warning at T-60, closing at T-15, swap at T-0", function()
-		local slotStart = 900 * 1000 -- a slot boundary (slot 1000 -> index 1)
+	t.test("boundaries: open, warning, closing, swap exactly at the slot boundary (derived from config)", function()
+		local c = Rotation
+		local slotStart = c.epoch + c.slotSeconds * #c.order * 1000 -- a cycle boundary: index 1
 		local s = RotationRules.at(slotStart)
-		t.eq(s.id, "Cemetery")
+		t.eq(s.id, c.order[1])
 		t.eq(s.phase, "open")
-		t.eq(s.swapAt, slotStart + 900)
-		t.eq(RotationRules.at(slotStart + 839.9).phase, "open")
-		t.eq(RotationRules.at(slotStart + 840).phase, "warning")
-		t.eq(RotationRules.at(slotStart + 884.9).phase, "warning")
-		t.eq(RotationRules.at(slotStart + 885).phase, "closing")
-		t.eq(RotationRules.at(slotStart + 899.99).id, "Cemetery")
-		local next = RotationRules.at(slotStart + 900)
-		t.eq(next.id, "Woodland", "the swap happens exactly at the slot boundary")
-		t.eq(next.phase, "open")
-		t.truthy(RotationRules.capturesOpen(slotStart + 884))
-		t.truthy(not RotationRules.capturesOpen(slotStart + 886), "captures close in the last 15 s")
+		t.eq(s.swapAt, slotStart + c.slotSeconds)
+		local warnAt = slotStart + c.slotSeconds - c.warningSeconds
+		local closeAt = slotStart + c.slotSeconds - c.closingSeconds
+		t.eq(RotationRules.at(warnAt - 0.1).phase, "open")
+		t.eq(RotationRules.at(warnAt).phase, "warning")
+		t.eq(RotationRules.at(closeAt - 0.1).phase, "warning")
+		t.eq(RotationRules.at(closeAt).phase, "closing")
+		t.eq(RotationRules.at(slotStart + c.slotSeconds - 0.01).id, c.order[1])
+		local nxt = RotationRules.at(slotStart + c.slotSeconds)
+		t.eq(nxt.id, c.order[2], "the swap happens exactly at the slot boundary")
+		t.eq(nxt.phase, "open")
+		t.truthy(RotationRules.capturesOpen(closeAt - 1))
+		t.truthy(not RotationRules.capturesOpen(closeAt + 1), "captures close for the closing window")
+		-- The same checks hold for any valid config: a fast test schedule
+		local fast =
+			RotationRules.withOverrides(c, { slotSeconds = 40, warningSeconds = 10, closingSeconds = 4, epoch = 0 })
+		t.eq(RotationRules.at(29.9, fast).phase, "open")
+		t.eq(RotationRules.at(30, fast).phase, "warning")
+		t.eq(RotationRules.at(36, fast).phase, "closing")
+		t.eq(RotationRules.at(40, fast).id, c.order[2])
 	end)
 
 	t.test("wrap-around: Settlement hands back to the Cemetery; clocks before the epoch work", function()
@@ -68,6 +78,11 @@ return function(t: TestRunner.T)
 		local bad = RotationRules.withOverrides(Rotation, { slotSeconds = 30, warningSeconds = 40 })
 		t.eq(bad.slotSeconds, 900, "a nonsensical override falls back to the live values")
 		t.eq(RotationRules.withOverrides(Rotation, "nope").slotSeconds, 900)
+		t.eq(
+			RotationRules.withOverrides(Rotation, { slotSeconds = 30, warningSeconds = 10, closingSeconds = -1 }).slotSeconds,
+			900,
+			"a negative closing window is rejected"
+		)
 	end)
 
 	t.test("countdown text", function()

@@ -189,7 +189,7 @@ function LocalWorld.start()
 	Workspace:GetAttributeChangedSignal(HabitatState.Attr.active):Connect(syncHabitat)
 	-- The swap's fog fade (TASK-0029): thicken this client's haze while the server swaps, then clear it.
 	local clearDensity: number? = nil
-	Workspace:GetAttributeChangedSignal(HabitatState.Attr.fog):Connect(function()
+	local function onFog()
 		local atm = Lighting:FindFirstChildOfClass("Atmosphere")
 		if not atm then
 			return
@@ -201,7 +201,9 @@ function LocalWorld.start()
 			TweenService:Create(atm, TweenInfo.new(1.5), { Density = clearDensity }):Play()
 			clearDensity = nil
 		end
-	end)
+	end
+	Workspace:GetAttributeChangedSignal(HabitatState.Attr.fog):Connect(onFog)
+	task.defer(onFog) -- a player joining mid-swap sees the fog too
 	task.spawn(function()
 		local folder = Workspace:WaitForChild("Habitat")
 		folder.DescendantAdded:Connect(function(d)

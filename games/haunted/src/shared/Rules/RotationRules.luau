@@ -62,7 +62,12 @@ function RotationRules.withOverrides(base: Rotation.Config, overrides: any): Rot
 			(c :: any)[key] = v
 		end
 	end
-	if c.slotSeconds < 10 or c.warningSeconds >= c.slotSeconds or c.closingSeconds > c.warningSeconds then
+	if
+		c.slotSeconds < 10
+		or c.warningSeconds >= c.slotSeconds
+		or c.closingSeconds > c.warningSeconds
+		or c.closingSeconds < 0
+	then
 		return table.clone(base)
 	end
 	return c

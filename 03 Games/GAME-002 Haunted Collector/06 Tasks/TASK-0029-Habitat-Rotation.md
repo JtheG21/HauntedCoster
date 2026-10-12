@@ -3,7 +3,7 @@ id: TASK-0029
 title: Habitat Rotation
 type: task
 project: GAME-002
-status: in_review
+status: in_progress
 priority: high
 risk: high
 owner: executor

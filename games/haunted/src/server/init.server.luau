@@ -28,14 +28,15 @@ local TutorialService = require(Services.TutorialService)
 
 -- The persistent outer world, then every habitat module (one active inside the hub wall, ADR-0007). The
 -- rotation schedule picks the active module. Studio test runs (a `scenario` argument) are pinned to the
--- `habitat` argument, or the Cemetery, unless they pass a `rotation` schedule (TASK-0029 scenarios).
+-- `habitat` argument, or the Cemetery, unless they pass a `rotation` schedule (TASK-0029 scenarios). With a
+-- `rotation` schedule the scheduled habitat wins (a `habitat` argument would be swapped out at once).
 local hub = HubBuilder.build(Workspace)
 local testScenario = StudioTestHook.arg("scenario")
 local testRotation = StudioTestHook.arg("rotation")
 local testHabitat = StudioTestHook.arg("habitat")
 local pinned = testScenario ~= nil and testRotation == nil
 RotationService.configure(testRotation)
-local initialHabitat = if type(testHabitat) == "string"
+local initialHabitat = if type(testHabitat) == "string" and pinned
 	then testHabitat
 	elseif pinned then "Cemetery"
 	else RotationService.scheduledId()

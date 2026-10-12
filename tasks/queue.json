@@ -2238,7 +2238,7 @@
       "id": "TASK-0029",
       "title": "Habitat Rotation",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "in_progress",
       "risk": "high",
       "depends_on": [
         "TASK-0027"
@@ -2272,6 +2272,18 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T12:05:17",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-12T12:09:41",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [
@@ -2281,8 +2293,14 @@
           "notes": "check.sh pass; specs 88/0; HabitatRotation 27/27; FullLoop 85/85; ExploitProbe 13/13; CrossPlot 16/16 (TEST-20261012-05)"
         }
       ],
-      "audits": [],
-      "revisions": 0,
+      "audits": [
+        {
+          "time": "2026-10-12T12:05:17",
+          "result": "fail",
+          "report": "06 QA/AUD-20261012-TASK-0029-01.md"
+        }
+      ],
+      "revisions": 1,
       "approved_by": "jg"
     },
     {

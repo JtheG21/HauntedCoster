@@ -158,14 +158,12 @@ return function(_args: any): { [string]: any }
 	)
 	check("and the carry is done", not CaptureService.isCarrying(player))
 	local m2 = aMonster()
+	check("a monster to try after the swap", m2 ~= nil)
 	if m2 then
 		tp((m2.PrimaryPart :: BasePart).Position + Vector3.new(4, 0, 0))
+		task.wait(2.1) -- the start remote allows 2 per 4 s
 		local r = CaptureService.startForTest(player, m2)
-		check(
-			"normal play resumes: a capture can start after the swap",
-			r.ok == true or string.find(r.reason or "", "fog") == nil,
-			r.reason or "ok"
-		)
+		check("normal play resumes: a capture can start after the swap", r.ok == true, r.reason or "ok")
 		if r.ok then
 			CaptureService.requestCancel(player)
 		end

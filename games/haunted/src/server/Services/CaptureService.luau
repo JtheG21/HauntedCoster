@@ -580,9 +580,12 @@ end
 -- carries on (the deadline is unchanged). Carried captures need nothing: they aren't tied to a habitat.
 function CaptureService.followSwap()
 	for player, ch in chases do
-		local root = rootOf(player)
-		if root and ch.encounter.alive then
-			EncounterService.relocateFleeing(ch.encounter, root.Position, Monsters.Chase.headStart)
+		local at = ch.encounter.root.Position
+		-- Only chases inside the hub move; one already out on the ring road carries on where it is.
+		if ch.encounter.alive and World.inHub(at.X, at.Z) then
+			local root = rootOf(player)
+			local near = if root then root.Position else World.gatePoint(1, World.Hub.wallRadius + 7)
+			EncounterService.relocateFleeing(ch.encounter, near, Monsters.Chase.headStart)
 			StateService.toast(
 				player,
 				`Your escaped {Monsters.Species[ch.species].name} followed you out of the fog. Catch it!`,
