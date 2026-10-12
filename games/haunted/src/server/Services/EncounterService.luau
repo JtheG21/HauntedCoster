@@ -15,6 +15,7 @@ local Habitats = require(Config:WaitForChild("Habitats"))
 local Monsters = require(Config:WaitForChild("Monsters"))
 local Variants = require(Config:WaitForChild("Variants"))
 local ChaseRules = require(Shared:WaitForChild("Rules"):WaitForChild("ChaseRules"))
+local HabitatRules = require(Shared:WaitForChild("Rules"):WaitForChild("HabitatRules"))
 local EconomyRules = require(Shared.Rules:WaitForChild("EconomyRules"))
 local Remotes = require(script.Parent.Parent.Remotes)
 local MonsterModels = require(script.Parent.Parent.World.MonsterModels)
@@ -138,9 +139,11 @@ end
 local function inspectPayload(e: Encounter, player: Player): { [string]: any }
 	local species = Monsters.Species[e.species]
 	local profile = PlayerDataService.get(player)
-	local zone = Habitats.zoneById(e.zone)
 	local locked: string? = nil
-	if zone and zone.gated and not (profile and EconomyRules.cryptOpen(profile.houseTier)) then
+	if
+		HabitatRules.needsCrypt(e.zone, e.species, e.variant)
+		and not (profile and EconomyRules.cryptOpen(profile.houseTier))
+	then
 		locked = "Restore your house to capture monsters in the Sealed Crypt."
 	end
 	local tuning = Monsters.Capture[species.rarity]
@@ -472,9 +475,11 @@ function EncounterService.respawnEscaped(speciesId: string, variantId: string)
 	if species and species.maxAlive and aliveOf(speciesId) + outsideCount(speciesId) >= species.maxAlive then
 		return
 	end
-	for _, zone in Habitats.active().zones do
+	-- Only zones where its variant may appear: an Ashen monster goes back to the Sealed Crypt or nowhere.
+	for _, zoneId in HabitatRules.escapedRespawnZones(Habitats.active(), speciesId, variantId) do
+		local zone = Habitats.zoneById(zoneId) :: World.Zone
 		-- A capped rare skips the zone cap, as in fillZones.
-		if zone.spawns[speciesId] and ((species and species.maxAlive) or countIn(zone.id) < zone.maxMonsters) then
+		if (species and species.maxAlive) or countIn(zone.id) < zone.maxMonsters then
 			EncounterService.spawn(speciesId, variantId, zone.id)
 			return
 		end

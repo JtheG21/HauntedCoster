@@ -24,6 +24,7 @@ local Props = require(script.Parent.Parent.World.Props)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local StateService = require(script.Parent.StateService)
 local PlotService = require(script.Parent.PlotService)
+local CaptureService = require(script.Parent.CaptureService)
 
 local TrainService = {}
 
@@ -555,13 +556,22 @@ function TrainService.ride(player: Player, index: number)
 		task.wait(0.1)
 	end
 	-- Eject riders and park the cart.
+	local riders: { Player } = {}
 	for _, s in (t.cart and t.cart:GetChildren() or {}) :: { Instance } do
 		if s:IsA("Seat") and s.Occupant then
+			local rider = Players:GetPlayerFromCharacter(s.Occupant.Parent)
+			if rider then
+				table.insert(riders, rider)
+			end
 			unseat(s)
 		end
 	end
 	task.wait(0.2)
 	seat.Disabled = true
+	-- The re-park can carry a rider whose seat weld outlived the unseat; it isn't their own movement.
+	for _, rider in riders do
+		CaptureService.noteTeleport(rider)
+	end
 	cartAt(t, 0)
 	t.riding = false
 	if t.prompt then

@@ -1684,7 +1684,7 @@
       "id": "TASK-0021",
       "title": "Anti-Cheat Hardening",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "high",
       "depends_on": [
         "TASK-0019"
@@ -1706,6 +1706,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg (M1 retro)"
+        },
+        {
+          "time": "2026-10-12T14:28:43",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [],

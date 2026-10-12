@@ -8,6 +8,16 @@ local World = require(Shared.Config.World)
 local Habitats = require(Shared.Config.Habitats)
 local HabitatRules = require(Shared.Rules.HabitatRules)
 
+-- Any open (ungated) zone of the Cemetery.
+local function cryptFreeZone(): string
+	for _, z in Habitats.ById.Cemetery.zones do
+		if not z.gated then
+			return z.id
+		end
+	end
+	error("no open zone")
+end
+
 return function(t: TestRunner.T)
 	t.test("all four habitat modules fit the module contract", function()
 		t.eq(#Habitats.List, 4)
@@ -154,5 +164,33 @@ return function(t: TestRunner.T)
 		t.truthy(HabitatRules.inGateCorridor(0, 105), "inside the south gate")
 		t.truthy(not HabitatRules.inGateCorridor(0, 60), "well inside the hub")
 		t.truthy(not HabitatRules.inGateCorridor(0, 130), "outside the wall")
+	end)
+	t.test("an escaped Ashen monster only goes back to the Sealed Crypt", function()
+		local cemetery = Habitats.ById.Cemetery
+		t.eq(table.concat(HabitatRules.escapedRespawnZones(cemetery, "Gentleman", "Ashen"), ","), "Crypt")
+		-- A normal or Spectral Gentleman may return to any zone that spawns Gentlemen.
+		local normal = HabitatRules.escapedRespawnZones(cemetery, "Gentleman", "Normal")
+		t.truthy(#normal >= 2 and table.find(normal, "Crypt") ~= nil, table.concat(normal, ","))
+		t.eq(#HabitatRules.escapedRespawnZones(cemetery, "Gentleman", "Spectral"), #normal)
+		-- Habitats without a crypt have nowhere for it: it isn't respawned there.
+		for _, h in Habitats.List do
+			if h.id ~= "Cemetery" then
+				t.eq(#HabitatRules.escapedRespawnZones(h, "Gentleman", "Ashen"), 0, h.id)
+			end
+		end
+	end)
+
+	t.test("crypt monsters need the crypt open wherever they stand", function()
+		Habitats.setActive("Cemetery")
+		t.eq(HabitatRules.needsCrypt("Crypt", "Gentleman", "Normal"), true)
+		-- The Bell Wraith only lives in the crypt, so it is gated even outside it.
+		t.eq(HabitatRules.needsCrypt(nil, "BellWraith", "Normal"), true)
+		local open = cryptFreeZone()
+		t.eq(HabitatRules.needsCrypt(open, "BellWraith", "Normal"), true)
+		-- Ashen is a crypt-only variant: gated in any zone.
+		t.eq(HabitatRules.needsCrypt(open, "Gentleman", "Ashen"), true)
+		-- Ordinary monsters outside the crypt are not gated.
+		t.eq(HabitatRules.needsCrypt(open, "Gentleman", "Normal"), false)
+		t.eq(HabitatRules.needsCrypt(open, "Wisp", "Spectral"), false)
 	end)
 end

@@ -113,4 +113,42 @@ return function(t: TestRunner.T)
 		t.eq(o, "miss")
 		local _ = h
 	end)
+	-- Carry speed budget (TASK-0021). Carry walk speed at level 0 is 9.6 studs/s.
+	t.test("a carrier walking at the slowed speed stays inside the budget", function()
+		local speed = 9.6
+		-- 30 s of continuous walking plus a little jitter.
+		t.eq(CaptureRules.carryTooFast(speed * 30 * 1.1, 30, speed), false)
+		-- Standing still, then walking: still a legal walk.
+		t.eq(CaptureRules.carryTooFast(speed * 10, 25, speed), false)
+	end)
+
+	t.test("sustained speeding is caught", function()
+		local speed = 9.6
+		-- Full walk speed (16) instead of the carry speed, for 10 s.
+		t.eq(CaptureRules.carryTooFast(16 * 10, 10, speed), true)
+	end)
+
+	t.test("alternating bursts are caught by their average", function()
+		local speed = 9.6
+		local travelled = 0
+		local caught = false
+		-- 0.25 s ticks alternating 2x and 1x the carry speed (average 1.5x > 1.35x tolerance).
+		for i = 1, 160 do
+			travelled += speed * 0.25 * (if i % 2 == 0 then 2 else 1)
+			if CaptureRules.carryTooFast(travelled, i * 0.25, speed) then
+				caught = true
+				break
+			end
+		end
+		t.truthy(caught, "alternating speed was never caught")
+	end)
+
+	t.test("a teleport to the pen is caught", function()
+		local speed = 9.6
+		-- 2 s into the carry, 150 studs at once.
+		t.eq(CaptureRules.carryTooFast(150, 2, speed), true)
+		-- The fixed slack covers a first step, not a jump.
+		t.eq(CaptureRules.carryTooFast(CaptureRules.CarrySlackStuds, 0, speed), false)
+		t.eq(CaptureRules.carryTooFast(CaptureRules.CarrySlackStuds + 1, 0, speed), true)
+	end)
 end

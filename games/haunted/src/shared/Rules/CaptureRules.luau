@@ -71,4 +71,20 @@ function CaptureRules.applyRelease(
 	return (if misses >= missesAllowed then "fled" else "miss"), hits, misses
 end
 
+-- Carry speed (TASK-0021). The carry slowdown is a WalkSpeed on a client-simulated character, so the server
+-- measures the horizontal path the carrier really covers and compares it with what the slowed walk allows
+-- over the whole carry. One budget catches sustained speeding, alternating bursts (they still raise the
+-- average) and teleports (one huge step). Time spent standing still is not punished: it only lets the
+-- carrier arrive as soon as a legal walker would. Moves the server makes itself are excused by the caller.
+CaptureRules.CarrySpeedTolerance = 1.35 -- lag, physics jitter, slopes
+CaptureRules.CarrySlackStuds = 12 -- a fixed allowance on top (replication bursts, the first step)
+
+function CaptureRules.carryBudget(elapsed: number, allowedSpeed: number): number
+	return allowedSpeed * CaptureRules.CarrySpeedTolerance * math.max(0, elapsed) + CaptureRules.CarrySlackStuds
+end
+
+function CaptureRules.carryTooFast(travelled: number, elapsed: number, allowedSpeed: number): boolean
+	return travelled > CaptureRules.carryBudget(elapsed, allowedSpeed)
+end
+
 return CaptureRules

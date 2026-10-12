@@ -3,7 +3,7 @@ id: TASK-0021
 title: Anti-Cheat Hardening
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: high
 risk: high
 owner: executor

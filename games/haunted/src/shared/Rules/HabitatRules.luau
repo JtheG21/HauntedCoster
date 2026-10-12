@@ -6,6 +6,7 @@ local Shared = script.Parent.Parent
 local World = require(Shared.Config.World)
 local Habitats = require(Shared.Config.Habitats)
 local Monsters = require(Shared.Config.Monsters)
+local Variants = require(Shared.Config.Variants)
 
 local HabitatRules = {}
 
@@ -203,6 +204,58 @@ function HabitatRules.validate(habitat: Habitats.Habitat): { string }
 		end
 	end
 	return problems
+end
+
+-- Zones of `habitat` where an escaped monster may go back to: its species spawns there and its variant may
+-- appear there. An Ashen monster only ever returns to the Sealed Crypt (ADR-0006 §2); in a habitat without
+-- one there is nowhere to go, and the spawner repopulates later.
+function HabitatRules.escapedRespawnZones(habitat: Habitats.Habitat, speciesId: string, variantId: string): { string }
+	local variant = Variants.ById[variantId]
+	local out = {}
+	for _, zone in habitat.zones do
+		if
+			zone.spawns[speciesId] and (variant == nil or variant.zones == nil or table.find(variant.zones, zone.id))
+		then
+			table.insert(out, zone.id)
+		end
+	end
+	return out
+end
+
+local function onlyGated(zoneIds: { string }): boolean
+	if #zoneIds == 0 then
+		return false
+	end
+	for _, id in zoneIds do
+		local zone = Habitats.anyZoneById(id)
+		if not (zone and zone.gated) then
+			return false
+		end
+	end
+	return true
+end
+
+-- True when capturing this monster needs the crypt open (house tier). Not only a monster standing in a gated
+-- zone: a crypt species (the Bell Wraith) or a crypt-only variant (Ashen) that ended up anywhere else is still
+-- gated, so a misplaced spawn can never hand a tier-0 player a crypt monster (TASK-0021).
+function HabitatRules.needsCrypt(zoneId: string?, speciesId: string, variantId: string): boolean
+	local zone = if zoneId then Habitats.zoneById(zoneId) else nil
+	if zone and zone.gated then
+		return true
+	end
+	local variant = Variants.ById[variantId]
+	if variant and variant.zones and onlyGated(variant.zones) then
+		return true
+	end
+	local homes = {}
+	for _, h in Habitats.List do
+		for _, z in h.zones do
+			if z.spawns[speciesId] then
+				table.insert(homes, z.id)
+			end
+		end
+	end
+	return onlyGated(homes)
 end
 
 return HabitatRules
