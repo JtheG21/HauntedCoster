@@ -3,7 +3,7 @@ id: TASK-0017
 title: Track Editor
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -79,4 +79,6 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 - [[AUD-20261011-TASK-0017-03]]: **pass** (2 minor, 3 nit): gamepad evidence covers only R1 Confirm (cursor, A/Y/X, D-pad not run); the quality-extremes spec doesn't reach either clamp. Nits: stale-purchase reason in the probe, a `setMovement` yield edge, carry refusal judged on code.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0017-03]] passed, on the last allowed revision. Touch moves to M2 (ADR-0006 item 7).
+- **Lesson:** a spec that passes for the wrong reason (the clearance case was rejected by point spacing) hides an untested rule. Assert the exact rejection reason.
+- **Follow-ups:** a virtual-gamepad run of the cursor, A/Y/X and the D-pad; a quality spec that reaches both clamps; make `setMovement` robust against open/close races; a runtime check of the carry refusal; touch and physical-controller checks and persistence after rejoin (M2).
