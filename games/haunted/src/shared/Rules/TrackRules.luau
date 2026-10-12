@@ -76,6 +76,34 @@ local function segmentsCross(a: P, b: P, c: P, d: P): boolean
 	return ((o1 > 0) ~= (o2 > 0)) and ((o3 > 0) ~= (o4 > 0)) and o1 ~= 0 and o2 ~= 0 and o3 ~= 0 and o4 ~= 0
 end
 
+-- True when `t` holds exactly the keys 1..n (no holes, no extra keys), so `#t` can be trusted.
+local function isSequence(t: { [any]: any }, n: number): boolean
+	local count = 0
+	for k in t do
+		if type(k) ~= "number" or k % 1 ~= 0 or k < 1 or k > n then
+			return false
+		end
+		count += 1
+	end
+	return count == n
+end
+
+local function finite(v: any): boolean
+	return type(v) == "number" and v == v and v ~= math.huge and v ~= -math.huge
+end
+
+local function pointSegDist(p: P, a: P, b: P): number
+	local abx, abz = b.x - a.x, b.z - a.z
+	local len2 = abx * abx + abz * abz
+	local t = if len2 > 0 then math.clamp(((p.x - a.x) * abx + (p.z - a.z) * abz) / len2, 0, 1) else 0
+	return dist(p, { x = a.x + abx * t, z = a.z + abz * t })
+end
+
+-- Distance between two segments that don't cross (crossings are rejected before this is used).
+local function segSegDist(a: P, b: P, c: P, d: P): number
+	return math.min(pointSegDist(a, c, d), pointSegDist(b, c, d), pointSegDist(c, a, b), pointSegDist(d, a, b))
+end
+
 export type Validation = { ok: boolean, reason: string?, sampled: Sampled? }
 
 -- Validates untrusted control points. `bounds` is the plot-local editor rectangle.
@@ -90,9 +118,13 @@ function TrackRules.validate(points: any, pieces: any, bounds: Rect): Validation
 	if n > Track.MaxPoints then
 		return { ok = false, reason = `At most {Track.MaxPoints} points` }
 	end
+	if not isSequence(points, n) then
+		return { ok = false, reason = "Bad point" }
+	end
 	local clean: { P } = {}
-	for _, p in points do
-		if type(p) ~= "table" or type(p.x) ~= "number" or type(p.z) ~= "number" or p.x ~= p.x or p.z ~= p.z then
+	for i = 1, n do
+		local p = points[i]
+		if type(p) ~= "table" or not finite(p.x) or not finite(p.z) then
 			return { ok = false, reason = "Bad point" }
 		end
 		if p.x < bounds.x1 or p.x > bounds.x2 or p.z < bounds.z1 or p.z > bounds.z2 then
@@ -109,8 +141,12 @@ function TrackRules.validate(points: any, pieces: any, bounds: Rect): Validation
 		if type(pieces) ~= "table" or #pieces > Track.MaxPieces then
 			return { ok = false, reason = `At most {Track.MaxPieces} special pieces` }
 		end
+		if not isSequence(pieces, #pieces) then
+			return { ok = false, reason = "Bad special piece" }
+		end
 		local used: { [number]: boolean } = {}
-		for _, piece in pieces do
+		for i = 1, #pieces do
+			local piece = pieces[i]
 			if
 				type(piece) ~= "table"
 				or type(piece.i) ~= "number"
@@ -156,14 +192,15 @@ function TrackRules.validate(points: any, pieces: any, bounds: Rect): Validation
 			end
 		end
 	end
-	-- Clearance: samples far apart along the loop must also be far apart in space (no overlapping or
-	-- near-parallel passes, which the crossing test alone doesn't catch).
+	-- Clearance: segments far apart along the loop must also be far apart in space (no overlapping or
+	-- near-parallel passes, which the crossing test alone doesn't catch). Segment-to-segment distance,
+	-- so passes can't slip between two sample points.
 	local spacing = Track.SampleSpacing
 	local skip = math.ceil((Track.MinClearance * 2) / spacing)
 	for i = 1, m do
 		for j = i + skip, m do
 			if m - (j - i) > skip then
-				if dist(sp[i], sp[j]) < Track.MinClearance then
+				if segSegDist(sp[i], sp[i % m + 1], sp[j], sp[j % m + 1]) < Track.MinClearance then
 					return { ok = false, reason = "Two parts of the track pass too close together" }
 				end
 			end

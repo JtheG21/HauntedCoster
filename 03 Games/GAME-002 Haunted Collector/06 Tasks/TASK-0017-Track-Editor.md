@@ -3,7 +3,7 @@ id: TASK-0017
 title: Track Editor
 type: task
 project: GAME-002
-status: ready
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -56,11 +56,29 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 *Prototype built in one integration commit, `17cb5ae` on `task/TASK-0011-Haunted-Scaffold-And-Player-Data`, which covers TASK-0011 to TASK-0018. The user approved building without per-task gates on 2026-10-11.*
 - `scripts/check.sh`: all pass (StyLua, Selene, strict typecheck for both projects, Rojo builds, vault, Python tests).
 - Unit specs: 37/37 pass headless ([[TEST-20261011-01]]). Server smoke in Run mode: clean.
-- **Not yet verified with a player:** the `FullLoop` play scenario is written but hasn't run (the Studio window didn't load the place). The ACs below stay unchecked until it has run.
+- *(Superseded below: FullLoop has since run, see revision 1.)*
+
+### Revision 1 (with TASK-0011, `5878f6d`, merged in PR #2)
+- Self-overlap clearance rule added; the editor tap offset (top-bar inset) was fixed; prompts are disabled while editing; gamepad cursor support.
+- Evidence: [[TEST-20261011-03]] (real-client editor: add, select, move, delete, piece, out-of-bounds tap, valid and invalid Confirm), [[TEST-20261011-04]] (fix checks).
+
+### Revision 2 (`task/TASK-0017-Track-Editor`, last allowed revision)
+- **F1 (touch, AC2):** moved to M2 by jg ([[ADR-0006-M1-Tuning-And-Scope-Decisions]] item 7). The specific risk the audit named is guarded in code: character controls are disabled while the editor is open, so a tap in the thumbstick or jump area can't move the character (checked: W and stick held while editing don't move it).
+- **F2:** the clearance spec uses a thin loop with every control point ≥ 6 studs apart, asserts the clearance reason, and has a valid hairpin as a positive case.
+- **F3:** ExploitProbe unlocks tier 1 first (test shortcut), spaces out the route calls past the rate limit, and asserts the validation reasons. The spec covers NaN, ±inf and 17 points.
+- **F4:** R1 also confirms (Start can be taken by the console menu). The light toggle is on DPadDown (TASK-0012), so it doesn't conflict with the editor's DPadLeft/Right.
+- **F5:** clearance now uses segment-to-segment distance instead of sample points.
+- **F6:** validation iterates 1..n and rejects non-sequence point or piece tables (holes, extra keys). A quality-limits spec covers both extremes.
+- **F7:** the editor refuses to open while carrying a monster.
+- Evidence: [[TEST-20261011-06]]: specs 51/0, ExploitProbe 13/13, FullLoop 56/56, editor movement and R1 checks. `scripts/check.sh` passes.
 - Systems: [[SYS-Haunted-Player-Data]], [[SYS-Haunted-Capture-Loop]], [[SYS-Haunted-Ghost-Train]].
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261011-TASK-0017-01]]: fail, revision 1
+- [[AUD-20261011-TASK-0017-02]]: fail (1 major: touch never run), revision 2
+- [[AUD-20261011-TASK-0017-03]]: **pass** (2 minor, 3 nit): gamepad evidence covers only R1 Confirm (cursor, A/Y/X, D-pad not run); the quality-extremes spec doesn't reach either clamp. Nits: stale-purchase reason in the probe, a `setMovement` yield edge, carry refusal judged on code.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0017-03]] passed, on the last allowed revision. Touch moves to M2 (ADR-0006 item 7).
+- **Lesson:** a spec that passes for the wrong reason (the clearance case was rejected by point spacing) hides an untested rule. Assert the exact rejection reason.
+- **Follow-ups:** a virtual-gamepad run of the cursor, A/Y/X and the D-pad; a quality spec that reaches both clamps; make `setMovement` robust against open/close races; a runtime check of the carry refusal; touch and physical-controller checks and persistence after rejoin (M2).

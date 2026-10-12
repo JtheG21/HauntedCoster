@@ -1363,7 +1363,7 @@
       "id": "TASK-0017",
       "title": "Track Editor",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0015",
@@ -1386,8 +1386,104 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-11T19:35:00",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T19:35:00",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T19:35:00",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-11T19:35:00",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T19:35:00",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T19:35:00",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 2/2"
+        },
+        {
+          "time": "2026-10-11T19:35:01",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T19:42:36",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T19:45:47",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-11T19:46:08",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
-      ]
+      ],
+      "executions": [
+        {
+          "time": "2026-10-11T19:35:00",
+          "result": "pass",
+          "notes": "Revision-0 build (17cb5ae) merged with TASK-0011"
+        },
+        {
+          "time": "2026-10-11T19:35:00",
+          "result": "pass",
+          "notes": "Revision 1 at 5878f6d; TEST-20261011-03/04"
+        },
+        {
+          "time": "2026-10-11T19:42:36",
+          "result": "pass",
+          "notes": "Revision 2: TEST-20261011-06 (specs 51/0, ExploitProbe 13/13, FullLoop 56/56)"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-11T19:35:00",
+          "result": "fail",
+          "report": "06 QA/AUD-20261011-TASK-0017-01.md"
+        },
+        {
+          "time": "2026-10-11T19:35:00",
+          "result": "fail",
+          "report": "06 QA/AUD-20261011-TASK-0017-02.md"
+        },
+        {
+          "time": "2026-10-11T19:45:47",
+          "result": "pass",
+          "report": "06 QA/AUD-20261011-TASK-0017-03.md"
+        }
+      ],
+      "revisions": 2,
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0018",
