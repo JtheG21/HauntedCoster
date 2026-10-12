@@ -1657,9 +1657,9 @@
       "acceptance_criteria": [
         "An exploit scenario running at full speed while carrying, and one teleporting to the pen, both fail to secure",
         "A secure after the deadline fails",
-        "A player without the Bell clue can't inspect the Wraith or get it recorded as seen (2-player scenario)",
+        "A tier-0 player can't capture a crypt monster (the Bell Wraith) through crafted CaptureStart calls, from inside or outside the crypt (2-player scenario) [reworded with jg's approval 2026-10-12]",
         "An escaped Ashen monster respawns only in the Sealed Crypt (spec or scenario)",
-        "A forced crypt ejection gives no carry strike (scenario)",
+        "A server-initiated move during a carry (habitat evacuation, test teleport) gives no carry strike (scenario) [reworded with jg's approval 2026-10-12]",
         "scripts/check.sh passes; ExploitProbe and CrossPlot pass"
       ],
       "approved_by": "jg",
@@ -2031,7 +2031,7 @@
       "id": "TASK-0026",
       "title": "Radial Plot Layout",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "high",
       "depends_on": [
         "TASK-0025"
@@ -2045,7 +2045,8 @@
         "Saved and starter routes build, validate, ride and pay on every plot. The editor places points where the player taps on a rotated plot (CrossPlot or FullLoop check on a non-axis-aligned plot).",
         "Securing works only at the player's own pen, at its new world position. Plot ownership and the cross-plot checks still hold (CrossPlot 2 players).",
         "The cemetery module stays inside its footprint. Reachability proves:",
-        "FullLoop, ExploitProbe and the specs pass. `scripts/check.sh` passes."
+        "FullLoop, ExploitProbe and the specs pass. `scripts/check.sh` passes.",
+        "CrossPlot checks that a non-owner touching a parked owner seat is not seated (follow-up from AUD-20261012-TASK-0025-02 N1, added with jg's approval on 2026-10-12)"
       ],
       "history": [
         {
@@ -2053,6 +2054,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-12T02:00:08",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [],

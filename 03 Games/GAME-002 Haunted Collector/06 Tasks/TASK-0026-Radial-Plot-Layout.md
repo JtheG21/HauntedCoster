@@ -3,7 +3,7 @@ id: TASK-0026
 title: Radial Plot Layout
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: high
 risk: high
 owner: executor
@@ -32,6 +32,7 @@ Six plots stand in a ring around a central hunting footprint with their entrance
   - `World.plotFrame / plotToWorld / worldToPlot`. Every consumer in the audit converts: plot geometry is built in local space, then transformed. That covers PlotBuilder, PlotService (spawn facing, `isInOwnPlot`), ContainmentService (residents face the plot front), `CaptureService.secure`, TrainService (positions and headings), TrackEditor (tap → local, outline, camera) and the Hud home arrow.
   - A `HabitatModule` contract (footprint disc, gate connection points, spawn zones, two landmark slots, `build`) and the cemetery as its first module. It is re-laid inside r ≤ 112, keeps all landmarks as scenery, and has winding paths linking the three gates.
   - Neutral spawn on the ring road. `ChaseRules` regions: hub disc and outer ring instead of rects.
+  - CrossPlot also checks that touch-sitting a parked owner seat is refused. This is the [[AUD-20261012-TASK-0025-02]] N1 follow-up, added with jg's approval on 2026-10-12.
 - **Out:** the other three habitats and swapping (TASK-0027), detail and lighting (TASK-0028), rotation (TASK-0029), new house or train visuals (TASK-0030).
 
 ## Files expected to change
@@ -53,6 +54,7 @@ Six plots stand in a ring around a central hunting footprint with their entrance
   - a real walk from home to the Weeping Angel succeeds.
   It also reports the longest pen walk time.
 - [ ] AC7: FullLoop, ExploitProbe and the specs pass. `scripts/check.sh` passes.
+- [ ] AC8: CrossPlot checks that a non-owner touching a parked owner seat is not seated (follow-up from AUD-20261012-TASK-0025-02 N1, added with jg's approval on 2026-10-12).
 
 ## Tests
 - **Automated:** `scripts/check.sh`, new `PlotLayout.spec`, and the scenarios above. An optional offline `roblox-map` prove of an exported greybox spec (ring symmetry P8, overlap). Never its Studio bootstrap.
