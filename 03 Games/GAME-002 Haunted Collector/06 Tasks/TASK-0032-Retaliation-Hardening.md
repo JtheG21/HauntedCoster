@@ -74,6 +74,6 @@ Close the follow-ups from [[AUD-20261012-TASK-0031-01]]: retaliation must surviv
 - **Merge** approved by jg in chat on 2026-10-12 ("merge it and do the post-merge notes"). Merged through PR #26.
 - **Result:** a retaliation tick error is caught and every pursuit ends cleanly. A failing `onFled` handler still lets the monster slip away. A monster that retaliated forgets the player's counters. The scenario now proves edge containment, tick-error recovery and the death ending.
 - **Follow-ups** (from [[AUD-20261012-TASK-0032-01]]):
-  - `RetaliationService.begin`: a mid-loop error can leave extra pursuers flagged `pursuing` with no pursuit record. Create the record first, or release the monsters already set on error. Proposed as [[TASK-0033-Retaliation-Begin-Cleanup]].
+  - `RetaliationService.begin`: a mid-loop error can leave extra pursuers flagged `pursuing` with no pursuit record. Create the record first, or release the monsters already set on error. Done in [[TASK-0033-Retaliation-Begin-Cleanup]] (PR #28).
   - Optional: a spec or scenario with a throwing `onFled` handler.
 - **Still needs jg (from TASK-0031):** the feel of the numbers (8 s, 13.5 studs/s, 1.5 s knockdown, 3 s grace).

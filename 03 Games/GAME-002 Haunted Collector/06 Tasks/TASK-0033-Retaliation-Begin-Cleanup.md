@@ -3,7 +3,7 @@ id: TASK-0033
 title: Retaliation Begin Cleanup
 type: task
 project: GAME-002
-status: in_review
+status: done
 priority: low
 risk: low
 owner: executor
@@ -66,6 +66,10 @@ Close finding 1 of [[AUD-20261012-TASK-0032-01]]. Today `RetaliationService.begi
 
 ## Audits
 - [[AUD-20261012-TASK-0033-01]]: fail (1 major: the scenario step couldn't catch the regression; 1 minor; 2 nit). Fixed in revision 1.
+- [[AUD-20261012-TASK-0033-02]]: pass (delta; 2 nit accepted).
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Merge** approved by jg in chat on 2026-10-12 ("merge it when the delta audit passes"). Merged through PR #28.
+- **Result:** if `RetaliationService.begin` errors part-way, every monster it had marked (including one half-set by a throwing `setPursuing`) is released, no pursuit record is left, and the target slips away through `onFled`'s fallback.
+- **Lesson:** a regression step needs a negative control. Attempt 1's step passed on the old code, because the injected failure fired where only the target (which is removed anyway) had been set. Running the step once with the fix disabled in Studio's copy showed revision 1's step can fail.
+- **Follow-ups:** none from the audits. Still for jg (from TASK-0031): the feel of the retaliation numbers.

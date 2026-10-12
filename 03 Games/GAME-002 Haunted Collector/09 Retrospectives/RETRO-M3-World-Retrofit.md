@@ -32,6 +32,7 @@ Retrofit the world without redesigning the game ([[ADR-0007-World-Retrofit-Direc
 | [[TASK-0030-House-And-Train-Presentation]] | Done. PR #24 |
 | [[TASK-0031-Failed-Capture-Retaliation]] | Merged through PR #25 once its audit passes; see the task note |
 | [[TASK-0032-Retaliation-Hardening]] | Done. PR #26. The TASK-0031 audit follow-ups |
+| [[TASK-0033-Retaliation-Begin-Cleanup]] | Done. PR #28. One failed audit: the regression step couldn't fail; fixed in revision 1 and proven with a negative control |
 
 ## What went well
 - Specs moved to Lune (ADR-0008), so `scripts/check.sh` proves the rules on every commit without Studio. It grew from 63 to 96 specs.

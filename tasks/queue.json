@@ -2539,7 +2539,7 @@
       "id": "TASK-0033",
       "title": "Retaliation Begin Cleanup",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "done",
       "risk": "low",
       "depends_on": [
         "TASK-0032"
@@ -2588,6 +2588,18 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T13:24:15",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-12T13:24:15",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -2607,10 +2619,16 @@
           "time": "2026-10-12T13:16:42",
           "result": "fail",
           "report": "06 QA/AUD-20261012-TASK-0033-01.md"
+        },
+        {
+          "time": "2026-10-12T13:24:15",
+          "result": "pass",
+          "report": "06 QA/AUD-20261012-TASK-0033-02.md"
         }
       ],
       "revisions": 1,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }
