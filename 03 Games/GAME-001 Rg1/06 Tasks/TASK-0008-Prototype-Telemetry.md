@@ -3,7 +3,7 @@ id: TASK-0008
 title: Prototype Telemetry
 type: task
 project: GAME-001
-status: ready
+status: archived
 priority: medium
 risk: low
 owner: executor
@@ -12,7 +12,7 @@ depends_on:
   - TASK-0006
 branch: task/TASK-0008-Prototype-Telemetry
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-11
 tags:
   - workflow/task
   - milestone/m2
@@ -52,3 +52,4 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 ## Audits
 
 ## Outcome
+- **Archived** by jg on 2026-10-11, never started (GAME-001 paused; GAME-002 is primary).

@@ -603,7 +603,7 @@
       "id": "TASK-0008",
       "title": "Prototype Telemetry",
       "project": "GAME-001",
-      "status": "ready",
+      "status": "archived",
       "risk": "low",
       "depends_on": [
         "TASK-0006"
@@ -622,6 +622,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-11T20:36:08",
+          "from": "ready",
+          "to": "archived",
+          "note": "archived by jg"
         }
       ]
     },
