@@ -3,7 +3,7 @@ id: TASK-0015
 title: House Tiers and Upgrades
 type: task
 project: GAME-002
-status: ready
+status: done
 priority: high
 risk: low
 owner: executor
@@ -56,11 +56,17 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 *Prototype built in one integration commit, `17cb5ae` on `task/TASK-0011-Haunted-Scaffold-And-Player-Data`, which covers TASK-0011 to TASK-0018. The user approved building without per-task gates on 2026-10-11.*
 - `scripts/check.sh`: all pass (StyLua, Selene, strict typecheck for both projects, Rojo builds, vault, Python tests).
 - Unit specs: 37/37 pass headless ([[TEST-20261011-01]]). Server smoke in Run mode: clean.
-- **Not yet verified with a player:** the `FullLoop` play scenario is written but hasn't run (the Studio window didn't load the place). The ACs below stay unchecked until it has run.
+- *(Superseded below: FullLoop has since run, see revision 1.)*
+
+### Revision 1 (with TASK-0011, `5878f6d`, merged in PR #2)
+- Double purchase fixed: the server rejects a request whose level doesn't match before charging; the client sends one request at a time. FullLoop checks a duplicate costs nothing, plus respawn and house-model checks. Prices per ADR-0006.
+- Evidence: [[TEST-20261011-03]] (first upgrade 51 s after the first secure; tier 1 bought in the real client), [[TEST-20261011-04]] (FullLoop 56/56).
 - Systems: [[SYS-Haunted-Player-Data]], [[SYS-Haunted-Capture-Loop]], [[SYS-Haunted-Ghost-Train]].
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261011-TASK-0015-01]]: fail (1 major: double-purchase coin loss), revision 1
+- [[AUD-20261011-TASK-0015-02]]: **pass** (1 minor, 2 nit): the first upgrade comes about 51 s after the first secure, against a target of about 2 min (retune at the retro). Nits: a stale-snapshot 'Already upgraded' reply is hidden in the Mansion UI; notes were stale.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0015-02]] passed.
+- **Follow-ups:** the first upgrade comes about 51 s after the first secure, against about 2 min (retune at the M1 retro). Show the 'Already upgraded' reply in the Mansion UI. Persistence of tier and speed moves to M2 (ADR-0006 §4).
