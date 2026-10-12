@@ -57,7 +57,11 @@ Proposed in [[RETRO-M1-Playable-MVP-Loop]]; created as `ready` with jg's approva
   - Specs: `SessionLockRules.spec` (8) and 4 new `ProfileRules.spec` cases (`isNewerSchema`, read-only newer schema, its fields survive sanitize, the repaired-field list).
   - Schema-bump rule written in [[SYS-Haunted-Player-Data]] (AC4). New species, variants and flags need a bump, because an older server's `sanitize` drops unknown ones.
 - **Checks:** `scripts/check.sh` passes (specs 108/0). Negative controls: with the lost-lock check disabled, `SessionLockRules.spec` fails 1; with `isNewerSchema` off by one, `ProfileRules.spec` fails 2. Both were restored.
-- **Still to do (part 2, needs jg's place):** AC1 leave and rejoin with values before and after, AC2 two servers and lock release on leave and shutdown, recorded in a TEST note.
+- **Part 2 (live, jg's private place "Haunted", 108419797534540):** jg confirmed the place in chat on 2026-10-12 ("ok you should be able to proceed"). New scenario `Persistence` with three phases, run from Edit ([[TEST-20261012-10]]):
+  - `write` 9/9: test values saved; a second server's load refused while held; leaving released the lock.
+  - `read` 4/4: every value survived leave and rejoin (AC1). The shutdown save then wrote one more coin and released the lock (AC2).
+  - `lock` 7/7: after another server took the lock, the session wrote nothing and turned read-only.
+  - Run 1 of `write` failed one check through a test bug (it expected the tutorial step it set, but the tutorial moves on by itself); fixed before the audit.
 
 ## Audits
 *(links to AUD- notes)*
