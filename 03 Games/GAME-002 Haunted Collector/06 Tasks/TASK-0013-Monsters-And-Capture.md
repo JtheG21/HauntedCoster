@@ -3,7 +3,7 @@ id: TASK-0013
 title: Monsters and Capture
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -71,4 +71,5 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 - [[AUD-20261011-TASK-0013-02]]: **pass** (3 minor, 3 nit): the slack makes the real hit window wider than the drawn zone; ExploitProbe's mash check can't fail; zone caps total 10, not 8. Nits: Ashen really rolls at 27%, ping clamped at 0.3 s.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0013-02]] passed.
+- **Follow-ups (M1 polish / M2):** make the drawn green zone match the judged window (or bound the slack in a spec); give ExploitProbe's mash check a way to fail; reconcile the 8-monster scope with the zone caps (10); Ashen's real roll (27%) vs ADR-0006's 30%; the ping clamp at 0.3 s.
