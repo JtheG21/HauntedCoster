@@ -2336,7 +2336,7 @@
       "id": "TASK-0030",
       "title": "House and Train Presentation",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "done",
       "risk": "low",
       "depends_on": [
         "TASK-0026"
@@ -2367,6 +2367,18 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T12:26:22",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-12T12:26:22",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -2376,9 +2388,16 @@
           "notes": "check.sh pass; specs 91/0; FullLoop 85/85 (after Manor rename); CrossPlot 16/16; parts 16/79/115 (TEST-20261012-06)"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-12T12:26:22",
+          "result": "pass",
+          "report": "06 QA/AUD-20261012-TASK-0030-01.md"
+        }
+      ],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0031",

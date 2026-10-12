@@ -3,7 +3,7 @@ id: TASK-0030
 title: House and Train Presentation
 type: task
 project: GAME-002
-status: in_review
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -45,8 +45,15 @@ Each plot reads as a small haunted theme park. The three house tiers look like c
   - Plot dressing: stone gate pillars with lanterns and an iron spiked arch at the entrance, 5 lamps (3 between the pen and the track area, 2 by the porch), and dressed exhibit plinths with corner posts.
   - Station (TrainService): a canopy on four iron posts with two hanging lanterns and a name board. Nothing collides, so the cart, riders and the Ride prompt are unchanged.
   - No fencing around the track area. A fence there would block walking to the station and the exhibits; the plot's entrance gate and border carry the "fence and gate" look.
+- Exhibit dressing (plinth and corner posts on each pedestal) is deliberately exempt from the keep-clear check: it sits on the pedestal itself and nothing in it collides.
 - **Evidence:** [[TEST-20261012-06]].
 
 ## Audits
+- [[AUD-20261012-TASK-0030-01]]: pass (3 minor, 4 nit). The TEST note counts were corrected; the exhibit-dressing exemption is recorded above.
 
 ## Outcome
+- **Merge** approved by jg in chat on 2026-10-12 ("merge anything you need to to finish this up"). Merged through PR #24.
+- **Result:** three clearly escalating house tiers, plot entrance gate, warm lamps, dressed exhibits and a lit station canopy. A spec keeps all of it out of the gameplay areas.
+- **Needs jg:** review all three tiers (tier 1 has no capture); confirm the 6-stud exhibit clearance reading and the proposed house budget (≤ 150 parts, ≤ 4 lights); say if the entrance arch reads too heavy.
+- **Follow-ups (nits):** tier 1's inner shutters touch the door frame; the wing gables poke through the main gable ends; the pillar caps reach 0.6 studs past the plot edge.
+
