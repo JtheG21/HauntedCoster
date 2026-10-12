@@ -3,7 +3,7 @@ id: TASK-0023
 title: Round 20 Design Changes
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -97,4 +97,7 @@ References: `10 References/06 Code` was not consulted. These are rule changes in
 - [[AUD-20261011-TASK-0023-02]]: **pass** (delta re-audit of revision 1; 0 blocker, 0 major, 1 minor carried, 3 nit)
 
 ## Outcome
-*(after merge)*
+- **Result:** jg approved the merge on 2026-10-11 (`approve-merge`) after [[AUD-20261011-TASK-0023-02]] passed on revision 1. PR: JtheG21/HauntedCoster#14. All five Round 20 answers are in the build: startle on miss, escape chase with one re-grab, carry penalty by level, a starter Scare Arch and display, and the "Build your haunted train" hook.
+- **Deferred:** the 2-player CrossPlot run (including a grab by another player) moves to [[TASK-0020-Physical-Device-Checks]] (jg). Chase death/leave, speed after a regrab and hits carry-over are judged on code only (carried minor F4).
+- **Lessons:** `git add <dir>` swept in `rojo init` boilerplate that someone else created mid-session. Stage explicit paths and check `git status` for new files before committing. A Rojo server started from the wrong directory can serve partial content, here src without tests. Compare TestService sizes against disk before trusting a Studio run.
+- **Follow-ups:** [[TASK-0024-FullLoop-Landmark-Flake]] (the "landmark records clue" check failed once in 3 runs); jg's feel run on chase tension, startle retry pace (two presses per retry) and 0.6× carry at level 0; Round 21 answers (misses-allowed, duplicates, exhibit assignment, respawn delay).

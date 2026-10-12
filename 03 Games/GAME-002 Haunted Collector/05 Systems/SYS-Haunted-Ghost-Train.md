@@ -25,6 +25,7 @@ Each plot's rideable ghost train: track geometry from a validated route, server-
 - Closed Catmull-Rom loop through plot-local points; validation: 4–16 points, 60–320 studs, spacing ≥ 6, inside bounds, no self-crossing, ≤ 3 special pieces.
 - Anchored cart moved by server CFrame; owner seat plus a guest seat; leaving the seat cancels with no payout.
 - Payout = 40 × house multiplier × route quality (0.9–1.25) × (1 + exhibit bonus within 16 studs); 20 s cooldown between paid rides.
+- The fixed starter loop (unowned plots, and owners with no saved route) has one Scare Arch and passes exhibit slot 2 (`World.Plot.starterPieces`, [[TASK-0023-Round-20-Design-Changes]]).
 - First paid ride sets `bellHint`, which starts the Bell Wraith clue chain.
 
 ## Interfaces

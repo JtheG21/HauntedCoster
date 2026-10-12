@@ -1772,7 +1772,7 @@
       "id": "TASK-0023",
       "title": "Round 20 Design Changes",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0023-Round-20-Design-Changes",
@@ -1829,6 +1829,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-11T21:28:16",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -1855,7 +1861,29 @@
           "report": "06 QA/AUD-20261011-TASK-0023-02.md"
         }
       ],
-      "revisions": 1
+      "revisions": 1,
+      "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0024",
+      "title": "FullLoop Landmark Flake",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0024-FullLoop-Landmark-Flake",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0024-FullLoop-Landmark-Flake.md",
+      "acceptance_criteria": [
+        "The cause is named with evidence (e.g. root position and anchor distance logged on failure), not guessed",
+        "FullLoop passes 5 consecutive runs in Studio with the landmark check passing each time",
+        "If the game is at fault, the fix is in LandmarkService and covered by a check that fails without it",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": null,
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
     }
   ]
 }
