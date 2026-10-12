@@ -3,7 +3,7 @@ id: TASK-0023
 title: Round 20 Design Changes
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: medium
 risk: medium
 owner: executor
@@ -90,7 +90,7 @@ References: `10 References/06 Code` was not consulted. These are rule changes in
 | nit: Overview row | Updated |
 | nit: `LoadCharacter` without death keeps the chase | Accepted: the chase reads `player.Character` fresh each tick and expires in 15 s |
 
-**Checks (rev 1):** `scripts/check.sh`: ALL CHECKS PASSED. **Studio:** not re-run yet.
+**Checks (rev 1):** `scripts/check.sh`: ALL CHECKS PASSED. **Studio ([[TEST-20261011-08]] rev 1):** specs 61/0. FullLoop 80/81 then 81/81: the one failure is the existing landmark check, which TASK-0023 doesn't touch (flaky). ExploitProbe 13/13. CrossPlot deferred.
 
 - [[AUD-20261011-TASK-0023-01]]: **fail** (1 major: undeclared `games/haunted/default.project.json` + README + `.gitignore`; 4 minor, 2 nit)
 

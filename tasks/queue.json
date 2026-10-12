@@ -1772,7 +1772,7 @@
       "id": "TASK-0023",
       "title": "Round 20 Design Changes",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0023-Round-20-Design-Changes",
@@ -1817,6 +1817,12 @@
           "from": "changes_requested",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-11T21:24:31",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
       "executions": [
@@ -1824,6 +1830,11 @@
           "time": "2026-10-11T21:07:11",
           "result": "pass",
           "notes": "TEST-20261011-08: specs 60/0, FullLoop 79/79, ExploitProbe 13/13; CrossPlot no result (harness, as TEST-07; 2-player run with TASK-0020)"
+        },
+        {
+          "time": "2026-10-11T21:24:31",
+          "result": "pass",
+          "notes": "Revision 1 (TEST-20261011-08): specs 61/0, FullLoop 80/81 then 81/81 (flaky landmark check, untouched code), ExploitProbe 13/13; CrossPlot deferred by jg"
         }
       ],
       "audits": [
