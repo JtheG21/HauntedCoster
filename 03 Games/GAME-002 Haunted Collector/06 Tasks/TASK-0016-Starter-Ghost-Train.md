@@ -3,7 +3,7 @@ id: TASK-0016
 title: Starter Ghost Train
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -69,4 +69,5 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 - [[AUD-20261011-TASK-0016-02]]: **pass** (2 minor, 2 nit): a new owner who gets a plot mid-ride can keep the old route and be paid on it; two tests can pass without the behaviour happening (the griefer was never asserted seated; the ride was never asserted started before the cancel). Nits: exhibit out-of-range feedback (TEST-03 F6); notes were stale.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0016-02]] passed.
+- **Follow-ups:** rebuild or cancel the track when a plot changes owner mid-ride; make the CrossPlot griefer check assert the griefer was seated, and the cancel check assert the ride started; per-slot in-range feedback for exhibits (TEST-03 F6).
