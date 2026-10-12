@@ -36,6 +36,7 @@ export type Encounter = {
 	progress: { [Player]: { hits: number, misses: number } }, -- capture counters kept between attempts
 	fleeing: Player?, -- set while it runs from the player whose capture escaped
 	claimEpoch: number, -- bumped by every claim, so a late startle release can't drop a newer claim
+	pursuing: Player?, -- set while it chases the player who failed to capture it (TASK-0031)
 }
 
 local SPAWN_INTERVAL = 4
@@ -103,7 +104,7 @@ local function roam(e: Encounter)
 		return
 	end
 	while e.alive do
-		if not e.claimedBy then
+		if not e.claimedBy and not e.pursuing then
 			local target = randomPoint(zone) + Vector3.new(0, species.hover, 0)
 			local from = e.root.Position
 			local flat = Vector3.new(target.X, from.Y, target.Z)
@@ -116,12 +117,12 @@ local function roam(e: Encounter)
 				e.tween = tween
 				tween:Play()
 				local t0 = os.clock()
-				while e.alive and not e.claimedBy and os.clock() - t0 < duration do
+				while e.alive and not e.claimedBy and not e.pursuing and os.clock() - t0 < duration do
 					task.wait(0.2)
 				end
 				-- Only stop this roam tween: a startle hop or flee step may already own e.tween.
 				if e.tween == tween then
-					if e.claimedBy then
+					if e.claimedBy or e.pursuing then
 						tween:Cancel()
 					end
 					e.tween = nil
@@ -216,6 +217,7 @@ function EncounterService.spawn(speciesId: string, variantId: string, zoneId: st
 		progress = {},
 		fleeing = nil,
 		claimEpoch = 0,
+		pursuing = nil,
 	}
 	encounters[model] = e
 	prompt.Triggered:Connect(function(player)
@@ -395,6 +397,70 @@ function EncounterService.relocateFleeing(e: Encounter, near: Vector3, headStart
 	local at = ChaseRules.fleeStep(region, near, nil, headStart, rng)
 	local hover = e.root.Position.Y
 	e.root.CFrame = CFrame.new(at.X, hover, at.Z) * e.root.CFrame.Rotation
+end
+
+-- Retaliation (TASK-0031) ------------------------------------------------------------------------------
+
+function EncounterService.byId(id: number): Encounter?
+	for _, e in encounters do
+		if e.id == id then
+			return e
+		end
+	end
+	return nil
+end
+
+-- Monsters that could join a pursuit: wild, unclaimed, not fleeing, startled or already pursuing.
+function EncounterService.candidatesForPursuit(): { { id: number, at: Vector3, available: boolean } }
+	local out = {}
+	for _, e in encounters do
+		table.insert(out, {
+			id = e.id,
+			at = e.root.Position,
+			available = e.alive
+				and not e.claimedBy
+				and not e.fleeing
+				and not e.pursuing
+				and not EncounterService.isStartled(e),
+		})
+	end
+	return out
+end
+
+-- Starts (`player`) or ends (nil) a pursuit for `e`. Starting needs a free, wild monster; ending lets it
+-- roam again from where it stands.
+function EncounterService.setPursuing(e: Encounter, player: Player?): boolean
+	if player then
+		if not e.alive or e.claimedBy or e.fleeing or e.pursuing then
+			return false
+		end
+		if e.tween then
+			e.tween:Cancel()
+		end
+		e.pursuing = player
+		local inspect = e.root:FindFirstChild("Inspect")
+		if inspect and inspect:IsA("ProximityPrompt") then
+			inspect.Enabled = false
+		end
+		return true
+	end
+	e.pursuing = nil
+	local inspect = e.root:FindFirstChild("Inspect")
+	if inspect and inspect:IsA("ProximityPrompt") then
+		inspect.Enabled = true
+	end
+	return true
+end
+
+function EncounterService.pursuingOf(e: Encounter): Player?
+	return e.pursuing
+end
+
+-- One pursuit step (the server decides the target; RetaliationRules keeps it inside its region).
+function EncounterService.stepTo(e: Encounter, target: Vector3, seconds: number)
+	if e.alive then
+		tweenTo(e, target, seconds, Enum.EasingStyle.Linear)
+	end
 end
 
 -- An escaped capture runs back to a zone where its species lives (ADR-0005).
