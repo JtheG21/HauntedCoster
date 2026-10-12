@@ -1590,7 +1590,7 @@
       "id": "TASK-0019",
       "title": "Persistence and Rejoin Test",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "high",
       "depends_on": [],
       "branch": "task/TASK-0019-Persistence-And-Rejoin-Test",
@@ -1615,9 +1615,21 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-12T14:20:57",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
-      "executions": [],
+      "executions": [
+        {
+          "time": "2026-10-12T14:20:57",
+          "result": "pass",
+          "notes": "check.sh pass (specs 108/0); Persistence write 9/9, read 4/4, lock 7/7 in jg's private place (TEST-20261012-10)"
+        }
+      ],
       "audits": [],
       "revisions": 0
     },

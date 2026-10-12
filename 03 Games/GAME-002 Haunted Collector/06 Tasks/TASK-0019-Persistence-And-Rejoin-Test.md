@@ -3,7 +3,7 @@ id: TASK-0019
 title: Persistence and Rejoin Test
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: high
 risk: high
 owner: executor
@@ -64,7 +64,7 @@ Proposed in [[RETRO-M1-Playable-MVP-Loop]]; created as `ready` with jg's approva
   - Run 1 of `write` failed one check through a test bug (it expected the tutorial step it set, but the tutorial moves on by itself); fixed before the audit.
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261012-TASK-0019-01]]: pass (3 minor, 2 nit; minors 3 and 4 and nit 6 fixed, minor 2 accepted as intentional).
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*

@@ -32,6 +32,8 @@ return function(t: TestRunner.T)
 		t.eq((rec :: any).lock.job, "B")
 		local _, _, again = SessionLockRules.claim({ lock = { job = "B", t = now } }, "B", now, false)
 		t.eq(again, false)
+		local _, _, nearlyStale = SessionLockRules.claim({ lock = { job = "A", t = now - stale + 1 } }, "B", now, false)
+		t.eq(nearlyStale, true)
 	end)
 
 	t.test("after waiting, a live lock is taken over", function()

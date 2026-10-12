@@ -37,7 +37,7 @@ Load, validate and save each player's profile, and push a read-only snapshot to 
   - a new flag (`KNOWN_FLAGS` filters unknown flags);
   - a new field inside an existing table (`journal`, `stats`, `route`, owned or exhibit entries are rebuilt field by field);
   - a renamed or removed field, or a field whose type, range or meaning changes (for example raising a clamp such as `MaxOwned`, `MaxCoins` or house tiers).
-- **No bump needed** for a new top-level field (sanitize preserves unknown top-level keys), or for a change that reads old data the same way.
+- **No bump needed** for a new top-level field (sanitize preserves unknown top-level keys, except one named `route`), as long as older servers may carry it unchanged; or for a change that reads old data the same way.
 - **With a bump:** migrate older profiles in `sanitize` (never drop their data), add a spec for the migration, and remember that older servers will treat these profiles as read-only until they shut down.
 
 ## Interfaces
@@ -52,9 +52,9 @@ The client never writes profile data. Every save re-sanitises a deep copy. Exped
 
 ## Tests
 - Automated: `ProfileRules.spec` (14 cases: sanitize, retired clue data, `isNewerSchema`, newer schema read-only, the repaired-field list) and `SessionLockRules.spec` (8 cases: claim, wait and take over, stale lock, save keeps or clears the lock, lost lock never writes, release only our lock).
-- Playtest: memory mode seen in [[TEST-20261011-01]]. **Real persistence not yet verified.**
+- Playtest: memory mode seen in [[TEST-20261011-01]]. Real persistence verified in [[TEST-20261012-10]] (`Persistence` scenario: leave and rejoin, shutdown save, lock refused and lost).
 
 ## History
 - [[TASK-0011-Haunted-Scaffold-And-Player-Data]] to [[TASK-0018-Journal-Tutorial-And-Rare-Clue]]: built in prototype commit 17cb5ae (2026-10-11)
 - [[TASK-0025-Clue-Hunting-Removal]]: clue fields retired, kept for compatibility (2026-10-12)
-- [[TASK-0019-Persistence-And-Rejoin-Test]]: lock transforms made pure and spec-tested, schema-bump rule written; real rejoin test pending a private API-enabled place (2026-10-12)
+- [[TASK-0019-Persistence-And-Rejoin-Test]]: lock transforms made pure and spec-tested, schema-bump rule written, real leave, rejoin, shutdown and lock-loss checks in jg's private place ([[TEST-20261012-10]], 2026-10-12)
