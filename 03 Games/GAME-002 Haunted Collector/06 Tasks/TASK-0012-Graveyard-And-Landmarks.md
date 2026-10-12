@@ -3,7 +3,7 @@ id: TASK-0012
 title: Graveyard and Landmarks
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: low
 owner: executor
@@ -83,4 +83,6 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 - [[AUD-20261011-TASK-0012-04]]: **pass** (2 nits: no scenario forces a crypt ejection; the light-off capture predates the label fix, to replace in M2).
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0012-04]] passed. That took 4 attempts: after the revision limit was hit, jg unblocked the task once [[ADR-0006-M1-Tuning-And-Scope-Decisions]] items 6–7 had settled AC2.
+- **Lesson:** evidence ACs that need a human's judgement (readability, physical devices) should be decided up front, not discovered at audit time.
+- **Follow-ups:** M2 tasks for a physical controller and touch, and a post-fix light-off capture. jg confirms the crypt-entry window at the M1 retro. A test case that forces a crypt ejection.
