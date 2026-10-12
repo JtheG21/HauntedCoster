@@ -1933,7 +1933,7 @@
       "id": "TASK-0025",
       "title": "Clue Hunting Removal",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0025-Clue-Hunting-Removal",
@@ -1979,6 +1979,18 @@
           "from": "changes_requested",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-12T01:33:54",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T01:37:19",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -1986,6 +1998,11 @@
           "time": "2026-10-12T01:01:23",
           "result": "pass",
           "notes": "TEST-20261012-01: check.sh green; specs 63/0, FullLoop 81/81, Reachability 15/15, ExploitProbe 13/13; CrossPlot 2p: 12/13 twice (seat check; engine repro shows server Seat:Sit seats in disabled seats) plus 2 harness no-results"
+        },
+        {
+          "time": "2026-10-12T01:33:54",
+          "result": "pass",
+          "notes": "Revision 1 (TEST-20261012-01): check.sh green; specs 64/0, FullLoop 81/81, Reachability 15/15, ExploitProbe 13/13, CrossPlot 2p 13/13"
         }
       ],
       "audits": [
@@ -1993,6 +2010,11 @@
           "time": "2026-10-12T01:01:23",
           "result": "fail",
           "report": "06 QA/AUD-20261012-TASK-0025-01.md"
+        },
+        {
+          "time": "2026-10-12T01:37:19",
+          "result": "pass",
+          "report": "06 QA/AUD-20261012-TASK-0025-02.md"
         }
       ],
       "revisions": 1,

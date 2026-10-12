@@ -3,7 +3,7 @@ id: TASK-0025
 title: Clue Hunting Removal
 type: task
 project: GAME-002
-status: in_progress
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -89,7 +89,7 @@ This is done first (before the layout work) because it removes the crypt gate, e
 - A minimal repro proved the cause: a server `Seat:Sit()` seats through `Disabled` (engine behaviour, not in our code).
 
 **Revision 1** (after [[AUD-20261012-TASK-0025-01]]):
-- **F1 (major):** the CrossPlot parked-seat check now asserts what the game guarantees. A forced into B's parked seat doesn't keep it, because the owner guard ejects A. The enabled-seat check resets its flag first, so it no longer passes on the earlier sighting. A player can't call `Seat:Sit()`, and touch-sitting a disabled seat still fails.
+- **F1 (major):** the CrossPlot parked-seat check now asserts what the game guarantees. A forced into B's parked seat doesn't keep it, because the owner guard ejects A. The enabled-seat check now runs first, while A has never sat in that seat, so it can't pass on an earlier sighting. A player can't call `Seat:Sit()`, and touch-sitting a disabled seat still fails.
 - **F2:** linked the TEST note and listed every result.
 - **F3:** the architecture row for LandmarkService now records its removal.
 - **F4:** added dated "superseded" notes to ADR-0006 (the clue-holder line and §9), keeping the original text. TASK-0021's AC3, AC5 and its Wraith-gating scope are flagged for jg; the ACs themselves are unchanged.
@@ -108,5 +108,6 @@ This is done first (before the layout work) because it removes the crypt gate, e
 
 ## Audits
 - [[AUD-20261012-TASK-0025-01]]: fail (1 major: CrossPlot not green)
+- [[AUD-20261012-TASK-0025-02]]: pass (delta). N1, a CrossPlot touch-sit check, is deferred as a follow-up; N2 and N3 doc nits are fixed.
 
 ## Outcome
