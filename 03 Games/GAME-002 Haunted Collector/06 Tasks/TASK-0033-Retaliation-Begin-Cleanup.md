@@ -3,7 +3,7 @@ id: TASK-0033
 title: Retaliation Begin Cleanup
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: low
 risk: low
 owner: executor
