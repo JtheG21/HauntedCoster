@@ -813,7 +813,7 @@
       "id": "TASK-0012",
       "title": "Graveyard and Landmarks",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "done",
       "risk": "low",
       "depends_on": [
         "TASK-0011"
@@ -835,8 +835,138 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 2/2"
+        },
+        {
+          "time": "2026-10-11T16:37:45",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T16:37:45",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T16:40:05",
+          "from": "in_review",
+          "to": "blocked",
+          "note": "audit failed; revision limit 2 exceeded, needs human"
+        },
+        {
+          "time": "2026-10-11T16:40:35",
+          "from": "blocked",
+          "to": "ready",
+          "note": "unblocked by jg"
+        },
+        {
+          "time": "2026-10-11T16:40:41",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T19:26:16",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T19:27:26",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-11T19:28:32",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
-      ]
+      ],
+      "executions": [
+        {
+          "time": "2026-10-11T16:33:02",
+          "result": "pass",
+          "notes": "Revision-0 build merged with TASK-0011 (PR #2); see TEST-20261011-03/04"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "result": "pass",
+          "notes": "Revision 1 at 5878f6d"
+        },
+        {
+          "time": "2026-10-11T16:37:45",
+          "result": "pass",
+          "notes": "Revision 2: TEST-20261011-05, Reachability 14/14, FullLoop 56/56"
+        },
+        {
+          "time": "2026-10-11T19:26:16",
+          "result": "pass",
+          "notes": "Attempt 4: audit-3 nits fixed; Reachability 15/15, FullLoop 56/56"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-11T16:33:02",
+          "result": "fail",
+          "report": "06 QA/AUD-20261011-TASK-0012-01.md"
+        },
+        {
+          "time": "2026-10-11T16:33:02",
+          "result": "fail",
+          "report": "06 QA/AUD-20261011-TASK-0012-02.md"
+        },
+        {
+          "time": "2026-10-11T16:40:05",
+          "result": "fail",
+          "report": "06 QA/AUD-20261011-TASK-0012-03.md"
+        },
+        {
+          "time": "2026-10-11T19:27:26",
+          "result": "pass",
+          "report": "06 QA/AUD-20261011-TASK-0012-04.md"
+        }
+      ],
+      "revisions": 0,
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0013",

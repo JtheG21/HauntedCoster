@@ -33,6 +33,10 @@ function LandmarkService.landmarkCount(profile: Profile): number
 	return n
 end
 
+-- Called before the server moves a player out of the crypt. CaptureService sets it to noteTeleport
+-- (it requires this module, so this module can't require it back).
+LandmarkService.beforeEject = nil :: ((Player) -> ())?
+
 function LandmarkService.cryptOpen(profile: Profile): boolean
 	local tier = Economy.HouseTiers[profile.houseTier + 1]
 	return tier ~= nil
@@ -124,7 +128,7 @@ function LandmarkService.start(landmarkAnchors: { [string]: BasePart }, cryptGat
 	local outside = Vector3.new(World.Graveyard.cryptGate.X, 3, crypt.z2 + 6)
 	task.spawn(function()
 		while true do
-			task.wait(1)
+			task.wait(0.25) -- the gate opens on the client, so keep the window for a forced entry short
 			for _, player in Players:GetPlayers() do
 				local root = rootOf(player)
 				local profile = PlayerDataService.get(player)
@@ -132,6 +136,9 @@ function LandmarkService.start(landmarkAnchors: { [string]: BasePart }, cryptGat
 					if not LandmarkService.cryptOpen(profile) then
 						local character = player.Character
 						if character then
+							if LandmarkService.beforeEject then
+								LandmarkService.beforeEject(player) -- a server move isn't a carry speed strike
+							end
 							character:PivotTo(CFrame.new(outside))
 						end
 						StateService.toast(

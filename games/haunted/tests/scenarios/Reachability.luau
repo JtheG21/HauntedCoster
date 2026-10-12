@@ -2,7 +2,7 @@
 -- Map reachability proof (TASK-0012 AC1), using the engine's own pathfinder on the built world:
 --  * every landmark and every open zone is reachable on foot from a home plot,
 --  * the Sealed Crypt interior is NOT reachable while its gate is closed,
---  * the west shortcut is closed until opened, and
+--  * the west shortcut is closed until opened (both checked again with the gates open as a control), and
 --  * a real walk (Humanoid:MoveTo along the path) from home reaches the Weeping Angel.
 --   game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "Reachability" })
 
@@ -90,6 +90,55 @@ return function(_args: any): { [string]: any }
 	end)
 	local direct = p.Status == Enum.PathStatus.Success and #p:GetWaypoints() < 8
 	check("west shortcut closed until opened", not direct, `{p.Status} waypoints={#p:GetWaypoints()}`)
+
+	-- Positive controls: with the gates open (server-side, for this check only) the same queries must
+	-- succeed, so the "closed" results above come from the gates and not from bad targets or geometry.
+	local graveyard = Workspace:FindFirstChild("Graveyard")
+	local cryptGate = graveyard and graveyard:FindFirstChild("CryptGate", true) :: BasePart?
+	local shortcutGate = graveyard and graveyard:FindFirstChild("OvergrownGate", true) :: BasePart?
+	check("gates found for the positive controls", cryptGate ~= nil and shortcutGate ~= nil)
+	if cryptGate and shortcutGate then
+		local cryptCollide, shortcutCollide = cryptGate.CanCollide, shortcutGate.CanCollide
+		cryptGate.CanCollide = false
+		shortcutGate.CanCollide = false
+		-- Always restore the gates, even if a control errors.
+		local ran, err = pcall(function()
+			-- Poll instead of a fixed wait: the navmesh updates asynchronously after a collision change.
+			for _, zone in World.Zones do
+				if zone.gated then
+					local r = zone.rect
+					local centre = Vector3.new((r.x1 + r.x2) / 2, 0, (r.z1 + r.z2) / 2)
+					local ok, status = false, "?"
+					local w0 = os.clock()
+					repeat
+						ok, status = reach(centre)
+						if not ok then
+							task.wait(0.5)
+						end
+					until ok or os.clock() - w0 > 8
+					check(`gated zone reachable once open (control): {zone.name}`, ok, status)
+				end
+			end
+			local open, detail = false, "?"
+			local w0 = os.clock()
+			repeat
+				local q = newPath()
+				pcall(function()
+					q:ComputeAsync(outside, inside)
+				end)
+				open = q.Status == Enum.PathStatus.Success and #q:GetWaypoints() < 8
+				detail = `{q.Status} waypoints={#q:GetWaypoints()}`
+				if not open then
+					task.wait(0.5)
+				end
+			until open or os.clock() - w0 > 8
+			check("west shortcut direct once open (control)", open, detail)
+		end)
+		cryptGate.CanCollide = cryptCollide
+		shortcutGate.CanCollide = shortcutCollide
+		check("positive controls ran without error", ran, err)
+		task.wait(1)
+	end
 
 	-- Real walk: home -> Weeping Angel along the computed path.
 	character:PivotTo(CFrame.new(home + Vector3.new(0, 3, 0)))
