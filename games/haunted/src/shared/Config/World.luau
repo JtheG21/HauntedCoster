@@ -14,14 +14,13 @@ export type Zone = {
 	spawns: { [string]: number }, -- species id -> weight
 }
 
+-- Landmarks are scenery and navigation points. Clue hunting was removed from the MVP (ADR-0007); the
+-- investigate flow can be restored from git history (LandmarkService before TASK-0025).
 export type Landmark = {
 	id: string,
 	name: string,
 	zone: string,
 	position: Vector3,
-	clue: string,
-	requiresFlag: string?, -- the landmark only gives its clue once this flag is set
-	setsFlag: string?,
 }
 
 local World = {}
@@ -71,12 +70,12 @@ World.Graveyard = {
 	rect = { x1 = -130, x2 = 130, z1 = -370, z2 = -160 } :: Rect,
 	gate = Vector3.new(0, 0, -160),
 	gateWidth = 24,
-	shortcut = Vector3.new(-130, 0, -180), -- west fence gap opened by the Old Well
+	shortcut = Vector3.new(-130, 0, -180), -- west fence gap by the Old Well, always open
 	shortcutWidth = 10,
+	-- Opens for house tiers with `unlocksCrypt` (EconomyRules.cryptOpen).
 	crypt = { x1 = -72, x2 = 17, z1 = -367, z2 = -323 } :: Rect,
 	cryptGate = Vector3.new(-30, 0, -323),
 	cryptGateWidth = 10,
-	cryptLandmarksNeeded = 3,
 }
 
 World.Zones = {
@@ -124,38 +123,30 @@ World.Landmarks = {
 		name = "Weeping Angel",
 		zone = "Gate",
 		position = Vector3.new(0, 0, -190),
-		clue = "Lantern Wisps drift toward lit lanterns near the gate. Marked: Wisps now glow on your screen.",
 	},
 	{
 		id = "Hearse",
 		name = "Broken Hearse",
 		zone = "OldRows",
 		position = Vector3.new(-75, 0, -255),
-		clue = "Paw prints in three sizes. Stitched Hounds prowl the Old Rows. Marked: Hounds now glow.",
 	},
 	{
 		id = "Mausoleum",
 		name = "Hollow Mausoleum",
 		zone = "Hollow",
 		position = Vector3.new(75, 0, -292),
-		clue = "An empty top hat on the steps. The Hollow Gentleman walks the dark Hollow. Marked: Gentlemen glow.",
 	},
 	{
 		id = "OldWell",
 		name = "Old Well",
 		zone = "OldRows",
 		position = Vector3.new(-108, 0, -196),
-		clue = "A rope ladder leads to a gap in the west fence. Shortcut home unlocked!",
-		setsFlag = "shortcut",
 	},
 	{
 		id = "BellTower",
 		name = "Bell Tower",
 		zone = "Hollow",
 		position = Vector3.new(58, 0, -352),
-		clue = "The tower tolls for you. A Bell Wraith now answers your call inside the Sealed Crypt.",
-		requiresFlag = "bellHint",
-		setsFlag = "bellClue",
 	},
 } :: { Landmark }
 

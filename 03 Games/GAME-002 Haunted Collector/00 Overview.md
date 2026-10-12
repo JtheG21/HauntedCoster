@@ -36,9 +36,9 @@ Hook (Round 20): **"Build your haunted train."** Pitch: hunt strange creatures i
 ## How to playtest (Studio)
 1. `rojo build haunted.project.json -o HauntedCollector.rbxl`, then open it in Studio (or `rojo serve haunted.project.json` into a new empty place). **Never sync it into the Rg1/place1 place.**
 2. Press Play. The banner "progress is NOT saved" is expected in an unpublished place.
-3. Follow the Objective panel: walk the lantern road north, investigate the Weeping Angel (E), Inspect a Wisp (R), Try Capture, press CATCH (Space / tap / A) in the green zone, run home and Secure at your purple pen.
+3. Follow the Objective panel: walk the lantern road north past the Weeping Angel, Inspect a Wisp (R), Try Capture, press CATCH (Space / tap / A) in the green zone, run home and Secure at your purple pen.
 4. Mansion menu (M): buy Speed, then Restore your house (250). Edit Track appears: tap to add/select points, Confirm.
-5. Mansion > Exhibits: place a monster. Ride at the station. A bell clue follows; investigate the Bell Tower (south-east).
+5. Mansion > Exhibits: place a monster. Ride at the station. With the Restored Manor the Sealed Crypt (south, behind the Bell Tower) opens: the Bell Wraith lives there. Clue hunting was removed in [[TASK-0025-Clue-Hunting-Removal]].
 6. Automated: `game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "FullLoop" })` from the command bar (Edit mode) prints PASS/FAIL per check. Other scenarios are `Reachability`, `ExploitProbe`, and `CrossPlot` (run with `ExecuteMultiplayerTestAsync(2, …)`). `HoldForManual` keeps a session open for hands-on checks. Unit specs: `require(game.TestService.Tests.TestRunner).run()`.
 
 ## Systems

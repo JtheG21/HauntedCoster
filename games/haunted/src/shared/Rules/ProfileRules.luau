@@ -31,7 +31,7 @@ export type Profile = {
 		seen: { [string]: boolean },
 		caught: { [string]: boolean },
 		variants: { [string]: boolean }, -- "Species:Variant"
-		clues: { [string]: boolean }, -- landmark id or special clue id
+		clues: { [string]: boolean }, -- retired (ADR-0007): kept so old profiles round-trip unchanged
 	},
 	flags: { [string]: boolean },
 	stats: { rides: number, captures: number, escapes: number },
@@ -43,6 +43,8 @@ export type Profile = {
 }
 
 local KNOWN_FLAGS = {
+	-- Retired with clue hunting (ADR-0007): nothing sets or reads these any more, but they stay known so
+	-- sanitize() keeps them in older profiles instead of dropping them.
 	shortcut = true,
 	bellHint = true,
 	bellClue = true,

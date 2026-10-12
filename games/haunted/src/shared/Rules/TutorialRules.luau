@@ -5,7 +5,6 @@
 
 local Shared = script.Parent.Parent
 local Economy = require(Shared.Config.Economy)
-local World = require(Shared.Config.World)
 
 local TutorialRules = {}
 
@@ -13,8 +12,7 @@ export type Ctx = {
 	nearTrain: boolean,
 	viewedCollection: boolean,
 	inGraveyard: boolean,
-	clueCount: number,
-	angelClue: boolean,
+	nearMonster: boolean, -- a wild monster within a few strides
 	seenCount: number,
 	captureTried: boolean,
 	carrying: boolean,
@@ -24,10 +22,8 @@ export type Ctx = {
 	routeCustom: boolean,
 	exhibits: number,
 	rides: number,
-	bellHint: boolean,
-	bellClue: boolean,
+	inCrypt: boolean,
 	caughtRare: boolean,
-	landmarks: number?, -- landmark clues only (the train's bell hint excluded); used by the completion hint
 }
 
 export type Step = { id: string, text: string, done: (Ctx) -> boolean, alt: ((Ctx) -> string?)? }
@@ -35,26 +31,27 @@ export type Step = { id: string, text: string, done: (Ctx) -> boolean, alt: ((Ct
 local tier1 = Economy.HouseTiers[2]
 
 TutorialRules.Steps = {
-	-- 1-12 follow brief §12 (INBOX-20261011-Haunted-Collector-Brief) one to one.
+	-- 12 steps after brief §12. Steps 3 and 12 were clue steps; ADR-0007 replaced them in place so a saved
+	-- step number still means the same point in the tutorial.
 	{
 		id = "welcome",
 		text = "Welcome home! Walk over to your Ghost Train station. Fill the train with monsters to make it worth riding.",
 		done = function(c)
-			return c.nearTrain or c.inGraveyard or c.owned > 0 or c.clueCount > 0
+			return c.nearTrain or c.inGraveyard or c.owned > 0
 		end,
 	},
 	{
 		id = "toGraveyard",
 		text = "Follow the lantern road north to the graveyard gate. Your flashlight is on (F to toggle).",
 		done = function(c)
-			return c.inGraveyard or c.owned > 0 or c.clueCount > 0
+			return c.inGraveyard or c.owned > 0
 		end,
 	},
 	{
-		id = "landmark",
-		text = "Investigate the Weeping Angel statue near the gate. Landmarks reveal clues.",
+		id = "explore",
+		text = "Explore past the Weeping Angel. Monsters roam between the graves: walk up to one.",
 		done = function(c)
-			return c.angelClue or c.clueCount > 0 or c.owned > 0
+			return c.nearMonster or c.seenCount > 0 or c.owned > 0
 		end,
 	},
 	{
@@ -120,16 +117,15 @@ TutorialRules.Steps = {
 		end,
 	},
 	{
-		id = "bell",
-		text = "A distant bell is tolling... Investigate the Bell Tower beyond Mausoleum Hollow.",
+		id = "lair",
+		text = "Your Restored Manor opened the Sealed Crypt behind the Bell Tower. The rare Bell Wraith haunts it: go in.",
 		done = function(c)
-			return c.bellClue
+			return c.inCrypt or c.caughtRare
 		end,
 	},
 } :: { Step }
 
-TutorialRules.CompleteText =
-	"The bell points to the Sealed Crypt: investigate 3 landmarks and Restore your house to enter, and find the Bell Wraith."
+TutorialRules.CompleteText = "The rare Bell Wraith haunts the Sealed Crypt. Restore your house to open it."
 
 function TutorialRules.advance(step: number, ctx: Ctx): number
 	local s = math.max(1, step)
@@ -139,28 +135,16 @@ function TutorialRules.advance(step: number, ctx: Ctx): number
 	return s
 end
 
--- After the tutorial: point at the Bell Wraith, naming only what is still missing to enter the Crypt.
+-- After the tutorial: point at the Bell Wraith, naming the house tier if the crypt is still shut.
 function TutorialRules.completeHint(ctx: Ctx): string
 	if ctx.caughtRare then
 		return "You caught the Bell Wraith! Collect its variants and build a better ghost train."
 	end
-	local landmarks = ctx.landmarks
-	if landmarks == nil then
-		return TutorialRules.CompleteText
-	end
-	local need = World.Graveyard.cryptLandmarksNeeded - landmarks
-	local tierOk = Economy.HouseTiers[ctx.houseTier + 1].unlocksCrypt
-	if need <= 0 and tierOk then
+	local tier = Economy.HouseTiers[ctx.houseTier + 1]
+	if tier and tier.unlocksCrypt then
 		return "The Sealed Crypt is open to you: find the Bell Wraith inside."
 	end
-	local missing = {}
-	if need > 0 then
-		table.insert(missing, `investigate {need} more landmark{if need == 1 then "" else "s"}`)
-	end
-	if not tierOk then
-		table.insert(missing, "Restore your house")
-	end
-	return `The bell points to the Sealed Crypt: {table.concat(missing, " and ")} to enter, and find the Bell Wraith.`
+	return TutorialRules.CompleteText
 end
 
 function TutorialRules.hint(step: number, ctx: Ctx): string

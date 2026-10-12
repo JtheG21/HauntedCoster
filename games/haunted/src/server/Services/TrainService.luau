@@ -539,14 +539,9 @@ function TrainService.ride(player: Player, index: number)
 	lastPaid[player.UserId] = now
 	local tier = Economy.HouseTiers[profile.houseTier + 1]
 	local pay = TrackRules.payout(t.sampled, t.pieces, tier.rideMultiplier, exhibitInputs(profile))
-	local firstRide = profile.stats.rides == 0
 	PlayerDataService.update(player, function(p)
 		EconomyRules.addCoins(p, pay.total)
 		p.stats.rides += 1
-		if not p.flags.bellHint then
-			p.flags.bellHint = true
-			p.journal.clues.TrainBell = true
-		end
 	end)
 	StateService.toast(
 		player,
@@ -561,13 +556,6 @@ function TrainService.ride(player: Player, index: number)
 		),
 		"success"
 	)
-	if firstRide then
-		StateService.toast(
-			player,
-			"As the cart stops, a distant bell tolls from the graveyard... Investigate the Bell Tower.",
-			"clue"
-		)
-	end
 	for _, cb in rideCallbacks do
 		task.spawn(cb, player, pay.total)
 	end

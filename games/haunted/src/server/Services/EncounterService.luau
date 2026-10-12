@@ -14,10 +14,10 @@ local World = require(Config:WaitForChild("World"))
 local Monsters = require(Config:WaitForChild("Monsters"))
 local Variants = require(Config:WaitForChild("Variants"))
 local ChaseRules = require(Shared:WaitForChild("Rules"):WaitForChild("ChaseRules"))
+local EconomyRules = require(Shared.Rules:WaitForChild("EconomyRules"))
 local Remotes = require(script.Parent.Parent.Remotes)
 local MonsterModels = require(script.Parent.Parent.World.MonsterModels)
 local PlayerDataService = require(script.Parent.PlayerDataService)
-local LandmarkService = require(script.Parent.LandmarkService)
 
 local EncounterService = {}
 
@@ -138,10 +138,8 @@ local function inspectPayload(e: Encounter, player: Player): { [string]: any }
 	local profile = PlayerDataService.get(player)
 	local zone = World.zoneById(e.zone)
 	local locked: string? = nil
-	if species.requiresFlag and not (profile and profile.flags[species.requiresFlag]) then
-		locked = "It ignores you. Investigate the Bell Tower first (after your first train ride)."
-	elseif zone and zone.gated and not (profile and LandmarkService.cryptOpen(profile)) then
-		locked = "Crypt monsters need crypt access."
+	if zone and zone.gated and not (profile and EconomyRules.cryptOpen(profile.houseTier)) then
+		locked = "Restore your house to capture monsters in the Sealed Crypt."
 	end
 	local tuning = Monsters.Capture[species.rarity]
 	return {
@@ -227,16 +225,6 @@ function EncounterService.spawn(speciesId: string, variantId: string, zoneId: st
 	return e
 end
 
-local function anyoneHasFlag(flag: string): boolean
-	for _, player in Players:GetPlayers() do
-		local profile = PlayerDataService.get(player)
-		if profile and profile.flags[flag] then
-			return true
-		end
-	end
-	return false
-end
-
 local function aliveOf(speciesId: string): number
 	local n = 0
 	for _, e in encounters do
@@ -254,14 +242,10 @@ local function fillZones()
 		if species and species.maxAlive and aliveOf(species.id) + outsideCount(species.id) >= species.maxAlive then
 			speciesId = nil
 		end
-		if species and species.requiresFlag then
-			-- Special encounters (the Bell Wraith) only appear once someone here has earned the clue. They
-			-- ignore the zone cap: ordinary monsters fill the zone before anyone has the clue and never
-			-- despawn, so a capped special would never get a slot (hands-on playtest, TEST-20261011-03).
-			if not anyoneHasFlag(species.requiresFlag) then
-				speciesId = nil
-			end
-		elseif countIn(zone.id) >= zone.maxMonsters then
+		-- A capped rare (the Bell Wraith) ignores the zone cap: ordinary monsters fill the zone first and
+		-- never despawn, so it would otherwise never get a slot (hands-on playtest, TEST-20261011-03).
+		-- Its own maxAlive check above still applies.
+		if not (species and species.maxAlive) and countIn(zone.id) >= zone.maxMonsters then
 			speciesId = nil
 		end
 		if speciesId then

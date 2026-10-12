@@ -20,6 +20,13 @@ function EconomyRules.fullRate(m: OwnedMonster): number
 	return species.incomePerSecond * Variants.multiplier(m.variant)
 end
 
+-- Whether a house tier opens gated zones (the Sealed Crypt and its Bell Wraith). Mansion progression
+-- replaced the landmark-clue requirement (ADR-0007).
+function EconomyRules.cryptOpen(houseTier: number): boolean
+	local tier = Economy.HouseTiers[houseTier + 1]
+	return tier ~= nil and tier.unlocksCrypt
+end
+
 -- Seconds of acclimation left (0 = earning).
 function EconomyRules.acclimationLeft(m: OwnedMonster, now: number): number
 	return math.max(0, Economy.AcclimationSeconds - (now - m.acquiredAt))

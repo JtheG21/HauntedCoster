@@ -17,7 +17,6 @@ local EconomyRules = require(Shared.Rules.EconomyRules)
 local Services = ServerScriptService:WaitForChild("Server"):WaitForChild("Services")
 local PlayerDataService = require(Services.PlayerDataService) :: any
 local PlotService = require(Services.PlotService) :: any
-local LandmarkService = require(Services.LandmarkService) :: any
 local CaptureService = require(Services.CaptureService) :: any
 local TrainService = require(Services.TrainService) :: any
 local EconomyService = require(Services.EconomyService) :: any
@@ -70,32 +69,20 @@ return function(_args: any): { [string]: any }
 		task.wait(0.3)
 	end
 
-	-- Landmark
-	tp((World.landmarkById("Angel") :: any).position + Vector3.new(0, 0, 6))
-	local angelBlocker = LandmarkService.blocker(player, "Angel")
-	LandmarkService.investigate(player, "Angel")
+	-- Landmarks are scenery and navigation only (ADR-0007): all built, none can be investigated.
+	local landmarks = Workspace.Graveyard:FindFirstChild("Landmarks")
+	local prompts = 0
+	for _, d in (if landmarks then landmarks:GetDescendants() else {}) :: { Instance } do
+		if d:IsA("ProximityPrompt") then
+			prompts += 1
+		end
+	end
 	check(
-		"landmark records clue",
-		profile.journal.clues.Angel == true,
-		angelBlocker
-			or (if player.Character ~= character then "character was replaced" else nil)
-			or (if PlayerDataService.get(player) ~= profile then "profile table was replaced" else nil)
+		"every landmark is built",
+		landmarks ~= nil and #landmarks:GetChildren() == #World.Landmarks,
+		landmarks and #landmarks:GetChildren()
 	)
-	local before = 0
-	for _ in profile.journal.clues do
-		before += 1
-	end
-	LandmarkService.investigate(player, "Angel")
-	local after = 0
-	for _ in profile.journal.clues do
-		after += 1
-	end
-	check("repeat investigate adds nothing", before == after)
-	tp(Vector3.new(0, 0, 0))
-	LandmarkService.investigate(player, "Hearse")
-	check("far-away investigate rejected", profile.journal.clues.Hearse ~= true)
-	LandmarkService.investigate(player, "BellTower")
-	check("bell tower locked before first ride", profile.flags.bellClue ~= true)
+	check("landmarks have no Investigate prompt", prompts == 0, prompts)
 
 	-- Find a Wisp and capture it
 	local function findMonster(species: string, zone: string?): Model?
@@ -171,6 +158,32 @@ return function(_args: any): { [string]: any }
 		humanoid.WalkSpeed
 	)
 	check("journal marks Wisp caught", profile.journal.caught.Wisp == true)
+
+	-- The Bell Wraith spawns without any clue (ADR-0007), but a tier-0 house can't capture it.
+	local function waitForWraith(limit: number): Model?
+		local w0 = os.clock()
+		local w = findMonster("BellWraith")
+		while not w and os.clock() - w0 < limit do
+			task.wait(1)
+			w = findMonster("BellWraith")
+		end
+		return w
+	end
+	-- 1-in-3 roll per 4 s spawn tick once the crypt has room for it, so 60 s fails ~0.2% of the time.
+	local wraith = waitForWraith(60)
+	check("Bell Wraith spawns in the Crypt without a clue", wraith ~= nil and wraith:GetAttribute("Zone") == "Crypt")
+	if wraith and wraith.PrimaryPart then
+		local inspect = wraith.PrimaryPart:FindFirstChild("Inspect")
+		check("Bell Wraith can be inspected by everyone", inspect ~= nil and (inspect :: ProximityPrompt).Enabled)
+		tp(wraith.PrimaryPart.Position - Vector3.new(0, 5, 0) + Vector3.new(3, 0, 0))
+		local refused = CaptureService.requestStart(player, wraith)
+		check(
+			"Bell Wraith capture refused at house tier 0",
+			refused.ok == false and string.find(refused.reason or "", "Restore your house", 1, true) ~= nil,
+			refused.reason
+		)
+		tp(home + World.Plot.pen)
+	end
 
 	-- Acclimation and income (TEST SHORTCUT: back-date acquisition instead of waiting 30 s)
 	local c0 = profile.coins
@@ -284,7 +297,10 @@ return function(_args: any): { [string]: any }
 	TrainService.ride(player, plotIndex)
 	check("ride paid out", profile.coins > coinsBeforeRide, profile.coins - coinsBeforeRide)
 	check("ride counted", profile.stats.rides == 1)
-	check("first ride reveals the bell clue", profile.flags.bellHint == true)
+	check(
+		"first ride sets no bell clue (ADR-0007)",
+		profile.flags.bellHint ~= true and profile.journal.clues.TrainBell == nil
+	)
 	task.wait(1)
 	local coinsBeforeSecond = profile.coins
 	TrainService.ride(player, plotIndex)
@@ -294,22 +310,20 @@ return function(_args: any): { [string]: any }
 		profile.coins - coinsBeforeSecond
 	)
 
-	-- Bell Tower now gives the rare clue
+	-- A Restored Manor opens the crypt: the Wraith can be captured, and the tutorial's lair step completes.
 	task.wait(1)
-	tp((World.landmarkById("BellTower") :: any).position + Vector3.new(0, 0, 8))
-	LandmarkService.investigate(player, "BellTower")
-	check("bell tower clue after first ride", profile.flags.bellClue == true)
-	-- The clue must actually bring the Bell Wraith, even though Gentlemen filled the Crypt long before
-	-- (1-in-3 roll per 4 s spawn tick, so 60 s fails by chance about 0.2% of the time).
-	local wraithAt = os.clock()
-	while not Workspace.Monsters:FindFirstChild("BellWraith") and os.clock() - wraithAt < 60 do
-		task.wait(1)
+	local wraith1 = waitForWraith(60)
+	if wraith1 and wraith1.PrimaryPart then
+		tp(wraith1.PrimaryPart.Position - Vector3.new(0, 5, 0) + Vector3.new(3, 0, 0))
+		local allowed = CaptureService.requestStart(player, wraith1)
+		check("Bell Wraith capture allowed at house tier 1", allowed.ok == true, allowed.reason)
+		if allowed.ok then
+			CaptureService.requestCancel(player)
+		end
+		task.wait(1.5) -- TutorialService ticks once a second
+	else
+		check("Bell Wraith present for the tier 1 check", false)
 	end
-	check(
-		"Bell Wraith spawns in the Crypt after the clue",
-		Workspace.Monsters:FindFirstChild("BellWraith") ~= nil,
-		string.format("%.0fs", os.clock() - wraithAt)
-	)
 
 	-- Escape never touches owned monsters
 	local ownedBefore = #profile.owned
@@ -511,7 +525,7 @@ return function(_args: any): { [string]: any }
 	TrainService.rebuildForOwner(plotIndex)
 
 	task.wait(2)
-	check("tutorial complete after the bell step (12 steps)", profile.tutorialStep >= 13, profile.tutorialStep)
+	check("tutorial complete after the lair step (12 steps)", profile.tutorialStep >= 13, profile.tutorialStep)
 
 	local failed = 0
 	for _, c in checks do

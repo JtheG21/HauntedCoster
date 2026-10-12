@@ -1,8 +1,9 @@
 --!strict
 -- Map reachability proof (TASK-0012 AC1), using the engine's own pathfinder on the built world:
 --  * every landmark and every open zone is reachable on foot from a home plot,
---  * the Sealed Crypt interior is NOT reachable while its gate is closed,
---  * the west shortcut is closed until opened (both checked again with the gates open as a control), and
+--  * the Sealed Crypt interior is NOT reachable while its gate is closed (checked again with the gate open
+--    as a control),
+--  * the west shortcut by the Old Well is always open (ADR-0007), and
 --  * a real walk (Humanoid:MoveTo along the path) from home reaches the Weeping Angel.
 --   game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "Reachability" })
 
@@ -81,7 +82,7 @@ return function(_args: any): { [string]: any }
 			check(`zone reachable on foot: {zone.name}`, ok, status)
 		end
 	end
-	-- Shortcut: from just outside the west gap, the inside must need the long way round (gate closed).
+	-- Shortcut: the west gap by the Old Well is open, so outside to inside is a short, direct path.
 	local outside = World.Graveyard.shortcut + Vector3.new(-8, 3, 0)
 	local inside = World.Graveyard.shortcut + Vector3.new(8, 3, 0)
 	local p = newPath()
@@ -89,19 +90,21 @@ return function(_args: any): { [string]: any }
 		p:ComputeAsync(outside, inside)
 	end)
 	local direct = p.Status == Enum.PathStatus.Success and #p:GetWaypoints() < 8
-	check("west shortcut closed until opened", not direct, `{p.Status} waypoints={#p:GetWaypoints()}`)
-
-	-- Positive controls: with the gates open (server-side, for this check only) the same queries must
-	-- succeed, so the "closed" results above come from the gates and not from bad targets or geometry.
+	check("west shortcut is open", direct, `{p.Status} waypoints={#p:GetWaypoints()}`)
 	local graveyard = Workspace:FindFirstChild("Graveyard")
+	check(
+		"no overgrown shortcut gate is built",
+		graveyard ~= nil and graveyard:FindFirstChild("OvergrownGate", true) == nil
+	)
+
+	-- Positive control: with the crypt gate open (server-side, for this check only) the same query must
+	-- succeed, so the "not reachable" result above comes from the gate, not from bad targets or geometry.
 	local cryptGate = graveyard and graveyard:FindFirstChild("CryptGate", true) :: BasePart?
-	local shortcutGate = graveyard and graveyard:FindFirstChild("OvergrownGate", true) :: BasePart?
-	check("gates found for the positive controls", cryptGate ~= nil and shortcutGate ~= nil)
-	if cryptGate and shortcutGate then
-		local cryptCollide, shortcutCollide = cryptGate.CanCollide, shortcutGate.CanCollide
+	check("crypt gate found for the positive control", cryptGate ~= nil)
+	if cryptGate then
+		local cryptCollide = cryptGate.CanCollide
 		cryptGate.CanCollide = false
-		shortcutGate.CanCollide = false
-		-- Always restore the gates, even if a control errors.
+		-- Always restore the gate, even if a control errors.
 		local ran, err = pcall(function()
 			-- Poll instead of a fixed wait: the navmesh updates asynchronously after a collision change.
 			for _, zone in World.Zones do
@@ -119,23 +122,8 @@ return function(_args: any): { [string]: any }
 					check(`gated zone reachable once open (control): {zone.name}`, ok, status)
 				end
 			end
-			local open, detail = false, "?"
-			local w0 = os.clock()
-			repeat
-				local q = newPath()
-				pcall(function()
-					q:ComputeAsync(outside, inside)
-				end)
-				open = q.Status == Enum.PathStatus.Success and #q:GetWaypoints() < 8
-				detail = `{q.Status} waypoints={#q:GetWaypoints()}`
-				if not open then
-					task.wait(0.5)
-				end
-			until open or os.clock() - w0 > 8
-			check("west shortcut direct once open (control)", open, detail)
 		end)
 		cryptGate.CanCollide = cryptCollide
-		shortcutGate.CanCollide = shortcutCollide
 		check("positive controls ran without error", ran, err)
 		task.wait(1)
 	end

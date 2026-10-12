@@ -28,7 +28,6 @@ local StateService = require(script.Parent.StateService)
 local PlotService = require(script.Parent.PlotService)
 local MovementService = require(script.Parent.MovementService)
 local EncounterService = require(script.Parent.EncounterService)
-local LandmarkService = require(script.Parent.LandmarkService)
 
 local CaptureService = {}
 
@@ -270,14 +269,13 @@ checkCarrySpeed = function(player: Player, c: Carry, now: number)
 	end
 end
 
--- Server-initiated moves (tests, future teleports) must not count as speeding.
+-- Server-initiated moves (tests, habitat evacuation) must not count as speeding.
 function CaptureService.noteTeleport(player: Player)
 	local c = carries[player]
 	if c then
 		c.lastPos = nil
 	end
 end
-LandmarkService.beforeEject = CaptureService.noteTeleport
 
 -- Studio test helper: make the current carry's timer run out on the next tick (real timeout path).
 function CaptureService.expireCarryForTest(player: Player)
@@ -451,12 +449,9 @@ local function onCaptureStart(player: Player, model: any): { [string]: any }
 		return { ok = false, reason = "Get closer" }
 	end
 	local species = Monsters.Species[e.species]
-	if species.requiresFlag and not profile.flags[species.requiresFlag] then
-		return { ok = false, reason = "It ignores you. Investigate the Bell Tower first." }
-	end
 	local zone = World.zoneById(e.zone)
-	if zone and zone.gated and not LandmarkService.cryptOpen(profile) then
-		return { ok = false, reason = "You don't have crypt access yet" }
+	if zone and zone.gated and not EconomyRules.cryptOpen(profile.houseTier) then
+		return { ok = false, reason = "Restore your house to capture monsters in the Sealed Crypt." }
 	end
 	if not EncounterService.claim(e, player) then
 		return { ok = false, reason = "Someone else is capturing it" }

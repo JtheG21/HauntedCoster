@@ -3,7 +3,7 @@ id: TASK-0025
 title: Clue Hunting Removal
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -56,6 +56,36 @@ This is done first (before the layout work) because it removes the crypt gate, e
 
 ---
 ## Implementation record
+**References used:** none applicable (removal work). Patterns kept from this codebase: pure rules in `shared/Rules`, snapshot providers in services.
+
+**Removed** (restore from git history before this task's commit if clue hunting returns):
+- `LandmarkService` (investigate prompts, clue writes, flag setting, landmark count, the 0.25 s crypt eject loop) and the `LandmarkStart` scenario.
+- From `World.Landmarks`: the `clue`, `requiresFlag` and `setsFlag` fields; `cryptLandmarksNeeded`.
+- `Monsters.clueLandmark` and `requiresFlag`; the hidden-Wraith client trick; the `OvergrownGate`.
+- The first-ride bell hint and toast; the journal Clues card and landmark counter; the Grave Scholar trophy.
+
+**Retained:**
+- Landmarks as named scenery (anchors and billboards).
+- The crypt walls and gate. The gate opens locally when `snap.cryptOpen` is true.
+- `journal.clues` and the flags `shortcut`, `bellHint` and `bellClue` in the profile schema. Nothing writes them, but `KNOWN_FLAGS` keeps them so old profiles survive.
+- The Round 20 startle, chase and grab behaviour, untouched.
+
+**Replaced:**
+- The crypt rule is `EconomyRules.cryptOpen(houseTier)`, using the existing `unlocksCrypt` on the Restored Manor and Grand Mansion.
+- A capped rare (`maxAlive`) ignores the zone cap, so the Bell Wraith always gets a slot. The old clue condition did that job before.
+- Monster markers now mark species you have inspected (`journal.seen`).
+- Tutorial steps 3 (`explore`: walk up to a monster) and 12 (`lair`: enter the crypt) replace the two clue steps in place. The completion hint names the house tier.
+- The unknown-creature journal hint lists the zones where the species lives.
+
+**Crypt enforcement decision:**
+- The eject loop was not kept. Access only matters for capture, and capture in a gated zone is refused on the server (`CaptureService.requestStart`) below tier 1.
+- Entering the crypt without access therefore grants nothing.
+- The capture check is stronger than the old 0.25 s eject window that ADR-0006 §9 accepted as a risk.
+
+**Checks (2026-10-12):**
+- `scripts/check.sh` ALL CHECKS PASSED (StyLua, Selene, strict types, both Rojo builds, JSON, queue, vault, Python tests).
+- Studio specs 63 passed, 0 failed (fresh Play, Server).
+- FullLoop 81/81 and Reachability 15/15.
 
 ## Audits
 

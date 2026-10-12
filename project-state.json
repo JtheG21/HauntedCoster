@@ -4,17 +4,17 @@
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "haunted.project.json",
   "dispatch_mode": "dry-run",
-  "updated": "2026-10-12T00:36:02",
+  "updated": "2026-10-12T00:36:12",
   "task_counts": {
     "done": 19,
-    "ready": 11,
-    "proposed": 1
+    "ready": 10,
+    "proposed": 1,
+    "in_progress": 1
   },
   "ready": [
     "TASK-0008",
     "TASK-0019",
-    "TASK-0020",
-    "TASK-0025"
+    "TASK-0020"
   ],
   "needs_human": [
     "TASK-0010"

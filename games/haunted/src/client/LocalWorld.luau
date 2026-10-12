@@ -1,14 +1,13 @@
 --!strict
--- Client-only world effects: flashlight, landmark "?" markers, glowing markers on monsters whose clue
--- you've found, your home beacon label, and opening the crypt/shortcut gates for you locally.
--- The server still enforces crypt access, so opening a gate locally grants nothing by itself.
+-- Client-only world effects: flashlight, glowing name markers on species you've already inspected, your
+-- home beacon label, and opening the crypt gate for you locally. Captures inside the crypt are checked on
+-- the server, so opening the gate locally grants nothing by itself.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
-local World = require(Config:WaitForChild("World"))
 local Monsters = require(Config:WaitForChild("Monsters"))
 local State = require(script.Parent.State)
 
@@ -96,24 +95,8 @@ function LocalWorld.toggleLight(): boolean
 	return lightOn
 end
 
-local landmarkLabels: { [string]: TextLabel } = {}
 local homeLabel: TextLabel? = nil
 local homeIndex: number? = nil
-
-local function setupLandmarks()
-	local folder = Workspace:WaitForChild("Graveyard", 30)
-	local lms = folder and folder:WaitForChild("Landmarks", 10)
-	if not lms then
-		return
-	end
-	for _, lm in World.Landmarks do
-		local m = lms:WaitForChild(lm.id, 10)
-		local anchor = m and m:FindFirstChild("Anchor")
-		if anchor and anchor:IsA("BasePart") then
-			landmarkLabels[lm.id] = billboard(anchor, "?", Color3.fromRGB(255, 210, 90), 14, 450, 34)
-		end
-	end
-end
 
 local function setGate(name: string, path: { string }, open: boolean)
 	local node: Instance? = Workspace
@@ -132,22 +115,7 @@ local function updateMarkers()
 	if not snap then
 		return
 	end
-	local clues = (snap.journal and snap.journal.clues) or {}
-	for id, label in landmarkLabels do
-		local lm = World.landmarkById(id)
-		if clues[id] then
-			label.Text = "✓"
-			label.TextColor3 = Color3.fromRGB(120, 230, 140)
-		elseif lm and lm.requiresFlag and not (snap.flags and snap.flags[lm.requiresFlag]) then
-			label.Text = "?"
-			label.TextColor3 = Color3.fromRGB(140, 130, 160)
-		else
-			label.Text = "?"
-			label.TextColor3 = Color3.fromRGB(255, 210, 90)
-		end
-	end
 	setGate("CryptGate", { "Graveyard", "Crypt" }, snap.cryptOpen == true)
-	setGate("OvergrownGate", { "Graveyard" }, snap.flags ~= nil and snap.flags.shortcut == true)
 
 	-- Home beacon label on my own plot
 	local idx = snap.plotIndex
@@ -171,27 +139,17 @@ local function updateMonsterMarkers()
 	if not (snap and folder) then
 		return
 	end
-	local clues = (snap.journal and snap.journal.clues) or {}
+	local seen = (snap.journal and snap.journal.seen) or {}
 	for _, m in folder:GetChildren() do
 		if m:IsA("Model") then
 			local speciesId = m:GetAttribute("Species")
 			local species = type(speciesId) == "string" and Monsters.Species[speciesId] or nil
-			-- A special encounter stays invisible (and un-inspectable) for players without its clue.
-			local hidden = species ~= nil
-				and species.requiresFlag ~= nil
-				and not (snap.flags and snap.flags[species.requiresFlag])
-			for _, d in m:GetDescendants() do
-				if d:IsA("BasePart") then
-					d.LocalTransparencyModifier = if hidden then 1 else 0
-				elseif d:IsA("ProximityPrompt") or d:IsA("Light") or d:IsA("Sparkles") then
-					d.Enabled = not hidden
-				end
-			end
-			local known = species ~= nil and clues[species.clueLandmark] == true and not hidden
-			local existing = m:FindFirstChild("ClueMarker")
+			-- Species you've inspected before glow and show their name, so you can spot them again.
+			local known = species ~= nil and seen[species.id] == true
+			local existing = m:FindFirstChild("KnownMarker")
 			if known and not existing and species then
 				local h = Instance.new("Highlight")
-				h.Name = "ClueMarker"
+				h.Name = "KnownMarker"
 				h.FillTransparency = 0.75
 				h.OutlineTransparency = 0.2
 				h.FillColor = Monsters.RarityColor[species.rarity]
@@ -216,7 +174,6 @@ function LocalWorld.start()
 	if player.Character then
 		task.spawn(attachLight, player.Character)
 	end
-	task.spawn(setupLandmarks)
 	State.Changed:Connect(updateMarkers)
 	task.spawn(function()
 		while true do

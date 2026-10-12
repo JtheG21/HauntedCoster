@@ -13,9 +13,9 @@ export type Species = {
 	roamSpeed: number, -- studs/s
 	hover: number, -- height of the model root above the ground
 	blurb: string,
-	clueLandmark: string, -- landmark whose clue describes this species
-	requiresFlag: string?, -- profile flag needed to capture (special encounter)
-	maxAlive: number?, -- server-wide cap (keeps rares rare)
+	-- Server-wide cap (keeps rares rare). A capped species also ignores its zone's monster cap, so the
+	-- commons that fill a zone first never lock it out.
+	maxAlive: number?,
 }
 
 export type CaptureTuning = {
@@ -38,7 +38,6 @@ Monsters.Species = {
 		roamSpeed = 5,
 		hover = 4,
 		blurb = "A flickering spirit drawn to lantern light.",
-		clueLandmark = "Angel",
 	},
 	Hound = {
 		id = "Hound",
@@ -49,7 +48,6 @@ Monsters.Species = {
 		roamSpeed = 7,
 		hover = 2.2,
 		blurb = "Sewn together from three dogs. Two of them still disagree.",
-		clueLandmark = "Hearse",
 	},
 	Gentleman = {
 		id = "Gentleman",
@@ -60,7 +58,6 @@ Monsters.Species = {
 		roamSpeed = 4,
 		hover = 4.5,
 		blurb = "Tips his hat. There is nothing under the hat.",
-		clueLandmark = "Mausoleum",
 	},
 	BellWraith = {
 		id = "BellWraith",
@@ -70,9 +67,7 @@ Monsters.Species = {
 		incomePerSecond = 8,
 		roamSpeed = 3,
 		hover = 6,
-		blurb = "A cracked funeral bell that rings itself. Only answers those who heard the tower's toll.",
-		clueLandmark = "BellTower",
-		requiresFlag = "bellClue",
+		blurb = "A cracked funeral bell that rings itself. It haunts the Sealed Crypt behind the Bell Tower.",
 		maxAlive = 1,
 	},
 } :: { [string]: Species }

@@ -12,7 +12,7 @@ source:
 related:
   - "[[GAME-002 Haunted Collector/02 Technical Architecture]]"
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-12
 tags:
   - game/system
 ---
@@ -26,7 +26,7 @@ Each plot's rideable ghost train: track geometry from a validated route, server-
 - Anchored cart moved by server CFrame; owner seat plus a guest seat; leaving the seat cancels with no payout.
 - Payout = 40 × house multiplier × route quality (0.9–1.25) × (1 + exhibit bonus within 16 studs); 20 s cooldown between paid rides.
 - The fixed starter loop (unowned plots, and owners with no saved route) has one Scare Arch and passes exhibit slot 2 (`World.Plot.starterPieces`, [[TASK-0023-Round-20-Design-Changes]]).
-- First paid ride sets `bellHint`, which starts the Bell Wraith clue chain.
+- ~~First paid ride sets `bellHint`~~: retired with clue hunting ([[TASK-0025-Clue-Hunting-Removal]], ADR-0007). The ride only pays and counts.
 
 ## Interfaces
 | API / Remote | Direction | Args (validated) | Notes |

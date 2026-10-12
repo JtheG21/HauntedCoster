@@ -1933,7 +1933,7 @@
       "id": "TASK-0025",
       "title": "Clue Hunting Removal",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0025-Clue-Hunting-Removal",
@@ -1955,6 +1955,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-12T00:36:12",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [],

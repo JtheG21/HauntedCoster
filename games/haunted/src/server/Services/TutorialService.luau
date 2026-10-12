@@ -4,6 +4,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local World = require(Shared:WaitForChild("Config"):WaitForChild("World"))
@@ -12,11 +13,11 @@ local PlayerDataService = require(script.Parent.PlayerDataService)
 local StateService = require(script.Parent.StateService)
 local CaptureService = require(script.Parent.CaptureService)
 local PlotService = require(script.Parent.PlotService)
-local LandmarkService = require(script.Parent.LandmarkService)
 
 local TutorialService = {}
 
 local NEAR_STATION_STUDS = 20
+local NEAR_MONSTER_STUDS = 30
 
 local started = false
 
@@ -26,6 +27,16 @@ local function count(t: { [string]: boolean }): number
 		n += 1
 	end
 	return n
+end
+
+local function nearMonster(pos: Vector3): boolean
+	local folder = Workspace:FindFirstChild("Monsters")
+	for _, m in (if folder then folder:GetChildren() else {}) :: { Instance } do
+		if m:IsA("Model") and m.PrimaryPart and (m.PrimaryPart.Position - pos).Magnitude <= NEAR_MONSTER_STUDS then
+			return true
+		end
+	end
+	return false
 end
 
 local function ctxFor(player: Player): TutorialRules.Ctx?
@@ -47,8 +58,7 @@ local function ctxFor(player: Player): TutorialRules.Ctx?
 			and (station.Position - pos).Magnitude <= NEAR_STATION_STUDS,
 		viewedCollection = profile.flags.journalOpened == true or profile.flags.mansionOpened == true,
 		inGraveyard = pos ~= nil and World.inRect(World.Graveyard.rect, pos.X, pos.Z),
-		clueCount = count(profile.journal.clues),
-		angelClue = profile.journal.clues.Angel == true,
+		nearMonster = pos ~= nil and nearMonster(pos),
 		seenCount = count(profile.journal.seen),
 		captureTried = profile.flags.captureTried == true,
 		carrying = CaptureService.isCarrying(player),
@@ -58,10 +68,8 @@ local function ctxFor(player: Player): TutorialRules.Ctx?
 		routeCustom = profile.flags.routeCustom == true,
 		exhibits = #profile.exhibits,
 		rides = profile.stats.rides,
-		bellHint = profile.flags.bellHint == true,
-		bellClue = profile.flags.bellClue == true,
+		inCrypt = pos ~= nil and World.inRect(World.Graveyard.crypt, pos.X, pos.Z),
 		caughtRare = profile.journal.caught.BellWraith == true,
-		landmarks = LandmarkService.landmarkCount(profile),
 	}
 end
 
