@@ -407,6 +407,26 @@ local function routeFor(profile: ProfileRules.Profile?): ({ TrackRules.P }, { Tr
 	return starterPoints(), {}
 end
 
+-- Builds plot `index`'s track from its current owner's validated route (the starter loop when unowned).
+-- While a ride is running this only marks the rebuild as pending; the ride end applies it.
+function TrainService.rebuildForOwner(index: number)
+	local owner = PlotService.ownerOf(index)
+	local points, pieces = routeFor(if owner then PlayerDataService.get(owner) else nil)
+	rebuild(index, points, pieces)
+end
+
+-- Which exhibit slots are within range of the route the server actually pays on (validated route, or
+-- the starter loop as fallback). Sent to the client so the Mansion shows exactly the payout rule.
+local function slotsInRange(profile: ProfileRules.Profile): { boolean }
+	local points = routeFor(profile)
+	local sampled = TrackRules.sample(points)
+	local out: { boolean } = {}
+	for i, pos in World.Plot.exhibitSlots do
+		out[i] = TrackRules.nearestDistance(sampled, pos.X, pos.Z) <= Economy.ExhibitRange
+	end
+	return out
+end
+
 function TrainService.ride(player: Player, index: number)
 	local t = trains[index]
 	if not t or t.riding then
@@ -491,9 +511,7 @@ function TrainService.ride(player: Player, index: number)
 		-- The plot changed hands (or its route changed) mid-ride: build the current owner's track now,
 		-- so nobody rides or gets paid on the previous owner's route.
 		t.rebuildPending = false
-		local owner = PlotService.ownerOf(index)
-		local points, pieces = routeFor(if owner then PlayerDataService.get(owner) else nil)
-		rebuild(index, points, pieces)
+		TrainService.rebuildForOwner(index)
 	end
 	Remotes.event("RideState"):FireClient(player, { riding = false })
 	if cancelled then
@@ -606,8 +624,7 @@ function TrainService.start()
 	end
 	Remotes.func("SubmitRoute").OnServerInvoke = onSubmitRoute
 	PlotService.onAssigned(function(player, index)
-		local points, pieces = routeFor(PlayerDataService.get(player))
-		rebuild(index, points, pieces)
+		TrainService.rebuildForOwner(index)
 		StateService.markDirty(player)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
@@ -624,6 +641,10 @@ function TrainService.start()
 		local pay = TrainService.payoutPreview(player)
 		if pay then
 			snap.ridePreview = pay
+		end
+		local profile = PlayerDataService.get(player)
+		if profile then
+			snap.exhibitInRange = slotsInRange(profile)
 		end
 		local i = PlotService.plotIndex(player)
 		local t = i and trains[i]

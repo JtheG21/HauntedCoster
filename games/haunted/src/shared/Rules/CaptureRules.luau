@@ -33,18 +33,24 @@ function CaptureRules.judgedWidth(width: number, period: number, slack: number):
 	return width + 2 * slack * (2 / period)
 end
 
--- True if the needle was inside the zone at any moment within `slack` seconds of `elapsed`.
+-- True if the needle was inside the zone at any moment within `slack` seconds of `elapsed`. Exact: the
+-- needle is continuous, so over [a, b] it covers every position between its lowest and highest value
+-- there (its value at a and b, or 1 / 0 if a peak / trough falls inside). That is precisely the window
+-- `judgedWidth` describes.
 function CaptureRules.judge(elapsed: number, period: number, center: number, width: number, slack: number): boolean
 	local half = width / 2
-	local step = 0.005
-	local t = elapsed - slack
-	while t <= elapsed + slack do
-		if math.abs(CaptureRules.needle(t, period) - center) <= half then
-			return true
+	local a, b = elapsed - slack, elapsed + slack
+	local na, nb = CaptureRules.needle(a, period), CaptureRules.needle(b, period)
+	local lo, hi = math.min(na, nb), math.max(na, nb)
+	if period > 0 then
+		if math.floor((b - period / 2) / period) >= math.ceil((a - period / 2) / period) then
+			hi = 1 -- a peak lies inside the window
 		end
-		t += step
+		if math.floor(b / period) >= math.ceil(a / period) then
+			lo = 0 -- a trough lies inside the window
+		end
 	end
-	return false
+	return hi >= center - half and lo <= center + half
 end
 
 export type Outcome = "hit" | "miss" | "success" | "fled"

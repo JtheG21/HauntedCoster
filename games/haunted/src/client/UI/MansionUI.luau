@@ -8,8 +8,6 @@ local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
 local Economy = require(Config:WaitForChild("Economy"))
 local Monsters = require(Config:WaitForChild("Monsters"))
 local Variants = require(Config:WaitForChild("Variants"))
-local World = require(Config:WaitForChild("World"))
-local TrackRules = require(ReplicatedStorage.Shared:WaitForChild("Rules"):WaitForChild("TrackRules"))
 local Theme = require(script.Parent.Theme)
 local State = require(script.Parent.Parent.State)
 
@@ -190,30 +188,10 @@ local function renderMonsters(snap: { [string]: any })
 	end
 end
 
--- Whether each exhibit slot is close enough to the current route to count (same rule as the payout).
-local function slotsInRange(snap: { [string]: any }): { [number]: boolean }
-	local points: { TrackRules.P } = {}
-	local route = snap.route
-	if route and route.points then
-		for _, p in route.points do
-			table.insert(points, { x = p.x, z = p.z })
-		end
-	else
-		for _, v in World.Plot.starterRoute do
-			table.insert(points, { x = v.X, z = v.Y })
-		end
-	end
-	local sampled = TrackRules.sample(points)
-	local out: { [number]: boolean } = {}
-	for i, pos in World.Plot.exhibitSlots do
-		out[i] = TrackRules.nearestDistance(sampled, pos.X, pos.Z) <= Economy.ExhibitRange
-	end
-	return out
-end
-
 local function renderExhibits(snap: { [string]: any })
 	local tier = Economy.HouseTiers[(snap.houseTier or 0) + 1]
-	local inRange = slotsInRange(snap)
+	-- Computed by the server from the route it really pays on (see TrainService.slotsInRange).
+	local inRange: { boolean } = snap.exhibitInRange or {}
 	local info = row()
 	Theme.label(
 		info,
@@ -310,7 +288,7 @@ local function signature(snap: { [string]: any }): string
 	elseif tab == "Monsters" then
 		parts = { tab, snap.now, snap.incomeRate, snap.owned, snap.exhibits }
 	else
-		parts = { tab, snap.houseTier, snap.owned, snap.exhibits, snap.route }
+		parts = { tab, snap.houseTier, snap.owned, snap.exhibits, snap.exhibitInRange }
 	end
 	local ok, json = pcall(HttpService.JSONEncode, HttpService, parts)
 	return if ok then json else tostring(os.clock())

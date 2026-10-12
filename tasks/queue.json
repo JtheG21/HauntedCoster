@@ -1679,7 +1679,7 @@
       "id": "TASK-0022",
       "title": "M1 Polish",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "in_progress",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0022-M1-Polish",
@@ -1709,6 +1709,18 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T20:23:03",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-11T20:23:03",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [
@@ -1718,8 +1730,14 @@
           "notes": "TEST-20261011-07: specs 53/0, FullLoop 57/57, ExploitProbe 13/13; CrossPlot not run (harness hung)"
         }
       ],
-      "audits": [],
-      "revisions": 0
+      "audits": [
+        {
+          "time": "2026-10-11T20:23:03",
+          "result": "fail",
+          "report": "06 QA/AUD-20261011-TASK-0022-01.md"
+        }
+      ],
+      "revisions": 1
     }
   ]
 }

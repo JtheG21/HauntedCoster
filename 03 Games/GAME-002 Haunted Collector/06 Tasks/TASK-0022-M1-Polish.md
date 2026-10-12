@@ -3,7 +3,7 @@ id: TASK-0022
 title: M1 Polish
 type: task
 project: GAME-002
-status: in_review
+status: in_progress
 priority: medium
 risk: low
 owner: executor
@@ -67,8 +67,17 @@ References: the `10 References/01 UI` index is empty, so the existing Theme and 
 
 Evidence: [[TEST-20261011-07]]: specs 53/0, FullLoop 57/57, ExploitProbe 13/13, Mansion capture. **CrossPlot not run** (Studio multiplayer harness hung; the CrossPlot and handover changes are judged on code). `scripts/check.sh` passes.
 
+### Revision 1 (after [[AUD-20261011-TASK-0022-01]])
+- **F1 (AC3):** the mid-ride handover is now run, in FullLoop: a rebuild requested mid-ride waits, then builds the current owner's route at ride end (59/59). The 2-player CrossPlot run is **deferred by jg** (chat answer on 2026-10-11: skip CrossPlot here, run it in the [[TASK-0020-Physical-Device-Checks]] session). The Studio multiplayer harness failed 4 times today (0 or 1 of 2 clients joined).
+- **F2:** variants roll once against cumulative chances: Crypt Ashen 30% / Spectral 10% / Normal 60%, Spectral 10% elsewhere (ADR-0006 §2, item 8). Spec added for Spectral in the Crypt.
+- **F3:** the server sends per-slot in-range flags (`snap.exhibitInRange`), computed from the validated route it pays on (`routeFor`, starter fallback). The Mansion only displays them.
+- **F4:** the capture judge is exact (needle range over the slack window, including peaks and troughs) instead of 5 ms steps. The spec tolerance is now 0.002.
+- **F5:** accepted as documented: the floor clamp can't be reached by the formula; the ceiling test does fail without the clamp.
+- **F6:** the movement freeze retries every 0.5 s while editing until PlayerModule has loaded.
+- Evidence: [[TEST-20261011-07]] revision-1 table. `scripts/check.sh` passes.
+
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261011-TASK-0022-01]]: fail (1 high: CrossPlot and handover not run; 1 medium: Spectral in the Crypt at 7%), revision 1
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*

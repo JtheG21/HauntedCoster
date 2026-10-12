@@ -60,7 +60,7 @@ return function(t: TestRunner.T)
 				end
 				tt += step
 			end
-			t.truthy(math.abs((hi - lo) - drawn) < 0.02, `{rarity}: judged {hi - lo}, drawn {drawn}`)
+			t.truthy(math.abs((hi - lo) - drawn) < 0.002, `{rarity}: judged {hi - lo}, drawn {drawn}`)
 			-- The widest drawn zone at the extreme centres still fits on the bar.
 			local half = tuning.zoneWidth / 2
 			t.truthy(half + 0.08 - drawn / 2 >= -1e-9, `{rarity}: drawn zone can leave the bar`)

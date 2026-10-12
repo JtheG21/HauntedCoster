@@ -428,6 +428,10 @@ end
 -- open/close race can't leave the controls off.
 local function syncMovement()
 	local c = getControls()
+	if c == nil and editing then
+		task.delay(0.5, syncMovement) -- PlayerModule not loaded yet; try again while still editing
+		return
+	end
 	if c then
 		pcall(function()
 			if editing then

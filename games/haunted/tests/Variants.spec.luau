@@ -30,6 +30,9 @@ return function(t: TestRunner.T)
 		local crypt = tally("Crypt", 10000)
 		local ashenRate = (crypt.Ashen or 0) / 10000
 		t.truthy(math.abs(ashenRate - Variants.ById.Ashen.chance) < 0.02, `ashen rate {ashenRate}`)
+		-- Spectral keeps its full chance in the Crypt too (one draw, cumulative chances).
+		local spectralRate = (crypt.Spectral or 0) / 10000
+		t.truthy(math.abs(spectralRate - Variants.ById.Spectral.chance) < 0.015, `crypt spectral rate {spectralRate}`)
 		local gate = tally("Gate", 10000)
 		t.truthy((gate.Normal or 0) > 8500, "normal at gate")
 	end)

@@ -25,7 +25,7 @@ related:
 Verify the game on a real controller and a touch device (or Studio's device emulator): flashlight, capture, prompts, Mansion and Journal, and the full track editor path.
 
 ## Scope
-- **In:** Gamepad: flashlight (DPadDown), capture (A/R2), prompts (X/Y), the editor's cursor, A/Y/X, D-pad cycling and R1/Start confirm. Touch: HUD buttons, capture, prompts, editor taps including the thumbstick and jump areas. A post-fix light-off capture.
+- **In:** Gamepad: flashlight (DPadDown), capture (A/R2), prompts (X/Y), the editor's cursor, A/Y/X, D-pad cycling and R1/Start confirm. Touch: HUD buttons, capture, prompts, editor taps including the thumbstick and jump areas. A post-fix light-off capture. **A 2-player CrossPlot run** on the current build (deferred from [[TASK-0022-M1-Polish]] by jg; the Studio multiplayer harness wasn't joining clients on 2026-10-11).
 - **Out:** New input features beyond fixing what the checks find.
 
 ## Files expected to change
