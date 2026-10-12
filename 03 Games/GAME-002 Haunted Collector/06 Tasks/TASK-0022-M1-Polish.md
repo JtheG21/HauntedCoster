@@ -3,7 +3,7 @@ id: TASK-0022
 title: M1 Polish
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -81,4 +81,7 @@ Evidence: [[TEST-20261011-07]]: specs 53/0, FullLoop 57/57, ExploitProbe 13/13, 
 - [[AUD-20261011-TASK-0022-02]]: **pass** (2 low: per-snapshot warning for an invalid saved route; no spec for the judge's peak/trough branches; 3 info). AC3: the 2-player CrossPlot run is deferred to TASK-0020 by jg.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0022-02]] passed (revision 1). All 11 M1 polish items are fixed; the quality floor clamp is unreachable by design.
+- **Deferred:** the 2-player CrossPlot run on this build moves to [[TASK-0020-Physical-Device-Checks]] (jg). AC3 is met for the handover through FullLoop.
+- **Lesson:** fixing one rate by changing roll order silently changed another (Spectral in the Crypt). Spec every rate in every zone it applies to.
+- **Follow-ups:** warn once per profile for an invalid saved route; specs for the judge's peak/trough branches and negative times; assert per-zone variant chances sum to at most 1.
