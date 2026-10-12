@@ -321,7 +321,8 @@ local function doConfirm()
 end
 
 -- Gamepad: the left stick moves an on-screen cursor, A taps at it, Y = Move, X = Delete,
--- D-pad left/right cycles the selected point, Start confirms, B exits.
+-- D-pad left/right cycles the selected point, Start or R1 confirms (Start can be taken by the Roblox menu
+-- on console), B exits.
 local function bindGamepad()
 	local cam = Workspace.CurrentCamera
 	if cam then
@@ -354,7 +355,7 @@ local function bindGamepad()
 					mode = "add"
 					redraw()
 				end
-			elseif key == Enum.KeyCode.ButtonStart then
+			elseif key == Enum.KeyCode.ButtonStart or key == Enum.KeyCode.ButtonR1 then
 				task.spawn(doConfirm)
 			elseif key == Enum.KeyCode.ButtonB then
 				TrackEditor.close()
@@ -370,7 +371,8 @@ local function bindGamepad()
 		Enum.KeyCode.ButtonY,
 		Enum.KeyCode.DPadLeft,
 		Enum.KeyCode.DPadRight,
-		Enum.KeyCode.ButtonStart
+		Enum.KeyCode.ButtonStart,
+		Enum.KeyCode.ButtonR1
 	)
 	padConn = RunService.RenderStepped:Connect(function(dt)
 		local view = Workspace.CurrentCamera and Workspace.CurrentCamera.ViewportSize or Vector2.new(800, 600)
@@ -402,6 +404,22 @@ local function unbindGamepad()
 	end
 end
 
+-- The character stays put while editing, so a tap on the mobile thumbstick or jump area (or a stick on
+-- a gamepad) can't walk it away while it is also placing points.
+local function setMovement(enabled: boolean)
+	local ok, controls = pcall(function()
+		local playerModule = Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule", 5)
+		return if playerModule then (require(playerModule :: ModuleScript) :: any):GetControls() else nil
+	end)
+	if ok and controls then
+		if enabled then
+			controls:Enable()
+		else
+			controls:Disable()
+		end
+	end
+end
+
 function TrackEditor.close()
 	if not editing then
 		return
@@ -409,6 +427,7 @@ function TrackEditor.close()
 	editing = false
 	panel.Visible = false
 	ProximityPromptService.Enabled = true
+	setMovement(true)
 	if preview then
 		preview:Destroy()
 		preview = nil
@@ -442,6 +461,10 @@ function TrackEditor.open()
 		toast("Finish your ride first.", "error")
 		return
 	end
+	if snap.carrying then
+		toast("Secure your monster first: its return timer keeps running.", "error")
+		return
+	end
 	origin = o
 	editing = true
 	loadSaved()
@@ -457,6 +480,7 @@ function TrackEditor.open()
 	panel.Visible = true
 	-- World prompts (e.g. the station's Ride prompt) would sit over the top-down view and swallow taps.
 	ProximityPromptService.Enabled = false
+	setMovement(false)
 	inputConn = UserInputService.InputBegan:Connect(function(input, processed)
 		if processed or not editing then
 			return

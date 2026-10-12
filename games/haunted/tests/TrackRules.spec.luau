@@ -56,17 +56,78 @@ return function(t: TestRunner.T)
 		t.eq(v.reason, "The track crosses itself")
 	end)
 
+	-- A thin loop: control points are all >= MinPointSpacing apart, so only the clearance rule can reject it.
+	local function thinLoop(gap: number): { TrackRules.P }
+		local z0 = -36
+		return {
+			{ x = -8, z = z0 },
+			{ x = 38, z = z0 },
+			{ x = 44, z = z0 + gap / 2 },
+			{ x = 38, z = z0 + gap },
+			{ x = -8, z = z0 + gap },
+			{ x = -14, z = z0 + gap / 2 },
+		}
+	end
+
 	t.test("near-parallel passes rejected by clearance", function()
-		-- A thin U: the return leg runs 3 studs from the outbound leg (no crossing, but overlapping track).
-		local pts = { { x = -10, z = -36 }, { x = 40, z = -36 }, { x = 40, z = -33 }, { x = -10, z = -33 } }
-		local v = TrackRules.validate(pts, {}, bounds)
+		local v = TrackRules.validate(thinLoop(3), {}, bounds)
 		t.eq(v.ok, false)
+		t.eq(v.reason, "Two parts of the track pass too close together")
+	end)
+
+	t.test("a hairpin with enough clearance stays valid", function()
+		local v = TrackRules.validate(thinLoop(8), {}, bounds)
+		t.eq(v.ok, true, v.reason)
+	end)
+
+	t.test("NaN, inf, too many and sparse inputs rejected", function()
+		local nan = 0 / 0
+		for _, bad in { nan, math.huge, -math.huge } do
+			local pts: { any } = starter()
+			pts[2] = { x = bad, z = 0 }
+			local v = TrackRules.validate(pts, {}, bounds)
+			t.eq(v.ok, false)
+			t.eq(v.reason, "Bad point")
+		end
+		local many = {}
+		for i = 1, Track.MaxPoints + 1 do
+			local a = (i / (Track.MaxPoints + 1)) * 2 * math.pi
+			table.insert(many, { x = 14 + 25 * math.cos(a), z = -14 + 20 * math.sin(a) })
+		end
+		t.eq(TrackRules.validate(many, {}, bounds).reason, `At most {Track.MaxPoints} points`)
+		local sparse: { any } = starter()
+		sparse[#sparse + 2] = { x = 0, z = 0 } -- a hole; # is unreliable
+		t.eq(TrackRules.validate(sparse, {}, bounds).ok, false)
+		local extra: { [any]: any } = starter()
+		extra.junk = true
+		t.eq(TrackRules.validate(extra, {}, bounds).reason, "Bad point")
+		local sparsePieces: { any } = { { i = 1, kind = "ScareArch" } }
+		sparsePieces[3] = { i = 2, kind = "FogTunnel" }
+		t.eq(TrackRules.validate(starter(), sparsePieces, bounds).ok, false)
 	end)
 
 	t.test("points too close rejected", function()
 		local pts = starter()
 		table.insert(pts, 2, { x = pts[1].x + 1, z = pts[1].z })
 		t.eq(TrackRules.validate(pts, {}, bounds).ok, false)
+	end)
+
+	t.test("quality limits hold at the extremes", function()
+		-- Shortest valid plain loop: never below QualityMin.
+		local small =
+			TrackRules.sample({ { x = 0, z = -20 }, { x = 18, z = -20 }, { x = 18, z = -4 }, { x = 0, z = -4 } })
+		t.truthy(TrackRules.quality(small, {}) >= Track.QualityMin)
+		-- Long, wiggly loop with every piece slot used: never above QualityMax.
+		local wiggly = {}
+		for i = 1, Track.MaxPoints do
+			local a = (i / Track.MaxPoints) * 2 * math.pi
+			local r = if i % 2 == 0 then 24 else 14
+			table.insert(wiggly, { x = 14 + r * math.cos(a), z = -14 + r * 0.9 * math.sin(a) })
+		end
+		local s = TrackRules.sample(wiggly)
+		local pieces = { { i = 1, kind = "ScareArch" }, { i = 2, kind = "FogTunnel" }, { i = 3, kind = "ScareArch" } }
+		local q = TrackRules.quality(s, pieces)
+		t.truthy(q <= Track.QualityMax and q >= Track.QualityMin)
 	end)
 
 	t.test("quality stays in range and pieces raise it", function()

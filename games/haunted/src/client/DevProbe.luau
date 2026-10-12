@@ -60,10 +60,14 @@ local function run(): { [string]: any }
 		huge[i] = { x = i % 40, z = -(i % 40) }
 	end
 	local nan = { { x = 0 / 0, z = 0 }, { x = 10, z = -30 }, { x = 30, z = -30 }, { x = 30, z = 0 } }
+	-- Spaced out so the SubmitRoute rate limit doesn't answer instead of route validation.
 	local r1 = { call(remotes, "SubmitRoute", huge, {}) }
+	task.wait(2.5)
 	local r2 = { call(remotes, "SubmitRoute", nan, {}) }
+	task.wait(2.5)
 	local r3 = { call(remotes, "SubmitRoute", "x", 5) }
 	report.forgedRoutesRejected = r1[1] and r1[2] == false and r2[1] and r2[2] == false and r3[1] and r3[2] == false
+	report.routeReasons = { tostring(r1[3]), tostring(r2[3]), tostring(r3[3]) }
 
 	local e1 = { call(remotes, "SetExhibit", 1.5, "m1") }
 	local e2 = { call(remotes, "SetExhibit", "1", nil) }
