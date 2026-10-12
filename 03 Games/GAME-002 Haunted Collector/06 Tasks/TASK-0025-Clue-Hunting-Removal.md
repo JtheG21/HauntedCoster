@@ -3,7 +3,7 @@ id: TASK-0025
 title: Clue Hunting Removal
 type: task
 project: GAME-002
-status: proposed
+status: ready
 priority: high
 risk: medium
 owner: executor

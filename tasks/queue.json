@@ -1933,7 +1933,7 @@
       "id": "TASK-0025",
       "title": "Clue Hunting Removal",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0025-Clue-Hunting-Removal",
@@ -1949,16 +1949,24 @@
         "The specs plus FullLoop, Reachability, ExploitProbe and CrossPlot (2 players) pass in Studio. LandmarkStart is retired.",
         "`scripts/check.sh` passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-12T00:36:01",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0026",
       "title": "Radial Plot Layout",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "high",
       "depends_on": [
         "TASK-0025"
@@ -1974,16 +1982,24 @@
         "The cemetery module stays inside its footprint. Reachability proves:",
         "FullLoop, ExploitProbe and the specs pass. `scripts/check.sh` passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-12T00:36:01",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0027",
       "title": "Habitat Modules and Blockouts",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0026"
@@ -1997,16 +2013,24 @@
         "Each habitat is readable as itself in Studio captures (ground, silhouettes, landmarks), recorded in a `TEST-` note for jg's review.",
         "FullLoop passes with the cemetery active. `scripts/check.sh` passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-12T00:36:01",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0028",
       "title": "Cemetery Vignette and Atmosphere",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "low",
       "depends_on": [
         "TASK-0027"
@@ -2020,16 +2044,24 @@
         "Lights are budgeted: shadows only on a few key lights, with the local light count recorded. No noticeable frame drop in a Studio play capture.",
         "`scripts/check.sh` and FullLoop pass."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-12T00:36:01",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0029",
       "title": "Habitat Rotation",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "high",
       "depends_on": [
         "TASK-0027"
@@ -2045,16 +2077,24 @@
         "Capture starts are refused while closing, and normal play resumes after the swap.",
         "FullLoop, CrossPlot and ExploitProbe pass. `scripts/check.sh` passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-12T00:36:02",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0030",
       "title": "House and Train Presentation",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "low",
       "depends_on": [
         "TASK-0026"
@@ -2067,16 +2107,24 @@
         "The part count per tier is recorded, and a house rebuild on upgrade stays under the agreed budget.",
         "FullLoop and CrossPlot pass. `scripts/check.sh` passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-12T00:36:02",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0031",
       "title": "Failed-Capture Retaliation",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0027"
@@ -2090,10 +2138,18 @@
         "Round 20 behaviour outside the approved trigger (startle hop, misses carried over) is unchanged. The ChaseRules and CaptureRules specs pass.",
         "FullLoop, ExploitProbe and CrossPlot pass. `scripts/check.sh` passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-12T00:36:02",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     }
   ]
 }

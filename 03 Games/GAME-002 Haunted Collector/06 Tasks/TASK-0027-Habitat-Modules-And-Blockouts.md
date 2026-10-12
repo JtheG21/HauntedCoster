@@ -3,7 +3,7 @@ id: TASK-0027
 title: Habitat Modules and Blockouts
 type: task
 project: GAME-002
-status: proposed
+status: ready
 priority: high
 risk: medium
 owner: executor

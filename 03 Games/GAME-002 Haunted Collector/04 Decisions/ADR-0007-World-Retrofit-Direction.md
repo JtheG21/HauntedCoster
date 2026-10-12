@@ -3,9 +3,9 @@ id: ADR-0007
 title: World Retrofit Direction
 type: adr
 project: GAME-002
-status: proposed
-approved_by:
-approved_on:
+status: approved
+approved_by: jg
+approved_on: 2026-10-12
 related:
   - "[[RSH-20261012-World-Retrofit-Audit]]"
   - "[[ADR-0005-Haunted-Collector-Direction]]"
@@ -40,7 +40,7 @@ This ADR changes approved decisions: [[ADR-0006-M1-Tuning-And-Scope-Decisions]] 
 3. A full redesign: out of scope (brief §14).
 
 ## Decision
-**Proposed, not yet approved.** Items marked *(jg)* wait for jg's answer. The rest are defaults derived from the brief and the audit, and can be overridden.
+**Approved by jg in chat on 2026-10-12** (Claude Code session, answers to the four batched questions): the plan and all seven tasks ("Approve all, run in order"), plus the choices recorded under *(jg)* below. The defaults were approved with the plan.
 
 **Layout (defaults)**
 - The hub centre is at the world origin. Six plots sit 60° apart with centres at r = 185, inner edge at r = 140, and keep their current 100 × 90 size and contents.
@@ -57,17 +57,24 @@ This ADR changes approved decisions: [[ADR-0006-M1-Tuning-And-Scope-Decisions]] 
 - A warning shows 60 s before the swap, and new captures close in the last 15 s.
 - All values live in config. Tests inject a clock and the live interval never reads a test setting.
 
-**Swap policy for players and captures** *(jg)*
+**Swap policy for players and captures** *(jg: "Evacuate to the gates")*
 - Carried captures are never touched (they aren't tied to a habitat).
-- Pending: what happens to players still inside at the swap, open meter sessions and fleeing escaped captures.
+- New captures close in the last 15 s.
+- At the swap: open meter sessions are cancelled (nothing was caught, so nothing is lost) and wild monsters are cleared. Players still inside are moved just outside their nearest gate behind a short fog fade.
+- An escaped capture being chased moves with its player, and the chase continues on the ring road.
 
-**Clue removal** *(jg: the replacement rule)*
+**Clue removal** *(jg: "Restored Manor")*
+- The Bell Wraith and the Sealed Crypt need house tier 1 (the existing `unlocksCrypt` flag).
+- The Wraith lives only in the cemetery crypt and is visible to everyone. Its capture prompt tells tier-0 players to restore their house. Ashen stays crypt-only.
 - Landmarks become scenery and navigation only: no prompts, no clues. The Old Well shortcut is retired.
 - The journal keeps species and variants. The Clues card and landmark counter are removed. `journal.clues` and the flags `shortcut`, `bellHint` and `bellClue` stay in the profile schema, unused, so old profiles load unchanged.
 - The tutorial keeps its 12 slots so saved step numbers still mean the same step: step 3 becomes a hunting-ground and rotation intro, and step 12 becomes a habitat or Bell Wraith step.
 - The "Grave Scholar" trophy is retired.
 
-**Failed-capture retaliation** *(jg: scope)*
+**Failed-capture retaliation** *(jg: "Final miss only")*
+- When a capture's misses run out, the target and up to 2 wild monsters within 30 studs chase the player for at most 8 s at 13.5 studs/s (players run 16).
+- A catch is a 1.5 s ragdoll with no damage, then that monster gives up.
+- Single misses keep the Round 20 startle hop. Built last (TASK-0031). All numbers are config.
 
 **Assets (default)**
 - Built-in parts and materials only. No uploaded, generated or Creator Store models, skyboxes or textures.

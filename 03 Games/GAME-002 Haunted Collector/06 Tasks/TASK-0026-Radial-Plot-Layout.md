@@ -3,7 +3,7 @@ id: TASK-0026
 title: Radial Plot Layout
 type: task
 project: GAME-002
-status: proposed
+status: ready
 priority: high
 risk: high
 owner: executor
