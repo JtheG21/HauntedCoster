@@ -3,7 +3,7 @@ id: TASK-0021
 title: Anti-Cheat Hardening
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: high
 risk: high
 owner: executor
@@ -64,7 +64,7 @@ Proposed in [[RETRO-M1-Playable-MVP-Loop]]; created as `ready` with jg's approva
 - **Open:** CrossPlot's seat-touch control failed in 2 of 3 runs, also with `TrainService` reverted. The all-main comparison couldn't run because the 2-player harness stopped launching its 2nd client. Not counted as a revision (environment).
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261012-TASK-0021-01]]: pass (1 major fixed: the train-seat exclusion now needs a riding cart and the root at the seat; 2 refactors done; banked idle budget and shove slack accepted as designed).
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*

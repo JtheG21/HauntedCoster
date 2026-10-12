@@ -167,9 +167,16 @@ return function(t: TestRunner.T)
 	end)
 	t.test("an escaped Ashen monster only goes back to the Sealed Crypt", function()
 		local cemetery = Habitats.ById.Cemetery
-		t.eq(table.concat(HabitatRules.escapedRespawnZones(cemetery, "Gentleman", "Ashen"), ","), "Crypt")
+		local function ids(zones: { any }): { string }
+			local out = {}
+			for _, z in zones do
+				table.insert(out, z.id)
+			end
+			return out
+		end
+		t.eq(table.concat(ids(HabitatRules.escapedRespawnZones(cemetery, "Gentleman", "Ashen")), ","), "Crypt")
 		-- A normal or Spectral Gentleman may return to any zone that spawns Gentlemen.
-		local normal = HabitatRules.escapedRespawnZones(cemetery, "Gentleman", "Normal")
+		local normal = ids(HabitatRules.escapedRespawnZones(cemetery, "Gentleman", "Normal"))
 		t.truthy(#normal >= 2 and table.find(normal, "Crypt") ~= nil, table.concat(normal, ","))
 		t.eq(#HabitatRules.escapedRespawnZones(cemetery, "Gentleman", "Spectral"), #normal)
 		-- Habitats without a crypt have nowhere for it: it isn't respawned there.

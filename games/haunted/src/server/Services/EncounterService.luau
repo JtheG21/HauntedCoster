@@ -476,8 +476,7 @@ function EncounterService.respawnEscaped(speciesId: string, variantId: string)
 		return
 	end
 	-- Only zones where its variant may appear: an Ashen monster goes back to the Sealed Crypt or nowhere.
-	for _, zoneId in HabitatRules.escapedRespawnZones(Habitats.active(), speciesId, variantId) do
-		local zone = Habitats.zoneById(zoneId) :: World.Zone
+	for _, zone in HabitatRules.escapedRespawnZones(Habitats.active(), speciesId, variantId) do
 		-- A capped rare skips the zone cap, as in fillZones.
 		if (species and species.maxAlive) or countIn(zone.id) < zone.maxMonsters then
 			EncounterService.spawn(speciesId, variantId, zone.id)

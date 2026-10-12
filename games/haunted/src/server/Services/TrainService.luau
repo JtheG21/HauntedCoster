@@ -504,6 +504,9 @@ function TrainService.ride(player: Player, index: number)
 		return
 	end
 	t.riding = true
+	if t.cart then
+		t.cart:SetAttribute("Riding", true)
+	end
 	if t.prompt then
 		t.prompt.Enabled = false
 	end
@@ -525,6 +528,9 @@ function TrainService.ride(player: Player, index: number)
 	if seat.Occupant ~= humanoid then
 		seat.Disabled = true
 		t.riding = false
+		if t.cart then
+			t.cart:SetAttribute("Riding", false)
+		end
 		if t.prompt then
 			t.prompt.Enabled = true
 		end
@@ -574,6 +580,9 @@ function TrainService.ride(player: Player, index: number)
 	end
 	cartAt(t, 0)
 	t.riding = false
+	if t.cart then
+		t.cart:SetAttribute("Riding", false)
+	end
 	if t.prompt then
 		t.prompt.Enabled = true
 	end

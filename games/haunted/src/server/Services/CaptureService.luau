@@ -56,7 +56,7 @@ type Carry = {
 	returnSeconds: number,
 	cage: BasePart?,
 	conns: { RBXScriptConnection },
-	lastPos: Vector3?, -- server-side speed check (WalkSpeed lives on the client-owned character)
+	lastPos: Vector3?, -- last sampled root position (speed budget)
 	startedAt: number, -- os.clock(); the speed budget grows with the time since
 	travelled: number, -- horizontal studs covered on foot (server moves and train rides excluded)
 	chased: boolean, -- already broke free once; the next timeout sends it straight home
@@ -241,14 +241,20 @@ local function escape(player: Player, why: string, canChase: boolean?)
 	lose(player, c.species, c.variant, why)
 end
 
--- True while the character rides a ghost train cart: the server moves the anchored cart, so that
--- movement isn't the carrier's own and doesn't count toward the speed budget.
-local function onTrainSeat(player: Player): boolean
+-- True while the character rides a moving ghost train cart: the server moves the anchored cart, so that
+-- movement isn't the carrier's own and doesn't count toward the speed budget. `SeatPart` alone is
+-- client-influenced (a desynced seat can stay set while the character walks off), so the cart must be
+-- riding (TrainService sets the attribute) and the character must actually be at its seat.
+local function onTrainSeat(player: Player, root: BasePart): boolean
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	local seat = humanoid and humanoid.SeatPart
 	local cart = seat and seat.Parent
-	return cart ~= nil and cart.Name == "GhostCart" and cart:IsA("Model")
+	return seat ~= nil
+		and cart ~= nil
+		and cart.Name == "GhostCart"
+		and cart:GetAttribute("Riding") == true
+		and (root.Position - seat.Position).Magnitude < 5
 end
 
 -- The carry slowdown is a WalkSpeed value on a character the client simulates, so an exploiter could
@@ -263,7 +269,7 @@ checkCarrySpeed = function(player: Player, c: Carry, now: number): boolean
 	local pos = root.Position
 	local last = c.lastPos
 	c.lastPos = pos
-	if not last or onTrainSeat(player) then
+	if not last or onTrainSeat(player, root) then
 		return true
 	end
 	c.travelled += Vector3.new(pos.X - last.X, 0, pos.Z - last.Z).Magnitude
