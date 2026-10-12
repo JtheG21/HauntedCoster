@@ -20,6 +20,7 @@ local ProfileRules = require(Rules:WaitForChild("ProfileRules"))
 local EconomyRules = require(Rules:WaitForChild("EconomyRules"))
 local Remotes = require(script.Parent.Parent.Remotes)
 local Build = require(script.Parent.Parent.World.Build)
+local Props = require(script.Parent.Parent.World.Props)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local StateService = require(script.Parent.StateService)
 local PlotService = require(script.Parent.PlotService)
@@ -309,7 +310,53 @@ local function rebuild(index: number, points: { TrackRules.P }, pieces: { TrackR
 		Enum.Material.WoodPlanks,
 		World.PlotAngles[index] -- square with its plot
 	)
-	Build.billboard(station, "Ghost Train", GLOW, 6, 120, 1.1)
+	Build.billboard(station, "Ghost Train", GLOW, 10, 120, 1.1)
+	-- Station presentation (TASK-0030): a canopy on four iron posts with two hanging lanterns and a name
+	-- board. None of it collides, so the cart, riders and the Ride prompt work exactly as before.
+	local function deco(name: string, size: Vector3, offset: CFrame, color: Color3, material: Enum.Material): Part
+		return Build.part({
+			name = name,
+			size = size,
+			cframe = station.CFrame * offset,
+			color = color,
+			material = material,
+			collide = false,
+			parent = folder,
+		})
+	end
+	for _, c in { { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } } do
+		deco(
+			"CanopyPost",
+			Vector3.new(0.4, 8, 0.4),
+			CFrame.new(c[1] * 3.3, 4.5, c[2] * 3.3),
+			Color3.fromRGB(25, 25, 28),
+			Enum.Material.Metal
+		)
+	end
+	for _, s2 in { -1, 1 } do
+		deco(
+			"CanopyRoof",
+			Vector3.new(8.4, 0.4, 4.6),
+			CFrame.new(0, 9, s2 * 2) * CFrame.Angles(s2 * math.rad(18), 0, 0),
+			Color3.fromRGB(58, 42, 70),
+			Enum.Material.Slate
+		)
+		local glass = deco(
+			"StationLantern",
+			Vector3.new(0.8, 1.1, 0.8),
+			CFrame.new(s2 * 2.6, 7.4, 0),
+			Props.C.lantern,
+			Enum.Material.Neon
+		)
+		Build.light(glass, Props.C.lanternLight, 20, 1.6)
+	end
+	deco(
+		"StationBoard",
+		Vector3.new(6, 1.2, 0.3),
+		CFrame.new(0, 8.1, -3.5),
+		Color3.fromRGB(70, 52, 38),
+		Enum.Material.Wood
+	)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "Ride"
 	prompt.ActionText = "Ride Ghost Train"
