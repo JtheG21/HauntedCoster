@@ -3,7 +3,7 @@ id: TASK-0014
 title: Return Trip and Containment
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -69,4 +69,5 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 - [[AUD-20261011-TASK-0014-02]]: **pass** (2 minor, 4 nit): the carry speed check (~23 studs/s) is too lenient for public play; an escaped Ashen Gentleman can respawn outside the Crypt (ADR-0006 §2). Nits: missing noteTeleport on the cart re-park, the death test doesn't check coins, secure ignores the deadline by up to 0.25 s.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0014-02]] passed.
+- **Follow-ups:** an escaped Ashen Gentleman must respawn only in the Crypt (ADR-0006 §2; M1 polish). Tighten the carry speed check and plausibility on secure before public play (M2). Call noteTeleport on the cart re-park. Enforce the secure deadline. Check coins in the death test.
