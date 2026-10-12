@@ -2102,7 +2102,7 @@
       "id": "TASK-0027",
       "title": "Habitat Modules and Blockouts",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0026"
@@ -2134,6 +2134,18 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T11:26:38",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-12T11:26:38",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -2143,9 +2155,16 @@
           "notes": "check.sh pass; specs 82/0; HabitatSwap 35/35; Reachability Cemetery 28/28, Woodland/Spider/Settlement 23/23 each; FullLoop 85/85; ExploitProbe 13/13; CrossPlot 16/16 (TEST-20261012-03)"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-12T11:26:38",
+          "result": "pass",
+          "report": "06 QA/AUD-20261012-TASK-0027-01.md"
+        }
+      ],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0028",

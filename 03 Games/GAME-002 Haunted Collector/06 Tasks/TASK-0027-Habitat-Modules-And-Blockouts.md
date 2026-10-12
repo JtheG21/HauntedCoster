@@ -3,7 +3,7 @@ id: TASK-0027
 title: Habitat Modules and Blockouts
 type: task
 project: GAME-002
-status: in_review
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -67,5 +67,11 @@ Part count: four prebuilt modules stay in memory. Measure the part count per mod
 - **Evidence:** [[TEST-20261012-03]].
 
 ## Audits
+- [[AUD-20261012-TASK-0027-01]]: pass (5 minor, 2 nit). Finding 1 moved to TASK-0028, findings 2 and 3 to TASK-0029, the TEST note placeholder fixed.
 
 ## Outcome
+- **Merge** approved by jg in chat on 2026-10-12 ("merge anything you need to to finish this up"). Merged through PR #21.
+- **Result:** four interchangeable habitat modules behind one contract and validator. `HabitatService` prebuilds them and swaps one in at a time; the old module's wild monsters are cleared and the new roster spawns.
+- **Lessons:** the Studio MCP plugin has its own module cache, so a Play session's services can't be driven from `execute_luau`; use scenario args. Screen captures in Play drop the MCP connection under memory pressure on this machine.
+- **Follow-ups:** jg's visual review of the blockouts (AC4); captures retried in TASK-0028.
+
