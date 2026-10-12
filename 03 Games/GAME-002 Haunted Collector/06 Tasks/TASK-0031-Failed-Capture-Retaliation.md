@@ -3,7 +3,7 @@ id: TASK-0031
 title: Failed-Capture Retaliation
 type: task
 project: GAME-002
-status: in_review
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -55,5 +55,16 @@ A failed capture turns into a short, local chase: the target and a few nearby mo
 - **Evidence:** [[TEST-20261012-07]].
 
 ## Audits
+- [[AUD-20261012-TASK-0031-01]]: pass (4 minor, 3 nit). The findings became follow-ups (below).
 
 ## Outcome
+- **Merge** approved by jg in chat on 2026-10-12 ("keep going and merge it when the audit passes"). Merged through PR #25.
+- **Result:** a failed capture turns the target and up to two neighbours on the failing player for up to 8 s. A catch is a 1.5 s knockdown with no damage, and a 3 s grace afterwards prevents stun-locks. Pursuits end cleanly on timeout, escape, death, leaving or a swap.
+- **Follow-ups** (from [[AUD-20261012-TASK-0031-01]]):
+  - Protect the retaliation tick with `pcall` and end pursuits on error (the same class of bug as TASK-0029's audit finding 1).
+  - Protect each `onFled` handler with `pcall`.
+  - Decide whether a monster that retaliated keeps the player's miss count (jg). Today a retry starts one miss from fleeing.
+  - Strengthen the scenario: containment at the hub edge, plus a death ending.
+  - Comment the Inspect re-enable assumption.
+- **Needs jg:** the feel of the numbers (8 s, 13.5 studs/s, 1.5 s knockdown, 3 s grace).
+
