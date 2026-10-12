@@ -2539,7 +2539,7 @@
       "id": "TASK-0033",
       "title": "Retaliation Begin Cleanup",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "low",
       "depends_on": [
         "TASK-0032"
@@ -2582,6 +2582,12 @@
           "from": "changes_requested",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-12T13:23:09",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
       "executions": [
@@ -2589,6 +2595,11 @@
           "time": "2026-10-12T13:15:09",
           "result": "pass",
           "notes": "check.sh pass; specs 96/0; Retaliation 35/35; FullLoop 85/85; ExploitProbe 13/13 (TEST-20261012-09)"
+        },
+        {
+          "time": "2026-10-12T13:23:09",
+          "result": "pass",
+          "notes": "revision 1: check.sh pass; specs 96/0; negative control fails 5b as expected; Retaliation 36/36; FullLoop 85/85; ExploitProbe 13/13 (TEST-20261012-09)"
         }
       ],
       "audits": [
