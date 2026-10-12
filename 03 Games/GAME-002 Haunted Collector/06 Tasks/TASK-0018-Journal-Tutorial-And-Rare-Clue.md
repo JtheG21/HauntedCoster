@@ -3,7 +3,7 @@ id: TASK-0018
 title: Journal, Tutorial and Rare Clue
 type: task
 project: GAME-002
-status: ready
+status: done
 priority: high
 risk: low
 owner: executor
@@ -59,11 +59,17 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 *Prototype built in one integration commit, `17cb5ae` on `task/TASK-0011-Haunted-Scaffold-And-Player-Data`, which covers TASK-0011 to TASK-0018. The user approved building without per-task gates on 2026-10-11.*
 - `scripts/check.sh`: all pass (StyLua, Selene, strict typecheck for both projects, Rojo builds, vault, Python tests).
 - Unit specs: 37/37 pass headless ([[TEST-20261011-01]]). Server smoke in Run mode: clean.
-- **Not yet verified with a player:** the `FullLoop` play scenario is written but hasn't run (the Studio window didn't load the place). The ACs below stay unchecked until it has run.
+- *(Superseded below: FullLoop has since run, see revision 1.)*
+
+### Revision 1 (with TASK-0011, `5878f6d`, merged in PR #2)
+- The tutorial was rewritten to brief §12 one to one (12 steps; step 1 on station proximity, step 8 on opening the Mansion or Journal; ADR-0006 §3) with a table-driven spec. The Bell Wraith spawns only while a player in the server has the Bell Tower clue, and specials ignore the zone cap.
+- Evidence: [[TEST-20261011-03]] (fresh-profile §20 run through the real client), [[TEST-20261011-04]] (FullLoop 56/56, including "Bell Wraith spawns in the Crypt after the clue").
 - Systems: [[SYS-Haunted-Player-Data]], [[SYS-Haunted-Capture-Loop]], [[SYS-Haunted-Ghost-Train]].
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261011-TASK-0018-01]]: fail (2 major: no §20 end-to-end TEST note; rare not conditioned on the clue), revision 1
+- [[AUD-20261011-TASK-0018-02]]: **pass** (2 minor, 4 nit): the Wraith is hidden only on the client, so a modified client can inspect it and get it recorded as seen; no test checks the Wraith is absent before the clue. Nits: trophy count includes the TrainBell clue, the journal hard-codes Crypt species, the Wraith can show for up to 1 s, notes were stale.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0018-02]] passed. Last M1 task.
+- **Follow-ups:** server-side visibility or inspect gating for the Bell Wraith; a test that the Wraith is absent before the clue and inside the Crypt after it; exclude the TrainBell clue from the trophy count; derive the journal's Crypt species from config; tailor the completion hint to what is missing (TEST-03 F7).
