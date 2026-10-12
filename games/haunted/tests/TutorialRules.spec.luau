@@ -93,7 +93,7 @@ return function(t: TestRunner.T)
 		-- A step saved before a later state still lands on the first unmet step.
 		t.eq(TutorialRules.advance(2, c), 10)
 		-- A saved step beyond the end shows the completion text.
-		t.eq(TutorialRules.hint(99, c), TutorialRules.completeHint(c))
+		t.eq(TutorialRules.hint(99, c), "The Sealed Crypt is open to you: find the Bell Wraith inside.")
 	end)
 
 	t.test("no step needs an investigation or a clue (ADR-0007)", function()

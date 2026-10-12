@@ -194,8 +194,8 @@ function EncounterService.spawn(speciesId: string, variantId: string, zoneId: st
 	prompt.ObjectText = (Variants.label(variantId) and (Variants.label(variantId) :: string) .. " " or "")
 		.. species.name
 	prompt.HoldDuration = 0
-	-- Its own key: monsters roam past landmarks, and with both on E only one prompt shows, so a nearby
-	-- monster hid the landmark's Investigate prompt (hands-on playtest, TEST-20261011-03).
+	-- Its own key (R), so Inspect never competes with the E prompts players use near monsters (Grab, Secure,
+	-- ride prompts); with both on E only one prompt shows (hands-on playtest, TEST-20261011-03).
 	prompt.KeyboardKeyCode = Enum.KeyCode.R
 	prompt.GamepadKeyCode = Enum.KeyCode.ButtonY
 	prompt.MaxActivationDistance = 16
@@ -385,7 +385,8 @@ function EncounterService.respawnEscaped(speciesId: string, variantId: string)
 		return
 	end
 	for _, zone in World.Zones do
-		if zone.spawns[speciesId] and countIn(zone.id) < zone.maxMonsters then
+		-- A capped rare skips the zone cap, as in fillZones.
+		if zone.spawns[speciesId] and ((species and species.maxAlive) or countIn(zone.id) < zone.maxMonsters) then
 			EncounterService.spawn(speciesId, variantId, zone.id)
 			return
 		end

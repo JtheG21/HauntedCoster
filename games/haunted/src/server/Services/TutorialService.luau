@@ -17,7 +17,7 @@ local PlotService = require(script.Parent.PlotService)
 local TutorialService = {}
 
 local NEAR_STATION_STUDS = 20
-local NEAR_MONSTER_STUDS = 30
+local NEAR_MONSTER_STUDS = 16 -- the Inspect prompt's reach, so "walk up to one" means close enough to inspect
 
 local started = false
 

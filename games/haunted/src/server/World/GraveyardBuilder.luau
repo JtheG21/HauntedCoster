@@ -10,6 +10,8 @@ local Build = require(script.Parent.Build)
 
 local GraveyardBuilder = {}
 
+-- landmarkAnchors and cryptGate have had no caller since TASK-0025 (LandmarkService removed); TASK-0026
+-- replaces this builder with the hub and habitat modules.
 export type Result = {
 	folder: Folder,
 	landmarkAnchors: { [string]: BasePart },

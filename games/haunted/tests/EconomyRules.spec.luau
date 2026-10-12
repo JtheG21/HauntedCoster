@@ -15,6 +15,14 @@ return function(t: TestRunner.T)
 		return p
 	end
 
+	t.test("the crypt opens from the Restored Manor (ADR-0007)", function()
+		t.eq(EconomyRules.cryptOpen(0), false)
+		t.eq(EconomyRules.cryptOpen(1), true)
+		t.eq(EconomyRules.cryptOpen(2), true)
+		t.eq(EconomyRules.cryptOpen(99), false)
+		t.eq(EconomyRules.cryptOpen(-1), false)
+	end)
+
 	t.test("no income while acclimating", function()
 		local p = withOwned({ { uid = "m1", species = "Wisp", variant = "Normal", acquiredAt = now } })
 		t.eq(EconomyRules.incomeRate(p, now + Economy.AcclimationSeconds - 1), 0)

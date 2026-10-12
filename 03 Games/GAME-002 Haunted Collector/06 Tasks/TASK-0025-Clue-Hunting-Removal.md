@@ -82,11 +82,31 @@ This is done first (before the layout work) because it removes the crypt gate, e
 - Entering the crypt without access therefore grants nothing.
 - The capture check is stronger than the old 0.25 s eject window that ADR-0006 §9 accepted as a risk.
 
-**Checks (2026-10-12):**
+**Attempt 1 checks** ([[TEST-20261012-01]], 2026-10-12):
 - `scripts/check.sh` ALL CHECKS PASSED (StyLua, Selene, strict types, both Rojo builds, JSON, queue, vault, Python tests).
-- Studio specs 63 passed, 0 failed (fresh Play, Server).
-- FullLoop 81/81 and Reachability 15/15.
+- Studio: specs 63/0, FullLoop 81/81, Reachability 15/15, ExploitProbe 13/13.
+- CrossPlot (2 players) scored 12/13 twice ("B's parked front seat refuses A"), and the harness gave no result twice.
+- A minimal repro proved the cause: a server `Seat:Sit()` seats through `Disabled` (engine behaviour, not in our code).
+
+**Revision 1** (after [[AUD-20261012-TASK-0025-01]]):
+- **F1 (major):** the CrossPlot parked-seat check now asserts what the game guarantees. A forced into B's parked seat doesn't keep it, because the owner guard ejects A. The enabled-seat check resets its flag first, so it no longer passes on the earlier sighting. A player can't call `Seat:Sit()`, and touch-sitting a disabled seat still fails.
+- **F2:** linked the TEST note and listed every result.
+- **F3:** the architecture row for LandmarkService now records its removal.
+- **F4:** added dated "superseded" notes to ADR-0006 (the clue-holder line and §9), keeping the original text. TASK-0021's AC3, AC5 and its Wraith-gating scope are flagged for jg; the ACs themselves are unchanged.
+- **F6:** `NEAR_MONSTER_STUDS` is now 16 (the Inspect reach), so the step 3 hint shows until the player is close enough to inspect.
+- **F7:** renamed the FullLoop prompt check to what it proves; the tutorial spec asserts the concrete string; added an `EconomyRules.cryptOpen` spec.
+- **F8:** fixed the stale R-key comment, removed the unused "clue" toast kind, and commented the builder's unused return fields (TASK-0026 replaces that builder).
+- **F9:** `respawnEscaped` applies the same capped-rare zone-cap exemption as `fillZones`.
+- **F5 (pre-existing):** left to TASK-0021 AC4.
+- **CrossPlot test robustness** (found while correcting F1, all test-only):
+  - The enabled-seat check now runs first, because the engine refuses to re-seat a humanoid right after an ejection.
+  - Captures try up to 3 monsters, since a timed release can miss under 3-process load.
+  - A missing B monster now reports and ends the scenario instead of erroring.
+- **Revision 1 evidence** ([[TEST-20261012-01]]):
+  - `scripts/check.sh` all pass.
+  - Specs 64/0, FullLoop 81/81, Reachability 15/15, ExploitProbe 13/13, CrossPlot (2 players) 13/13.
 
 ## Audits
+- [[AUD-20261012-TASK-0025-01]]: fail (1 major: CrossPlot not green)
 
 ## Outcome

@@ -174,7 +174,10 @@ return function(_args: any): { [string]: any }
 	check("Bell Wraith spawns in the Crypt without a clue", wraith ~= nil and wraith:GetAttribute("Zone") == "Crypt")
 	if wraith and wraith.PrimaryPart then
 		local inspect = wraith.PrimaryPart:FindFirstChild("Inspect")
-		check("Bell Wraith can be inspected by everyone", inspect ~= nil and (inspect :: ProximityPrompt).Enabled)
+		check(
+			"Bell Wraith has a server Inspect prompt (no clue gate; the client no longer hides it)",
+			inspect ~= nil and (inspect :: ProximityPrompt).Enabled
+		)
 		tp(wraith.PrimaryPart.Position - Vector3.new(0, 5, 0) + Vector3.new(3, 0, 0))
 		local refused = CaptureService.requestStart(player, wraith)
 		check(
