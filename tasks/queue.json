@@ -1868,7 +1868,7 @@
       "id": "TASK-0024",
       "title": "FullLoop Landmark Flake",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0024-FullLoop-Landmark-Flake",
@@ -1898,6 +1898,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T21:50:06",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -1907,7 +1913,13 @@
           "notes": "TEST-20261011-09: LandmarkStart 12/12, FullLoop 5/5 (81/81); flake not reproduced; AC1 reworded by jg"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-11T21:50:06",
+          "result": "pass",
+          "report": "06 QA/AUD-20261011-TASK-0024-01.md"
+        }
+      ],
       "revisions": 0
     }
   ]

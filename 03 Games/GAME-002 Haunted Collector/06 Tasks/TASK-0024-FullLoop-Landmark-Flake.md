@@ -3,7 +3,7 @@ id: TASK-0024
 title: FullLoop Landmark Flake
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: low
 risk: low
 owner: executor
@@ -62,7 +62,7 @@ Make FullLoop's first landmark check deterministic, so a red FullLoop always mea
 **Checks:** `scripts/check.sh`: ALL CHECKS PASSED (2026-10-11).
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261011-TASK-0024-01]]: pass (0 blocker, 0 major, 3 nit)
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*
