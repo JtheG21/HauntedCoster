@@ -2471,7 +2471,7 @@
       "id": "TASK-0032",
       "title": "Retaliation Hardening",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [
         "TASK-0031"
@@ -2497,9 +2497,21 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-12T13:04:30",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
-      "executions": [],
+      "executions": [
+        {
+          "time": "2026-10-12T13:04:30",
+          "result": "pass",
+          "notes": "check.sh pass; specs 96/0; Retaliation 31/31 (run 2, seeded counters); FullLoop 85/85; ExploitProbe 13/13 (TEST-20261012-08)"
+        }
+      ],
       "audits": [],
       "revisions": 0,
       "approved_by": "jg"

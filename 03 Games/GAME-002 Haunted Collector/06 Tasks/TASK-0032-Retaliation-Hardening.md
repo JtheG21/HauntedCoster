@@ -3,7 +3,7 @@ id: TASK-0032
 title: Retaliation Hardening
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: medium
 risk: medium
 owner: executor
