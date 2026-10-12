@@ -2,9 +2,9 @@
 id: ADR-0008
 title: Headless Specs With Lune
 type: adr
-status: proposed
-approved_by:
-approved_on:
+status: approved
+approved_by: jg
+approved_on: 2026-10-12
 created: 2026-10-12
 updated: 2026-10-12
 tags:
@@ -25,7 +25,7 @@ GAME-002 unit specs (`games/haunted/tests/*.spec.luau`) only ran in a Studio Pla
 
 ## Decision
 Option 3: no source changes, and Studio keeps using `TestRunner` unchanged. Lune 0.11.0 is pinned in `rokit.toml`; `scripts/check.sh` and the pre-commit hook run `lune run scripts/lune/specs`. Studio Play remains the authority for scenarios, replication and anything touching real Instances.
-*(Mark `status: approved` only after explicit human approval. Record who approved it and when.)*
+Approved by jg in chat on 2026-10-12 ("go ahead" after the PR #19 summary).
 
 ## Consequences
 - CI now fails on logic regressions (verified: changing `EconomyRules.fullRate` failed 3 specs).
