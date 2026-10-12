@@ -3,7 +3,7 @@ id: TASK-0018
 title: Journal, Tutorial and Rare Clue
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: low
 owner: executor
@@ -71,4 +71,5 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 - [[AUD-20261011-TASK-0018-02]]: **pass** (2 minor, 4 nit): the Wraith is hidden only on the client, so a modified client can inspect it and get it recorded as seen; no test checks the Wraith is absent before the clue. Nits: trophy count includes the TrainBell clue, the journal hard-codes Crypt species, the Wraith can show for up to 1 s, notes were stale.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0018-02]] passed. Last M1 task.
+- **Follow-ups:** server-side visibility or inspect gating for the Bell Wraith; a test that the Wraith is absent before the clue and inside the Crypt after it; exclude the TrainBell clue from the trophy count; derive the journal's Crypt species from config; tailor the completion hint to what is missing (TEST-03 F7).
