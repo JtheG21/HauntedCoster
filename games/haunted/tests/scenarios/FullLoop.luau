@@ -13,6 +13,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local World = require(Shared.Config.World)
 local Economy = require(Shared.Config.Economy)
 local CaptureRules = require(Shared.Rules.CaptureRules)
+local EconomyRules = require(Shared.Rules.EconomyRules)
 local Services = ServerScriptService:WaitForChild("Server"):WaitForChild("Services")
 local PlayerDataService = require(Services.PlayerDataService) :: any
 local PlotService = require(Services.PlotService) :: any
@@ -56,6 +57,10 @@ return function(_args: any): { [string]: any }
 		root.Position
 	)
 	check("starter train exists", Workspace.Plots[`Plot{plotIndex}`].Track:FindFirstChild("GhostCart") ~= nil)
+	check(
+		"starter ride has its Scare Arch (Round 20 Q4)",
+		Workspace.Plots[`Plot{plotIndex}`].Track:FindFirstChild("ArchPost") ~= nil
+	)
 	local preview = TrainService.payoutPreview(player)
 	check("starter ride payout preview", preview ~= nil and preview.total > 0, preview and preview.total)
 
@@ -111,8 +116,8 @@ return function(_args: any): { [string]: any }
 				task.wait()
 			end
 			r = CaptureService.requestRelease(player)
-			if r.outcome == "success" then
-				break
+			if r.outcome ~= "hit" then
+				break -- success, or a miss/flee/cancel that ended the session
 			end
 			tgt = r.zoneCenter or tgt
 			task.wait(CaptureRules.MinReleaseGap + 0.05)
@@ -138,7 +143,7 @@ return function(_args: any): { [string]: any }
 	check("carrying after capture", CaptureService.isCarrying(player))
 	check(
 		"carry slows walk speed",
-		math.abs(humanoid.WalkSpeed - Economy.BaseWalkSpeed * Economy.CarrySpeedMultiplier) < 0.01,
+		math.abs(humanoid.WalkSpeed - EconomyRules.walkSpeed(0, true)) < 0.01,
 		humanoid.WalkSpeed
 	)
 	local again = CaptureService.requestStart(player, findMonster("Wisp") or wisp)
@@ -341,23 +346,111 @@ return function(_args: any): { [string]: any }
 		check("character respawned", false)
 	end
 
-	-- Timeout path: the real timer expiry releases only the carried monster, coins untouched
+	-- Round 20 Q2: a missed press startles the monster; it hops away and the attempt resumes later.
 	local third = findMonster("Wisp") or findMonster("Hound")
 	if third and third.PrimaryPart then
 		tp(third.PrimaryPart.Position - Vector3.new(0, 3, 0) + Vector3.new(4, 0, 0))
+		local s3 = CaptureService.requestStart(player, third)
+		if s3.ok then
+			local st = os.clock()
+			local offZone = if s3.zoneCenter > 0.5 then 0.02 else 0.98
+			while
+				os.clock() - st < s3.period * 2
+				and math.abs(CaptureRules.needle(os.clock() - st, s3.period) - offZone) > 0.03
+			do
+				task.wait()
+			end
+			local p0 = (third.PrimaryPart :: BasePart).Position
+			local miss = CaptureService.requestRelease(player)
+			check("off-zone press is a miss", miss.outcome == "miss", miss.outcome)
+			check("a miss ends the meter session", CaptureService.requestRelease(player).outcome == "none")
+			local skittish = CaptureService.requestStart(player, third)
+			check("no instant retry while startled", skittish.ok == false, skittish.reason)
+			task.wait(1)
+			local hop = Vector3.new(
+				(third.PrimaryPart :: BasePart).Position.X - p0.X,
+				0,
+				(third.PrimaryPart :: BasePart).Position.Z - p0.Z
+			).Magnitude
+			check("startled monster hopped 8-14 studs", hop >= 7 and hop <= 15, string.format("%.1f", hop))
+			tp(third.PrimaryPart.Position - Vector3.new(0, 3, 0) + Vector3.new(4, 0, 0))
+			local again3 = CaptureService.requestStart(player, third)
+			check(
+				"retry after the hop keeps the miss",
+				again3.ok == true and again3.misses == miss.misses,
+				again3.misses
+			)
+			if again3.ok then
+				-- Close this session so catch() can start its own (the counters are kept on the monster).
+				CaptureService.requestCancel(player)
+			end
+		else
+			check("third capture start", false, s3.reason)
+		end
+	end
+
+	-- Round 20 Q1: the timer runs out -> it breaks free and runs; grab it back once, then it goes home.
+	if third and third.Parent and third.PrimaryPart then
+		tp(third.PrimaryPart.Position - Vector3.new(0, 3, 0) + Vector3.new(4, 0, 0))
 		local r3 = catch(third)
 		if r3 and r3.outcome == "success" then
-			local ownedB, coinsB = #profile.owned, profile.coins
+			local ownedB, coinsB, escB = #profile.owned, profile.coins, profile.stats.escapes
 			CaptureService.expireCarryForTest(player)
 			task.wait(0.6)
 			check("timer expiry = escape", not CaptureService.isCarrying(player))
+			check("timer expiry starts a chase", CaptureService.isChasing(player))
+			check("a chase isn't a lost escape yet", profile.stats.escapes == escB, profile.stats.escapes)
+			local runner = CaptureService.chaseTarget(player)
+			check("the escaped monster is in the world", runner ~= nil and runner.Parent ~= nil)
+			local busy = CaptureService.requestStart(player, findMonster("Wisp") or third)
+			check("no new capture during a chase", busy.ok == false, busy.reason)
+			if runner and runner.PrimaryPart then
+				local rp = runner.PrimaryPart.Position
+				local pos = root.Position
+				tp(Vector3.new(rp.X, 0, rp.Z) + (Vector3.new(pos.X - rp.X, 0, pos.Z - rp.Z).Unit * 40))
+				check("grab from too far rejected", CaptureService.grab(player) == false)
+				task.wait(1)
+				check("it runs away", (runner.PrimaryPart.Position - rp).Magnitude > 3)
+				local rp2 = runner.PrimaryPart.Position
+				tp(Vector3.new(rp2.X, 0, rp2.Z))
+				check("grab when close", CaptureService.grab(player) == true)
+				check("carrying again after the grab", CaptureService.isCarrying(player))
+				check("the fleeing model is gone", runner.Parent == nil)
+				CaptureService.expireCarryForTest(player)
+				task.wait(0.6)
+				check(
+					"second timeout sends it home (no second chase)",
+					not CaptureService.isCarrying(player) and not CaptureService.isChasing(player)
+				)
+				check("lost escape counted", profile.stats.escapes == escB + 1, profile.stats.escapes)
+			end
 			check(
-				"timeout kept owned monsters and coins",
+				"escape kept owned monsters and coins",
 				#profile.owned == ownedB and profile.coins >= coinsB,
 				`{#profile.owned} {profile.coins - coinsB}`
 			)
 		else
 			check("third capture succeeded", false, r3 and (r3.outcome or r3.reason))
+		end
+	end
+
+	-- A chase that runs out: the monster returns to its habitat.
+	local fourth = findMonster("Wisp") or findMonster("Hound")
+	if fourth and fourth.PrimaryPart then
+		tp(fourth.PrimaryPart.Position - Vector3.new(0, 3, 0) + Vector3.new(4, 0, 0))
+		local r4 = catch(fourth)
+		if r4 and r4.outcome == "success" then
+			local escB = profile.stats.escapes
+			CaptureService.expireCarryForTest(player)
+			task.wait(0.6)
+			local runner = CaptureService.chaseTarget(player)
+			CaptureService.expireChaseForTest(player)
+			task.wait(0.6)
+			check("chase expiry ends the chase", not CaptureService.isChasing(player))
+			check("chase expiry removes the runner", runner == nil or runner.Parent == nil)
+			check("chase expiry counts a lost escape", profile.stats.escapes == escB + 1, profile.stats.escapes)
+		else
+			check("fourth capture succeeded", false, r4 and (r4.outcome or r4.reason))
 		end
 	end
 

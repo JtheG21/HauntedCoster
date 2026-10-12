@@ -73,6 +73,14 @@ local function starterPoints(): { TrackRules.P }
 	return pts
 end
 
+local function starterPieces(): { TrackRules.Piece }
+	local pieces = {}
+	for _, piece in World.Plot.starterPieces do
+		table.insert(pieces, { i = piece.i, kind = piece.kind })
+	end
+	return pieces
+end
+
 local function toWorld(index: number, p: TrackRules.P, y: number): Vector3
 	local o = World.PlotCenters[index]
 	return Vector3.new(o.X + p.x, y, o.Z + p.z)
@@ -404,7 +412,7 @@ local function routeFor(profile: ProfileRules.Profile?): ({ TrackRules.P }, { Tr
 		end
 		warn("[Train] saved route failed validation; using the starter loop")
 	end
-	return starterPoints(), {}
+	return starterPoints(), starterPieces()
 end
 
 -- Builds plot `index`'s track from its current owner's validated route (the starter loop when unowned).
@@ -620,7 +628,7 @@ function TrainService.start()
 	end
 	started = true
 	for i = 1, #World.PlotCenters do
-		rebuild(i, starterPoints(), {})
+		rebuild(i, starterPoints(), starterPieces())
 	end
 	Remotes.func("SubmitRoute").OnServerInvoke = onSubmitRoute
 	PlotService.onAssigned(function(player, index)
@@ -632,7 +640,7 @@ function TrainService.start()
 		if type(index) == "number" then
 			task.defer(function()
 				if not PlotService.ownerOf(index) then
-					rebuild(index, starterPoints(), {})
+					rebuild(index, starterPoints(), starterPieces())
 				end
 			end)
 		end

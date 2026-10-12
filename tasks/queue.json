@@ -1767,6 +1767,43 @@
       ],
       "revisions": 1,
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0023",
+      "title": "Round 20 Design Changes",
+      "project": "GAME-002",
+      "status": "in_progress",
+      "risk": "medium",
+      "depends_on": [],
+      "branch": "task/TASK-0023-Round-20-Design-Changes",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0023-Round-20-Design-Changes.md",
+      "acceptance_criteria": [
+        "A missed capture press startles the monster (8-14 stud hop inside its zone, no instant retry) and hits/misses carry over to the next attempt",
+        "Return-timer expiry starts a 15 s chase; grabbing within 6 studs resumes the carry with 20 s, once per capture; chase expiry, death, leaving or the speed check send it back to its habitat; owned monsters and coins are untouched",
+        "Carry speed multiplier is 0.6/0.7/0.8/0.9 by Running Shoes level, and the server speed check uses the same rule",
+        "The fixed starter ride has one Scare Arch and at least one starter exhibit slot within range",
+        "GDD v0.3 and the Overview record the Round 20 decisions and the 'Build your haunted train' hook",
+        "Specs (ChaseRules, EconomyRules, TrackRules) and FullLoop, CrossPlot and ExploitProbe pass in Studio",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T20:55:57",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-11T20:55:58",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
     }
   ]
 }

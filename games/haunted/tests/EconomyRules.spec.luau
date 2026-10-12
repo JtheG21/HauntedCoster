@@ -80,7 +80,25 @@ return function(t: TestRunner.T)
 
 	t.test("carrying slows movement", function()
 		t.eq(EconomyRules.walkSpeed(0, false), Economy.BaseWalkSpeed)
-		t.eq(EconomyRules.walkSpeed(0, true), Economy.BaseWalkSpeed * Economy.CarrySpeedMultiplier)
+		t.eq(EconomyRules.walkSpeed(0, true), Economy.BaseWalkSpeed * 0.6)
 		t.eq(EconomyRules.walkSpeed(2, false), Economy.BaseWalkSpeed + 2 * Economy.SpeedPerLevel)
+	end)
+
+	t.test("running shoes shrink the carry penalty level by level (Round 20 Q3)", function()
+		local last = 0
+		for i = 1, #Economy.SpeedLevelCosts + 1 do
+			local level = i - 1
+			local m = EconomyRules.carryMultiplier(level)
+			t.truthy(m > last, `level {level} penalty is smaller than the level below`)
+			last = m
+		end
+		t.eq(EconomyRules.carryMultiplier(#Economy.SpeedLevelCosts), 0.9)
+		-- Out-of-range levels clamp instead of erroring.
+		t.eq(EconomyRules.carryMultiplier(-1), 0.6)
+		t.eq(EconomyRules.carryMultiplier(99), 0.9)
+		t.truthy(
+			EconomyRules.walkSpeed(3, true) < EconomyRules.walkSpeed(0, false) + 6,
+			"still slower than running free"
+		)
 	end)
 end

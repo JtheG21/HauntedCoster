@@ -52,6 +52,19 @@ local function plotOrigin(): Vector3?
 	return if idx then World.PlotCenters[idx] else nil
 end
 
+local function loadStarter()
+	points = {}
+	for i, v in World.Plot.starterRoute do
+		local kind: string? = nil
+		for _, piece in World.Plot.starterPieces do
+			if piece.i == i then
+				kind = piece.kind
+			end
+		end
+		table.insert(points, { x = v.X, z = v.Y, kind = kind })
+	end
+end
+
 local function loadSaved()
 	points = {}
 	local snap = State.snap
@@ -67,9 +80,7 @@ local function loadSaved()
 			table.insert(points, { x = p.x, z = p.z, kind = kind })
 		end
 	else
-		for _, v in World.Plot.starterRoute do
-			table.insert(points, { x = v.X, z = v.Y })
-		end
+		loadStarter()
 	end
 	selected = nil
 end
@@ -579,10 +590,7 @@ function TrackEditor.mount(gui: ScreenGui, toastFn: (string, string?) -> ())
 		setPiece("FogTunnel")
 	end, { Size = UDim2.fromOffset(110, 36), TextSize = 14, BackgroundColor3 = Color3.fromRGB(150, 60, 110) })
 	Theme.button(row1, "Starter Loop", function()
-		points = {}
-		for _, v in World.Plot.starterRoute do
-			table.insert(points, { x = v.X, z = v.Y })
-		end
+		loadStarter()
 		selected = nil
 		redraw()
 	end, small)

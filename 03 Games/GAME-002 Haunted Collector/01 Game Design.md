@@ -4,7 +4,7 @@ title: Game Design
 type: design
 project: GAME-002
 status: proposed
-version: 0.2
+version: 0.3
 created: 2026-10-11
 updated: 2026-10-11
 tags:
@@ -14,11 +14,13 @@ related:
   - "[[ADR-0005-Haunted-Collector-Direction]]"
   - "[[ADR-0006-M1-Tuning-And-Scope-Decisions]]"
 ---
-# Game design: Haunted Collector (draft v0.1, **proposed**)
+# Game design: Haunted Collector (draft v0.3, **proposed**)
 
 > This draft is derived from [[INBOX-20261011-Haunted-Collector-Brief]]. Every number below is an **unvalidated starting guess**, kept in config so it can be tuned. The brief remains the requirement source. This note records the choices it left open.
 
 ## Pitch (1–2 sentences)
+**Public hook (Round 20 Q5): "Build your haunted train."** Collect monsters and build a ride your friends can experience.
+
 Explore an eerie graveyard with a flashlight, capture strange creatures, and race them home before they escape. Each one makes your haunted mansion and your self-built ghost train ride worth more.
 
 ## Target players & session length
@@ -33,11 +35,11 @@ Explore → investigate landmarks (clues) → inspect a monster (rarity, value, 
 - **Roster (4):** Wisp (ghost, common), Stitched Hound (distorted animal, common), Hollow Gentleman (unsettling figure, uncommon), Bell Wraith (bizarre, rare: it only appears in the Sealed Crypt after the Bell Tower clue). Each is a placeholder model built from parts with a distinct silhouette.
 - **Variants:** a colour or particle overlay on the base model. The natural variant "Spectral" rolls 10% anywhere, ×1.5 income. The special **"Ashen"** variant is environmental: it rolls 30% only for monsters spawning in the Sealed Crypt, ×1.75 income ([[ADR-0006-M1-Tuning-And-Scope-Decisions]]).
 - **Inspect:** a ProximityPrompt shows the name, rarity, variant label and an estimated income per minute.
-- **Capture meter:** hold to fill while a needle sweeps. Release inside the green zone, which narrows with rarity, for one success. The server stores the timing; the client only sends the release time. Three misses scare the monster off.
-- **Return trip:** a timer of 75 s (common), 90 s (uncommon) or 120 s (rare). WalkSpeed ×0.7 while carrying. The beacon and an on-screen arrow point home. Securing happens at your own containment pad. Failure means the capture escapes ([[ADR-0005-Haunted-Collector-Direction]]).
+- **Capture meter:** hold to fill while a needle sweeps. Release inside the green zone, which narrows with rarity, for one success. The server stores the timing; the client only sends the release time. A miss **startles** the monster: the meter closes and it hops 8–14 studs within its zone, and the player walks up and tries again. Hits and misses carry over between attempts, and it flees for good when the rarity's misses-allowed is used up (Common 2, Uncommon and Rare 3; revisit after Round 21 Q1). (v0.3, Round 20 Q2)
+- **Return trip:** a timer of 75 s (common), 90 s (uncommon) or 120 s (rare). Carrying slows WalkSpeed to ×0.6 at speed level 0, and each Running Shoes level shrinks the penalty: ×0.7, ×0.8, ×0.9 (v0.3, Round 20 Q3). The beacon and an on-screen arrow point home. Securing happens at your own containment pad. **Escape chase (v0.3, Round 20 Q1):** when the timer runs out, the capture breaks free about 10 studs away and runs at 12.5 studs/s for 15 s. It stays on its side of the graveyard fence, and the HUD points at it. Get within 6 studs and press E to grab it, and the carry resumes with 20 s. It can only break free once per capture. If the chase runs out (or the player dies, leaves, or trips the speed check), it returns to its habitat and can be found again later; owned monsters are never lost ([[ADR-0005-Haunted-Collector-Direction]]).
 - **Containment:** owned monsters are listed in the roster. Acclimation takes 30 s, then the monster earns full passive income. Base income per second: Wisp 1, Stitched Hound 1.5, Hollow Gentleman 3, Bell Wraith 8, times the variant multiplier. Official for M1 ([[ADR-0006-M1-Tuning-And-Scope-Decisions]]), tunable after playtests.
 - **House tiers:** Tier 0 Shabby (starter). Tier 1 Restored, cost 250: adds space and unlocks the **track editor** and the Sealed Crypt key. Tier 2 Grand, cost 1,500: more exhibit slots and capped offline income (max 2 h, 25% rate). The **speed upgrade** has 3 levels costing 75, 200 and 450, +2 WalkSpeed each.
-- **Ghost train:** a fixed starter loop works from the start. The server moves the cart along a sampled spline with CFrame, so there is no physics. Payout on server-confirmed completion = base 40 × tier multiplier × (1 + 0.1 × exhibits in range, rarity-weighted) × route quality (0.9–1.2, from length and turn variety). There is a 20 s cooldown between paid rides.
+- **Ghost train:** a fixed starter loop works from the start. It includes one Scare Arch and passes one display (exhibit slot 2) so the first ride shows riding, monsters and a scare without being a tutorial level (v0.3, Round 20 Q4). The server moves the cart along a sampled spline with CFrame, so there is no physics. Payout on server-confirmed completion = base 40 × tier multiplier × (1 + 0.1 × exhibits in range, rarity-weighted) × route quality (0.9–1.2, from length and turn variety). There is a 20 s cooldown between paid rides.
 - **Track editor:** control points inside the plot bounds, 4 to 16 points, total length 60–300 studs. Add, move and delete points, with a live preview, Confirm, Cancel and Exit. The server re-validates the route, and a rejected edit keeps the last valid route. There are 2 special pieces: a Scare Arch (+quality) and a Fog Tunnel. Exhibits use fixed slots near the plot, and the editor shows which slots sit within range of the route.
 - **Journal:** known and unknown entries for types and variants, plus the clue list. Completion rewards are trophies on the mansion only, with no stat bonuses.
 - **Tutorial:** a 12-step state machine following brief §12 one to one. Step 1 finishes on reaching your station, and step 8 on opening the Mansion or Journal. It is saved, each step has a skip-forward check (for example, owning a monster completes steps 1–7), and it never blocks normal play. Catching the Bell Wraith is the post-tutorial hook, not a step.

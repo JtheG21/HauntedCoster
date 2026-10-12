@@ -24,7 +24,9 @@ local Economy = {
 	BaseWalkSpeed = 16,
 	SpeedPerLevel = 2,
 	SpeedLevelCosts = { 75, 200, 450 }, -- index = level being bought
-	CarrySpeedMultiplier = 0.7,
+	-- Carry slowdown by Running Shoes level (index = level + 1): each level shrinks the penalty
+	-- (Round 20 Q3; GDD v0.3).
+	CarrySpeedMultipliers = { 0.6, 0.7, 0.8, 0.9 },
 
 	-- index 1 = tier 0 (starter). Tier n is HouseTiers[n + 1].
 	HouseTiers = {

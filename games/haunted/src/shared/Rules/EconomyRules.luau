@@ -88,9 +88,14 @@ function EconomyRules.purchase(p: Profile, item: string): (boolean, string?)
 	return true, nil
 end
 
+function EconomyRules.carryMultiplier(speedLevel: number): number
+	local m = Economy.CarrySpeedMultipliers
+	return m[math.clamp(math.floor(speedLevel), 0, #m - 1) + 1]
+end
+
 function EconomyRules.walkSpeed(speedLevel: number, carrying: boolean): number
 	local base = Economy.BaseWalkSpeed + Economy.SpeedPerLevel * speedLevel
-	return if carrying then base * Economy.CarrySpeedMultiplier else base
+	return if carrying then base * EconomyRules.carryMultiplier(speedLevel) else base
 end
 
 function EconomyRules.addCoins(p: Profile, amount: number)

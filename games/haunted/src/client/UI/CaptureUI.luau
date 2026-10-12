@@ -89,10 +89,14 @@ local function release()
 		if type(result.zoneCenter) == "number" then
 			setZone(result.zoneCenter, a.zoneWidth, a.period)
 		end
-	elseif result.outcome == "miss" then
-		a.misses = result.misses
-		flash(Theme.Colors.bad)
-	elseif result.outcome == "success" or result.outcome == "fled" or result.outcome == "cancelled" then
+	elseif
+		-- A miss closes the session too: the monster was startled and hopped away (Round 20 Q2). The
+		-- CaptureEnded event carries the toast, since it can arrive before this reply.
+		result.outcome == "miss"
+		or result.outcome == "success"
+		or result.outcome == "fled"
+		or result.outcome == "cancelled"
+	then
 		closeMeter()
 		return
 	end
@@ -118,8 +122,9 @@ local function startCapture()
 		zoneWidth = result.zoneWidth,
 		hitsNeeded = result.hitsNeeded,
 		missesAllowed = result.missesAllowed,
-		hits = 0,
-		misses = 0,
+		-- Hits and misses carry over from earlier attempts on the same monster.
+		hits = result.hits or 0,
+		misses = result.misses or 0,
 	}
 	meterStart = os.clock()
 	setZone(result.zoneCenter, result.zoneWidth, result.period)
@@ -269,6 +274,14 @@ function CaptureUI.mount(gui: ScreenGui, toastFn: (string, string?) -> ())
 	endedEvent.OnClientEvent:Connect(function(info)
 		if type(info) == "table" and info.result == "timeout" then
 			toast("You hesitated too long and it wandered off.", "error")
+		elseif type(info) == "table" and info.result == "startled" then
+			local left = if type(info.missesLeft) == "number" then info.missesLeft else 0
+			toast(
+				`Missed! It darted away. Walk up and Inspect (R) to try again ({left} miss{if left == 1
+					then ""
+					else "es"} left).`,
+				"error"
+			)
 		end
 		closeMeter()
 	end)

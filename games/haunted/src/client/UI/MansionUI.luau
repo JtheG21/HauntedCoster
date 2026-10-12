@@ -8,6 +8,7 @@ local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
 local Economy = require(Config:WaitForChild("Economy"))
 local Monsters = require(Config:WaitForChild("Monsters"))
 local Variants = require(Config:WaitForChild("Variants"))
+local EconomyRules = require(ReplicatedStorage.Shared:WaitForChild("Rules"):WaitForChild("EconomyRules"))
 local Theme = require(script.Parent.Theme)
 local State = require(script.Parent.Parent.State)
 
@@ -108,7 +109,12 @@ local function renderUpgrades(snap: { [string]: any })
 	)
 	Theme.label(
 		speed,
-		`Walk speed {Economy.BaseWalkSpeed + Economy.SpeedPerLevel * lvl}. Faster expeditions and faster escapes home.`,
+		string.format(
+			"Walk speed %d, carrying %.1f (%d%%). Each level also lightens the load on the way home.",
+			EconomyRules.walkSpeed(lvl, false),
+			EconomyRules.walkSpeed(lvl, true),
+			math.round(EconomyRules.carryMultiplier(lvl) * 100)
+		),
 		{ AutomaticSize = Enum.AutomaticSize.Y, TextSize = 14 }
 	)
 	local cost = Economy.SpeedLevelCosts[lvl + 1]

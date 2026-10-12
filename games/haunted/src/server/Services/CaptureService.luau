@@ -2,6 +2,10 @@
 -- Capture meter sessions (server-timed), carrying the capture home under a timer, escape on failure,
 -- and securing it at the player's own containment pen.
 --
+-- Round 20 (GDD v0.3): a missed press startles the monster, which hops away; walk up and try again, with
+-- hits and misses kept. When the return timer runs out the capture breaks free and runs: catch it within
+-- Monsters.Chase.seconds to carry on, or it goes back to its habitat.
+--
 -- The expedition state (session, carried capture) lives only in memory and is never saved; only a
 -- secured monster becomes part of the profile. Failing an expedition never touches owned monsters.
 
@@ -55,12 +59,22 @@ type Carry = {
 	lastPos: Vector3?, -- server-side speed check (WalkSpeed lives on the client-owned character)
 	lastAt: number,
 	strikes: number,
+	chased: boolean, -- already broke free once; the next timeout sends it straight home
+}
+
+type Chase = {
+	encounter: EncounterService.Encounter,
+	species: string,
+	variant: string,
+	deadline: number, -- os.clock()
+	deadlineServer: number,
 }
 
 local started = false
 local rng = Random.new()
 local sessions: { [Player]: Session } = {}
 local carries: { [Player]: Carry } = {}
+local chases: { [Player]: Chase } = {}
 local securedCallbacks: { (Player, ProfileRules.OwnedMonster) -> () } = {}
 
 local function rootOf(player: Player): BasePart?
@@ -71,6 +85,16 @@ end
 
 function CaptureService.isCarrying(player: Player): boolean
 	return carries[player] ~= nil
+end
+
+function CaptureService.isChasing(player: Player): boolean
+	return chases[player] ~= nil
+end
+
+-- The fleeing monster's model while `player` chases it (tests and the HUD arrow).
+function CaptureService.chaseTarget(player: Player): Model?
+	local ch = chases[player]
+	return if ch then ch.encounter.model else nil
 end
 
 function CaptureService.onSecured(cb: (Player, ProfileRules.OwnedMonster) -> ())
@@ -84,9 +108,13 @@ local function endSession(player: Player, result: string)
 	end
 	sessions[player] = nil
 	if result ~= "success" and result ~= "fled" then
-		EncounterService.release(s.encounter)
+		-- Walking away, timing out or being startled keeps this player's counters for the next attempt.
+		s.encounter.progress[player] = { hits = s.hits, misses = s.misses }
+		if result ~= "startled" then
+			EncounterService.release(s.encounter)
+		end
 	end
-	Remotes.event("CaptureEnded"):FireClient(player, { result = result })
+	Remotes.event("CaptureEnded"):FireClient(player, { result = result, missesLeft = s.missesAllowed - s.misses })
 end
 
 local function clearCarry(player: Player)
@@ -107,24 +135,100 @@ end
 
 local checkCarrySpeed: (Player, Carry, number) -> ()
 
-local function escape(player: Player, why: string)
+-- The capture is gone for good this time: back to its habitat, to be found again later (Round 20 Q1).
+local function lose(player: Player, speciesId: string, variantId: string, why: string)
+	local species = Monsters.Species[speciesId]
+	PlayerDataService.update(player, function(p)
+		p.stats.escapes += 1
+	end)
+	EncounterService.respawnEscaped(speciesId, variantId)
+	if player.Parent then
+		StateService.toast(
+			player,
+			`{why} The {species and species.name or "monster"} escaped back to its habitat. Find it again later; your collection is safe.`,
+			"error"
+		)
+	end
+end
+
+local function endChase(player: Player, why: string?)
+	local ch = chases[player]
+	if not ch then
+		return
+	end
+	chases[player] = nil
+	ch.encounter.fleeing = nil
+	if ch.encounter.alive then
+		EncounterService.remove(ch.encounter)
+	end
+	StateService.markDirty(player)
+	if why then
+		lose(player, ch.species, ch.variant, why)
+	end
+end
+
+local function startChase(player: Player, c: Carry, root: BasePart): boolean
+	local tuning = Monsters.Chase
+	local deadline = os.clock() + tuning.seconds
+	local e = EncounterService.spawnFleeing(
+		c.species,
+		c.variant,
+		player,
+		root.Position,
+		tuning.headStart,
+		tuning.fleeSpeed,
+		deadline
+	)
+	if not e then
+		return false
+	end
+	chases[player] = {
+		encounter = e,
+		species = c.species,
+		variant = c.variant,
+		deadline = deadline,
+		deadlineServer = workspace:GetServerTimeNow() + tuning.seconds,
+	}
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "Grab"
+	prompt.ActionText = "Grab!"
+	prompt.ObjectText = "Escaped monster"
+	prompt.HoldDuration = 0
+	prompt.KeyboardKeyCode = Enum.KeyCode.E
+	prompt.GamepadKeyCode = Enum.KeyCode.ButtonX
+	prompt.MaxActivationDistance = tuning.grabDistance
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = e.root
+	prompt.Triggered:Connect(function(who)
+		CaptureService.grab(who)
+	end)
+	StateService.markDirty(player)
+	return true
+end
+
+-- `canChase`: the timer ran out on a living player, so the capture breaks free and runs instead of
+-- vanishing. Deaths, leaving and the anti-speed check send it straight home.
+local function escape(player: Player, why: string, canChase: boolean?)
 	local c = carries[player]
 	if not c then
 		return
 	end
 	clearCarry(player)
-	local species = Monsters.Species[c.species]
-	PlayerDataService.update(player, function(p)
-		p.stats.escapes += 1
-	end)
-	EncounterService.respawnEscaped(c.species, c.variant)
-	if player.Parent then
-		StateService.toast(
-			player,
-			`{why} The {species and species.name or "monster"} escaped back to the graveyard. Your collection is safe.`,
-			"error"
-		)
+	local root = rootOf(player)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if canChase and not c.chased and root and humanoid and humanoid.Health > 0 and player.Parent then
+		if startChase(player, c, root) then
+			local species = Monsters.Species[c.species]
+			StateService.toast(
+				player,
+				`{why} The {species.name} broke free! Catch it within {Monsters.Chase.seconds}s (get close, press E).`,
+				"error"
+			)
+			return
+		end
 	end
+	lose(player, c.species, c.variant, why)
 end
 
 -- The carry slowdown is a WalkSpeed value on a character the client simulates, so an exploiter could
@@ -175,6 +279,14 @@ function CaptureService.expireCarryForTest(player: Player)
 	end
 end
 
+-- Studio test helper: end the current chase on the next tick (real expiry path).
+function CaptureService.expireChaseForTest(player: Player)
+	local ch = chases[player]
+	if ch then
+		ch.deadline = os.clock()
+	end
+end
+
 -- Number of monsters of a species currently being carried (counts toward spawn caps).
 function CaptureService.carriedCount(speciesId: string): number
 	local n = 0
@@ -218,20 +330,22 @@ local function makeCage(player: Player, speciesId: string, variantId: string): B
 	return cage
 end
 
-local function startCarry(player: Player, speciesId: string, variantId: string)
+local function startCarry(player: Player, speciesId: string, variantId: string, regrab: boolean?)
 	local species = Monsters.Species[speciesId]
 	local tuning = Monsters.Capture[species.rarity]
+	local seconds = if regrab then Monsters.Chase.regrabSeconds else tuning.returnSeconds
 	local c: Carry = {
 		species = speciesId,
 		variant = variantId,
-		deadline = os.clock() + tuning.returnSeconds,
-		deadlineServer = workspace:GetServerTimeNow() + tuning.returnSeconds,
-		returnSeconds = tuning.returnSeconds,
+		deadline = os.clock() + seconds,
+		deadlineServer = workspace:GetServerTimeNow() + seconds,
+		returnSeconds = seconds,
 		cage = makeCage(player, speciesId, variantId),
 		conns = {},
 		lastPos = nil,
 		lastAt = os.clock(),
 		strikes = 0,
+		chased = regrab == true,
 	}
 	carries[player] = c
 	local character = player.Character
@@ -254,7 +368,41 @@ local function startCarry(player: Player, speciesId: string, variantId: string)
 	PlayerDataService.update(player, function(p)
 		p.flags.captureTried = true
 	end)
-	StateService.toast(player, `Captured the {species.name}! Get it home within {tuning.returnSeconds}s.`, "success")
+	if regrab then
+		StateService.toast(
+			player,
+			`Got it back! {seconds}s to get the {species.name} home. It won't break free twice.`,
+			"success"
+		)
+	else
+		StateService.toast(player, `Captured the {species.name}! Get it home within {seconds}s.`, "success")
+	end
+end
+
+-- Grabbing a fleeing escaped capture (the Grab prompt, or the Studio scenarios). Server-checked: only the
+-- player it escaped from, while the chase runs, from within grab distance.
+function CaptureService.grab(player: Player): boolean
+	local ch = chases[player]
+	if not ch or not ch.encounter.alive or os.clock() >= ch.deadline then
+		return false
+	end
+	if carries[player] then
+		return false
+	end
+	local root = rootOf(player)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not root or not humanoid or humanoid.Health <= 0 then
+		return false
+	end
+	local m = ch.encounter.root.Position
+	-- Flat distance: monsters hover. +2 studs for the prompt's own reach and replication lag.
+	if Vector3.new(m.X - root.Position.X, 0, m.Z - root.Position.Z).Magnitude > Monsters.Chase.grabDistance + 2 then
+		return false
+	end
+	endChase(player, nil)
+	startCarry(player, ch.species, ch.variant, true)
+	return true
 end
 
 local function onCaptureStart(player: Player, model: any): { [string]: any }
@@ -271,6 +419,9 @@ local function onCaptureStart(player: Player, model: any): { [string]: any }
 	if carries[player] then
 		return { ok = false, reason = "You're already carrying a monster home!" }
 	end
+	if chases[player] then
+		return { ok = false, reason = "Catch your escaped monster first!" }
+	end
 	if sessions[player] then
 		return { ok = false, reason = "Already capturing" }
 	end
@@ -280,6 +431,12 @@ local function onCaptureStart(player: Player, model: any): { [string]: any }
 	local e = EncounterService.get(model)
 	if not e or not e.alive then
 		return { ok = false, reason = "It's gone" }
+	end
+	if e.fleeing then
+		return { ok = false, reason = "It's running from someone else" }
+	end
+	if EncounterService.isStartled(e) then
+		return { ok = false, reason = "It's skittish. Give it a moment." }
 	end
 	local root = rootOf(player)
 	if not root or (root.Position - e.root.Position).Magnitude > START_DISTANCE then
@@ -297,14 +454,15 @@ local function onCaptureStart(player: Player, model: any): { [string]: any }
 		return { ok = false, reason = "Someone else is capturing it" }
 	end
 	local tuning = Monsters.Capture[species.rarity]
+	local kept = e.progress[player]
 	local s: Session = {
 		encounter = e,
 		startedAt = os.clock(),
 		period = tuning.period,
 		zoneCenter = CaptureRules.zoneCenter(rng, tuning.zoneWidth),
 		zoneWidth = tuning.zoneWidth,
-		hits = 0,
-		misses = 0,
+		hits = if kept then kept.hits else 0,
+		misses = if kept then kept.misses else 0,
 		hitsNeeded = tuning.hitsNeeded,
 		missesAllowed = tuning.missesAllowed,
 		lastRelease = 0,
@@ -324,6 +482,8 @@ local function onCaptureStart(player: Player, model: any): { [string]: any }
 		zoneWidth = s.zoneWidth,
 		hitsNeeded = s.hitsNeeded,
 		missesAllowed = s.missesAllowed,
+		hits = s.hits,
+		misses = s.misses,
 	}
 end
 
@@ -364,6 +524,11 @@ local function onCaptureRelease(player: Player): { [string]: any }
 		endSession(player, "fled")
 		EncounterService.remove(e)
 		StateService.toast(player, "It slipped away into the dark! Find another.", "error")
+	elseif outcome == "miss" then
+		-- A miss startles it (Round 20 Q2): the meter closes and it hops away; walk up and try again.
+		local e = s.encounter
+		endSession(player, "startled")
+		EncounterService.startle(e, root.Position)
 	elseif outcome == "hit" then
 		-- Each hit moves the green zone for the next attempt.
 		s.zoneCenter = CaptureRules.zoneCenter(rng, s.zoneWidth)
@@ -374,6 +539,9 @@ end
 -- Entry points shared by the remotes and the Studio test scenarios.
 CaptureService.requestStart = onCaptureStart
 CaptureService.requestRelease = onCaptureRelease
+function CaptureService.requestCancel(player: Player)
+	endSession(player, "cancelled")
+end
 
 function CaptureService.secure(player: Player, plotIndex: number)
 	local c = carries[player]
@@ -454,9 +622,7 @@ function CaptureService.start()
 		end
 		return onCaptureRelease(player)
 	end
-	Remotes.event("CaptureCancel").OnServerEvent:Connect(function(player)
-		endSession(player, "cancelled")
-	end)
+	Remotes.event("CaptureCancel").OnServerEvent:Connect(CaptureService.requestCancel)
 
 	for i = 1, #World.PlotCenters do
 		local plot = PlotService.plotModel(i)
@@ -489,6 +655,15 @@ function CaptureService.start()
 				returnSeconds = c.returnSeconds,
 			}
 		end
+		local ch = chases[player]
+		if ch then
+			snap.chase = {
+				name = Monsters.Species[ch.species].name,
+				deadline = ch.deadlineServer,
+				seconds = Monsters.Chase.seconds,
+				monster = ch.encounter.model,
+			}
+		end
 	end)
 
 	task.spawn(function()
@@ -497,9 +672,18 @@ function CaptureService.start()
 			local now = os.clock()
 			for player, c in carries do
 				if now >= c.deadline then
-					escape(player, "Time's up!")
+					escape(player, "Time's up!", true)
 				else
 					checkCarrySpeed(player, c, now)
+				end
+			end
+			for player, ch in chases do
+				local character = player.Character
+				local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+				if now >= ch.deadline or not ch.encounter.alive then
+					endChase(player, "It got away!")
+				elseif not humanoid or humanoid.Health <= 0 then
+					endChase(player, "You fell!")
 				end
 			end
 			for player, s in sessions do
@@ -525,6 +709,14 @@ function CaptureService.start()
 		if c then
 			clearCarry(player)
 			EncounterService.respawnEscaped(c.species, c.variant)
+		end
+		local ch = chases[player]
+		if ch then
+			chases[player] = nil
+			if ch.encounter.alive then
+				EncounterService.remove(ch.encounter)
+			end
+			EncounterService.respawnEscaped(ch.species, ch.variant)
 		end
 	end)
 end

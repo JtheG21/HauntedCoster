@@ -13,7 +13,7 @@ tags:
 
 **Phase:** M1 (the playable MVP loop) is **complete**: TASK-0011 to TASK-0018 are done, with merges approved by jg on 2026-10-11. Retro: [[RETRO-M1-Playable-MVP-Loop]] (approved by jg). **This is the studio's primary game** (user, 2026-10-11). GAME-001 is source material. Latest evidence: specs 51/0, FullLoop 56/56, Reachability 15/15, ExploitProbe 13/13, CrossPlot (2 players) 12/12 ([[TEST-20261011-04]], [[TEST-20261011-05]], [[TEST-20261011-06]]); fresh-profile first session in the real client ([[TEST-20261011-03]]). M1 decisions: [[ADR-0006-M1-Tuning-And-Scope-Decisions]]. Saving is **memory-only and unproven** until the M2 rejoin test. Physical controller and touch are also M2. **Next:** M2 ([[GAME-002 Haunted Collector/03 Roadmap]]): TASK-0019 to TASK-0022 are `ready`. **Code:** `games/haunted/` with `haunted.project.json`, synced to a separate place ([[ADR-0005-Haunted-Collector-Direction]]). **Task status:** `tasks/queue.json`
 
-Pitch: hunt strange creatures in a dark graveyard, risk the trip home, and turn your collection into a rideable haunted train attraction you design yourself.
+Hook (Round 20): **"Build your haunted train."** Pitch: hunt strange creatures in a dark graveyard, risk the trip home, and turn your collection into a rideable haunted train attraction you design yourself.
 
 ## Documents
 [[GAME-002 Haunted Collector/01 Game Design]] · [[GAME-002 Haunted Collector/02 Technical Architecture]] · [[GAME-002 Haunted Collector/03 Roadmap]] · source brief: [[INBOX-20261011-Haunted-Collector-Brief]]
@@ -29,6 +29,7 @@ Pitch: hunt strange creatures in a dark graveyard, risk the trip home, and turn 
 | [[TASK-0016-Starter-Ghost-Train]] | ready (code in 17cb5ae) | — |
 | [[TASK-0017-Track-Editor]] | ready (code in 17cb5ae) | — |
 | [[TASK-0018-Journal-Tutorial-And-Rare-Clue]] | ready (code in 17cb5ae) | — |
+| [[TASK-0023-Round-20-Design-Changes]] | in_progress (Round 20 decisions: startle, chase, carry penalty, starter scare) | — |
 
 ## How to playtest (Studio)
 1. `rojo build haunted.project.json -o HauntedCollector.rbxl`, then open it in Studio (or `rojo serve haunted.project.json` into a new empty place). **Never sync it into the Rg1/place1 place.**

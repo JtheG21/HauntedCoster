@@ -60,6 +60,11 @@ World.Plot = {
 		Vector2.new(0, 8),
 		Vector2.new(-12, -8),
 	},
+	-- The fixed starter ride shows one scare from the first ride (Round 20 Q4). Its one display is
+	-- exhibit slot 2, which sits beside the loop (TrackRules.spec checks both).
+	starterPieces = {
+		{ i = 4, kind = "ScareArch" },
+	},
 }
 
 World.Graveyard = {

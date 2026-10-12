@@ -88,6 +88,18 @@ Monsters.Capture = {
 	Rare = { period = 1.0, zoneWidth = 0.1, hitsNeeded = 3, missesAllowed = 3, returnSeconds = 120 },
 } :: { [Rarity]: CaptureTuning }
 
+-- Escaped-capture chase (Round 20 Q1; GDD v0.3). When the return timer runs out the monster breaks free
+-- beside the player and runs, slower than an unburdened player. Get within grabDistance and press E to
+-- grab it again (the carry resumes with regrabSeconds on the clock, once per capture); otherwise it goes
+-- back to its habitat and can be found again later.
+Monsters.Chase = {
+	seconds = 15,
+	headStart = 10, -- studs from the player when it breaks free
+	fleeSpeed = 12.5, -- studs/s (base walk speed is 16)
+	grabDistance = 6,
+	regrabSeconds = 20,
+}
+
 Monsters.RarityColor = {
 	Common = Color3.fromRGB(190, 200, 210),
 	Uncommon = Color3.fromRGB(120, 220, 140),

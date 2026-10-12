@@ -83,8 +83,8 @@ return function(args: any): { [string]: any }
 				task.wait()
 			end
 			r = CaptureService.requestRelease(p)
-			if r.outcome == "success" then
-				break
+			if r.outcome ~= "hit" then
+				break -- success, or a miss/flee/cancel that ended the session
 			end
 			tgt = r.zoneCenter or tgt
 			task.wait(CaptureRules.MinReleaseGap + 0.05)
