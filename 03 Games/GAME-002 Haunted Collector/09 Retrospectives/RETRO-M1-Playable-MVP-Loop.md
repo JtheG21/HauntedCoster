@@ -3,7 +3,7 @@ id: RETRO-M1-Playable-MVP-Loop
 title: "M1: Playable MVP loop"
 type: retro
 project: GAME-002
-status: in_review
+status: done
 milestone: M1
 created: 2026-10-11
 updated: 2026-10-11
@@ -20,7 +20,7 @@ related:
 
 # Retrospective: M1, the playable MVP loop
 
-*Draft written by Claude. The items marked **jg** need your review before this is `done` (status `in_review` until then).*
+*Written by Claude; approved by jg on 2026-10-11 (chat), including the open items below.*
 
 ## Goal of the milestone
 A playable first session following brief §12 and §20: walk the graveyard, capture a monster, bring it home for income, upgrade, ride and edit the ghost train, and follow the Bell Tower clue to the Bell Wraith.
@@ -51,11 +51,11 @@ A playable first session following brief §12 and §20: walk the graveyard, capt
 - API spend: $0 (subscription only).
 - Audit subagents in this session, from `tasks/usage-ledger.jsonl`: 4 attempt-2 audits on Opus (about 563k tokens across 8 tasks) and 3 delta audits on Sonnet (about 261k). The main session's tokens weren't measured.
 
-## Open items for jg
-- **jg:** confirm the code values ADR-0006 adopted but didn't name one by one: return timer 75/90/120 s, ride base 40, ride cooldown 20 s, Spectral at 10% × 1.5. Also note the first upgrade comes about 51 s after the first secure, against a target of about 2 min ([[AUD-20261011-TASK-0015-02]]).
-- **jg:** confirm the accepted crypt-entry window: the gate opens on the client and the server checks every 0.25 s (TASK-0012 Outcome).
-- **jg:** a short human feel run of the first session (pacing, readability in the dark).
-- **jg:** approve this retro, then approve the M2 tasks below.
+## Open items for jg (settled 2026-10-11)
+- ✅ **Confirmed by jg** (ADR-0006 item 8): the code values ADR-0006 adopted but didn't name one by one: return timer 75/90/120 s, ride base 40, ride cooldown 20 s, Spectral at 10% × 1.5. Also note the first upgrade comes about 51 s after the first secure, against a target of about 2 min ([[AUD-20261011-TASK-0015-02]]).
+- ✅ **Accepted by jg** (ADR-0006 item 9): the crypt-entry window: the gate opens on the client and the server checks every 0.25 s (TASK-0012 Outcome).
+- ⏳ **Still open:** a short human feel run of the first session (pacing, readability in the dark).
+- ✅ Retro approved; the M2 tasks below were created as `ready` (TASK-0019 to TASK-0022).
 
 ## Changes to adopt
 - When approving a task, name who settles each evidence AC and how (human judgement, a device, or a scenario). Don't leave it to the audit.
@@ -63,9 +63,9 @@ A playable first session following brief §12 and §20: walk the graveyard, capt
 - One task per build commit. No integration commits across tasks.
 - Candidate lesson (not promoted, it needs a second occurrence): "Check input bindings against Roblox-reserved keys with virtual input before shipping" ([[TEST-20261011-05]]).
 
-## Proposed M2 tasks (to approve)
-1. **Persistence and rejoin test** in a private API-enabled place (ADR-0006 §4). Required before any public play.
-2. **Physical devices:** a controller and a touch device (or emulator) for the flashlight, the track editor and capture (ADR-0006 item 7). Include the full gamepad editor path.
-3. **Anti-cheat hardening before public play:** carry speed and secure plausibility, server-side Bell Wraith visibility or inspect gating, Ashen escape respawn only in the Crypt (ADR-0006 §2).
-4. **M1 polish:** exhibit in-range feedback (TEST-03 F6), a tailored completion hint (F7), a drawn capture zone matching the judged window, the stale-purchase reply, quality-clamp specs, a test that forces a crypt ejection, rebuilding the track when a plot changes owner mid-ride, and a post-fix light-off capture.
+## M2 tasks (approved by jg on 2026-10-11)
+1. [[TASK-0019-Persistence-And-Rejoin-Test]]: **persistence and rejoin test** in a private API-enabled place (ADR-0006 §4). Required before any public play.
+2. [[TASK-0020-Physical-Device-Checks]]: **physical devices:** a controller and a touch device (or emulator) for the flashlight, the track editor and capture (ADR-0006 item 7). Include the full gamepad editor path.
+3. [[TASK-0021-Anti-Cheat-Hardening]]: **anti-cheat hardening before public play:** carry speed and secure plausibility, server-side Bell Wraith visibility or inspect gating, Ashen escape respawn only in the Crypt (ADR-0006 §2).
+4. [[TASK-0022-M1-Polish]]: **M1 polish:** exhibit in-range feedback (TEST-03 F6), a tailored completion hint (F7), a drawn capture zone matching the judged window, the stale-purchase reply, quality-clamp specs, a test that forces a crypt ejection, rebuilding the track when a plot changes owner mid-ride, and a post-fix light-off capture.
 5. Then the roadmap's M2: tuning from playtest data and sound (`roblox-sfx`).

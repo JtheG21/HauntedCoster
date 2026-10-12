@@ -1585,6 +1585,123 @@
       ],
       "revisions": 1,
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0019",
+      "title": "Persistence and Rejoin Test",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "high",
+      "depends_on": [],
+      "branch": "task/TASK-0019-Persistence-And-Rejoin-Test",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0019-Persistence-And-Rejoin-Test.md",
+      "acceptance_criteria": [
+        "Coins, owned monsters, house tier, speed, route, exhibits, clues and tutorial step survive leave and rejoin (TEST note with values before and after)",
+        "A second server can't load a locked profile while the first holds it; the lock is released on leave and on shutdown",
+        "A profile saved by a newer schema loads read-only and is never written (spec)",
+        "The schema-bump rule for new species, variants and flags is documented in the SYS note",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T19:51:18",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (M1 retro)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0020",
+      "title": "Physical Device Checks",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [],
+      "branch": "task/TASK-0020-Physical-Device-Checks",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0020-Physical-Device-Checks.md",
+      "acceptance_criteria": [
+        "Every listed gamepad action works on a physical controller (TEST note, per action)",
+        "Every listed touch action works on a touch device or the device emulator, and taps in the thumbstick or jump area neither move the character nor misplace points while editing",
+        "The HUD Light label matches the light in a new capture after the fix",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T19:51:18",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (M1 retro)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0021",
+      "title": "Anti-Cheat Hardening",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "high",
+      "depends_on": [
+        "TASK-0019"
+      ],
+      "branch": "task/TASK-0021-Anti-Cheat-Hardening",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0021-Anti-Cheat-Hardening.md",
+      "acceptance_criteria": [
+        "An exploit scenario running at full speed while carrying, and one teleporting to the pen, both fail to secure",
+        "A secure after the deadline fails",
+        "A player without the Bell clue can't inspect the Wraith or get it recorded as seen (2-player scenario)",
+        "An escaped Ashen monster respawns only in the Sealed Crypt (spec or scenario)",
+        "A forced crypt ejection gives no carry strike (scenario)",
+        "scripts/check.sh passes; ExploitProbe and CrossPlot pass"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T19:51:18",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (M1 retro)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0022",
+      "title": "M1 Polish",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0022-M1-Polish",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0022-M1-Polish.md",
+      "acceptance_criteria": [
+        "Each listed item is fixed or explicitly deferred with a reason in the Implementation record",
+        "New or changed specs fail when the behaviour is removed (no specs that pass for the wrong reason)",
+        "FullLoop, CrossPlot and ExploitProbe pass",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T19:51:18",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (M1 retro)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
     }
   ]
 }

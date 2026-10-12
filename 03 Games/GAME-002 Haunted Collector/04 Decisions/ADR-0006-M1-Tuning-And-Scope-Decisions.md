@@ -16,6 +16,7 @@ related:
   - "[[AUD-20261011-TASK-0018-01]]"
   - "[[AUD-20261011-TASK-0012-03]]"
   - "[[TEST-20261011-05]]"
+  - "[[RETRO-M1-Playable-MVP-Loop]]"
 created: 2026-10-11
 updated: 2026-10-11
 tags:
@@ -54,6 +55,10 @@ Approved by jg on 2026-10-11 (Claude Code session, chat answers).
 7. **Physical-device checks move to M2.** A physical controller and a real or emulated touch device are required in M2 before public play, covering the flashlight (TASK-0012 AC2) and **the touch track editor (TASK-0017 AC2)**, including taps near the mobile thumbstick and jump areas. For M1, TASK-0017 AC2 is judged on mouse and gamepad-cursor evidence.
 
 Bell Wraith spawning only for clue holders follows the approved design and needed no new decision. Revision 1 implemented it.
+
+### Addendum 2 (approved by jg on 2026-10-11, chat answer at the [[RETRO-M1-Playable-MVP-Loop]])
+8. **The unnamed code values are confirmed as-is:** return timer 75 / 90 / 120 s, ride base payout 40, ride cooldown 20 s, Spectral at 10% × 1.5. The first upgrade arriving about 51 s after the first secure (target about 2 min) stays for now and is retuned with M2 playtest data.
+9. **The crypt-entry window is an accepted M1 risk:** the gate opens on the client for qualifying players, and the server checks every 0.25 s. Capture in the Crypt is gated separately on the server. Hardening before public play is [[TASK-0021-Anti-Cheat-Hardening]].
 
 ## Consequences
 - [[GAME-002 Haunted Collector/01 Game Design]] goes to v0.2 with these values. Its status stays `proposed`, because the roadmap and design as a whole still need jg's approval.

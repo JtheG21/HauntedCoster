@@ -30,6 +30,17 @@ related:
 
 **Exit gate:** a recorded `TEST-` playtest walks the full brief §20 journey, including a persistence check in a published or API-enabled place. A `RETRO-` note follows.
 
+**M1 status:** complete on 2026-10-11 ([[RETRO-M1-Playable-MVP-Loop]]). The persistence part of the exit gate moved to M2 ([[ADR-0006-M1-Tuning-And-Scope-Decisions]] §4).
+
+## M2: Ready for public play
+| Order | Task | Depends on | Result |
+|---|---|---|---|
+| 1 | [[TASK-0019-Persistence-And-Rejoin-Test]] | — | Real saving proven on rejoin |
+| 2 | [[TASK-0020-Physical-Device-Checks]] | — | Controller and touch verified |
+| 3 | [[TASK-0021-Anti-Cheat-Hardening]] | 0019 | Accepted M1 cheat paths closed |
+| 4 | [[TASK-0022-M1-Polish]] | — | M1 UX and test gaps fixed |
+
+Then: tune from playtest data and add sound (`roblox-sfx`).
+
 ## Later (not planned in detail)
-- M2: tune from playtest data, add sound (`roblox-sfx`), polish.
 - M3: Haunted Forest and Mine region (brief §15), reusing every system.
