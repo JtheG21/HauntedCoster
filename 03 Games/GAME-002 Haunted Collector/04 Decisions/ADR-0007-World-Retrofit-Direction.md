@@ -85,3 +85,6 @@ This ADR changes approved decisions: [[ADR-0006-M1-Tuning-And-Scope-Decisions]] 
 - Return walks get shorter (worst case about 500 → 320 studs). `returnSeconds` stays 75 / 90 / 120 s (ADR-0006 §8) and is retuned only after a playtest.
 - New tasks: [[TASK-0025-Clue-Hunting-Removal]], [[TASK-0026-Radial-Plot-Layout]], [[TASK-0027-Habitat-Modules-And-Blockouts]], [[TASK-0028-Cemetery-Vignette-And-Atmosphere]], [[TASK-0029-Habitat-Rotation]], [[TASK-0030-House-And-Train-Presentation]], [[TASK-0031-Failed-Capture-Retaliation]].
 - Persistence is still memory-only ([[TASK-0019-Persistence-And-Rejoin-Test]]), so no live profiles exist yet. The schema stays at version 1 because no field is removed or renamed.
+
+## Implementation notes
+- 2026-10-12 (TASK-0026): the angles are rotated by 30° against the text above. The gates are at 0°, 120° and 240° and the plots at 30° + 60°k. The topology is the same: one gate between each pair of plots, every plot equally far from a gate. With this layout no plot is axis-aligned, so tests on plot 1 exercise the rotation. The decision itself is unchanged.

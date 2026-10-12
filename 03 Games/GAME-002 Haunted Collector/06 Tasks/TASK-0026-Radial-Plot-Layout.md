@@ -67,6 +67,15 @@ Six plots stand in a ring around a central hunting footprint with their entrance
 
 ---
 ## Implementation record
+- **References used:** map references 1–7 (radial composition: plots around a central ground, entrances inward) for layout only; [[RSH-20261012-World-Retrofit-Audit]] for the coordinate audit. No reference code copied.
+- **Decisions:**
+  - The transforms live in `World` (`plotFrame`, `plotToWorld`, `worldToPlot`, `plotDirToWorld`) rather than a separate `PlotSpace` module: every consumer already requires `World`.
+  - Plot angles are 30° + 60°k, so no plot is axis-aligned. Plot 1 (the one tests use) exercises the rotation.
+  - Gates at 0°, 120° and 240° sit between plots, so every plot entrance is equally far from its nearest gate.
+  - `GraveyardBuilder` is split into `HubBuilder` (wall, gates, ring road; permanent), `Props` (the shared kit) and `Habitats/Cemetery` (the first module). `Habitats.luau` holds the module contract, and `HabitatRules.validate` checks it at startup.
+  - `ChaseRules` regions are a habitat disc (avoiding the crypt) and an open ring between the hub wall and the plots. Flee steps are capped at one step after the clamp.
+- **AC2 grep:** no plot-local offset is added to a centre outside `World`. `PlotService.center()` only returns the centre.
+- **Evidence:** [[TEST-20261012-02]].
 
 ## Audits
 
