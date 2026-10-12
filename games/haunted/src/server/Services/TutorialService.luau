@@ -12,6 +12,7 @@ local PlayerDataService = require(script.Parent.PlayerDataService)
 local StateService = require(script.Parent.StateService)
 local CaptureService = require(script.Parent.CaptureService)
 local PlotService = require(script.Parent.PlotService)
+local LandmarkService = require(script.Parent.LandmarkService)
 
 local TutorialService = {}
 
@@ -60,6 +61,7 @@ local function ctxFor(player: Player): TutorialRules.Ctx?
 		bellHint = profile.flags.bellHint == true,
 		bellClue = profile.flags.bellClue == true,
 		caughtRare = profile.journal.caught.BellWraith == true,
+		landmarks = LandmarkService.landmarkCount(profile),
 	}
 end
 

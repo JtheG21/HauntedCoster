@@ -251,6 +251,12 @@ return function(_args: any): { [string]: any }
 	local coinsBeforeCancel = profile.coins
 	task.spawn(TrainService.ride, player, plotIndex)
 	task.wait(2.5)
+	local seatPart = humanoid.SeatPart
+	check(
+		"the ride had started before leaving (seated in the front seat)",
+		seatPart ~= nil and seatPart.Name == "FrontSeat",
+		seatPart and seatPart:GetFullName()
+	)
 	humanoid.Sit = false
 	humanoid.Jump = true
 	task.wait(1.5)
@@ -354,6 +360,50 @@ return function(_args: any): { [string]: any }
 			check("third capture succeeded", false, r3 and (r3.outcome or r3.reason))
 		end
 	end
+
+	-- Mid-ride handover: a rebuild requested during a ride (as when the plot changes owner) must wait
+	-- for the ride to end, then build the CURRENT owner's route. Simulated here by changing the owner's
+	-- saved route mid-ride and asking for the owner rebuild, the same path PlotService.onAssigned uses.
+	local trackFolder = Workspace.Plots[`Plot{plotIndex}`].Track
+	local function railCount(): number
+		local n = 0
+		for _, c in trackFolder:GetChildren() do
+			if c.Name == "Rail" then
+				n += 1
+			end
+		end
+		return n
+	end
+	local savedRoute = profile.route
+	local railsCustom = railCount()
+	-- The character respawned earlier in this scenario: use the current humanoid.
+	local current = player.Character :: Model
+	local hum = current:FindFirstChildOfClass("Humanoid") :: Humanoid
+	current:PivotTo(CFrame.new(home + Vector3.new(custom[1].x, 3, custom[1].z)))
+	CaptureService.noteTeleport(player)
+	task.wait(0.3)
+	task.spawn(TrainService.ride, player, plotIndex)
+	task.wait(2.5)
+	local seatedForHandover = hum.SeatPart ~= nil and hum.SeatPart.Name == "FrontSeat"
+	profile.route = nil -- the "new owner" has no custom route: the starter loop
+	TrainService.rebuildForOwner(plotIndex)
+	task.wait(0.3)
+	check(
+		"handover mid-ride: no rebuild under the moving cart",
+		seatedForHandover and railCount() == railsCustom,
+		`seated={seatedForHandover} rails {railCount()} vs {railsCustom}`
+	)
+	hum.Sit = false
+	hum.Jump = true
+	task.wait(1.5)
+	local railsAfter = railCount()
+	check(
+		"handover: the current owner's route is built when the ride ends",
+		railsAfter > 0 and railsAfter ~= railsCustom,
+		`rails {railsAfter} (custom was {railsCustom})`
+	)
+	profile.route = savedRoute
+	TrainService.rebuildForOwner(plotIndex)
 
 	task.wait(2)
 	check("tutorial complete after the bell step (12 steps)", profile.tutorialStep >= 13, profile.tutorialStep)

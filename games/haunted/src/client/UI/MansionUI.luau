@@ -65,8 +65,13 @@ local function buy(item: string)
 	local expected = if item == "speed" then snap.speedLevel else snap.houseTier
 	local ok, reason = State.invoke("Purchase", item, expected)
 	buying = false
-	if not ok and reason ~= "Already upgraded" then
-		toast(reason or "Can't buy that", "error")
+	if not ok then
+		if reason == "Already upgraded" then
+			-- A click on a stale panel (e.g. a double-click): the first one went through, nothing was charged twice.
+			toast("Already upgraded: your earlier click went through.", "info")
+		else
+			toast(reason or "Can't buy that", "error")
+		end
 	end
 end
 
@@ -185,6 +190,8 @@ end
 
 local function renderExhibits(snap: { [string]: any })
 	local tier = Economy.HouseTiers[(snap.houseTier or 0) + 1]
+	-- Computed by the server from the route it really pays on (see TrainService.slotsInRange).
+	local inRange: { boolean } = snap.exhibitInRange or {}
 	local info = row()
 	Theme.label(
 		info,
@@ -209,12 +216,17 @@ local function renderExhibits(snap: { [string]: any })
 			r,
 			if locked
 				then `Slot {slot}: locked (upgrade house)`
-				elseif current then `Slot {slot}: {nameOf(current)}`
-				else `Slot {slot}: empty`,
+				else `Slot {slot}: {if current then nameOf(current) else "empty"}  ·  {if inRange[slot]
+					then "near the track"
+					else "too far from the track (no bonus)"}`,
 			{
 				Size = UDim2.new(1, -150, 1, 0),
 				Font = Theme.Bold,
-				TextColor3 = if locked then Theme.Colors.dim else Theme.Colors.text,
+				TextColor3 = if locked
+					then Theme.Colors.dim
+					elseif not inRange[slot] then Theme.Colors.dim
+					else Theme.Colors.text,
+				TextWrapped = true,
 			}
 		)
 		if not locked then
@@ -276,7 +288,7 @@ local function signature(snap: { [string]: any }): string
 	elseif tab == "Monsters" then
 		parts = { tab, snap.now, snap.incomeRate, snap.owned, snap.exhibits }
 	else
-		parts = { tab, snap.houseTier, snap.owned, snap.exhibits }
+		parts = { tab, snap.houseTier, snap.owned, snap.exhibits, snap.exhibitInRange }
 	end
 	local ok, json = pcall(HttpService.JSONEncode, HttpService, parts)
 	return if ok then json else tostring(os.clock())

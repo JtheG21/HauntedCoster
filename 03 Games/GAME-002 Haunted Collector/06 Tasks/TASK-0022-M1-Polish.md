@@ -3,7 +3,7 @@ id: TASK-0022
 title: M1 Polish
 type: task
 project: GAME-002
-status: ready
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -49,10 +49,39 @@ Proposed in [[RETRO-M1-Playable-MVP-Loop]]; created as `ready` with jg's approva
 
 ---
 ## Implementation record
-*(Executor: files changed, decisions, check output)*
+References: the `10 References/01 UI` index is empty, so the existing Theme and Mansion conventions were followed.
+
+| Item | Change |
+|---|---|
+| Exhibit in-range feedback (TEST-03 F6) | `MansionUI`: per-slot "near the track" / "too far from the track (no bonus)", same rule as the payout; re-renders when the route changes |
+| Completion hint (F7) | `TutorialRules.completeHint`: names only what's missing (landmarks still needed, Restore house), "open to you" once both are met, and a post-catch line. `TutorialService` passes `landmarks` |
+| Capture zone vs judged window | `CaptureRules.judgedWidth`; the meter draws it. Spec: measured judge window = drawn width, and it stays on the bar |
+| Stale "Already upgraded" | Shown as an info toast instead of being hidden |
+| Quality clamps | Spec reaches the ceiling (fails without the clamp); the floor equals the formula base |
+| Plot changes owner mid-ride | `TrainService`: a rebuild skipped mid-ride sets `rebuildPending` and is redone from the current owner when the ride ends |
+| Tests that could pass vacuously | CrossPlot: the parked seat refuses A, and an enabled seat seats A and then ejects them. FullLoop: asserts seated in the FrontSeat before the cancel |
+| Trophy count | Counts landmark clues only (TrainBell excluded) |
+| Journal Crypt species | Zone-only variants listed for species that spawn in those zones (from `World.Zones`) |
+| Ashen roll | Environmental variants roll first, so Ashen is exactly 30% in the Crypt (ADR-0006 §2) |
+| Editor `setMovement` | Non-yielding, cached controls; always applies the current editing state (no race) |
+
+Evidence: [[TEST-20261011-07]]: specs 53/0, FullLoop 57/57, ExploitProbe 13/13, Mansion capture. **CrossPlot not run** (Studio multiplayer harness hung; the CrossPlot and handover changes are judged on code). `scripts/check.sh` passes.
+
+### Revision 1 (after [[AUD-20261011-TASK-0022-01]])
+- **F1 (AC3):** the mid-ride handover is now run, in FullLoop: a rebuild requested mid-ride waits, then builds the current owner's route at ride end (59/59). The 2-player CrossPlot run is **deferred by jg** (chat answer on 2026-10-11: skip CrossPlot here, run it in the [[TASK-0020-Physical-Device-Checks]] session). The Studio multiplayer harness failed 4 times today (0 or 1 of 2 clients joined).
+- **F2:** variants roll once against cumulative chances: Crypt Ashen 30% / Spectral 10% / Normal 60%, Spectral 10% elsewhere (ADR-0006 §2, item 8). Spec added for Spectral in the Crypt.
+- **F3:** the server sends per-slot in-range flags (`snap.exhibitInRange`), computed from the validated route it pays on (`routeFor`, starter fallback). The Mansion only displays them.
+- **F4:** the capture judge is exact (needle range over the slack window, including peaks and troughs) instead of 5 ms steps. The spec tolerance is now 0.002.
+- **F5:** accepted as documented: the floor clamp can't be reached by the formula; the ceiling test does fail without the clamp.
+- **F6:** the movement freeze retries every 0.5 s while editing until PlayerModule has loaded.
+- Evidence: [[TEST-20261011-07]] revision-1 table. `scripts/check.sh` passes.
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261011-TASK-0022-01]]: fail (1 high: CrossPlot and handover not run; 1 medium: Spectral in the Crypt at 7%), revision 1
+- [[AUD-20261011-TASK-0022-02]]: **pass** (2 low: per-snapshot warning for an invalid saved route; no spec for the judge's peak/trough branches; 3 info). AC3: the 2-player CrossPlot run is deferred to TASK-0020 by jg.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0022-02]] passed (revision 1). All 11 M1 polish items are fixed; the quality floor clamp is unreachable by design.
+- **Deferred:** the 2-player CrossPlot run on this build moves to [[TASK-0020-Physical-Device-Checks]] (jg). AC3 is met for the handover through FullLoop.
+- **Lesson:** fixing one rate by changing roll order silently changed another (Spectral in the Crypt). Spec every rate in every zone it applies to.
+- **Follow-ups:** warn once per profile for an invalid saved route; specs for the judge's peak/trough branches and negative times; assert per-zone variant chances sum to at most 1.

@@ -46,7 +46,8 @@ local function closeMeter()
 	ContextActionService:UnbindAction("HauntedCatch")
 end
 
-local function setZone(center: number, width: number)
+local function setZone(center: number, nominalWidth: number, period: number)
+	local width = CaptureRules.judgedWidth(nominalWidth, period, CaptureRules.LatencySlack)
 	zone.Position = UDim2.fromScale(center - width / 2, 0)
 	zone.Size = UDim2.fromScale(width, 1)
 end
@@ -86,7 +87,7 @@ local function release()
 		a.hits = result.hits
 		flash(Theme.Colors.good)
 		if type(result.zoneCenter) == "number" then
-			setZone(result.zoneCenter, a.zoneWidth)
+			setZone(result.zoneCenter, a.zoneWidth, a.period)
 		end
 	elseif result.outcome == "miss" then
 		a.misses = result.misses
@@ -121,7 +122,7 @@ local function startCapture()
 		misses = 0,
 	}
 	meterStart = os.clock()
-	setZone(result.zoneCenter, result.zoneWidth)
+	setZone(result.zoneCenter, result.zoneWidth, result.period)
 	meterTitle.Text = string.format(
 		"Capturing %s%s (%s)",
 		if result.variantLabel then result.variantLabel .. " " else "",

@@ -46,12 +46,18 @@ function Variants.multiplier(variantId: string): number
 	return if v then v.incomeMultiplier else 1
 end
 
--- Rolls a variant for a monster spawning in `zoneId`. Zone-restricted variants only roll in their zones.
+-- Rolls a variant for a monster spawning in `zoneId` with ONE draw against cumulative chances, so every
+-- allowed variant gets exactly its configured chance (Crypt: Ashen 30%, Spectral 10%, Normal 60%;
+-- elsewhere: Spectral 10%). Zone-restricted variants only roll in their zones (ADR-0006 §2 and item 8).
 function Variants.roll(zoneId: string, rng: Random): string
+	local r = rng:NextNumber()
+	local acc = 0
 	for _, v in Variants.List do
-		local allowed = v.zones == nil or table.find(v.zones, zoneId) ~= nil
-		if allowed and rng:NextNumber() < v.chance then
-			return v.id
+		if v.zones == nil or table.find(v.zones, zoneId) ~= nil then
+			acc += v.chance
+			if r < acc then
+				return v.id
+			end
 		end
 	end
 	return Variants.Normal
