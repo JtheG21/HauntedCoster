@@ -48,7 +48,8 @@ A failed check or audit → `changes_requested`. After 2 revisions → `blocked`
 | Project builds | `rojo build` | ✅ check.sh |
 | Tooling logic | `python3 -m unittest discover -s tests` | ✅ check.sh |
 | Note conventions, links, task sync | `scripts/validate_vault.py` | ✅ check.sh |
-| Luau unit specs | Studio, fresh Play session (Server): `require(game.TestService.Tests.TestRunner).run()` (Claude can run it through Studio MCP) | ⚠️ needs Studio |
+| GAME-002 unit specs | `lune run scripts/lune/specs` (headless, [[ADR-0008-Headless-Specs-With-Lune]]); also in Studio: `require(game.TestService.Tests.TestRunner).run()` | ✅ check.sh |
+| GAME-001 unit specs | Studio, fresh Play session (Server): `require(game.TestService.Tests.TestRunner).run()` (Claude can run it through Studio MCP) | ⚠️ needs Studio |
 | GAME-002 play scenarios | `games/haunted/tests/scenarios/` (FullLoop, Reachability, ExploitProbe, CrossPlot), see [[GAME-002 Haunted Collector/00 Overview]] | ⚠️ needs Studio |
 | Gameplay, replication, feel | The task's playtest procedure → a `TEST-` note | ❌ manual or Studio MCP |
 

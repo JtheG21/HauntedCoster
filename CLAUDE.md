@@ -6,7 +6,7 @@
 - Use `--!strict` and tabs (StyLua). Type-annotate public functions.
 - Paths below are for the active game, GAME-002 (`games/haunted/`). GAME-001 uses the same layout under `src/` and `tests/luau/`.
 - Server services are `games/haunted/src/server/Services/<Name>Service.luau` with an idempotent `start()`. Config and pure rules go in `games/haunted/src/shared/`.
-- Tests go in `games/haunted/tests/<Module>.spec.luau` and return `function(t: TestRunner.T)`. Run them in a **fresh Play session (Server data model)** with `require(game.TestService.Tests.TestRunner).run()`. Edit mode caches modules (LES-0005). Play scenarios live in `games/haunted/tests/scenarios/`.
+- Tests go in `games/haunted/tests/<Module>.spec.luau` and return `function(t: TestRunner.T)`. They run headlessly with `lune run scripts/lune/specs` (in `check.sh`, ADR-0008), so assert properties, not exact seeded `Random` values. In Studio, use a **fresh Play session (Server data model)** with `require(game.TestService.Tests.TestRunner).run()`. Edit mode caches modules (LES-0005). Play scenarios live in `games/haunted/tests/scenarios/`.
 
 ## Commands
 - `rojo serve haunted.project.json`: sync GAME-002 to the `HauntedCollector.rbxl` place (never a bare `rojo serve`, which serves GAME-001)
