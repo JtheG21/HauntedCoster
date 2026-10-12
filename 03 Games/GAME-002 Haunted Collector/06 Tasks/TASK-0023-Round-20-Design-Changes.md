@@ -3,7 +3,7 @@ id: TASK-0023
 title: Round 20 Design Changes
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: medium
 risk: medium
 owner: executor
@@ -76,7 +76,7 @@ References: `10 References/06 Code` was not consulted. These are rule changes in
 | Q4 starter | `World.Plot.starterPieces` (a Scare Arch at point 4), used by `TrainService` (starter fallback and unowned plots) and `TrackEditor` (starter load and the "Starter Loop" button). `TrackRules.spec` checks one arch and one in-range starter slot |
 | Q5 hook | GDD Pitch and Overview |
 
-**Checks:** `scripts/check.sh`: ALL CHECKS PASSED (2026-10-11). **Studio:** not run yet. No Studio instance was connected to the MCP, so AC6 is open.
+**Checks:** `scripts/check.sh`: ALL CHECKS PASSED (2026-10-11). **Studio ([[TEST-20261011-08]]):** specs 60/0, FullLoop 79/79, ExploitProbe 13/13. CrossPlot gave no result (the same harness problem as TEST-07); its change is judged on code only, and the 2-player run sits with TASK-0020. AC6 is partly met.
 
 ## Audits
 *(none yet)*
