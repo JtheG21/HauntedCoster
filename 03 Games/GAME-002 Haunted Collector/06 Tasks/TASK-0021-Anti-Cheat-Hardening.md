@@ -52,7 +52,16 @@ Proposed in [[RETRO-M1-Playable-MVP-Loop]]; created as `ready` with jg's approva
 
 ---
 ## Implementation record
-*(Executor: files changed, decisions, check output)*
+- **Approval:** created `ready` with jg's approval on 2026-10-11; jg started it in chat on 2026-10-12 ("start TASK-0021").
+- **Built:**
+  - Carry speed: one budget over the whole carry (`CaptureRules.carryTooFast`), replacing per-tick strikes that alternating bursts and single teleports slipped past. **Values:** tolerance 1.35x the slowed walk speed, plus 12 studs of slack. Standing still banks budget on purpose: it only lets a carrier arrive as soon as a legal walker would. Train-seat movement and noted server moves are excluded.
+  - `secure` enforces the deadline and counts the last stretch before accepting, so a teleport between two 0.25 s ticks can't secure (AC1, AC2).
+  - Crypt gating by species and variant as well as zone (`HabitatRules.needsCrypt`), for capture and Inspect (AC3).
+  - An escaped Ashen monster respawns only in the Sealed Crypt (`HabitatRules.escapedRespawnZones`); before, it went to the first zone spawning its species, outside the crypt (AC4).
+  - `TrainService` notes riders on the cart re-park (AC5).
+  - Tests: 6 new specs; new `CarryGuard` scenario; AC3 step in `CrossPlot`.
+- **Checks:** [[TEST-20261012-11]]: `scripts/check.sh` 114/0; CarryGuard 21/21 (its negative control failed 6 checks as intended); FullLoop 85/85; ExploitProbe 13/13; CrossPlot AC3 7/7 (twice).
+- **Open:** CrossPlot's seat-touch control failed in 2 of 3 runs, also with `TrainService` reverted. The all-main comparison couldn't run because the 2-player harness stopped launching its 2nd client. Not counted as a revision (environment).
 
 ## Audits
 *(links to AUD- notes)*

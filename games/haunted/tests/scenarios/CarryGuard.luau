@@ -51,31 +51,57 @@ return function(_args: any): { [string]: any }
 		return finish()
 	end
 	task.wait(2)
-	local humanoid = character:FindFirstChildOfClass("Humanoid") :: Humanoid
-	local root = character:WaitForChild("HumanoidRootPart") :: BasePart
+	-- A death respawns the character and would silently end a carry, so every step uses the current
+	-- character and the run reports how many times it respawned (it should be 0).
+	local respawns = 0
+	local respawnConn = player.CharacterAdded:Connect(function()
+		respawns += 1
+	end)
+	local function current(): (Model, Humanoid, BasePart)
+		local c = player.Character or player.CharacterAdded:Wait()
+		local h = c:WaitForChild("Humanoid", 5) :: Humanoid?
+		local r = c:WaitForChild("HumanoidRootPart", 5) :: BasePart?
+		if not (h and r) then
+			error("the character lost its humanoid or root part (fell out of the world?)")
+		end
+		h.WalkSpeed = 0 -- the scenario does all the moving
+		return c, h, r
+	end
+	local _ = character
 	local pen = World.plotToWorld(plotIndex, World.Plot.pen)
 	local carrySpeed = EconomyRules.walkSpeed(profile.speedLevel, true)
-	-- Far from the pen, on open ground (the plaza ring), so a walk home is long.
-	local away = Vector3.new(0, 0, 0)
+	-- Far from the pen on solid ground: another plot's spawn point (plots are built for every slot), so a walk
+	-- home is long. The plaza and the ring road dropped the character out of the world in earlier runs.
+	local away = World.plotToWorld(plotIndex % #World.PlotCenters + 1, World.Plot.spawn)
 
 	-- A server move the game makes itself (noted) vs a move it only observes (a cheat).
 	local function place(pos: Vector3)
+		local c = current()
 		CaptureService.noteTeleport(player)
-		character:PivotTo(CFrame.new(pos + Vector3.new(0, 3, 0)))
+		c:PivotTo(CFrame.new(pos + Vector3.new(0, 3, 0)))
 	end
 	local function cheatTo(pos: Vector3)
-		character:PivotTo(CFrame.new(pos + Vector3.new(0, 3, 0)))
+		local c = current()
+		c:PivotTo(CFrame.new(pos + Vector3.new(0, 3, 0)))
 	end
+	-- Every step needs its own fresh carry: the speed budget grows with the carry's age, so a carry left
+	-- over from an earlier step would have banked time and hide a cheat. A leftover carry is timed out
+	-- (and its chase ended) through the real expiry paths first.
 	local function newCarry(species: string?, variant: string?): boolean
-		local deadline = os.clock() + 5
-		while (CaptureService.isCarrying(player) or CaptureService.isChasing(player)) and os.clock() < deadline do
-			task.wait(0.2)
+		if CaptureService.isCarrying(player) then
+			CaptureService.expireCarryForTest(player)
+			task.wait(0.5)
+		end
+		if CaptureService.isChasing(player) then
+			CaptureService.expireChaseForTest(player)
+			task.wait(0.5)
 		end
 		place(away)
 		task.wait(0.5)
 		CaptureService.carryForTest(player, species or "Wisp", variant or Variants.Normal)
 		task.wait(0.3)
-		return CaptureService.isCarrying(player)
+		local info = CaptureService.carryForTestInfo(player)
+		return info ~= nil and info.elapsed < 1
 	end
 	-- Moves the character from the server at `speeds[i]` studs/s for each 0.25 s step, zigzagging (the
 	-- direction flips every 2 s) so it stays on the plaza instead of running off the map.
@@ -85,14 +111,32 @@ return function(_args: any): { [string]: any }
 				return
 			end
 			local sign = if math.floor((i - 1) / 8) % 2 == 0 then 1 else -1
+			local _, _, root = current()
 			cheatTo(root.Position - Vector3.new(0, 3, 0) + dir * sign * v * 0.25)
 			task.wait(0.25)
 		end
 	end
-	local function alive(): boolean
-		return humanoid.Health > 0 and player.Character == character
+	-- What the server measured for the current carry (shown when a speed check fails).
+	local function measured(): string
+		local info = CaptureService.carryForTestInfo(player)
+		if not info then
+			return "no carry"
+		end
+		local _, _, root = current()
+		return string.format(
+			"travelled %.0f in %.1fs (budget %.0f), sampled=%s, at %.0f,%.0f",
+			info.travelled,
+			info.elapsed,
+			carrySpeed * 1.35 * info.elapsed + 12,
+			tostring(info.sampled),
+			root.Position.X,
+			root.Position.Z
+		)
 	end
-	humanoid.WalkSpeed = 0 -- the scenario does all the moving
+	local function alive(): boolean
+		local _, h = current()
+		return h.Health > 0 and respawns == 0
+	end
 
 	-- Control: a carrier the server moves (noted) to the pen secures.
 	local owned0 = #profile.owned
@@ -104,11 +148,13 @@ return function(_args: any): { [string]: any }
 
 	-- AC5: server moves during a carry are not speeding, however far.
 	check("AC5: carry started", newCarry())
+	-- Between plot spawn points (solid ground, well over 100 studs apart), and back to `away`.
 	for i = 1, 4 do
-		place(away + Vector3.new(if i % 2 == 0 then 120 else -120, 0, 40))
+		local plot = (plotIndex + i - 1) % #World.PlotCenters + 1
+		place(if i == 4 then away else World.plotToWorld(plot, World.Plot.spawn))
 		task.wait(0.6)
 	end
-	check("AC5: four long server moves left the carry intact", CaptureService.isCarrying(player))
+	check("AC5: four long server moves left the carry intact", CaptureService.isCarrying(player) and alive())
 
 	-- AC1: sustained full walking speed (the carry slowdown undone).
 	check("AC1 sustained: carry started", newCarry())
@@ -117,16 +163,16 @@ return function(_args: any): { [string]: any }
 		fast[i] = 16
 	end
 	run(fast, Vector3.new(1, 0, 0))
-	check("AC1: 10 s at full speed drops the capture", not CaptureService.isCarrying(player) and alive())
+	check("AC1: 10 s at full speed drops the capture", not CaptureService.isCarrying(player) and alive(), measured())
 
-	-- AC1: alternating bursts (2x then 1x the carry speed, average 1.5x).
+	-- AC1: alternating bursts (2.5x then 1x the carry speed, average 1.75x; 2x/1x sat right at the budget).
 	check("AC1 alternating: carry started", newCarry())
 	local alternating = {}
 	for i = 1, 80 do
-		alternating[i] = carrySpeed * (if i % 2 == 0 then 2 else 1)
+		alternating[i] = carrySpeed * (if i % 2 == 0 then 2.5 else 1)
 	end
 	run(alternating, Vector3.new(0, 0, 1))
-	check("AC1: alternating bursts drop the capture", not CaptureService.isCarrying(player) and alive())
+	check("AC1: alternating bursts drop the capture", not CaptureService.isCarrying(player) and alive(), measured())
 
 	-- Control for the speed checks: an honest walk at the carry speed keeps the capture.
 	check("control walk: carry started", newCarry())
@@ -141,9 +187,10 @@ return function(_args: any): { [string]: any }
 	local owned1 = #profile.owned
 	check("AC1 teleport: carry started", newCarry())
 	task.wait(1)
+	local beforeJump = measured()
 	cheatTo(pen)
 	CaptureService.secure(player, plotIndex)
-	check("AC1: a teleport to the pen doesn't secure", #profile.owned == owned1, #profile.owned - owned1)
+	check("AC1: a teleport to the pen doesn't secure", #profile.owned == owned1, beforeJump)
 	check("AC1: the teleport dropped the capture", not CaptureService.isCarrying(player) and alive())
 
 	-- AC2: a secure after the deadline, before the tick notices, is a timeout.
@@ -196,6 +243,9 @@ return function(_args: any): { [string]: any }
 	check("AC4: the escaped Ashen Gentlemen respawned in the crypt", inCrypt >= 3, inCrypt)
 	check("AC4: none respawned outside the crypt", outside == 0, outside)
 
-	humanoid.WalkSpeed = EconomyRules.walkSpeed(profile.speedLevel, false)
+	check("the character never died or respawned during the run", respawns == 0, respawns)
+	respawnConn:Disconnect()
+	local _, h = current()
+	h.WalkSpeed = EconomyRules.walkSpeed(profile.speedLevel, false)
 	return finish()
 end

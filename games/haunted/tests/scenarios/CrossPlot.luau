@@ -181,9 +181,12 @@ return function(args: any): { [string]: any }
 		local wraith =
 			EncounterService.spawn("BellWraith", Variants.Normal, "Crypt", Vector3.new(crypt.x2 - 6, 0, gateZ))
 		check("AC3: a Bell Wraith spawned in the crypt", wraith ~= nil)
-		local function try(p: Player, e: any, at: Vector3): string
+		local function try(p: Player, e: any, at: Vector3, prep: (() -> ())?): string
 			tp(p, at)
 			task.wait(2.2) -- stay clear of the CaptureStart rate limit
+			if prep then
+				prep()
+			end
 			local r = CaptureService.startForTest(p, e.model)
 			if r.ok then
 				CaptureService.requestCancel(p)
@@ -193,20 +196,25 @@ return function(args: any): { [string]: any }
 			return tostring(r.reason)
 		end
 		if wraith then
-			local w = wraith.root.Position
-			local inside = try(a, wraith, Vector3.new(w.X - 5, 0, w.Z))
+			-- The Wraith roams, so before each call it is put back 4 studs inside the gate.
+			local function pin()
+				wraith.model:PivotTo(CFrame.new(crypt.x2 - 4, wraith.root.Position.Y, gateZ))
+			end
+			local inside = try(a, wraith, Vector3.new(crypt.x2 - 10, 0, gateZ), pin)
 			check(
 				"AC3: tier-0 A can't capture the Bell Wraith from inside the crypt",
 				inside:find("Restore your house") ~= nil,
 				inside
 			)
-			local outside = try(a, wraith, Vector3.new(crypt.x2 + 6, 0, w.Z + 8))
+			-- Just outside the wall by the gate: A is in capture range, and only the crypt gate can refuse.
+			local spot = Vector3.new(crypt.x2 + 2, 0, gateZ)
+			local outside = try(a, wraith, spot, pin)
 			check(
 				"AC3: tier-0 A can't capture it from outside the wall",
 				outside:find("Restore your house") ~= nil,
 				outside
 			)
-			local byB = try(b, wraith, Vector3.new(w.X - 5, 0, w.Z))
+			local byB = try(b, wraith, Vector3.new(crypt.x2 - 10, 0, gateZ), pin)
 			check("AC3: tier-1 B can (control)", byB == "ok", byB)
 			if wraith.alive then
 				EncounterService.remove(wraith)

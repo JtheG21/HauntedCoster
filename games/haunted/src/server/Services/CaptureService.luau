@@ -646,7 +646,16 @@ end
 
 function CaptureService.carryForTestInfo(player: Player): any
 	local c = carries[player]
-	return if c then { species = c.species, variant = c.variant, deadlineServer = c.deadlineServer } else nil
+	return if c
+		then {
+			species = c.species,
+			variant = c.variant,
+			deadlineServer = c.deadlineServer,
+			travelled = c.travelled,
+			elapsed = os.clock() - c.startedAt,
+			sampled = c.lastPos ~= nil,
+		}
+		else nil
 end
 
 function CaptureService.startForTest(player: Player, model: Model): { [string]: any }
