@@ -3,7 +3,7 @@ id: TASK-0030
 title: House and Train Presentation
 type: task
 project: GAME-002
-status: ready
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -37,7 +37,23 @@ Each plot reads as a small haunted theme park. The three house tiers look like c
 
 ---
 ## Implementation record
+- **References used:** map reference 6 (chunky, readable silhouettes, warm-lit windows) and the TASK-0028 lamp family. Qualities only.
+- **Decisions:**
+  - Every house volume per tier lives in `shared/Config/PlotDecor` (`Houses[tier]` boxes), and `PlotBuilder.buildHouse` builds from it. The `PlotDecor` spec checks the boxes (grown 1.5 studs for details), the lamps and the entrance pillars against the track bounds, the pen, the entrance, the beacon, the trophies, the spawn (5 studs) and each exhibit pedestal (6 studs, our reading of "exhibit range rings": the pedestal and room to walk round it; the scoring range of 16 studs is a gameplay radius, not a no-build zone). It also checks that each tier has a bigger footprint and is taller.
+  - Tiers: the Shabby Shack keeps its crooked box and tilted roof, and gains a lean-to, a crooked chimney and a boarded window. The Restored Manor has two storeys, a gable roof with ridge and gable ends, trim bands, shuttered windows in two rows, two chimneys, a gabled wing and a columned porch. The Grand Mansion is wider and taller, with two wings, a deep porch with a balcony, and a tower with a stepped spire and the purple lantern.
+  - Light budget: only 2 front windows per house cast light (plus the door-side lamps). The other lit windows glow without a light.
+  - Plot dressing: stone gate pillars with lanterns and an iron spiked arch at the entrance, 5 lamps (3 between the pen and the track area, 2 by the porch), and dressed exhibit plinths with corner posts.
+  - Station (TrainService): a canopy on four iron posts with two hanging lanterns and a name board. Nothing collides, so the cart, riders and the Ride prompt are unchanged.
+  - No fencing around the track area. A fence there would block walking to the station and the exhibits; the plot's entrance gate and border carry the "fence and gate" look.
+- Exhibit dressing (plinth and corner posts on each pedestal) is deliberately exempt from the keep-clear check: it sits on the pedestal itself and nothing in it collides.
+- **Evidence:** [[TEST-20261012-06]].
 
 ## Audits
+- [[AUD-20261012-TASK-0030-01]]: pass (3 minor, 4 nit). The TEST note counts were corrected; the exhibit-dressing exemption is recorded above.
 
 ## Outcome
+- **Merge** approved by jg in chat on 2026-10-12 ("merge anything you need to to finish this up"). Merged through PR #24.
+- **Result:** three clearly escalating house tiers, plot entrance gate, warm lamps, dressed exhibits and a lit station canopy. A spec keeps all of it out of the gameplay areas.
+- **Needs jg:** review all three tiers (tier 1 has no capture); confirm the 6-stud exhibit clearance reading and the proposed house budget (≤ 150 parts, ≤ 4 lights); say if the entrance arch reads too heavy.
+- **Follow-ups (nits):** tier 1's inner shutters touch the door frame; the wing gables poke through the main gable ends; the pillar caps reach 0.6 studs past the plot edge.
+
