@@ -5,7 +5,7 @@ type: roadmap
 project: GAME-002
 status: proposed
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-12
 tags:
   - game/roadmap
 related:
@@ -42,5 +42,18 @@ related:
 
 Then: tune from playtest data and add sound (`roblox-sfx`).
 
+## M3: World retrofit (proposed, [[ADR-0007-World-Retrofit-Direction]])
+Brief from jg on 2026-10-12, audit in [[RSH-20261012-World-Retrofit-Audit]]. Nothing here is approved yet.
+
+| Order | Task | Depends on | Result |
+|---|---|---|---|
+| 1 | [[TASK-0025-Clue-Hunting-Removal]] | — | Main loop without clues; rare and crypt on house tier |
+| 2 | [[TASK-0026-Radial-Plot-Layout]] | 0025 | Six radial plots, ring road, cemetery re-laid as module 1 |
+| 3 | [[TASK-0027-Habitat-Modules-And-Blockouts]] | 0026 | Four swappable habitats (three blockouts) |
+| 4 | [[TASK-0028-Cemetery-Vignette-And-Atmosphere]] | 0027 | Purple sky, green haze, orange lights; cemetery benchmark |
+| 5 | [[TASK-0029-Habitat-Rotation]] | 0027 | Shared 15-minute schedule with capture-safe swaps |
+| 6 | [[TASK-0030-House-And-Train-Presentation]] | 0026 | Mansion tiers and train areas read as mini theme parks |
+| 7 | [[TASK-0031-Failed-Capture-Retaliation]] | 0027 | Local chase and brief knockdown after a failed capture (scope per ADR-0007) |
+
 ## Later (not planned in detail)
-- M3: Haunted Forest and Mine region (brief §15), reusing every system.
+- Haunted Forest and Mine region (brief §15). The woodland habitats in M3 may cover part of it.

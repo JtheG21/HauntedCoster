@@ -5,7 +5,7 @@ type: architecture
 project: GAME-002
 status: proposed
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-12
 tags:
   - game/architecture
 related:
@@ -22,7 +22,7 @@ The server is authoritative. Code lives in `games/haunted/src/{server,shared,cli
 |---|---|---|---|
 | PlayerDataService | S | Load/save profile (UpdateAsync, session lock, retries, schema version, migration that never drops fields), in-memory fallback flagged in the UI | — |
 | PlotService | S | Assign/release home plots, ownership checks, plot bounds | — |
-| LandmarkService | S | Investigate prompts, record clues, unlock the gate/shortcut | `Landmark` (prompt-driven) |
+| ~~LandmarkService~~ | — | Removed with clue hunting ([[TASK-0025-Clue-Hunting-Removal]], [[ADR-0007-World-Retrofit-Direction]]). Landmarks are scenery. Crypt access is the pure rule `EconomyRules.cryptOpen(houseTier)`; EconomyService adds `cryptOpen` to the snapshot and CaptureService refuses captures in gated zones below it | — |
 | EncounterService | S | Spawn and roam monsters in zones, roll variants, inspect payload; startle hops and fleeing escaped captures | — |
 | CaptureService | S | Capture sessions, server-timed meter, carry state, return timer, escape chase and grab | `Capture` (start/release), `Grab` prompt |
 | ContainmentService | S | Secure at own pad, owned roster, acclimation, passive income tick | `Containment` |

@@ -91,35 +91,50 @@ return function(args: any): { [string]: any }
 		end
 		return r
 	end
-	local function monster(): Model?
+	local function monster(skip: { [Model]: boolean }?): Model?
 		for _, m in Workspace.Monsters:GetChildren() do
 			local zone = m:GetAttribute("Zone")
-			if zone == "Gate" or zone == "OldRows" then
+			if (zone == "Gate" or zone == "OldRows") and not (skip and skip[m :: Model]) then
 				return m :: Model
 			end
 		end
 		return nil
 	end
+	-- A timed release can still miss under multiplayer load (three Studio processes on one machine), and a
+	-- miss startles the monster: try up to three monsters before reporting a failed capture.
+	local function captureOne(p: Player): any
+		local tried: { [Model]: boolean } = {}
+		local r: any = nil
+		for _ = 1, 3 do
+			local m = monster(tried)
+			if not (m and m.PrimaryPart) then
+				break
+			end
+			tried[m] = true
+			tp(p, m.PrimaryPart.Position - Vector3.new(0, 3, 0) + Vector3.new(4, 0, 0))
+			r = catch(p, m)
+			if r and r.outcome == "success" then
+				break
+			end
+			task.wait(1)
+		end
+		return r
+	end
 
 	-- B secures one monster first (so B has something to protect).
-	local mb = monster()
-	if mb and mb.PrimaryPart then
-		tp(b, mb.PrimaryPart.Position - Vector3.new(0, 3, 0) + Vector3.new(4, 0, 0))
-		local rb = catch(b, mb)
-		check("B captured a monster", rb and rb.outcome == "success", rb and (rb.outcome or rb.reason))
-		tp(b, World.PlotCenters[ib] + World.Plot.pen)
-		CaptureService.secure(b, ib)
-	end
+	local rb = captureOne(b)
+	check("B captured a monster", rb and rb.outcome == "success", rb and (rb.outcome or rb.reason))
+	tp(b, World.PlotCenters[ib] + World.Plot.pen)
+	CaptureService.secure(b, ib)
 	check("B owns one monster", #pb.owned == 1, #pb.owned)
+	if #pb.owned ~= 1 then
+		return finish() -- the ownership checks below need B's monster
+	end
 
 	-- A captures, then tries to secure at B's pen.
 	task.wait(1)
-	local ma = monster()
-	if ma and ma.PrimaryPart then
-		tp(a, ma.PrimaryPart.Position - Vector3.new(0, 3, 0) + Vector3.new(4, 0, 0))
-		local ra = catch(a, ma)
-		check("A captured a monster", ra and ra.outcome == "success", ra and (ra.outcome or ra.reason))
-	end
+	local ra = captureOne(a)
+	check("A captured a monster", ra and ra.outcome == "success", ra and (ra.outcome or ra.reason))
 	tp(a, World.PlotCenters[ib] + World.Plot.pen)
 	CaptureService.secure(a, ib)
 	check("A can't secure at B's pen", #pa.owned == 0 and CaptureService.isCarrying(a), #pa.owned)
@@ -152,11 +167,8 @@ return function(args: any): { [string]: any }
 			end
 		end)
 		tp(a, front.Position)
-		-- Parked: the seat is disabled, so A can't sit at all.
-		front:Sit(humA)
-		task.wait(1)
-		check("B's parked front seat refuses A", not seatedSeen and front.Occupant ~= humA, front.Occupant)
-		-- Enabled (as during a ride): A does get seated, and the guard ejects A.
+		-- Enabled (as during a ride): A does get seated, and the guard ejects A. Tested first, while A has
+		-- never sat in this seat: right after an ejection the engine refuses to re-seat A for a while.
 		front.Disabled = false
 		front:Sit(humA)
 		task.wait(1)
@@ -165,6 +177,12 @@ return function(args: any): { [string]: any }
 			seatedSeen and front.Occupant ~= humA,
 			`seatedSeen={seatedSeen} occupant={front.Occupant}`
 		)
+		-- Parked: disabled again, so A can't touch-sit. A server Seat:Sit() can still seat through Disabled
+		-- (engine behaviour, minimal repro in TEST-20261012-01), so the same guard must eject A.
+		front.Disabled = true
+		front:Sit(humA)
+		task.wait(1)
+		check("A forced into B's parked front seat doesn't keep it", front.Occupant ~= humA, front.Occupant)
 		front.Disabled = true
 		watch:Disconnect()
 	else

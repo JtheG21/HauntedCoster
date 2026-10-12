@@ -84,4 +84,18 @@ return function(t: TestRunner.T)
 		t.eq(p.flags.shortcut, true)
 		t.eq(p.flags.godMode, nil)
 	end)
+
+	t.test("retired clue data from older profiles survives sanitize unchanged (ADR-0007)", function()
+		local p = ProfileRules.sanitize({
+			journal = { clues = { Angel = true, OldWell = true, TrainBell = true } },
+			flags = { shortcut = true, bellHint = true, bellClue = true },
+		}, now)
+		t.eq(p.journal.clues.Angel, true)
+		t.eq(p.journal.clues.OldWell, true)
+		t.eq(p.journal.clues.TrainBell, true)
+		t.eq(p.flags.shortcut, true)
+		t.eq(p.flags.bellHint, true)
+		t.eq(p.flags.bellClue, true)
+		t.eq(p.schema, ProfileRules.Schema)
+	end)
 end

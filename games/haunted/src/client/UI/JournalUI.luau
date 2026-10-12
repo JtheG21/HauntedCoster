@@ -1,5 +1,5 @@
 --!strict
--- Collection journal: known/unknown monsters and variants, clues, landmark progress and trophies.
+-- Collection journal: known/unknown monsters, their variants and where they live, and trophies.
 -- Completion only gives cosmetic trophies on the mansion plot.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -16,8 +16,6 @@ local JournalUI = {}
 local panel: Frame
 local content: ScrollingFrame
 local lastSig = ""
-
-local TRAIN_BELL_CLUE = "After your first ride, a bell tolled from the graveyard. Investigate the Bell Tower."
 
 local function clear()
 	for _, c in content:GetChildren() do
@@ -47,6 +45,17 @@ local function text(parent: Instance, s: string, props: { [string]: any }?)
 	return Theme.label(parent, s, p)
 end
 
+-- Names of the zones where `species` spawns, for the unknown-creature hint.
+local function habitatsOf(species: string): string
+	local names = {}
+	for _, zone in World.Zones do
+		if zone.spawns[species] then
+			table.insert(names, zone.name)
+		end
+	end
+	return if #names > 0 then table.concat(names, ", ") else "unknown"
+end
+
 -- True if `species` can spawn in any of `zoneIds` (from the zone spawn tables), so the journal lists
 -- zone-only variants exactly for the species that can roll them.
 local function spawnsIn(species: string, zoneIds: { string }): boolean
@@ -70,16 +79,12 @@ local function render(force: boolean?)
 	local j = snap.journal
 	local sig = table.concat({
 		tostring(#(snap.owned or {})),
-		tostring(snap.landmarkCount),
 		tostring(next(j.seen) ~= nil),
 	}, ":")
 	for k in j.seen do
 		sig ..= k
 	end
 	for k in j.variants do
-		sig ..= k
-	end
-	for k in j.clues do
 		sig ..= k
 	end
 	if sig == lastSig and not force then
@@ -98,11 +103,7 @@ local function render(force: boolean?)
 		end
 	end
 	local summary = card()
-	text(
-		summary,
-		`Caught {caught}/{#Monsters.Order} species  ·  Seen {seen}  ·  Landmarks {snap.landmarkCount or 0}/{#World.Landmarks}`,
-		{ Font = Theme.Bold, TextSize = 16 }
-	)
+	text(summary, `Caught {caught}/{#Monsters.Order} species  ·  Seen {seen}`, { Font = Theme.Bold, TextSize = 16 })
 	text(summary, "Trophies for milestones appear on your plot (cosmetic only).", { TextColor3 = Theme.Colors.dim })
 
 	for _, id in Monsters.Order do
@@ -126,32 +127,8 @@ local function render(force: boolean?)
 			text(c, `Variants: {table.concat(found, ", ")}`, { TextColor3 = Theme.Colors.clue })
 		else
 			text(c, "??? Unknown creature", { Font = Theme.Title, TextSize = 22, TextColor3 = Theme.Colors.dim })
-			local lm = World.landmarkById(s.clueLandmark)
-			if lm and j.clues[lm.id] then
-				text(c, `Clue: {lm.clue}`, { TextColor3 = Theme.Colors.clue })
-			else
-				text(c, `Rarity: {s.rarity}. Investigate the {lm and lm.name or "landmarks"} to learn more.`)
-			end
+			text(c, `Rarity: {s.rarity}. Seen around: {habitatsOf(id)}. Inspect one to learn more.`)
 		end
-	end
-
-	local clues = card()
-	text(clues, "Clues", { Font = Theme.Title, TextSize = 22, TextColor3 = Theme.Colors.gold })
-	local any = false
-	for _, lm in World.Landmarks do
-		if j.clues[lm.id] then
-			any = true
-			text(clues, `{lm.name}: {lm.clue}`)
-		else
-			text(clues, `{lm.name}: not investigated`, { TextColor3 = Theme.Colors.dim })
-		end
-	end
-	if j.clues.TrainBell then
-		any = true
-		text(clues, TRAIN_BELL_CLUE, { TextColor3 = Theme.Colors.clue })
-	end
-	if not any then
-		text(clues, "Investigate landmarks in the graveyard to record clues.", { TextColor3 = Theme.Colors.dim })
 	end
 end
 

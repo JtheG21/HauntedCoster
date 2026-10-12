@@ -12,7 +12,7 @@ depends_on:
   - TASK-0019
 branch: task/TASK-0021-Anti-Cheat-Hardening
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-12
 tags:
   - workflow/task
   - milestone/m2
@@ -41,6 +41,7 @@ Close the cheat paths the M1 audits accepted for an unpublished prototype, befor
 - [ ] AC3: A player without the Bell clue can't inspect the Wraith or get it recorded as seen (2-player scenario)
 - [ ] AC4: An escaped Ashen monster respawns only in the Sealed Crypt (spec or scenario)
 - [ ] AC5: A forced crypt ejection gives no carry strike (scenario)
+  - *Needs jg (flagged 2026-10-12, [[AUD-20261012-TASK-0025-01]] finding 4):* [[TASK-0025-Clue-Hunting-Removal]] removed the crypt ejection and the Bell clue. AC3, AC5 and the "Bell Wraith inspect and seen gating" scope item no longer apply as written and need rewording or dropping. The ACs are left unchanged until jg decides.
 - [ ] AC6: scripts/check.sh passes; ExploitProbe and CrossPlot pass
 
 ## Tests

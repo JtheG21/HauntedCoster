@@ -75,6 +75,13 @@ function EconomyService.start()
 	end
 	started = true
 	Remotes.func("Purchase").OnServerInvoke = onPurchase
+	-- The client opens the crypt gate locally for tiers that unlock it; captures inside stay server-gated.
+	StateService.addProvider(function(player, snap)
+		local profile = PlayerDataService.get(player)
+		if profile then
+			snap.cryptOpen = EconomyRules.cryptOpen(profile.houseTier)
+		end
+	end)
 end
 
 return EconomyService

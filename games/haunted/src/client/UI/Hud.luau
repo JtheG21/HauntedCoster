@@ -42,7 +42,6 @@ function Hud.toast(text: string, kind: string?)
 	local color = if kind == "success"
 		then Theme.Colors.good
 		elseif kind == "error" then Theme.Colors.bad
-		elseif kind == "clue" then Theme.Colors.clue
 		else Theme.Colors.text
 	local f = Theme.panel(toastHolder, {
 		Size = UDim2.fromScale(1, 0),
@@ -57,8 +56,7 @@ function Hud.toast(text: string, kind: string?)
 		Size = UDim2.fromScale(1, 0),
 		TextSize = 17,
 	})
-	local life = if kind == "clue" then 9 else 5
-	task.delay(life, function()
+	task.delay(5, function()
 		if f.Parent then
 			TweenService:Create(l, TweenInfo.new(0.4), { TextTransparency = 1 }):Play()
 			TweenService:Create(f, TweenInfo.new(0.4), { BackgroundTransparency = 1 }):Play()

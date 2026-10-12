@@ -10,11 +10,12 @@ local Build = require(script.Parent.Build)
 
 local GraveyardBuilder = {}
 
+-- landmarkAnchors and cryptGate have had no caller since TASK-0025 (LandmarkService removed); TASK-0026
+-- replaces this builder with the hub and habitat modules.
 export type Result = {
 	folder: Folder,
 	landmarkAnchors: { [string]: BasePart },
 	cryptGate: BasePart,
-	shortcutGate: BasePart,
 }
 
 local C = {
@@ -460,7 +461,7 @@ function GraveyardBuilder.build(parent: Instance): Result
 	lantern(deco, -60, -238)
 	lantern(deco, -110, -238)
 
-	-- Fence with the main gate and the (initially overgrown) west shortcut
+	-- Fence with the main gate and the open west shortcut by the Old Well
 	local fence = Build.folder(folder, "Fence")
 	local gw = g.gateWidth / 2
 	fenceLine(fence, Vector3.new(r.x1, 0, r.z2), Vector3.new(-gw, 0, r.z2))
@@ -470,15 +471,6 @@ function GraveyardBuilder.build(parent: Instance): Result
 	local sw = g.shortcutWidth / 2
 	fenceLine(fence, Vector3.new(r.x1, 0, r.z1), Vector3.new(r.x1, 0, g.shortcut.Z - sw))
 	fenceLine(fence, Vector3.new(r.x1, 0, g.shortcut.Z + sw), Vector3.new(r.x1, 0, r.z2))
-	local shortcutGate = Build.part({
-		name = "OvergrownGate",
-		size = Vector3.new(1.5, 8, g.shortcutWidth),
-		cframe = CFrame.new(r.x1, 4, g.shortcut.Z),
-		color = Color3.fromRGB(30, 60, 30),
-		material = Enum.Material.LeafyGrass,
-		parent = folder,
-	})
-	Build.billboard(shortcutGate, "Overgrown", Color3.fromRGB(120, 200, 120), 5, 40, 0.7)
 	-- Gate arch
 	for _, side in { -1, 1 } do
 		Build.block(
@@ -533,14 +525,7 @@ function GraveyardBuilder.build(parent: Instance): Result
 		C.wood,
 		Enum.Material.Wood
 	)
-	Build.billboard(
-		sign,
-		`Needs {g.cryptLandmarksNeeded} landmarks + a Restored Manor`,
-		Color3.fromRGB(255, 220, 160),
-		3,
-		60,
-		1.1
-	)
+	Build.billboard(sign, "Restored Manor owners only", Color3.fromRGB(255, 220, 160), 3, 60, 1.1)
 
 	-- Decorative mausoleums in the Old Rows and the dark Hollow
 	mausoleum(deco, -100, -285, 0.8, "Mausoleum")
@@ -585,7 +570,6 @@ function GraveyardBuilder.build(parent: Instance): Result
 		folder = folder,
 		landmarkAnchors = anchors,
 		cryptGate = cryptGate,
-		shortcutGate = shortcutGate,
 	}
 end
 

@@ -9,8 +9,7 @@ return function(t: TestRunner.T)
 			nearTrain = false,
 			viewedCollection = false,
 			inGraveyard = false,
-			clueCount = 0,
-			angelClue = false,
+			nearMonster = false,
 			seenCount = 0,
 			captureTried = false,
 			carrying = false,
@@ -20,8 +19,7 @@ return function(t: TestRunner.T)
 			routeCustom = false,
 			exhibits = 0,
 			rides = 0,
-			bellHint = false,
-			bellClue = false,
+			inCrypt = false,
 			caughtRare = false,
 		}
 		for k, v in (over or {}) :: { [string]: any } do
@@ -34,23 +32,23 @@ return function(t: TestRunner.T)
 		t.eq(TutorialRules.advance(1, ctx()), 1)
 	end)
 
-	-- Cumulative state that satisfies steps 1..n (index n). Brief §12 has 12 steps.
+	-- Cumulative state that satisfies steps 1..n (index n). 12 steps (brief §12, steps 3 and 12 per ADR-0007).
 	local reached: { { [string]: any } } = {
 		{ nearTrain = true },
 		{ inGraveyard = true },
-		{ inGraveyard = true, angelClue = true, clueCount = 1 },
-		{ clueCount = 1, seenCount = 1 },
-		{ clueCount = 1, seenCount = 1, captureTried = true },
-		{ clueCount = 1, seenCount = 1, captureTried = true, carrying = true },
+		{ inGraveyard = true, nearMonster = true },
+		{ seenCount = 1 },
+		{ seenCount = 1, captureTried = true },
+		{ seenCount = 1, captureTried = true, carrying = true },
 		{ owned = 1 },
 		{ owned = 1, viewedCollection = true },
 		{ owned = 1, viewedCollection = true, speedLevel = 1 },
 		{ owned = 1, speedLevel = 1, houseTier = 1, routeCustom = true },
-		{ owned = 1, speedLevel = 1, houseTier = 1, routeCustom = true, rides = 1, bellHint = true },
-		{ owned = 1, speedLevel = 1, houseTier = 1, routeCustom = true, rides = 1, bellHint = true, bellClue = true },
+		{ owned = 1, speedLevel = 1, houseTier = 1, routeCustom = true, rides = 1 },
+		{ owned = 1, speedLevel = 1, houseTier = 1, routeCustom = true, rides = 1, inCrypt = true },
 	}
 
-	t.test("there are 12 steps, matching brief §12", function()
+	t.test("there are 12 steps, so saved step numbers keep their meaning", function()
 		t.eq(#TutorialRules.Steps, 12)
 		t.eq(#reached, #TutorialRules.Steps)
 	end)
@@ -95,7 +93,14 @@ return function(t: TestRunner.T)
 		-- A step saved before a later state still lands on the first unmet step.
 		t.eq(TutorialRules.advance(2, c), 10)
 		-- A saved step beyond the end shows the completion text.
-		t.eq(TutorialRules.hint(99, c), TutorialRules.CompleteText)
+		t.eq(TutorialRules.hint(99, c), "The Sealed Crypt is open to you: find the Bell Wraith inside.")
+	end)
+
+	t.test("no step needs an investigation or a clue (ADR-0007)", function()
+		for _, step in TutorialRules.Steps do
+			t.truthy(string.find(string.lower(step.text), "investigate", 1, true) == nil, step.id)
+			t.truthy(string.find(string.lower(step.text), "clue", 1, true) == nil, step.id)
+		end
 	end)
 
 	t.test("completed tutorial returns the completion hint", function()
@@ -105,31 +110,16 @@ return function(t: TestRunner.T)
 			speedLevel = 1,
 			routeCustom = true,
 			rides = 1,
-			bellClue = true,
+			caughtRare = true,
 		})
 		local s = TutorialRules.advance(1, done)
 		t.eq(s, #TutorialRules.Steps + 1)
-		t.eq(TutorialRules.hint(s, done), TutorialRules.CompleteText)
+		t.truthy(string.find(TutorialRules.hint(s, done), "You caught the Bell Wraith", 1, true) ~= nil)
 	end)
 
-	t.test("completion hint names only what is missing", function()
-		local c = ctx({ houseTier = 0, landmarks = 1 })
-		t.eq(
-			TutorialRules.hint(99, c),
-			"The bell points to the Sealed Crypt: investigate 2 more landmarks and Restore your house to enter, and find the Bell Wraith."
-		)
-		c.landmarks = 2
-		c.houseTier = 1
-		t.eq(
-			TutorialRules.hint(99, c),
-			"The bell points to the Sealed Crypt: investigate 1 more landmark to enter, and find the Bell Wraith."
-		)
-		c.landmarks = 3
-		c.houseTier = 0
-		t.eq(
-			TutorialRules.hint(99, c),
-			"The bell points to the Sealed Crypt: Restore your house to enter, and find the Bell Wraith."
-		)
+	t.test("completion hint names the house tier only while the crypt is shut", function()
+		local c = ctx({ houseTier = 0 })
+		t.eq(TutorialRules.hint(99, c), TutorialRules.CompleteText)
 		c.houseTier = 1
 		t.eq(TutorialRules.hint(99, c), "The Sealed Crypt is open to you: find the Bell Wraith inside.")
 		c.caughtRare = true

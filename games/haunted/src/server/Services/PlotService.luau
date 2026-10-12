@@ -72,19 +72,14 @@ function PlotService.rebuildTrophies(player: Player)
 	if not (i and profile) then
 		return
 	end
-	local caught, variants, clues = 0, 0, 0
+	local caught, variants = 0, 0
 	for _ in profile.journal.caught do
 		caught += 1
 	end
 	for _ in profile.journal.variants do
 		variants += 1
 	end
-	for id in profile.journal.clues do
-		if World.landmarkById(id) then -- landmark clues only; the train's bell hint isn't a trophy
-			clues += 1
-		end
-	end
-	PlotBuilder.buildTrophies(plots[i], i, caught, variants, clues)
+	PlotBuilder.buildTrophies(plots[i], i, caught, variants)
 end
 
 local function spawnAtHome(player: Player, character: Model)
@@ -161,7 +156,7 @@ local function release(player: Player)
 	owners[i] = nil
 	PlotBuilder.setOwner(plots[i], nil)
 	PlotBuilder.buildHouse(plots[i], i, 0)
-	PlotBuilder.buildTrophies(plots[i], i, 0, 0, 0)
+	PlotBuilder.buildTrophies(plots[i], i, 0, 0)
 	local residents = plots[i]:FindFirstChild("Pen")
 	residents = residents and residents:FindFirstChild("Residents")
 	if residents then

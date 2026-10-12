@@ -264,13 +264,8 @@ function PlotBuilder.buildHouse(plot: Model, index: number, tier: number)
 end
 
 -- Cosmetic trophies for journal milestones (no gameplay effect).
-function PlotBuilder.buildTrophies(
-	plot: Model,
-	index: number,
-	caughtCount: number,
-	variantCount: number,
-	clueCount: number
-)
+-- The clue trophy ("Grave Scholar") was retired with clue hunting (ADR-0007).
+function PlotBuilder.buildTrophies(plot: Model, index: number, caughtCount: number, variantCount: number)
 	local folder = plot:FindFirstChild("Trophies") :: Folder
 	folder:ClearAllChildren()
 	local origin = World.PlotCenters[index]
@@ -278,9 +273,6 @@ function PlotBuilder.buildTrophies(
 	local list: { { name: string, color: Color3 } } = {}
 	if caughtCount >= 1 then
 		table.insert(list, { name = "First Catch", color = Color3.fromRGB(180, 120, 70) })
-	end
-	if clueCount >= 5 then
-		table.insert(list, { name = "Grave Scholar", color = Color3.fromRGB(150, 200, 255) })
 	end
 	if variantCount >= 1 then
 		table.insert(list, { name = "Variant Hunter", color = Color3.fromRGB(200, 200, 215) })
