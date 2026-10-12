@@ -5,6 +5,7 @@ local Shared = ReplicatedStorage.Shared
 local TrackRules = require(Shared.Rules.TrackRules)
 local World = require(Shared.Config.World)
 local Track = require(Shared.Config.Track)
+local Economy = require(Shared.Config.Economy)
 
 return function(t: TestRunner.T)
 	local bounds = World.Plot.trackBounds
@@ -21,6 +22,29 @@ return function(t: TestRunner.T)
 		t.eq(v.ok, true, v.reason)
 		local s = v.sampled :: TrackRules.Sampled
 		t.truthy(s.length >= Track.MinLength and s.length <= Track.MaxLength)
+	end)
+
+	t.test("starter ride has one scare and one display beside the loop (Round 20 Q4)", function()
+		local pieces = World.Plot.starterPieces :: { any }
+		local v = TrackRules.validate(starter(), pieces, bounds)
+		t.eq(v.ok, true, v.reason)
+		local scares = 0
+		for _, piece in pieces do
+			if piece.kind == "ScareArch" then
+				scares += 1
+			end
+		end
+		t.eq(scares, 1, "exactly one Scare Arch")
+		-- The starter house (tier 0) unlocks the first slots; at least one of them must count for the ride.
+		local sampled = v.sampled :: TrackRules.Sampled
+		local inRange = 0
+		for i = 1, Economy.HouseTiers[1].exhibitSlots do
+			local pos = World.Plot.exhibitSlots[i]
+			if TrackRules.nearestDistance(sampled, pos.X, pos.Z) <= Economy.ExhibitRange then
+				inRange += 1
+			end
+		end
+		t.truthy(inRange >= 1, "a starter exhibit slot sits beside the starter loop")
 	end)
 
 	t.test("too few points rejected", function()

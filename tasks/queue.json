@@ -1767,6 +1767,123 @@
       ],
       "revisions": 1,
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0023",
+      "title": "Round 20 Design Changes",
+      "project": "GAME-002",
+      "status": "done",
+      "risk": "medium",
+      "depends_on": [],
+      "branch": "task/TASK-0023-Round-20-Design-Changes",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0023-Round-20-Design-Changes.md",
+      "acceptance_criteria": [
+        "A missed capture press startles the monster (8-14 stud hop inside its zone, no instant retry) and hits/misses carry over to the next attempt",
+        "Return-timer expiry starts a 15 s chase; grabbing within 6 studs resumes the carry with 20 s, once per capture; chase expiry, death, leaving or the speed check send it back to its habitat; owned monsters and coins are untouched",
+        "Carry speed multiplier is 0.6/0.7/0.8/0.9 by Running Shoes level, and the server speed check uses the same rule",
+        "The fixed starter ride has one Scare Arch and at least one starter exhibit slot within range",
+        "GDD v0.3 and the Overview record the Round 20 decisions and the 'Build your haunted train' hook",
+        "Specs (ChaseRules, EconomyRules, TrackRules) and FullLoop, CrossPlot and ExploitProbe pass in Studio",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T20:55:57",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-11T20:55:58",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T21:07:11",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T21:15:49",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-11T21:17:08",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T21:24:31",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T21:26:36",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-11T21:28:16",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-11T21:07:11",
+          "result": "pass",
+          "notes": "TEST-20261011-08: specs 60/0, FullLoop 79/79, ExploitProbe 13/13; CrossPlot no result (harness, as TEST-07; 2-player run with TASK-0020)"
+        },
+        {
+          "time": "2026-10-11T21:24:31",
+          "result": "pass",
+          "notes": "Revision 1 (TEST-20261011-08): specs 61/0, FullLoop 80/81 then 81/81 (flaky landmark check, untouched code), ExploitProbe 13/13; CrossPlot deferred by jg"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-11T21:15:49",
+          "result": "fail",
+          "report": "06 QA/AUD-20261011-TASK-0023-01.md"
+        },
+        {
+          "time": "2026-10-11T21:26:36",
+          "result": "pass",
+          "report": "06 QA/AUD-20261011-TASK-0023-02.md"
+        }
+      ],
+      "revisions": 1,
+      "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0024",
+      "title": "FullLoop Landmark Flake",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0024-FullLoop-Landmark-Flake",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0024-FullLoop-Landmark-Flake.md",
+      "acceptance_criteria": [
+        "The cause is named with evidence (e.g. root position and anchor distance logged on failure), not guessed",
+        "FullLoop passes 5 consecutive runs in Studio with the landmark check passing each time",
+        "If the game is at fault, the fix is in LandmarkService and covered by a check that fails without it",
+        "scripts/check.sh passes"
+      ],
+      "approved_by": null,
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
     }
   ]
 }

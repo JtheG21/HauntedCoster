@@ -1,6 +1,7 @@
 --!strict
 -- Spawns monsters inside their zones, rolls variants, roams them (server-side tweened CFrame, no physics),
--- and serves the pre-capture Inspect card.
+-- and serves the pre-capture Inspect card. Also moves startled monsters (a missed capture press) and
+-- escaped captures fleeing from the player who dropped them (Round 20; GDD v0.3).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,6 +13,7 @@ local Config = Shared:WaitForChild("Config")
 local World = require(Config:WaitForChild("World"))
 local Monsters = require(Config:WaitForChild("Monsters"))
 local Variants = require(Config:WaitForChild("Variants"))
+local ChaseRules = require(Shared:WaitForChild("Rules"):WaitForChild("ChaseRules"))
 local Remotes = require(script.Parent.Parent.Remotes)
 local MonsterModels = require(script.Parent.Parent.World.MonsterModels)
 local PlayerDataService = require(script.Parent.PlayerDataService)
@@ -29,10 +31,17 @@ export type Encounter = {
 	claimedBy: Player?,
 	alive: boolean,
 	tween: Tween?,
+	startledUntil: number, -- os.clock(); no capture until it lands from a startle hop
+	progress: { [Player]: { hits: number, misses: number } }, -- capture counters kept between attempts
+	fleeing: Player?, -- set while it runs from the player whose capture escaped
+	claimEpoch: number, -- bumped by every claim, so a late startle release can't drop a newer claim
 }
 
 local SPAWN_INTERVAL = 4
 local INSPECT_DISTANCE = 22
+local STARTLE_HOP_SECONDS = 0.5
+local STARTLE_SETTLE_SECONDS = 0.8
+local FLEE_STEP_SECONDS = 0.6
 
 local started = false
 local folder: Folder
@@ -109,10 +118,13 @@ local function roam(e: Encounter)
 				while e.alive and not e.claimedBy and os.clock() - t0 < duration do
 					task.wait(0.2)
 				end
-				if e.claimedBy and e.tween then
-					e.tween:Cancel()
+				-- Only stop this roam tween: a startle hop or flee step may already own e.tween.
+				if e.tween == tween then
+					if e.claimedBy then
+						tween:Cancel()
+					end
+					e.tween = nil
 				end
-				e.tween = nil
 			end
 			task.wait(rng:NextNumber(1, 3))
 		else
@@ -201,6 +213,10 @@ function EncounterService.spawn(speciesId: string, variantId: string, zoneId: st
 		claimedBy = nil,
 		alive = true,
 		tween = nil,
+		startledUntil = 0,
+		progress = {},
+		fleeing = nil,
+		claimEpoch = 0,
 	}
 	encounters[model] = e
 	prompt.Triggered:Connect(function(player)
@@ -266,6 +282,7 @@ function EncounterService.claim(e: Encounter, player: Player): boolean
 		return false
 	end
 	e.claimedBy = player
+	e.claimEpoch += 1
 	if e.tween then
 		e.tween:Cancel()
 	end
@@ -284,6 +301,97 @@ function EncounterService.remove(e: Encounter)
 	end
 	encounters[e.model] = nil
 	e.model:Destroy()
+end
+
+local function tweenTo(e: Encounter, target: Vector3, seconds: number, style: Enum.EasingStyle)
+	if e.tween then
+		e.tween:Cancel()
+	end
+	local from = e.root.Position
+	local flat = Vector3.new(target.X - from.X, 0, target.Z - from.Z)
+	local goal = if flat.Magnitude > 0.1
+		then CFrame.lookAt(target, target + flat.Unit)
+		else CFrame.new(target) * e.root.CFrame.Rotation
+	local tween =
+		TweenService:Create(e.root, TweenInfo.new(seconds, style, Enum.EasingDirection.Out), { CFrame = goal })
+	e.tween = tween
+	tween:Play()
+end
+
+-- A missed capture press startles the monster: it hops away inside its zone and can't be captured again
+-- until it settles. The capturing player keeps the claim during the hop, then the monster roams again.
+function EncounterService.startle(e: Encounter, from: Vector3)
+	local zone = World.zoneById(e.zone)
+	if not e.alive or not zone then
+		return
+	end
+	local claimer, epoch = e.claimedBy, e.claimEpoch
+	e.startledUntil = os.clock() + STARTLE_SETTLE_SECONDS
+	tweenTo(
+		e,
+		ChaseRules.startleTarget(zone.rect, e.root.Position, from, rng),
+		STARTLE_HOP_SECONDS,
+		Enum.EasingStyle.Quad
+	)
+	task.delay(STARTLE_SETTLE_SECONDS, function()
+		if e.alive and e.claimedBy == claimer and e.claimEpoch == epoch then
+			e.claimedBy = nil
+		end
+	end)
+end
+
+function EncounterService.isStartled(e: Encounter): boolean
+	return os.clock() < e.startledUntil
+end
+
+-- An escaped capture reappears beside the player who dropped it and runs. Only that player can grab it;
+-- `untilClock` ends the chase (CaptureService then sends it home with respawnEscaped).
+function EncounterService.spawnFleeing(
+	speciesId: string,
+	variantId: string,
+	owner: Player,
+	near: Vector3,
+	headStart: number,
+	speed: number,
+	untilClock: number
+): Encounter?
+	local species = Monsters.Species[speciesId]
+	if not species then
+		return nil
+	end
+	local habitat: string? = nil
+	for _, zone in World.Zones do
+		if zone.spawns[speciesId] then
+			habitat = zone.id
+			break
+		end
+	end
+	if not habitat then
+		return nil
+	end
+	local region, avoid = ChaseRules.fleeRegion(near)
+	local start = ChaseRules.fleeStep(region, near, nil, headStart, rng, avoid)
+	local e = EncounterService.spawn(speciesId, variantId, habitat, Vector3.new(start.X, 0, start.Z))
+	if not e then
+		return nil
+	end
+	e.claimedBy = owner
+	e.fleeing = owner
+	local inspect = e.root:FindFirstChild("Inspect")
+	if inspect and inspect:IsA("ProximityPrompt") then
+		inspect.Enabled = false
+	end
+	task.spawn(function()
+		while e.alive and e.fleeing == owner and os.clock() < untilClock do
+			local character = owner.Character
+			local root = character and character:FindFirstChild("HumanoidRootPart")
+			local chaser = if root and root:IsA("BasePart") then root.Position else nil
+			local target = ChaseRules.fleeStep(region, e.root.Position, chaser, speed * FLEE_STEP_SECONDS, rng, avoid)
+			tweenTo(e, target, FLEE_STEP_SECONDS, Enum.EasingStyle.Linear)
+			task.wait(FLEE_STEP_SECONDS)
+		end
+	end)
+	return e
 end
 
 -- An escaped capture runs back to a zone where its species lives (ADR-0005).
@@ -325,6 +433,7 @@ function EncounterService.start()
 			if e.claimedBy == player then
 				e.claimedBy = nil
 			end
+			e.progress[player] = nil
 		end
 	end)
 end

@@ -287,6 +287,29 @@ function Hud.mount(gui: ScreenGui, cb: Callbacks)
 					arrow.Rotation = math.deg(rel)
 				end
 			end
+		elseif snap and snap.chase and root then
+			-- Escaped capture: countdown and an arrow to the monster instead of home (Round 20 Q1).
+			local ch = snap.chase
+			local left = math.max(0, ch.deadline - Workspace:GetServerTimeNow())
+			carry.Visible = true
+			carryText.Text = string.format("It broke free! Catch the %s: %ds", ch.name, math.ceil(left))
+			bar.Size = UDim2.fromScale(math.clamp(left / ch.seconds, 0, 1), 1)
+			bar.BackgroundColor3 = Theme.Colors.bad
+			local m = ch.monster
+			local target = if typeof(m) == "Instance" and m:IsA("Model") and m.PrimaryPart then m.PrimaryPart else nil
+			local cam = Workspace.CurrentCamera
+			if target and cam then
+				local to = target.Position - root.Position
+				homeText.Text =
+					`{math.floor(Vector3.new(to.X, 0, to.Z).Magnitude)} studs away. Get close and press E to grab it`
+				local look = cam.CFrame.LookVector
+				local rel = math.atan2(look.X, look.Z) - math.atan2(to.X, to.Z)
+				arrow.Visible = true
+				arrow.Position = UDim2.new(0.5, math.sin(rel) * 110, 0.5, -math.cos(rel) * 110)
+				arrow.Rotation = math.deg(rel)
+			else
+				arrow.Visible = false
+			end
 		else
 			carry.Visible = false
 			arrow.Visible = false
