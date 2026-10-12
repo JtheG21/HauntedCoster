@@ -3,7 +3,7 @@ id: TASK-0032
 title: Retaliation Hardening
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: medium
 risk: medium
 owner: executor
@@ -68,7 +68,12 @@ Close the follow-ups from [[AUD-20261012-TASK-0031-01]]: retaliation must surviv
 - **Checks:** `scripts/check.sh` passes (specs 96/0). Retaliation 31/31 (run 2, after seeding saved counters so the counter checks can fail), FullLoop 85/85, ExploitProbe 13/13 ([[TEST-20261012-08]]).
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261012-TASK-0032-01]]: pass (2 minor, 4 nit).
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Merge:** pending jg's approval (the audit passed).
+- **Result:** a retaliation tick error is caught and every pursuit ends cleanly. A failing `onFled` handler still lets the monster slip away. A monster that retaliated forgets the player's counters. The scenario now proves edge containment, tick-error recovery and the death ending.
+- **Follow-ups** (from [[AUD-20261012-TASK-0032-01]]):
+  - `RetaliationService.begin`: a mid-loop error can leave extra pursuers flagged `pursuing` with no pursuit record. Create the record first, or release the monsters already set on error.
+  - Optional: a spec or scenario with a throwing `onFled` handler.
+- **Still needs jg (from TASK-0031):** the feel of the numbers (8 s, 13.5 studs/s, 1.5 s knockdown, 3 s grace).
