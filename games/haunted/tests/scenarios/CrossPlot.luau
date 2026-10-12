@@ -123,6 +123,7 @@ return function(args: any): { [string]: any }
 			end
 		end)
 		-- Touch: A drops onto B's parked (disabled) seat and isn't seated (AUD-20261012-TASK-0025-02 N1).
+		check("B's parked front seat is disabled (precondition)", front.Disabled == true, front.Disabled)
 		tp(a, front.Position)
 		task.wait(1)
 		check(
@@ -130,10 +131,19 @@ return function(args: any): { [string]: any }
 			not seatedSeen and front.Occupant ~= humA,
 			`seatedSeen={seatedSeen} occupant={front.Occupant}`
 		)
-		-- Enabled (as during a ride): A does get seated, and the guard ejects A. Tested before any forced
-		-- seating: right after an ejection the engine refuses to re-seat A for a while.
+		-- Enabled (as during a ride): the same touch does seat A (the positive control for the check above,
+		-- AUD-20261012-TASK-0026-01 F2), and the guard ejects A. Tested before any forced seating: right
+		-- after an ejection the engine refuses to re-seat A for a while.
 		front.Disabled = false
-		front:Sit(humA)
+		tp(a, front.Position + Vector3.new(0, 1.5, 0))
+		local t1 = os.clock()
+		while not seatedSeen and os.clock() - t1 < 2 do
+			task.wait(0.1)
+		end
+		check("control: touching B's enabled front seat does seat A", seatedSeen, front.Occupant)
+		if not seatedSeen then
+			front:Sit(humA) -- still test the guard if the touch missed
+		end
 		task.wait(1)
 		check(
 			"A seated in B's enabled front seat, then ejected",

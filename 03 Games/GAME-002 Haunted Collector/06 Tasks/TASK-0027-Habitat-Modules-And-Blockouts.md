@@ -3,7 +3,7 @@ id: TASK-0027
 title: Habitat Modules and Blockouts
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -50,6 +50,21 @@ Part count: four prebuilt modules stay in memory. Measure the part count per mod
 
 ---
 ## Implementation record
+- **References used:**
+  - vfx_template `Validator` pattern (startup validation that returns readable problems instead of failing silently), via the code index guide [[vfx_template]]. Its source wasn't re-opened in this task; only the pattern was used, not its code.
+  - Map references 5 and 6 (chunky, readable silhouettes) for the blockouts' proportions. Qualities only.
+- **Built:**
+  - `Habitats.luau`: Cursed Woodland, Spider Woodland and Zombie Settlement, with rosters weighted per ADR-0007. Also `setActive`, `anyZoneById`, and the rotation order in `List`.
+  - `HabitatRules.validate` now also checks species ids and weights, duplicate landmark ids, and that a landmark sits inside the zone it names. The Bell Tower no longer claims the Crypt zone (it stands outside it, [[AUD-20261012-TASK-0026-01]] finding 5).
+  - `World/Habitats/Kit.luau`: shared steps (ground, plaza, paths, gate lanterns, landmarks, free-ground tests, scatter, dark-zone candles). Cemetery now uses it. Woodland, SpiderWoodland and Settlement are blockouts built on it.
+  - `HabitatService`: prebuilds all four into `ServerStorage.HabitatModules`. `activate` and `deactivate` run hooks: deactivating clears wild monsters (`EncounterService.clearWild`, which keeps fleeing escapes); activating repopulates (`EncounterService.populate`). It sets the `ActiveHabitat` Workspace attribute and the hub gate label.
+  - Client: LocalWorld follows `ActiveHabitat` and re-opens the crypt gate locally when the cemetery comes back. The journal lists every habitat where a species lives.
+  - Studio-only selector: `StudioTestHook.arg("habitat")` picks the starting module in test runs.
+- **Audit follow-ups from TASK-0026:**
+  - Finding 2: CrossPlot asserts the parked seat is Disabled, and adds a touch-only control on the enabled seat.
+  - Finding 4: Reachability checks all plots × all gates.
+- **Part counts:** Cemetery 463, Woodland 298, Spider Woodland 247, Settlement 135 (HabitatSwap).
+- **Evidence:** [[TEST-20261012-03]].
 
 ## Audits
 

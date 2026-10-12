@@ -1,0 +1,197 @@
+--!strict
+-- Shared building steps for habitat modules (ADR-0007): footprint ground, plaza, paths with z-fight-free
+-- heights, gate-path lanterns, landmark models with labels, free-ground tests for scenery and seeded
+-- scatter. Each module (Cemetery, Woodland, SpiderWoodland, Settlement) adds its own props on top.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local World = require(Shared:WaitForChild("Config"):WaitForChild("World"))
+local Habitats = require(Shared.Config:WaitForChild("Habitats"))
+local HabitatRules = require(Shared:WaitForChild("Rules"):WaitForChild("HabitatRules"))
+local Build = require(script.Parent.Parent.Build)
+local Props = require(script.Parent.Parent.Props)
+
+local Kit = {}
+
+export type Result = {
+	model: Model,
+	landmarkAnchors: { [string]: BasePart },
+	cryptGate: BasePart?,
+}
+
+export type LandmarkBuilder = (Instance, Vector3) -> BasePart
+
+-- A new module model with the footprint ground (meets the hub wall) and the plaza.
+function Kit.base(
+	def: Habitats.Habitat,
+	ground: Color3,
+	groundMaterial: Enum.Material,
+	plazaColor: Color3,
+	plazaMaterial: Enum.Material
+): Model
+	local model = Instance.new("Model")
+	model.Name = def.id
+	model:SetAttribute("Habitat", def.id)
+	Props.disc(model, "HabitatGround", World.Hub.center, World.Hub.wallRadius, 0.12, ground, groundMaterial)
+	local plaza = def.plaza
+	if plaza then
+		Props.disc(model, "Plaza", plaza.center, plaza.radius, 0.15, plazaColor, plazaMaterial)
+	end
+	return model
+end
+
+-- Paths are strips per segment with a disc at each bend. Every piece gets its own top height so pieces that
+-- overlap at bends and junctions never share a plane (z-fighting).
+function Kit.layPaths(parent: Instance, def: Habitats.Habitat, color: Color3, material: Enum.Material)
+	local k = 0
+	local function nextTop(): number
+		k += 1
+		return 0.16 + 0.011 * (k % 11)
+	end
+	for _, path in def.paths do
+		local pts = path.points
+		for i = 1, #pts - 1 do
+			Build.strip(parent, path.id, pts[i], pts[i + 1], path.width, color, material, nextTop())
+			if i > 1 then
+				Props.disc(parent, path.id .. "Bend", pts[i], path.width / 2, nextTop(), color, material)
+			end
+		end
+	end
+end
+
+-- Lanterns along the gate paths, alternating sides, so the way in and out is lit.
+function Kit.lightPaths(parent: Instance, def: Habitats.Habitat)
+	for _, id in def.gatePaths do
+		for _, path in def.paths do
+			if path.id == id then
+				local side = 1
+				for i = 1, #path.points - 1 do
+					local a, b = path.points[i], path.points[i + 1]
+					local d = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+					local n = math.max(1, math.floor(d.Magnitude / 22))
+					local perp = Vector3.new(-d.Z, 0, d.X).Unit
+					for j = 0, n - 1 do
+						local p = a + d * ((j + 0.5) / n) + perp * side * (path.width / 2 + 1.5)
+						Props.lantern(parent, p.X, p.Z)
+						side = -side
+					end
+				end
+			end
+		end
+	end
+end
+
+-- Landmark models with their labels. A landmark without a builder is skipped (and reported by the caller's
+-- tests, since every module names a builder for each of its landmarks).
+function Kit.landmarks(
+	model: Model,
+	def: Habitats.Habitat,
+	builders: { [string]: LandmarkBuilder }
+): { [string]: BasePart }
+	local anchors: { [string]: BasePart } = {}
+	local folder = Build.folder(model, "Landmarks")
+	for _, lm in def.landmarks do
+		local builder = builders[lm.id]
+		if builder then
+			local m = Build.model(folder, lm.id)
+			local anchor = builder(m, lm.position)
+			anchor.Name = "Anchor"
+			Build.billboard(anchor, lm.name, Color3.fromRGB(230, 220, 255), 9, 90, 0.9)
+			anchors[lm.id] = anchor
+			m.PrimaryPart = anchor
+		end
+	end
+	return anchors
+end
+
+local function nearLandmark(def: Habitats.Habitat, x: number, z: number, radius: number): boolean
+	for _, lm in def.landmarks do
+		if Vector3.new(lm.position.X - x, 0, lm.position.Z - z).Magnitude < radius then
+			return true
+		end
+	end
+	return false
+end
+
+local function inCrypt(def: Habitats.Habitat, x: number, z: number, margin: number): boolean
+	local crypt = def.crypt
+	if not crypt then
+		return false
+	end
+	local r = crypt.rect
+	return x > r.x1 - margin and x < r.x2 + margin and z > r.z1 - margin and z < r.z2 + margin
+end
+
+-- Free ground for scenery: in the footprint, off the plaza and paths, clear of gates, landmarks and crypt.
+function Kit.freeGround(def: Habitats.Habitat, x: number, z: number, clearance: number): boolean
+	local plaza = def.plaza
+	return HabitatRules.inFootprint(x, z, 5)
+		and not (plaza and World.hubDistance(x, z) < plaza.radius + clearance + 2)
+		and HabitatRules.pathClearance(def, x, z) > clearance
+		and not HabitatRules.inGateCorridor(x, z)
+		and not nearLandmark(def, x, z, 11)
+		and not inCrypt(def, x, z, 6)
+end
+
+-- False within `radius` of a spawn zone's centre, so scenery never blocks the spot scenarios walk to.
+function Kit.clearOfZoneCentres(def: Habitats.Habitat, x: number, z: number, radius: number): boolean
+	for _, zone in def.zones do
+		local r = zone.rect
+		if Vector3.new((r.x1 + r.x2) / 2 - x, 0, (r.z1 + r.z2) / 2 - z).Magnitude < radius then
+			return false
+		end
+	end
+	return true
+end
+
+-- Up to `count` props on free ground, placed by `place(x, z)` at seeded random spots.
+function Kit.scatter(
+	def: Habitats.Habitat,
+	rng: Random,
+	count: number,
+	clearance: number,
+	place: (number, number) -> ()
+): number
+	local r = World.Hub.moduleRadius
+	local placed = 0
+	for _ = 1, count * 6 do
+		local x = rng:NextNumber(-r, r)
+		local z = rng:NextNumber(-r, r)
+		if Kit.freeGround(def, x, z, clearance) then
+			place(x, z)
+			placed += 1
+			if placed >= count then
+				break
+			end
+		end
+	end
+	return placed
+end
+
+-- Cold candles in dark zones, so they stay dark but navigable.
+function Kit.darkCandles(parent: Instance, def: Habitats.Habitat, rng: Random, color: Color3)
+	for _, zone in def.zones do
+		if zone.dark and not zone.gated then
+			for _ = 1, 6 do
+				local x = rng:NextNumber(zone.rect.x1 + 4, zone.rect.x2 - 4)
+				local z = rng:NextNumber(zone.rect.z1 + 4, zone.rect.z2 - 4)
+				if HabitatRules.pathClearance(def, x, z) > 1 and not nearLandmark(def, x, z, 8) then
+					local candle = Build.block(
+						parent,
+						"GhostCandle",
+						Vector3.new(0.4, 1.2, 0.4),
+						x,
+						0,
+						z,
+						color,
+						Enum.Material.Neon
+					)
+					Build.light(candle, color, 12, 0.8)
+				end
+			end
+		end
+	end
+end
+
+return Kit

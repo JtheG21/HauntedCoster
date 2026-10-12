@@ -24,7 +24,7 @@ export type Zone = {
 export type Landmark = {
 	id: string,
 	name: string,
-	zone: string,
+	zone: string?, -- the spawn zone it stands in, if any (checked by HabitatRules.validate)
 	position: Vector3,
 }
 

@@ -9,6 +9,7 @@ local Workspace = game:GetService("Workspace")
 
 local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
 local Monsters = require(Config:WaitForChild("Monsters"))
+local Habitats = require(Config:WaitForChild("Habitats"))
 local State = require(script.Parent.State)
 
 local LocalWorld = {}
@@ -173,6 +174,25 @@ function LocalWorld.start()
 		task.spawn(attachLight, player.Character)
 	end
 	State.Changed:Connect(updateMarkers)
+	-- Follow the server's active habitat (zone names in the Hud and journal), and re-open the crypt gate
+	-- locally when the cemetery module is parented back in after a swap.
+	local function syncHabitat()
+		local id = Workspace:GetAttribute("ActiveHabitat")
+		if type(id) == "string" then
+			Habitats.setActive(id)
+		end
+		updateMarkers()
+	end
+	Workspace:GetAttributeChangedSignal("ActiveHabitat"):Connect(syncHabitat)
+	task.spawn(function()
+		local folder = Workspace:WaitForChild("Habitat")
+		folder.DescendantAdded:Connect(function(d)
+			if d.Name == "CryptGate" then
+				updateMarkers()
+			end
+		end)
+	end)
+	syncHabitat()
 	task.spawn(function()
 		while true do
 			task.wait(1)

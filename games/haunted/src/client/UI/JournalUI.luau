@@ -45,22 +45,29 @@ local function text(parent: Instance, s: string, props: { [string]: any }?)
 	return Theme.label(parent, s, p)
 end
 
--- Names of the zones where `species` spawns, for the unknown-creature hint.
+-- Where `species` spawns, for the unknown-creature hint: every habitat in the rotation that has it, with
+-- the zone names for the active habitat.
 local function habitatsOf(species: string): string
 	local names = {}
-	for _, zone in Habitats.active().zones do
-		if zone.spawns[species] then
-			table.insert(names, zone.name)
+	for _, h in Habitats.List do
+		local zones = {}
+		for _, zone in h.zones do
+			if zone.spawns[species] then
+				table.insert(zones, zone.name)
+			end
+		end
+		if #zones > 0 then
+			table.insert(names, if h == Habitats.active() then `{h.name} ({table.concat(zones, ", ")})` else h.name)
 		end
 	end
-	return if #names > 0 then table.concat(names, ", ") else "unknown"
+	return if #names > 0 then table.concat(names, "; ") else "unknown"
 end
 
 -- True if `species` can spawn in any of `zoneIds` (from the zone spawn tables), so the journal lists
 -- zone-only variants exactly for the species that can roll them.
 local function spawnsIn(species: string, zoneIds: { string }): boolean
 	for _, zoneId in zoneIds do
-		local zone = Habitats.zoneById(zoneId)
+		local zone = Habitats.anyZoneById(zoneId)
 		if zone and zone.spawns[species] then
 			return true
 		end
