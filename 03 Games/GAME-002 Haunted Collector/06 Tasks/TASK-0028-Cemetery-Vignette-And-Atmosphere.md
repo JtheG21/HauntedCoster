@@ -3,7 +3,7 @@ id: TASK-0028
 title: Cemetery Vignette and Atmosphere
 type: task
 project: GAME-002
-status: in_review
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -66,5 +66,11 @@ The world's visual signature (a purple sky, green-tinted haze and warm orange pa
 - **Evidence:** [[TEST-20261012-04]].
 
 ## Audits
+- [[AUD-20261012-TASK-0028-01]]: pass (4 minor, 2 nit). TEST note wording fixed; AC1 and AC2 wait on jg.
 
 ## Outcome
+- **Merge** approved by jg in chat on 2026-10-12 ("merge anything you need to to finish this up"). Merged through PR #22.
+- **Result:** a twilight sky with stars, readable ground without the flashlight, the orange lamp family, a detailed Angel and Bell Tower, and the finished cemetery vignette.
+- **Needs jg:** (1) the sky renders blue-indigo rather than clearly violet; (2) the green comes from ground mist, because one Atmosphere colour can't be both a purple sky and a green haze. Accept this, or ask for a retune (for example a more magenta haze colour).
+- **Follow-ups:** soften the mist edges; lighten the Woodland trail; measure the frame rate on a device (TASK-0020).
+
