@@ -140,6 +140,15 @@ function ProfileRules.isNewerSchema(raw: any): boolean
 	return type(raw) == "table" and type(raw.schema) == "number" and raw.schema > ProfileRules.Schema
 end
 
+-- How a loaded profile may be persisted. A profile saved by a newer schema is read-only: this (older)
+-- server plays with a sanitised copy but must never write it back and strip fields it doesn't know.
+function ProfileRules.persistenceFor(mode: string, raw: any): string
+	if mode == "saved" and ProfileRules.isNewerSchema(raw) then
+		return "readonly"
+	end
+	return mode
+end
+
 -- Returns a fully valid profile built from untrusted data, plus a list of repaired field names.
 function ProfileRules.sanitize(raw: any, now: number): (Profile, { string })
 	local repaired: { string } = {}
@@ -171,6 +180,7 @@ function ProfileRules.sanitize(raw: any, now: number): (Profile, { string })
 	p.houseTier = num(raw.houseTier, 0, #Economy.HouseTiers - 1, 0, true)
 	fix("houseTier", p.houseTier == raw.houseTier)
 	p.tutorialStep = num(raw.tutorialStep, 1, 99, 1, true)
+	fix("tutorialStep", p.tutorialStep == raw.tutorialStep)
 	p.lastSeen = num(raw.lastSeen, 0, now + 60, 0)
 
 	local maxUid = 0

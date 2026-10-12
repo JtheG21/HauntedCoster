@@ -17,6 +17,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local ProfileRules = require(Shared:WaitForChild("Rules"):WaitForChild("ProfileRules"))
+local SessionLockRules = require(Shared:WaitForChild("Rules"):WaitForChild("SessionLockRules"))
 
 type Profile = ProfileRules.Profile
 export type Persistence = "saved" | "memory" | "readonly" | "loading"
@@ -25,7 +26,6 @@ local PlayerDataService = {}
 
 local STORE_NAME = "HauntedCollector_Profiles_v1"
 local AUTOSAVE_SECONDS = 60
-local LOCK_STALE_SECONDS = 120
 -- Wait up to LOCK_WAIT_TRIES x 5 s for another server to release a live lock, then take it over (the
 -- other server's later saves then abort because the lock is no longer theirs).
 local LOCK_WAIT_TRIES = 6
@@ -117,20 +117,9 @@ local function loadRecord(player: Player): (string, any)
 		local loaded: any = nil
 		local ok, err = pcall(function()
 			ds:UpdateAsync(key, function(old: any)
-				local rec = if type(old) == "table" then old else {}
-				local lock = rec.lock
-				if
-					type(lock) == "table"
-					and lock.job ~= jobId
-					and type(lock.t) == "number"
-					and os.time() - lock.t < LOCK_STALE_SECONDS
-					and lockTries < LOCK_WAIT_TRIES
-				then
-					locked = true
-					return nil -- abort: another server still owns this profile
-				end
-				loaded = rec.profile
-				rec.lock = { job = jobId, t = os.time() }
+				-- Aborts (nil) while another server still owns this profile and we may keep waiting.
+				local rec
+				rec, loaded, locked = SessionLockRules.claim(old, jobId, os.time(), lockTries >= LOCK_WAIT_TRIES)
 				return rec
 			end)
 		end)
@@ -180,15 +169,10 @@ local function saveNow(player: Player, release: boolean)
 		end
 		local ok, err = pcall(function()
 			ds:UpdateAsync(keyFor(player), function(old: any)
-				local rec = if type(old) == "table" then old else {}
-				-- Our session always holds the lock between load and release. A missing or foreign lock means
-				-- another server took the profile over, so writing would overwrite newer progress.
-				if type(rec.lock) ~= "table" or rec.lock.job ~= jobId then
-					lost = true
-					return nil
-				end
-				rec.profile = snapshot
-				rec.lock = if release then nil else { job = jobId, t = os.time() }
+				-- Our session always holds the lock between load and release; a missing or foreign lock means
+				-- another server took the profile over, so the write is aborted.
+				local rec
+				rec, lost = SessionLockRules.save(old, jobId, os.time(), snapshot, release)
 				return rec
 			end)
 		end)
@@ -226,11 +210,7 @@ releaseLock = function(player: Player)
 	local jobId = if game.JobId ~= "" then game.JobId else "studio"
 	pcall(function()
 		ds:UpdateAsync(keyFor(player), function(old: any)
-			if type(old) == "table" and type(old.lock) == "table" and old.lock.job == jobId then
-				old.lock = nil
-				return old
-			end
-			return nil
+			return SessionLockRules.release(old, jobId)
 		end)
 	end)
 end
@@ -255,7 +235,7 @@ local function onPlayerAdded(player: Player)
 		end
 		return
 	end
-	if mode == "saved" and ProfileRules.isNewerSchema(raw) then
+	if mode == "saved" and ProfileRules.persistenceFor(mode, raw) == "readonly" then
 		-- Saved by a newer game version: play with a cleaned copy but never write it back, so this
 		-- (older) server can't strip fields it doesn't understand. The newer server will save it.
 		warn(`[PlayerData] {player.Name}'s profile has a newer schema; this server won't save it`)
