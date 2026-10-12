@@ -1363,7 +1363,7 @@
       "id": "TASK-0017",
       "title": "Track Editor",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [
         "TASK-0015",
@@ -1434,6 +1434,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T19:45:47",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -1463,6 +1469,11 @@
           "time": "2026-10-11T19:35:00",
           "result": "fail",
           "report": "06 QA/AUD-20261011-TASK-0017-02.md"
+        },
+        {
+          "time": "2026-10-11T19:45:47",
+          "result": "pass",
+          "report": "06 QA/AUD-20261011-TASK-0017-03.md"
         }
       ],
       "revisions": 2

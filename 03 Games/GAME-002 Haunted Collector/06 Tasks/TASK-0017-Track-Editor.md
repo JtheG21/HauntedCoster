@@ -3,7 +3,7 @@ id: TASK-0017
 title: Track Editor
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -76,6 +76,7 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 ## Audits
 - [[AUD-20261011-TASK-0017-01]]: fail, revision 1
 - [[AUD-20261011-TASK-0017-02]]: fail (1 major: touch never run), revision 2
+- [[AUD-20261011-TASK-0017-03]]: **pass** (2 minor, 3 nit): gamepad evidence covers only R1 Confirm (cursor, A/Y/X, D-pad not run); the quality-extremes spec doesn't reach either clamp. Nits: stale-purchase reason in the probe, a `setMovement` yield edge, carry refusal judged on code.
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*
