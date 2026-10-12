@@ -3,7 +3,7 @@ id: TASK-0012
 title: Graveyard and Landmarks
 type: task
 project: GAME-002
-status: blocked
+status: in_progress
 priority: high
 risk: low
 owner: executor
@@ -64,10 +64,17 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 ### Revision 2 (`task/TASK-0012-Graveyard-And-Landmarks`, last allowed revision)
 - **F2 (AC2):** [[TEST-20261011-05]]: dark Mausoleum Hollow captures with the light on and off, F / HUD button / virtual gamepad toggles. DPadUp turned out to be reserved by Roblox, so the gamepad toggle moved to **DPadDown** (verified). Not run: a physical controller, a touch device, a human readability verdict.
 - **F3:** the HUD Light label follows every toggle (`Hud.setLight`).
-- **F4:** the crypt check now runs every 0.25 s instead of 1 s. **Accepted M1 risk:** the gate opens on the client for players who meet the requirement, so a modified client can step inside for up to 0.25 s before the server moves it out. Nothing can be captured in that window that the server doesn't also gate (`CaptureService` checks `cryptOpen` for gated-zone monsters).
+- **F4:** the crypt check now runs every 0.25 s instead of 1 s. **Accepted M1 risk:** the gate opens on the client for players who meet the requirement, so a modified client can step inside for up to 0.25 s before the server moves it out. Capture is gated separately: `CaptureService` refuses to start a capture on a gated-zone monster without crypt access (`CaptureService.luau` start check). No ExploitProbe case covers the forced entry itself. **To confirm with jg at the M1 retro.**
 - **N1:** Reachability adds gate-open positive controls (Crypt `Success` once open; shortcut 6 waypoints once open): **14/14**. Stuck-pocket checking is still covered only by the walk-through.
 - **N2:** crypt ejection calls `CaptureService.noteTeleport` first. FullLoop 56/56 after the change.
 - Systems: [[SYS-Haunted-Player-Data]], [[SYS-Haunted-Capture-Loop]], [[SYS-Haunted-Ghost-Train]].
+
+### Attempt 4 (after jg's unblock, ADR-0006 items 6–7)
+- **N3:** the crypt eject calls a typed `LandmarkService.beforeEject` hook, which CaptureService sets to `noteTeleport`. No runtime `require`, and no `:: any`.
+- **N4:** the Reachability positive controls run inside `pcall`, always restore both gates, and poll up to 8 s for the navmesh instead of a fixed 1 s wait.
+- **N5:** the light-off capture in [[TEST-20261011-05]] is captioned as taken before the label fix.
+- **N6:** the accepted-risk claim is narrowed to what the code does, and flagged for jg at the retro.
+- Re-run on this code: Reachability **15/15** (controls pass, "ran without error"), FullLoop **56/56**. `scripts/check.sh` passes.
 
 ## Audits
 - [[AUD-20261011-TASK-0012-01]]: fail, revision 1

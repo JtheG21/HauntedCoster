@@ -33,6 +33,10 @@ function LandmarkService.landmarkCount(profile: Profile): number
 	return n
 end
 
+-- Called before the server moves a player out of the crypt. CaptureService sets it to noteTeleport
+-- (it requires this module, so this module can't require it back).
+LandmarkService.beforeEject = nil :: ((Player) -> ())?
+
 function LandmarkService.cryptOpen(profile: Profile): boolean
 	local tier = Economy.HouseTiers[profile.houseTier + 1]
 	return tier ~= nil
@@ -132,8 +136,9 @@ function LandmarkService.start(landmarkAnchors: { [string]: BasePart }, cryptGat
 					if not LandmarkService.cryptOpen(profile) then
 						local character = player.Character
 						if character then
-							-- A server move isn't a carry speed strike. Required lazily: CaptureService requires this module.
-							(require(script.Parent.CaptureService) :: any).noteTeleport(player)
+							if LandmarkService.beforeEject then
+								LandmarkService.beforeEject(player) -- a server move isn't a carry speed strike
+							end
 							character:PivotTo(CFrame.new(outside))
 						end
 						StateService.toast(

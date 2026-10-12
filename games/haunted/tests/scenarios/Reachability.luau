@@ -101,22 +101,42 @@ return function(_args: any): { [string]: any }
 		local cryptCollide, shortcutCollide = cryptGate.CanCollide, shortcutGate.CanCollide
 		cryptGate.CanCollide = false
 		shortcutGate.CanCollide = false
-		task.wait(1) -- let the navmesh update
-		for _, zone in World.Zones do
-			if zone.gated then
-				local r = zone.rect
-				local ok, status = reach(Vector3.new((r.x1 + r.x2) / 2, 0, (r.z1 + r.z2) / 2))
-				check(`gated zone reachable once open (control): {zone.name}`, ok, status)
+		-- Always restore the gates, even if a control errors.
+		local ran, err = pcall(function()
+			-- Poll instead of a fixed wait: the navmesh updates asynchronously after a collision change.
+			for _, zone in World.Zones do
+				if zone.gated then
+					local r = zone.rect
+					local centre = Vector3.new((r.x1 + r.x2) / 2, 0, (r.z1 + r.z2) / 2)
+					local ok, status = false, "?"
+					local w0 = os.clock()
+					repeat
+						ok, status = reach(centre)
+						if not ok then
+							task.wait(0.5)
+						end
+					until ok or os.clock() - w0 > 8
+					check(`gated zone reachable once open (control): {zone.name}`, ok, status)
+				end
 			end
-		end
-		local q = newPath()
-		pcall(function()
-			q:ComputeAsync(outside, inside)
+			local open, detail = false, "?"
+			local w0 = os.clock()
+			repeat
+				local q = newPath()
+				pcall(function()
+					q:ComputeAsync(outside, inside)
+				end)
+				open = q.Status == Enum.PathStatus.Success and #q:GetWaypoints() < 8
+				detail = `{q.Status} waypoints={#q:GetWaypoints()}`
+				if not open then
+					task.wait(0.5)
+				end
+			until open or os.clock() - w0 > 8
+			check("west shortcut direct once open (control)", open, detail)
 		end)
-		local open = q.Status == Enum.PathStatus.Success and #q:GetWaypoints() < 8
-		check("west shortcut direct once open (control)", open, `{q.Status} waypoints={#q:GetWaypoints()}`)
 		cryptGate.CanCollide = cryptCollide
 		shortcutGate.CanCollide = shortcutCollide
+		check("positive controls ran without error", ran, err)
 		task.wait(1)
 	end
 

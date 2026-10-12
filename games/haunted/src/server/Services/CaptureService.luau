@@ -165,6 +165,7 @@ function CaptureService.noteTeleport(player: Player)
 		c.lastPos = nil
 	end
 end
+LandmarkService.beforeEject = CaptureService.noteTeleport
 
 -- Studio test helper: make the current carry's timer run out on the next tick (real timeout path).
 function CaptureService.expireCarryForTest(player: Player)
