@@ -1,0 +1,58 @@
+---
+id: TASK-0022
+title: M1 Polish
+type: task
+project: GAME-002
+status: ready
+priority: medium
+risk: low
+owner: executor
+milestone: M2
+depends_on: []
+branch: task/TASK-0022-M1-Polish
+created: 2026-10-11
+updated: 2026-10-11
+tags:
+  - workflow/task
+  - milestone/m2
+related:
+  - "[[RETRO-M1-Playable-MVP-Loop]]"
+  - "[[ADR-0006-M1-Tuning-And-Scope-Decisions]]"
+---
+# TASK-0022: M1 Polish
+
+## Goal
+Fix the UX and test gaps found in M1 that don't affect security or persistence.
+
+## Scope
+- **In:** Exhibit in-range feedback per slot (TEST-03 F6); a completion hint tailored to what's missing (F7); the drawn capture zone matching the judged window (or a spec bounding the slack); show the 'Already upgraded' reply; quality specs that reach both clamps; rebuild or cancel the track when a plot changes owner mid-ride; CrossPlot asserts the griefer was seated and the cancel asserts the ride started; trophy count excludes the TrainBell clue; journal Crypt species from config; Ashen roll matches 30%; a robust `setMovement` in the editor.
+- **Out:** Economy retuning (needs playtest data, roadmap M2); sound.
+
+## Files expected to change
+- `games/haunted/src/client/UI/` (Mansion, Journal, Capture, TrackEditor)
+- `games/haunted/src/shared/Rules/` (Track, Capture, Variants)
+- `games/haunted/src/server/Services/TrainService.luau`
+- `games/haunted/tests/`
+
+## Acceptance criteria
+- [ ] AC1: Each listed item is fixed or explicitly deferred with a reason in the Implementation record
+- [ ] AC2: New or changed specs fail when the behaviour is removed (no specs that pass for the wrong reason)
+- [ ] AC3: FullLoop, CrossPlot and ExploitProbe pass
+- [ ] AC4: scripts/check.sh passes
+
+## Tests
+- **Automated:** `scripts/check.sh` plus the specs and scenarios named in the ACs.
+- **Who settles the evidence:** Scenarios and specs (Claude). **jg** judges the UX items in a short feel run.
+
+## Risks / notes
+Proposed in [[RETRO-M1-Playable-MVP-Loop]]; created as `ready` with jg's approval on 2026-10-11. Broad scope. Split if the diff grows past one reviewable PR.
+
+---
+## Implementation record
+*(Executor: files changed, decisions, check output)*
+
+## Audits
+*(links to AUD- notes)*
+
+## Outcome
+*(after merge: result, lessons, follow-ups)*
