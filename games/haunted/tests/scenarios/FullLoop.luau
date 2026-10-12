@@ -414,6 +414,7 @@ return function(_args: any): { [string]: any }
 				local rp2 = runner.PrimaryPart.Position
 				tp(Vector3.new(rp2.X, 0, rp2.Z))
 				check("grab when close", CaptureService.grab(player) == true)
+				check("a second grab does nothing", CaptureService.grab(player) == false)
 				check("carrying again after the grab", CaptureService.isCarrying(player))
 				check("the fleeing model is gone", runner.Parent == nil)
 				CaptureService.expireCarryForTest(player)
@@ -444,7 +445,11 @@ return function(_args: any): { [string]: any }
 			CaptureService.expireCarryForTest(player)
 			task.wait(0.6)
 			local runner = CaptureService.chaseTarget(player)
+			if runner and runner.PrimaryPart then
+				tp(Vector3.new(runner.PrimaryPart.Position.X, 0, runner.PrimaryPart.Position.Z))
+			end
 			CaptureService.expireChaseForTest(player)
+			check("grab after the deadline rejected (even when close)", CaptureService.grab(player) == false)
 			task.wait(0.6)
 			check("chase expiry ends the chase", not CaptureService.isChasing(player))
 			check("chase expiry removes the runner", runner == nil or runner.Parent == nil)

@@ -1772,7 +1772,7 @@
       "id": "TASK-0023",
       "title": "Round 20 Design Changes",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0023-Round-20-Design-Changes",
@@ -1805,6 +1805,18 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T21:15:49",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-11T21:17:08",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [
@@ -1814,8 +1826,14 @@
           "notes": "TEST-20261011-08: specs 60/0, FullLoop 79/79, ExploitProbe 13/13; CrossPlot no result (harness, as TEST-07; 2-player run with TASK-0020)"
         }
       ],
-      "audits": [],
-      "revisions": 0
+      "audits": [
+        {
+          "time": "2026-10-11T21:15:49",
+          "result": "fail",
+          "report": "06 QA/AUD-20261011-TASK-0023-01.md"
+        }
+      ],
+      "revisions": 1
     }
   ]
 }

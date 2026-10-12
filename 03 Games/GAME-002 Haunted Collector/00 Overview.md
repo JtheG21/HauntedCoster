@@ -29,7 +29,7 @@ Hook (Round 20): **"Build your haunted train."** Pitch: hunt strange creatures i
 | [[TASK-0016-Starter-Ghost-Train]] | ready (code in 17cb5ae) | — |
 | [[TASK-0017-Track-Editor]] | ready (code in 17cb5ae) | — |
 | [[TASK-0018-Journal-Tutorial-And-Rare-Clue]] | ready (code in 17cb5ae) | — |
-| [[TASK-0023-Round-20-Design-Changes]] | in_progress (Round 20 decisions: startle, chase, carry penalty, starter scare) | — |
+| [[TASK-0023-Round-20-Design-Changes]] | in_progress, revision 1 (Round 20: startle, chase, carry penalty, starter scare) | [[AUD-20261011-TASK-0023-01]] fail |
 
 ## How to playtest (Studio)
 1. `rojo build haunted.project.json -o HauntedCollector.rbxl`, then open it in Studio (or `rojo serve haunted.project.json` into a new empty place). **Never sync it into the Rg1/place1 place.**

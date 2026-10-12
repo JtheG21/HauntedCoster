@@ -118,10 +118,13 @@ local function roam(e: Encounter)
 				while e.alive and not e.claimedBy and os.clock() - t0 < duration do
 					task.wait(0.2)
 				end
-				if e.claimedBy and e.tween then
-					e.tween:Cancel()
+				-- Only stop this roam tween: a startle hop or flee step may already own e.tween.
+				if e.tween == tween then
+					if e.claimedBy then
+						tween:Cancel()
+					end
+					e.tween = nil
 				end
-				e.tween = nil
 			end
 			task.wait(rng:NextNumber(1, 3))
 		else
@@ -366,8 +369,8 @@ function EncounterService.spawnFleeing(
 	if not habitat then
 		return nil
 	end
-	local region = ChaseRules.fleeRegion(near)
-	local start = ChaseRules.fleeStep(region, near, nil, headStart, rng)
+	local region, avoid = ChaseRules.fleeRegion(near)
+	local start = ChaseRules.fleeStep(region, near, nil, headStart, rng, avoid)
 	local e = EncounterService.spawn(speciesId, variantId, habitat, Vector3.new(start.X, 0, start.Z))
 	if not e then
 		return nil
@@ -383,7 +386,7 @@ function EncounterService.spawnFleeing(
 			local character = owner.Character
 			local root = character and character:FindFirstChild("HumanoidRootPart")
 			local chaser = if root and root:IsA("BasePart") then root.Position else nil
-			local target = ChaseRules.fleeStep(region, e.root.Position, chaser, speed * FLEE_STEP_SECONDS, rng)
+			local target = ChaseRules.fleeStep(region, e.root.Position, chaser, speed * FLEE_STEP_SECONDS, rng, avoid)
 			tweenTo(e, target, FLEE_STEP_SECONDS, Enum.EasingStyle.Linear)
 			task.wait(FLEE_STEP_SECONDS)
 		end

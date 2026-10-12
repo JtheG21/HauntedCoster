@@ -3,7 +3,7 @@ id: TASK-0023
 title: Round 20 Design Changes
 type: task
 project: GAME-002
-status: in_review
+status: in_progress
 priority: medium
 risk: medium
 owner: executor
@@ -78,8 +78,21 @@ References: `10 References/06 Code` was not consulted. These are rule changes in
 
 **Checks:** `scripts/check.sh`: ALL CHECKS PASSED (2026-10-11). **Studio ([[TEST-20261011-08]]):** specs 60/0, FullLoop 79/79, ExploitProbe 13/13. CrossPlot gave no result (the same harness problem as TEST-07); its change is judged on code only, and the 2-player run sits with TASK-0020. AC6 is partly met: **CrossPlot deferred by jg** (chat, 2026-10-11) to TASK-0020.
 
-## Audits
-*(none yet)*
+### Revision 1 (after [[AUD-20261011-TASK-0023-01]])
+| Finding | Change |
+|---|---|
+| major: `games/haunted/default.project.json`, `README.md` and `.gitignore` committed | These were `rojo init` boilerplate created in `games/haunted/` at 20:56, not written by the executor. They were swept in by `git add games/haunted`. Removed from the branch; the copies are kept in the session scratchpad, not deleted. They also explain the stale TestService seen before [[TEST-20261011-08]]: a `rojo serve default.project.json` that served the Haunted src without tests |
+| minor: a fleeing monster can enter the sealed crypt | `ChaseRules.fleeRegion` returns the crypt as an area to avoid inside the open graveyard; `fleeStep(..., avoid)` skips candidates within 2 studs of it. Spec added |
+| minor: roam cancels a startle or flee tween | The roam loop cancels and clears only its own tween |
+| minor: missing chase checks | FullLoop adds "a second grab does nothing" and "grab after the deadline rejected (even when close)". Not added: death or leave during a chase, other-player grab (CrossPlot, deferred), speed after a regrab, hits carry-over (Common needs 1 hit). Covered by reading the code only |
+| minor: everyone sees the Grab prompt | A non-owner now gets "That's someone else's escaped monster." |
+| nit: no rate limit on grab | `Remotes.allow(who, "Grab", 4, 4)` |
+| nit: Overview row | Updated |
+| nit: `LoadCharacter` without death keeps the chase | Accepted: the chase reads `player.Character` fresh each tick and expires in 15 s |
+
+**Checks (rev 1):** `scripts/check.sh`: ALL CHECKS PASSED. **Studio:** not re-run yet.
+
+- [[AUD-20261011-TASK-0023-01]]: **fail** (1 major: undeclared `games/haunted/default.project.json` + README + `.gitignore`; 4 minor, 2 nit)
 
 ## Outcome
 *(after merge)*

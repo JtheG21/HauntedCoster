@@ -44,7 +44,9 @@ return function(t: TestRunner.T)
 	t.test("flee region never crosses a fence", function()
 		local g = World.Graveyard
 		t.eq(ChaseRules.fleeRegion(Vector3.new(-30, 0, -345)), g.crypt)
-		t.eq(ChaseRules.fleeRegion(Vector3.new(60, 0, -250)), g.rect)
+		local inYard, avoid = ChaseRules.fleeRegion(Vector3.new(60, 0, -250))
+		t.eq(inYard, g.rect)
+		t.eq(avoid, g.crypt, "the open graveyard avoids the sealed crypt")
 		t.eq(ChaseRules.fleeRegion(World.PlotCenters[3]), ChaseRules.OpenGround)
 		-- The open ground and the graveyard don't overlap (the fence lies between them).
 		t.truthy(ChaseRules.OpenGround.z1 > g.rect.z2, "open ground ends before the graveyard fence")
@@ -59,6 +61,19 @@ return function(t: TestRunner.T)
 			t.truthy(inside(region, p), "inside the region")
 			t.truthy(flat(p, chaser) > flat(at, chaser), "the gap to the chaser grows")
 			t.truthy(flat(p, at) <= 7.5 + 1e-6, "no more than one step")
+		end
+	end)
+
+	t.test("a fleeing monster in the graveyard never enters the sealed crypt", function()
+		local g = World.Graveyard
+		local region, avoid = ChaseRules.fleeRegion(Vector3.new(-30, 0, -310))
+		-- Just north of the crypt wall, chased from the north: straight away is into the crypt.
+		local at = Vector3.new(-30, 4, g.crypt.z2 + 4)
+		local chaser = at + Vector3.new(0, 0, 8)
+		for _ = 1, 50 do
+			local p = ChaseRules.fleeStep(region, at, chaser, 7.5, rng, avoid)
+			t.truthy(not inside(g.crypt, p), "stays out of the crypt")
+			t.truthy(inside(region, p), "inside the graveyard")
 		end
 	end)
 

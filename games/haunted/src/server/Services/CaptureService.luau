@@ -200,6 +200,14 @@ local function startChase(player: Player, c: Carry, root: BasePart): boolean
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = e.root
 	prompt.Triggered:Connect(function(who)
+		if not Remotes.allow(who, "Grab", 4, 4) then
+			return
+		end
+		if who ~= player then
+			-- The prompt is visible to everyone; only the player it escaped from can grab it.
+			StateService.toast(who, "That's someone else's escaped monster.", "info")
+			return
+		end
 		CaptureService.grab(who)
 	end)
 	StateService.markDirty(player)

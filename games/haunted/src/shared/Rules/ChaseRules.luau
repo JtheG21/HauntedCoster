@@ -39,36 +39,52 @@ function ChaseRules.startleTarget(rect: World.Rect, at: Vector3, from: Vector3, 
 end
 
 -- Which region a fleeing monster is kept inside: the crypt, the graveyard, or the open ground outside it,
--- so it never crosses a fence the player has to walk around.
-function ChaseRules.fleeRegion(at: Vector3): World.Rect
+-- so it never crosses a fence the player has to walk around. The second result is an area inside the
+-- region it must stay out of: the sealed crypt, when it runs in the open graveyard (its wall needs access).
+function ChaseRules.fleeRegion(at: Vector3): (World.Rect, World.Rect?)
 	local g = World.Graveyard
 	if World.inRect(g.crypt, at.X, at.Z) then
-		return g.crypt
+		return g.crypt, nil
 	elseif World.inRect(g.rect, at.X, at.Z) then
-		return g.rect
+		return g.rect, g.crypt
 	end
-	return ChaseRules.OpenGround
+	return ChaseRules.OpenGround, nil
 end
 
 -- The next point on a flee path. Runs away from the chaser with a random swerve, clamped to the
--- region; when cornered it slides along the edge instead of stopping.
-function ChaseRules.fleeStep(region: World.Rect, at: Vector3, chaser: Vector3?, step: number, roll: Random): Vector3
+-- region and kept out of `avoid`; when cornered it slides along the edge instead of stopping.
+function ChaseRules.fleeStep(
+	region: World.Rect,
+	at: Vector3,
+	chaser: Vector3?,
+	step: number,
+	roll: Random,
+	avoid: World.Rect?
+): Vector3
 	local away = if chaser then Vector3.new(at.X - chaser.X, 0, at.Z - chaser.Z) else Vector3.zero
 	local base = if away.Magnitude > 0.1 then math.atan2(away.Z, away.X) else roll:NextNumber(0, math.pi * 2)
 	local best: Vector3 = at
 	local bestScore = -math.huge
-	for _, turn in { roll:NextNumber(-0.9, 0.9), 1.2, -1.2, 1.9, -1.9 } do
+	for _, turn in { roll:NextNumber(-0.9, 0.9), 1.2, -1.2, 1.9, -1.9, math.pi } do
 		local a = base + turn
 		local x, z = clampTo(region, 4, at.X + math.cos(a) * step, at.Z + math.sin(a) * step)
-		local p = Vector3.new(x, at.Y, z)
-		local moved = Vector3.new(x - at.X, 0, z - at.Z).Magnitude
-		if moved >= step * 0.8 then
-			return p
-		end
-		local gap = if chaser then Vector3.new(x - chaser.X, 0, z - chaser.Z).Magnitude else moved
-		local score = moved + gap * 0.1
-		if score > bestScore then
-			best, bestScore = p, score
+		-- 2-stud margin around the avoided area so it never ends up inside the wall.
+		local blocked = avoid ~= nil
+			and x >= avoid.x1 - 2
+			and x <= avoid.x2 + 2
+			and z >= avoid.z1 - 2
+			and z <= avoid.z2 + 2
+		if not blocked then
+			local p = Vector3.new(x, at.Y, z)
+			local moved = Vector3.new(x - at.X, 0, z - at.Z).Magnitude
+			if moved >= step * 0.8 then
+				return p
+			end
+			local gap = if chaser then Vector3.new(x - chaser.X, 0, z - chaser.Z).Magnitude else moved
+			local score = moved + gap * 0.1
+			if score > bestScore then
+				best, bestScore = p, score
+			end
 		end
 	end
 	return best
