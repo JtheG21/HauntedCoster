@@ -2466,6 +2466,43 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0032",
+      "title": "Retaliation Hardening",
+      "project": "GAME-002",
+      "status": "in_progress",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0031"
+      ],
+      "branch": "task/TASK-0032-Retaliation-Hardening",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0032-Retaliation-Hardening.md",
+      "acceptance_criteria": [
+        "An error inside the retaliation tick is caught and warned; every pursuit is finished (pursuers roam and can be inspected again) and the loop keeps running.",
+        "An erroring onFled handler is caught and warned, and the fled monster still falls back to the slipped-away removal unless a handler took it.",
+        "A fled capture clears that player's saved counters on the monster, so a retry on a monster that retaliated starts at 0 hits and 0 misses (jg, 2026-10-12).",
+        "The Retaliation scenario checks containment with the player just outside the hub edge and within the give-up distance (pursuit still running, pursuers inside the habitat footprint), and a death ending (Health 0 -> pursuersOf empty).",
+        "setPursuing(nil)'s Inspect re-enable assumption is commented. Retaliation, FullLoop and ExploitProbe pass; scripts/check.sh passes."
+      ],
+      "history": [
+        {
+          "time": "2026-10-12T12:54:47",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-12T12:54:47",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg"
     }
   ]
 }
