@@ -3,7 +3,7 @@ id: TASK-0022
 title: M1 Polish
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: medium
 risk: low
 owner: executor
@@ -78,6 +78,7 @@ Evidence: [[TEST-20261011-07]]: specs 53/0, FullLoop 57/57, ExploitProbe 13/13, 
 
 ## Audits
 - [[AUD-20261011-TASK-0022-01]]: fail (1 high: CrossPlot and handover not run; 1 medium: Spectral in the Crypt at 7%), revision 1
+- [[AUD-20261011-TASK-0022-02]]: **pass** (2 low: per-snapshot warning for an invalid saved route; no spec for the judge's peak/trough branches; 3 info). AC3: the 2-player CrossPlot run is deferred to TASK-0020 by jg.
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*

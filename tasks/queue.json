@@ -1679,7 +1679,7 @@
       "id": "TASK-0022",
       "title": "M1 Polish",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0022-M1-Polish",
@@ -1727,6 +1727,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T20:31:00",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -1746,6 +1752,11 @@
           "time": "2026-10-11T20:23:03",
           "result": "fail",
           "report": "06 QA/AUD-20261011-TASK-0022-01.md"
+        },
+        {
+          "time": "2026-10-11T20:31:00",
+          "result": "pass",
+          "report": "06 QA/AUD-20261011-TASK-0022-02.md"
         }
       ],
       "revisions": 1
