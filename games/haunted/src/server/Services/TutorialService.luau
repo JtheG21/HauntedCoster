@@ -8,6 +8,7 @@ local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local World = require(Shared:WaitForChild("Config"):WaitForChild("World"))
+local Habitats = require(Shared.Config:WaitForChild("Habitats"))
 local TutorialRules = require(Shared:WaitForChild("Rules"):WaitForChild("TutorialRules"))
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local StateService = require(script.Parent.StateService)
@@ -39,6 +40,11 @@ local function nearMonster(pos: Vector3): boolean
 	return false
 end
 
+local function inCrypt(pos: Vector3): boolean
+	local walls = Habitats.cryptWalls()
+	return walls ~= nil and World.inRect(walls, pos.X, pos.Z)
+end
+
 local function ctxFor(player: Player): TutorialRules.Ctx?
 	local profile = PlayerDataService.get(player)
 	if not profile then
@@ -57,7 +63,7 @@ local function ctxFor(player: Player): TutorialRules.Ctx?
 			and station:IsA("BasePart")
 			and (station.Position - pos).Magnitude <= NEAR_STATION_STUDS,
 		viewedCollection = profile.flags.journalOpened == true or profile.flags.mansionOpened == true,
-		inGraveyard = pos ~= nil and World.inRect(World.Graveyard.rect, pos.X, pos.Z),
+		inGraveyard = pos ~= nil and World.inHub(pos.X, pos.Z), -- inside the hub wall, in the active habitat
 		nearMonster = pos ~= nil and nearMonster(pos),
 		seenCount = count(profile.journal.seen),
 		captureTried = profile.flags.captureTried == true,
@@ -68,7 +74,7 @@ local function ctxFor(player: Player): TutorialRules.Ctx?
 		routeCustom = profile.flags.routeCustom == true,
 		exhibits = #profile.exhibits,
 		rides = profile.stats.rides,
-		inCrypt = pos ~= nil and World.inRect(World.Graveyard.crypt, pos.X, pos.Z),
+		inCrypt = pos ~= nil and inCrypt(pos),
 		caughtRare = profile.journal.caught.BellWraith == true,
 	}
 end

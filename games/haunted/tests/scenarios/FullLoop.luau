@@ -11,6 +11,7 @@ local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local World = require(Shared.Config.World)
+local Habitats = require(Shared.Config.Habitats)
 local Economy = require(Shared.Config.Economy)
 local CaptureRules = require(Shared.Rules.CaptureRules)
 local EconomyRules = require(Shared.Rules.EconomyRules)
@@ -63,6 +64,32 @@ return function(_args: any): { [string]: any }
 	local preview = TrainService.payoutPreview(player)
 	check("starter ride payout preview", preview ~= nil and preview.total > 0, preview and preview.total)
 
+	-- Radial layout (TASK-0026): the plot is rotated, and its parts sit where the plot transform says.
+	local plotModel = Workspace.Plots[`Plot{plotIndex}`]
+	local pad = plotModel.Pen.PenPad :: BasePart
+	local padWorld = World.plotToWorld(plotIndex, World.Plot.pen)
+	check(
+		"pen pad sits at the transformed pen position",
+		Vector3.new(pad.Position.X - padWorld.X, 0, pad.Position.Z - padWorld.Z).Magnitude < 0.5,
+		`{pad.Position} vs {padWorld}`
+	)
+	local station = plotModel.Track:FindFirstChild("Station") :: BasePart?
+	local first = World.Plot.starterRoute[1]
+	local stationWorld = World.plotToWorld(plotIndex, Vector3.new(first.X, 0, first.Y))
+	check(
+		"station sits at the transformed route start",
+		station ~= nil
+			and Vector3.new(station.Position.X - stationWorld.X, 0, station.Position.Z - stationWorld.Z).Magnitude
+				< 1,
+		station and `{station.Position} vs {stationWorld}`
+	)
+	check(
+		"own-plot test works in plot space on a rotated plot",
+		PlotService.isInOwnPlot(player, padWorld) and not PlotService.isInOwnPlot(player, World.NeutralSpawn)
+	)
+	local look = World.plotFrame(plotIndex).LookVector
+	check("this plot is rotated (not world-aligned)", math.abs(look.X) > 0.1 and math.abs(look.Z) > 0.1, look)
+
 	local function tp(pos: Vector3)
 		character:PivotTo(CFrame.new(pos + Vector3.new(0, 3, 0)))
 		CaptureService.noteTeleport(player) -- server moves aren't speeding
@@ -70,7 +97,7 @@ return function(_args: any): { [string]: any }
 	end
 
 	-- Landmarks are scenery and navigation only (ADR-0007): all built, none can be investigated.
-	local landmarks = Workspace.Graveyard:FindFirstChild("Landmarks")
+	local landmarks = Workspace.Habitat:FindFirstChild("Landmarks", true)
 	local prompts = 0
 	for _, d in (if landmarks then landmarks:GetDescendants() else {}) :: { Instance } do
 		if d:IsA("ProximityPrompt") then
@@ -79,7 +106,7 @@ return function(_args: any): { [string]: any }
 	end
 	check(
 		"every landmark is built",
-		landmarks ~= nil and #landmarks:GetChildren() == #World.Landmarks,
+		landmarks ~= nil and #landmarks:GetChildren() == #Habitats.active().landmarks,
 		landmarks and #landmarks:GetChildren()
 	)
 	check("landmarks have no Investigate prompt", prompts == 0, prompts)
@@ -145,10 +172,10 @@ return function(_args: any): { [string]: any }
 
 	-- Secure: wrong pen, then own pen
 	local otherIndex = if plotIndex == 1 then 2 else 1
-	tp(World.PlotCenters[otherIndex] + World.Plot.pen)
+	tp(World.plotToWorld(otherIndex, World.Plot.pen))
 	CaptureService.secure(player, otherIndex)
 	check("securing at another plot's pen rejected", #profile.owned == 0 and CaptureService.isCarrying(player))
-	tp(home + World.Plot.pen)
+	tp(World.plotToWorld(plotIndex, World.Plot.pen))
 	CaptureService.secure(player, plotIndex)
 	check("secured at own pen", #profile.owned == 1, #profile.owned)
 	check("onboarding reward granted", profile.coins >= Economy.OnboardingReward, profile.coins)
@@ -185,7 +212,7 @@ return function(_args: any): { [string]: any }
 			refused.ok == false and string.find(refused.reason or "", "Restore your house", 1, true) ~= nil,
 			refused.reason
 		)
-		tp(home + World.Plot.pen)
+		tp(World.plotToWorld(plotIndex, World.Plot.pen))
 	end
 
 	-- Acclimation and income (TEST SHORTCUT: back-date acquisition instead of waiting 30 s)
@@ -275,7 +302,7 @@ return function(_args: any): { [string]: any }
 	check("exhibit near track counts toward payout", pay ~= nil and pay.counted >= 1, pay and pay.counted)
 
 	-- Ride: leaving the seat mid-ride cancels with no payout
-	tp(home + Vector3.new(custom[1].x, 0, custom[1].z))
+	tp(World.plotToWorld(plotIndex, Vector3.new(custom[1].x, 0, custom[1].z)))
 	local coinsBeforeCancel = profile.coins
 	task.spawn(TrainService.ride, player, plotIndex)
 	task.wait(2.5)
@@ -296,7 +323,7 @@ return function(_args: any): { [string]: any }
 	task.wait(1)
 
 	local coinsBeforeRide = profile.coins
-	tp(home + Vector3.new(custom[1].x, 0, custom[1].z))
+	tp(World.plotToWorld(plotIndex, Vector3.new(custom[1].x, 0, custom[1].z)))
 	TrainService.ride(player, plotIndex)
 	check("ride paid out", profile.coins > coinsBeforeRide, profile.coins - coinsBeforeRide)
 	check("ride counted", profile.stats.rides == 1)
@@ -501,7 +528,7 @@ return function(_args: any): { [string]: any }
 	-- The character respawned earlier in this scenario: use the current humanoid.
 	local current = player.Character :: Model
 	local hum = current:FindFirstChildOfClass("Humanoid") :: Humanoid
-	current:PivotTo(CFrame.new(home + Vector3.new(custom[1].x, 3, custom[1].z)))
+	current:PivotTo(CFrame.new(World.plotToWorld(plotIndex, Vector3.new(custom[1].x, 3, custom[1].z))))
 	CaptureService.noteTeleport(player)
 	task.wait(0.3)
 	task.spawn(TrainService.ride, player, plotIndex)

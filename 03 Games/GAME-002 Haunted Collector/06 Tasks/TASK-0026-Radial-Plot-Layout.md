@@ -3,7 +3,7 @@ id: TASK-0026
 title: Radial Plot Layout
 type: task
 project: GAME-002
-status: ready
+status: done
 priority: high
 risk: high
 owner: executor
@@ -32,6 +32,7 @@ Six plots stand in a ring around a central hunting footprint with their entrance
   - `World.plotFrame / plotToWorld / worldToPlot`. Every consumer in the audit converts: plot geometry is built in local space, then transformed. That covers PlotBuilder, PlotService (spawn facing, `isInOwnPlot`), ContainmentService (residents face the plot front), `CaptureService.secure`, TrainService (positions and headings), TrackEditor (tap → local, outline, camera) and the Hud home arrow.
   - A `HabitatModule` contract (footprint disc, gate connection points, spawn zones, two landmark slots, `build`) and the cemetery as its first module. It is re-laid inside r ≤ 112, keeps all landmarks as scenery, and has winding paths linking the three gates.
   - Neutral spawn on the ring road. `ChaseRules` regions: hub disc and outer ring instead of rects.
+  - CrossPlot also checks that touch-sitting a parked owner seat is refused. This is the [[AUD-20261012-TASK-0025-02]] N1 follow-up, added with jg's approval on 2026-10-12.
 - **Out:** the other three habitats and swapping (TASK-0027), detail and lighting (TASK-0028), rotation (TASK-0029), new house or train visuals (TASK-0030).
 
 ## Files expected to change
@@ -53,6 +54,7 @@ Six plots stand in a ring around a central hunting footprint with their entrance
   - a real walk from home to the Weeping Angel succeeds.
   It also reports the longest pen walk time.
 - [ ] AC7: FullLoop, ExploitProbe and the specs pass. `scripts/check.sh` passes.
+- [ ] AC8: CrossPlot checks that a non-owner touching a parked owner seat is not seated (follow-up from AUD-20261012-TASK-0025-02 N1, added with jg's approval on 2026-10-12).
 
 ## Tests
 - **Automated:** `scripts/check.sh`, new `PlotLayout.spec`, and the scenarios above. An optional offline `roblox-map` prove of an exported greybox spec (ring symmetry P8, overlap). Never its Studio bootstrap.
@@ -65,7 +67,22 @@ Six plots stand in a ring around a central hunting footprint with their entrance
 
 ---
 ## Implementation record
+- **References used:** map references 1–7 (radial composition: plots around a central ground, entrances inward) for layout only; [[RSH-20261012-World-Retrofit-Audit]] for the coordinate audit. No reference code copied.
+- **Decisions:**
+  - The transforms live in `World` (`plotFrame`, `plotToWorld`, `worldToPlot`, `plotDirToWorld`) rather than a separate `PlotSpace` module: every consumer already requires `World`.
+  - Plot angles are 30° + 60°k, so no plot is axis-aligned. Plot 1 (the one tests use) exercises the rotation.
+  - Gates at 0°, 120° and 240° sit between plots, so every plot entrance is equally far from its nearest gate.
+  - `GraveyardBuilder` is split into `HubBuilder` (wall, gates, ring road; permanent), `Props` (the shared kit) and `Habitats/Cemetery` (the first module). `Habitats.luau` holds the module contract, and `HabitatRules.validate` checks it at startup.
+  - `ChaseRules` regions are a habitat disc (avoiding the crypt) and an open ring between the hub wall and the plots. Flee steps are capped at one step after the clamp.
+- **AC2 grep:** no plot-local offset is added to a centre outside `World`. `PlotService.center()` only returns the centre.
+- **Evidence:** [[TEST-20261012-02]].
 
 ## Audits
+- [[AUD-20261012-TASK-0026-01]]: pass (4 minor, 3 nit). Findings 2, 4 and 5 are fixed in [[TASK-0027-Habitat-Modules-And-Blockouts]]; finding 1 is listed for jg's hands-on walk.
 
 ## Outcome
+- **Merge** approved by jg in chat on 2026-10-12 ("anything you need my approval for you got it"). PR #20 has CI green and is waiting for jg to press merge (this session's permission settings block agent merges).
+- **Result:** six plots in a ring around the hub, entrances facing in, one shared plot transform. The persistent hub (wall, ring road, three gates) is separate from the habitat module, and the Ghost Cemetery is the first module behind the `Habitats` contract and validator.
+- **Lessons:** Vector3 is 32-bit, so geometry specs need about 1e-3 tolerance at r ≈ 126. Clamping a flee target into a ring can stretch the step, so the step is capped after the clamp.
+- **Follow-ups:** return walks are at most 34 s of a 75 s timer (tuning); the editor tap on a rotated plot is part of jg's hands-on walk.
+

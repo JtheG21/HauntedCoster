@@ -1,6 +1,7 @@
 --!strict
 -- Builds a home plot: ground pad, house (per tier), containment pen, exhibit pedestals, beacon, trophies.
--- The ghost-train track is built separately by TrainService.
+-- The ghost-train track is built separately by TrainService. Everything is built at plot-local coordinates
+-- and then placed with the plot's frame (World.plotFrame), so plots can face the hub from any angle.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -33,12 +34,8 @@ PlotBuilder.Colors = {
 	Color3.fromRGB(255, 140, 190),
 }
 
-function PlotBuilder.toWorld(origin: Vector3, localPos: Vector3): Vector3
-	return origin + localPos
-end
-
 function PlotBuilder.build(parent: Instance, index: number): Model
-	local origin = World.PlotCenters[index]
+	local frame = World.plotFrame(index)
 	local size = World.PlotSize
 	local plot = Instance.new("Model")
 	plot.Name = `Plot{index}`
@@ -48,25 +45,26 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 	local base = Build.part({
 		name = "Base",
 		size = Vector3.new(size.X, 0.2, size.Y),
-		cframe = CFrame.new(origin + Vector3.new(0, 0.1, 0)),
+		cframe = CFrame.new(0, 0.1, 0),
 		color = C.lawn,
 		material = Enum.Material.Grass,
 		parent = plot,
 	})
 	plot.PrimaryPart = base
-	-- Low border wall with a front opening facing the avenue/graveyard
+	-- Low border wall with a front opening facing the hub
 	-- Walls are inset half a stud so neighbouring plots' boundary walls don't overlap (z-fighting).
 	local hx, hz = size.X / 2 - 0.5, size.Y / 2 - 0.5
+	local gap = World.Plot.entranceWidth / 2
 	for _, seg in
 		{
 			{ Vector3.new(-hx, 0, hz), Vector3.new(hx, 0, hz) },
 			{ Vector3.new(-hx, 0, -hz), Vector3.new(-hx, 0, hz) },
 			{ Vector3.new(hx, 0, -hz), Vector3.new(hx, 0, hz) },
-			{ Vector3.new(-hx, 0, -hz), Vector3.new(-12, 0, -hz) },
-			{ Vector3.new(12, 0, -hz), Vector3.new(hx, 0, -hz) },
+			{ Vector3.new(-hx, 0, -hz), Vector3.new(-gap, 0, -hz) },
+			{ Vector3.new(gap, 0, -hz), Vector3.new(hx, 0, -hz) },
 		}
 	do
-		local a, b = origin + seg[1], origin + seg[2]
+		local a, b = seg[1], seg[2]
 		local mid = (a + b) / 2
 		-- Side walls (along Z) are a little taller so the overlapping corner tops don't z-fight.
 		local h = if math.abs(a.X - b.X) < 0.01 then 1.7 else 1.6
@@ -81,12 +79,11 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 	end
 
 	-- Owner sign at the entrance
-	local sign =
-		Build.block(plot, "Sign", Vector3.new(8, 4, 0.5), origin.X, 0, origin.Z - hz + 1, C.plank, Enum.Material.Wood)
+	local sign = Build.block(plot, "Sign", Vector3.new(8, 4, 0.5), 0, 0, -hz + 1, C.plank, Enum.Material.Wood)
 	Build.billboard(sign, "Vacant Plot", Color3.fromRGB(255, 220, 160), 4, 120, 1)
 
 	-- Containment pen
-	local penPos = origin + World.Plot.pen
+	local penPos = World.Plot.pen
 	local ps = World.Plot.penSize
 	local pen = Build.folder(plot, "Pen")
 	local pad = Build.part({
@@ -127,8 +124,7 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 
 	-- Exhibit pedestals (activated by tier)
 	local exhibits = Build.folder(plot, "Exhibits")
-	for i, lp in World.Plot.exhibitSlots do
-		local p = origin + lp
+	for i, p in World.Plot.exhibitSlots do
 		local ped = Build.block(
 			exhibits,
 			`Exhibit{i}`,
@@ -144,7 +140,7 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 	end
 
 	-- Home beacon (owner-coloured light pillar, visible from the graveyard)
-	local bp = origin + World.Plot.beacon
+	local bp = World.Plot.beacon
 	local beacon = Build.part({
 		name = "Beacon",
 		size = Vector3.new(2.5, 80, 2.5),
@@ -157,6 +153,8 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 	})
 	Build.light(beacon, PlotBuilder.Colors[index], 30, 1)
 
+	-- Place everything built so far; the house, trophies and track folders are placed as they're rebuilt.
+	Build.toFrame(plot, frame)
 	Build.folder(plot, "House")
 	Build.folder(plot, "Trophies")
 	Build.folder(plot, "Track")
@@ -183,8 +181,7 @@ end
 function PlotBuilder.buildHouse(plot: Model, index: number, tier: number)
 	local houseFolder = plot:FindFirstChild("House") :: Folder
 	houseFolder:ClearAllChildren()
-	local origin = World.PlotCenters[index]
-	local hp = origin + World.Plot.house
+	local hp = World.Plot.house
 	local x, z = hp.X, hp.Z
 	if tier <= 0 then
 		-- Shabby shack: small, crooked, one dim window
@@ -208,6 +205,7 @@ function PlotBuilder.buildHouse(plot: Model, index: number, tier: number)
 			30
 		)
 		Build.billboard(body, "Shabby Shack", Color3.fromRGB(200, 180, 160), 7, 120, 1)
+		Build.toFrame(houseFolder, World.plotFrame(index))
 		return
 	end
 	local w = if tier == 1 then 26 else 34
@@ -261,6 +259,7 @@ function PlotBuilder.buildHouse(plot: Model, index: number, tier: number)
 		Build.light(lamp, C.purple, 40, 1.5)
 	end
 	Build.billboard(body, label, Color3.fromRGB(255, 220, 170), h / 2 + 3, 150, 1.1)
+	Build.toFrame(houseFolder, World.plotFrame(index))
 end
 
 -- Cosmetic trophies for journal milestones (no gameplay effect).
@@ -268,8 +267,7 @@ end
 function PlotBuilder.buildTrophies(plot: Model, index: number, caughtCount: number, variantCount: number)
 	local folder = plot:FindFirstChild("Trophies") :: Folder
 	folder:ClearAllChildren()
-	local origin = World.PlotCenters[index]
-	local tp = origin + World.Plot.trophies
+	local tp = World.Plot.trophies
 	local list: { { name: string, color: Color3 } } = {}
 	if caughtCount >= 1 then
 		table.insert(list, { name = "First Catch", color = Color3.fromRGB(180, 120, 70) })
@@ -302,6 +300,7 @@ function PlotBuilder.buildTrophies(plot: Model, index: number, caughtCount: numb
 		})
 		Build.billboard(cup, t.name, t.color, 2.2, 40, 0.5)
 	end
+	Build.toFrame(folder, World.plotFrame(index))
 end
 
 function PlotBuilder.setOwner(plot: Model, player: Player?)

@@ -32,7 +32,8 @@ Hook (Round 20): **"Build your haunted train."** Pitch: hunt strange creatures i
 | [[TASK-0023-Round-20-Design-Changes]] | done, merge approved by jg (Round 20: startle, chase, carry penalty, starter scare) | [[AUD-20261011-TASK-0023-01]] fail, [[AUD-20261011-TASK-0023-02]] pass |
 | [[TASK-0024-FullLoop-Landmark-Flake]] | done, merge approved by jg (landmark diagnostics; flake not reproduced) | [[AUD-20261011-TASK-0024-01]] pass |
 | [[TASK-0025-Clue-Hunting-Removal]] | done, merge approved by jg (clue hunting removed; crypt and Bell Wraith need the Restored Manor) | [[AUD-20261012-TASK-0025-01]] fail, [[AUD-20261012-TASK-0025-02]] pass |
-| [[TASK-0026-Radial-Plot-Layout]] to [[TASK-0031-Failed-Capture-Retaliation]] | ready (M3 world retrofit, [[ADR-0007-World-Retrofit-Direction]] approved by jg) | — |
+| [[TASK-0026-Radial-Plot-Layout]] | done, merge approved by jg (six plots around the hub; the cemetery is the first habitat module) | [[AUD-20261012-TASK-0026-01]] pass |
+| [[TASK-0027-Habitat-Modules-And-Blockouts]] to [[TASK-0031-Failed-Capture-Retaliation]] | ready (M3 world retrofit, [[ADR-0007-World-Retrofit-Direction]] approved by jg) | — |
 
 ## How to playtest (Studio)
 1. `rojo build haunted.project.json -o HauntedCollector.rbxl`, then open it in Studio (or `rojo serve haunted.project.json` into a new empty place). **Never sync it into the Rg1/place1 place.**

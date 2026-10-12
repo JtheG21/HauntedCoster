@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage.Shared
 local ChaseRules = require(Shared.Rules.ChaseRules)
 local World = require(Shared.Config.World)
+local Habitats = require(Shared.Config.Habitats)
 
 local function flat(a: Vector3, b: Vector3): number
 	return Vector3.new(a.X - b.X, 0, a.Z - b.Z).Magnitude
@@ -15,11 +16,12 @@ end
 
 return function(t: TestRunner.T)
 	local rng = Random.new(20)
+	local walls = Habitats.cryptWalls() :: World.Rect
 
 	t.test("a startle hops 8-14 studs away from the player, inside the zone (Round 20 Q2)", function()
-		local zone = World.zoneById("Gate") :: World.Zone
-		local at = Vector3.new(0, 4, -185)
-		local from = Vector3.new(-4, 3, -185)
+		local zone = Habitats.zoneById("Gate") :: World.Zone
+		local at = Vector3.new(0, 4, 5)
+		local from = Vector3.new(-4, 3, 5)
 		for _ = 1, 50 do
 			local p = ChaseRules.startleTarget(zone.rect, at, from, rng)
 			local hop = flat(p, at)
@@ -32,7 +34,7 @@ return function(t: TestRunner.T)
 	end)
 
 	t.test("a startle near a zone edge darts sideways instead of stalling", function()
-		local zone = World.zoneById("Gate") :: World.Zone
+		local zone = Habitats.zoneById("Gate") :: World.Zone
 		local r = zone.rect
 		-- Against the east edge, pressed from the west: straight away is blocked.
 		local at = Vector3.new(r.x2 - 4, 4, (r.z1 + r.z2) / 2)
@@ -41,48 +43,52 @@ return function(t: TestRunner.T)
 		t.truthy(inside(r, p), "stays in its zone")
 	end)
 
-	t.test("flee region never crosses a fence", function()
-		local g = World.Graveyard
-		t.eq(ChaseRules.fleeRegion(Vector3.new(-30, 0, -345)), g.crypt)
-		local inYard, avoid = ChaseRules.fleeRegion(Vector3.new(60, 0, -250))
-		t.eq(inYard, g.rect)
-		t.eq(avoid, g.crypt, "the open graveyard avoids the sealed crypt")
-		t.eq(ChaseRules.fleeRegion(World.PlotCenters[3]), ChaseRules.OpenGround)
-		-- The open ground and the graveyard don't overlap (the fence lies between them).
-		t.truthy(ChaseRules.OpenGround.z1 > g.rect.z2, "open ground ends before the graveyard fence")
+	t.test("flee region never crosses a wall (crypt, hub, open ring)", function()
+		local inCrypt = ChaseRules.fleeRegion(Vector3.new((walls.x1 + walls.x2) / 2, 0, (walls.z1 + walls.z2) / 2))
+		t.eq(inCrypt.rect, walls, "inside the crypt it stays in the crypt")
+		local inHub, avoid = ChaseRules.fleeRegion(Vector3.new(60, 0, -20))
+		t.eq(inHub, ChaseRules.Habitat, "inside the hub wall it stays in the habitat")
+		t.eq(avoid, walls, "and keeps out of the crypt")
+		t.eq(ChaseRules.fleeRegion(World.PlotCenters[3]), ChaseRules.OpenGround, "near a plot: the open ring")
+		t.eq(ChaseRules.fleeRegion(World.NeutralSpawn), ChaseRules.OpenGround, "on the ring road: the open ring")
+		-- The open ring lies between the hub wall and the plots.
+		local ring = ChaseRules.OpenGround.ring :: { r0: number, r1: number }
+		t.truthy(ring.r0 > World.Hub.wallRadius, "starts outside the hub wall")
+		t.truthy(ring.r1 < World.PlotRing.radius - World.PlotSize.Y / 2, "ends before the plots")
 	end)
 
-	t.test("a fleeing monster runs away from the chaser and stays in its region (Round 20 Q1)", function()
+	t.test("a fleeing monster runs away from the chaser and stays on the open ring (Round 20 Q1)", function()
 		local region = ChaseRules.OpenGround
-		local at = Vector3.new(0, 4, 0)
-		local chaser = Vector3.new(0, 3, 10)
+		local at = World.polar(90, 126) + Vector3.new(0, 4, 0)
+		local chaser = World.polar(84, 126) + Vector3.new(0, 3, 0)
 		for _ = 1, 50 do
 			local p = ChaseRules.fleeStep(region, at, chaser, 7.5, rng)
-			t.truthy(inside(region, p), "inside the region")
+			t.truthy(ChaseRules.contains(region, p.X, p.Z), "inside the region")
 			t.truthy(flat(p, chaser) > flat(at, chaser), "the gap to the chaser grows")
-			t.truthy(flat(p, at) <= 7.5 + 1e-6, "no more than one step")
+			-- Vector3 is 32-bit: about 1e-5 resolution this far from the origin.
+			t.truthy(flat(p, at) <= 7.5 + 1e-3, "no more than one step")
 		end
 	end)
 
-	t.test("a fleeing monster in the graveyard never enters the sealed crypt", function()
-		local g = World.Graveyard
-		local region, avoid = ChaseRules.fleeRegion(Vector3.new(-30, 0, -310))
-		-- Just north of the crypt wall, chased from the north: straight away is into the crypt.
-		local at = Vector3.new(-30, 4, g.crypt.z2 + 4)
-		local chaser = at + Vector3.new(0, 0, 8)
+	t.test("a fleeing monster in the habitat never enters the sealed crypt", function()
+		local region, avoid = ChaseRules.fleeRegion(Vector3.new(0, 0, 0))
+		-- Just east of the crypt's gate wall, chased from the east: straight away is into the crypt.
+		local at = Vector3.new(walls.x2 + 4, 4, (walls.z1 + walls.z2) / 2)
+		local chaser = at + Vector3.new(8, 0, 0)
 		for _ = 1, 50 do
 			local p = ChaseRules.fleeStep(region, at, chaser, 7.5, rng, avoid)
-			t.truthy(not inside(g.crypt, p), "stays out of the crypt")
-			t.truthy(inside(region, p), "inside the graveyard")
+			t.truthy(not inside(walls, p), "stays out of the crypt")
+			t.truthy(ChaseRules.contains(region, p.X, p.Z), "inside the habitat")
 		end
 	end)
 
-	t.test("a cornered fleeing monster slides along the edge", function()
+	t.test("a cornered fleeing monster slides along the ring's edge", function()
 		local region = ChaseRules.OpenGround
-		local at = Vector3.new(region.x2 - 4, 4, region.z1 + 4)
-		local chaser = at + Vector3.new(-6, 0, 6) -- pinned into the corner
+		local ring = region.ring :: { r0: number, r1: number }
+		local at = World.polar(90, ring.r0 + 4) + Vector3.new(0, 4, 0)
+		local chaser = World.polar(90, ring.r0 + 10) -- pinned against the hub wall
 		local p = ChaseRules.fleeStep(region, at, chaser, 7.5, rng)
-		t.truthy(inside(region, p), "inside the region")
+		t.truthy(ChaseRules.contains(region, p.X, p.Z), "inside the region")
 		t.truthy(flat(p, at) > 1, "keeps moving")
 	end)
 end

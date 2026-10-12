@@ -98,12 +98,10 @@ end
 local homeLabel: TextLabel? = nil
 local homeIndex: number? = nil
 
-local function setGate(name: string, path: { string }, open: boolean)
-	local node: Instance? = Workspace
-	for _, step in path do
-		node = node and node:FindFirstChild(step)
-	end
-	local gate = node and node:FindFirstChild(name)
+-- Opens or closes a named gate anywhere in the active habitat, for this client only.
+local function setGate(name: string, open: boolean)
+	local habitat = Workspace:FindFirstChild("Habitat")
+	local gate = habitat and habitat:FindFirstChild(name, true)
 	if gate and gate:IsA("BasePart") then
 		gate.CanCollide = not open
 		gate.Transparency = if open then 0.85 else 0.25
@@ -115,7 +113,7 @@ local function updateMarkers()
 	if not snap then
 		return
 	end
-	setGate("CryptGate", { "Graveyard", "Crypt" }, snap.cryptOpen == true)
+	setGate("CryptGate", snap.cryptOpen == true)
 
 	-- Home beacon label on my own plot
 	local idx = snap.plotIndex

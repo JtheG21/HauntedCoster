@@ -81,9 +81,13 @@ local function starterPieces(): { TrackRules.Piece }
 	return pieces
 end
 
+-- Track points and headings are plot-local (saved routes stay valid on a rotated plot).
 local function toWorld(index: number, p: TrackRules.P, y: number): Vector3
-	local o = World.PlotCenters[index]
-	return Vector3.new(o.X + p.x, y, o.Z + p.z)
+	return World.plotToWorld(index, Vector3.new(p.x, y, p.z))
+end
+
+local function dirToWorld(index: number, dir: TrackRules.P): Vector3
+	return World.plotDirToWorld(index, Vector3.new(dir.x, 0, dir.z))
 end
 
 local function buildCart(parent: Instance): (Model, Seat)
@@ -145,11 +149,11 @@ local function cartAt(t: PlotTrain, d: number)
 	end
 	local p, dir = TrackRules.pointAt(t.sampled, d)
 	local pos = toWorld(t.index, p, Track.RailHeight + 0.6)
-	t.cart:PivotTo(CFrame.lookAt(pos, pos + Vector3.new(dir.x, 0, dir.z)))
+	t.cart:PivotTo(CFrame.lookAt(pos, pos + dirToWorld(t.index, dir)))
 end
 
-local function buildPiece(parent: Instance, kind: string, pos: Vector3, dir: TrackRules.P)
-	local cf = CFrame.lookAt(pos, pos + Vector3.new(dir.x, 0, dir.z))
+local function buildPiece(parent: Instance, kind: string, pos: Vector3, dir: Vector3)
+	local cf = CFrame.lookAt(pos, pos + dir)
 	if kind == "ScareArch" then
 		for _, side in { -1, 1 } do
 			Build.part({
@@ -289,7 +293,7 @@ local function rebuild(index: number, points: { TrackRules.P }, pieces: { TrackR
 			if m > 0 then
 				dir = { x = dx / m, z = dz / m }
 			end
-			buildPiece(folder, piece.kind, toWorld(index, p, y), dir)
+			buildPiece(folder, piece.kind, toWorld(index, p, y), dirToWorld(index, dir))
 		end
 	end
 	-- Station platform at the start of the loop
@@ -302,7 +306,8 @@ local function rebuild(index: number, points: { TrackRules.P }, pieces: { TrackR
 		0,
 		start.Z,
 		Color3.fromRGB(55, 45, 60),
-		Enum.Material.WoodPlanks
+		Enum.Material.WoodPlanks,
+		World.PlotAngles[index] -- square with its plot
 	)
 	Build.billboard(station, "Ghost Train", GLOW, 6, 120, 1.1)
 	local prompt = Instance.new("ProximityPrompt")

@@ -1,6 +1,11 @@
 --!strict
--- World layout: plots, graveyard zones and landmarks. Positions are world studs (ground top is y = 0)
--- unless marked plot-local. Plot-local axes match world axes (plots are not rotated); -Z faces the graveyard.
+-- Persistent world layout (ADR-0007): six home plots in a ring around a central hunting footprint, a ring
+-- road between them, and a hub wall with three gates. The active habitat (Config.Habitats) fills the
+-- footprint. Positions are world studs (ground top is y = 0) unless marked plot-local.
+--
+-- Plot-local space: each plot has a frame (World.plotFrame) whose -Z faces the hub. Every plot-local point
+-- or direction goes through plotToWorld / worldToPlot / plotDirToWorld; never add a local offset to a
+-- plot centre directly, since plots are rotated.
 
 export type Rect = { x1: number, x2: number, z1: number, z2: number }
 
@@ -25,15 +30,62 @@ export type Landmark = {
 
 local World = {}
 
-World.PlotCenters = {
-	Vector3.new(-250, 0, 85),
-	Vector3.new(-150, 0, 85),
-	Vector3.new(-50, 0, 85),
-	Vector3.new(50, 0, 85),
-	Vector3.new(150, 0, 85),
-	Vector3.new(250, 0, 85),
+-- Angles are degrees around the hub, measured from +Z towards +X: a point at angle a and radius r is
+-- hub + (sin a, 0, cos a) * r.
+World.Hub = {
+	center = Vector3.new(0, 0, 0),
+	wallRadius = 115, -- persistent hub wall; the habitat footprint is inside it
+	moduleRadius = 112, -- habitat geometry and spawn zones must stay inside this disc
+	ringInner = 120, -- ring road
+	ringOuter = 132,
+	gateAngles = { 0, 120, 240 }, -- one gate between each pair of plots, so every plot is equally far from one
+	gateWidth = 16,
+	gateCorridor = 20, -- studs inside each gate that habitats keep clear
 }
-World.PlotSize = Vector2.new(100, 90)
+
+-- Plots: centres on a ring, entrances facing the hub. No plot is axis-aligned, so tests on plot 1 exercise
+-- the rotation.
+World.PlotSize = Vector2.new(100, 90) -- plot-local X (across) by Z (depth)
+World.PlotRing = {
+	radius = 185, -- inner edge at 140: clears the ring road (132) and its neighbours (53 studs apart)
+	firstAngle = 30,
+	step = 60,
+	count = 6,
+}
+
+local function polar(angle: number, radius: number): Vector3
+	local a = math.rad(angle)
+	return World.Hub.center + Vector3.new(math.sin(a), 0, math.cos(a)) * radius
+end
+World.polar = polar
+
+World.PlotAngles = {} :: { number }
+World.PlotCenters = {} :: { Vector3 }
+local frames: { CFrame } = {}
+for i = 1, World.PlotRing.count do
+	local angle = World.PlotRing.firstAngle + (i - 1) * World.PlotRing.step
+	local centre = polar(angle, World.PlotRing.radius)
+	World.PlotAngles[i] = angle
+	World.PlotCenters[i] = centre
+	-- CFrame.lookAt points -Z (the plot's front) at the hub.
+	frames[i] = CFrame.lookAt(centre, Vector3.new(World.Hub.center.X, centre.Y, World.Hub.center.Z))
+end
+
+function World.plotFrame(index: number): CFrame
+	return frames[index]
+end
+
+function World.plotToWorld(index: number, localPos: Vector3): Vector3
+	return frames[index]:PointToWorldSpace(localPos)
+end
+
+function World.worldToPlot(index: number, worldPos: Vector3): Vector3
+	return frames[index]:PointToObjectSpace(worldPos)
+end
+
+function World.plotDirToWorld(index: number, localDir: Vector3): Vector3
+	return frames[index]:VectorToWorldSpace(localDir)
+end
 
 -- Plot-local layout
 World.Plot = {
@@ -43,6 +95,8 @@ World.Plot = {
 	penSize = 16,
 	beacon = Vector3.new(-44, 0, 40),
 	trophies = Vector3.new(38, 0, 38),
+	entrance = Vector3.new(0, 0, -45), -- the gap in the front wall, facing the hub
+	entranceWidth = 24,
 	-- Track editor bounds (plot-local x/z)
 	trackBounds = { x1 = -18, x2 = 46, z1 = -40, z2 = 12 } :: Rect,
 	exhibitSlots = {
@@ -66,106 +120,26 @@ World.Plot = {
 	},
 }
 
-World.Graveyard = {
-	rect = { x1 = -130, x2 = 130, z1 = -370, z2 = -160 } :: Rect,
-	gate = Vector3.new(0, 0, -160),
-	gateWidth = 24,
-	shortcut = Vector3.new(-130, 0, -180), -- west fence gap by the Old Well, always open
-	shortcutWidth = 10,
-	-- Opens for house tiers with `unlocksCrypt` (EconomyRules.cryptOpen).
-	crypt = { x1 = -72, x2 = 17, z1 = -367, z2 = -323 } :: Rect,
-	cryptGate = Vector3.new(-30, 0, -323),
-	cryptGateWidth = 10,
-}
-
-World.Zones = {
-	{
-		id = "Gate",
-		name = "Gate Path",
-		rect = { x1 = -40, x2 = 40, z1 = -205, z2 = -165 },
-		dark = false,
-		gated = false,
-		maxMonsters = 2,
-		spawns = { Wisp = 1 },
-	},
-	{
-		id = "OldRows",
-		name = "Old Rows",
-		rect = { x1 = -125, x2 = -20, z1 = -310, z2 = -210 },
-		dark = false,
-		gated = false,
-		maxMonsters = 3,
-		spawns = { Wisp = 2, Hound = 2 },
-	},
-	{
-		id = "Hollow",
-		name = "Mausoleum Hollow",
-		rect = { x1 = 22, x2 = 125, z1 = -335, z2 = -210 },
-		dark = true,
-		gated = false,
-		maxMonsters = 3,
-		spawns = { Hound = 2, Gentleman = 2 },
-	},
-	{
-		id = "Crypt",
-		name = "Sealed Crypt",
-		rect = { x1 = -66, x2 = 11, z1 = -362, z2 = -328 },
-		dark = true,
-		gated = true,
-		maxMonsters = 2,
-		spawns = { Gentleman = 2, BellWraith = 1 },
-	},
-} :: { Zone }
-
-World.Landmarks = {
-	{
-		id = "Angel",
-		name = "Weeping Angel",
-		zone = "Gate",
-		position = Vector3.new(0, 0, -190),
-	},
-	{
-		id = "Hearse",
-		name = "Broken Hearse",
-		zone = "OldRows",
-		position = Vector3.new(-75, 0, -255),
-	},
-	{
-		id = "Mausoleum",
-		name = "Hollow Mausoleum",
-		zone = "Hollow",
-		position = Vector3.new(75, 0, -292),
-	},
-	{
-		id = "OldWell",
-		name = "Old Well",
-		zone = "OldRows",
-		position = Vector3.new(-108, 0, -196),
-	},
-	{
-		id = "BellTower",
-		name = "Bell Tower",
-		zone = "Hollow",
-		position = Vector3.new(58, 0, -352),
-	},
-} :: { Landmark }
-
-function World.zoneById(id: string): Zone?
-	for _, z in World.Zones do
-		if z.id == id then
-			return z
-		end
-	end
-	return nil
+-- Hub gates, on the wall, in gateAngles order.
+function World.gatePosition(gate: number): Vector3
+	return polar(World.Hub.gateAngles[gate], World.Hub.wallRadius)
 end
 
-function World.landmarkById(id: string): Landmark?
-	for _, l in World.Landmarks do
-		if l.id == id then
-			return l
-		end
-	end
-	return nil
+-- A point on the radial line through a gate, `radius` studs from the hub centre (inside or outside it).
+function World.gatePoint(gate: number, radius: number): Vector3
+	return polar(World.Hub.gateAngles[gate], radius)
+end
+
+-- Where players arrive before their plot is assigned: on the ring road in front of plot 1.
+World.NeutralSpawn = polar(World.PlotRing.firstAngle, (World.Hub.ringInner + World.Hub.ringOuter) / 2)
+
+function World.hubDistance(x: number, z: number): number
+	return Vector3.new(x - World.Hub.center.X, 0, z - World.Hub.center.Z).Magnitude
+end
+
+-- Inside the hub wall (the active habitat's footprint).
+function World.inHub(x: number, z: number): boolean
+	return World.hubDistance(x, z) <= World.Hub.wallRadius
 end
 
 function World.inRect(rect: Rect, x: number, z: number): boolean

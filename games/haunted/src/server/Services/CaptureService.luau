@@ -18,6 +18,7 @@ local Rules = Shared:WaitForChild("Rules")
 local Monsters = require(Config:WaitForChild("Monsters"))
 local Variants = require(Config:WaitForChild("Variants"))
 local World = require(Config:WaitForChild("World"))
+local Habitats = require(Config:WaitForChild("Habitats"))
 local Economy = require(Config:WaitForChild("Economy"))
 local CaptureRules = require(Rules:WaitForChild("CaptureRules"))
 local ProfileRules = require(Rules:WaitForChild("ProfileRules"))
@@ -385,6 +386,14 @@ local function startCarry(player: Player, speciesId: string, variantId: string, 
 	end
 end
 
+-- Studio test helper: start a carry without the timed minigame (CrossPlot tests ownership, not capture;
+-- FullLoop covers the real capture path). The carry itself is the real one: same timer, cage and escapes.
+function CaptureService.carryForTest(player: Player, speciesId: string, variantId: string)
+	if not carries[player] and Monsters.Species[speciesId] then
+		startCarry(player, speciesId, variantId)
+	end
+end
+
 -- Grabbing a fleeing escaped capture (the Grab prompt, or the Studio scenarios). Server-checked: only the
 -- player it escaped from, while the chase runs, from within grab distance.
 function CaptureService.grab(player: Player): boolean
@@ -449,7 +458,7 @@ local function onCaptureStart(player: Player, model: any): { [string]: any }
 		return { ok = false, reason = "Get closer" }
 	end
 	local species = Monsters.Species[e.species]
-	local zone = World.zoneById(e.zone)
+	local zone = Habitats.zoneById(e.zone)
 	if zone and zone.gated and not EconomyRules.cryptOpen(profile.houseTier) then
 		return { ok = false, reason = "Restore your house to capture monsters in the Sealed Crypt." }
 	end
@@ -557,7 +566,7 @@ function CaptureService.secure(player: Player, plotIndex: number)
 		return
 	end
 	local root = rootOf(player)
-	local padPos = World.PlotCenters[plotIndex] + World.Plot.pen
+	local padPos = World.plotToWorld(plotIndex, World.Plot.pen)
 	if not root or (root.Position - padPos).Magnitude > SECURE_DISTANCE + 8 then
 		return
 	end

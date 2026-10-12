@@ -123,6 +123,16 @@ function Build.strip(
 	})
 end
 
+-- Moves every part under `container` from local space into `frame`. Plot geometry is built at plot-local
+-- coordinates and then placed with the plot's frame, so a rotated plot needs no other changes.
+function Build.toFrame(container: Instance, frame: CFrame)
+	for _, d in container:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.CFrame = frame * d.CFrame
+		end
+	end
+end
+
 function Build.folder(parent: Instance, name: string): Folder
 	local existing = parent:FindFirstChild(name)
 	if existing and existing:IsA("Folder") then

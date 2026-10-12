@@ -31,6 +31,10 @@ function PlotService.origin(index: number): Vector3
 	return World.PlotCenters[index]
 end
 
+function PlotService.frame(index: number): CFrame
+	return World.plotFrame(index)
+end
+
 function PlotService.ownerOf(index: number): Player?
 	return owners[index]
 end
@@ -38,17 +42,18 @@ end
 -- World position of a plot-local point for the player's own plot.
 function PlotService.toWorld(player: Player, localPos: Vector3): Vector3?
 	local i = byPlayer[player]
-	return if i then World.PlotCenters[i] + localPos else nil
+	return if i then World.plotToWorld(i, localPos) else nil
 end
 
+-- Measured in plot-local space, so it holds for rotated plots.
 function PlotService.isInOwnPlot(player: Player, pos: Vector3): boolean
 	local i = byPlayer[player]
 	if not i then
 		return false
 	end
-	local o = World.PlotCenters[i]
+	local l = World.worldToPlot(i, pos)
 	local s = World.PlotSize
-	return math.abs(pos.X - o.X) <= s.X / 2 and math.abs(pos.Z - o.Z) <= s.Y / 2
+	return math.abs(l.X) <= s.X / 2 and math.abs(l.Z) <= s.Y / 2
 end
 
 function PlotService.onAssigned(cb: (Player, number) -> ())
@@ -91,8 +96,8 @@ local function spawnAtHome(player: Player, character: Model)
 	if not (root and root:IsA("BasePart")) then
 		return
 	end
-	local pos = World.PlotCenters[i] + World.Plot.spawn
-	local target = CFrame.lookAt(pos, pos + Vector3.new(0, 0, -1))
+	local pos = World.plotToWorld(i, World.Plot.spawn)
+	local target = CFrame.lookAt(pos, pos + World.plotDirToWorld(i, Vector3.new(0, 0, -1))) -- facing the hub
 	-- Roblox places a new character at a SpawnLocation just after CharacterAdded fires, which would undo
 	-- an immediate teleport. Move after that has happened, and re-check once in case it was late.
 	for _, delay in { 0.2, 0.8 } do
@@ -100,10 +105,10 @@ local function spawnAtHome(player: Player, character: Model)
 		if character.Parent == nil or player.Character ~= character then
 			return
 		end
-		-- Only correct a character Roblox left on the avenue spawn; never undo a move made since.
-		local avenue = Vector3.new(0, 0, 40)
-		local fromAvenue = Vector3.new(root.Position.X - avenue.X, 0, root.Position.Z - avenue.Z)
-		if fromAvenue.Magnitude < 15 then
+		-- Only correct a character Roblox left on the neutral spawn; never undo a move made since.
+		local neutral = World.NeutralSpawn
+		local fromNeutral = Vector3.new(root.Position.X - neutral.X, 0, root.Position.Z - neutral.Z)
+		if fromNeutral.Magnitude < 15 then
 			character:PivotTo(target)
 		end
 	end
@@ -175,12 +180,12 @@ function PlotService.start()
 	for i = 1, #World.PlotCenters do
 		plots[i] = PlotBuilder.build(folder, i)
 	end
-	-- Neutral spawn on the avenue; players are moved home once their plot is assigned.
+	-- Neutral spawn on the ring road; players are moved home once their plot is assigned.
 	local spawn = Instance.new("SpawnLocation")
-	spawn.Name = "AvenueSpawn"
+	spawn.Name = "NeutralSpawn"
 	spawn.Anchored = true
 	spawn.Size = Vector3.new(8, 1, 8)
-	spawn.Position = Vector3.new(0, 0.5, 40)
+	spawn.Position = World.NeutralSpawn + Vector3.new(0, 0.5, 0)
 	spawn.Transparency = 1
 	spawn.CanCollide = false
 	spawn.Neutral = true
