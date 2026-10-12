@@ -1,6 +1,6 @@
 --!strict
 -- Always-on HUD: coins and income, save-status banner, objective, carry timer with home arrow,
--- area name, toasts and the main buttons.
+-- area name, the hunting-ground rotation countdown, toasts and the main buttons.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,6 +12,8 @@ local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
 local World = require(Config:WaitForChild("World"))
 local Habitats = require(Config:WaitForChild("Habitats"))
 local Economy = require(Config:WaitForChild("Economy"))
+local RotationRules = require(ReplicatedStorage.Shared:WaitForChild("Rules"):WaitForChild("RotationRules"))
+local HabitatState = require(ReplicatedStorage.Shared:WaitForChild("HabitatState"))
 local Theme = require(script.Parent.Theme)
 local State = require(script.Parent.Parent.State)
 
@@ -88,7 +90,54 @@ local function zoneAt(pos: Vector3): string?
 	return nil
 end
 
+-- The hunting-ground line (TASK-0029): the active habitat and the next one with a countdown from the
+-- server's swap deadline, gold in the warning minute, red while captures are closed. Hidden when pinned.
+local function mountRotation(gui: ScreenGui)
+	local panel = Theme.panel(gui, {
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -12, 0, 12),
+		Size = UDim2.fromOffset(330, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		Visible = false,
+	})
+	Theme.pad(panel, 8)
+	local line = Theme.label(panel, "", {
+		AutomaticSize = Enum.AutomaticSize.Y,
+		Size = UDim2.fromScale(1, 0),
+		TextSize = 14,
+		TextWrapped = true,
+	})
+	task.spawn(function()
+		while panel.Parent do
+			local st = HabitatState.read()
+			local active = st.active and Habitats.ById[st.active]
+			local nextHab = st.next and Habitats.ById[st.next]
+			if st.phase == "pinned" or not active or not nextHab or not st.swapAt then
+				panel.Visible = false
+			else
+				panel.Visible = true
+				local left = RotationRules.clock(st.swapAt - Workspace:GetServerTimeNow())
+				if st.fog then
+					line.Text = `The fog rolls in... the {nextHab.name} is coming`
+					line.TextColor3 = Theme.Colors.gold
+				elseif st.phase == "closing" then
+					line.Text = `No new captures: fog in {left}. Next: {nextHab.name}`
+					line.TextColor3 = Theme.Colors.bad
+				elseif st.phase == "warning" then
+					line.Text = `Fog in {left}! The {nextHab.name} replaces the {active.name}`
+					line.TextColor3 = Theme.Colors.gold
+				else
+					line.Text = `{active.name} · next: {nextHab.name} in {left}`
+					line.TextColor3 = Theme.Colors.dim
+				end
+			end
+			task.wait(0.25)
+		end
+	end)
+end
+
 function Hud.mount(gui: ScreenGui, cb: Callbacks)
+	mountRotation(gui)
 	-- Coins
 	local coinPanel = Theme.panel(gui, {
 		Position = UDim2.fromOffset(12, 12),

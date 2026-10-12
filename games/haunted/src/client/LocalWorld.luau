@@ -3,13 +3,16 @@
 -- home beacon label, and opening the crypt gate for you locally. Captures inside the crypt are checked on
 -- the server, so opening the gate locally grants nothing by itself.
 
+local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
 local Monsters = require(Config:WaitForChild("Monsters"))
 local Habitats = require(Config:WaitForChild("Habitats"))
+local HabitatState = require(ReplicatedStorage.Shared:WaitForChild("HabitatState"))
 local State = require(script.Parent.State)
 
 local LocalWorld = {}
@@ -183,7 +186,22 @@ function LocalWorld.start()
 		end
 		updateMarkers()
 	end
-	Workspace:GetAttributeChangedSignal("ActiveHabitat"):Connect(syncHabitat)
+	Workspace:GetAttributeChangedSignal(HabitatState.Attr.active):Connect(syncHabitat)
+	-- The swap's fog fade (TASK-0029): thicken this client's haze while the server swaps, then clear it.
+	local clearDensity: number? = nil
+	Workspace:GetAttributeChangedSignal(HabitatState.Attr.fog):Connect(function()
+		local atm = Lighting:FindFirstChildOfClass("Atmosphere")
+		if not atm then
+			return
+		end
+		if Workspace:GetAttribute(HabitatState.Attr.fog) == true then
+			clearDensity = clearDensity or atm.Density
+			TweenService:Create(atm, TweenInfo.new(0.7), { Density = 0.85 }):Play()
+		elseif clearDensity then
+			TweenService:Create(atm, TweenInfo.new(1.5), { Density = clearDensity }):Play()
+			clearDensity = nil
+		end
+	end)
 	task.spawn(function()
 		local folder = Workspace:WaitForChild("Habitat")
 		folder.DescendantAdded:Connect(function(d)

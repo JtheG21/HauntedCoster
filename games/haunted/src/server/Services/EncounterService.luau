@@ -371,12 +371,30 @@ function EncounterService.spawnFleeing(
 			local character = owner.Character
 			local root = character and character:FindFirstChild("HumanoidRootPart")
 			local chaser = if root and root:IsA("BasePart") then root.Position else nil
+			-- The region is re-read every step: a habitat swap moves the chase out to the ring road
+			-- (relocateFleeing), and the regions are disjoint, so it never crosses a wall.
+			region, avoid = ChaseRules.fleeRegion(e.root.Position)
 			local target = ChaseRules.fleeStep(region, e.root.Position, chaser, speed * FLEE_STEP_SECONDS, rng, avoid)
 			tweenTo(e, target, FLEE_STEP_SECONDS, Enum.EasingStyle.Linear)
 			task.wait(FLEE_STEP_SECONDS)
 		end
 	end)
 	return e
+end
+
+-- A habitat swap (ADR-0007 "evacuate to the gates"): a fleeing escaped capture follows its player out of
+-- the hub, landing a head start away from `near` on the open ring, and the chase continues there.
+function EncounterService.relocateFleeing(e: Encounter, near: Vector3, headStart: number)
+	if not e.alive then
+		return
+	end
+	if e.tween then
+		e.tween:Cancel()
+	end
+	local region = ChaseRules.fleeRegion(near)
+	local at = ChaseRules.fleeStep(region, near, nil, headStart, rng)
+	local hover = e.root.Position.Y
+	e.root.CFrame = CFrame.new(at.X, hover, at.Z) * e.root.CFrame.Rotation
 end
 
 -- An escaped capture runs back to a zone where its species lives (ADR-0005).
@@ -424,10 +442,13 @@ function EncounterService.populate()
 end
 
 -- Every live encounter's species and zone (scenarios check a swap left nothing behind).
-function EncounterService.snapshot(): { { species: string, zone: string, fleeing: boolean } }
+function EncounterService.snapshot(): { { species: string, zone: string, fleeing: boolean, claimed: boolean } }
 	local out = {}
 	for _, e in encounters do
-		table.insert(out, { species = e.species, zone = e.zone, fleeing = e.fleeing ~= nil })
+		table.insert(
+			out,
+			{ species = e.species, zone = e.zone, fleeing = e.fleeing ~= nil, claimed = e.claimedBy ~= nil }
+		)
 	end
 	return out
 end

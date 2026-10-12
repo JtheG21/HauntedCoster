@@ -42,14 +42,14 @@ TutorialRules.Steps = {
 	},
 	{
 		id = "toGraveyard",
-		text = "Follow the lantern road north to the graveyard gate. Your flashlight is on (F to toggle).",
+		text = "Follow the ring road to a gate in the hub wall. Your flashlight is on (F to toggle).",
 		done = function(c)
 			return c.inGraveyard or c.owned > 0
 		end,
 	},
 	{
 		id = "explore",
-		text = "Explore past the Weeping Angel. Monsters roam between the graves: walk up to one.",
+		text = "This is the hunting ground. It changes every 15 minutes (see the top right). Monsters roam inside: walk up to one.",
 		done = function(c)
 			return c.nearMonster or c.seenCount > 0 or c.owned > 0
 		end,
@@ -118,7 +118,7 @@ TutorialRules.Steps = {
 	},
 	{
 		id = "lair",
-		text = "Your Restored Manor opened the Sealed Crypt behind the Bell Tower. The rare Bell Wraith haunts it: go in.",
+		text = "Your Restored Manor opened the Sealed Crypt by the Bell Tower in the Ghost Cemetery. The rare Bell Wraith haunts it: go in while the Cemetery is the hunting ground.",
 		done = function(c)
 			return c.inCrypt or c.caughtRare
 		end,
