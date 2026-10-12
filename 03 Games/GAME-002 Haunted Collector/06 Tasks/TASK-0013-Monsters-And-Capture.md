@@ -3,7 +3,7 @@ id: TASK-0013
 title: Monsters and Capture
 type: task
 project: GAME-002
-status: ready
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -59,11 +59,17 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 *Prototype built in one integration commit, `17cb5ae` on `task/TASK-0011-Haunted-Scaffold-And-Player-Data`, which covers TASK-0011 to TASK-0018. The user approved building without per-task gates on 2026-10-11.*
 - `scripts/check.sh`: all pass (StyLua, Selene, strict typecheck for both projects, Rojo builds, vault, Python tests).
 - Unit specs: 37/37 pass headless ([[TEST-20261011-01]]). Server smoke in Run mode: clean.
-- **Not yet verified with a player:** the `FullLoop` play scenario is written but hasn't run (the Studio window didn't load the place). The ACs below stay unchecked until it has run.
+- *(Superseded below: FullLoop has since run, see revision 1.)*
+
+### Revision 1 (with TASK-0011, `5878f6d`, merged in PR #2)
+- Judge tightened so blind mashing loses (shared constants in `CaptureRules`), the exploit probe goes through the real remotes from a client (`DevProbe`, ExploitProbe 11/11), the variant roll is a shared function with its own spec. Ashen is Crypt-only (ADR-0006 §2).
+- Evidence: [[TEST-20261011-03]] (real-client captures), [[TEST-20261011-04]] (specs 48/0, FullLoop 56/56, ExploitProbe 11/11).
 - Systems: [[SYS-Haunted-Player-Data]], [[SYS-Haunted-Capture-Loop]], [[SYS-Haunted-Ghost-Train]].
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261011-TASK-0013-01]]: fail (3 major), revision 1
+- [[AUD-20261011-TASK-0013-02]]: **pass** (3 minor, 3 nit): the slack makes the real hit window wider than the drawn zone; ExploitProbe's mash check can't fail; zone caps total 10, not 8. Nits: Ashen really rolls at 27%, ping clamped at 0.3 s.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0013-02]] passed.
+- **Follow-ups (M1 polish / M2):** make the drawn green zone match the judged window (or bound the slack in a spec); give ExploitProbe's mash check a way to fail; reconcile the 8-monster scope with the zone caps (10); Ashen's real roll (27%) vs ADR-0006's 30%; the ping clamp at 0.3 s.
