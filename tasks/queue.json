@@ -1772,7 +1772,7 @@
       "id": "TASK-0023",
       "title": "Round 20 Design Changes",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0023-Round-20-Design-Changes",
@@ -1823,6 +1823,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T21:26:36",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -1842,6 +1848,11 @@
           "time": "2026-10-11T21:15:49",
           "result": "fail",
           "report": "06 QA/AUD-20261011-TASK-0023-01.md"
+        },
+        {
+          "time": "2026-10-11T21:26:36",
+          "result": "pass",
+          "report": "06 QA/AUD-20261011-TASK-0023-02.md"
         }
       ],
       "revisions": 1
