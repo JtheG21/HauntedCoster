@@ -3,7 +3,7 @@ id: TASK-0030
 title: House and Train Presentation
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: medium
 risk: low
 owner: executor
