@@ -1,5 +1,5 @@
 # Runs scripts/check.sh (format, lint, strict types, both Rojo builds, JSON, queue, vault, Python tests)
-# on every PR and on pushes to main. Luau specs and play scenarios still need Studio (see README).
+# on every PR and on pushes to main. GAME-002 unit specs run headlessly via Lune; play scenarios still need Studio (see README).
 name: check
 
 on:
@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      # Installs rojo, stylua and luau-lsp at the versions pinned in rokit.toml.
+      # Installs rojo, stylua, luau-lsp and lune at the versions pinned in rokit.toml.
       - uses: CompeyDev/setup-rokit@1d9390883f7ebce19d48f5b8d006e11d387c92ab # v0.2.1
         with:
           cache: "true"

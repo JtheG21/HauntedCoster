@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Fast half of scripts/check.sh: format and lint (~1s). CI still runs the full check.
+# Fast half of scripts/check.sh: format, lint and headless GAME-002 specs (~1.5s). CI still runs the full check.
 # Skip once with `git commit --no-verify`.
 set -u
 cd "$(git rev-parse --show-toplevel)"
 fail=0
 stylua --check src tests/luau games/haunted || fail=1
 selene --display-style quiet src tests/luau games/haunted || fail=1
-if [ $fail -ne 0 ]; then echo "pre-commit: StyLua/Selene failed (fix with: stylua src tests/luau games/haunted)"; fi
+lune run scripts/lune/specs || fail=1
+if [ $fail -ne 0 ]; then echo "pre-commit: StyLua/Selene/specs failed (format with: stylua src tests/luau games/haunted)"; fi
 exit $fail

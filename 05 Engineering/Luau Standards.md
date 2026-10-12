@@ -4,7 +4,7 @@ title: Luau Standards
 type: index
 status: approved
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - engineering/standards
 ---
@@ -17,3 +17,4 @@ tags:
 - Remotes are created by the server. Every client argument is type-checked and range-checked, plus rate-limited.
 - Debounce shared state synchronously, before any yield (pattern from [[SYS-Collectible-Service]]).
 - Tests: `tests/luau/<Module>.spec.luau` returns `function(t: TestRunner.T)` ([[LES-0002-Typed-Test-Context]]).
+- GAME-002 specs (`games/haunted/tests/`) also run headlessly in Lune ([[ADR-0008-Headless-Specs-With-Lune]]): keep them pure (no services, real Instances or `task`), and assert properties rather than exact seeded `Random` values.
