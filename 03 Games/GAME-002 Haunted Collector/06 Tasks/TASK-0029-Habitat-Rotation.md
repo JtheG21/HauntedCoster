@@ -3,7 +3,7 @@ id: TASK-0029
 title: Habitat Rotation
 type: task
 project: GAME-002
-status: in_review
+status: done
 priority: high
 risk: high
 owner: executor
@@ -65,5 +65,12 @@ The active habitat follows a shared 15-minute, four-habitat schedule that every 
 - **Evidence:** [[TEST-20261012-05]].
 
 ## Audits
+- [[AUD-20261012-TASK-0029-01]]: fail (1 major: an error inside a swap left the server foggy and refusing captures; 7 minor/nit).
+- Revision 1 fixed all eight. [[AUD-20261012-TASK-0029-02]] (delta): pass, 3 nits.
 
 ## Outcome
+- **Merge** approved by jg in chat on 2026-10-12 ("merge anything you need to to finish this up"). Merged through PR #23.
+- **Result:** the hunting ground rotates every 15 minutes on a UTC schedule every server agrees on, with a HUD countdown, a closing window and fog-covered swaps that keep carries, cancel open meters, move players out and keep chases going.
+- **Lessons:** a server loop that sets "busy" flags must reset them on every path (audit finding 1). Scenarios that depend on timing are cheap when the schedule is a test argument.
+- **Residual risk:** clock skew between live servers. jg should watch one real 15-minute swap.
+
