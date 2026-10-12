@@ -26,7 +26,7 @@ Spawn and roam monsters, run the capture meter, carry the capture home under a t
 ## Responsibilities
 - Zone spawns (weights, per-zone max, `maxAlive` for rares; a capped rare ignores the zone max), variant rolls (Spectral anywhere, Ashen crypt only). No clue gates since [[TASK-0025-Clue-Hunting-Removal]]: the Bell Wraith is visible to everyone and capturable from the Restored Manor.
 - Inspect card (name, rarity, variant, est. income, lock reason).
-- Capture sessions: server clock, latency-compensated judge (`CaptureRules`), hits/misses by rarity, 20 s timeout. A miss startles the monster (an 8–14 stud hop in its zone, 0.8 s settle). Hits and misses are kept per player on the encounter between attempts.
+- Capture sessions: server clock, latency-compensated judge (`CaptureRules`), hits/misses by rarity, 20 s timeout. A miss startles the monster (an 8–14 stud hop in its zone, 0.8 s settle). Hits and misses are kept per player on the encounter between attempts, except after the last miss: the monster flees or retaliates, and that player's counters are cleared ([[TASK-0032-Retaliation-Hardening]], jg).
 - Carry: WalkSpeed ×0.6/0.7/0.8/0.9 by Running Shoes level, timer by rarity. On timeout: a 15 s chase. The monster flees (`ChaseRules`, never crossing a fence or entering the crypt), and the owner grabs it within 6 studs to resume with 20 s, once per capture. Chase expiry, death, despawn, leaving or the speed check send it to its habitat. Owned monsters are untouched.
 - Secure only at the owner's pen; onboarding reward once; acclimation 30 s, then passive income; capped offline income at tier 2.
 

@@ -38,6 +38,7 @@ Hook (Round 20): **"Build your haunted train."** Pitch: hunt strange creatures i
 | [[TASK-0029-Habitat-Rotation]] | done, merge approved by jg (15-minute rotation, capture-safe swaps) | [[AUD-20261012-TASK-0029-01]] fail, [[AUD-20261012-TASK-0029-02]] pass |
 | [[TASK-0030-House-And-Train-Presentation]] | done, merge approved by jg (house tiers, plot dressing, station canopy; look awaits jg) | [[AUD-20261012-TASK-0030-01]] pass |
 | [[TASK-0031-Failed-Capture-Retaliation]] | done, merge approved by jg (retaliation on the final miss; follow-ups listed) | [[AUD-20261012-TASK-0031-01]] pass |
+| [[TASK-0032-Retaliation-Hardening]] | done, merge approved by jg (TASK-0031 audit follow-ups: protected tick and fled handlers, counters cleared on fled) | [[AUD-20261012-TASK-0032-01]] pass |
 
 ## How to playtest (Studio)
 1. `rojo build haunted.project.json -o HauntedCollector.rbxl`, then open it in Studio (or `rojo serve haunted.project.json` into a new empty place). **Never sync it into the Rg1/place1 place.**

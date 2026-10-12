@@ -31,6 +31,7 @@ Retrofit the world without redesigning the game ([[ADR-0007-World-Retrofit-Direc
 | [[TASK-0029-Habitat-Rotation]] | Done. PR #23. One failed audit (a stuck swap), fixed in revision 1 |
 | [[TASK-0030-House-And-Train-Presentation]] | Done. PR #24 |
 | [[TASK-0031-Failed-Capture-Retaliation]] | Merged through PR #25 once its audit passes; see the task note |
+| [[TASK-0032-Retaliation-Hardening]] | Done. PR #26. The TASK-0031 audit follow-ups |
 
 ## What went well
 - Specs moved to Lune (ADR-0008), so `scripts/check.sh` proves the rules on every commit without Studio. It grew from 63 to 96 specs.

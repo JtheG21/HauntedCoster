@@ -3,7 +3,7 @@ id: TASK-0032
 title: Retaliation Hardening
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -71,7 +71,7 @@ Close the follow-ups from [[AUD-20261012-TASK-0031-01]]: retaliation must surviv
 - [[AUD-20261012-TASK-0032-01]]: pass (2 minor, 4 nit).
 
 ## Outcome
-- **Merge:** pending jg's approval (the audit passed).
+- **Merge** approved by jg in chat on 2026-10-12 ("merge it and do the post-merge notes"). Merged through PR #26.
 - **Result:** a retaliation tick error is caught and every pursuit ends cleanly. A failing `onFled` handler still lets the monster slip away. A monster that retaliated forgets the player's counters. The scenario now proves edge containment, tick-error recovery and the death ending.
 - **Follow-ups** (from [[AUD-20261012-TASK-0032-01]]):
   - `RetaliationService.begin`: a mid-loop error can leave extra pursuers flagged `pursuing` with no pursuit record. Create the record first, or release the monsters already set on error.
