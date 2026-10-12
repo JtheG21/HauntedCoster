@@ -3,7 +3,7 @@ id: TASK-0029
 title: Habitat Rotation
 type: task
 project: GAME-002
-status: ready
+status: done
 priority: high
 risk: high
 owner: executor
@@ -51,7 +51,26 @@ The active habitat follows a shared 15-minute, four-habitat schedule that every 
 
 ---
 ## Implementation record
+- **References used:** SODT-RC-1's leaf `RoundState` module and `GetServerTimeNow` deadlines ([[SODT-RC-1]] guide, as found in [[RSH-20261012-World-Retrofit-Audit]]); adapted as `HabitatState` (Workspace attributes rather than SODT's own replication). Not re-opened in this task.
+- **Built:**
+  - `Config/Rotation` (900 s slots, warning 60 s, closing 15 s, UTC epoch) and pure `RotationRules` (`at`, `capturesOpen`, `withOverrides`, `clock`), with a spec.
+  - `HabitatState`: the Workspace attributes the server writes and the client reads.
+  - `RotationService`: a 0.25 s tick on `Workspace:GetServerTimeNow()`. It publishes the phase and closes captures in the closing window, then swaps: fog in, cancel meter sessions, evacuate players inside the hub to just outside their nearest gate, activate the next module (wild monsters cleared), let fleeing escapes follow their players out, fog out.
+  - `CaptureService`: `setClosing`, `cancelAllSessions`, `followSwap`, and test views.
+  - `EncounterService`: the flee region is re-read every step (a relocated chase continues on the ring road), plus `relocateFleeing`.
+  - Client: a HUD rotation line (gold in the warning minute, red while closed) and a local fog fade.
+  - Tutorial steps 2, 3 and 12 and the Bell Wraith blurb no longer assume the cemetery is active.
+- **Test runs:** a `scenario` argument pins the Cemetery (or the `habitat` argument) unless a `rotation` schedule is passed. Live servers never see test arguments (`StudioTestHook.arg` is Studio-only).
+- **From [[AUD-20261012-TASK-0027-01]]:** findings 2 and 3 (open sessions and kept chases across a swap) are covered by swaps 2 and 3 of the scenario.
+- **Evidence:** [[TEST-20261012-05]].
 
 ## Audits
+- [[AUD-20261012-TASK-0029-01]]: fail (1 major: an error inside a swap left the server foggy and refusing captures; 7 minor/nit).
+- Revision 1 fixed all eight. [[AUD-20261012-TASK-0029-02]] (delta): pass, 3 nits.
 
 ## Outcome
+- **Merge** approved by jg in chat on 2026-10-12 ("merge anything you need to to finish this up"). Merged through PR #23.
+- **Result:** the hunting ground rotates every 15 minutes on a UTC schedule every server agrees on, with a HUD countdown, a closing window and fog-covered swaps that keep carries, cancel open meters, move players out and keep chases going.
+- **Lessons:** a server loop that sets "busy" flags must reset them on every path (audit finding 1). Scenarios that depend on timing are cheap when the schedule is a test argument.
+- **Residual risk:** clock skew between live servers. jg should watch one real 15-minute swap.
+

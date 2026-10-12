@@ -76,6 +76,7 @@ local sessions: { [Player]: Session } = {}
 local carries: { [Player]: Carry } = {}
 local chases: { [Player]: Chase } = {}
 local securedCallbacks: { (Player, ProfileRules.OwnedMonster) -> () } = {}
+local closing = false -- the last seconds before a habitat swap: no new captures (TASK-0029)
 
 local function rootOf(player: Player): BasePart?
 	local character = player.Character
@@ -440,6 +441,9 @@ local function onCaptureStart(player: Player, model: any): { [string]: any }
 	if sessions[player] then
 		return { ok = false, reason = "Already capturing" }
 	end
+	if closing then
+		return { ok = false, reason = "The fog is rolling in. The hunting ground is about to change!" }
+	end
 	if #profile.owned >= ProfileRules.capacity(profile) then
 		return { ok = false, reason = "Your containment pen is full. Upgrade your house for more room." }
 	end
@@ -551,6 +555,61 @@ end
 -- Entry points shared by the remotes and the Studio test scenarios.
 CaptureService.requestStart = onCaptureStart
 CaptureService.requestRelease = onCaptureRelease
+-- Habitat rotation (TASK-0029, ADR-0007 "evacuate to the gates").
+function CaptureService.setClosing(on: boolean)
+	closing = on
+end
+
+function CaptureService.isClosing(): boolean
+	return closing
+end
+
+-- At the swap: every open meter session ends. Nothing was caught yet, so nothing is lost; the monster is
+-- released (the habitat clears it right after) and the meter closes on the client.
+function CaptureService.cancelAllSessions(): number
+	local n = 0
+	for player in sessions do
+		endSession(player, "cancelled")
+		StateService.toast(player, "The fog swallowed your monster. The hunting ground is changing!", "info")
+		n += 1
+	end
+	return n
+end
+
+-- After players were moved out of the hub: a fleeing escaped capture follows its player out and the chase
+-- carries on (the deadline is unchanged). Carried captures need nothing: they aren't tied to a habitat.
+function CaptureService.followSwap()
+	for player, ch in chases do
+		local at = ch.encounter.root.Position
+		-- Only chases inside the hub move; one already out on the ring road carries on where it is.
+		if ch.encounter.alive and World.inHub(at.X, at.Z) then
+			local root = rootOf(player)
+			local near = if root then root.Position else World.gatePoint(1, World.Hub.wallRadius + 7)
+			EncounterService.relocateFleeing(ch.encounter, near, Monsters.Chase.headStart)
+			StateService.toast(
+				player,
+				`Your escaped {Monsters.Species[ch.species].name} followed you out of the fog. Catch it!`,
+				"info"
+			)
+		end
+	end
+end
+
+-- Test-only views (scenarios): the open session's encounter, the carry and chase details.
+function CaptureService.sessionForTest(player: Player): any
+	local s = sessions[player]
+	return if s then { encounter = s.encounter } else nil
+end
+
+function CaptureService.carryForTestInfo(player: Player): any
+	local c = carries[player]
+	return if c then { species = c.species, variant = c.variant, deadlineServer = c.deadlineServer } else nil
+end
+
+function CaptureService.startForTest(player: Player, model: Model): { [string]: any }
+	return onCaptureStart(player, model)
+end
+
 function CaptureService.requestCancel(player: Player)
 	endSession(player, "cancelled")
 end

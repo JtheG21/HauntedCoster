@@ -5,7 +5,7 @@
 --                 the id to the Workspace attribute `ActiveHabitat` (clients follow it), relabel the hub
 --                 gates, then run the activated hooks (EncounterService repopulates).
 --   deactivate(): run the deactivating hooks (EncounterService clears wild monsters), then unparent.
--- Scheduling, warnings and capture-safe swaps are TASK-0029's HabitatRotation work.
+-- RotationService decides when to swap (TASK-0029).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
@@ -14,6 +14,7 @@ local Workspace = game:GetService("Workspace")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Habitats = require(Shared:WaitForChild("Config"):WaitForChild("Habitats"))
 local HabitatRules = require(Shared:WaitForChild("Rules"):WaitForChild("HabitatRules"))
+local HabitatState = require(Shared:WaitForChild("HabitatState"))
 local World = script.Parent.Parent.World
 local HubBuilder = require(World.HubBuilder)
 local Kit = require(World.Habitats.Kit)
@@ -78,7 +79,7 @@ function HabitatService.activate(id: string): boolean
 	Habitats.setActive(id)
 	activeId = id
 	result.model.Parent = stage
-	Workspace:SetAttribute("ActiveHabitat", id)
+	Workspace:SetAttribute(HabitatState.Attr.active, id)
 	HubBuilder.setGateLabel(hub, Habitats.ById[id].name)
 	for _, fn in onActivatedFns do
 		fn(id)

@@ -18,6 +18,7 @@ local StateService = require(Services.StateService)
 local PlotService = require(Services.PlotService)
 local MovementService = require(Services.MovementService)
 local HabitatService = require(Services.HabitatService)
+local RotationService = require(Services.RotationService)
 local EncounterService = require(Services.EncounterService)
 local CaptureService = require(Services.CaptureService)
 local ContainmentService = require(Services.ContainmentService)
@@ -25,11 +26,21 @@ local EconomyService = require(Services.EconomyService)
 local TrainService = require(Services.TrainService)
 local TutorialService = require(Services.TutorialService)
 
--- The persistent outer world, then every habitat module (one active inside the hub wall, ADR-0007).
--- In Studio test runs the `habitat` argument picks the starting module.
+-- The persistent outer world, then every habitat module (one active inside the hub wall, ADR-0007). The
+-- rotation schedule picks the active module. Studio test runs (a `scenario` argument) are pinned to the
+-- `habitat` argument, or the Cemetery, unless they pass a `rotation` schedule (TASK-0029 scenarios). With a
+-- `rotation` schedule the scheduled habitat wins (a `habitat` argument would be swapped out at once).
 local hub = HubBuilder.build(Workspace)
-local initialHabitat = StudioTestHook.arg("habitat")
-HabitatService.start(hub, if type(initialHabitat) == "string" then initialHabitat else nil)
+local testScenario = StudioTestHook.arg("scenario")
+local testRotation = StudioTestHook.arg("rotation")
+local testHabitat = StudioTestHook.arg("habitat")
+local pinned = testScenario ~= nil and testRotation == nil
+RotationService.configure(testRotation)
+local initialHabitat = if type(testHabitat) == "string" and pinned
+	then testHabitat
+	elseif pinned then "Cemetery"
+	else RotationService.scheduledId()
+HabitatService.start(hub, initialHabitat)
 
 StudioTestHook.start()
 
@@ -43,6 +54,7 @@ ContainmentService.start()
 EconomyService.start()
 TrainService.start()
 TutorialService.start()
+RotationService.start(pinned)
 
 -- A habitat swap clears the old module's wild monsters and populates the new one.
 HabitatService.onDeactivating(function()

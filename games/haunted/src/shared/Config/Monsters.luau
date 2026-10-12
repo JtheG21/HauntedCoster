@@ -67,7 +67,7 @@ Monsters.Species = {
 		incomePerSecond = 8,
 		roamSpeed = 3,
 		hover = 6,
-		blurb = "A cracked funeral bell that rings itself. It haunts the Sealed Crypt behind the Bell Tower.",
+		blurb = "A cracked funeral bell that rings itself. It haunts the Sealed Crypt by the Bell Tower in the Ghost Cemetery.",
 		maxAlive = 1,
 	},
 } :: { [string]: Species }

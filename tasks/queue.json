@@ -2238,7 +2238,7 @@
       "id": "TASK-0029",
       "title": "Habitat Rotation",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "done",
       "risk": "high",
       "depends_on": [
         "TASK-0027"
@@ -2260,12 +2260,77 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-12T11:43:35",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-12T12:01:29",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T12:05:17",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-12T12:09:41",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-12T12:09:45",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T12:11:33",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-12T12:11:33",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
-      "executions": [],
-      "audits": [],
-      "revisions": 0,
-      "approved_by": "jg"
+      "executions": [
+        {
+          "time": "2026-10-12T12:01:29",
+          "result": "pass",
+          "notes": "check.sh pass; specs 88/0; HabitatRotation 27/27; FullLoop 85/85; ExploitProbe 13/13; CrossPlot 16/16 (TEST-20261012-05)"
+        },
+        {
+          "time": "2026-10-12T12:09:45",
+          "result": "pass",
+          "notes": "revision 1: specs 88/0; HabitatRotation 28/28; FullLoop 85/85"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-12T12:05:17",
+          "result": "fail",
+          "report": "06 QA/AUD-20261012-TASK-0029-01.md"
+        },
+        {
+          "time": "2026-10-12T12:11:33",
+          "result": "pass",
+          "report": "06 QA/AUD-20261012-TASK-0029-02.md"
+        }
+      ],
+      "revisions": 1,
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0030",
