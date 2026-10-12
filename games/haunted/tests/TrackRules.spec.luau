@@ -112,22 +112,26 @@ return function(t: TestRunner.T)
 		t.eq(TrackRules.validate(pts, {}, bounds).ok, false)
 	end)
 
-	t.test("quality limits hold at the extremes", function()
-		-- Shortest valid plain loop: never below QualityMin.
-		local small =
-			TrackRules.sample({ { x = 0, z = -20 }, { x = 18, z = -20 }, { x = 18, z = -4 }, { x = 0, z = -4 } })
-		t.truthy(TrackRules.quality(small, {}) >= Track.QualityMin)
-		-- Long, wiggly loop with every piece slot used: never above QualityMax.
-		local wiggly = {}
-		for i = 1, Track.MaxPoints do
-			local a = (i / Track.MaxPoints) * 2 * math.pi
-			local r = if i % 2 == 0 then 24 else 14
-			table.insert(wiggly, { x = 14 + r * math.cos(a), z = -14 + r * 0.9 * math.sin(a) })
+	t.test("quality is clamped at both ends", function()
+		-- Floor: a plain square at the minimum length scores QualityMin (the formula's base equals the floor).
+		local square: TrackRules.Sampled = {
+			points = { { x = 0, z = 0 }, { x = 20, z = 0 }, { x = 20, z = 20 }, { x = 0, z = 20 } },
+			length = Track.MinLength,
+		}
+		t.truthy(
+			math.abs(TrackRules.quality(square, {}) - Track.QualityMin) < 1e-9,
+			tostring(TrackRules.quality(square, {}))
+		)
+		-- Ceiling: maximum length, constant zig-zag turning and every piece slot would score above
+		-- QualityMax unclamped (0.9 + 0.12 + 0.08 + 3 x 0.06 = 1.28), so this fails without the clamp.
+		local zig: { TrackRules.P } = {}
+		for i = 1, 60 do
+			table.insert(zig, { x = i * 3, z = if i % 2 == 0 then 0 else 3 })
 		end
-		local s = TrackRules.sample(wiggly)
-		local pieces = { { i = 1, kind = "ScareArch" }, { i = 2, kind = "FogTunnel" }, { i = 3, kind = "ScareArch" } }
-		local q = TrackRules.quality(s, pieces)
-		t.truthy(q <= Track.QualityMax and q >= Track.QualityMin)
+		local maxed: TrackRules.Sampled = { points = zig, length = Track.MaxLength }
+		local pieces = { { i = 1, kind = "ScareArch" }, { i = 2, kind = "ScareArch" }, { i = 3, kind = "ScareArch" } }
+		t.eq(TrackRules.quality(maxed, pieces), Track.QualityMax)
+		t.truthy(TrackRules.quality(maxed, {}) < Track.QualityMax, "the ceiling needs the pieces")
 	end)
 
 	t.test("quality stays in range and pieces raise it", function()

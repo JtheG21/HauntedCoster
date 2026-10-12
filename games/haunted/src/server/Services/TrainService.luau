@@ -33,6 +33,7 @@ type PlotTrain = {
 	cart: Model?,
 	frontSeat: Seat?,
 	riding: boolean,
+	rebuildPending: boolean?, -- a rebuild was skipped mid-ride; redo it from the current owner afterwards
 	prompt: ProximityPrompt?,
 }
 
@@ -200,7 +201,8 @@ local function rebuild(index: number, points: { TrackRules.P }, pieces: { TrackR
 	end
 	local old = trains[index]
 	if old and old.riding then
-		return -- never rebuild under a moving cart
+		old.rebuildPending = true -- never rebuild under a moving cart; redone when the ride ends
+		return
 	end
 	folder:ClearAllChildren()
 	local sampled = TrackRules.sample(points)
@@ -484,6 +486,14 @@ function TrainService.ride(player: Player, index: number)
 	t.riding = false
 	if t.prompt then
 		t.prompt.Enabled = true
+	end
+	if t.rebuildPending then
+		-- The plot changed hands (or its route changed) mid-ride: build the current owner's track now,
+		-- so nobody rides or gets paid on the previous owner's route.
+		t.rebuildPending = false
+		local owner = PlotService.ownerOf(index)
+		local points, pieces = routeFor(if owner then PlayerDataService.get(owner) else nil)
+		rebuild(index, points, pieces)
 	end
 	Remotes.event("RideState"):FireClient(player, { riding = false })
 	if cancelled then

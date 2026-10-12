@@ -28,7 +28,8 @@ return function(t: TestRunner.T)
 
 	t.test("the crypt rolls Ashen, and most spawns stay Normal elsewhere", function()
 		local crypt = tally("Crypt", 10000)
-		t.truthy((crypt.Ashen or 0) > 2000, "ashen in crypt")
+		local ashenRate = (crypt.Ashen or 0) / 10000
+		t.truthy(math.abs(ashenRate - Variants.ById.Ashen.chance) < 0.02, `ashen rate {ashenRate}`)
 		local gate = tally("Gate", 10000)
 		t.truthy((gate.Normal or 0) > 8500, "normal at gate")
 	end)

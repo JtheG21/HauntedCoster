@@ -145,10 +145,28 @@ return function(args: any): { [string]: any }
 	local front = cart and cart:FindFirstChild("FrontSeat") :: Seat?
 	local humA = (a.Character :: Model):FindFirstChildOfClass("Humanoid") :: Humanoid
 	if front then
+		local seatedSeen = false
+		local watch = front:GetPropertyChangedSignal("Occupant"):Connect(function()
+			if front.Occupant == humA then
+				seatedSeen = true
+			end
+		end)
 		tp(a, front.Position)
+		-- Parked: the seat is disabled, so A can't sit at all.
 		front:Sit(humA)
 		task.wait(1)
-		check("A ejected from B's front seat", front.Occupant ~= humA, front.Occupant)
+		check("B's parked front seat refuses A", not seatedSeen and front.Occupant ~= humA, front.Occupant)
+		-- Enabled (as during a ride): A does get seated, and the guard ejects A.
+		front.Disabled = false
+		front:Sit(humA)
+		task.wait(1)
+		check(
+			"A seated in B's enabled front seat, then ejected",
+			seatedSeen and front.Occupant ~= humA,
+			`seatedSeen={seatedSeen} occupant={front.Occupant}`
+		)
+		front.Disabled = true
+		watch:Disconnect()
 	else
 		check("B's cart found", false)
 	end

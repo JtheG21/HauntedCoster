@@ -79,8 +79,10 @@ function PlotService.rebuildTrophies(player: Player)
 	for _ in profile.journal.variants do
 		variants += 1
 	end
-	for _ in profile.journal.clues do
-		clues += 1
+	for id in profile.journal.clues do
+		if World.landmarkById(id) then -- landmark clues only; the train's bell hint isn't a trophy
+			clues += 1
+		end
 	end
 	PlotBuilder.buildTrophies(plots[i], i, caught, variants, clues)
 end

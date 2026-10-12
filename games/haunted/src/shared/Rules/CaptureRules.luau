@@ -23,6 +23,16 @@ function CaptureRules.zoneCenter(rng: Random, width: number): number
 	return rng:NextNumber(half + 0.08, 1 - half - 0.08)
 end
 
+-- Width of the window the judge really accepts: the zone plus the distance the needle travels in
+-- `slack` seconds either side (the needle covers 2 bar-widths per period). The meter draws this, so
+-- the green zone on screen matches what is judged.
+function CaptureRules.judgedWidth(width: number, period: number, slack: number): number
+	if period <= 0 then
+		return width
+	end
+	return width + 2 * slack * (2 / period)
+end
+
 -- True if the needle was inside the zone at any moment within `slack` seconds of `elapsed`.
 function CaptureRules.judge(elapsed: number, period: number, center: number, width: number, slack: number): boolean
 	local half = width / 2

@@ -46,9 +46,23 @@ function Variants.multiplier(variantId: string): number
 	return if v then v.incomeMultiplier else 1
 end
 
+-- Roll order: zone-restricted (environmental) variants first, so their configured chance is exact in
+-- their zones (Ashen 30% in the Crypt, ADR-0006 §2); natural variants roll on what's left.
+local rollOrder: { Variant } = {}
+for _, v in Variants.List do
+	if v.zones ~= nil then
+		table.insert(rollOrder, v)
+	end
+end
+for _, v in Variants.List do
+	if v.zones == nil then
+		table.insert(rollOrder, v)
+	end
+end
+
 -- Rolls a variant for a monster spawning in `zoneId`. Zone-restricted variants only roll in their zones.
 function Variants.roll(zoneId: string, rng: Random): string
-	for _, v in Variants.List do
+	for _, v in rollOrder do
 		local allowed = v.zones == nil or table.find(v.zones, zoneId) ~= nil
 		if allowed and rng:NextNumber() < v.chance then
 			return v.id

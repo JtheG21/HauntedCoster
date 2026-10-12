@@ -111,4 +111,28 @@ return function(t: TestRunner.T)
 		t.eq(s, #TutorialRules.Steps + 1)
 		t.eq(TutorialRules.hint(s, done), TutorialRules.CompleteText)
 	end)
+
+	t.test("completion hint names only what is missing", function()
+		local c = ctx({ houseTier = 0, landmarks = 1 })
+		t.eq(
+			TutorialRules.hint(99, c),
+			"The bell points to the Sealed Crypt: investigate 2 more landmarks and Restore your house to enter, and find the Bell Wraith."
+		)
+		c.landmarks = 2
+		c.houseTier = 1
+		t.eq(
+			TutorialRules.hint(99, c),
+			"The bell points to the Sealed Crypt: investigate 1 more landmark to enter, and find the Bell Wraith."
+		)
+		c.landmarks = 3
+		c.houseTier = 0
+		t.eq(
+			TutorialRules.hint(99, c),
+			"The bell points to the Sealed Crypt: Restore your house to enter, and find the Bell Wraith."
+		)
+		c.houseTier = 1
+		t.eq(TutorialRules.hint(99, c), "The Sealed Crypt is open to you: find the Bell Wraith inside.")
+		c.caughtRare = true
+		t.truthy(string.find(TutorialRules.hint(99, c), "You caught the Bell Wraith", 1, true) ~= nil)
+	end)
 end

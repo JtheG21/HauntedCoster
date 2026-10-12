@@ -46,6 +46,27 @@ return function(t: TestRunner.T)
 		end
 	end)
 
+	t.test("the drawn zone matches the judged window and stays on the bar", function()
+		for rarity, tuning in Monsters.Capture do
+			local drawn = CaptureRules.judgedWidth(tuning.zoneWidth, tuning.period, CaptureRules.LatencySlack)
+			-- Measure the judged window on the rising half of the needle (position = 2t / period).
+			local lo, hi = math.huge, -math.huge
+			local step = tuning.period / 4000
+			local tt = 0.05 * tuning.period
+			while tt < 0.45 * tuning.period do
+				if CaptureRules.judge(tt, tuning.period, 0.5, tuning.zoneWidth, CaptureRules.LatencySlack) then
+					local pos = CaptureRules.needle(tt, tuning.period)
+					lo, hi = math.min(lo, pos), math.max(hi, pos)
+				end
+				tt += step
+			end
+			t.truthy(math.abs((hi - lo) - drawn) < 0.02, `{rarity}: judged {hi - lo}, drawn {drawn}`)
+			-- The widest drawn zone at the extreme centres still fits on the bar.
+			local half = tuning.zoneWidth / 2
+			t.truthy(half + 0.08 - drawn / 2 >= -1e-9, `{rarity}: drawn zone can leave the bar`)
+		end
+	end)
+
 	t.test("judge hits inside the zone and misses outside", function()
 		-- period 2: needle = t for t in [0,1]
 		t.eq(CaptureRules.judge(0.5, 2, 0.5, 0.2, 0), true)

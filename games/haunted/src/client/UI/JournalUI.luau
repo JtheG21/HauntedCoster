@@ -47,6 +47,18 @@ local function text(parent: Instance, s: string, props: { [string]: any }?)
 	return Theme.label(parent, s, p)
 end
 
+-- True if `species` can spawn in any of `zoneIds` (from the zone spawn tables), so the journal lists
+-- zone-only variants exactly for the species that can roll them.
+local function spawnsIn(species: string, zoneIds: { string }): boolean
+	for _, zoneId in zoneIds do
+		local zone = World.zoneById(zoneId)
+		if zone and zone.spawns[species] then
+			return true
+		end
+	end
+	return false
+end
+
 local function render(force: boolean?)
 	if not panel.Visible then
 		return
@@ -106,7 +118,7 @@ local function render(force: boolean?)
 			text(c, s.blurb, { TextColor3 = Theme.Colors.dim })
 			local found = {}
 			for _, v in Variants.List do
-				local allowed = v.zones == nil or id == "Gentleman" or id == "BellWraith"
+				local allowed = v.zones == nil or spawnsIn(id, v.zones)
 				if allowed then
 					table.insert(found, if j.variants[id .. ":" .. v.id] then v.label else "???")
 				end

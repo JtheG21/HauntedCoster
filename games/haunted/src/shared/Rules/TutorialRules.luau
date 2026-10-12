@@ -5,6 +5,7 @@
 
 local Shared = script.Parent.Parent
 local Economy = require(Shared.Config.Economy)
+local World = require(Shared.Config.World)
 
 local TutorialRules = {}
 
@@ -26,6 +27,7 @@ export type Ctx = {
 	bellHint: boolean,
 	bellClue: boolean,
 	caughtRare: boolean,
+	landmarks: number?, -- landmark clues only (the train's bell hint excluded); used by the completion hint
 }
 
 export type Step = { id: string, text: string, done: (Ctx) -> boolean, alt: ((Ctx) -> string?)? }
@@ -137,10 +139,34 @@ function TutorialRules.advance(step: number, ctx: Ctx): number
 	return s
 end
 
+-- After the tutorial: point at the Bell Wraith, naming only what is still missing to enter the Crypt.
+function TutorialRules.completeHint(ctx: Ctx): string
+	if ctx.caughtRare then
+		return "You caught the Bell Wraith! Collect its variants and build a better ghost train."
+	end
+	local landmarks = ctx.landmarks
+	if landmarks == nil then
+		return TutorialRules.CompleteText
+	end
+	local need = World.Graveyard.cryptLandmarksNeeded - landmarks
+	local tierOk = Economy.HouseTiers[ctx.houseTier + 1].unlocksCrypt
+	if need <= 0 and tierOk then
+		return "The Sealed Crypt is open to you: find the Bell Wraith inside."
+	end
+	local missing = {}
+	if need > 0 then
+		table.insert(missing, `investigate {need} more landmark{if need == 1 then "" else "s"}`)
+	end
+	if not tierOk then
+		table.insert(missing, "Restore your house")
+	end
+	return `The bell points to the Sealed Crypt: {table.concat(missing, " and ")} to enter, and find the Bell Wraith.`
+end
+
 function TutorialRules.hint(step: number, ctx: Ctx): string
 	local def = TutorialRules.Steps[step]
 	if not def then
-		return TutorialRules.CompleteText
+		return TutorialRules.completeHint(ctx)
 	end
 	if def.alt then
 		local alt = def.alt(ctx)

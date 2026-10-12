@@ -406,17 +406,36 @@ end
 
 -- The character stays put while editing, so a tap on the mobile thumbstick or jump area (or a stick on
 -- a gamepad) can't walk it away while it is also placing points.
-local function setMovement(enabled: boolean)
-	local ok, controls = pcall(function()
-		local playerModule = Players.LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule", 5)
-		return if playerModule then (require(playerModule :: ModuleScript) :: any):GetControls() else nil
-	end)
-	if ok and controls then
-		if enabled then
-			controls:Enable()
-		else
-			controls:Disable()
+local controls: any = nil
+
+local function getControls(): any
+	if controls == nil then
+		local scripts = Players.LocalPlayer:FindFirstChild("PlayerScripts")
+		local module = scripts and scripts:FindFirstChild("PlayerModule")
+		if module and module:IsA("ModuleScript") then
+			local ok, c = pcall(function()
+				return (require(module) :: any):GetControls()
+			end)
+			if ok then
+				controls = c
+			end
 		end
+	end
+	return controls
+end
+
+-- Matches movement to the editor state. It never yields and always applies the CURRENT state, so an
+-- open/close race can't leave the controls off.
+local function syncMovement()
+	local c = getControls()
+	if c then
+		pcall(function()
+			if editing then
+				c:Disable()
+			else
+				c:Enable()
+			end
+		end)
 	end
 end
 
@@ -427,7 +446,7 @@ function TrackEditor.close()
 	editing = false
 	panel.Visible = false
 	ProximityPromptService.Enabled = true
-	setMovement(true)
+	syncMovement()
 	if preview then
 		preview:Destroy()
 		preview = nil
@@ -480,7 +499,7 @@ function TrackEditor.open()
 	panel.Visible = true
 	-- World prompts (e.g. the station's Ride prompt) would sit over the top-down view and swallow taps.
 	ProximityPromptService.Enabled = false
-	setMovement(false)
+	syncMovement()
 	inputConn = UserInputService.InputBegan:Connect(function(input, processed)
 		if processed or not editing then
 			return

@@ -251,6 +251,12 @@ return function(_args: any): { [string]: any }
 	local coinsBeforeCancel = profile.coins
 	task.spawn(TrainService.ride, player, plotIndex)
 	task.wait(2.5)
+	local seatPart = humanoid.SeatPart
+	check(
+		"the ride had started before leaving (seated in the front seat)",
+		seatPart ~= nil and seatPart.Name == "FrontSeat",
+		seatPart and seatPart:GetFullName()
+	)
 	humanoid.Sit = false
 	humanoid.Jump = true
 	task.wait(1.5)
