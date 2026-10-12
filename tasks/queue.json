@@ -1868,7 +1868,7 @@
       "id": "TASK-0024",
       "title": "FullLoop Landmark Flake",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "in_progress",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0024-FullLoop-Landmark-Flake",
@@ -1879,8 +1879,21 @@
         "If the game is at fault, the fix is in LandmarkService and covered by a check that fails without it",
         "scripts/check.sh passes"
       ],
-      "approved_by": null,
-      "history": [],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T21:31:25",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-11T21:31:25",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0

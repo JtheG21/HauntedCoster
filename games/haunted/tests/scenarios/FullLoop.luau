@@ -72,8 +72,15 @@ return function(_args: any): { [string]: any }
 
 	-- Landmark
 	tp((World.landmarkById("Angel") :: any).position + Vector3.new(0, 0, 6))
+	local angelBlocker = LandmarkService.blocker(player, "Angel")
 	LandmarkService.investigate(player, "Angel")
-	check("landmark records clue", profile.journal.clues.Angel == true)
+	check(
+		"landmark records clue",
+		profile.journal.clues.Angel == true,
+		angelBlocker
+			or (if player.Character ~= character then "character was replaced" else nil)
+			or (if PlayerDataService.get(player) ~= profile then "profile table was replaced" else nil)
+	)
 	local before = 0
 	for _ in profile.journal.clues do
 		before += 1

@@ -54,17 +54,34 @@ local function rootOf(player: Player): BasePart?
 	return if root and root:IsA("BasePart") then root else nil
 end
 
-function LandmarkService.investigate(player: Player, lmId: string)
-	local lm = World.landmarkById(lmId)
+-- Why an investigate would be silently ignored, or nil if it can go ahead. Shared with the test scenarios
+-- so a refused investigate reports its reason (TASK-0024).
+function LandmarkService.blocker(player: Player, lmId: string): string?
 	local anchor = anchors[lmId]
 	local root = rootOf(player)
-	local profile = PlayerDataService.get(player)
-	if not (lm and anchor and root and profile) then
+	if not World.landmarkById(lmId) then
+		return "unknown landmark"
+	elseif not anchor then
+		return "no anchor"
+	elseif not root then
+		return "no character root"
+	elseif not PlayerDataService.get(player) then
+		return "no profile"
+	end
+	local dist = ((root :: BasePart).Position - (anchor :: BasePart).Position).Magnitude
+	if dist > MAX_DISTANCE then
+		local p = (root :: BasePart).Position
+		return string.format("too far: %.1f studs (root at %.0f, %.0f, %.0f)", dist, p.X, p.Y, p.Z)
+	end
+	return nil
+end
+
+function LandmarkService.investigate(player: Player, lmId: string)
+	if LandmarkService.blocker(player, lmId) then
 		return
 	end
-	if (root.Position - anchor.Position).Magnitude > MAX_DISTANCE then
-		return
-	end
+	local lm = World.landmarkById(lmId) :: World.Landmark
+	local profile = PlayerDataService.get(player) :: Profile
 	if profile.journal.clues[lm.id] then
 		StateService.toast(player, `{lm.name}: already in your journal.`, "info")
 		return

@@ -3,7 +3,7 @@ id: TASK-0024
 title: FullLoop Landmark Flake
 type: task
 project: GAME-002
-status: proposed
+status: in_progress
 priority: low
 risk: low
 owner: executor
@@ -52,7 +52,14 @@ Make FullLoop's first landmark check deterministic, so a red FullLoop always mea
 
 ---
 ## Implementation record
-*(Executor: files changed, decisions, check output)*
+| Change | Why |
+|---|---|
+| `LandmarkService.blocker(player, id)` returns the reason an investigate would be ignored (unknown landmark, no anchor, no root, no profile, or "too far: N studs (root at …)"); `investigate` uses it | Same behaviour, but the silent early returns now explain themselves (AC1 evidence) |
+| FullLoop's landmark check reports the blocker, or whether the character or profile table was replaced | The next failure names its cause |
+| New `tests/scenarios/LandmarkStart.luau`: FullLoop's opening plus the first investigate | Repeats the start-of-session check in many fresh sessions cheaply |
+
+**Evidence ([[TEST-20261011-09]]):** the teleport-revert hypothesis is not supported (20/20 clean). The plot-spawn correction, missing anchors, monster collision and random props are ruled out by reading the code. LandmarkStart 12/12, FullLoop 5/5 (81/81). **The cause is not reproduced, so AC1 is open; AC2 is met.**
+**Checks:** `scripts/check.sh`: ALL CHECKS PASSED (2026-10-11).
 
 ## Audits
 *(links to AUD- notes)*
