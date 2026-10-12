@@ -1363,7 +1363,7 @@
       "id": "TASK-0017",
       "title": "Track Editor",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [
         "TASK-0015",
@@ -1428,6 +1428,12 @@
           "from": "changes_requested",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-11T19:42:36",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
       "executions": [
@@ -1440,6 +1446,11 @@
           "time": "2026-10-11T19:35:00",
           "result": "pass",
           "notes": "Revision 1 at 5878f6d; TEST-20261011-03/04"
+        },
+        {
+          "time": "2026-10-11T19:42:36",
+          "result": "pass",
+          "notes": "Revision 2: TEST-20261011-06 (specs 51/0, ExploitProbe 13/13, FullLoop 56/56)"
         }
       ],
       "audits": [
