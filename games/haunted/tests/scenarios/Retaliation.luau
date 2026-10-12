@@ -8,6 +8,8 @@
 --  * just outside the hub edge (within the give-up distance) the pursuers stay inside the habitat
 --    footprint; running further ends the pursuit,
 --  * an error in the pursuit tick ends every pursuit and the loop keeps running,
+--  * an error part-way through starting a pursuit leaves no monster pursuing, and the target slips away
+--    (TASK-0033),
 --  * a habitat swap ends a pursuit at once, and so does the player's death.
 --   game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "Retaliation" })
 
@@ -235,6 +237,26 @@ return function(_args: any): { [string]: any }
 		check("a tick error ends the pursuit", #RetaliationService.pursuersOf(player) == 0)
 		local stuck = stuckOf(mine)
 		check("no pursuer is stuck after the error (roaming, inspectable)", stuck == 0, stuck)
+	end
+
+	-- 5b. An error while a pursuit starts: the monsters already set are released, the target slips away ----
+	task.wait(2.1)
+	RetaliationService.failNextBeginForTest()
+	local broken = failACapture()
+	check("a capture was failed with begin set to error", broken ~= nil)
+	if broken then
+		check("the target slipped away (fallback)", not broken.alive)
+		check("no pursuit record after the failed begin", #RetaliationService.pursuersOf(player) == 0)
+		local all = {}
+		local folder = Workspace:FindFirstChild("Monsters")
+		for _, m in (folder and folder:GetChildren() or {}) do
+			local e = EncounterService.get(m)
+			if e then
+				table.insert(all, e)
+			end
+		end
+		local stuck = stuckOf(all)
+		check("no monster left pursuing or uninspectable after the failed begin", stuck == 0, stuck)
 	end
 
 	-- 6. The loop survived the error: a new pursuit starts, and a habitat swap ends it at once ---------------

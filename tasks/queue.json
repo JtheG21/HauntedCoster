@@ -2539,7 +2539,7 @@
       "id": "TASK-0033",
       "title": "Retaliation Begin Cleanup",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "in_progress",
       "risk": "low",
       "depends_on": [
         "TASK-0032"
@@ -2552,10 +2552,24 @@
         "The Retaliation scenario injects a failure inside begin after the first pursuer is set and checks that no monster is left pursuing and the target was removed.",
         "Normal pursuits are unchanged: Retaliation, FullLoop and ExploitProbe pass; scripts/check.sh passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-12T13:11:00",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-12T13:11:00",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     }
   ]
 }

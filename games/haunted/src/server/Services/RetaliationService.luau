@@ -34,6 +34,7 @@ local pursuits: { [Player]: Pursuit } = {}
 local lastKnock: { [EncounterService.Encounter]: { [Player]: number } } = setmetatable({}, { __mode = "k" }) :: any
 local knockCount = 0
 local failNextTick = false -- test hook: the next tick errors
+local failNextBegin = false -- test hook: the next begin errors after setting its first pursuer
 local tickErrors = 0
 local lastKnockOf: { [Player]: number } = {} -- server time each player was last knocked down
 
@@ -89,11 +90,27 @@ function RetaliationService.begin(player: Player, target: EncounterService.Encou
 	end
 	local ids = RetaliationRules.pickPursuers(target.id, root.Position, EncounterService.candidatesForPursuit())
 	local pursuers = {}
-	for _, id in ids do
-		local e = EncounterService.byId(id)
-		if e and e.alive and EncounterService.setPursuing(e, player) then
-			table.insert(pursuers, e)
+	-- An error part-way through must not leave monsters marked as pursuing with no pursuit record (nothing
+	-- would release them): release the ones already set, then re-raise for CaptureService.onFled's pcall.
+	local ok, err = pcall(function()
+		for _, id in ids do
+			local e = EncounterService.byId(id)
+			if e and e.alive and EncounterService.setPursuing(e, player) then
+				table.insert(pursuers, e)
+				if failNextBegin then
+					failNextBegin = false
+					error("injected begin failure (test)")
+				end
+			end
 		end
+	end)
+	if not ok then
+		for _, e in pursuers do
+			pcall(function()
+				release(e)
+			end)
+		end
+		error(err, 0)
 	end
 	if #pursuers == 0 then
 		return 0
@@ -122,6 +139,11 @@ end
 
 function RetaliationService.tickErrorCount(): number
 	return tickErrors
+end
+
+-- Test-only (scenarios): the next begin raises an error after setting its first pursuer.
+function RetaliationService.failNextBeginForTest()
+	failNextBegin = true
 end
 
 -- Test-only (scenarios): the next tick raises an error, to prove the loop recovers.
