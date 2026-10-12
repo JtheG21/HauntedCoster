@@ -98,4 +98,54 @@ return function(t: TestRunner.T)
 		t.eq(p.flags.bellClue, true)
 		t.eq(p.schema, ProfileRules.Schema)
 	end)
+	t.test("isNewerSchema only flags a numeric schema above ours", function()
+		t.eq(ProfileRules.isNewerSchema({ schema = ProfileRules.Schema + 1 }), true)
+		t.eq(ProfileRules.isNewerSchema({ schema = ProfileRules.Schema }), false)
+		t.eq(ProfileRules.isNewerSchema({ schema = ProfileRules.Schema - 1 }), false)
+		t.eq(ProfileRules.isNewerSchema({ schema = "9" }), false)
+		t.eq(ProfileRules.isNewerSchema({}), false)
+		t.eq(ProfileRules.isNewerSchema(nil), false)
+	end)
+
+	t.test("a newer-schema profile is read-only, other loads keep their mode", function()
+		local newer = { schema = ProfileRules.Schema + 1, coins = 5 }
+		t.eq(ProfileRules.persistenceFor("saved", newer), "readonly")
+		t.eq(ProfileRules.persistenceFor("saved", { schema = ProfileRules.Schema }), "saved")
+		t.eq(ProfileRules.persistenceFor("saved", nil), "saved")
+		t.eq(ProfileRules.persistenceFor("memory", newer), "memory")
+	end)
+
+	t.test("a newer-schema profile's unknown fields survive sanitize (the copy it plays with)", function()
+		local p = ProfileRules.sanitize({ schema = ProfileRules.Schema + 1, coins = 7, pets = { "x" } }, now)
+		t.eq(p.coins, 7)
+		t.eq((p :: any).pets[1], "x")
+	end)
+
+	t.test("repaired lists exactly the fields that were changed", function()
+		local good = ProfileRules.sanitize(nil, now)
+		good.coins = 40
+		good.owned = { { uid = "m1", species = "Wisp", variant = "Normal", acquiredAt = 5 } }
+		good.nextUid = 2
+		local _, none = ProfileRules.sanitize(good, now)
+		t.eq(#none, 0)
+
+		local _, repaired = ProfileRules.sanitize({
+			coins = -1,
+			speedLevel = 0,
+			houseTier = 0,
+			tutorialStep = 500,
+			owned = { { uid = "m1", species = "Dragon" } },
+			route = { points = { { x = "a", z = 0 } } },
+			exhibits = { { slot = 1, uid = "m9" } },
+		}, now)
+		local set = {}
+		for _, name in repaired do
+			set[name] = true
+		end
+		for _, name in { "coins", "tutorialStep", "owned", "route", "exhibits" } do
+			t.truthy(set[name], name)
+		end
+		t.eq(set.speedLevel, nil)
+		t.eq(set.houseTier, nil)
+	end)
 end

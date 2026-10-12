@@ -3,7 +3,7 @@ id: TASK-0019
 title: Persistence and Rejoin Test
 type: task
 project: GAME-002
-status: ready
+status: done
 priority: high
 risk: high
 owner: executor
@@ -11,7 +11,7 @@ milestone: M2
 depends_on: []
 branch: task/TASK-0019-Persistence-And-Rejoin-Test
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-12
 tags:
   - workflow/task
   - milestone/m2
@@ -49,10 +49,29 @@ Proposed in [[RETRO-M1-Playable-MVP-Loop]]; created as `ready` with jg's approva
 
 ---
 ## Implementation record
-*(Executor: files changed, decisions, check output)*
+- **Approval:** created `ready` with jg's approval on 2026-10-11; jg started it in chat on 2026-10-12 ("start TASK-0019 with the code and specs first"). Part 1 is code and specs only; the live rejoin and lock checks wait for jg's private API-enabled place.
+- **References used:** none new; this is the existing `PlayerDataService` (TASK-0011).
+- **Built (part 1):**
+  - `SessionLockRules` (new, shared, pure): the `UpdateAsync` record transforms for load (claim, wait, take over), save (write only while we own the lock; release clears it) and release (only our own lock). `PlayerDataService` now calls these; behaviour unchanged.
+  - `ProfileRules.persistenceFor`: a newer-schema profile loads read-only (used by `PlayerDataService`). `sanitize` now reports a clamped `tutorialStep` in the repaired list.
+  - Specs: `SessionLockRules.spec` (8) and 4 new `ProfileRules.spec` cases (`isNewerSchema`, read-only newer schema, its fields survive sanitize, the repaired-field list).
+  - Schema-bump rule written in [[SYS-Haunted-Player-Data]] (AC4). New species, variants and flags need a bump, because an older server's `sanitize` drops unknown ones.
+- **Checks:** `scripts/check.sh` passes (specs 108/0). Negative controls: with the lost-lock check disabled, `SessionLockRules.spec` fails 1; with `isNewerSchema` off by one, `ProfileRules.spec` fails 2. Both were restored.
+- **Part 2 (live, jg's private place "Haunted", 108419797534540):** jg confirmed the place in chat on 2026-10-12 ("ok you should be able to proceed"). New scenario `Persistence` with three phases, run from Edit ([[TEST-20261012-10]]):
+  - `write` 9/9: test values saved; a second server's load refused while held; leaving released the lock.
+  - `read` 4/4: every value survived leave and rejoin (AC1). The shutdown save then wrote one more coin and released the lock (AC2).
+  - `lock` 7/7: after another server took the lock, the session wrote nothing and turned read-only.
+  - Run 1 of `write` failed one check through a test bug (it expected the tutorial step it set, but the tutorial moves on by itself); fixed before the audit.
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261012-TASK-0019-01]]: pass (3 minor, 2 nit; minors 3 and 4 and nit 6 fixed, minor 2 accepted as intentional).
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Merge** approved by jg in chat on 2026-10-12 ("merge it and do the pending tasks"). Merged through PR #29.
+- **Result:** real saving works. Every saved value survives leave and rejoin; leaving and shutdown both save and release the lock; a second server can't load a held profile; a server that lost its lock writes nothing. The lock transforms are now pure and spec-tested.
+- **Intentional change:** a clamped `tutorialStep` is now listed in the repaired-fields warning (warn only; [[AUD-20261012-TASK-0019-01]] finding 2).
+- **Lessons:** the game changes some values on its own (the tutorial advances, `sanitize` marks owned species caught), so a persistence check must compare with what was actually saved, not with what the test set.
+- **Follow-ups:**
+  - Adding a species, variant or flag must bump `ProfileRules.Schema` and migrate in `sanitize` (rule in [[SYS-Haunted-Player-Data]]).
+  - A true two-server lock test needs a live, running experience; only simulated here.
+  - TASK-0021 (anti-cheat hardening) was waiting on this task and is now unblocked.
