@@ -1868,7 +1868,7 @@
       "id": "TASK-0024",
       "title": "FullLoop Landmark Flake",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0024-FullLoop-Landmark-Flake",
@@ -1904,6 +1904,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-11T21:51:02",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -1920,7 +1926,8 @@
           "report": "06 QA/AUD-20261011-TASK-0024-01.md"
         }
       ],
-      "revisions": 0
+      "revisions": 0,
+      "merge_approved_by": "jg"
     }
   ]
 }

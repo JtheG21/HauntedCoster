@@ -3,7 +3,7 @@ id: TASK-0024
 title: FullLoop Landmark Flake
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: low
 risk: low
 owner: executor
@@ -65,4 +65,7 @@ Make FullLoop's first landmark check deterministic, so a red FullLoop always mea
 - [[AUD-20261011-TASK-0024-01]]: pass (0 blocker, 0 major, 3 nit)
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** jg approved the merge on 2026-10-11 after [[AUD-20261011-TASK-0024-01]] passed. PR: JtheG21/HauntedCoster#15. The flake did not reproduce in 17 runs. The task ships diagnostics: `LandmarkService.blocker`, the FullLoop detail, and the `LandmarkStart` probe. AC1 was reworded by jg.
+- **Cause:** still unknown. Ruled out: teleport revert, the home-spawn correction, missing anchors, monster collision and random props ([[TEST-20261011-09]]). Untested: the first play session after a Rojo resync (cold start).
+- **Lesson:** an intermittent check that fails with no detail can't be diagnosed after the fact. Silent guard returns should be observable to tests from the start.
+- **Follow-ups (audit nits):** a "guards passed" fallback detail in FullLoop's landmark check; keep `LandmarkStart` in step with FullLoop's opening. Reopen as a bug if the check fails again.
