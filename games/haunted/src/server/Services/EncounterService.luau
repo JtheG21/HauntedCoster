@@ -395,6 +395,43 @@ function EncounterService.respawnEscaped(speciesId: string, variantId: string)
 	-- Every zone is full: the spawner will repopulate later.
 end
 
+-- Removes every wild monster (for a habitat swap, TASK-0027). A fleeing escaped capture belongs to its
+-- player, not to the habitat, and is kept. Returns how many were removed.
+function EncounterService.clearWild(): number
+	local n = 0
+	for _, e in encounters do
+		if not e.fleeing then
+			EncounterService.remove(e)
+			n += 1
+		end
+	end
+	return n
+end
+
+-- Initial population of the active habitat: its guaranteed monster for the tutorial (a Wisp by the
+-- central landmark), then a few spawner passes. Called at start and after each habitat swap.
+function EncounterService.populate()
+	if not started then
+		return
+	end
+	local starter = Habitats.active().starter
+	if starter then
+		EncounterService.spawn(starter.species, Variants.Normal, starter.zone, starter.at)
+	end
+	for _ = 1, 3 do
+		fillZones()
+	end
+end
+
+-- Every live encounter's species and zone (scenarios check a swap left nothing behind).
+function EncounterService.snapshot(): { { species: string, zone: string, fleeing: boolean } }
+	local out = {}
+	for _, e in encounters do
+		table.insert(out, { species = e.species, zone = e.zone, fleeing = e.fleeing ~= nil })
+	end
+	return out
+end
+
 function EncounterService.start()
 	if started then
 		return
@@ -403,14 +440,7 @@ function EncounterService.start()
 	folder = Instance.new("Folder")
 	folder.Name = "Monsters"
 	folder.Parent = Workspace
-	-- Initial population: the habitat's guaranteed monster for the tutorial (a Wisp by the Weeping Angel).
-	local starter = Habitats.active().starter
-	if starter then
-		EncounterService.spawn(starter.species, Variants.Normal, starter.zone, starter.at)
-	end
-	for _ = 1, 3 do
-		fillZones()
-	end
+	EncounterService.populate()
 	task.spawn(function()
 		while true do
 			task.wait(SPAWN_INTERVAL)

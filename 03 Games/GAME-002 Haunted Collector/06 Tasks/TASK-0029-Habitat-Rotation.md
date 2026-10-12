@@ -33,6 +33,7 @@ The active habitat follows a shared 15-minute, four-habitat schedule that every 
   - New capture starts refused while closing.
   - The swap policy approved in ADR-0007 (players inside, open meters, fleeing escapes).
   - A short fog transition. The incoming module activates only after cleanup and validation.
+- From [[AUD-20261012-TASK-0027-01]]: `EncounterService.clearWild` removes a claimed encounter but leaves its capture session open until the next release; the swap must end those sessions (AC3). A kept fleeing monster carries an old-module zone id (nil-safe); the swap-with-chase case needs a scenario (AC4).
 - **Out:** cinematic transitions, cross-server messaging, per-habitat mechanics.
 
 ## Acceptance criteria

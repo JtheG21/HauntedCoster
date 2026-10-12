@@ -10,15 +10,14 @@ print(`[HauntedCollector] server build {BuildInfo.stamp()}`)
 
 local Remotes = require(script.Remotes)
 local HubBuilder = require(script.World.HubBuilder)
-local CemeteryBuilder = require(script.World.Habitats.Cemetery)
-local Habitats = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("Habitats"))
-local HabitatRules = require(ReplicatedStorage.Shared:WaitForChild("Rules"):WaitForChild("HabitatRules"))
+local StudioTestHook = require(script.StudioTestHook)
 local Services = script.Services
 
 local PlayerDataService = require(Services.PlayerDataService)
 local StateService = require(Services.StateService)
 local PlotService = require(Services.PlotService)
 local MovementService = require(Services.MovementService)
+local HabitatService = require(Services.HabitatService)
 local EncounterService = require(Services.EncounterService)
 local CaptureService = require(Services.CaptureService)
 local ContainmentService = require(Services.ContainmentService)
@@ -26,18 +25,13 @@ local EconomyService = require(Services.EconomyService)
 local TrainService = require(Services.TrainService)
 local TutorialService = require(Services.TutorialService)
 
--- The persistent outer world, then the active habitat module inside the hub wall (ADR-0007).
+-- The persistent outer world, then every habitat module (one active inside the hub wall, ADR-0007).
+-- In Studio test runs the `habitat` argument picks the starting module.
 local hub = HubBuilder.build(Workspace)
-for _, problem in HabitatRules.validate(Habitats.active()) do
-	warn(`[Habitats] {problem}`)
-end
-local habitatFolder = Instance.new("Folder")
-habitatFolder.Name = "Habitat"
-habitatFolder.Parent = Workspace
-CemeteryBuilder.build(Habitats.active()).model.Parent = habitatFolder
-HubBuilder.setGateLabel(hub, Habitats.active().name)
+local initialHabitat = StudioTestHook.arg("habitat")
+HabitatService.start(hub, if type(initialHabitat) == "string" then initialHabitat else nil)
 
-require(script.StudioTestHook).start()
+StudioTestHook.start()
 
 PlayerDataService.start()
 StateService.start()
@@ -50,6 +44,13 @@ EconomyService.start()
 TrainService.start()
 TutorialService.start()
 
+-- A habitat swap clears the old module's wild monsters and populates the new one.
+HabitatService.onDeactivating(function()
+	EncounterService.clearWild()
+end)
+HabitatService.onActivated(function()
+	EncounterService.populate()
+end)
 -- Monsters being carried home still count toward rare spawn caps.
 EncounterService.setOutsideCounter(CaptureService.carriedCount)
 -- Securing a monster updates the pen and the train's payout preview.

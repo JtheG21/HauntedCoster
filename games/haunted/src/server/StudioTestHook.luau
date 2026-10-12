@@ -12,6 +12,21 @@ local StudioTestHook = {}
 
 local started = false
 
+-- A named play-test argument, in Studio test runs only (nil in live servers and normal play). Used to pick
+-- the starting habitat: ExecutePlayModeAsync({ scenario = "Reachability", habitat = "Woodland" }).
+function StudioTestHook.arg(name: string): any
+	if not RunService:IsStudio() or not RunService:IsServer() then
+		return nil
+	end
+	local ok, args = pcall(function()
+		return game:GetService("StudioTestService"):GetTestArgs()
+	end)
+	if ok and typeof(args) == "table" then
+		return (args :: any)[name]
+	end
+	return nil
+end
+
 function StudioTestHook.start()
 	if started or not RunService:IsStudio() or not RunService:IsServer() then
 		return

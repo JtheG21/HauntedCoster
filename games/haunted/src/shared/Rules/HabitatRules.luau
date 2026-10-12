@@ -5,6 +5,7 @@
 local Shared = script.Parent.Parent
 local World = require(Shared.Config.World)
 local Habitats = require(Shared.Config.Habitats)
+local Monsters = require(Shared.Config.Monsters)
 
 local HabitatRules = {}
 
@@ -104,11 +105,38 @@ function HabitatRules.validate(habitat: Habitats.Habitat): { string }
 		if next(zone.spawns) == nil then
 			bad(`zone {zone.id} spawns nothing`)
 		end
+		for species, weight in zone.spawns do
+			if not Monsters.Species[species] then
+				bad(`zone {zone.id} spawns unknown species {species}`)
+			end
+			if type(weight) ~= "number" or weight <= 0 then
+				bad(`zone {zone.id} has a bad weight for {species}`)
+			end
+		end
 	end
 	if #habitat.landmarks < 2 then
 		bad("needs at least two landmarks")
 	end
+	local landmarkIds: { [string]: boolean } = {}
 	for _, lm in habitat.landmarks do
+		if landmarkIds[lm.id] then
+			bad(`duplicate landmark id {lm.id}`)
+		end
+		landmarkIds[lm.id] = true
+		local zoneId = lm.zone
+		if zoneId then
+			local zone: World.Zone? = nil
+			for _, z in habitat.zones do
+				if z.id == zoneId then
+					zone = z
+				end
+			end
+			if not zone then
+				bad(`landmark {lm.id} names missing zone {zoneId}`)
+			elseif not World.inRect(zone.rect, lm.position.X, lm.position.Z) then
+				bad(`landmark {lm.id} isn't inside its zone {zoneId}`)
+			end
+		end
 		if not HabitatRules.inFootprint(lm.position.X, lm.position.Z, 4) then
 			bad(`landmark {lm.id} leaves the footprint`)
 		end

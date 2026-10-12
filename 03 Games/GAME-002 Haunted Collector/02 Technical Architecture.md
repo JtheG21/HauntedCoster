@@ -35,9 +35,10 @@ The server is authoritative. Code lives in `games/haunted/src/{server,shared,cli
 
 ## World layout (M3, [[ADR-0007-World-Retrofit-Direction]])
 - `shared/Config/World`: the hub (wall r 115, footprint r 112, ring road r 120–132, gates at 0°/120°/240°) and the plot ring (centres at r 185, angles 30° + 60k). Each plot has a frame, `World.plotFrame(i)`, whose -Z faces the hub. Every plot-local point or direction goes through `plotToWorld`, `worldToPlot` or `plotDirToWorld`. Plot geometry is built at local coordinates and placed with `Build.toFrame`. Saved routes and `TrackRules` stay plot-local, so they're unchanged.
-- `shared/Config/Habitats`: the module contract (zones, landmarks, paths, one path per gate, plaza, crypt, starter) and the Ghost Cemetery. `Habitats.active()` is the live module; TASK-0027 adds the other three and swapping.
-- `shared/Rules/HabitatRules`: pure footprint, corridor and path checks, plus `validate` (warnings at server start).
-- `server/World`: `HubBuilder` (persistent ground, ring road, hub wall and gates, spokes, lights), `Atmosphere` (lighting), `Props` (the shared prop kit) and `Habitats/Cemetery` (the module builder). Workspace holds `World`, `Habitat/<id>`, `Plots` and `Monsters`.
+- `shared/Config/Habitats`: the module contract (zones, landmarks, paths, one path per gate, plaza, crypt, starter) and the four modules in rotation order (Ghost Cemetery, Cursed Woodland, Spider Woodland, Zombie Settlement). `Habitats.active()` is the live module; the server sets it and mirrors it to the Workspace attribute `ActiveHabitat`, which the client follows.
+- `shared/Rules/HabitatRules`: pure footprint, corridor and path checks, plus `validate` (species, weights, landmark zones; warnings at server start).
+- `server/Services/HabitatService`: prebuilds every module into `ServerStorage.HabitatModules` and parents one under `Workspace.Habitat`. `activate` / `deactivate` hooks clear wild monsters (`EncounterService.clearWild`, fleeing escapes kept) and repopulate (`EncounterService.populate`). In Studio test runs the `habitat` argument picks the starting module.
+- `server/World`: `HubBuilder` (persistent ground, ring road, hub wall and gates, spokes, lights), `Atmosphere` (lighting), `Props` (the shared prop kit), `Habitats/Kit` (shared module building steps) and one builder per module in `Habitats/`. Workspace holds `World`, `Habitat/<id>`, `Plots` and `Monsters`.
 
 ## Remotes & trust boundary
 - Clients send **intents only**: start capture, release time, investigate, secure, purchase id, route control points, ride start, exhibit slot assignment.

@@ -32,6 +32,7 @@ The world's visual signature (a purple sky, green-tinted haze and warm orange pa
   - The shared kit: ground transitions, path edges, gravestones, trees and roots, fence and gate, lanterns and candles, ruined masonry.
   - Detailed Weeping Angel and Bell Tower.
   - One complete vignette: a winding path with a side route, gravestones, vegetation, a lit segment and both landmarks.
+- From [[AUD-20261012-TASK-0027-01]] finding 1: `Kit.freeGround` checks only a prop's centre against gate corridors; give scenery a radius margin (long logs, cottage walls) and rerun Reachability on all four modules.
 - **Out:** detail in the other three habitats, houses and trains (TASK-0030), uploaded or generated assets, flashlight changes.
 - **References:** map references 3 and 7 (sky and ground glow, framed path), 5 and 6 (chunky tombstones, spiked iron, warm-lit faced trees). Qualities only ([[RSH-20261012-World-Retrofit-Audit]]).
 

@@ -1,11 +1,12 @@
 --!strict
 -- Map reachability proof on the built world, using the engine's own pathfinder (TASK-0012 AC1, TASK-0026 AC6):
---  * every hub gate, open zone and landmark of the active habitat is reachable on foot from home,
---  * every plot reaches the habitat, and the hub wall blocks between gates,
---  * the Sealed Crypt interior is NOT reachable while its gate is closed (checked again with it open),
---  * a real walk (Humanoid:MoveTo along the path) from home reaches the Weeping Angel, and
+--  * every open zone and landmark of the active habitat is reachable on foot from home,
+--  * every plot reaches every hub gate and the habitat, and the hub wall blocks between gates,
+--  * a walled crypt (the cemetery's) is NOT reachable while its gate is closed (checked again with it open),
+--  * a real walk (Humanoid:MoveTo along the path) from home reaches the habitat's first landmark, and
 --  * the longest walk home (habitat zone -> pen) is measured and reported for tuning.
---   game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "Reachability" })
+-- The `habitat` argument picks the module (TASK-0027 AC2):
+--   game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "Reachability", habitat = "Woodland" })
 
 local PathfindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players")
@@ -16,7 +17,7 @@ local World = require(ReplicatedStorage.Shared.Config.World)
 local Habitats = require(ReplicatedStorage.Shared.Config.Habitats)
 local EconomyRules = require(ReplicatedStorage.Shared.Rules.EconomyRules)
 
-return function(_args: any): { [string]: any }
+return function(args: any): { [string]: any }
 	local checks: { { name: string, ok: boolean, detail: string? } } = {}
 	local function check(name: string, ok: boolean, detail: any?)
 		table.insert(checks, { name = name, ok = ok == true, detail = if detail ~= nil then tostring(detail) else nil })
@@ -85,10 +86,22 @@ return function(_args: any): { [string]: any }
 		return ok, status
 	end
 
-	-- Gates, zones, landmarks of the active habitat
-	for g = 1, #World.Hub.gateAngles do
-		local ok, status = reach(World.gatePoint(g, World.Hub.moduleRadius - 8))
-		check(`hub gate {g} reachable from home`, ok, status)
+	check(
+		"the requested habitat is active",
+		args == nil or args.habitat == nil or habitat.id == args.habitat,
+		`{habitat.id} (asked for {args and args.habitat})`
+	)
+	-- Every plot reaches every gate; then zones and landmarks of the active habitat from home
+	for i = 1, #World.PlotCenters do
+		local failedGates = {}
+		for g = 1, #World.Hub.gateAngles do
+			local ok, status =
+				route(World.plotToWorld(i, World.Plot.spawn), World.gatePoint(g, World.Hub.moduleRadius - 8))
+			if not ok then
+				table.insert(failedGates, `{g}:{status}`)
+			end
+		end
+		check(`plot {i} reaches all three hub gates`, #failedGates == 0, table.concat(failedGates, " "))
 	end
 	for _, lm in habitat.landmarks do
 		local ok, status = reach(lm.position + Vector3.new(0, 0, 7))
@@ -123,8 +136,12 @@ return function(_args: any): { [string]: any }
 	-- succeed, so "not reachable" above comes from the gate, not from bad targets or geometry.
 	local habitatFolder = Workspace:FindFirstChild("Habitat")
 	local cryptGate = habitatFolder and habitatFolder:FindFirstChild("CryptGate", true) :: BasePart?
-	check("crypt gate found for the positive control", cryptGate ~= nil)
-	if cryptGate then
+	if habitat.crypt then
+		check("crypt gate found for the positive control", cryptGate ~= nil)
+	else
+		check("no crypt in this habitat, and no crypt gate built", cryptGate == nil)
+	end
+	if cryptGate and habitat.crypt then
 		local cryptCollide = cryptGate.CanCollide
 		cryptGate.CanCollide = false
 		-- Always restore the gate, even if a control errors.
@@ -188,10 +205,11 @@ return function(_args: any): { [string]: any }
 		)
 	end
 
-	-- Real walk: home -> Weeping Angel along the computed path.
+	-- Real walk: home -> the habitat's first landmark along the computed path.
 	character:PivotTo(CFrame.new(home + Vector3.new(0, 3, 0)))
 	task.wait(1)
-	local angelPos = (Habitats.landmarkById("Angel") :: any).position + Vector3.new(0, 0, 7)
+	local firstLandmark = habitat.landmarks[1]
+	local angelPos = firstLandmark.position + Vector3.new(0, 0, 7)
 	local walk = newPath()
 	pcall(function()
 		walk:ComputeAsync(root.Position, angelPos)
@@ -221,7 +239,7 @@ return function(_args: any): { [string]: any }
 			< 12
 	end
 	check(
-		"walked from home to the Weeping Angel",
+		`walked from home to the {firstLandmark.name}`,
 		arrived,
 		string.format("%.0fs, end %s", os.clock() - started, tostring(root.Position))
 	)
