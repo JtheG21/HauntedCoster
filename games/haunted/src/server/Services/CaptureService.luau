@@ -77,6 +77,7 @@ local carries: { [Player]: Carry } = {}
 local chases: { [Player]: Chase } = {}
 local securedCallbacks: { (Player, ProfileRules.OwnedMonster) -> () } = {}
 local closing = false -- the last seconds before a habitat swap: no new captures (TASK-0029)
+local fledCallbacks: { (Player, EncounterService.Encounter) -> boolean } = {}
 
 local function rootOf(player: Player): BasePart?
 	local character = player.Character
@@ -454,6 +455,9 @@ local function onCaptureStart(player: Player, model: any): { [string]: any }
 	if e.fleeing then
 		return { ok = false, reason = "It's running from someone else" }
 	end
+	if e.pursuing then
+		return { ok = false, reason = "It's charging! Get clear first." }
+	end
 	if EncounterService.isStartled(e) then
 		return { ok = false, reason = "It's skittish. Give it a moment." }
 	end
@@ -503,6 +507,37 @@ local function onCaptureStart(player: Player, model: any): { [string]: any }
 	}
 end
 
+-- The last miss: the monster gets away. With retaliation wired (TASK-0031) it turns on the player instead
+-- of vanishing; otherwise (no handler took it) it slips away as before.
+local function onFled(player: Player, s: Session)
+	local e = s.encounter
+	endSession(player, "fled")
+	EncounterService.release(e)
+	for _, fn in fledCallbacks do
+		if fn(player, e) then
+			return
+		end
+	end
+	EncounterService.remove(e)
+	StateService.toast(player, "It slipped away into the dark! Find another.", "error")
+end
+
+-- `fn(player, encounter)` returns true when it took the fled monster (RetaliationService).
+function CaptureService.onFled(fn: (Player, EncounterService.Encounter) -> boolean)
+	table.insert(fledCallbacks, fn)
+end
+
+-- Test-only (scenarios): the open session's last miss happens now.
+function CaptureService.failForTest(player: Player): boolean
+	local s = sessions[player]
+	if not s then
+		return false
+	end
+	s.misses = s.missesAllowed
+	onFled(player, s)
+	return true
+end
+
 local function onCaptureRelease(player: Player): { [string]: any }
 	local s = sessions[player]
 	if not s then
@@ -536,10 +571,7 @@ local function onCaptureRelease(player: Player): { [string]: any }
 		EncounterService.remove(e)
 		startCarry(player, e.species, e.variant)
 	elseif outcome == "fled" then
-		local e = s.encounter
-		endSession(player, "fled")
-		EncounterService.remove(e)
-		StateService.toast(player, "It slipped away into the dark! Find another.", "error")
+		onFled(player, s)
 	elseif outcome == "miss" then
 		-- A miss startles it (Round 20 Q2): the meter closes and it hops away; walk up and try again.
 		local e = s.encounter

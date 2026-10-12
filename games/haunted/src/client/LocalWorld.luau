@@ -171,7 +171,41 @@ local function updateMonsterMarkers()
 	end
 end
 
+-- Retaliation knockdown (TASK-0031): while the server's `KnockedDownUntil` (server time) is in the future,
+-- the character goes limp (Physics state, so it can't walk) and then gets back up. No damage.
+local function watchKnockdown(character: Model)
+	local humanoid = character:WaitForChild("Humanoid", 10)
+	if not humanoid or not humanoid:IsA("Humanoid") then
+		return
+	end
+	local hum: Humanoid = humanoid
+	character:GetAttributeChangedSignal("KnockedDownUntil"):Connect(function()
+		local untilT = character:GetAttribute("KnockedDownUntil")
+		if type(untilT) ~= "number" then
+			return
+		end
+		local left = untilT - Workspace:GetServerTimeNow()
+		if left <= 0 then
+			return
+		end
+		hum:ChangeState(Enum.HumanoidStateType.Physics)
+		local root = character:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") then
+			root.AssemblyLinearVelocity += root.CFrame.LookVector * -18 + Vector3.new(0, 14, 0)
+		end
+		task.delay(left, function()
+			if hum.Parent and hum.Health > 0 then
+				hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+			end
+		end)
+	end)
+end
+
 function LocalWorld.start()
+	player.CharacterAdded:Connect(watchKnockdown)
+	if player.Character then
+		task.spawn(watchKnockdown, player.Character)
+	end
 	player.CharacterAdded:Connect(attachLight)
 	if player.Character then
 		task.spawn(attachLight, player.Character)

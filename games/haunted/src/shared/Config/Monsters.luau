@@ -95,6 +95,20 @@ Monsters.Chase = {
 	regrabSeconds = 20,
 }
 
+-- Failed-capture retaliation (TASK-0031, ADR-0007 "final miss only"): when the last miss lets a monster
+-- go, it and up to `maxExtra` wild monsters within `radius` studs of the player chase that player.
+Monsters.Retaliation = {
+	radius = 30, -- studs from the player
+	maxExtra = 2, -- besides the target
+	speed = 13.5, -- studs/s (players run 16)
+	seconds = 8, -- longest pursuit
+	catchDistance = 3.5, -- studs (flat)
+	knockdownSeconds = 1.5, -- ragdoll time, no damage
+	cooldownSeconds = 20, -- the same monster can't knock the same player down again within this
+	graceSeconds = 3, -- after getting up, no monster can knock that player down again for this long
+	giveUpDistance = 60, -- studs: outrun them and they give up
+}
+
 Monsters.RarityColor = {
 	Common = Color3.fromRGB(190, 200, 210),
 	Uncommon = Color3.fromRGB(120, 220, 140),

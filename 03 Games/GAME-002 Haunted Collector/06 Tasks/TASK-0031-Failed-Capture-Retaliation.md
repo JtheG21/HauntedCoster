@@ -3,7 +3,7 @@ id: TASK-0031
 title: Failed-Capture Retaliation
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: medium
 risk: medium
 owner: executor
@@ -42,6 +42,17 @@ A failed capture turns into a short, local chase: the target and a few nearby mo
 
 ---
 ## Implementation record
+- **References used:** Npc_template's Idle → Hunting → WindingDown state shape ([[Npc_template]] guide, via [[RSH-20261012-World-Retrofit-Audit]]): adapted as roaming → pursuing → giving up. Not used: its unlimited targeting and Humanoid NPCs. Monsters stay anchored and server-stepped, like the escape chase. Not re-opened in this task.
+- **Built:**
+  - `Monsters.Retaliation` config (ADR-0007 numbers, plus catch distance 3.5, cooldown 20 s, give-up distance 60, grace 3 s).
+  - Pure `RetaliationRules`: `pickPursuers`, `pursueStep` (never leaves the habitat region, never enters the crypt from outside), `caught`, `endReason`, `canKnock`.
+  - `RetaliationService`: `begin(player, target)` on the last miss; a 0.25 s tick steps the pursuers and handles catches. A catch sets the character attribute `KnockedDownUntil`, then that pursuer gives up. Pursuits end on timeout, escape, death, leaving, or a swap (`stopAll` from `HabitatService.onDeactivating`).
+  - `EncounterService`: a `pursuing` state, pursuers skipped by the roam loop, `setPursuing` / `stepTo` / `candidatesForPursuit` / `byId`.
+  - `CaptureService`: the final miss goes to `onFled` handlers (RetaliationService) and falls back to "slipped away"; pursuers can't be captured; `failForTest`.
+  - Client `LocalWorld`: the knockdown goes into the Physics state with a small knock-back, then GettingUp. No damage anywhere.
+- **Decision during testing:** a per-player grace period (3 s after getting up). The per-pursuer cooldown alone let a second pursuer knock a player down again straight away ([[TEST-20261012-07]] run 1).
+- **AC4:** single misses still startle (unchanged code path); the ChaseRules and CaptureRules specs pass.
+- **Evidence:** [[TEST-20261012-07]].
 
 ## Audits
 
