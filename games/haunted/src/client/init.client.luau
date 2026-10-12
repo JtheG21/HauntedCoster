@@ -2,6 +2,7 @@
 -- GAME-002 Haunted Collector: client entry point. Mounts the HUD and menus, and wires input.
 
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
@@ -12,6 +13,10 @@ local CaptureUI = require(script.UI.CaptureUI)
 local MansionUI = require(script.UI.MansionUI)
 local JournalUI = require(script.UI.JournalUI)
 local TrackEditor = require(script.UI.TrackEditor)
+
+local BuildInfo = require(ReplicatedStorage.Shared.BuildInfo)
+
+print(`[HauntedCollector] client build {BuildInfo.stamp()}`)
 
 local player = Players.LocalPlayer
 

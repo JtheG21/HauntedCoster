@@ -31,7 +31,9 @@ tasks/prompts/
 .claude/skills/*/LOCAL.md
 .claude/skills/*/work/
 
-# GAME-002 built place and sourcemap
+# Built place, the GAME-001 sourcemap (sourcemap.json is GAME-002) and the local build stamp (scripts/stamp.sh)
 /HauntedCollector.rbxl
 /HauntedCollector.rbxl.lock
+game001-sourcemap.json
 haunted-sourcemap.json
+games/haunted/src/shared/BuildStamp.txt

@@ -2,7 +2,11 @@
 -- GAME-002 Haunted Collector: server entry point. Builds the world, then starts services in
 -- dependency order. Cross-service hooks are wired here so services don't require each other in cycles.
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
+
+local BuildInfo = require(ReplicatedStorage.Shared.BuildInfo)
+print(`[HauntedCollector] server build {BuildInfo.stamp()}`)
 
 local Remotes = require(script.Remotes)
 local GraveyardBuilder = require(script.World.GraveyardBuilder)
