@@ -512,9 +512,16 @@ end
 local function onFled(player: Player, s: Session)
 	local e = s.encounter
 	endSession(player, "fled")
+	-- The monster got away from this player: a later attempt on it starts fresh (jg, TASK-0032), not one
+	-- miss from fleeing again with counters kept from earlier walk-aways or startles.
+	e.progress[player] = nil
 	EncounterService.release(e)
 	for _, fn in fledCallbacks do
-		if fn(player, e) then
+		-- A handler that errors doesn't take the monster: it still slips away below.
+		local ok, took = pcall(fn, player, e)
+		if not ok then
+			warn(`[CaptureService] onFled handler failed: {took}`)
+		elseif took then
 			return
 		end
 	end

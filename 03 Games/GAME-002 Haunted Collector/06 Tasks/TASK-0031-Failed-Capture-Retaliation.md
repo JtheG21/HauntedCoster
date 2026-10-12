@@ -66,5 +66,6 @@ A failed capture turns into a short, local chase: the target and a few nearby mo
   - Decide whether a monster that retaliated keeps the player's miss count (jg). Today a retry starts one miss from fleeing.
   - Strengthen the scenario: containment at the hub edge, plus a death ending.
   - Comment the Inspect re-enable assumption.
+- **Follow-ups addressed** in [[TASK-0032-Retaliation-Hardening]] (2026-10-12): the protected tick, the protected `onFled` handlers, the miss count (jg: clear it on fled), the stronger scenario and the Inspect comment.
 - **Needs jg:** the feel of the numbers (8 s, 13.5 studs/s, 1.5 s knockdown, 3 s grace).
 
