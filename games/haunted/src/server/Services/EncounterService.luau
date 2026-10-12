@@ -445,6 +445,9 @@ function EncounterService.setPursuing(e: Encounter, player: Player?): boolean
 		return true
 	end
 	e.pursuing = nil
+	-- Re-enables Inspect unconditionally: a pursuer is always a free, wild monster (checked above when the
+	-- pursuit started, and capture start refuses a pursuer), so nothing else had it disabled meanwhile. If
+	-- another state ever disables Inspect while a monster pursues, restore it from that state instead.
 	local inspect = e.root:FindFirstChild("Inspect")
 	if inspect and inspect:IsA("ProximityPrompt") then
 		inspect.Enabled = true

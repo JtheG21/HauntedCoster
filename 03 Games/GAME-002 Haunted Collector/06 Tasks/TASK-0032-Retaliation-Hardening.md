@@ -58,7 +58,14 @@ Close the follow-ups from [[AUD-20261012-TASK-0031-01]]: retaliation must surviv
 
 ---
 ## Implementation record
-*(Executor: files changed, decisions, check output)*
+- **References used:** none new. The recovery pattern is `RotationService.swap` (TASK-0029 revision 1).
+- **Built:**
+  - `RetaliationService`: the tick runs under `pcall`. On error, `abandonAll` warns, empties the pursuit table and releases every pursuer (each release under its own `pcall`), and the loop carries on. Test hooks: `failNextTickForTest`, `tickErrorCount`.
+  - `CaptureService.onFled`: clears `e.progress[player]` (jg: "Clear on fled", 2026-10-12) and runs each fled handler under `pcall`. A handler that errors is warned and doesn't count as taking the monster, so the "slipped away" fallback still runs.
+  - `EncounterService.setPursuing(nil)`: a comment on why re-enabling Inspect unconditionally is safe today.
+  - `Retaliation` scenario: checks the cleared counters (on fled, and a retry starting at 0/0), containment on the ring road just past the wall (pursuit still running, pursuers within the 112-stud footprint), the tick-error recovery, a pursuit starting after the error, and a death ending.
+- **Studio sync note:** the running Rojo server serves the main checkout, so the four changed sources were written into Studio's Edit model through MCP (byte counts checked against the worktree). Studio still holds these sources (unsaved); Rojo resyncs from disk on reconnect.
+- **Checks:** `scripts/check.sh` passes (specs 96/0). Retaliation 31/31 (run 2, after seeding saved counters so the counter checks can fail), FullLoop 85/85, ExploitProbe 13/13 ([[TEST-20261012-08]]).
 
 ## Audits
 *(links to AUD- notes)*

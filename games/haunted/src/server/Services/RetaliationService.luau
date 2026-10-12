@@ -33,6 +33,8 @@ local pursuits: { [Player]: Pursuit } = {}
 -- Per pursuer, per player: when it last knocked them down (cooldown).
 local lastKnock: { [EncounterService.Encounter]: { [Player]: number } } = setmetatable({}, { __mode = "k" }) :: any
 local knockCount = 0
+local failNextTick = false -- test hook: the next tick errors
+local tickErrors = 0
 local lastKnockOf: { [Player]: number } = {} -- server time each player was last knocked down
 
 local function rootOf(player: Player): BasePart?
@@ -118,7 +120,20 @@ function RetaliationService.knockCount(): number
 	return knockCount
 end
 
+function RetaliationService.tickErrorCount(): number
+	return tickErrors
+end
+
+-- Test-only (scenarios): the next tick raises an error, to prove the loop recovers.
+function RetaliationService.failNextTickForTest()
+	failNextTick = true
+end
+
 local function tick()
+	if failNextTick then
+		failNextTick = false
+		error("injected tick failure (test)")
+	end
 	local now = os.clock()
 	local serverNow = Workspace:GetServerTimeNow()
 	for player, p in pursuits do
@@ -171,6 +186,25 @@ local function tick()
 	end
 end
 
+-- The tick failed part-way: end every pursuit so no monster is left stuck chasing (uncapturable, with
+-- Inspect off), then carry on with the next tick (the same recovery as RotationService.swap, TASK-0029).
+local function abandonAll(err: any)
+	tickErrors += 1
+	warn(`[RetaliationService] tick failed, ending every pursuit: {err}`)
+	local all = pursuits
+	pursuits = {}
+	for _, p in all do
+		for _, e in p.pursuers do
+			local ok, releaseErr = pcall(function()
+				release(e)
+			end)
+			if not ok then
+				warn(`[RetaliationService] could not release a pursuer: {releaseErr}`)
+			end
+		end
+	end
+end
+
 function RetaliationService.start()
 	if started then
 		return
@@ -179,7 +213,12 @@ function RetaliationService.start()
 	task.spawn(function()
 		while true do
 			task.wait(STEP_SECONDS)
-			tick()
+			local ok, err = pcall(function()
+				tick()
+			end)
+			if not ok then
+				abandonAll(err)
+			end
 		end
 	end)
 	Players.PlayerRemoving:Connect(function(player)
