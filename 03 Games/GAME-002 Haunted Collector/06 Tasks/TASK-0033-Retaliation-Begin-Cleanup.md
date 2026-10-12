@@ -3,7 +3,7 @@ id: TASK-0033
 title: Retaliation Begin Cleanup
 type: task
 project: GAME-002
-status: proposed
+status: done
 priority: low
 risk: low
 owner: executor
@@ -54,10 +54,22 @@ Close finding 1 of [[AUD-20261012-TASK-0032-01]]. Today `RetaliationService.begi
 
 ---
 ## Implementation record
-*(Executor: files changed, decisions, check output)*
+- **Approval:** jg approved the start in chat on 2026-10-12 ("merge #27 and start TASK-0033").
+- **Decision:** wrap `begin`'s setup loop in `pcall`, release every monster already set, then re-raise. The other option (create the record first) would have let a half-started pursuit carry on with the extras while the target was removed. Releasing all of them matches AC1 exactly and leaves `onFled`'s fallback in charge.
+- **Built:** `RetaliationService.begin` (protected setup, release, `error(err, 0)` re-raise). Test hook `failNextBeginForTest`, used by the scenario only. `Retaliation` scenario step 5b: the target slips away, there is no pursuit record, and no monster is left pursuing or with Inspect off. This also covers the erroring `onFled` handler path (finding 2 of [[AUD-20261012-TASK-0032-01]]).
+- **Checks (attempt 1):** `scripts/check.sh` passes (specs 96/0). Retaliation 35/35, FullLoop 85/85, ExploitProbe 13/13 ([[TEST-20261012-09]]).
+- **Revision 1** (after [[AUD-20261012-TASK-0033-01]], fail):
+  - The hook now fails once the target and an extra are set, and the scenario picks a target with a free neighbour. The step checks the monsters the failed `begin` had set (`lastFailedBeginForTest`), and the flag is cleared after the step.
+  - `begin` also releases a monster whose own `setPursuing` threw after marking it (finding 2).
+  - A negative control with the release loop disabled failed step 5b (1 extra stuck), so the step can catch the regression.
+  - Results: `scripts/check.sh` passes; Retaliation 36/36, FullLoop 85/85, ExploitProbe 13/13.
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261012-TASK-0033-01]]: fail (1 major: the scenario step couldn't catch the regression; 1 minor; 2 nit). Fixed in revision 1.
+- [[AUD-20261012-TASK-0033-02]]: pass (delta; 2 nit accepted).
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Merge** approved by jg in chat on 2026-10-12 ("merge it when the delta audit passes"). Merged through PR #28.
+- **Result:** if `RetaliationService.begin` errors part-way, every monster it had marked (including one half-set by a throwing `setPursuing`) is released, no pursuit record is left, and the target slips away through `onFled`'s fallback.
+- **Lesson:** a regression step needs a negative control. Attempt 1's step passed on the old code, because the injected failure fired where only the target (which is removed anyway) had been set. Running the step once with the fix disabled in Studio's copy showed revision 1's step can fail.
+- **Follow-ups:** none from the audits. Still for jg (from TASK-0031): the feel of the retaliation numbers.

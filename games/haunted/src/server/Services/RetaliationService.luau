@@ -34,6 +34,8 @@ local pursuits: { [Player]: Pursuit } = {}
 local lastKnock: { [EncounterService.Encounter]: { [Player]: number } } = setmetatable({}, { __mode = "k" }) :: any
 local knockCount = 0
 local failNextTick = false -- test hook: the next tick errors
+local failNextBegin = false -- test hook: the next begin errors once it has set two pursuers
+local lastFailedBegin: { EncounterService.Encounter } = {} -- test view: what the last failed begin had set
 local tickErrors = 0
 local lastKnockOf: { [Player]: number } = {} -- server time each player was last knocked down
 
@@ -89,11 +91,38 @@ function RetaliationService.begin(player: Player, target: EncounterService.Encou
 	end
 	local ids = RetaliationRules.pickPursuers(target.id, root.Position, EncounterService.candidatesForPursuit())
 	local pursuers = {}
-	for _, id in ids do
-		local e = EncounterService.byId(id)
-		if e and e.alive and EncounterService.setPursuing(e, player) then
-			table.insert(pursuers, e)
+	local trying: EncounterService.Encounter? = nil
+	-- An error part-way through must not leave monsters marked as pursuing with no pursuit record (nothing
+	-- would release them): release the ones already set, then re-raise for CaptureService.onFled's pcall.
+	local ok, err = pcall(function()
+		for _, id in ids do
+			local e = EncounterService.byId(id)
+			if e and e.alive then
+				trying = e
+				if EncounterService.setPursuing(e, player) then
+					table.insert(pursuers, e)
+				end
+				trying = nil
+				if failNextBegin and #pursuers >= 2 then
+					failNextBegin = false
+					error("injected begin failure (test)")
+				end
+			end
 		end
+	end)
+	if not ok then
+		-- setPursuing itself may have thrown after marking `trying` for this player.
+		local half = trying :: EncounterService.Encounter?
+		if half and EncounterService.pursuingOf(half) == player and not table.find(pursuers, half) then
+			table.insert(pursuers, half)
+		end
+		lastFailedBegin = table.clone(pursuers)
+		for _, e in pursuers do
+			pcall(function()
+				release(e)
+			end)
+		end
+		error(err, 0)
 	end
 	if #pursuers == 0 then
 		return 0
@@ -122,6 +151,20 @@ end
 
 function RetaliationService.tickErrorCount(): number
 	return tickErrors
+end
+
+-- Test-only (scenarios): the next begin raises an error once it has set two pursuers (the target and an
+-- extra); `false` clears it.
+function RetaliationService.failNextBeginForTest(on: boolean?)
+	failNextBegin = on ~= false
+	if failNextBegin then
+		lastFailedBegin = {}
+	end
+end
+
+-- Test view: the monsters the last failed begin had set (all of them must have been released).
+function RetaliationService.lastFailedBeginForTest(): { EncounterService.Encounter }
+	return table.clone(lastFailedBegin)
 end
 
 -- Test-only (scenarios): the next tick raises an error, to prove the loop recovers.

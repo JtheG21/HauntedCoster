@@ -8,6 +8,8 @@
 --  * just outside the hub edge (within the give-up distance) the pursuers stay inside the habitat
 --    footprint; running further ends the pursuit,
 --  * an error in the pursuit tick ends every pursuit and the loop keeps running,
+--  * an error part-way through starting a pursuit (after the target and an extra were set) leaves no
+--    monster pursuing, and the target slips away (TASK-0033),
 --  * a habitat swap ends a pursuit at once, and so does the player's death.
 --   game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "Retaliation" })
 
@@ -57,10 +59,20 @@ return function(_args: any): { [string]: any }
 		character:PivotTo(CFrame.new(pos + Vector3.new(0, 3, 0)))
 		task.wait(0.3)
 	end
+	-- Another free monster within 20 studs of `e` (the player stands 6 studs off it; the join radius is 30).
+	local function hasNeighbour(e: any): boolean
+		for _, c in EncounterService.candidatesForPursuit() do
+			local d = Vector3.new(c.at.X - e.root.Position.X, 0, c.at.Z - e.root.Position.Z).Magnitude
+			if c.id ~= e.id and c.available and d <= 20 then
+				return true
+			end
+		end
+		return false
+	end
 	-- A free monster inside the hub (at least `minR` studs from its centre), with the player put 6 studs
 	-- from it and a capture session opened, then failed on its last miss. `seed` first leaves saved counters
-	-- on it, as an earlier walk-away would.
-	local function failACapture(minR: number?, seed: boolean?): any
+	-- on it, as an earlier walk-away would; `neighbour` needs another free monster close enough to join.
+	local function failACapture(minR: number?, seed: boolean?, neighbour: boolean?): any
 		local folder = Workspace:FindFirstChild("Monsters")
 		for _ = 1, 6 do
 			for _, m in (folder and folder:GetChildren() or {}) do
@@ -76,6 +88,7 @@ return function(_args: any): { [string]: any }
 					and not EncounterService.isStartled(e)
 					and World.inHub(p.X, p.Z)
 					and World.hubDistance(p.X, p.Z) >= (minR or 0)
+					and (not neighbour or hasNeighbour(e))
 				then
 					tp(Vector3.new(p.X + 6, 0, p.Z))
 					if seed then
@@ -235,6 +248,22 @@ return function(_args: any): { [string]: any }
 		check("a tick error ends the pursuit", #RetaliationService.pursuersOf(player) == 0)
 		local stuck = stuckOf(mine)
 		check("no pursuer is stuck after the error (roaming, inspectable)", stuck == 0, stuck)
+	end
+
+	-- 5b. An error while a pursuit starts, after the target and an extra were set: both are released and the
+	-- target slips away -----------------------------------------------------------------------------------
+	task.wait(2.1)
+	RetaliationService.failNextBeginForTest(true)
+	local broken = failACapture(nil, nil, true)
+	RetaliationService.failNextBeginForTest(false)
+	check("a capture was failed with begin set to error", broken ~= nil)
+	if broken then
+		local set = RetaliationService.lastFailedBeginForTest()
+		check("the failing begin had set the target and an extra", #set >= 2 and set[1] == broken, #set)
+		check("the target slipped away (fallback)", not broken.alive)
+		check("no pursuit record after the failed begin", #RetaliationService.pursuersOf(player) == 0)
+		local stuck = stuckOf(set)
+		check("every extra it had set was released (roaming, inspectable)", stuck == 0, stuck)
 	end
 
 	-- 6. The loop survived the error: a new pursuit starts, and a habitat swap ends it at once ---------------
