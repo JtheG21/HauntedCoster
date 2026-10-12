@@ -3,7 +3,7 @@ id: TASK-0022
 title: M1 Polish
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: medium
 risk: low
 owner: executor
@@ -49,7 +49,23 @@ Proposed in [[RETRO-M1-Playable-MVP-Loop]]; created as `ready` with jg's approva
 
 ---
 ## Implementation record
-*(Executor: files changed, decisions, check output)*
+References: the `10 References/01 UI` index is empty, so the existing Theme and Mansion conventions were followed.
+
+| Item | Change |
+|---|---|
+| Exhibit in-range feedback (TEST-03 F6) | `MansionUI`: per-slot "near the track" / "too far from the track (no bonus)", same rule as the payout; re-renders when the route changes |
+| Completion hint (F7) | `TutorialRules.completeHint`: names only what's missing (landmarks still needed, Restore house), "open to you" once both are met, and a post-catch line. `TutorialService` passes `landmarks` |
+| Capture zone vs judged window | `CaptureRules.judgedWidth`; the meter draws it. Spec: measured judge window = drawn width, and it stays on the bar |
+| Stale "Already upgraded" | Shown as an info toast instead of being hidden |
+| Quality clamps | Spec reaches the ceiling (fails without the clamp); the floor equals the formula base |
+| Plot changes owner mid-ride | `TrainService`: a rebuild skipped mid-ride sets `rebuildPending` and is redone from the current owner when the ride ends |
+| Tests that could pass vacuously | CrossPlot: the parked seat refuses A, and an enabled seat seats A and then ejects them. FullLoop: asserts seated in the FrontSeat before the cancel |
+| Trophy count | Counts landmark clues only (TrainBell excluded) |
+| Journal Crypt species | Zone-only variants listed for species that spawn in those zones (from `World.Zones`) |
+| Ashen roll | Environmental variants roll first, so Ashen is exactly 30% in the Crypt (ADR-0006 §2) |
+| Editor `setMovement` | Non-yielding, cached controls; always applies the current editing state (no race) |
+
+Evidence: [[TEST-20261011-07]]: specs 53/0, FullLoop 57/57, ExploitProbe 13/13, Mansion capture. **CrossPlot not run** (Studio multiplayer harness hung; the CrossPlot and handover changes are judged on code). `scripts/check.sh` passes.
 
 ## Audits
 *(links to AUD- notes)*
