@@ -3,7 +3,7 @@ id: TASK-0019
 title: Persistence and Rejoin Test
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: high
 risk: high
 owner: executor
