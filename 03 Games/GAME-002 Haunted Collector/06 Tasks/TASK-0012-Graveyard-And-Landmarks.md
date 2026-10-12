@@ -3,7 +3,7 @@ id: TASK-0012
 title: Graveyard and Landmarks
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: high
 risk: low
 owner: executor
@@ -80,6 +80,7 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 - [[AUD-20261011-TASK-0012-01]]: fail, revision 1
 - [[AUD-20261011-TASK-0012-02]]: fail (1 major: AC2 evidence), revision 2
 - [[AUD-20261011-TASK-0012-03]]: fail (1 major: AC2 needs jg's readability verdict or a device waiver; 4 nits). Revision limit reached → `blocked`. jg then gave both (ADR-0006 addendum, items 6–7); unblocking is jg's call.
+- [[AUD-20261011-TASK-0012-04]]: **pass** (2 nits: no scenario forces a crypt ejection; the light-off capture predates the label fix, to replace in M2).
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*

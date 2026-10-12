@@ -813,7 +813,7 @@
       "id": "TASK-0012",
       "title": "Graveyard and Landmarks",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "low",
       "depends_on": [
         "TASK-0011"
@@ -907,6 +907,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T19:27:26",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -946,6 +952,11 @@
           "time": "2026-10-11T16:40:05",
           "result": "fail",
           "report": "06 QA/AUD-20261011-TASK-0012-03.md"
+        },
+        {
+          "time": "2026-10-11T19:27:26",
+          "result": "pass",
+          "report": "06 QA/AUD-20261011-TASK-0012-04.md"
         }
       ],
       "revisions": 0
