@@ -1168,7 +1168,7 @@
       "id": "TASK-0015",
       "title": "House Tiers and Upgrades",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "low",
       "depends_on": [
         "TASK-0014"
@@ -1226,6 +1226,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-11T19:33:17",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -1252,7 +1258,8 @@
           "report": "06 QA/AUD-20261011-TASK-0015-02.md"
         }
       ],
-      "revisions": 1
+      "revisions": 1,
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0016",

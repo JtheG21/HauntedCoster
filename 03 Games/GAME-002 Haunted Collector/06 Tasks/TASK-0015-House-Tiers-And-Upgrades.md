@@ -3,7 +3,7 @@ id: TASK-0015
 title: House Tiers and Upgrades
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: low
 owner: executor
@@ -68,4 +68,5 @@ Planned from [[INBOX-20261011-Haunted-Collector-Brief]]. Blocked on approval of 
 - [[AUD-20261011-TASK-0015-02]]: **pass** (1 minor, 2 nit): the first upgrade comes about 51 s after the first secure, against a target of about 2 min (retune at the retro). Nits: a stale-snapshot 'Already upgraded' reply is hidden in the Mansion UI; notes were stale.
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Result:** merge approved by jg on 2026-10-11 after [[AUD-20261011-TASK-0015-02]] passed.
+- **Follow-ups:** the first upgrade comes about 51 s after the first secure, against about 2 min (retune at the M1 retro). Show the 'Already upgraded' reply in the Mansion UI. Persistence of tier and speed moves to M2 (ADR-0006 §4).
