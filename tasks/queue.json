@@ -1933,7 +1933,7 @@
       "id": "TASK-0025",
       "title": "Clue Hunting Removal",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0025-Clue-Hunting-Removal",
@@ -1991,6 +1991,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-12T01:59:13",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -2018,7 +2024,8 @@
         }
       ],
       "revisions": 1,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0026",

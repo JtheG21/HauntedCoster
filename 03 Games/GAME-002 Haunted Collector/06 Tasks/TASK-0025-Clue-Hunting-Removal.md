@@ -3,7 +3,7 @@ id: TASK-0025
 title: Clue Hunting Removal
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -111,3 +111,14 @@ This is done first (before the layout work) because it removes the crypt gate, e
 - [[AUD-20261012-TASK-0025-02]]: pass (delta). N1, a CrossPlot touch-sit check, is deferred as a follow-up; N2 and N3 doc nits are fixed.
 
 ## Outcome
+- **Merge** approved by jg in chat on 2026-10-12 ("i approve all of the tasks and anything else you needed"). Merged through PR #17 (CI `check` passed).
+- **Result:** clue hunting is gone from the MVP loop. Landmarks are scenery, and the Restored Manor opens the Sealed Crypt and its Bell Wraith. The journal keeps species and variants, the tutorial keeps 12 steps, and old profile data round-trips.
+- **Lessons:**
+  - A server `Seat:Sit()` seats a humanoid even in a disabled seat.
+  - The engine briefly refuses to re-seat a humanoid that was just ejected.
+  - CrossPlot needs `timeout = 240` on this machine, and its harness sometimes gets only 1 client, so rerun it.
+  - Evidence: [[TEST-20261012-01]].
+- **Follow-ups**, approved by jg on 2026-10-12:
+  - TASK-0021 AC3 and AC5 are reworded to the tier rule (done in TASK-0026's first commit).
+  - The CrossPlot touch-sit check on the parked seat moves into [[TASK-0026-Radial-Plot-Layout]], which edits CrossPlot for rotated plots anyway.
+  - Pre-existing (TASK-0021 AC4): an escaped Ashen monster can respawn outside the crypt.
