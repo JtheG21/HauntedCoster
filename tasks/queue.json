@@ -1679,7 +1679,7 @@
       "id": "TASK-0022",
       "title": "M1 Polish",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0022-M1-Polish",
@@ -1721,6 +1721,12 @@
           "from": "changes_requested",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-11T20:28:55",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
       "executions": [
@@ -1728,6 +1734,11 @@
           "time": "2026-10-11T20:18:45",
           "result": "pass",
           "notes": "TEST-20261011-07: specs 53/0, FullLoop 57/57, ExploitProbe 13/13; CrossPlot not run (harness hung)"
+        },
+        {
+          "time": "2026-10-11T20:28:55",
+          "result": "pass",
+          "notes": "Revision 1: specs 53/0, FullLoop 59/59, ExploitProbe 13/13; CrossPlot deferred to TASK-0020 by jg"
         }
       ],
       "audits": [

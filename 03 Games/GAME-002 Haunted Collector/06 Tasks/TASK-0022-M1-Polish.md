@@ -3,7 +3,7 @@ id: TASK-0022
 title: M1 Polish
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: medium
 risk: low
 owner: executor
