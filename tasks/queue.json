@@ -1868,21 +1868,58 @@
       "id": "TASK-0024",
       "title": "FullLoop Landmark Flake",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "approved",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0024-FullLoop-Landmark-Flake",
       "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0024-FullLoop-Landmark-Flake.md",
       "acceptance_criteria": [
-        "The cause is named with evidence (e.g. root position and anchor distance logged on failure), not guessed",
+        "A failing landmark check reports its cause (distance and root, missing anchor/root/profile, or replaced character/profile); the hypotheses tested are recorded with evidence (AC reworded by jg 2026-10-11: cause not reproducible)",
         "FullLoop passes 5 consecutive runs in Studio with the landmark check passing each time",
         "If the game is at fault, the fix is in LandmarkService and covered by a check that fails without it",
         "scripts/check.sh passes"
       ],
-      "approved_by": null,
-      "history": [],
-      "executions": [],
-      "audits": [],
+      "approved_by": "jg",
+      "history": [
+        {
+          "time": "2026-10-11T21:31:25",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-11T21:31:25",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-11T21:49:04",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-11T21:50:06",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-11T21:49:04",
+          "result": "pass",
+          "notes": "TEST-20261011-09: LandmarkStart 12/12, FullLoop 5/5 (81/81); flake not reproduced; AC1 reworded by jg"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-11T21:50:06",
+          "result": "pass",
+          "report": "06 QA/AUD-20261011-TASK-0024-01.md"
+        }
+      ],
       "revisions": 0
     }
   ]

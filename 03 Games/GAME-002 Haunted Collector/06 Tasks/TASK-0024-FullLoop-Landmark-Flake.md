@@ -3,7 +3,7 @@ id: TASK-0024
 title: FullLoop Landmark Flake
 type: task
 project: GAME-002
-status: proposed
+status: approved
 priority: low
 risk: low
 owner: executor
@@ -35,10 +35,10 @@ Make FullLoop's first landmark check deterministic, so a red FullLoop always mea
 - Possibly `games/haunted/src/server/Services/LandmarkService.luau`
 
 ## Acceptance criteria
-- [ ] AC1: The cause is named with evidence (for example, root position and anchor distance logged when the check fails), not guessed
-- [ ] AC2: FullLoop passes 5 runs in a row in Studio, with the landmark check passing each time
-- [ ] AC3: If the game is at fault (a real player could hit it), the fix is in `LandmarkService` and covered by a check that fails without it
-- [ ] AC4: scripts/check.sh passes
+- [x] AC1: A failing landmark check reports its cause (distance and root, a missing anchor, root or profile, or a replaced character or profile), and the hypotheses tested are recorded with evidence. *Reworded by jg in chat on 2026-10-11 ("Ship the diagnostics"): the original AC1, "the cause is named with evidence", could not be met because the flake did not reproduce in 17 runs ([[TEST-20261011-09]]).*
+- [x] AC2: FullLoop passes 5 runs in a row in Studio, with the landmark check passing each time
+- [x] AC3 (n/a, no game fault found): If the game is at fault (a real player could hit it), the fix is in `LandmarkService` and covered by a check that fails without it
+- [x] AC4: scripts/check.sh passes
 
 ## Tests
 - **Automated:** `scripts/check.sh`; FullLoop run 5 times from Edit (`StudioTestService:ExecutePlayModeAsync({ scenario = "FullLoop" })`).
@@ -52,10 +52,17 @@ Make FullLoop's first landmark check deterministic, so a red FullLoop always mea
 
 ---
 ## Implementation record
-*(Executor: files changed, decisions, check output)*
+| Change | Why |
+|---|---|
+| `LandmarkService.blocker(player, id)` returns the reason an investigate would be ignored (unknown landmark, no anchor, no root, no profile, or "too far: N studs (root at …)"); `investigate` uses it | Same behaviour, but the silent early returns now explain themselves (AC1 evidence) |
+| FullLoop's landmark check reports the blocker, or whether the character or profile table was replaced | The next failure names its cause |
+| New `tests/scenarios/LandmarkStart.luau`: FullLoop's opening plus the first investigate | Repeats the start-of-session check in many fresh sessions cheaply |
+
+**Evidence ([[TEST-20261011-09]]):** the teleport-revert hypothesis is not supported (20/20 clean). The plot-spawn correction, missing anchors, monster collision and random props are ruled out by reading the code. LandmarkStart 12/12, FullLoop 5/5 (81/81). **The cause is not reproduced, so AC1 is open; AC2 is met.**
+**Checks:** `scripts/check.sh`: ALL CHECKS PASSED (2026-10-11).
 
 ## Audits
-*(links to AUD- notes)*
+- [[AUD-20261011-TASK-0024-01]]: pass (0 blocker, 0 major, 3 nit)
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*
