@@ -4,18 +4,19 @@
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "haunted.project.json",
   "dispatch_mode": "dry-run",
-  "updated": "2026-10-11T19:33:17",
+  "updated": "2026-10-11T19:33:50",
   "task_counts": {
     "done": 13,
-    "ready": 4,
-    "proposed": 1
+    "ready": 3,
+    "proposed": 1,
+    "approved": 1
   },
   "ready": [
-    "TASK-0008",
-    "TASK-0016"
+    "TASK-0008"
   ],
   "needs_human": [
-    "TASK-0010"
+    "TASK-0010",
+    "TASK-0016"
   ],
   "api_spend_this_month_usd": 0.0,
   "active_game": "GAME-002",
