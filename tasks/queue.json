@@ -2031,7 +2031,7 @@
       "id": "TASK-0026",
       "title": "Radial Plot Layout",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "done",
       "risk": "high",
       "depends_on": [
         "TASK-0025"
@@ -2066,6 +2066,18 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T09:57:17",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-12T09:57:39",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -2075,9 +2087,16 @@
           "notes": "check.sh pass; specs 78/0; FullLoop 85/85; Reachability 24/24; ExploitProbe 13/13; CrossPlot 14/14 (TEST-20261012-02)"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-12T09:57:17",
+          "result": "pass",
+          "report": "06 QA/AUD-20261012-TASK-0026-01.md"
+        }
+      ],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0027",

@@ -3,7 +3,7 @@ id: TASK-0026
 title: Radial Plot Layout
 type: task
 project: GAME-002
-status: in_review
+status: done
 priority: high
 risk: high
 owner: executor
@@ -78,5 +78,11 @@ Six plots stand in a ring around a central hunting footprint with their entrance
 - **Evidence:** [[TEST-20261012-02]].
 
 ## Audits
+- [[AUD-20261012-TASK-0026-01]]: pass (4 minor, 3 nit). Findings 2, 4 and 5 are fixed in [[TASK-0027-Habitat-Modules-And-Blockouts]]; finding 1 is listed for jg's hands-on walk.
 
 ## Outcome
+- **Merge** approved by jg in chat on 2026-10-12 ("anything you need my approval for you got it"). Merged through PR #20.
+- **Result:** six plots in a ring around the hub, entrances facing in, one shared plot transform. The persistent hub (wall, ring road, three gates) is separate from the habitat module, and the Ghost Cemetery is the first module behind the `Habitats` contract and validator.
+- **Lessons:** Vector3 is 32-bit, so geometry specs need about 1e-3 tolerance at r ≈ 126. Clamping a flee target into a ring can stretch the step, so the step is capped after the clamp.
+- **Follow-ups:** return walks are at most 34 s of a 75 s timer (tuning); the editor tap on a rotated plot is part of jg's hands-on walk.
+
