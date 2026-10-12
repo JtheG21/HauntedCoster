@@ -5,6 +5,9 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
+local BuildInfo = require(ReplicatedStorage.Shared.BuildInfo)
+print(`[HauntedCollector] server build {BuildInfo.stamp()}`)
+
 local Remotes = require(script.Remotes)
 local HubBuilder = require(script.World.HubBuilder)
 local CemeteryBuilder = require(script.World.Habitats.Cemetery)

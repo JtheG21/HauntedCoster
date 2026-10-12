@@ -19,11 +19,15 @@ In Studio: open the **local `HauntedCollector.rbxl`** place (first time: `rojo b
 
 ```bash
 scripts/check.sh                                   # format, lint, types, build, JSON, queue, vault, Python tests
+scripts/install-hooks.sh                           # once per clone: pre-commit StyLua+Selene, build stamp on commit/checkout
+scripts/stamp.sh                                   # refresh the build stamp before a Play test
 python3 scripts/orchestrator.py status             # task list
 python3 scripts/orchestrator.py next               # what's ready
 python3 scripts/validate_vault.py                  # note conventions + links + queue/note sync
 python3 scripts/orchestrator.py report             # 08 Reviews/HLT-<date>.md
 ```
+
+**Is Studio running your code?** Both boot scripts print `[HauntedCollector] server build <sha> <time>` / `client build ...`. It must match `cat games/haunted/src/shared/BuildStamp.txt`; if not, the sync is stale. VS Code's luau-lsp reads `sourcemap.json`, which is GAME-002 (`.vscode/settings.json`); GAME-001 type checks use `game001-sourcemap.json`.
 
 ## Task lifecycle (see [[Workflow]])
 ```bash
@@ -44,7 +48,8 @@ A failed check or audit → `changes_requested`. After 2 revisions → `blocked`
 | Project builds | `rojo build` | ✅ check.sh |
 | Tooling logic | `python3 -m unittest discover -s tests` | ✅ check.sh |
 | Note conventions, links, task sync | `scripts/validate_vault.py` | ✅ check.sh |
-| Luau unit specs | Studio, fresh Play session (Server): `require(game.TestService.Tests.TestRunner).run()` (Claude can run it through Studio MCP) | ⚠️ needs Studio |
+| GAME-002 unit specs | `lune run scripts/lune/specs` (headless, [[ADR-0008-Headless-Specs-With-Lune]]); also in Studio: `require(game.TestService.Tests.TestRunner).run()` | ✅ check.sh |
+| GAME-001 unit specs | Studio, fresh Play session (Server): `require(game.TestService.Tests.TestRunner).run()` (Claude can run it through Studio MCP) | ⚠️ needs Studio |
 | GAME-002 play scenarios | `games/haunted/tests/scenarios/` (FullLoop, Reachability, ExploitProbe, CrossPlot), see [[GAME-002 Haunted Collector/00 Overview]] | ⚠️ needs Studio |
 | Gameplay, replication, feel | The task's playtest procedure → a `TEST-` note | ❌ manual or Studio MCP |
 
