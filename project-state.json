@@ -1,6 +1,6 @@
 {
   "project": "Rg1",
-  "phase": "GAME-002 M1: MVP loop",
+  "phase": "GAME-002: M1 and M3 done, M2 device checks deferred; audit remediation",
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "haunted.project.json",
   "dispatch_mode": "dry-run",

@@ -6,7 +6,7 @@ project: GAME-001
 status: approved
 version: 0.1
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - game/design
 related:
@@ -92,4 +92,4 @@ This is **bigger than candidate A** as scored: 4 ability kits plus PvP were expl
 2. Players per match: 4–8 proposed.
 3. Should Echo charges *replace* or *add to* your own power in the finale? (Proposed: add.)
 
-Related: [[00 Overview]] · [[02 Technical Architecture]] · [[03 Roadmap]] · [[RSH-20261010-Anime-IP-And-Demand]]
+Related: [[GAME-001 Rg1/00 Overview|00 Overview]] · [[GAME-001 Rg1/02 Technical Architecture|02 Technical Architecture]] · [[GAME-001 Rg1/03 Roadmap|03 Roadmap]] · [[RSH-20261010-Anime-IP-And-Demand]]

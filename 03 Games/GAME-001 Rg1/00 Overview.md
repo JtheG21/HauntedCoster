@@ -5,16 +5,16 @@ type: overview
 project: GAME-001
 status: in_progress
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - game/overview
 ---
 # GAME-001: Rival Realms (working title; repo name Rg1)
 
-**Phase:** M2 planning: [[03 Roadmap]] proposed, 8 tasks proposed · **Code:** `src/` (Rojo 7.7.0) · **Task status:** `tasks/queue.json`
+**Phase:** M2 planning: [[GAME-001 Rg1/03 Roadmap|03 Roadmap]] proposed, 8 tasks proposed · **Code:** `src/` (Rojo 7.7.0) · **Task status:** `tasks/queue.json`
 
 ## Documents
-[[01 Game Design]] · [[02 Technical Architecture]] · [[03 Roadmap]]
+[[GAME-001 Rg1/01 Game Design|01 Game Design]] · [[GAME-001 Rg1/02 Technical Architecture|02 Technical Architecture]] · [[GAME-001 Rg1/03 Roadmap|03 Roadmap]]
 
 ## Tasks
 | Task | Status | Audit |
@@ -26,9 +26,9 @@ tags:
 | [[TASK-0005-Convergence-Gate]] | done | [[AUD-20261010-TASK-0005-01]] (fail), [[AUD-20261010-TASK-0005-02]] (pass) |
 | [[TASK-0006-Match-Flow-And-Onboarding]] | done | [[AUD-20261010-TASK-0006-01]] (pass) |
 | [[TASK-0007-Ring-Out-Finale]] | done | [[AUD-20261010-TASK-0007-01]] (fail), [[AUD-20261010-TASK-0007-02]] (pass) |
-| [[TASK-0008-Prototype-Telemetry]] | proposed | — |
+| [[TASK-0008-Prototype-Telemetry]] | archived (executed, audit failed; preserved as [[AUD-20261010-TASK-0008-01]]) | [[AUD-20261010-TASK-0008-01]] (fail) |
 | [[TASK-0009-Multi-Client-Test-Harness]] | done | [[AUD-20261010-TASK-0009-01]] (pass) |
-| [[TASK-0010-Ability-And-Harness-Hardening]] | proposed | — |
+| [[TASK-0010-Ability-And-Harness-Hardening]] | archived (not started; GAME-001 paused) | — |
 
 ## Research (M1)
 - [[RSH-20261010-Candidate-Comparison]]: decided (A)
@@ -39,7 +39,7 @@ tags:
 - [[ADR-0003-Original-Factions-IP-Policy]]: approved
 
 ## Design & validation
-- [[01 Game Design]] v0.1: approved
+- [[GAME-001 Rg1/01 Game Design|01 Game Design]] v0.1: approved
 - [[EXP-0001-M2-Validation-Experiments]]: **proposed**
 - Baseline: [[RSH-20261010-Roblox-Platform-Economics]]
 

@@ -14,13 +14,13 @@ depends_on:
   - TASK-0006
 branch: task/TASK-0007-Ring-Out-Finale
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - workflow/task
   - milestone/m2
 related:
-  - "[[01 Game Design]]"
-  - "[[03 Roadmap]]"
+  - "[[GAME-001 Rg1/01 Game Design|01 Game Design]]"
+  - "[[GAME-001 Rg1/03 Roadmap|03 Roadmap]]"
 ---
 # TASK-0007: Ring-Out Finale
 

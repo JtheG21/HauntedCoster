@@ -41,6 +41,13 @@ Spawn and roam monsters, run the capture meter, carry the capture home under a t
 | `Grab` prompt on a fleeing monster | C→S | none | chase owner only; distance, deadline, rate limit 4/s |
 | `SetExhibit` | C→S | slot, uid? | owned + unlocked slot |
 
+## Accepted limitations (audit 2026-10-12, AUDIT-011)
+- Rate limits and the 20 s ride-payout cooldown live in one server's memory, so a server hop resets them. Hopping costs more time than it saves.
+- The retaliation knockdown is a server attribute the client ragdolls on; an exploiter can ignore it (no damage, minor advantage).
+- Walking speed outside a carry is client-simulated; only carries have a server speed budget.
+- No currency, ownership or progression path trusts the client. Accepted by jg (audit plan defaults, 2026-10-12); no change.
+- Capture start: every refusal is a pure, specced rule, `CaptureRules.startRefusal` ([[TASK-0038-Encounter-Review-Capture-Guards]]).
+
 ## Tests
 - Automated: `CaptureRules.spec`, `ChaseRules.spec`, `EconomyRules.spec`.
 - Playtest: the `FullLoop` scenario (startle, chase, grab and expiry paths), plus `ExploitProbe`.

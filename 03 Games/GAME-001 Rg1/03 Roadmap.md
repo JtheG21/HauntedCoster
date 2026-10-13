@@ -5,11 +5,11 @@ type: roadmap
 project: GAME-001
 status: proposed
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - game/roadmap
 related:
-  - "[[01 Game Design]]"
+  - "[[GAME-001 Rg1/01 Game Design|01 Game Design]]"
   - "[[EXP-0001-M2-Validation-Experiments]]"
 ---
 # Roadmap: Rival Realms (GAME-001), **proposed**
@@ -21,12 +21,12 @@ related:
 Workflow, checks, vault conventions, [[TASK-0001-Collectible-Pickup]]. Open: [[TEST-20261010-02]] (2-player test, manual).
 
 ### M1: Research & concept selection ✅ 2026-10-10
-[[RSH-20261010-Candidate-Comparison]] → [[ADR-0002-Game-Direction]] → [[ADR-0003-Original-Factions-IP-Policy]] → [[01 Game Design]] v0.1 approved.
+[[RSH-20261010-Candidate-Comparison]] → [[ADR-0002-Game-Direction]] → [[ADR-0003-Original-Factions-IP-Policy]] → [[GAME-001 Rg1/01 Game Design|01 Game Design]] v0.1 approved.
 
 ---
 
 ## M2: Core gameplay prototype (next)
-- **Objective:** prove or disprove the riskiest assumptions R1–R4 in [[01 Game Design]] with the smallest build.
+- **Objective:** prove or disprove the riskiest assumptions R1–R4 in [[GAME-001 Rg1/01 Game Design|01 Game Design]] with the smallest build.
 - **Deliverables:** 2 factions (Shinobi, Ki), 1 course (race → gate → race), Echo charges, a ring-out finale, a 30 s onboarding trial, telemetry, and a written experiment result.
 - **Dependencies:** the [[EXP-0001-M2-Validation-Experiments]] plan approved, for the run at the end of M2.
 - **Tasks:**

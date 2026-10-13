@@ -6,12 +6,12 @@ project: GAME-001
 status: research
 confidence: medium
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - research/ip
 related:
   - "[[ADR-0003-Original-Factions-IP-Policy]]"
-  - "[[01 Game Design]]"
+  - "[[GAME-001 Rg1/01 Game Design|01 Game Design]]"
 ---
 # Anime demand and IP risk on Roblox
 

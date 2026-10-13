@@ -50,6 +50,10 @@ Load, validate and save each player's profile, and push a read-only snapshot to 
 ## Trust boundary / security
 The client never writes profile data. Every save re-sanitises a deep copy. Expedition state is never saved.
 
+## Accepted risks (audit 2026-10-12)
+- **Live load failure:** after 4 retries the player is `readonly` (banner, no writes) and loses that session's progress, never their save. Memory mode happens only in a development place ([[TASK-0036-Persistence-Load-Failure]]).
+- **Failed leave save (AUDIT-004):** if every save retry fails on leave, the lock stays in the store; the next join waits about 30 s, then takes it over (safe). `lastSeen` is only written on a successful save, so offline income after an outage is computed from an older time, still capped at 2 h × 0.25. Accepted by jg (audit plan defaults, 2026-10-12); no change.
+
 ## Tests
 - Automated: `ProfileRules.spec` (14 cases: sanitize, retired clue data, `isNewerSchema`, newer schema read-only, the repaired-field list) and `SessionLockRules.spec` (8 cases: claim, wait and take over, stale lock, save keeps or clears the lock, lost lock never writes, release only our lock).
 - Playtest: memory mode seen in [[TEST-20261011-01]]. Real persistence verified in [[TEST-20261012-10]] (`Persistence` scenario: leave and rejoin, shutdown save, lock refused and lost).

@@ -6,12 +6,12 @@ project: GAME-001
 status: research
 confidence: high
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - research/platform
 related:
   - "[[RSH-20261010-Candidate-Comparison]]"
-  - "[[00 Overview]]"
+  - "[[GAME-001 Rg1/00 Overview|00 Overview]]"
 ---
 # Roblox platform economics and discovery (shared baseline)
 
