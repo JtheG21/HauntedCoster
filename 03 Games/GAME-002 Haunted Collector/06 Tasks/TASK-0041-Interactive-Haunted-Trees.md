@@ -3,7 +3,7 @@ id: TASK-0041
 title: "Interactive Haunted Trees"
 type: task
 project: GAME-002
-status: in_progress
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -205,5 +205,23 @@ Add stationary trees to the Cursed Woodland whose bark faces watch players and g
 
 ## Audits
 - [[AUD-20261013-TASK-0041-01]]: **pass with notes**. No blockers. Finding 7 (stale plan text) was fixed after the audit; findings 1–6 were fixed in revision 1.
+- [[AUD-20261013-TASK-0041-02]]: delta re-audit of revision 1, **pass with notes**. All 6 confirmed fixed; two Studio-only test nits accepted.
 
 ## Outcome
+Merge approved by jg on 2026-10-13 ("fix the audit items now, then merge"), after revision 1 (1 of 2 revisions used).
+
+- **Result:** the Cursed Woodland has 16 haunted trees, 8 with faces, in 3 archetypes. Each face is frozen globally while any player looks at it and resumes after 1 continuous second with no observer.
+  - Proven with 2 players ([[TEST-20261013-01]]: 20/20, then 28/28 after revision 1), plus `Reachability` and `HabitatRotation` regressions and 140 specs.
+- **Still open:**
+  - AC1 visual sign-off: jg's taste call. The part-built faces read as carved bark totems, blockier than ASSET-REF-001.
+  - [[ADR-0010-Client-Reported-Gaze]] stays **proposed** until jg approves it.
+  - 6 players not verified.
+  - The next manual session should connect Rojo normally. This task's Studio sync used MCP `Source` writes.
+- **Lessons** (kept in session memory, not yet promoted to a LES):
+  - `LoadCharacter()` yields, so a following `CharacterAdded:Wait()` hangs a scenario.
+  - With the Rojo plugin disconnected, hash-checked `Source` writes through MCP are a workable sync.
+  - Test hooks that steer real client cameras give real 2-player gaze evidence.
+- **Follow-ups:**
+  - jg's visual review.
+  - The ADR-0010 decision.
+  - Resume TASK-0040 Audio Pass (paused). Its branch will need this merge, and its own queue entry and Overview row, when it continues.
