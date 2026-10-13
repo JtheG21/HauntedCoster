@@ -3,7 +3,7 @@ id: TASK-0010
 title: Ability and Harness Hardening
 type: task
 project: GAME-001
-status: proposed
+status: archived
 priority: medium
 risk: low
 owner: executor
@@ -11,7 +11,7 @@ milestone: M2
 depends_on: []
 branch: task/TASK-0010-Ability-And-Harness-Hardening
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - workflow/task
   - milestone/m2
