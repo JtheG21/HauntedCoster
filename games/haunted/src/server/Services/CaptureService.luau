@@ -18,11 +18,11 @@ local Rules = Shared:WaitForChild("Rules")
 local Monsters = require(Config:WaitForChild("Monsters"))
 local Variants = require(Config:WaitForChild("Variants"))
 local World = require(Config:WaitForChild("World"))
-local Habitats = require(Config:WaitForChild("Habitats"))
 local Economy = require(Config:WaitForChild("Economy"))
 local CaptureRules = require(Rules:WaitForChild("CaptureRules"))
 local ProfileRules = require(Rules:WaitForChild("ProfileRules"))
 local EconomyRules = require(Rules:WaitForChild("EconomyRules"))
+local HabitatRules = require(Rules:WaitForChild("HabitatRules"))
 local Remotes = require(script.Parent.Parent.Remotes)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local StateService = require(script.Parent.StateService)
@@ -56,9 +56,9 @@ type Carry = {
 	returnSeconds: number,
 	cage: BasePart?,
 	conns: { RBXScriptConnection },
-	lastPos: Vector3?, -- server-side speed check (WalkSpeed lives on the client-owned character)
-	lastAt: number,
-	strikes: number,
+	lastPos: Vector3?, -- last sampled root position (speed budget)
+	startedAt: number, -- os.clock(); the speed budget grows with the time since
+	travelled: number, -- horizontal studs covered on foot (server moves and train rides excluded)
 	chased: boolean, -- already broke free once; the next timeout sends it straight home
 }
 
@@ -135,7 +135,7 @@ local function clearCarry(player: Player)
 	StateService.markDirty(player)
 end
 
-local checkCarrySpeed: (Player, Carry, number) -> ()
+local checkCarrySpeed: (Player, Carry, number) -> boolean
 
 -- The capture is gone for good this time: back to its habitat, to be found again later (Round 20 Q1).
 local function lose(player: Player, speciesId: string, variantId: string, why: string)
@@ -241,38 +241,49 @@ local function escape(player: Player, why: string, canChase: boolean?)
 	lose(player, c.species, c.variant, why)
 end
 
--- The carry slowdown is a WalkSpeed value on a character the client simulates, so an exploiter could
--- undo it. Measure horizontal speed on the server; repeated speeding drops the capture.
-local SPEED_TOLERANCE = 1.35
-local SPEED_STRIKES = 3
+-- True while the character rides a moving ghost train cart: the server moves the anchored cart, so that
+-- movement isn't the carrier's own and doesn't count toward the speed budget. `SeatPart` alone is
+-- client-influenced (a desynced seat can stay set while the character walks off), so the cart must be
+-- riding (TrainService sets the attribute) and the character must actually be at its seat.
+local function onTrainSeat(player: Player, root: BasePart): boolean
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local seat = humanoid and humanoid.SeatPart
+	local cart = seat and seat.Parent
+	return seat ~= nil
+		and cart ~= nil
+		and cart.Name == "GhostCart"
+		and cart:GetAttribute("Riding") == true
+		and (root.Position - seat.Position).Magnitude < 5
+end
 
-checkCarrySpeed = function(player: Player, c: Carry, now: number)
+-- The carry slowdown is a WalkSpeed value on a character the client simulates, so an exploiter could
+-- undo it. The server adds up the horizontal path the carrier covers and drops the capture once it exceeds
+-- what the slowed walk allows since the carry began (CaptureRules.carryTooFast). Returns false if the
+-- capture was dropped.
+checkCarrySpeed = function(player: Player, c: Carry, now: number): boolean
 	local root = rootOf(player)
 	if not root then
-		return
+		return true
 	end
 	local pos = root.Position
 	local last = c.lastPos
-	local dt = now - c.lastAt
 	c.lastPos = pos
-	c.lastAt = now
-	if not last or dt <= 0 then
-		return
+	if not last or onTrainSeat(player, root) then
+		return true
 	end
+	c.travelled += Vector3.new(pos.X - last.X, 0, pos.Z - last.Z).Magnitude
 	local profile = PlayerDataService.get(player)
 	local allowed = EconomyRules.walkSpeed(if profile then profile.speedLevel else 0, true)
-	local flat = Vector3.new(pos.X - last.X, 0, pos.Z - last.Z).Magnitude
-	if flat > allowed * dt * SPEED_TOLERANCE + 2 then
-		c.strikes += 1
-		if c.strikes >= SPEED_STRIKES then
-			escape(player, "The jar shattered as you sped off!")
-		end
-	else
-		c.strikes = math.max(0, c.strikes - 1)
+	if CaptureRules.carryTooFast(c.travelled, now - c.startedAt, allowed) then
+		escape(player, "The jar shattered as you sped off!")
+		return false
 	end
+	return true
 end
 
--- Server-initiated moves (tests, habitat evacuation) must not count as speeding.
+-- Server-initiated moves (tests, habitat evacuation, the train cart re-park) must not count as speeding:
+-- the next sample starts a new segment instead of measuring across the move. Call it before moving.
 function CaptureService.noteTeleport(player: Player)
 	local c = carries[player]
 	if c then
@@ -352,8 +363,8 @@ local function startCarry(player: Player, speciesId: string, variantId: string, 
 		cage = makeCage(player, speciesId, variantId),
 		conns = {},
 		lastPos = nil,
-		lastAt = os.clock(),
-		strikes = 0,
+		startedAt = os.clock(),
+		travelled = 0,
 		chased = regrab == true,
 	}
 	carries[player] = c
@@ -466,8 +477,7 @@ local function onCaptureStart(player: Player, model: any): { [string]: any }
 		return { ok = false, reason = "Get closer" }
 	end
 	local species = Monsters.Species[e.species]
-	local zone = Habitats.zoneById(e.zone)
-	if zone and zone.gated and not EconomyRules.cryptOpen(profile.houseTier) then
+	if HabitatRules.needsCrypt(e.zone, e.species, e.variant) and not EconomyRules.cryptOpen(profile.houseTier) then
 		return { ok = false, reason = "Restore your house to capture monsters in the Sealed Crypt." }
 	end
 	if not EncounterService.claim(e, player) then
@@ -642,7 +652,16 @@ end
 
 function CaptureService.carryForTestInfo(player: Player): any
 	local c = carries[player]
-	return if c then { species = c.species, variant = c.variant, deadlineServer = c.deadlineServer } else nil
+	return if c
+		then {
+			species = c.species,
+			variant = c.variant,
+			deadlineServer = c.deadlineServer,
+			travelled = c.travelled,
+			elapsed = os.clock() - c.startedAt,
+			sampled = c.lastPos ~= nil,
+		}
+		else nil
 end
 
 function CaptureService.startForTest(player: Player, model: Model): { [string]: any }
@@ -666,6 +685,17 @@ function CaptureService.secure(player: Player, plotIndex: number)
 	local root = rootOf(player)
 	local padPos = World.plotToWorld(plotIndex, World.Plot.pen)
 	if not root or (root.Position - padPos).Magnitude > SECURE_DISTANCE + 8 then
+		return
+	end
+	-- The timer is enforced here too, not only by the 0.25 s tick: a secure after the deadline is the
+	-- timeout it is (the capture breaks free).
+	local now = os.clock()
+	if now >= c.deadline then
+		escape(player, "Time's up!", true)
+		return
+	end
+	-- Count the last stretch now, so a teleport to the pen between two ticks can't secure.
+	if not checkCarrySpeed(player, c, now) then
 		return
 	end
 	local profile = PlayerDataService.get(player)
