@@ -6,13 +6,15 @@
 --  * Saves use UpdateAsync with a session lock ({ job = JobId }). If another server owns the lock, this
 --    server stops saving that profile instead of overwriting newer progress.
 --  * Saves per player are serialised (one in flight, at most one queued).
---  * If DataStores are unavailable (an unpublished Studio place, or API access off) the server runs in
---    "memory" mode: the game works and a banner says progress is not saved.
+--  * If DataStores are unavailable in a development place (Studio, or an unpublished place) the server
+--    runs in "memory" mode: the game works and a banner says progress is not saved. On a live server the
+--    same errors are retried and end in "readonly", never memory (SessionLockRules.loadFailure, TASK-0036).
 --  * If a load fails for any other reason the profile is "readonly": the player can play but nothing is
 --    written, so a temporary outage can never overwrite a real save with defaults.
 
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
@@ -48,14 +50,8 @@ local sessions: { [Player]: Session } = {}
 local loadedCallbacks: { (Player, Profile) -> () } = {}
 local dirtyCallbacks: { (Player) -> () } = {}
 
-local function isUnavailableError(err: string): boolean
-	local e = string.lower(err)
-	return string.find(e, "publish", 1, true) ~= nil
-		or string.find(e, "studioaccesstoapisnotallowed", 1, true) ~= nil
-		or string.find(e, "403", 1, true) ~= nil
-		or string.find(e, "not allowed", 1, true) ~= nil
-		or string.find(e, "api services", 1, true) ~= nil
-end
+-- Studio or an unpublished place: the only places where DataStores may legitimately be off (TASK-0036).
+local DEVELOPMENT_PLACE = RunService:IsStudio() or game.PlaceId == 0
 
 local function goMemory(reason: string)
 	if serverMode ~= "memory" then
@@ -74,8 +70,12 @@ local function getStore(): DataStore?
 	end)
 	if ok then
 		store = result
+	elseif DEVELOPMENT_PLACE then
+		goMemory(tostring(result)) -- unchanged in Studio: no store means memory mode
 	else
-		goMemory(tostring(result))
+		-- Live server: no store this time. The caller treats the profile as readonly and the next
+		-- caller tries again; the server never switches to memory mode.
+		warn(`[PlayerData] GetDataStore failed: {result}`)
 	end
 	return store
 end
@@ -106,7 +106,7 @@ end
 local function loadRecord(player: Player): (string, any)
 	local ds = getStore()
 	if not ds then
-		return "memory", nil
+		return if serverMode == "memory" then "memory" else "readonly", nil
 	end
 	local jobId = if game.JobId ~= "" then game.JobId else "studio"
 	local key = keyFor(player)
@@ -130,7 +130,7 @@ local function loadRecord(player: Player): (string, any)
 			task.wait(5)
 		else
 			local msg = tostring(err)
-			if isUnavailableError(msg) then
+			if SessionLockRules.loadFailure(msg, DEVELOPMENT_PLACE) == "memory" then
 				goMemory(msg)
 				return "memory", nil
 			end
