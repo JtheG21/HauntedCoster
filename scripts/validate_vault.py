@@ -142,6 +142,7 @@ def validate(root: Path) -> Report:
             check_links(rep, where, text, by_name)
 
     check_queue(rep, root, task_notes)
+    check_overview_tables(rep, root)
     return rep
 
 
@@ -239,6 +240,31 @@ def check_queue(rep, root, task_notes):
     for tid, (rel, _) in task_notes.items():
         if tid not in seen:
             rep.warn(str(rel), f"{tid} isn't in tasks/queue.json")
+
+
+OVERVIEW_ROW = re.compile(r"^\|\s*\[\[(TASK-\d{4})[^\]]*\]\]\s*\|\s*([a-z_]+)")
+
+
+def check_overview_tables(rep, root):
+    """Warn when a game Overview's task table shows a status other than the queue's (AUDIT-005)."""
+    qpath = root / "tasks" / "queue.json"
+    if not qpath.exists():
+        return
+    try:
+        status = {t.get("id"): t.get("status") for t in json.loads(qpath.read_text()).get("tasks", [])}
+    except json.JSONDecodeError:
+        return  # check_queue reports it
+    for p in sorted((root / "03 Games").glob("*/00 Overview.md")):
+        where = str(p.relative_to(root))
+        for line in p.read_text(encoding="utf-8").splitlines():
+            m = OVERVIEW_ROW.match(line)
+            if not m:
+                continue
+            tid, shown = m.groups()
+            if tid not in status:
+                rep.warn(where, f"task table lists {tid}, which isn't in tasks/queue.json")
+            elif shown != status[tid]:
+                rep.warn(where, f"task table shows {tid} as '{shown}' but the queue says '{status[tid]}'")
 
 
 def main(argv=None) -> int:

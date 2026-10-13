@@ -17,8 +17,8 @@ tags:
   - workflow/task
   - milestone/m2
 related:
-  - "[[01 Game Design]]"
-  - "[[03 Roadmap]]"
+  - "[[GAME-001 Rg1/01 Game Design|01 Game Design]]"
+  - "[[GAME-001 Rg1/03 Roadmap|03 Roadmap]]"
 ---
 # TASK-0008: Prototype Telemetry
 

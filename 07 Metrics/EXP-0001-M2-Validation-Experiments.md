@@ -8,15 +8,15 @@ start:
 end:
 metric: see table
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - metrics/validation
 related:
-  - "[[01 Game Design]]"
+  - "[[GAME-001 Rg1/01 Game Design|01 Game Design]]"
 ---
 # EXP-0001: M2 validation experiments (proposed)
 
-These are designed to **disprove** the riskiest assumptions in [[01 Game Design]] cheaply, using the M2 prototype in **local Studio tests and private sessions only**. No ads, purchases or publishing.
+These are designed to **disprove** the riskiest assumptions in [[GAME-001 Rg1/01 Game Design|01 Game Design]] cheaply, using the M2 prototype in **local Studio tests and private sessions only**. No ads, purchases or publishing.
 
 ## Sample-size honesty
 Early tests involve **5–10 people** (friends, family, a small Discord). That's enough to spot clear failures (confusion, frustration, bugs), **not** enough to estimate retention or conversion. There are no universal benchmark targets. Thresholds below are *decision triggers* for small samples, not success claims. Stronger evidence later comes from a **soft-launched private or unlisted test** (with your approval) using Roblox Creator Analytics: <60 s bounce, D1/D7, session length.

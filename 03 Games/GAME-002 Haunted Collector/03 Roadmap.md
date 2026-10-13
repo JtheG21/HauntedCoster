@@ -3,7 +3,7 @@ id: GAME-002-ROADMAP
 title: Roadmap
 type: roadmap
 project: GAME-002
-status: proposed
+status: in_progress
 created: 2026-10-11
 updated: 2026-10-12
 tags:
@@ -12,9 +12,9 @@ related:
   - "[[GAME-002 Haunted Collector/01 Game Design]]"
   - "[[ADR-0005-Haunted-Collector-Direction]]"
 ---
-# Roadmap: Haunted Collector (GAME-002), **proposed**
+# Roadmap: Haunted Collector (GAME-002)
 
-> Nothing is approved yet. Each task is a vertical slice that ends playable in Studio, so the loop can be tried as early as TASK-0014. Effort estimates are rough. Everything runs on the subscription, with **$0 paid API**.
+> Written as a proposal on 2026-10-11; since then jg has approved each task's plan and merge individually (see each task note). The roadmap as a whole was never approved as one document, so its status is `in_progress`, not `approved`. Each task is a vertical slice that ends playable in Studio, so the loop can be tried as early as TASK-0014. Effort estimates are rough. Everything runs on the subscription, with **$0 paid API**.
 
 ## M1: Playable MVP loop
 | Order | Task | Depends on | Playable result |
@@ -36,14 +36,14 @@ related:
 | Order | Task | Depends on | Result |
 |---|---|---|---|
 | 1 | [[TASK-0019-Persistence-And-Rejoin-Test]] | — | Real saving proven on rejoin (done, [[TEST-20261012-10]]) |
-| 2 | [[TASK-0020-Physical-Device-Checks]] | — | Controller and touch verified (parked by jg until after the audit) |
+| 2 | [[TASK-0020-Physical-Device-Checks]] | — | Controller and touch verified. **Archived** in the queue (deferred by jg); returns as a new task that supersedes it (jg's decision, 2026-10-12) |
 | 3 | [[TASK-0021-Anti-Cheat-Hardening]] | 0019 | Accepted M1 cheat paths closed (done, [[TEST-20261012-11]]) |
-| 4 | [[TASK-0022-M1-Polish]] | — | M1 UX and test gaps fixed |
+| 4 | [[TASK-0022-M1-Polish]] | — | M1 UX and test gaps fixed (done) |
 
 Then: tune from playtest data and add sound (`roblox-sfx`).
 
-## M3: World retrofit (proposed, [[ADR-0007-World-Retrofit-Direction]])
-Brief from jg on 2026-10-12, audit in [[RSH-20261012-World-Retrofit-Audit]]. Nothing here is approved yet.
+## M3: World retrofit ([[ADR-0007-World-Retrofit-Direction]], approved by jg 2026-10-12)
+Brief from jg on 2026-10-12, audit in [[RSH-20261012-World-Retrofit-Audit]]. **M3 status:** code complete and merged (TASK-0025 to TASK-0033, retro [[RETRO-M3-World-Retrofit]]); the habitat, house and train looks await jg's review.
 
 | Order | Task | Depends on | Result |
 |---|---|---|---|
@@ -54,6 +54,20 @@ Brief from jg on 2026-10-12, audit in [[RSH-20261012-World-Retrofit-Audit]]. Not
 | 5 | [[TASK-0029-Habitat-Rotation]] | 0027 | Shared 15-minute schedule with capture-safe swaps |
 | 6 | [[TASK-0030-House-And-Train-Presentation]] | 0026 | Mansion tiers and train areas read as mini theme parks |
 | 7 | [[TASK-0031-Failed-Capture-Retaliation]] | 0027 | Local chase and brief knockdown after a failed capture (scope per ADR-0007) |
+
+## Audit remediation (2026-10-12)
+From the formal project audit (chat report, 2026-10-12). Each task was approved by jg in chat.
+
+| Order | Task | Finding | Result |
+|---|---|---|---|
+| T1 | [[TASK-0034-Post-Merge-Verification]] | AUDIT-001 | Every single-player scenario passes on merged main ([[TEST-20261012-12]]) (done) |
+| T2 | [[TASK-0035-CrossPlot-Harness-Reliability]] | AUDIT-001 | CrossPlot 3/3 valid runs with a deterministic seat control ([[TEST-20261012-13]]) (done) |
+| T3 | [[TASK-0036-Persistence-Load-Failure]] | AUDIT-003 | Live load failures retry then readonly, never memory mode (done) |
+| T4 | [[TASK-0037-Plot-Capacity]] | AUDIT-002, 012 | Max Players 6, tied to the 6 plots (done) |
+| T5 | [[TASK-0038-Encounter-Review-Capture-Guards]] | AUDIT-009 | EncounterService reviewed; capture-start guards specced (done) |
+| T6/T7 | `chore/doc-sync-and-links` | AUDIT-005, 006, 008, 014 | Overview and roadmap synced to the queue; 45 ambiguous links qualified |
+
+Still open: art review then audio/VFX (AUDIT-010), 6-player profiling (AUDIT-015), the TASK-0020 device checks (as a new task), reference-image and `chore/git-safety` housekeeping (AUDIT-016). Accepted risks, documented, no change: AUDIT-004 (save-failure edge cases), AUDIT-011 (per-server limits, client-performed ragdoll).
 
 ## Later (not planned in detail)
 - Haunted Forest and Mine region (brief §15). The woodland habitats in M3 may cover part of it.

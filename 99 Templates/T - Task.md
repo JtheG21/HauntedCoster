@@ -28,6 +28,7 @@ tags:
 -
 
 ## Acceptance criteria
+*(Tick an AC only when it is proven, and link the proof: `- [x] AC1 … Evidence: [[TEST-…]]` or an audit note. Leave unproven ACs unticked and say why in the Outcome.)*
 - [ ] AC1
 
 ## Tests

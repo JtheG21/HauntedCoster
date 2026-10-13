@@ -10,12 +10,12 @@ owner: executor
 depends_on: []
 branch: task/T-001-collectibles
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - workflow/task
   - game/collectibles
 related:
-  - "[[00 Overview]]"
+  - "[[GAME-001 Rg1/00 Overview|00 Overview]]"
   - "[[SYS-Collectible-Service]]"
 ---
 # TASK-0001: Collectible pickup + leaderstats (workflow prototype)

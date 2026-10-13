@@ -6,7 +6,7 @@ project: GAME-001
 status: done
 confidence: low
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - research/comparison
 related:
@@ -15,7 +15,7 @@ related:
   - "[[RSH-20261010-Round-Party-Minigames]]"
   - "[[RSH-20261010-Steal-Collect-Base]]"
   - "[[RSH-20261010-Roblox-Platform-Economics]]"
-  - "[[00 Overview]]"
+  - "[[GAME-001 Rg1/00 Overview|00 Overview]]"
 ---
 # M1 candidate comparison: **decided**
 

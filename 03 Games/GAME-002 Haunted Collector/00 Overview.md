@@ -11,7 +11,7 @@ tags:
 ---
 # GAME-002: Haunted Collector (working title)
 
-**Phase:** M1 (the playable MVP loop) is **complete**: TASK-0011 to TASK-0018 are done, with merges approved by jg on 2026-10-11. Retro: [[RETRO-M1-Playable-MVP-Loop]] (approved by jg). **This is the studio's primary game** (user, 2026-10-11). GAME-001 is source material. Latest evidence: specs 51/0, FullLoop 56/56, Reachability 15/15, ExploitProbe 13/13, CrossPlot (2 players) 12/12 ([[TEST-20261011-04]], [[TEST-20261011-05]], [[TEST-20261011-06]]); fresh-profile first session in the real client ([[TEST-20261011-03]]). M1 decisions: [[ADR-0006-M1-Tuning-And-Scope-Decisions]]. Real saving is **proven** in jg's private place: leave and rejoin, shutdown save and the session lock ([[TASK-0019-Persistence-And-Rejoin-Test]], [[TEST-20261012-10]]). The accepted M1 cheat paths are closed server-side ([[TASK-0021-Anti-Cheat-Hardening]], [[TEST-20261012-11]]). Physical controller and touch are also M2. **Next:** M2 ([[GAME-002 Haunted Collector/03 Roadmap]]): TASK-0019 and TASK-0021 are done; TASK-0022 is done; TASK-0020 is parked until after the audit. **Code:** `games/haunted/` with `haunted.project.json`, synced to a separate place ([[ADR-0005-Haunted-Collector-Direction]]). **Task status:** `tasks/queue.json`
+**Phase:** M1 (playable MVP loop) and M3 (world retrofit) are complete ([[RETRO-M1-Playable-MVP-Loop]], [[RETRO-M3-World-Retrofit]]). M2 is complete except the physical controller and touch checks: [[TASK-0020-Physical-Device-Checks]] is archived (deferred by jg) and returns as a new task. **This is the studio's primary game** (user, 2026-10-11); GAME-001 is source material. **Audit remediation (2026-10-12):** T1–T5 are done ([[TASK-0034-Post-Merge-Verification]] to [[TASK-0038-Encounter-Review-Capture-Guards]]). **Latest evidence:** specs 125/0 (`scripts/check.sh`, 2026-10-12); on the merged code FullLoop 85/85, ExploitProbe 13/13, CarryGuard 21/21, Retaliation 36/36, HabitatRotation 28/28, HabitatSwap 35/35, Reachability 28/23/23/23 ([[TEST-20261012-12]], [[TEST-20261012-16]]); CrossPlot (2 players) 22/22 in 3 of 3 valid runs ([[TEST-20261012-13]]). Real saving is proven in jg's private place ([[TEST-20261012-10]]); live load failures go readonly, never memory ([[TEST-20261012-14]]). Max Players is 6, one per plot ([[TEST-20261012-15]]). **Not yet verified:** physical devices, a 6-player profiling session, the habitat art (looks await jg), audio and VFX (none yet). **Next:** the remaining audit items ([[GAME-002 Haunted Collector/03 Roadmap]]). **Code:** `games/haunted/` with `haunted.project.json`, synced to a separate place ([[ADR-0005-Haunted-Collector-Direction]]). **Task status:** `tasks/queue.json`
 
 Hook (Round 20): **"Build your haunted train."** Pitch: hunt strange creatures in a dark graveyard, risk the trip home, and turn your collection into a rideable haunted train attraction you design yourself.
 
@@ -19,29 +19,38 @@ Hook (Round 20): **"Build your haunted train."** Pitch: hunt strange creatures i
 [[GAME-002 Haunted Collector/01 Game Design]] · [[GAME-002 Haunted Collector/02 Technical Architecture]] · [[GAME-002 Haunted Collector/03 Roadmap]] · source brief: [[INBOX-20261011-Haunted-Collector-Brief]]
 
 ## Tasks
-| Task | Status | Audit |
+Statuses are copied from `tasks/queue.json` (authoritative); `validate_vault.py` warns when a row disagrees.
+
+| Task | Status (queue) | Audits |
 |---|---|---|
-| [[TASK-0011-Haunted-Scaffold-And-Player-Data]] | in_progress | — |
-| [[TASK-0012-Graveyard-And-Landmarks]] | ready (code in 17cb5ae) | — |
-| [[TASK-0013-Monsters-And-Capture]] | ready (code in 17cb5ae) | — |
-| [[TASK-0014-Return-Trip-And-Containment]] | ready (code in 17cb5ae) | — |
-| [[TASK-0015-House-Tiers-And-Upgrades]] | ready (code in 17cb5ae) | — |
-| [[TASK-0016-Starter-Ghost-Train]] | ready (code in 17cb5ae) | — |
-| [[TASK-0017-Track-Editor]] | ready (code in 17cb5ae) | — |
-| [[TASK-0018-Journal-Tutorial-And-Rare-Clue]] | ready (code in 17cb5ae) | — |
-| [[TASK-0023-Round-20-Design-Changes]] | done, merge approved by jg (Round 20: startle, chase, carry penalty, starter scare) | [[AUD-20261011-TASK-0023-01]] fail, [[AUD-20261011-TASK-0023-02]] pass |
-| [[TASK-0024-FullLoop-Landmark-Flake]] | done, merge approved by jg (landmark diagnostics; flake not reproduced) | [[AUD-20261011-TASK-0024-01]] pass |
-| [[TASK-0025-Clue-Hunting-Removal]] | done, merge approved by jg (clue hunting removed; crypt and Bell Wraith need the Restored Manor) | [[AUD-20261012-TASK-0025-01]] fail, [[AUD-20261012-TASK-0025-02]] pass |
-| [[TASK-0026-Radial-Plot-Layout]] | done, merge approved by jg (six plots around the hub; the cemetery is the first habitat module) | [[AUD-20261012-TASK-0026-01]] pass |
-| [[TASK-0027-Habitat-Modules-And-Blockouts]] | done, merge approved by jg (four habitat modules, swap lifecycle; blockout look awaits jg's review) | [[AUD-20261012-TASK-0027-01]] pass |
-| [[TASK-0028-Cemetery-Vignette-And-Atmosphere]] | done, merge approved by jg (twilight sky, lamp family, cemetery vignette; look awaits jg) | [[AUD-20261012-TASK-0028-01]] pass |
-| [[TASK-0029-Habitat-Rotation]] | done, merge approved by jg (15-minute rotation, capture-safe swaps) | [[AUD-20261012-TASK-0029-01]] fail, [[AUD-20261012-TASK-0029-02]] pass |
-| [[TASK-0030-House-And-Train-Presentation]] | done, merge approved by jg (house tiers, plot dressing, station canopy; look awaits jg) | [[AUD-20261012-TASK-0030-01]] pass |
-| [[TASK-0031-Failed-Capture-Retaliation]] | done, merge approved by jg (retaliation on the final miss; follow-ups listed) | [[AUD-20261012-TASK-0031-01]] pass |
-| [[TASK-0032-Retaliation-Hardening]] | done, merge approved by jg (TASK-0031 audit follow-ups: protected tick and fled handlers, counters cleared on fled) | [[AUD-20261012-TASK-0032-01]] pass |
-| [[TASK-0033-Retaliation-Begin-Cleanup]] | done, merge approved by jg (a failed `begin` releases every monster it had set) | [[AUD-20261012-TASK-0033-01]] fail, [[AUD-20261012-TASK-0033-02]] pass |
-| [[TASK-0019-Persistence-And-Rejoin-Test]] | done, merge approved by jg (real saving proven on rejoin; session lock spec-tested; schema-bump rule) | [[AUD-20261012-TASK-0019-01]] pass |
-| [[TASK-0021-Anti-Cheat-Hardening]] | done, merge approved by jg (carry speed budget, deadline and teleport checks on secure, crypt gating by species, Ashen respawns in the crypt; CrossPlot seat check open) | [[AUD-20261012-TASK-0021-01]] pass |
+| [[TASK-0011-Haunted-Scaffold-And-Player-Data]] | done (project scaffold, player data) | [[AUD-20261011-TASK-0011-01]] fail, [[AUD-20261011-TASK-0011-02]] pass |
+| [[TASK-0012-Graveyard-And-Landmarks]] | done (graveyard, landmarks) | [[AUD-20261011-TASK-0012-01]] fail, [[AUD-20261011-TASK-0012-02]] fail, [[AUD-20261011-TASK-0012-03]] fail, [[AUD-20261011-TASK-0012-04]] pass |
+| [[TASK-0013-Monsters-And-Capture]] | done (monsters, capture) | [[AUD-20261011-TASK-0013-01]] fail, [[AUD-20261011-TASK-0013-02]] pass |
+| [[TASK-0014-Return-Trip-And-Containment]] | done (return trip, containment) | [[AUD-20261011-TASK-0014-01]] fail, [[AUD-20261011-TASK-0014-02]] pass |
+| [[TASK-0015-House-Tiers-And-Upgrades]] | done (house tiers, upgrades) | [[AUD-20261011-TASK-0015-01]] fail, [[AUD-20261011-TASK-0015-02]] pass |
+| [[TASK-0016-Starter-Ghost-Train]] | done (starter ghost train) | [[AUD-20261011-TASK-0016-01]] fail, [[AUD-20261011-TASK-0016-02]] pass |
+| [[TASK-0017-Track-Editor]] | done (track editor) | [[AUD-20261011-TASK-0017-01]] fail, [[AUD-20261011-TASK-0017-02]] fail, [[AUD-20261011-TASK-0017-03]] pass |
+| [[TASK-0018-Journal-Tutorial-And-Rare-Clue]] | done (journal, tutorial) | [[AUD-20261011-TASK-0018-01]] fail, [[AUD-20261011-TASK-0018-02]] pass |
+| [[TASK-0019-Persistence-And-Rejoin-Test]] | done (real saving proven on rejoin; session lock spec-tested; schema-bump rule) | [[AUD-20261012-TASK-0019-01]] pass |
+| [[TASK-0020-Physical-Device-Checks]] | archived (physical device checks; deferred by jg, to return as a new task) | — |
+| [[TASK-0021-Anti-Cheat-Hardening]] | done (carry speed budget, deadline and teleport checks on secure, crypt gating by species, Ashen respawns in the crypt; CrossPlot seat check open) | [[AUD-20261012-TASK-0021-01]] pass |
+| [[TASK-0022-M1-Polish]] | done (M1 polish) | [[AUD-20261011-TASK-0022-01]] fail, [[AUD-20261011-TASK-0022-02]] pass |
+| [[TASK-0023-Round-20-Design-Changes]] | done (Round 20: startle, chase, carry penalty, starter scare) | [[AUD-20261011-TASK-0023-01]] fail, [[AUD-20261011-TASK-0023-02]] pass |
+| [[TASK-0024-FullLoop-Landmark-Flake]] | done (landmark diagnostics; flake not reproduced) | [[AUD-20261011-TASK-0024-01]] pass |
+| [[TASK-0025-Clue-Hunting-Removal]] | done (clue hunting removed; crypt and Bell Wraith need the Restored Manor) | [[AUD-20261012-TASK-0025-01]] fail, [[AUD-20261012-TASK-0025-02]] pass |
+| [[TASK-0026-Radial-Plot-Layout]] | done (six plots around the hub; the cemetery is the first habitat module) | [[AUD-20261012-TASK-0026-01]] pass |
+| [[TASK-0027-Habitat-Modules-And-Blockouts]] | done (four habitat modules, swap lifecycle; blockout look awaits jg's review) | [[AUD-20261012-TASK-0027-01]] pass |
+| [[TASK-0028-Cemetery-Vignette-And-Atmosphere]] | done (twilight sky, lamp family, cemetery vignette; look awaits jg) | [[AUD-20261012-TASK-0028-01]] pass |
+| [[TASK-0029-Habitat-Rotation]] | done (15-minute rotation, capture-safe swaps) | [[AUD-20261012-TASK-0029-01]] fail, [[AUD-20261012-TASK-0029-02]] pass |
+| [[TASK-0030-House-And-Train-Presentation]] | done (house tiers, plot dressing, station canopy; look awaits jg) | [[AUD-20261012-TASK-0030-01]] pass |
+| [[TASK-0031-Failed-Capture-Retaliation]] | done (retaliation on the final miss; follow-ups listed) | [[AUD-20261012-TASK-0031-01]] pass |
+| [[TASK-0032-Retaliation-Hardening]] | done (TASK-0031 audit follow-ups: protected tick and fled handlers, counters cleared on fled) | [[AUD-20261012-TASK-0032-01]] pass |
+| [[TASK-0033-Retaliation-Begin-Cleanup]] | done (a failed `begin` releases every monster it had set) | [[AUD-20261012-TASK-0033-01]] fail, [[AUD-20261012-TASK-0033-02]] pass |
+| [[TASK-0034-Post-Merge-Verification]] | done (post-merge scenario run on main; CrossPlot blocked by the harness) | [[AUD-20261012-TASK-0034-01]] pass |
+| [[TASK-0035-CrossPlot-Harness-Reliability]] | done (deterministic CrossPlot seat control; 3/3 valid runs) | [[AUD-20261012-TASK-0035-01]] pass |
+| [[TASK-0036-Persistence-Load-Failure]] | done (live load failures retry then readonly, never memory mode) | [[AUD-20261012-TASK-0036-01]] pass |
+| [[TASK-0037-Plot-Capacity]] | done (6-player cap tied to the 6 plots) | [[AUD-20261012-TASK-0037-01]] pass |
+| [[TASK-0038-Encounter-Review-Capture-Guards]] | done (EncounterService review; capture-start guards as a pure rule) | [[AUD-20261012-TASK-0038-01]] pass |
 
 ## How to playtest (Studio)
 1. `rojo build haunted.project.json -o HauntedCollector.rbxl`, then open it in Studio (or `rojo serve haunted.project.json` into a new empty place). **Never sync it into the Rg1/place1 place.**
@@ -49,15 +58,19 @@ Hook (Round 20): **"Build your haunted train."** Pitch: hunt strange creatures i
 3. Follow the Objective panel: walk the lantern road north past the Weeping Angel, Inspect a Wisp (R), Try Capture, press CATCH (Space / tap / A) in the green zone, run home and Secure at your purple pen.
 4. Mansion menu (M): buy Speed, then Restore your house (250). Edit Track appears: tap to add/select points, Confirm.
 5. Mansion > Exhibits: place a monster. Ride at the station. With the Restored Manor the Sealed Crypt (south, behind the Bell Tower) opens: the Bell Wraith lives there. Clue hunting was removed in [[TASK-0025-Clue-Hunting-Removal]].
-6. Automated: `game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "FullLoop" })` from the command bar (Edit mode) prints PASS/FAIL per check. Other scenarios are `Reachability`, `ExploitProbe`, and `CrossPlot` (run with `ExecuteMultiplayerTestAsync(2, …)`). `HoldForManual` keeps a session open for hands-on checks. Unit specs: `require(game.TestService.Tests.TestRunner).run()`.
+6. Automated: `game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "FullLoop" })` from the command bar (Edit mode) prints PASS/FAIL per check. Other single-player scenarios: `Reachability`, `ExploitProbe`, `CarryGuard`, `Retaliation`, `HabitatRotation`, `HabitatSwap`. `HoldForManual` keeps a session open for hands-on checks. Unit specs: `require(game.TestService.Tests.TestRunner).run()`.
+7. `CrossPlot` (2 players): `ExecuteMultiplayerTestAsync(2, …)` rarely gets its 2nd client on an 8 GB Mac. Use Test → Clients and Servers → 2 Players, one fresh session per run, and run the scenario from a temporary server Script that first pins the Cemetery ([[TEST-20261012-13]]). Scratch places must not keep the template SpawnLocation ([[TEST-20261012-15]]).
 
 ## Systems
 [[SYS-Haunted-Player-Data]] · [[SYS-Haunted-Capture-Loop]] · [[SYS-Haunted-Ghost-Train]] · Playtests: [[TEST-20261011-01]] · [[TEST-20261011-02]] (FullLoop 48/48)
 
 ## Decisions
 - [[ADR-0005-Haunted-Collector-Direction]]: approved (jg, 2026-10-11)
+- [[ADR-0006-M1-Tuning-And-Scope-Decisions]]: approved
+- [[ADR-0007-World-Retrofit-Direction]]: approved
 
 ## Needs human review
 - Review the draft economy numbers in the design note. They are guesses until playtested.
 - Hands-on playtest by the user. Keep the GAME-001 `rojo serve` away from this place (it injected a Baseplate that caused z-fighting).
-- ADR-0005 open question 4 (migrating the old links).
+- ADR-0005 open question 4 (migrating the old links): done 2026-10-12, the 45 ambiguous links are qualified (GAME-001 notes link to `GAME-001 Rg1/…`).
+- The habitat, house and train looks (TASK-0027, 0028, 0030) await jg's review.

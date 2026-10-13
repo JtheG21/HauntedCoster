@@ -96,6 +96,16 @@ class VaultTest(unittest.TestCase):
         rep = vv.validate(self.root)
         self.assertTrue(any("isn't in tasks/queue.json" in w for w in rep.warnings))
 
+    def test_overview_table_matches_queue(self):
+        self.write(f"{GAME}/00 Overview.md", note("GAME-001", "overview", project="GAME-001",
+                                                 body="| [[TASK-0001-Thing]] | done | — |"))
+        rep = vv.validate(self.root)
+        self.assertFalse(any("task table" in w for w in rep.warnings))
+        self.write(f"{GAME}/00 Overview.md", note("GAME-001", "overview", project="GAME-001",
+                                                 body="| [[TASK-0001-Thing]] | in_progress (old) | — |"))
+        rep = vv.validate(self.root)
+        self.assertTrue(any("shows TASK-0001 as 'in_progress'" in w for w in rep.warnings))
+
     def test_plugin_folders_ignored(self):
         self.write("Agents/whatever.md", "[[broken]]")
         self.write(".obsidian/x.md", "[[broken]]")

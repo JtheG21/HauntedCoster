@@ -5,7 +5,7 @@ type: agent
 status: approved
 output: 02 Research/RSH-YYYYMMDD-Topic.md
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - workflow/agent
 ---
@@ -16,7 +16,7 @@ Analyze game references and opportunities: the core loop, progression, retention
 
 ## Inputs
 - The question or references the human supplied, or an item from `01 Inbox/`
-- The game's [[01 Game Design]] (only if it's relevant)
+- The game's `01 Game Design` (only if it's relevant)
 - Existing `02 Research/` notes. **Search them by topic first** and update instead of duplicating.
 
 ## Rules

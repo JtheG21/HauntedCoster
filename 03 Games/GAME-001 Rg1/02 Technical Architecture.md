@@ -5,7 +5,7 @@ type: architecture
 project: GAME-001
 status: in_progress
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - game/architecture
 ---
@@ -30,4 +30,4 @@ Clients send requests, never results. The server validates every argument and ra
 ## Data model
 No DataStores yet. Adding one requires an ADR and human approval.
 
-Related: [[00 Overview]]
+Related: [[GAME-001 Rg1/00 Overview|00 Overview]]

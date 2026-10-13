@@ -5,7 +5,7 @@ type: agent
 status: approved
 output: 03 Games/<game>/06 Tasks/TASK-####-Title.md + tasks/queue.json entry
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - workflow/agent
 ---
@@ -15,7 +15,7 @@ tags:
 Turn an **approved** idea into small tasks that can be implemented and tested.
 
 ## Inputs
-- The approved idea or research note, the game's [[02 Technical Architecture]], and related `SYS-` notes
+- The approved idea or research note, the game's `02 Technical Architecture`, and related `SYS-` notes
 - `tasks/queue.json`, for the next free `TASK-####` and dependencies
 
 ## Rules
