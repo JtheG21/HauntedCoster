@@ -3,7 +3,7 @@ id: TASK-0021
 title: Anti-Cheat Hardening
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: high
 owner: executor
@@ -67,4 +67,9 @@ Proposed in [[RETRO-M1-Playable-MVP-Loop]]; created as `ready` with jg's approva
 - [[AUD-20261012-TASK-0021-01]]: pass (1 major fixed: the train-seat exclusion now needs a riding cart and the root at the seat; 2 refactors done; banked idle budget and shove slack accepted as designed).
 
 ## Outcome
-*(after merge: result, lessons, follow-ups)*
+- **Merge** approved by jg in chat on 2026-10-12 ("merge it and do the post-merge notes"). Merged through PR #30.
+- **Result:** the accepted M1 cheat paths are closed server-side: speeding or teleporting home drops the capture (one budget over the whole carry), a secure after the deadline fails, tier-0 players are refused crypt monsters by species and variant, and escaped Ashen monsters respawn only in the crypt ([[TEST-20261012-11]]).
+- **Lessons:** a scenario step needs its own fresh carry, because the budget grows with carry age; the 2-player CrossPlot harness is too flaky to retry, so use it only when nothing cheaper can check the change.
+- **Follow-ups:**
+  - Open: CrossPlot's seat-control check (touching another plot's enabled front seat seats A) failed 2 of 3 runs, also with the train change reverted; the all-`main` comparison is still to run ([[TEST-20261012-11]]).
+  - Repair the 2-player harness first (one-Studio preflight, a renamed place copy, one-line results).

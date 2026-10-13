@@ -1684,7 +1684,7 @@
       "id": "TASK-0021",
       "title": "Anti-Cheat Hardening",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "high",
       "depends_on": [
         "TASK-0019"
@@ -1724,6 +1724,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-12T18:03:36",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -1740,7 +1746,8 @@
           "report": "06 QA/AUD-20261012-TASK-0021-01.md"
         }
       ],
-      "revisions": 0
+      "revisions": 0,
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0022",

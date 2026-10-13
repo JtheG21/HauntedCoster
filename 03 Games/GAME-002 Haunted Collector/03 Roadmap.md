@@ -37,7 +37,7 @@ related:
 |---|---|---|---|
 | 1 | [[TASK-0019-Persistence-And-Rejoin-Test]] | — | Real saving proven on rejoin (done, [[TEST-20261012-10]]) |
 | 2 | [[TASK-0020-Physical-Device-Checks]] | — | Controller and touch verified |
-| 3 | [[TASK-0021-Anti-Cheat-Hardening]] | 0019 | Accepted M1 cheat paths closed |
+| 3 | [[TASK-0021-Anti-Cheat-Hardening]] | 0019 | Accepted M1 cheat paths closed (done, [[TEST-20261012-11]]) |
 | 4 | [[TASK-0022-M1-Polish]] | — | M1 UX and test gaps fixed |
 
 Then: tune from playtest data and add sound (`roblox-sfx`).

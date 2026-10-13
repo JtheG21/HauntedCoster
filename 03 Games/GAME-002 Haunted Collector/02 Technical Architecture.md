@@ -24,7 +24,7 @@ The server is authoritative. Code lives in `games/haunted/src/{server,shared,cli
 | PlotService | S | Assign/release home plots, ownership checks, plot bounds (in plot-local space) | — |
 | ~~LandmarkService~~ | — | Removed with clue hunting ([[TASK-0025-Clue-Hunting-Removal]], [[ADR-0007-World-Retrofit-Direction]]). Landmarks are scenery. Crypt access is the pure rule `EconomyRules.cryptOpen(houseTier)`; EconomyService adds `cryptOpen` to the snapshot and CaptureService refuses captures in gated zones below it | — |
 | EncounterService | S | Spawn and roam monsters in zones, roll variants, inspect payload; startle hops and fleeing escaped captures | — |
-| CaptureService | S | Capture sessions, server-timed meter, carry state, return timer, escape chase and grab | `Capture` (start/release), `Grab` prompt |
+| CaptureService | S | Capture sessions, server-timed meter, carry state, return timer, escape chase and grab; carry speed budget and deadline checks on secure (TASK-0021) | `Capture` (start/release), `Grab` prompt |
 | ContainmentService | S | Secure at own pad, owned roster, acclimation, passive income tick | `Containment` |
 | EconomyService | S | Currency changes and purchases (price, requirement and funds checks) | `Purchase` |
 | TrainService | S | Validate/build routes, exhibits, server cart ride, payout and cooldown | `Track`, `Ride`, `Exhibit` |
