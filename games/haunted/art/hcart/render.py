@@ -48,8 +48,11 @@ def _bounds():
 
 
 def contact_sheet(path: Path, tile: int = 400, night: bool = False, no_glow: bool = False, views=(0, 40, 90, 180),
-                  elevation: float = 12.0, samples: int = 24, ground: bool = True, focus=None) -> Path:
+                  elevation: float = 12.0, samples: int = 24, ground: bool = True, focus=None, show_parts=()) -> Path:
     sc = bpy.context.scene
+    for o in sc.objects:
+        if o.type == "MESH" and o.get("rbx_part") == "Ember":
+            o.hide_render = "Ember" not in show_parts
     for o in list(sc.objects):
         if o.type == "MESH" and "rbx_material" in o.keys():
             o.data.materials.clear()
@@ -136,4 +139,7 @@ def contact_sheet(path: Path, tile: int = 400, night: bool = False, no_glow: boo
     out.save()
     for o in added:
         bpy.data.objects.remove(o)
+    for o in sc.objects:
+        if o.type == "MESH" and o.get("rbx_part") == "Ember":
+            o.hide_render = False
     return path

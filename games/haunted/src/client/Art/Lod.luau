@@ -75,7 +75,7 @@ function Lod.register(
 	distance: number?,
 	cull: number?
 )
-	if #lod1 == 0 and not cull then
+	if #lod1 == 0 and #lod0 == 0 and not cull then
 		return
 	end
 	local e: Entry =

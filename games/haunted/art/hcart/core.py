@@ -41,8 +41,10 @@ def obj_from_bmesh(name: str, bm: bmesh.types.BMesh, material: str = "SmoothPlas
     return obj
 
 
-def tag(obj: bpy.types.Object, material: str, alpha: float = 0.0, part: str | None = None, pivot=None, lod: bool = True, color=None) -> bpy.types.Object:
+def tag(obj: bpy.types.Object, material: str, alpha: float = 0.0, part: str | None = None, pivot=None, lod: bool = True, color=None,
+        detail: bool = False) -> bpy.types.Object:
     obj["rbx_material"] = material
+    obj["rbx_detail"] = bool(detail)
     obj["rbx_alpha"] = float(alpha)
     obj["rbx_part"] = part or obj.name
     obj["rbx_lod"] = bool(lod)

@@ -57,6 +57,7 @@ def main() -> None:
     p.add_argument("--tile", type=int, default=400)
     p.add_argument("--views", default="0,40,90,180")
     p.add_argument("--focus", default=None, help="x,y,z,size (Blender space) for a close-up sheet")
+    p.add_argument("--ashen", action="store_true", help="also render the Ashen ember overlay sheet")
     a = p.parse_args(argv)
     reg = registry()
     names = sorted(reg) if a.all else [n for n in sorted(reg) if a.prefix and n.startswith(a.prefix)] + a.asset
@@ -81,6 +82,8 @@ def main() -> None:
         if a.focus:
             f = tuple(float(v) for v in a.focus.split(","))
             render.contact_sheet(WORK / "previews" / f"{name}_focus.png", tile=a.tile, views=views, focus=f)
+        if a.ashen:
+            render.contact_sheet(WORK / "previews" / f"{name}_ashen.png", tile=a.tile, night=True, views=views, show_parts=("Ember",))
         if a.noglow:
             render.contact_sheet(WORK / "previews" / f"{name}_noglow.png", tile=a.tile, no_glow=True, views=views)
         info["seconds"] = round(time.time() - t, 1)

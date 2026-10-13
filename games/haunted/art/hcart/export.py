@@ -17,6 +17,11 @@ TEXTURED = {"Wood", "WoodPlanks", "Slate", "Rock", "Fabric", "Concrete", "Brick"
             "Carpet", "CeramicTiles", "ClayRoofTiles", "Rubber", "Salt", "Snow", "Ice", "Glacier", "CrackedLava"}
 
 
+# Roblox material textures darken the vertex colour they multiply (measured in Studio 2026-10-13: Fabric reads
+# roughly 35% darker than Plastic). Exported colours are lifted so painted values survive.
+MATERIAL_GAIN = {"Fabric": 1.55, "Wood": 1.1}
+
+
 def to_roblox(v) -> tuple[float, float, float]:
     """Blender (Z up, front -Y) -> Roblox (Y up, front -Z): a proper rotation, so winding is kept."""
     return (-v[0], v[2], v[1])
@@ -71,6 +76,9 @@ def mesh_arrays(obj: bpy.types.Object, with_uv: bool) -> tuple[list, list, list,
 def part_record(obj: bpy.types.Object, name: str, lod: int) -> tuple[dict, int]:
     mat = obj.get("rbx_material", "SmoothPlastic")
     pos, nrm, cols, faces, uvs, ntri = mesh_arrays(obj, mat in TEXTURED)
+    gain = MATERIAL_GAIN.get(mat, 1.0)
+    if gain != 1.0:
+        cols = [tuple(min(255, round(c * gain)) for c in rgb) for rgb in cols]
     data = codec.encode(pos, nrm, cols, faces, uvs)
     mins = [min(p[i] for p in pos) for i in range(3)]
     maxs = [max(p[i] for p in pos) for i in range(3)]
@@ -88,6 +96,8 @@ def part_record(obj: bpy.types.Object, name: str, lod: int) -> tuple[dict, int]:
     if "rbx_pivot" in obj.keys():
         pv = to_roblox(obj["rbx_pivot"])
         attrs.update({"PX": round(pv[0], 4), "PY": round(pv[1], 4), "PZ": round(pv[2], 4)})
+    if obj.get("rbx_detail", False):
+        attrs["Detail"] = True
     if "rbx_tags" in obj.keys():
         attrs["Tags"] = str(obj["rbx_tags"])
     return {"name": name, "className": "StringValue", "properties": {"Value": codec.to_text(data)}, "attributes": attrs}, ntri

@@ -27,6 +27,7 @@ local EconomyService = require(Services.EconomyService)
 local TrainService = require(Services.TrainService)
 local TutorialService = require(Services.TutorialService)
 local HauntedTreeService = require(Services.HauntedTreeService)
+local ArtBakeService = require(Services.ArtBakeService)
 
 -- The persistent outer world, then every habitat module (one active inside the hub wall, ADR-0007). The
 -- rotation schedule picks the active module. Studio test runs (a `scenario` argument) are pinned to the
@@ -45,6 +46,7 @@ local initialHabitat = if type(testHabitat) == "string" and pinned
 HabitatService.start(hub, initialHabitat)
 
 StudioTestHook.start()
+ArtBakeService.start() -- art first: clients clone its templates (TASK-0042)
 
 PlayerDataService.start()
 StateService.start()
