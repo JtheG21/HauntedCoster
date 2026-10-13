@@ -3,7 +3,7 @@ id: TASK-0035
 title: "CrossPlot Harness Reliability"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: low
 owner: executor
@@ -61,3 +61,6 @@ Make CrossPlot (2-player plot isolation) give a trustworthy result. Its "touchin
 - [[AUD-20261012-TASK-0035-01]]: pass (3 minor notes: possible re-seat cooldown false failure, no explicit probe check line, forced-parked check doesn't need the guard)
 
 ## Outcome
+- Merge approved by jg in chat on 2026-10-12 ("merge it once CI passes"); PR #36.
+- CrossPlot now gives a trustworthy 2-player result: 3/3 valid at 22/22, and the negative control catches a missing owner guard. With [[TEST-20261012-12]], every Studio scenario has passed on the current code; AUDIT-001 is closed except for the follow-ups below.
+- Follow-ups: (1) the forced-parked-seat check passes without the guard (jg to decide: fix or drop); (2) automated 2-client launch is unreliable on this Mac, so 2-player scenarios use manual Test-tab sessions (procedure in [[TEST-20261012-13]]).
