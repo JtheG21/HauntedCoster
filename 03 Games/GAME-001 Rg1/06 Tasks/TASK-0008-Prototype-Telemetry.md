@@ -48,7 +48,11 @@ Follow [[Luau Standards]]: server-authoritative, validate every remote argument,
 
 ---
 ## Implementation record
+- Executed on `task/TASK-0008-Prototype-Telemetry` at `af72448` (2026-10-10): `TelemetryService`, `TelemetryRules`, 6 specs, event hooks. Evidence: [[TEST-20261010-12]]. The branch is kept, not merged.
+- This run was never recorded through the orchestrator, so the `tasks/queue.json` history goes `ready` → `archived` without it.
 
 ## Audits
+- [[AUD-20261010-TASK-0008-01]]: **fail** (1 major, 5 minor, 2 nit). The major finding: the first-power median can never exceed 30 s, so the EXP-0001 "<60 s" trigger always passes. No revision followed.
 
 ## Outcome
+- **Archived** 2026-10-12 by jg (GAME-001 paused; GAME-002 is primary), after a failed first audit and without a revision. Nothing was merged. If GAME-001 telemetry is ever revived, start from the audit's findings.
