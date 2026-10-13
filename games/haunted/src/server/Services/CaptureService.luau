@@ -438,48 +438,30 @@ local function onCaptureStart(player: Player, model: any): { [string]: any }
 		return { ok = false, reason = "Slow down" }
 	end
 	local profile = PlayerDataService.get(player)
-	if not profile then
-		return { ok = false, reason = "Still loading" }
-	end
-	if not PlotService.plotIndex(player) then
-		return { ok = false, reason = "You need a home plot first" }
-	end
-	if carries[player] then
-		return { ok = false, reason = "You're already carrying a monster home!" }
-	end
-	if chases[player] then
-		return { ok = false, reason = "Catch your escaped monster first!" }
-	end
-	if sessions[player] then
-		return { ok = false, reason = "Already capturing" }
-	end
-	if closing then
-		return { ok = false, reason = "The fog is rolling in. The hunting ground is about to change!" }
-	end
-	if #profile.owned >= ProfileRules.capacity(profile) then
-		return { ok = false, reason = "Your containment pen is full. Upgrade your house for more room." }
-	end
 	local e = EncounterService.get(model)
-	if not e or not e.alive then
-		return { ok = false, reason = "It's gone" }
-	end
-	if e.fleeing then
-		return { ok = false, reason = "It's running from someone else" }
-	end
-	if e.pursuing then
-		return { ok = false, reason = "It's charging! Get clear first." }
-	end
-	if EncounterService.isStartled(e) then
-		return { ok = false, reason = "It's skittish. Give it a moment." }
-	end
 	local root = rootOf(player)
-	if not root or (root.Position - e.root.Position).Magnitude > START_DISTANCE then
-		return { ok = false, reason = "Get closer" }
+	local refusal = CaptureRules.startRefusal({
+		loaded = profile ~= nil,
+		hasPlot = PlotService.plotIndex(player) ~= nil,
+		carrying = carries[player] ~= nil,
+		chasing = chases[player] ~= nil,
+		inSession = sessions[player] ~= nil,
+		closing = closing,
+		owned = if profile then #profile.owned else 0,
+		capacity = if profile then ProfileRules.capacity(profile) else 1,
+		alive = e ~= nil and e.alive,
+		fleeing = e ~= nil and e.fleeing ~= nil,
+		pursuing = e ~= nil and e.pursuing ~= nil,
+		startled = e ~= nil and EncounterService.isStartled(e),
+		distance = if root and e then (root.Position - e.root.Position).Magnitude else nil,
+		maxDistance = START_DISTANCE,
+		needsCrypt = e ~= nil and HabitatRules.needsCrypt(e.zone, e.species, e.variant),
+		cryptOpen = profile ~= nil and EconomyRules.cryptOpen(profile.houseTier),
+	})
+	if refusal or not (profile and e) then
+		return { ok = false, reason = refusal or "It's gone" }
 	end
 	local species = Monsters.Species[e.species]
-	if HabitatRules.needsCrypt(e.zone, e.species, e.variant) and not EconomyRules.cryptOpen(profile.houseTier) then
-		return { ok = false, reason = "Restore your house to capture monsters in the Sealed Crypt." }
-	end
 	if not EncounterService.claim(e, player) then
 		return { ok = false, reason = "Someone else is capturing it" }
 	end

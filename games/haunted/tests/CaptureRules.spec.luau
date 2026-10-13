@@ -151,4 +151,163 @@ return function(t: TestRunner.T)
 		t.eq(CaptureRules.carryTooFast(CaptureRules.CarrySlackStuds, 0, speed), false)
 		t.eq(CaptureRules.carryTooFast(CaptureRules.CarrySlackStuds + 1, 0, speed), true)
 	end)
+
+	-- TASK-0038: capture start is refused for every unsafe state, in the server's order, and allowed only
+	-- when all of them are clear. The reasons are what the player sees.
+	local function clear(): any
+		return {
+			loaded = true,
+			hasPlot = true,
+			carrying = false,
+			chasing = false,
+			inSession = false,
+			closing = false,
+			owned = 2,
+			capacity = 4,
+			alive = true,
+			fleeing = false,
+			pursuing = false,
+			startled = false,
+			distance = 10,
+			maxDistance = 18,
+			needsCrypt = false,
+			cryptOpen = false,
+		}
+	end
+	t.test("capture start is allowed only when every guard is clear", function()
+		t.eq(CaptureRules.startRefusal(clear()), nil)
+		local crypt = clear()
+		crypt.needsCrypt, crypt.cryptOpen = true, true
+		t.eq(CaptureRules.startRefusal(crypt), nil, "crypt monster, crypt open")
+		local edge = clear()
+		edge.distance = 18
+		t.eq(CaptureRules.startRefusal(edge), nil, "exactly at the distance limit")
+	end)
+
+	t.test("each unsafe state refuses capture start", function()
+		local cases: { { any } } = {
+			{
+				"not loaded",
+				function(f)
+					f.loaded = false
+				end,
+				"Still loading",
+			},
+			{
+				"no plot",
+				function(f)
+					f.hasPlot = false
+				end,
+				"You need a home plot first",
+			},
+			{
+				"carrying",
+				function(f)
+					f.carrying = true
+				end,
+				"already carrying",
+			},
+			{
+				"chasing",
+				function(f)
+					f.chasing = true
+				end,
+				"escaped monster",
+			},
+			{
+				"in a session",
+				function(f)
+					f.inSession = true
+				end,
+				"Already capturing",
+			},
+			{
+				"rotation closing",
+				function(f)
+					f.closing = true
+				end,
+				"fog",
+			},
+			{
+				"pen full",
+				function(f)
+					f.owned = 4
+				end,
+				"pen is full",
+			},
+			{
+				"gone",
+				function(f)
+					f.alive = false
+				end,
+				"It's gone",
+			},
+			{
+				"fleeing",
+				function(f)
+					f.fleeing = true
+				end,
+				"running from someone",
+			},
+			{
+				"pursuing",
+				function(f)
+					f.pursuing = true
+				end,
+				"charging",
+			},
+			{
+				"startled",
+				function(f)
+					f.startled = true
+				end,
+				"skittish",
+			},
+			{
+				"too far",
+				function(f)
+					f.distance = 18.5
+				end,
+				"Get closer",
+			},
+			{
+				"no character",
+				function(f)
+					f.distance = nil
+				end,
+				"Get closer",
+			},
+			{
+				"crypt locked",
+				function(f)
+					f.needsCrypt = true
+				end,
+				"Restore your house",
+			},
+		}
+		for _, c in cases do
+			local f = clear()
+			c[2](f)
+			local reason = CaptureRules.startRefusal(f)
+			t.eq(reason ~= nil and string.find(reason, c[3], 1, true) ~= nil, true, `{c[1]}: {reason}`)
+		end
+	end)
+
+	t.test("player-state guards come before monster guards", function()
+		local f = clear()
+		f.carrying, f.pursuing = true, true
+		t.eq(string.find(CaptureRules.startRefusal(f) or "", "already carrying", 1, true) ~= nil, true)
+	end)
+
+	t.test("monster guards keep their order: gone, fleeing, pursuing, startled, distance, crypt", function()
+		local f = clear()
+		f.alive, f.distance, f.needsCrypt = false, nil, true
+		t.eq(CaptureRules.startRefusal(f), "It's gone")
+		f = clear()
+		f.startled, f.distance = true, nil
+		t.eq(string.find(CaptureRules.startRefusal(f) or "", "skittish", 1, true) ~= nil, true)
+		f = clear()
+		f.distance, f.needsCrypt = 30, true
+		t.eq(CaptureRules.startRefusal(f), "Get closer")
+	end)
 end

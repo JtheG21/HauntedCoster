@@ -87,4 +87,56 @@ function CaptureRules.carryTooFast(travelled: number, elapsed: number, allowedSp
 	return travelled > CaptureRules.carryBudget(elapsed, allowedSpeed)
 end
 
+-- Why a capture can't start (nil = it can), checked in this order (TASK-0038). The server gathers the facts;
+-- the claim itself (another player capturing it) and the rate limit stay in CaptureService.
+export type StartFacts = {
+	loaded: boolean,
+	hasPlot: boolean,
+	carrying: boolean,
+	chasing: boolean,
+	inSession: boolean,
+	closing: boolean,
+	owned: number,
+	capacity: number,
+	alive: boolean,
+	fleeing: boolean,
+	pursuing: boolean,
+	startled: boolean,
+	distance: number?, -- nil without a character
+	maxDistance: number,
+	needsCrypt: boolean,
+	cryptOpen: boolean,
+}
+
+function CaptureRules.startRefusal(f: StartFacts): string?
+	if not f.loaded then
+		return "Still loading"
+	elseif not f.hasPlot then
+		return "You need a home plot first"
+	elseif f.carrying then
+		return "You're already carrying a monster home!"
+	elseif f.chasing then
+		return "Catch your escaped monster first!"
+	elseif f.inSession then
+		return "Already capturing"
+	elseif f.closing then
+		return "The fog is rolling in. The hunting ground is about to change!"
+	elseif f.owned >= f.capacity then
+		return "Your containment pen is full. Upgrade your house for more room."
+	elseif not f.alive then
+		return "It's gone"
+	elseif f.fleeing then
+		return "It's running from someone else"
+	elseif f.pursuing then
+		return "It's charging! Get clear first."
+	elseif f.startled then
+		return "It's skittish. Give it a moment."
+	elseif f.distance == nil or f.distance > f.maxDistance then
+		return "Get closer"
+	elseif f.needsCrypt and not f.cryptOpen then
+		return "Restore your house to capture monsters in the Sealed Crypt."
+	end
+	return nil
+end
+
 return CaptureRules
