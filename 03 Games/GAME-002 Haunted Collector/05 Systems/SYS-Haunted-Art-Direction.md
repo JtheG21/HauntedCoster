@@ -45,20 +45,21 @@ Night indigo world; iron `#2a2c36` with blue-grey edges; lantern amber `#ffb352`
 2. **Paint** vertex colour with `hcart.paint` (ray-cast AO over the whole asset, cavity/edge, gradients, mottling).
 3. **Preview** with `hcart.render`: front, three-quarter, side and rear in neutral light, plus night and glow-off passes (`~/Roblox-Work/haunted/art/previews/`).
 4. **Export** `--export` → `src/shared/ArtData/<asset>.model.json`: one StringValue per part with HCM1 data (`hcart/codec.py` ↔ `shared/Art/MeshCodec.luau`, both spec-tested), attributes for material, transparency, centre, joint pivot and LOD. Parts over 400 triangles also get an LOD1 (~30%).
-5. **Run** on the client: `client/Art/ArtLoader` decodes once, builds one EditableMesh per part, creates a template MeshPart and clones it (multi-reference). Server builders keep their invisible colliders, lights and prompts and tag an anchor `ArtSlot` with `ArtKey`; `client/Art/Dressing` attaches the visual. A failed EditableMesh build leaves the collider and logs once; gameplay never depends on art.
-6. **Verify** in Studio at gameplay distance and in game lighting; record triangles and memory.
+5. **Bake** on the server: `server/Services/ArtBakeService` turns each HCM1 part into an EditableMesh (servers have no editable memory budget), stores it as DataModel-scoped content (`AssetService:CreateDataModelContentAsync`) and keeps a template MeshPart in `ReplicatedStorage.ArtTemplates/<asset>/<part>`. That content replicates like a normal mesh. Studio test 2026-10-13: the first client-side design hit the per-device EditableMesh budget after a few meshes ("Failed to create empty EditableMesh ... memory budget limits"); with server baking, all lamps and creatures cost 2.0 MB `GraphicsMeshParts` on the client.
+6. **Run** on the client: `client/Art/ArtLoader` clones the baked template (falling back to a local EditableMesh build). Server builders keep their invisible colliders, lights and prompts and tag an anchor `ArtSlot` with `ArtKey`; `client/Art/Dressing` attaches the visual, `client/Art/Lod` swaps LOD0/LOD1 and drops `Detail` parts with distance, `client/Art/Creatures` animates creatures. A failed bake or build leaves the collider and logs once; gameplay never depends on art.
+7. **Verify** in Studio at gameplay distance and in game lighting; record triangles and memory.
 
 Command: `/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup -P games/haunted/art/build.py -- --asset <name> --render --night --noglow --export`.
 
 ### Going live (needs jg)
 EditableMesh fails by default in published games. Either:
 - **A. Import** (recommended for release): `--fbx` writes import files; jg runs one batch 3D import (an upload to the account) and the MeshIds go into an asset map so the loader prefers them. Vertex-colour support on imported meshes must be confirmed at that import; if unsupported, colours are baked to a texture first.
-- **B. Keep runtime meshes**: jg completes 13+ age and ID verification and turns on **Enable Mesh / Image APIs** in the Creator Dashboard (creator-docs `EditableMesh.yaml`, read 2026-10-13). Client memory budgets then apply.
+- **B. Keep the server bake**: jg completes 13+ age and ID verification and turns on **Enable Mesh / Image APIs** in the Creator Dashboard (creator-docs `EditableMesh.yaml`, read 2026-10-13). The bake creates *ephemeral* DataModel-scoped content each server session (Roblox stores it for the session; it is not an inventory asset and is subject to a server storage budget, `Enum.CreateContentResult.StorageLimitExceeded`). Whether `CreateDataModelContentAsync` needs anything beyond the toggle in live servers is **unverified** until a published test.
 
 ## Budgets (proposed; measured in TASK-0042 and TASK-0052)
 | Asset class | LOD0 triangles | LOD1 | Notes |
 |---|---|---|---|
-| Creature | ≤ 4,500 | ≤ 1,500 | 8 wild + pen/exhibit displays |
+| Creature | ≤ 8,500 | ≤ 6,000 incl. detail parts dropped at distance | 8 wild + pen/exhibit displays (measured: Wisp 3.4k, Gentleman 5.6k, Bell Wraith 5.3k, Hound 8.3k) |
 | Repeated prop (lamp, grave, fence, tree) | ≤ 3,200 | ≤ 1,100 | LOD1 beyond 70 studs |
 | Landmark | ≤ 12,000 | ≤ 4,000 | one or two per habitat |
 | Mansion tier | ≤ 16,000 | ≤ 5,000 | six plots |

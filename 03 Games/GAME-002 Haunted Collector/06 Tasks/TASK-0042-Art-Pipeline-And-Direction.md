@@ -57,6 +57,23 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 
 ---
 ## Implementation record
+**References used:** MODEL-MIN-064 (lighting pack: lantern cage, candles), MODEL-MIN-069 (finished architectural iron); rejected MODEL-BAD-015/016 (plain post, box lantern, glow over form).
+
+**Built (commits d13c57f, e5e5ff4):**
+- `games/haunted/art/`: Blender 5.1 headless library `hcart` (core, shapes, anatomy, paint, render, export, codec, palette) and `build.py`. One command builds, paints, previews (front, 3/4, side, rear; neutral, night, glow-off, close-up) and exports.
+- HCM1 codec: `hcart/codec.py` ↔ `src/shared/Art/MeshCodec.luau`, with the same fixture in `tests/test_hcm_codec.py` and `games/haunted/tests/MeshCodec.spec.luau`.
+- Runtime: `src/shared/Art/MeshBuild.luau`, `src/server/Services/ArtBakeService.luau` (server bake to DataModel content), `src/client/Art/{ArtLoader,Lod,Dressing}.luau`; `Build.artSlot` / `Build.collider` on the server.
+- Lamp family: `lamp_post` (3,164 tris, LOD1 1,082), `lantern_wall` (1,144), `lantern_hanging` (1,120). All 67–70 path/hub lamps now use `lamp_post`; colliders and the server PointLight are unchanged in role (light moved to the new lantern head height, 5.1).
+
+**Decisions:**
+- Glass panes use translucent Neon: Roblox Glass refracted the background and read as an offset block (Studio, 2026-10-13).
+- `CreateMeshPartAsync` keeps raw vertex coordinates, so vertices are recentred on the box centre (found when lamps floated ~4 studs in Studio).
+- Client EditableMeshes hit the per-device budget after a few meshes in Studio Play, so the server bakes templates (see [[SYS-Haunted-Art-Direction]] step 5). Live use still needs jg's choice of path A (import) or B (Mesh/Image API toggle).
+- Fabric darkens vertex colour ~35% in Studio; exported Fabric colours get a 1.55 gain.
+
+**Evidence:** `07 Playtests/assets/overhaul/` — `blender-lamp_post.jpg` (4 views neutral), `blender-lamp_post_night.jpg`, `T42-lamp-post-studio-neutral.jpg`, `T42-lamp-post-game-night.jpg`, `before-*.jpg`. Client memory with all lamps and creatures: `GraphicsMeshParts` 2.0 MB (Studio Play, 2026-10-13).
+
+**Checks:** `scripts/check.sh` steps pass via the pre-commit hook (lint, types, 143 specs). FullLoop: first run failed at "Get closer" after a scripted teleport (7 follow-on checks); immediate rerun 85/85. Recorded as a harness timing flake; rerun on the stacked head below.
 
 ## Audits
 
