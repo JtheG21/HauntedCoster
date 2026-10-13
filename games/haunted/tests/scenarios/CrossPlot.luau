@@ -190,12 +190,8 @@ return function(args: any): { [string]: any }
 			seatedSeen and front.Occupant ~= humA,
 			`seatedSeen={seatedSeen} occupant={front.Occupant}`
 		)
-		-- Parked: disabled again, so A can't touch-sit. A server Seat:Sit() can still seat through Disabled
-		-- (engine behaviour, minimal repro in TEST-20261012-01), so the same guard must eject A.
-		front.Disabled = true
-		front:Sit(humA)
-		task.wait(1)
-		check("A forced into B's parked front seat doesn't keep it", front.Occupant ~= humA, front.Occupant)
+		-- The forced-parked-seat check was dropped (TASK-0039): it passed with the owner guard off
+		-- (TEST-20261012-13), so it proved nothing. The enabled-seat check above covers the guard.
 		front.Disabled = true
 		watch:Disconnect()
 	else

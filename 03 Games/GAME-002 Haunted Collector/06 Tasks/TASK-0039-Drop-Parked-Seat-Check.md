@@ -1,0 +1,57 @@
+---
+id: TASK-0039
+title: "Drop Parked Seat Check"
+type: task
+project: GAME-002
+status: done
+priority: low
+risk: low
+owner: executor
+depends_on:
+  - TASK-0038
+branch: task/TASK-0039-Drop-Parked-Seat-Check
+related:
+  - "[[TASK-0035-CrossPlot-Harness-Reliability]]"
+  - "[[TEST-20261012-13]]"
+  - "[[TEST-20261012-17]]"
+created: 2026-10-12
+updated: 2026-10-12
+tags:
+  - workflow/task
+---
+
+# Drop Parked Seat Check
+
+## Goal
+Remove CrossPlot's "A forced into B's parked front seat doesn't keep it" check. It passed with the owner guard turned off ([[TEST-20261012-13]]), so it proved nothing; the enabled-seat check already covers the guard. Also record jg's 2026-10-12 decisions on the rest of the audit plan.
+
+## Scope
+- **In:** `games/haunted/tests/scenarios/CrossPlot.luau` (that one check); notes.
+- **Out:** `TrainService` and every other check.
+
+## Files expected to change
+- `games/haunted/tests/scenarios/CrossPlot.luau`, this note, [[TEST-20261012-17]], the Roadmap and Overview.
+
+## Acceptance criteria
+- [x] AC1 CrossPlot no longer runs the forced-parked-seat check; every other check is unchanged. Evidence: [[AUD-20261012-TASK-0039-01]] finding 1.
+- [x] AC2 The 2-player baseline and the 2026-10-12 decisions are recorded. Evidence: [[TEST-20261012-17]], [[GAME-002 Haunted Collector/03 Roadmap]].
+- [x] AC3 `scripts/check.sh` passes (specs 125/0).
+
+## Tests
+- **Automated:** `scripts/check.sh`.
+- **Studio playtest procedure:** none for the deletion (test-only code removed; the remaining checks are untouched). Next CrossPlot run will show 21 checks instead of 22.
+
+## Risks / notes
+- jg, in chat on 2026-10-12: "drop the parked seat check". Same message: art is fine for now (expect a full revamp later); references on hold; device checks wait until the game is nearly finished, so they test the final systems. After a 6-client test failed to start, jg decided to build for a full server but test with at most 2 players in Studio for now.
+
+---
+## Implementation record
+- Removed the `Sit`, wait and check; kept `front.Disabled = true`. Not rerun in Studio (deletion only).
+- 2-player server baseline taken on `main@d16b7f1`: [[TEST-20261012-17]].
+
+## Audits
+- [[AUD-20261012-TASK-0039-01]]: pass (minor: Overview status, close-out pending)
+
+## Outcome
+- Merge approved by jg in chat on 2026-10-12 ("merge it once CI passes"); PR #43.
+- CrossPlot drops a check that proved nothing (21 checks now). The 2-player baseline shows ample server headroom; 6-player profiling and device checks are deferred by jg's decision.
