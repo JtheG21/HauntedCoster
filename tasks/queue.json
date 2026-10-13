@@ -3063,7 +3063,7 @@
       "id": "TASK-0039",
       "title": "Drop Parked Seat Check",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "low",
       "depends_on": [
         "TASK-0038"
@@ -3093,6 +3093,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T21:57:29",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -3102,7 +3108,13 @@
           "notes": "check.sh pass; specs 125/0; CrossPlot forced-parked check removed (test-only, no Studio rerun); 2-player baseline TEST-20261012-17"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-12T21:57:29",
+          "result": "pass",
+          "report": "06 QA/AUD-20261012-TASK-0039-01.md"
+        }
+      ],
       "revisions": 0,
       "approved_by": "jg"
     }

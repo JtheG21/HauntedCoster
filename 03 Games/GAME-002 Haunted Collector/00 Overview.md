@@ -51,7 +51,7 @@ Statuses are copied from `tasks/queue.json` (authoritative); `validate_vault.py`
 | [[TASK-0036-Persistence-Load-Failure]] | done (live load failures retry then readonly, never memory mode) | [[AUD-20261012-TASK-0036-01]] pass |
 | [[TASK-0037-Plot-Capacity]] | done (6-player cap tied to the 6 plots) | [[AUD-20261012-TASK-0037-01]] pass |
 | [[TASK-0038-Encounter-Review-Capture-Guards]] | done (EncounterService review; capture-start guards as a pure rule) | [[AUD-20261012-TASK-0038-01]] pass |
-| [[TASK-0039-Drop-Parked-Seat-Check]] | in_progress (forced-parked-seat check dropped; decisions recorded) | — |
+| [[TASK-0039-Drop-Parked-Seat-Check]] | approved (forced-parked-seat check dropped; decisions recorded) | [[AUD-20261012-TASK-0039-01]] pass |
 
 ## How to playtest (Studio)
 1. `rojo build haunted.project.json -o HauntedCollector.rbxl`, then open it in Studio (or `rojo serve haunted.project.json` into a new empty place). **Never sync it into the Rg1/place1 place.**

@@ -3,7 +3,7 @@ id: TASK-0039
 title: "Drop Parked Seat Check"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: low
 risk: low
 owner: executor
@@ -33,9 +33,9 @@ Remove CrossPlot's "A forced into B's parked front seat doesn't keep it" check. 
 - `games/haunted/tests/scenarios/CrossPlot.luau`, this note, [[TEST-20261012-17]], the Roadmap and Overview.
 
 ## Acceptance criteria
-- [ ] AC1 CrossPlot no longer runs the forced-parked-seat check; every other check is unchanged.
-- [ ] AC2 The 2-player baseline and the 2026-10-12 decisions are recorded.
-- [ ] AC3 `scripts/check.sh` passes.
+- [x] AC1 CrossPlot no longer runs the forced-parked-seat check; every other check is unchanged. Evidence: [[AUD-20261012-TASK-0039-01]] finding 1.
+- [x] AC2 The 2-player baseline and the 2026-10-12 decisions are recorded. Evidence: [[TEST-20261012-17]], [[GAME-002 Haunted Collector/03 Roadmap]].
+- [x] AC3 `scripts/check.sh` passes (specs 125/0).
 
 ## Tests
 - **Automated:** `scripts/check.sh`.
@@ -46,7 +46,10 @@ Remove CrossPlot's "A forced into B's parked front seat doesn't keep it" check. 
 
 ---
 ## Implementation record
+- Removed the `Sit`, wait and check; kept `front.Disabled = true`. Not rerun in Studio (deletion only).
+- 2-player server baseline taken on `main@d16b7f1`: [[TEST-20261012-17]].
 
 ## Audits
+- [[AUD-20261012-TASK-0039-01]]: pass (minor: Overview status, close-out pending)
 
 ## Outcome
