@@ -10,6 +10,7 @@ local World = require(Config:WaitForChild("World"))
 local Monsters = require(Config:WaitForChild("Monsters"))
 local PlotDecor = require(Config:WaitForChild("PlotDecor"))
 local Build = require(script.Parent.Build)
+local GroundPainter = require(script.Parent.GroundPainter)
 local Props = require(script.Parent.Props)
 
 local PlotBuilder = {}
@@ -57,6 +58,7 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 		parent = plot,
 	})
 	plot.PrimaryPart = base
+	GroundPainter.mark(base) -- the lawn is terrain once the plot is placed (TASK-0044)
 	-- Low border wall with a front opening facing the hub
 	-- Walls are inset half a stud so neighbouring plots' boundary walls don't overlap (z-fighting).
 	local hx, hz = size.X / 2 - 0.5, size.Y / 2 - 0.5
@@ -234,6 +236,7 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 	Build.folder(plot, "Trophies")
 	Build.folder(plot, "Track")
 	plot.Parent = parent
+	GroundPainter.paint(plot, { [Enum.Material.Grass] = Enum.Material.LeafyGrass }) -- no blades over pens and exhibits
 	PlotBuilder.buildHouse(plot, index, 0)
 	return plot
 end

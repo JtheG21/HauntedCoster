@@ -16,6 +16,7 @@ local Habitats = require(Shared:WaitForChild("Config"):WaitForChild("Habitats"))
 local HabitatRules = require(Shared:WaitForChild("Rules"):WaitForChild("HabitatRules"))
 local HabitatState = require(Shared:WaitForChild("HabitatState"))
 local World = script.Parent.Parent.World
+local GroundPainter = require(World.GroundPainter)
 local HubBuilder = require(World.HubBuilder)
 local Kit = require(World.Habitats.Kit)
 
@@ -79,6 +80,8 @@ function HabitatService.activate(id: string): boolean
 	Habitats.setActive(id)
 	activeId = id
 	result.model.Parent = stage
+	-- The module's ground and paths become terrain (TASK-0044); no grass blades where creatures roam.
+	GroundPainter.paint(result.model, { [Enum.Material.Grass] = Enum.Material.LeafyGrass })
 	Workspace:SetAttribute(HabitatState.Attr.active, id)
 	HubBuilder.setGateLabel(hub, Habitats.ById[id].name)
 	for _, fn in onActivatedFns do

@@ -4,6 +4,8 @@
 
 local CollectionService = game:GetService("CollectionService")
 
+local GroundPainter = require(script.Parent.GroundPainter)
+
 local Build = {}
 
 export type PartProps = {
@@ -116,7 +118,7 @@ function Build.strip(
 	local mid = (a + b) / 2
 	local len = (Vector3.new(b.X, 0, b.Z) - Vector3.new(a.X, 0, a.Z)).Magnitude
 	local cf = CFrame.lookAt(Vector3.new(mid.X, y or 0.06, mid.Z), Vector3.new(b.X, y or 0.06, b.Z))
-	return Build.part({
+	local strip = Build.part({
 		name = name,
 		size = Vector3.new(width, 0.12, len),
 		cframe = cf,
@@ -124,6 +126,8 @@ function Build.strip(
 		material = material,
 		parent = parent,
 	})
+	GroundPainter.mark(strip) -- shown as terrain once painted (TASK-0044)
+	return strip
 end
 
 -- Moves every part under `container` from local space into `frame`. Plot geometry is built at plot-local
@@ -165,6 +169,7 @@ function Build.collider(parent: Instance, name: string, size: Vector3, cframe: C
 	local p =
 		Build.part({ name = name, size = size, cframe = cframe, shape = shape, transparency = 1, parent = parent })
 	p.CanTouch = false
+	p:SetAttribute("Solid", true) -- blocks sight checks (shared/TreeSight) like the mesh it stands for
 	return p
 end
 

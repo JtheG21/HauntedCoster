@@ -94,43 +94,30 @@ end
 
 local function pine(parent: Instance, rng: Random, x: number, z: number)
 	local h = rng:NextNumber(14, 22)
-	Build.block(parent, "PineTrunk", Vector3.new(1.4, h, 1.4), x, 0, z, C.bark, Enum.Material.Wood)
-	for i = 0, 2 do
-		local w = (3 - i) * rng:NextNumber(2.6, 3.4)
-		Build.part({
-			name = "PineTier",
-			size = Vector3.new(w, 4, w),
-			cframe = CFrame.new(x, h * 0.45 + i * 3.6, z) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 90)), 0),
-			color = C.pine,
-			material = Enum.Material.LeafyGrass,
-			collide = false,
-			parent = parent,
-		})
-	end
+	Build.collider(parent, "PineTrunk", Vector3.new(1.4, h, 1.4), CFrame.new(x, h / 2, z))
+	Build.artSlot(
+		parent,
+		if rng:NextNumber() < 0.5 then "tree_pine_a" else "tree_pine_b",
+		CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 360)), 0),
+		{ ArtScale = h / 18 }
+	)
 end
 
+local ROCKS = { "rock_a", "rock_b", "rock_c" }
 local function boulder(parent: Instance, rng: Random, x: number, z: number)
 	local s = rng:NextNumber(3, 6)
-	Build.part({
-		name = "Boulder",
-		size = Vector3.new(s * 1.3, s * 0.8, s),
-		cframe = CFrame.new(x, s * 0.3, z)
-			* CFrame.Angles(0, math.rad(rng:NextNumber(0, 180)), math.rad(rng:NextNumber(-8, 8))),
-		color = C.stone,
-		material = Enum.Material.Slate,
-		parent = parent,
-	})
+	local cf = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 180)), 0)
+	local box =
+		Build.collider(parent, "Boulder", Vector3.new(s * 1.2, s * 0.62, s * 0.9), cf * CFrame.new(0, s * 0.31, 0))
+	box.CanQuery = true
+	Build.artSlot(parent, ROCKS[rng:NextInteger(1, #ROCKS)], cf, { ArtScale = s / 4.5 })
 end
 
 local function fallenLog(parent: Instance, rng: Random, x: number, z: number)
-	Build.part({
-		name = "FallenLog",
-		size = Vector3.new(2, 2, rng:NextNumber(9, 14)),
-		cframe = CFrame.new(x, 1, z) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 180)), 0),
-		color = C.bark,
-		material = Enum.Material.Wood,
-		parent = parent,
-	})
+	local len = rng:NextNumber(9, 14)
+	local cf = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 180)), 0)
+	Build.collider(parent, "FallenLog", Vector3.new(2, 2, len), cf * CFrame.new(0, 1, 0))
+	Build.artSlot(parent, "log_fallen", cf, { ArtScale = len / 12.2 })
 end
 
 -- A hound den: an earth mound with a dark mouth and two glowing eyes inside.

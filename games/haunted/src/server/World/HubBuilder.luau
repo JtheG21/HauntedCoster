@@ -9,6 +9,7 @@ local World = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Con
 local Build = require(script.Parent.Build)
 local Props = require(script.Parent.Props)
 local Atmosphere = require(script.Parent.Atmosphere)
+local GroundPainter = require(script.Parent.GroundPainter)
 
 local HubBuilder = {}
 
@@ -39,26 +40,21 @@ local function wallArc(parent: Instance, fromAngle: number, toAngle: number)
 		local b = World.polar(fromAngle + (toAngle - fromAngle) * (i + 1) / steps, r)
 		local mid = (a + b) / 2
 		local len = (b - a).Magnitude
-		-- Neighbouring segments overlap a little at the joints; alternate heights so tops never share a plane.
-		local h = if i % 2 == 0 then WALL_HEIGHT else WALL_HEIGHT + 0.1
-		Build.part({
-			name = "HubWall",
-			size = Vector3.new(1.6, h, len + 0.6),
-			cframe = CFrame.lookAt(Vector3.new(mid.X, h / 2, mid.Z), Vector3.new(b.X, h / 2, b.Z)),
-			color = C.darkStone,
-			material = Enum.Material.Cobblestone,
-			parent = parent,
-		})
-		Build.part({
-			name = "HubRail",
-			size = Vector3.new(0.2, 0.2, len),
-			cframe = CFrame.lookAt(Vector3.new(mid.X, 5.5, mid.Z), Vector3.new(b.X, 5.5, b.Z)),
-			color = C.iron,
-			material = Enum.Material.Metal,
-			collide = false,
-			parent = parent,
-		})
-		Build.block(parent, "HubSpike", Vector3.new(0.3, 3.2, 0.3), a.X, WALL_HEIGHT, a.Z, C.iron, Enum.Material.Metal)
+		local along = Vector3.new(b.X - a.X, 0, b.Z - a.Z).Unit
+		-- Art (TASK-0044): a coped stone run with an iron railing and a pier, stretched to the segment.
+		Build.artSlot(
+			parent,
+			"hub_wall",
+			CFrame.fromMatrix(Vector3.new(mid.X, 0, mid.Z), along, Vector3.yAxis),
+			{ ArtStretchX = (len + 0.6) / 12 }
+		)
+		local wall = Build.collider(
+			parent,
+			"HubWall",
+			Vector3.new(1.6, WALL_HEIGHT, len + 0.6),
+			CFrame.lookAt(Vector3.new(mid.X, WALL_HEIGHT / 2, mid.Z), Vector3.new(b.X, WALL_HEIGHT / 2, b.Z))
+		)
+		wall.CanQuery = true
 		Build.part({
 			name = "HubWallCollider",
 			size = Vector3.new(1, WALL_COLLIDER, len + 0.8),
@@ -72,30 +68,71 @@ local function wallArc(parent: Instance, fromAngle: number, toAngle: number)
 	end
 end
 
-local function gate(parent: Instance, index: number): TextLabel
+-- One face of the hanging gate sign: the habitat name lettered on the board (TASK-0044).
+local function signFace(sign: BasePart, face: Enum.NormalId): TextLabel
+	local sg = Instance.new("SurfaceGui")
+	sg.Name = "Lettering" .. face.Name
+	sg.Face = face
+	sg.LightInfluence = 0.6
+	sg.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	sg.PixelsPerStud = 40
+	sg.MaxDistance = 260
+	local label = Instance.new("TextLabel")
+	label.Name = "Text"
+	label.BackgroundTransparency = 1
+	label.Size = UDim2.fromScale(0.92, 0.8)
+	label.Position = UDim2.fromScale(0.04, 0.1)
+	label.FontFace = Font.fromEnum(Enum.Font.GrenzeGotisch)
+	label.TextScaled = true
+	label.TextColor3 = Color3.fromRGB(255, 214, 150)
+	label.TextStrokeColor3 = Color3.fromRGB(40, 20, 10)
+	label.TextStrokeTransparency = 0.35
+	label.Text = "HUNTING GROUNDS"
+	label.Parent = sg
+	sg.Parent = sign
+	return label
+end
+
+local function gate(parent: Instance, index: number): { TextLabel }
 	local hub = World.Hub
 	local angle = hub.gateAngles[index]
 	local half = math.deg(math.asin((hub.gateWidth / 2 + 1.5) / hub.wallRadius))
 	local pillars = {}
+	local outward = World.polar(angle, 1) - World.polar(angle, 0)
+	outward = Vector3.new(outward.X, 0, outward.Z).Unit
 	for _, side in { -1, 1 } do
 		local p = World.polar(angle + side * half, hub.wallRadius)
 		table.insert(pillars, p)
-		Build.block(parent, "GatePillar", Vector3.new(3, 14, 3), p.X, 0, p.Z, C.darkStone, Enum.Material.Cobblestone)
+		Build.collider(parent, "GatePillar", Vector3.new(3, 14, 3), CFrame.new(p.X, 7, p.Z))
+		Build.artSlot(
+			parent,
+			"hub_gate_pillar",
+			CFrame.lookAt(Vector3.new(p.X, 0, p.Z), Vector3.new(p.X, 0, p.Z) + outward)
+		)
 		local lamp = World.polar(angle + side * (half + 3), hub.wallRadius + 3)
 		Props.lantern(parent, lamp.X, lamp.Z)
 	end
 	local a, b = pillars[1], pillars[2]
 	local mid = (a + b) / 2
-	local arch = Build.part({
-		name = "GateArch",
-		size = Vector3.new(2, 2, (b - a).Magnitude + 3),
-		cframe = CFrame.lookAt(Vector3.new(mid.X, 15, mid.Z), Vector3.new(b.X, 15, b.Z)),
-		color = C.iron,
-		material = Enum.Material.Metal,
+	local across = Vector3.new(b.X - a.X, 0, b.Z - a.Z).Unit
+	Build.artSlot(
+		parent,
+		"hub_gate_arch",
+		CFrame.fromMatrix(Vector3.new(mid.X, 12.9, mid.Z), across, Vector3.yAxis),
+		{ ArtStretchX = (b - a).Magnitude / 20 }
+	)
+	local signCF = CFrame.fromMatrix(Vector3.new(mid.X, 10.6, mid.Z), across, Vector3.yAxis)
+	Build.artSlot(parent, "hub_gate_sign", signCF)
+	local sign = Build.part({
+		name = "GateSign",
+		size = Vector3.new(8.4, 1.5, 0.34),
+		cframe = signCF,
+		transparency = 1,
+		collide = false,
 		parent = parent,
 	})
-	local label = Build.billboard(arch, "HUNTING GROUNDS", Color3.fromRGB(255, 190, 120), 3, 300, 1.5)
-	return label:FindFirstChild("Text") :: TextLabel
+	sign.CanQuery = false
+	return { signFace(sign, Enum.NormalId.Front), signFace(sign, Enum.NormalId.Back) }
 end
 
 function HubBuilder.build(parent: Instance): Result
@@ -106,7 +143,7 @@ function HubBuilder.build(parent: Instance): Result
 	folder.Name = "World"
 	local deco = Build.folder(folder, "Decor")
 
-	Build.part({
+	local ground = Build.part({
 		name = "Ground",
 		size = Vector3.new(1400, 2, 1400),
 		cframe = CFrame.new(hub.center.X, -1, hub.center.Z),
@@ -130,7 +167,9 @@ function HubBuilder.build(parent: Instance): Result
 	local gates = Build.folder(folder, "Gates")
 	local labels: { TextLabel } = {}
 	for i = 1, n do
-		table.insert(labels, gate(gates, i))
+		for _, label in gate(gates, i) do
+			table.insert(labels, label)
+		end
 	end
 
 	-- Spokes: each plot entrance to the ring road, with a lantern pair at the road edge
@@ -158,6 +197,9 @@ function HubBuilder.build(parent: Instance): Result
 	end
 
 	folder.Parent = parent
+	GroundPainter.style()
+	GroundPainter.paintOuter(ground, 330) -- terrain across the hub and every plot; the part shows beyond
+	GroundPainter.paint(folder, { [Enum.Material.Grass] = Enum.Material.LeafyGrass })
 	return { folder = folder, gateLabels = labels }
 end
 

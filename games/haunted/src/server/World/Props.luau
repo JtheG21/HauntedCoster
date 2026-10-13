@@ -4,6 +4,7 @@
 -- the TASK-0012 graveyard builder; TASK-0028 details the Weeping Angel and Bell Tower.
 
 local Build = require(script.Parent.Build)
+local GroundPainter = require(script.Parent.GroundPainter)
 
 local Props = {}
 
@@ -43,45 +44,30 @@ function Props.lantern(parent: Instance, x: number, z: number, y: number?, shado
 	Build.light(head, C.lanternLight, 30, 2.6, shadows)
 end
 
--- A carved pumpkin with a warm glow (map reference 3). No light of its own unless `lit`, to keep the budget.
+-- A carved pumpkin (art: pumpkin / pumpkin_lit, TASK-0044). `size` keeps the old footprint; lit ones keep their
+-- small warm light. No collider (it never had one).
 function Props.pumpkin(parent: Instance, x: number, z: number, size: number, yaw: number, lit: boolean?)
-	local body = Build.part({
-		name = "Pumpkin",
-		size = Vector3.new(size, size, size),
-		cframe = CFrame.new(x, size * 0.42, z) * CFrame.Angles(0, math.rad(yaw), 0),
-		color = C.pumpkin,
-		material = Enum.Material.SmoothPlastic,
-		shape = Enum.PartType.Ball,
-		collide = false,
-		parent = parent,
-	})
-	Build.part({
-		name = "PumpkinStem",
-		size = Vector3.new(0.25, size * 0.3, 0.25),
-		cframe = body.CFrame * CFrame.new(0, size * 0.55, 0),
-		color = Color3.fromRGB(60, 80, 40),
-		material = Enum.Material.Wood,
-		collide = false,
-		parent = parent,
-	})
-	-- The face: two eyes and a mouth on the front (-Z) side.
-	for _, f in { { -0.2, 0.12, 0.16 }, { 0.2, 0.12, 0.16 }, { 0, -0.12, 0.42 } } do
-		Build.part({
-			name = "PumpkinFace",
-			size = Vector3.new(size * f[3], size * 0.14, 0.1),
-			cframe = body.CFrame * CFrame.new(size * f[1], size * f[2], -size * 0.49),
-			color = Color3.fromRGB(255, 190, 80),
-			material = Enum.Material.Neon,
+	Build.artSlot(
+		parent,
+		if lit then "pumpkin_lit" else "pumpkin",
+		CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(yaw), 0),
+		{ ArtScale = size / 2, ArtCull = 220 }
+	)
+	if lit then
+		local glow = Build.part({
+			name = "PumpkinGlow",
+			size = Vector3.new(0.4, 0.4, 0.4),
+			cframe = CFrame.new(x, size * 0.3, z),
+			transparency = 1,
 			collide = false,
 			parent = parent,
 		})
-	end
-	if lit then
-		Build.light(body, C.lanternLight, 10, 1)
+		glow.CanQuery = false
+		Build.light(glow, C.lanternLight, 10, 1)
 	end
 end
 
--- Low edge stones along both sides of a path segment (path edges in the kit).
+-- Low edge stones along both sides of a path segment (art: edge_stone_a/b, culled beyond 140 studs).
 function Props.curbStones(parent: Instance, a: Vector3, b: Vector3, width: number, rng: Random)
 	local d = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
 	local len = d.Magnitude
@@ -94,17 +80,13 @@ function Props.curbStones(parent: Instance, a: Vector3, b: Vector3, width: numbe
 		local t = 1.5
 		while t < len - 1.5 do
 			local p = a + unit * t + perp * side * (width / 2 + 0.5)
-			local shade = rng:NextNumber(0.8, 1.1)
-			Build.part({
-				name = "EdgeStone",
-				size = Vector3.new(rng:NextNumber(0.8, 1.3), rng:NextNumber(0.35, 0.6), rng:NextNumber(1.2, 2)),
-				cframe = CFrame.lookAt(Vector3.new(p.X, 0.2, p.Z), Vector3.new(p.X, 0.2, p.Z) + unit)
-					* CFrame.Angles(0, math.rad(rng:NextNumber(-10, 10)), 0),
-				color = Color3.new(C.stone.R * shade, C.stone.G * shade, C.stone.B * shade),
-				material = Enum.Material.Slate,
-				collide = false,
-				parent = parent,
-			})
+			Build.artSlot(
+				parent,
+				if rng:NextNumber() < 0.5 then "edge_stone_a" else "edge_stone_b",
+				CFrame.lookAt(Vector3.new(p.X, 0, p.Z), Vector3.new(p.X, 0, p.Z) + unit)
+					* CFrame.Angles(0, math.rad(rng:NextNumber(-12, 12)), 0),
+				{ ArtScale = rng:NextNumber(0.8, 1.2), ArtCull = 140 }
+			)
 			t += rng:NextNumber(2.4, 3.4)
 		end
 	end
@@ -115,103 +97,59 @@ function Props.mossPatch(parent: Instance, x: number, z: number, radius: number,
 	return Props.disc(parent, "Moss", Vector3.new(x, 0, z), radius, top, C.moss, Enum.Material.Grass)
 end
 
--- A spiked iron arch over a path: two stone pillars with caps and lamps, and an iron arch between them.
--- `centre` is on the path; the arch spans `width` across `facing` (the direction along the path).
+-- A cemetery gate over a path: two stone pillars with ball finials and lamps, and a wrought-iron arch between
+-- them (art: gate_pillar, gate_arch stretched to the span). `centre` is on the path; `facing` is along it.
 function Props.cemeteryGate(parent: Instance, centre: Vector3, facing: Vector3, width: number)
 	local unit = Vector3.new(facing.X, 0, facing.Z).Unit
 	local perp = Vector3.new(-unit.Z, 0, unit.X)
 	for side = -1, 1, 2 do
 		local p = centre + perp * side * (width / 2 + 1)
-		Build.block(parent, "GatePillar", Vector3.new(2, 9, 2), p.X, 0, p.Z, C.darkStone, Enum.Material.Slate)
-		Build.block(parent, "GatePillarCap", Vector3.new(2.6, 0.8, 2.6), p.X, 9, p.Z, C.stone, Enum.Material.Slate)
+		Build.collider(parent, "GatePillar", Vector3.new(2, 9.9, 2), CFrame.new(p.X, 4.95, p.Z))
+		Build.artSlot(parent, "gate_pillar", CFrame.lookAt(Vector3.new(p.X, 0, p.Z), Vector3.new(p.X, 0, p.Z) + unit))
 		Props.lantern(parent, p.X + perp.X * side * 1.6, p.Z + perp.Z * side * 1.6)
 	end
-	local top = centre + Vector3.new(0, 10.5, 0)
-	Build.part({
-		name = "GateArch",
-		size = Vector3.new(0.5, 0.5, width + 2),
-		cframe = CFrame.lookAt(top, top + perp),
-		color = C.iron,
-		material = Enum.Material.Metal,
-		collide = false,
-		parent = parent,
-	})
-	for i = -3, 3 do
-		local p = top + perp * (i * (width / 7))
-		Build.part({
-			name = "GateSpike",
-			size = Vector3.new(0.25, 1.4 - math.abs(i) * 0.12, 0.25),
-			cframe = CFrame.new(p + Vector3.new(0, 0.8, 0)),
-			color = C.iron,
-			material = Enum.Material.Metal,
-			collide = false,
-			parent = parent,
-		})
-	end
+	local top = Vector3.new(centre.X, 9.15, centre.Z)
+	Build.artSlot(parent, "gate_arch", CFrame.fromMatrix(top, perp, Vector3.yAxis), { ArtStretchX = (width + 2) / 8 })
 end
 
--- A broken stretch of old wall (ruined masonry): uneven blocks, one fallen.
+-- A broken stretch of old masonry with a fallen block (art: ruin_wall). Colliders follow the mesh's five block
+-- columns, whose heights are fixed in the art (games/haunted/art/assets/graveyard.py ruin_wall, seed 12).
+local RUIN_TOPS = { 3.119, 3.704, 3.733, 2.056, 1.635 }
 function Props.ruinedWall(parent: Instance, rng: Random, x: number, z: number, yaw: number)
 	local cf = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(yaw), 0)
-	for i = -2, 2 do
-		local h = rng:NextNumber(1.5, 5)
-		Build.part({
-			name = "RuinBlock",
-			size = Vector3.new(2, h, 1.4),
-			cframe = cf * CFrame.new(i * 2.05, h / 2, 0),
-			color = C.darkStone,
-			material = Enum.Material.Cobblestone,
-			parent = parent,
-		})
+	-- Mesh +X is world -X of the art frame (Blender -> Roblox), so column i sits at -(-5.1 + 2.05 * (i - 1) + 1.025).
+	for i, h in RUIN_TOPS do
+		local cx = -(-5.1 + 2.05 * (i - 1) + 1.025)
+		Build.collider(parent, "RuinBlock", Vector3.new(2, h, 1.4), cf * CFrame.new(cx, h / 2, 0))
 	end
-	Build.part({
-		name = "RuinFallen",
-		size = Vector3.new(2, 1.2, 1.4),
-		cframe = cf
-			* CFrame.new(rng:NextNumber(-3, 3), 0.6, 2.4)
-			* CFrame.Angles(0, math.rad(rng:NextNumber(0, 60)), 0),
-		color = C.darkStone,
-		material = Enum.Material.Cobblestone,
-		parent = parent,
-	})
+	local _ = rng
+	Build.artSlot(parent, "ruin_wall", cf)
 end
 
--- A few candles of different heights on a grave or a step.
+-- A cluster of dripping candles on a grave or a step (art: candles). Lit clusters keep their small light.
 function Props.candles(parent: Instance, rng: Random, x: number, z: number, lit: boolean)
-	local tallest: Part? = nil
-	for i = 1, 3 do
-		local h = rng:NextNumber(0.6, 1.4)
-		local c = Build.block(
-			parent,
-			"Candle",
-			Vector3.new(0.3, h, 0.3),
-			x + rng:NextNumber(-0.6, 0.6),
-			0,
-			z + rng:NextNumber(-0.6, 0.6),
-			Color3.fromRGB(235, 225, 200),
-			Enum.Material.SmoothPlastic
-		)
-		c.CanCollide = false
-		Build.part({
-			name = "Flame",
-			size = Vector3.new(0.18, 0.3, 0.18),
-			cframe = c.CFrame * CFrame.new(0, h / 2 + 0.15, 0),
-			color = C.lantern,
-			material = Enum.Material.Neon,
+	Build.artSlot(
+		parent,
+		"candles",
+		CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 360)), 0),
+		{ ArtCull = 160 }
+	)
+	if lit then
+		local glow = Build.part({
+			name = "CandleGlow",
+			size = Vector3.new(0.3, 0.3, 0.3),
+			cframe = CFrame.new(x, 1.4, z),
+			transparency = 1,
 			collide = false,
 			parent = parent,
 		})
-		if i == 1 then
-			tallest = c
-		end
-	end
-	if lit and tallest then
-		Build.light(tallest, C.lanternLight, 9, 0.9)
+		glow.CanQuery = false
+		Build.light(glow, C.lanternLight, 9, 0.9)
 	end
 end
 
--- An iron fence between a and b with an invisible collider (rails alone have gaps). `posts` remembers
--- placed posts so fence lines that share a corner don't stack coincident posts (z-fighting).
+-- A wrought-iron fence from a to b (art: fence_post at each post, fence_panel stretched between them) with one
+-- invisible collider for the whole run. `posts` remembers placed posts so lines that share a corner don't stack.
 function Props.fenceLine(parent: Instance, a: Vector3, b: Vector3, posts: { [string]: boolean })
 	local dir = b - a
 	local len = dir.Magnitude
@@ -219,26 +157,26 @@ function Props.fenceLine(parent: Instance, a: Vector3, b: Vector3, posts: { [str
 		return
 	end
 	local unit = dir.Unit
+	local flat = Vector3.new(unit.X, 0, unit.Z).Unit
 	local n = math.max(1, math.floor(len / 4))
 	for i = 0, n do
 		local p = a + unit * (len * i / n)
 		local key = `{math.floor(p.X * 10 + 0.5)}:{math.floor(p.Z * 10 + 0.5)}`
 		if not posts[key] then
 			posts[key] = true
-			Build.block(parent, "FencePost", Vector3.new(0.4, 6, 0.4), p.X, 0, p.Z, C.iron, Enum.Material.Metal)
+			Build.artSlot(parent, "fence_post", CFrame.new(p.X, 0, p.Z))
+		end
+		if i < n then
+			local q = a + unit * (len * (i + 0.5) / n)
+			Build.artSlot(
+				parent,
+				"fence_panel",
+				CFrame.fromMatrix(Vector3.new(q.X, 0, q.Z), flat, Vector3.yAxis),
+				{ ArtStretchX = len / n / 4 }
+			)
 		end
 	end
 	local mid = (a + b) / 2
-	for _, h in { 2, 5 } do
-		Build.part({
-			name = "FenceRail",
-			size = Vector3.new(0.2, 0.2, len),
-			cframe = CFrame.lookAt(Vector3.new(mid.X, h, mid.Z), Vector3.new(b.X, h, b.Z)),
-			color = C.iron,
-			material = Enum.Material.Metal,
-			parent = parent,
-		})
-	end
 	Build.part({
 		name = "FenceCollider",
 		size = Vector3.new(0.6, 8, len),
@@ -248,67 +186,38 @@ function Props.fenceLine(parent: Instance, a: Vector3, b: Vector3, posts: { [str
 	})
 end
 
+-- A grave: headstone, Celtic cross, obelisk or a broken leaning slab, with a mound in front (art: grave_*).
+-- Colliders keep the old footprints.
+local GRAVE_ART = { "grave_headstone", "grave_cross", "grave_obelisk", "grave_leaning" }
+local GRAVE_SIZE =
+	{ Vector3.new(2.4, 3.2, 0.6), Vector3.new(0.6, 4, 0.6), Vector3.new(1.2, 5.5, 1.2), Vector3.new(2.2, 2.6, 0.5) }
 function Props.tombstone(parent: Instance, rng: Random, x: number, z: number)
 	local kind = rng:NextInteger(1, 4)
 	local rot = rng:NextNumber(-12, 12)
-	local shade = rng:NextNumber(0.85, 1.1)
-	local col =
-		Color3.new(math.min(1, C.stone.R * shade), math.min(1, C.stone.G * shade), math.min(1, C.stone.B * shade))
-	if kind == 1 then
-		Build.block(parent, "Tombstone", Vector3.new(2.4, 3.2, 0.6), x, 0, z, col, Enum.Material.Slate, rot)
-	elseif kind == 2 then
-		Build.block(parent, "Cross", Vector3.new(0.6, 4, 0.6), x, 0, z, col, Enum.Material.Slate, rot)
-		Build.part({
-			name = "CrossArm",
-			size = Vector3.new(2.4, 0.6, 0.6),
-			cframe = CFrame.new(x, 2.9, z) * CFrame.Angles(0, math.rad(rot), 0),
-			color = col,
-			material = Enum.Material.Slate,
-			parent = parent,
-		})
-	elseif kind == 3 then
-		Build.block(parent, "Obelisk", Vector3.new(1.2, 5.5, 1.2), x, 0, z, col, Enum.Material.Marble, rot)
-	else
-		local slab = Build.block(parent, "LeaningStone", Vector3.new(2.2, 2.6, 0.5), x, 0, z, col, Enum.Material.Slate)
-		slab.CFrame = slab.CFrame * CFrame.Angles(math.rad(rng:NextNumber(-18, 18)), math.rad(rot), 0)
-	end
-	-- Grave mound
-	Build.block(parent, "Mound", Vector3.new(2.6, 0.4, 5), x, 0, z + 3, C.dirt, Enum.Material.Ground, rot)
+	local scale = rng:NextNumber(0.9, 1.08)
+	local base = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(rot), 0)
+	local lean = if kind == 4
+		then CFrame.Angles(math.rad(rng:NextNumber(-14, 14)), 0, math.rad(rng:NextNumber(-6, 6)))
+		else CFrame.identity
+	local size = GRAVE_SIZE[kind] * scale
+	Build.collider(parent, "Tombstone", size, base * lean * CFrame.new(0, size.Y / 2, 0))
+	Build.artSlot(parent, GRAVE_ART[kind], base * lean, { ArtScale = scale })
+	-- Grave mound (a low step, as before), towards +Z of the stone.
+	Build.collider(parent, "Mound", Vector3.new(2.6, 0.4, 5), base * CFrame.new(0, 0.2, 3))
+	Build.artSlot(parent, "grave_mound", base * CFrame.new(0, 0, 3), { ArtCull = 180 })
 end
 
+-- A dead, twisted tree with spreading roots (art: tree_dead_a/b/c, 13 studs tall at scale 1).
+local DEAD_TREES = { "tree_dead_a", "tree_dead_b", "tree_dead_c" }
 function Props.deadTree(parent: Instance, rng: Random, x: number, z: number)
 	local h = rng:NextNumber(10, 16)
-	Build.block(parent, "Trunk", Vector3.new(1.4, h, 1.4), x, 0, z, Color3.fromRGB(45, 35, 30), Enum.Material.Wood)
-	-- Roots splaying into the ground (kit: trees and roots)
-	for i = 0, 2 do
-		local a = math.rad(i * 120 + rng:NextNumber(-20, 20))
-		Build.part({
-			name = "Root",
-			size = Vector3.new(0.7, 0.7, 3.2),
-			cframe = CFrame.new(x + math.sin(a) * 1.4, 0.3, z + math.cos(a) * 1.4)
-				* CFrame.Angles(0, a, 0)
-				* CFrame.Angles(math.rad(14), 0, 0),
-			color = Color3.fromRGB(45, 35, 30),
-			material = Enum.Material.Wood,
-			collide = false,
-			parent = parent,
-		})
-	end
-	for i = 1, 3 do
-		local y = h * rng:NextNumber(0.55, 0.95)
-		local yaw = rng:NextNumber(0, 360)
-		local len = rng:NextNumber(4, 7)
-		local cf = CFrame.new(x, y, z) * CFrame.Angles(0, math.rad(yaw), 0) * CFrame.Angles(0, 0, math.rad(55))
-		Build.part({
-			name = "Branch" .. i,
-			size = Vector3.new(len, 0.5, 0.5),
-			cframe = cf * CFrame.new(len / 2, 0, 0),
-			color = Color3.fromRGB(45, 35, 30),
-			material = Enum.Material.Wood,
-			collide = false,
-			parent = parent,
-		})
-	end
+	Build.collider(parent, "Trunk", Vector3.new(1.4, h * 0.7, 1.4), CFrame.new(x, h * 0.35, z))
+	Build.artSlot(
+		parent,
+		DEAD_TREES[rng:NextInteger(1, #DEAD_TREES)],
+		CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 360)), 0),
+		{ ArtScale = h / 13 }
+	)
 end
 
 function Props.mausoleum(parent: Instance, x: number, z: number, scale: number, name: string): Part
@@ -623,7 +532,7 @@ function Props.disc(
 	material: Enum.Material
 ): Part
 	local thickness = 0.2
-	return Build.part({
+	local disc = Build.part({
 		name = name,
 		size = Vector3.new(thickness, radius * 2, radius * 2),
 		cframe = CFrame.new(center.X, top - thickness / 2, center.Z) * CFrame.Angles(0, 0, math.rad(90)),
@@ -632,6 +541,8 @@ function Props.disc(
 		shape = Enum.PartType.Cylinder,
 		parent = parent,
 	})
+	GroundPainter.mark(disc) -- shown as terrain once painted (TASK-0044)
+	return disc
 end
 
 return Props
