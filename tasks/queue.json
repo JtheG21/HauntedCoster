@@ -2790,6 +2790,73 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0035",
+      "title": "CrossPlot Harness Reliability",
+      "project": "GAME-002",
+      "status": "done",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0034"
+      ],
+      "branch": "task/TASK-0035-CrossPlot-Harness-Reliability",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0035-CrossPlot-Harness-Reliability.md",
+      "acceptance_criteria": [
+        "Touch is proven with an unguarded, enabled probe seat (up to 3 tries); if it never seats A, the parked-seat check is recorded as inconclusive (run flagged infra), never as a pass or a game failure.",
+        "The enabled-seat guard is tested deterministically: the server seats A in B's enabled front seat and A is ejected within about 1 s.",
+        "Negative control: with the owner-seat guard disabled in Studio's copy only, the AC2 check fails.",
+        "CrossPlot passes 3 of 3 runs with both clients joined; runs where the 2nd client doesn't join are logged as infra and not counted. No TrainService or ownership changes."
+      ],
+      "history": [
+        {
+          "time": "2026-10-12T19:30:32",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-12T19:30:32",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-12T20:27:25",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T20:28:18",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-12T20:28:42",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-12T20:27:25",
+          "result": "pass",
+          "notes": "check.sh pass; CrossPlot 3/3 valid at 22/22 (1 automated, 2 manual Test-tab sessions); negative control 21/22 failing only the AC2 check; automated 2-client launch 1 of 4 (TEST-20261012-13)"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-12T20:28:18",
+          "result": "pass",
+          "report": "06 QA/AUD-20261012-TASK-0035-01.md"
+        }
+      ],
+      "revisions": 0,
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }

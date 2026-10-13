@@ -29,6 +29,7 @@ return function(args: any): { [string]: any }
 	local function check(name: string, ok: boolean, detail: any?)
 		table.insert(checks, { name = name, ok = ok == true, detail = if detail ~= nil then tostring(detail) else nil })
 	end
+	local inconclusive: { string } = {}
 	local function finish()
 		local failed = 0
 		for _, c in checks do
@@ -36,7 +37,15 @@ return function(args: any): { [string]: any }
 				failed += 1
 			end
 		end
-		return { ok = failed == 0, passed = #checks - failed, failed = failed, checks = checks }
+		-- An inconclusive check is neither a pass nor a game failure: the run is flagged so it isn't counted.
+		return {
+			ok = failed == 0 and #inconclusive == 0,
+			passed = #checks - failed,
+			failed = failed,
+			checks = checks,
+			inconclusive = inconclusive,
+			infra = if #inconclusive > 0 then true else nil,
+		}
 	end
 
 	local timeout = (type(args) == "table" and args.timeout) or 60
@@ -127,27 +136,53 @@ return function(args: any): { [string]: any }
 				seatedSeen = true
 			end
 		end)
+		-- Positive control for the touch method (TASK-0035 AC1): an unguarded, enabled seat away from the
+		-- plots. Touch-sitting is client-simulated physics and missed 2 of 3 runs on B's seat even with
+		-- TrainService reverted (TEST-20261012-11), so a miss here makes the parked-seat check inconclusive,
+		-- not a silent pass.
+		local probe = Instance.new("Seat")
+		probe.Name = "CrossPlotTouchProbe"
+		probe.Anchored = true
+		probe.Size = Vector3.new(2, 1, 2)
+		probe.Position = World.plotToWorld(ia, World.Plot.spawn) + Vector3.new(0, 0.5, 12)
+		probe.Parent = Workspace
+		local touchWorks = false
+		for _ = 1, 3 do
+			tp(a, probe.Position + Vector3.new(0, 1.5, 0))
+			local t1 = os.clock()
+			while probe.Occupant ~= humA and os.clock() - t1 < 1.6 do
+				task.wait(0.1)
+			end
+			if probe.Occupant == humA then
+				touchWorks = true
+				break
+			end
+		end
+		probe:Destroy() -- also frees A (the SeatWeld goes with it)
+		humA.Sit = false
+		task.wait(0.5)
 		-- Touch: A drops onto B's parked (disabled) seat and isn't seated (AUD-20261012-TASK-0025-02 N1).
 		check("B's parked front seat is disabled (precondition)", front.Disabled == true, front.Disabled)
 		tp(a, front.Position)
 		task.wait(1)
-		check(
-			"touching B's parked front seat doesn't seat A",
-			not seatedSeen and front.Occupant ~= humA,
-			`seatedSeen={seatedSeen} occupant={front.Occupant}`
-		)
-		-- Enabled (as during a ride): the same touch does seat A (the positive control for the check above,
-		-- AUD-20261012-TASK-0026-01 F2), and the guard ejects A. Tested before any forced seating: right
-		-- after an ejection the engine refuses to re-seat A for a while.
-		front.Disabled = false
-		tp(a, front.Position + Vector3.new(0, 1.5, 0))
-		local t1 = os.clock()
-		while not seatedSeen and os.clock() - t1 < 2 do
-			task.wait(0.1)
+		local untouched = not seatedSeen and front.Occupant ~= humA
+		if touchWorks or not untouched then
+			check(
+				"touching B's parked front seat doesn't seat A",
+				untouched,
+				`seatedSeen={seatedSeen} occupant={front.Occupant}`
+			)
+		else
+			table.insert(inconclusive, "touching B's parked front seat doesn't seat A (touch probe never seated A)")
 		end
-		check("control: touching B's enabled front seat does seat A", seatedSeen, front.Occupant)
-		if not seatedSeen then
-			front:Sit(humA) -- still test the guard if the touch missed
+		-- Enabled (as during a ride): the server seats A directly, which is deterministic, and the owner
+		-- guard must eject A (TASK-0035 AC2). Seat:Sit() goes through the same Occupant signal as a touch.
+		front.Disabled = false
+		seatedSeen = false
+		front:Sit(humA)
+		local t2 = os.clock()
+		while not seatedSeen and os.clock() - t2 < 1 do
+			task.wait(0.05)
 		end
 		task.wait(1)
 		check(
@@ -215,7 +250,7 @@ return function(args: any): { [string]: any }
 				outside
 			)
 			local byB = try(b, wraith, Vector3.new(crypt.x2 - 10, 0, gateZ), pin)
-			check("AC3: tier-1 B can (control)", byB == "ok", byB)
+			check("AC3: tier-1 B can capture the Bell Wraith (control)", byB == "ok", byB)
 			if wraith.alive then
 				EncounterService.remove(wraith)
 			end
@@ -238,14 +273,19 @@ return function(args: any): { [string]: any }
 		check("AC3: an Ashen Gentleman spawned outside the crypt", ashen ~= nil)
 		if ashen then
 			local p0 = ashen.root.Position
-			local byA = try(a, ashen, Vector3.new(p0.X + 5, 0, p0.Z))
+			-- It roams too, and A's and B's tries take about 5 s, so it is put back before each call (TASK-0035:
+			-- unpinned, B's control got "Get closer" in 2 of 3 runs).
+			local function pinAshen()
+				ashen.model:PivotTo(CFrame.new(p0))
+			end
+			local byA = try(a, ashen, Vector3.new(p0.X + 5, 0, p0.Z), pinAshen)
 			check(
 				"AC3: tier-0 A can't capture an Ashen monster outside the crypt",
 				byA:find("Restore your house") ~= nil,
 				byA
 			)
-			local byB2 = try(b, ashen, Vector3.new(p0.X + 5, 0, p0.Z))
-			check("AC3: tier-1 B can (control)", byB2 == "ok", byB2)
+			local byB2 = try(b, ashen, Vector3.new(p0.X + 5, 0, p0.Z), pinAshen)
+			check("AC3: tier-1 B can capture the Ashen Gentleman (control)", byB2 == "ok", byB2)
 			if ashen.alive then
 				EncounterService.remove(ashen)
 			end
