@@ -57,7 +57,7 @@ local CARRY_SCALE = { Wisp = 0.42, Hound = 0.3, Gentleman = 0.22, BellWraith = 0
 
 local SPECTRAL_TINT = Color3.fromRGB(196, 242, 255)
 local SPECTRAL_SHELL = Color3.fromRGB(110, 225, 255)
-local ASHEN_TINT = Color3.fromRGB(118, 112, 108)
+local ASHEN_TINT = Color3.fromRGB(78, 72, 70)
 
 local rigs: { [Instance]: Rig } = {}
 local list: { Rig } = {}
@@ -90,6 +90,8 @@ local function variantPart(p: BasePart, variant: string)
 		end
 	elseif variant == "Ashen" then
 		p.Color = ASHEN_TINT
+		p.Material = Enum.Material.Slate -- burnt, ashy surface under the glowing cracks
+		p.Transparency = 0 -- ash is solid, even on ghosts
 	end
 end
 
@@ -176,7 +178,12 @@ local function attach(host: Instance)
 	end
 	local carried = host:IsA("BasePart")
 	local root: BasePart? = if carried then host :: BasePart else (host :: Model).PrimaryPart
-	if not root then
+	if not root and not carried then
+		-- The tag can replicate before the model's children: wait for the Root the server moves.
+		local r = host:WaitForChild("Root", 10)
+		root = if r and r:IsA("BasePart") then r else nil
+	end
+	if not root or rigs[host] then
 		return
 	end
 	local species = host:GetAttribute("Species")
