@@ -94,6 +94,7 @@ end
 
 local function pine(parent: Instance, rng: Random, x: number, z: number)
 	local h = rng:NextNumber(14, 22)
+	Props.burn(rng, 4) -- the old builder drew 7 numbers per pine
 	Build.collider(parent, "PineTrunk", Vector3.new(1.4, h, 1.4), CFrame.new(x, h / 2, z))
 	Build.artSlot(
 		parent,

@@ -8,6 +8,14 @@ local GroundPainter = require(script.Parent.GroundPainter)
 
 local Props = {}
 
+-- Consumes `n` random draws. The art builders draw fewer numbers than the part builders they replaced; burning the
+-- difference keeps every later draw - and so every habitat layout Reachability validated - exactly as before.
+function Props.burn(rng: Random, n: number)
+	for _ = 1, n do
+		rng:NextNumber()
+	end
+end
+
 Props.C = {
 	grass = Color3.fromRGB(38, 52, 40),
 	dirt = Color3.fromRGB(58, 50, 44),
@@ -80,6 +88,7 @@ function Props.curbStones(parent: Instance, a: Vector3, b: Vector3, width: numbe
 		local t = 1.5
 		while t < len - 1.5 do
 			local p = a + unit * t + perp * side * (width / 2 + 0.5)
+			Props.burn(rng, 2) -- the old builder drew 6 numbers per stone
 			Build.artSlot(
 				parent,
 				if rng:NextNumber() < 0.5 then "edge_stone_a" else "edge_stone_b",
@@ -122,12 +131,13 @@ function Props.ruinedWall(parent: Instance, rng: Random, x: number, z: number, y
 		local cx = -(-5.1 + 2.05 * (i - 1) + 1.025)
 		Build.collider(parent, "RuinBlock", Vector3.new(2, h, 1.4), cf * CFrame.new(cx, h / 2, 0))
 	end
-	local _ = rng
+	Props.burn(rng, 7) -- the old builder drew 7 numbers per wall
 	Build.artSlot(parent, "ruin_wall", cf)
 end
 
 -- A cluster of dripping candles on a grave or a step (art: candles). Lit clusters keep their small light.
 function Props.candles(parent: Instance, rng: Random, x: number, z: number, lit: boolean)
+	Props.burn(rng, 8) -- the old builder drew 9 numbers per cluster
 	Build.artSlot(
 		parent,
 		"candles",
@@ -211,6 +221,7 @@ end
 local DEAD_TREES = { "tree_dead_a", "tree_dead_b", "tree_dead_c" }
 function Props.deadTree(parent: Instance, rng: Random, x: number, z: number)
 	local h = rng:NextNumber(10, 16)
+	Props.burn(rng, 10) -- the old builder drew 13 numbers per tree
 	Build.collider(parent, "Trunk", Vector3.new(1.4, h * 0.7, 1.4), CFrame.new(x, h * 0.35, z))
 	Build.artSlot(
 		parent,

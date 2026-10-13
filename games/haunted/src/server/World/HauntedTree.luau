@@ -138,7 +138,12 @@ function HauntedTree.build(parent: Instance, o: Options): Model
 	-- TASK-0044) whose face band is exactly radius r, so the eyes below sit in its carved sockets. One solid
 	-- collider stands in for it (blocks movement and gaze sight lines, shared/TreeSight).
 	local r, h = spec.r, spec.h
-	local _ = rng
+	-- The old part builder drew this many numbers (jitter, roots, moss, limbs); burn them so the Woodland layout
+	-- after each tree is unchanged.
+	local draws = if o.archetype == "Broad" then 37 elseif o.archetype == "Angular" then 43 else 23
+	for _ = 1, draws do
+		rng:NextNumber()
+	end
 	local trunk = put("Trunk", Vector3.new(r * 1.9, h * 0.75, r * 1.9), at(0, h * 0.375, 0), spec.bark, nil, true)
 	trunk.Transparency = 1
 	trunk:SetAttribute("Solid", true)

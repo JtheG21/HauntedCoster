@@ -22,17 +22,26 @@ local C = {
 	hay = Color3.fromRGB(170, 140, 70),
 }
 
-local function wall(parent: Instance, a: Vector3, b: Vector3, height: number, color: Color3)
-	local len = Vector3.new(b.X - a.X, 0, b.Z - a.Z).Magnitude
+-- A wall segment: art stretched along it (ruined brick by default, `barn_wall` planks for the barn; TASK-0044/45)
+-- over the old box collider.
+local WALL_ART = { settle_wall = 5.6, barn_wall = 12 } -- asset key -> authored height (each is 8 long)
+local function wall(parent: Instance, a: Vector3, b: Vector3, height: number, _color: Color3, key: string?)
+	local d = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+	local len = d.Magnitude
 	local mid = (a + b) / 2
-	return Build.part({
-		name = "Wall",
-		size = Vector3.new(1, height, len),
-		cframe = CFrame.lookAt(Vector3.new(mid.X, height / 2, mid.Z), Vector3.new(b.X, height / 2, b.Z)),
-		color = color,
-		material = Enum.Material.Brick,
-		parent = parent,
-	})
+	local art = key or "settle_wall"
+	Build.artSlot(
+		parent,
+		art,
+		CFrame.fromMatrix(Vector3.new(mid.X, 0, mid.Z), d.Unit, Vector3.yAxis),
+		{ ArtStretchX = len / 8, ArtStretchY = height / WALL_ART[art] }
+	)
+	return Build.collider(
+		parent,
+		"Wall",
+		Vector3.new(1, height, len),
+		CFrame.lookAt(Vector3.new(mid.X, height / 2, mid.Z), Vector3.new(b.X, height / 2, b.Z))
+	)
 end
 
 -- The chapel: roofless broken walls, a door facing the square (east) and a steeple stub at the west end.
@@ -110,29 +119,16 @@ local function cottage(parent: Instance, rng: Random, x: number, z: number)
 end
 
 local function brokenFence(parent: Instance, rng: Random, x: number, z: number)
-	local yaw = rng:NextNumber(0, 180)
-	for i = -2, 2 do
+	local cf = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 180)), 0)
+	-- Same draws as the old post-by-post builder, so the settlement layout is unchanged.
+	for _ = -2, 2 do
 		if rng:NextNumber() < 0.75 then
-			local cf = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(yaw), 0) * CFrame.new(i * 2.5, 0, 0)
-			Build.part({
-				name = "FencePost",
-				size = Vector3.new(0.5, 3.5, 0.5),
-				cframe = cf * CFrame.new(0, 1.75, 0) * CFrame.Angles(0, 0, math.rad(rng:NextNumber(-12, 12))),
-				color = C.timber,
-				material = Enum.Material.Wood,
-				parent = parent,
-			})
+			rng:NextNumber()
 		end
 	end
-	Build.part({
-		name = "FenceRail",
-		size = Vector3.new(10, 0.4, 0.3),
-		cframe = CFrame.new(x, 2.2, z) * CFrame.Angles(0, math.rad(yaw), math.rad(rng:NextNumber(-6, 6))),
-		color = C.timber,
-		material = Enum.Material.Wood,
-		collide = false,
-		parent = parent,
-	})
+	rng:NextNumber()
+	Build.collider(parent, "Fence", Vector3.new(10, 3, 0.6), cf * CFrame.new(0, 1.5, 0))
+	Build.artSlot(parent, "fence_wood", cf)
 end
 
 function Settlement.build(def: Habitats.Habitat): Kit.Result

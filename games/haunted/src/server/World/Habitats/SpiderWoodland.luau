@@ -22,37 +22,24 @@ local C = {
 	eye = Color3.fromRGB(255, 40, 40),
 }
 
-local function webSheet(parent: Instance, a: Vector3, b: Vector3, height: number)
+local function webSheet(parent: Instance, a: Vector3, b: Vector3, height: number, bottom: number?)
 	local mid = (a + b) / 2
-	local len = Vector3.new(b.X - a.X, 0, b.Z - a.Z).Magnitude
+	local d = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+	local len = d.Magnitude
 	if len < 1 then
 		return
 	end
-	Build.part({
-		name = "Web",
-		size = Vector3.new(len, height, 0.1),
-		cframe = CFrame.lookAt(Vector3.new(mid.X, height / 2 + 3, mid.Z), Vector3.new(b.X, height / 2 + 3, b.Z))
-			* CFrame.Angles(0, math.rad(90), 0),
-		color = C.web,
-		material = Enum.Material.Fabric,
-		transparency = 0.55,
-		collide = false,
-		parent = parent,
-	})
+	-- Art (TASK-0044): a torn radial web stretched across the gap; non-colliding as before.
+	Build.artSlot(
+		parent,
+		"web_sheet",
+		CFrame.fromMatrix(Vector3.new(mid.X, height / 2 + (bottom or 3), mid.Z), d.Unit, Vector3.yAxis),
+		{ ArtStretchX = len / 8, ArtStretchY = height / 6 }
+	)
 end
 
 local function cocoon(parent: Instance, x: number, z: number, size: number, hang: number?)
-	-- Cylinder parts extend along X: stand it upright.
-	Build.part({
-		name = "Cocoon",
-		size = Vector3.new(size * 1.8, size, size),
-		cframe = CFrame.new(x, (hang or 0) + size * 0.9, z) * CFrame.Angles(0, 0, math.rad(90)),
-		color = C.cocoon,
-		material = Enum.Material.Fabric,
-		shape = Enum.PartType.Cylinder,
-		collide = false,
-		parent = parent,
-	})
+	Build.artSlot(parent, "cocoon", CFrame.new(x, hang or 0, z), { ArtScale = size })
 end
 
 -- A giant dead tree: thick trunk, four splayed limbs with webs strung between them, red eyes in the hollow.

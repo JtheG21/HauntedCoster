@@ -183,27 +183,33 @@ end
 
 -- Low green ground mist (TASK-0028): soft, overlapping, see-through discs that never collide or block a
 -- raycast. The sky carries the purple (Atmosphere), the mist carries the green (map reference 3).
+-- Low rolling ground mist (TASK-0044): soft Smoke puffs hugging the ground instead of flat discs.
 function Kit.mist(parent: Instance, rng: Random, count: number, color: Color3)
 	local folder = Build.folder(parent, "Mist")
 	local r = World.Hub.moduleRadius - 10
 	for _ = 1, count do
-		local radius = rng:NextNumber(10, 22)
+		-- Same draws as the old disc builder: radius, x, z, then one more when inside.
+		local size = rng:NextNumber(10, 22)
 		local x, z = rng:NextNumber(-r, r), rng:NextNumber(-r, r)
 		if World.hubDistance(x, z) < r then
-			local thickness = rng:NextNumber(0.6, 1.6)
-			local disc = Build.part({
+			local k = rng:NextNumber()
+			local anchor = Build.part({
 				name = "Mist",
-				size = Vector3.new(thickness, radius * 2, radius * 2),
-				cframe = CFrame.new(x, 0.3 + thickness / 2, z) * CFrame.Angles(0, 0, math.rad(90)),
-				color = color,
-				material = Enum.Material.SmoothPlastic,
-				shape = Enum.PartType.Cylinder,
-				transparency = 0.9,
+				size = Vector3.new(1, 1, 1),
+				cframe = CFrame.new(x, 0.4, z),
+				transparency = 1,
 				collide = false,
 				parent = folder,
 			})
-			disc.CanQuery = false
-			disc.CanTouch = false
+			anchor.CanQuery = false
+			anchor.CanTouch = false
+			local smoke = Instance.new("Smoke")
+			smoke.Color = color
+			smoke.Opacity = 0.05 + 0.04 * k
+			smoke.RiseVelocity = 0.1 + 0.3 * (1 - k)
+			smoke.Size = math.min(size * 0.8, 18)
+			smoke.TimeScale = 0.35
+			smoke.Parent = anchor
 		end
 	end
 end
@@ -216,17 +222,23 @@ function Kit.darkCandles(parent: Instance, def: Habitats.Habitat, rng: Random, c
 				local x = rng:NextNumber(zone.rect.x1 + 4, zone.rect.x2 - 4)
 				local z = rng:NextNumber(zone.rect.z1 + 4, zone.rect.z2 - 4)
 				if HabitatRules.pathClearance(def, x, z) > 1 and not nearLandmark(def, x, z, 8) then
-					local candle = Build.block(
+					-- Art (TASK-0044): a dripping candle cluster burning in the habitat's ghost colour.
+					Build.artSlot(
 						parent,
-						"GhostCandle",
-						Vector3.new(0.4, 1.2, 0.4),
-						x,
-						0,
-						z,
-						color,
-						Enum.Material.Neon
+						"candles",
+						CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad((x * 13.7 + z * 7.1) % 360), 0),
+						{ Tint_Flames = color, ArtCull = 180 }
 					)
-					Build.light(candle, color, 12, 0.8)
+					local glow = Build.part({
+						name = "GhostCandle",
+						size = Vector3.new(0.3, 0.3, 0.3),
+						cframe = CFrame.new(x, 1.4, z),
+						transparency = 1,
+						collide = false,
+						parent = parent,
+					})
+					glow.CanQuery = false
+					Build.light(glow, color, 12, 0.8)
 				end
 			end
 		end

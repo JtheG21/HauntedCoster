@@ -3,7 +3,7 @@
 -- "ArtSlot" whose CFrame is the asset origin (base centre, front = LookVector) and sets:
 --   ArtKey     asset name (ServerStorage.ArtData, baked to ReplicatedStorage.ArtTemplates; changing it rebuilds the visual)
 --   ArtScale   uniform scale (default 1)
---   ArtStretchX  stretch along the asset's local X after scaling (fence panels, arches spanning a gap)
+--   ArtStretchX, ArtStretchY  stretch along the asset's local X / Y after scaling (fences, arches, walls, webs)
 --   ArtFollow  true for anchors the server moves (the visual is welded instead of anchored)
 --   ArtLod     LOD1 distance in studs (default: the asset's LodDistance, else 70)
 --   ArtCull    hide beyond this distance (optional, for small clutter)
@@ -72,14 +72,17 @@ local function attach(anchor: BasePart)
 	if type(scale) == "number" and scale > 0 and scale ~= 1 then
 		model:ScaleTo(scale)
 	end
-	local stretch = anchor:GetAttribute("ArtStretchX")
-	if type(stretch) == "number" and stretch > 0 and stretch ~= 1 then
+	local sx = anchor:GetAttribute("ArtStretchX")
+	local sy = anchor:GetAttribute("ArtStretchY")
+	local kx = if type(sx) == "number" and sx > 0 then sx else 1
+	local ky = if type(sy) == "number" and sy > 0 then sy else 1
+	if kx ~= 1 or ky ~= 1 then
 		local pivot = model:GetPivot()
 		for _, p in model:GetChildren() do
 			if p:IsA("BasePart") then
 				local rel = pivot:ToObjectSpace(p.CFrame)
-				p.Size = Vector3.new(p.Size.X * stretch, p.Size.Y, p.Size.Z)
-				p.CFrame = pivot * CFrame.new(rel.X * stretch, rel.Y, rel.Z) * rel.Rotation
+				p.Size = Vector3.new(p.Size.X * kx, p.Size.Y * ky, p.Size.Z)
+				p.CFrame = pivot * CFrame.new(rel.X * kx, rel.Y * ky, rel.Z) * rel.Rotation
 			end
 		end
 	end
