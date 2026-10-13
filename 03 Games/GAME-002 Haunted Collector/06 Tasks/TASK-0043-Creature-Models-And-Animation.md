@@ -3,7 +3,7 @@ id: TASK-0043
 title: "Creature Models and Animation"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -75,5 +75,6 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 **Not verified:** animation was checked for errors and poses in stills only, not judged in motion by a person; triangle budgets were raised to ≤ 8.5k (Hound 8.3k) and recorded in [[SYS-Haunted-Art-Direction]].
 
 ## Audits
+- [[AUD-20261013-TASK-0043-01]]: pass. Fixed on the TASK-0044 branch: finding 1 (Spectral shells were drawn at all distances, near-range cost up to 14.3k on the Hound) — shells are now near-only; 2 (step guarded); 3 (re-check after build); 4 (Root timeout warns); 5 (LOD hysteresis, staggered throttle); 7 (Lamp rides ArmL, Jaw/ears ride Head); 8 (separate start guards); 9 (ArtShowcase refuses non-memory profiles); 10 (Hitbox comment). Open: 6 (gait speed from a tweened Root, judge in motion), 11 (nits).
 
 ## Outcome

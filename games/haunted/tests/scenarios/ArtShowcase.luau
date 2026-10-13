@@ -41,6 +41,10 @@ return function(args: any): { [string]: any }
 	if not profile then
 		return { ok = false, error = "no profile" }
 	end
+	-- Never stage over a real save: only memory-mode (unpublished Studio) profiles.
+	if PlayerDataService.persistence(player) ~= "memory" then
+		return { ok = false, error = "ArtShowcase runs only on memory-mode profiles" }
+	end
 	local t0 = os.clock()
 	while not PlotService.plotIndex(player) and os.clock() - t0 < 20 do
 		task.wait(0.2)

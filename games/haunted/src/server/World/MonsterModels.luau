@@ -1,6 +1,7 @@
 --!strict
--- Monster models (server side). Each model has an anchored, invisible "Root" the services move or tween, an
--- invisible welded "Hitbox" sized to the creature (queries, prompts, highlights) and its lights. The visible
+-- Monster models (server side). Each model has an anchored, invisible "Root" the services move or tween (prompts
+-- live on it), an invisible welded "Hitbox" sized to the creature for spatial queries (nothing depends on it yet;
+-- the Root kept its old size so every existing distance check is unchanged) and its lights. The visible
 -- creature is client art (client/Art/Creatures, TASK-0043): models are tagged "Creature" and carry Species,
 -- Variant and, for displays, ArtScale. The art origin is the Root, so species hover heights are unchanged.
 

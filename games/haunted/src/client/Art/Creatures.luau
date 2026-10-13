@@ -35,6 +35,7 @@ type Rig = {
 	phase: number,
 	seed: number,
 	tick: number,
+	pivots: { [string]: Vector3 }, -- logical part -> joint pivot (scaled)
 }
 
 local KEYS = {
@@ -55,6 +56,14 @@ local JAR_OFFSET = {
 -- Carried copies are shrunk to fit the jar.
 local CARRY_SCALE = { Wisp = 0.42, Hound = 0.3, Gentleman = 0.22, BellWraith = 0.24 }
 
+-- Joints that ride on another joint (the child's motion is applied inside its parent's).
+local PARENT: { [string]: { [string]: string } } = {
+	Wisp = { Lamp = "ArmL" },
+	Hound = { Jaw = "Head", EarL = "Head", EarR = "Head" },
+	Gentleman = {},
+	BellWraith = {},
+}
+
 local SPECTRAL_TINT = Color3.fromRGB(196, 242, 255)
 local SPECTRAL_SHELL = Color3.fromRGB(110, 225, 255)
 local ASHEN_TINT = Color3.fromRGB(78, 72, 70)
@@ -71,7 +80,7 @@ end
 
 -- Spectral: a pale, translucent body inside a ForceField shimmer shell (form stays readable through the
 -- shell's fresnel). Ashen: charcoal tint plus the art's glowing ember cracks.
-local function variantPart(p: BasePart, variant: string)
+local function variantPart(p: BasePart, variant: string, shells: { BasePart })
 	if p.Material == Enum.Material.Neon then
 		return
 	end
@@ -87,6 +96,7 @@ local function variantPart(p: BasePart, variant: string)
 			shell.Transparency = 0
 			shell:SetAttribute("ArtPart", p:GetAttribute("ArtPart"))
 			shell.Parent = p.Parent
+			table.insert(shells, shell)
 		end
 	elseif variant == "Ashen" then
 		p.Color = ASHEN_TINT
@@ -96,6 +106,7 @@ local function variantPart(p: BasePart, variant: string)
 end
 
 local function applyVariant(built: ArtLoader.Built, variant: string)
+	local shells: { BasePart } = {}
 	for logical, parts in built.parts do
 		for _, p in parts do
 			if logical == "Ember" then
@@ -103,13 +114,17 @@ local function applyVariant(built: ArtLoader.Built, variant: string)
 					p:Destroy()
 				end
 			else
-				variantPart(p, variant)
+				variantPart(p, variant, shells)
 			end
 		end
 	end
+	-- Shells are full-resolution copies: near range only (the far set swaps to ForceField LOD1 below).
+	for _, sh in shells do
+		table.insert(built.lod0, sh)
+	end
 	for _, p in built.lod1 do
 		if variant == "Ashen" then
-			variantPart(p, variant)
+			variantPart(p, variant, shells)
 		elseif variant == "Spectral" and p.Material ~= Enum.Material.Neon then
 			p.Material = Enum.Material.ForceField -- far away the shell alone carries the look
 			p.Color = SPECTRAL_SHELL
@@ -159,6 +174,9 @@ local function record(rig: Rig, built: ArtLoader.Built)
 	for _, p in rig.art:GetChildren() do
 		if p:IsA("BasePart") then
 			local r = rec(p)
+			if r.pivot and not rig.pivots[r.logical] then
+				rig.pivots[r.logical] = r.pivot
+			end
 			local isLod1 = table.find(built.lod1, p) ~= nil
 			if isLod1 then
 				table.insert(rig.far, r)
@@ -182,6 +200,9 @@ local function attach(host: Instance)
 		-- The tag can replicate before the model's children: wait for the Root the server moves.
 		local r = host:WaitForChild("Root", 10)
 		root = if r and r:IsA("BasePart") then r else nil
+		if not root and host.Parent then
+			warn(`[Creatures] no Root replicated for {host:GetFullName()}; it stays without art`)
+		end
 	end
 	if not root or rigs[host] then
 		return
@@ -193,6 +214,10 @@ local function attach(host: Instance)
 		return
 	end
 	local built = ArtLoader.build(key, { castShadow = not carried })
+	if built and rigs[host] then -- attached by another path while this one was building
+		built.model:Destroy()
+		return
+	end
 	if not built or not host.Parent then
 		if built then
 			built.model:Destroy()
@@ -226,7 +251,8 @@ local function attach(host: Instance)
 		speed = 0,
 		phase = 0,
 		seed = math.random() * 100,
-		tick = 0,
+		tick = math.random(0, 3), -- staggers the far-range throttle across rigs
+		pivots = {},
 	}
 	record(rig, built)
 	for _, r in rig.far do
@@ -393,7 +419,7 @@ local function step(dt: number)
 		if rig.display then
 			rig.speed = 0
 		end
-		local wantFar = dist > rig.lodDistance
+		local wantFar = dist > rig.lodDistance * (if rig.lodFar then 0.9 else 1.1) -- hysteresis at the boundary
 		if wantFar ~= rig.lodFar then
 			rig.lodFar = wantFar
 			local show: { PartRec } = if wantFar then rig.far else rig.near
@@ -414,11 +440,16 @@ local function step(dt: number)
 		local base = if rig.carried
 			then rootCF * CFrame.new(JAR_OFFSET[rig.species] or Vector3.zero) * body
 			else rootCF * body
+		local parents = PARENT[rig.species] or {}
 		local visible: { PartRec } = if rig.lodFar then rig.far else rig.near
 		for _, r in visible do
-			local motion = local_(r.logical)
+			local joint = about(r.pivot, local_(r.logical))
+			local parent = parents[r.logical]
+			if parent then
+				joint = about(rig.pivots[parent], local_(parent)) * joint
+			end
 			table.insert(parts, r.part)
-			table.insert(cframes, base * about(r.pivot, motion) * r.rel)
+			table.insert(cframes, base * joint * r.rel)
 		end
 	end
 	if #parts > 0 then
@@ -441,7 +472,16 @@ function Creatures.start()
 			task.spawn(attach, inst)
 		end
 	end
-	RunService.RenderStepped:Connect(step)
+	local warned = false
+	RunService.RenderStepped:Connect(function(dt)
+		local ok, err = pcall(function()
+			step(dt)
+		end)
+		if not ok and not warned then
+			warned = true
+			warn(`[Creatures] {err}`)
+		end
+	end)
 end
 
 -- Exposed for the Studio showroom and specs: applies a natural variant look to a built creature.

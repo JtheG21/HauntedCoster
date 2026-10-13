@@ -44,14 +44,21 @@ end
 
 State.start()
 -- Art is presentation only: start it off the main thread so a slow or failed bake never blocks the HUD.
-task.spawn(function()
-	local ok, err = pcall(function()
-		require(script.Art.Dressing).start()
-		require(script.Art.Creatures).start()
+local function startArt(name: string, start: () -> ())
+	task.spawn(function()
+		local ok, err = pcall(function()
+			start()
+		end)
+		if not ok then
+			warn(`[Art] {name} start failed: {err}`)
+		end
 	end)
-	if not ok then
-		warn(`[Art] start failed: {err}`)
-	end
+end
+startArt("Dressing", function()
+	require(script.Art.Dressing).start()
+end)
+startArt("Creatures", function()
+	require(script.Art.Creatures).start()
 end)
 LocalWorld.start()
 HauntedTrees.start()
