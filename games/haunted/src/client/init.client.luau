@@ -8,6 +8,7 @@ local Workspace = game:GetService("Workspace")
 
 local State = require(script.State)
 local LocalWorld = require(script.LocalWorld)
+local HauntedTrees = require(script.HauntedTrees)
 local Hud = require(script.UI.Hud)
 local CaptureUI = require(script.UI.CaptureUI)
 local MansionUI = require(script.UI.MansionUI)
@@ -43,6 +44,7 @@ end
 
 State.start()
 LocalWorld.start()
+HauntedTrees.start()
 require(script.DevProbe).start() -- Studio-only; inert unless a test arms it
 
 local function closeMenus()

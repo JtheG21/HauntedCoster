@@ -3124,6 +3124,46 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0041",
+      "title": "Interactive Haunted Trees",
+      "project": "GAME-002",
+      "status": "in_progress",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0039"
+      ],
+      "branch": "task/TASK-0041-Interactive-Haunted-Trees",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0041-Interactive-Haunted-Trees.md",
+      "acceptance_criteria": [
+        "Three distinct archetypes (A closest to ASSET-REF-001), bark-integrated faces, avatar-checked heights, ~50% faced, trunk/roots/branches never move, readable without neon; gameplay-distance screenshots.",
+        "Eye palette black/orange-yellow/purple at equal odds, chosen once per instance on the server, identical on both clients.",
+        "Gaze triggers within configured range and angle; not on a clear miss, behind the face, or when occluded.",
+        "On gaze the face returns to rest and freezes; resumes gradually only after 1 continuous second without observers; reacquisition cancels; interrupted animations settle validly.",
+        "Unobserved eyes track the nearest visible player in range, else idle glances and blinks; eyes, lids and mouth independently controllable; mouth override hook exists.",
+        "Two-client Studio test: global freeze, stays frozen while any observer remains, 1 s recovery on both, reset during delay, no stale state on leave/reset, no leaks on rapid toggling.",
+        "Gaze remote validated (tree, habitat, alive, distance, facing, line of sight), rate-limited, expires without keepalive, cosmetic only; trust boundary documented.",
+        "scripts/check.sh passes; no regression in existing Studio scenarios; part and instance counts recorded."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T01:03:34",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-13T01:03:34",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg"
     }
   ]
 }
