@@ -5,10 +5,14 @@
 
 local Build = require(script.Parent.Parent.Build)
 local Props = require(script.Parent.Parent.Props)
+local HauntedTree = require(script.Parent.Parent.HauntedTree)
 local Kit = require(script.Parent.Kit)
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Habitats = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("Habitats"))
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Habitats = require(Shared:WaitForChild("Config"):WaitForChild("Habitats"))
+local HauntedTrees = require(Shared.Config:WaitForChild("HauntedTrees"))
+local GazeRules = require(Shared:WaitForChild("Rules"):WaitForChild("GazeRules"))
 
 local Woodland = {}
 
@@ -161,6 +165,87 @@ local function den(parent: Instance, x: number, z: number, facing: number)
 	end
 end
 
+-- Haunted trees (TASK-0041) along the trail edges, facing the trail. Placed after the other scenery and
+-- kept clear of it, so the existing seeded layout is unchanged. Layout and archetypes are seeded; each eye
+-- palette is rolled once per server (an unseeded Random) and replicated as an attribute.
+local function hauntedTrees(parent: Instance, def: Habitats.Habitat, avoid: Instance)
+	local folder = Build.folder(parent, "HauntedTrees")
+	local rng = Random.new(4141)
+	local paletteRng = Random.new()
+	-- Obstacles as circles: centre plus horizontal reach (half the footprint diagonal), so long logs and den
+	-- mounds count by their ends, not their centres (AUD-20261013-TASK-0041-01 finding 4). The ground, plaza,
+	-- paths and mist are left to Kit.freeGround.
+	type Circle = { pos: Vector3, r: number }
+	local taken: { Circle } = {}
+	local paths = avoid:FindFirstChild("Paths")
+	for _, d in avoid:GetDescendants() do
+		if d:IsA("BasePart") and d.CanCollide and not (paths and d:IsDescendantOf(paths)) then
+			local reach = math.sqrt(d.Size.X ^ 2 + d.Size.Z ^ 2) / 2
+			if reach < 15 then
+				table.insert(taken, { pos = Vector3.new(d.Position.X, 0, d.Position.Z), r = reach })
+			end
+		end
+	end
+	local FOOTPRINT = 3.2 -- widest tree footprint at scale 1 (Broad flare plus roots)
+	local function clear(p: Vector3): boolean
+		for _, q in taken do
+			if (p - q.pos).Magnitude < q.r + FOOTPRINT + 0.5 then
+				return false
+			end
+		end
+		return true
+	end
+	-- Candidates every ~9 studs along each trail, 3.5-6 studs off one edge, facing the trail point.
+	type Spot = { pos: Vector3, look: Vector3 }
+	local spots: { Spot } = {}
+	for _, path in def.paths do
+		for i = 1, #path.points - 1 do
+			local a, b = path.points[i], path.points[i + 1]
+			local seg = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+			local steps = math.max(1, math.floor(seg.Magnitude / 9))
+			local side = Vector3.new(-seg.Z, 0, seg.X).Unit
+			for k = 0, steps - 1 do
+				local c = Vector3.new(a.X, 0, a.Z) + seg * ((k + rng:NextNumber(0.2, 0.8)) / steps)
+				local dir = if rng:NextNumber() < 0.5 then -1 else 1
+				local pos = c + side * dir * (path.width / 2 + rng:NextNumber(3.5, 6))
+				if Kit.freeGround(def, pos.X, pos.Z, 3) and Kit.clearOfZoneCentres(def, pos.X, pos.Z, 8) then
+					table.insert(spots, { pos = pos, look = c })
+				end
+			end
+		end
+	end
+	for i = #spots, 2, -1 do
+		local j = rng:NextInteger(1, i)
+		spots[i], spots[j] = spots[j], spots[i]
+	end
+	local chosen: { Spot } = {}
+	for _, spot in spots do
+		if #chosen >= HauntedTrees.treeCount then
+			break
+		end
+		if clear(spot.pos) then
+			table.insert(chosen, spot)
+			table.insert(taken, { pos = spot.pos, r = FOOTPRINT })
+		end
+	end
+	local faced = GazeRules.facedSlots(#chosen, HauntedTrees.faceShare, rng)
+	local archetypes = HauntedTrees.archetypes
+	local offset = rng:NextInteger(0, #archetypes - 1)
+	for i, spot in chosen do
+		local cf = CFrame.lookAt(spot.pos, spot.look) * CFrame.Angles(0, math.rad(rng:NextNumber(-15, 15)), 0)
+		HauntedTree.build(folder, {
+			archetype = archetypes[(i + offset) % #archetypes + 1],
+			cframe = cf,
+			scale = if rng:NextNumber() < HauntedTrees.smallShare
+				then rng:NextNumber(0.68, 0.8)
+				else rng:NextNumber(0.85, 1),
+			palette = if faced[i] then GazeRules.pick(HauntedTrees.palettes, paletteRng:NextNumber()) else nil,
+			id = string.format("W%02d", i),
+			rng = rng,
+		})
+	end
+end
+
 function Woodland.build(def: Habitats.Habitat): Kit.Result
 	local model = Kit.base(def, C.grass, Enum.Material.Grass, C.moss, Enum.Material.LeafyGrass)
 	local deco = Build.folder(model, "Decor")
@@ -195,6 +280,7 @@ function Woodland.build(def: Habitats.Habitat): Kit.Result
 	Props.deadTree(deco, rng, -20, -60)
 	Kit.darkCandles(deco, def, rng, Color3.fromRGB(120, 255, 150))
 	Kit.mist(model, Random.new(77), 24, Color3.fromRGB(110, 230, 150))
+	hauntedTrees(model, def, model)
 	return { model = model, landmarkAnchors = anchors, cryptGate = nil }
 end
 

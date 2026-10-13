@@ -11,6 +11,7 @@ Net.Events = {
 	"RideState", -- S->C: ride started/ended
 	"RequestState", -- C->S
 	"CaptureCancel", -- C->S
+	"TreeGaze", -- C->S (treeId: string, looking: boolean) cosmetic haunted-tree gaze report (ADR-0010)
 }
 
 Net.Functions = {
