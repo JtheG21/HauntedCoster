@@ -2728,7 +2728,7 @@
       "id": "TASK-0034",
       "title": "Post-Merge Verification",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "done",
       "risk": "low",
       "depends_on": [
         "TASK-0033"
@@ -2759,6 +2759,18 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T19:27:20",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-12T19:27:20",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -2768,9 +2780,16 @@
           "notes": "main@502a446: FullLoop 85/85, ExploitProbe 13/13, CarryGuard 21/21, Retaliation 36/36, HabitatRotation 28/28, HabitatSwap 35/35, Reachability 28/23/23/23; CrossPlot blocked by harness (TEST-20261012-12)"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-12T19:27:20",
+          "result": "pass",
+          "report": "06 QA/AUD-20261012-TASK-0034-01.md"
+        }
+      ],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }

@@ -3,7 +3,7 @@ id: TASK-0034
 title: "Post-Merge Verification"
 type: task
 project: GAME-002
-status: in_review
+status: done
 priority: high
 risk: low
 owner: executor
@@ -52,7 +52,9 @@ Run the Studio scenarios once on the merged `main` (`502a446`). Every earlier ru
 - The first three Reachability results (Woodland, Spider Woodland, Settlement) were lost when Studio's MCP connection moved to the CrossPlot client window; they were rerun after reconnecting.
 
 ## Audits
-*(none: no code changed)*
+- [[AUD-20261012-TASK-0034-01]]: pass (records-only diff; minor template headings fixed)
 
 ## Outcome
-*(after merge)*
+- Merge approved by jg in chat on 2026-10-12 ("merge it once CI passes"); PR #35, CI passed.
+- The merged `main@502a446` passes every single-player scenario. AUDIT-001 stays open only for CrossPlot (2-player harness), which is follow-up T2.
+- AUDIT-013 is superseded: the Retaliation edge step tests a real boundary and passed.
