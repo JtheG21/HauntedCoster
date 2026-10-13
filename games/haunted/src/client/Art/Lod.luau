@@ -86,7 +86,12 @@ function Lod.register(
 		started = true
 		task.spawn(function()
 			while true do
-				sweep()
+				local ok, err = pcall(function()
+					sweep()
+				end)
+				if not ok then
+					warn(`[Lod] {err}`)
+				end
 				task.wait(0.4)
 			end
 		end)

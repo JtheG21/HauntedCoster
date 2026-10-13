@@ -9,8 +9,6 @@ local Workspace = game:GetService("Workspace")
 local State = require(script.State)
 local LocalWorld = require(script.LocalWorld)
 local HauntedTrees = require(script.HauntedTrees)
-local Dressing = require(script.Art.Dressing)
-local Creatures = require(script.Art.Creatures)
 local Hud = require(script.UI.Hud)
 local CaptureUI = require(script.UI.CaptureUI)
 local MansionUI = require(script.UI.MansionUI)
@@ -45,8 +43,16 @@ if Workspace.CurrentCamera then
 end
 
 State.start()
-Dressing.start()
-Creatures.start()
+-- Art is presentation only: start it off the main thread so a slow or failed bake never blocks the HUD.
+task.spawn(function()
+	local ok, err = pcall(function()
+		require(script.Art.Dressing).start()
+		require(script.Art.Creatures).start()
+	end)
+	if not ok then
+		warn(`[Art] start failed: {err}`)
+	end
+end)
 LocalWorld.start()
 HauntedTrees.start()
 require(script.DevProbe).start() -- Studio-only; inert unless a test arms it

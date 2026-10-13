@@ -1,8 +1,9 @@
 --!strict
 -- Attaches client art to server anchors. The server tags an invisible, non-colliding anchor part
 -- "ArtSlot" whose CFrame is the asset origin (base centre, front = LookVector) and sets:
---   ArtKey     asset name in ReplicatedStorage.Shared.ArtData (changing it rebuilds the visual)
+--   ArtKey     asset name (ServerStorage.ArtData, baked to ReplicatedStorage.ArtTemplates; changing it rebuilds the visual)
 --   ArtScale   uniform scale (default 1)
+--   ArtStretchX  stretch along the asset's local X after scaling (fence panels, arches spanning a gap)
 --   ArtFollow  true for anchors the server moves (the visual is welded instead of anchored)
 --   ArtLod     LOD1 distance in studs (default: the asset's LodDistance, else 70)
 --   ArtCull    hide beyond this distance (optional, for small clutter)
@@ -70,6 +71,17 @@ local function attach(anchor: BasePart)
 	model:PivotTo(anchor.CFrame)
 	if type(scale) == "number" and scale > 0 and scale ~= 1 then
 		model:ScaleTo(scale)
+	end
+	local stretch = anchor:GetAttribute("ArtStretchX")
+	if type(stretch) == "number" and stretch > 0 and stretch ~= 1 then
+		local pivot = model:GetPivot()
+		for _, p in model:GetChildren() do
+			if p:IsA("BasePart") then
+				local rel = pivot:ToObjectSpace(p.CFrame)
+				p.Size = Vector3.new(p.Size.X * stretch, p.Size.Y, p.Size.Z)
+				p.CFrame = pivot * CFrame.new(rel.X * stretch, rel.Y, rel.Z) * rel.Rotation
+			end
+		end
 	end
 	if anchor:GetAttribute("ArtFollow") then
 		for _, p in model:GetDescendants() do
@@ -149,19 +161,25 @@ function Dressing.start()
 	for _, inst in CollectionService:GetTagged(TAG) do
 		watch(inst)
 	end
+	-- Attaches run concurrently (an asset still baking must not hold up every other anchor), a few per frame.
+	local active = 0
 	task.spawn(function()
 		while true do
 			local n = 0
-			while #queue > 0 and n < PER_FRAME do
+			while #queue > 0 and n < PER_FRAME and active < 24 do
 				local anchor = table.remove(queue, 1) :: BasePart
 				queued[anchor] = nil
 				if listeners[anchor] then
-					local ok, err = pcall(function()
-						attach(anchor)
+					active += 1
+					task.spawn(function()
+						local ok, err = pcall(function()
+							attach(anchor)
+						end)
+						if not ok then
+							warn(`[Dressing] {anchor:GetFullName()}: {err}`)
+						end
+						active -= 1
 					end)
-					if not ok then
-						warn(`[Dressing] {anchor:GetFullName()}: {err}`)
-					end
 				end
 				n += 1
 			end

@@ -1,11 +1,13 @@
 --!strict
--- Bakes every client art part once per server (TASK-0042). Each HCM1 part in ReplicatedStorage.Shared.ArtData
+-- Bakes every client art part once per server (TASK-0042). Each HCM1 part in ServerStorage.ArtData (raw data
+-- never replicates)
 -- becomes a template MeshPart in ReplicatedStorage.ArtTemplates/<asset>/<part> backed by DataModel-scoped
 -- content, which replicates like a normal mesh; clients clone templates (client/Art/ArtLoader) instead of
 -- building EditableMeshes against their small per-device budget. Presentation only: a failed bake leaves the
 -- asset to the client's local fallback, and gameplay never waits on art.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
 
 local MeshBuild = require(ReplicatedStorage.Shared.Art.MeshBuild)
 
@@ -24,10 +26,20 @@ function ArtBakeService.start()
 		return
 	end
 	started = true
-	local data = ReplicatedStorage.Shared:WaitForChild("ArtData")
+	task.spawn(ArtBakeService._run)
+end
+
+-- The whole bake runs off the init thread, so missing or broken art can never stall server start-up.
+function ArtBakeService._run()
+	local data = ServerStorage:WaitForChild("ArtData", 10)
 	local root = Instance.new("Folder")
 	root.Name = "ArtTemplates"
 	root.Parent = ReplicatedStorage
+	if not data then
+		root:SetAttribute("Ready", true)
+		warn("[ArtBake] no ServerStorage.ArtData; art stays hidden")
+		return
+	end
 	local order: { Instance } = {}
 	for _, name in FIRST do
 		local f = data:FindFirstChild(name)
@@ -86,7 +98,8 @@ function ArtBakeService.start()
 				active -= 1
 			end)
 		end
-		while active > 0 do
+		local cap = os.clock() + 120 -- a hung bake must not keep clients waiting forever
+		while active > 0 and os.clock() < cap do
 			task.wait()
 		end
 		stats.seconds = os.clock() - t0

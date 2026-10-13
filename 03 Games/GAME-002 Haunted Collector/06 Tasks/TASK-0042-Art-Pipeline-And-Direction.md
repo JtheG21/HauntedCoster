@@ -3,7 +3,7 @@ id: TASK-0042
 title: "Art Pipeline and Direction"
 type: task
 project: GAME-002
-status: in_progress
+status: approved
 priority: high
 risk: medium
 owner: executor

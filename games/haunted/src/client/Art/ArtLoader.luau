@@ -1,16 +1,16 @@
 --!strict
--- Builds client-side visuals from ReplicatedStorage.Shared.ArtData (HCM1 meshes exported by
--- games/haunted/art). Each part's template is the server-baked MeshPart in ReplicatedStorage.ArtTemplates
--- (server/Services/ArtBakeService); every use is a clone, so copies share one mesh. If the bake is missing the
--- client builds the part itself from an EditableMesh (small per-device budget). Art is presentation only:
--- if neither works, `build` returns nil after one warning and the server's colliders keep gameplay working.
+-- Builds client-side visuals from the server-baked art templates: ReplicatedStorage.ArtTemplates/<asset>/<part>
+-- (server/Services/ArtBakeService bakes ServerStorage.ArtData, the HCM1 meshes exported by games/haunted/art).
+-- Every use is a clone of the template, so copies share one mesh. Where the raw data is reachable (Studio Edit,
+-- the command bar) a part can also be built locally from an EditableMesh. Art is presentation only: if a part
+-- can't be had, `build` returns nil after one warning and the server's colliders keep gameplay working.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ServerStorage = game:GetService("ServerStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local MeshBuild = require(Shared:WaitForChild("Art"):WaitForChild("MeshBuild"))
-local ArtData = Shared:WaitForChild("ArtData")
 
 local ArtLoader = {}
 
@@ -23,7 +23,7 @@ export type PartSpec = {
 	centre: Vector3,
 	pivot: Vector3?,
 	detail: boolean, -- small detail shown only at LOD0 distance
-	value: StringValue,
+	value: Instance, -- baked template MeshPart, or the raw HCM1 StringValue (local builds)
 }
 
 export type Spec = {
@@ -49,8 +49,8 @@ export type Options = {
 }
 
 local specs: { [string]: Spec | false } = {}
-local templates: { [StringValue]: MeshPart | false } = {}
-local building: { [StringValue]: boolean } = {}
+local templates: { [Instance]: MeshPart | false } = {}
+local building: { [Instance]: boolean } = {}
 local warned: { [string]: boolean } = {}
 local stats = { meshes = 0, triangles = 0, failures = 0, buildSeconds = 0, localBuilds = 0 }
 
@@ -68,6 +68,30 @@ local function materialOf(name: any): Enum.Material
 	return if ok and m then m else Enum.Material.SmoothPlastic
 end
 
+-- The asset's folder: baked templates while the game runs; the raw data where it is reachable (Studio Edit).
+local function source(key: string): Instance?
+	if RunService:IsRunning() then
+		local root = ReplicatedStorage:WaitForChild("ArtTemplates", 30)
+		if not root then
+			return nil
+		end
+		local deadline = os.clock() + 45
+		while os.clock() < deadline do
+			local folder = root:FindFirstChild(key)
+			if folder and folder:GetAttribute("Ready") then
+				return folder
+			end
+			if not folder and root:GetAttribute("Ready") then
+				return nil
+			end
+			task.wait(0.1)
+		end
+		return nil
+	end
+	local data = ServerStorage:FindFirstChild("ArtData")
+	return data and data:FindFirstChild(key)
+end
+
 function ArtLoader.spec(key: string): Spec?
 	local cached = specs[key]
 	if cached == false then
@@ -75,31 +99,34 @@ function ArtLoader.spec(key: string): Spec?
 	elseif cached then
 		return cached :: Spec
 	end
-	local folder = ArtData:FindFirstChild(key)
+	local folder = source(key)
 	if not folder then
 		specs[key] = false
-		warnOnce(key, `no art data for "{key}"`)
+		warnOnce(key, `no art for "{key}"`)
 		return nil
 	end
 	local parts: { PartSpec } = {}
 	for _, v in folder:GetChildren() do
-		if v:IsA("StringValue") then
+		if v:IsA("StringValue") or v:IsA("MeshPart") then
 			local px, py, pz = v:GetAttribute("PX"), v:GetAttribute("PY"), v:GetAttribute("PZ")
-			table.insert(parts, {
-				name = v.Name,
-				part = (v:GetAttribute("Part") :: string?) or v.Name,
-				material = materialOf(v:GetAttribute("Material")),
-				alpha = (v:GetAttribute("Alpha") :: number?) or 0,
-				lod = (v:GetAttribute("Lod") :: number?) or 0,
-				centre = Vector3.new(
-					(v:GetAttribute("CX") :: number?) or 0,
-					(v:GetAttribute("CY") :: number?) or 0,
-					(v:GetAttribute("CZ") :: number?) or 0
-				),
-				pivot = if px then Vector3.new(px :: number, py :: number, pz :: number) else nil,
-				detail = v:GetAttribute("Detail") == true,
-				value = v,
-			})
+			table.insert(
+				parts,
+				{
+					name = v.Name,
+					part = (v:GetAttribute("Part") :: string?) or v.Name,
+					material = materialOf(v:GetAttribute("Material")),
+					alpha = (v:GetAttribute("Alpha") :: number?) or 0,
+					lod = (v:GetAttribute("Lod") :: number?) or 0,
+					centre = Vector3.new(
+						(v:GetAttribute("CX") :: number?) or 0,
+						(v:GetAttribute("CY") :: number?) or 0,
+						(v:GetAttribute("CZ") :: number?) or 0
+					),
+					pivot = if px then Vector3.new(px :: number, py :: number, pz :: number) else nil,
+					detail = v:GetAttribute("Detail") == true,
+					value = v :: Instance,
+				} :: PartSpec
+			)
 		end
 	end
 	table.sort(parts, function(a, b)
@@ -110,48 +137,15 @@ function ArtLoader.spec(key: string): Spec?
 	return s
 end
 
--- Server-baked template (server/Services/ArtBakeService), else a local EditableMesh build as a fallback.
-local noBake = false
-local function findTemplate(value: StringValue): MeshPart?
-	if noBake then
-		return nil
-	end
-	local root = ReplicatedStorage:FindFirstChild("ArtTemplates")
-	if not root and RunService:IsRunning() then
-		root = ReplicatedStorage:WaitForChild("ArtTemplates", 30)
-	end
-	if not root then
-		noBake = true
-	end
-	local assetName = value.Parent and value.Parent.Name
-	if not root or not assetName then
-		return nil
-	end
-	local deadline = os.clock() + 45
-	while os.clock() < deadline do
-		local folder = root:FindFirstChild(assetName)
-		local t = folder and folder:FindFirstChild(value.Name)
-		if t and t:IsA("MeshPart") then
-			return t
-		end
-		if (folder and folder:GetAttribute("Ready")) or root:GetAttribute("Ready") then
-			return nil
-		end
-		task.wait(0.1)
-	end
-	return nil
-end
-
-local function buildTemplate(value: StringValue): MeshPart?
-	local t0 = os.clock()
-	local baked = findTemplate(value)
-	if baked then
+local function buildTemplate(value: Instance): MeshPart?
+	if value:IsA("MeshPart") then
 		stats.meshes += 1
-		stats.triangles += (baked:GetAttribute("Tris") :: number?) or 0
-		return baked
+		stats.triangles += (value:GetAttribute("Tris") :: number?) or 0
+		return value
 	end
+	local t0 = os.clock()
 	stats.localBuilds += 1
-	local part = MeshBuild.local_(value)
+	local part = MeshBuild.local_(value :: StringValue)
 	stats.meshes += 1
 	stats.triangles += (value:GetAttribute("Tris") :: number?) or 0
 	stats.buildSeconds += os.clock() - t0
@@ -159,7 +153,7 @@ local function buildTemplate(value: StringValue): MeshPart?
 end
 
 -- Yields the first time a part is requested (EditableMesh -> MeshPart is async); later calls are instant.
-function ArtLoader.template(value: StringValue): MeshPart?
+function ArtLoader.template(value: Instance): MeshPart?
 	local cached = templates[value]
 	if cached == false then
 		return nil

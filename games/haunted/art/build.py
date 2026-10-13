@@ -3,7 +3,7 @@
   /Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup -P games/haunted/art/build.py -- \
       --asset lamp_post [--asset ...|--all] [--render] [--night] [--noglow] [--export] [--fbx]
 
---export writes games/haunted/src/shared/ArtData/<asset>.model.json (runtime EditableMesh data);
+--export writes games/haunted/assets/ArtData/<asset>.model.json (ServerStorage) (runtime EditableMesh data);
 --render writes preview sheets to ~/Roblox-Work/haunted/art/previews/; --fbx writes the import file for
 jg's batch Studio import (an upload, so a human step). Asset generators live in art/assets/*.py and
 register themselves in ASSETS.
@@ -27,7 +27,7 @@ import bpy  # noqa: E402
 from hcart import core, export, render  # noqa: E402
 
 GAME = HERE.parent
-DATA = GAME / "src" / "shared" / "ArtData"
+DATA = GAME / "assets" / "ArtData"  # ServerStorage.ArtData: the server bakes it; clients get templates
 WORK = Path.home() / "Roblox-Work" / "haunted" / "art"
 
 
