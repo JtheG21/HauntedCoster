@@ -9,6 +9,7 @@
 -- The expedition state (session, carried capture) lives only in memory and is never saved; only a
 -- secured monster becomes part of the profile. Failing an expedition never touches owned monsters.
 
+local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -329,8 +330,15 @@ local function makeCage(player: Player, speciesId: string, variantId: string): B
 	cage.Name = "CaptureJar"
 	cage.Shape = Enum.PartType.Ball
 	cage.Size = Vector3.new(2.2, 2.2, 2.2)
-	cage.Material = Enum.Material.ForceField
+	cage.Transparency = 1 -- client art: the capture_jar mesh with a small copy of the creature inside (TASK-0043)
 	cage.Color = if variant and variant.glow then variant.glow else Monsters.RarityColor[species.rarity]
+	cage:SetAttribute("ArtKey", "capture_jar")
+	cage:SetAttribute("ArtFollow", true)
+	cage:SetAttribute("ArtShadow", false)
+	cage:SetAttribute("Species", speciesId)
+	cage:SetAttribute("Variant", variantId)
+	CollectionService:AddTag(cage, "ArtSlot")
+	CollectionService:AddTag(cage, "CarriedCreature")
 	cage.CanCollide = false
 	cage.CanTouch = false
 	cage.CanQuery = false

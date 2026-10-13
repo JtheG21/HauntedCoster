@@ -3272,7 +3272,7 @@
       "id": "TASK-0043",
       "title": "Creature Models and Animation",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [
         "TASK-0041"
@@ -3293,6 +3293,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        },
+        {
+          "time": "2026-10-13T05:53:55",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [],

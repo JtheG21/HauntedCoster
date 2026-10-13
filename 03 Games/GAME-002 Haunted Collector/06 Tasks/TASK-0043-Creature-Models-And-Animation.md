@@ -3,7 +3,7 @@ id: TASK-0043
 title: "Creature Models and Animation"
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: high
 risk: medium
 owner: executor

@@ -121,3 +121,51 @@ def teeth_row(name: str, centre, width: float, count: int, length: float, down: 
     obj = core.join(parts, name)
     core.tag(obj, material, **props)
     return obj
+
+
+def embers(name: str, objs: Sequence[bpy.types.Object], count: int, seed: int = 3, length: float = 0.5, width: float = 0.05,
+           lift: float = 0.015, min_z: float | None = None) -> bpy.types.Object | None:
+    """Ashen variant overlay: short jagged glowing cracks laid on the body surface (hidden unless Ashen)."""
+    rng = random.Random(seed)
+    tris = []
+    for o in objs:
+        mw = o.matrix_world
+        for p in o.data.polygons:
+            c = mw @ p.center
+            if min_z is not None and c.z < min_z:
+                continue
+            tris.append((p.area, c, (mw.to_3x3() @ p.normal).normalized()))
+    if not tris:
+        return None
+    total = sum(t[0] for t in tris)
+    tree = surface_bvh(objs)
+    parts = []
+    for k in range(count):
+        r = rng.random() * total
+        acc = 0.0
+        pick = tris[-1]
+        for t in tris:
+            acc += t[0]
+            if acc >= r:
+                pick = t
+                break
+        _, c, n = pick
+        tangent = n.orthogonal().normalized()
+        ang = rng.random() * math.tau
+        tangent = (Matrix.Rotation(ang, 3, n) @ tangent).normalized()
+        pts = []
+        p = Vector(c)
+        for i in range(4):
+            hit = project(tree, p + n * 0.6, -n)
+            if hit:
+                pts.append(hit[0] + hit[1] * lift)
+                n = hit[1]
+            side = n.cross(tangent).normalized()
+            p = p + tangent * (length / 3) + side * (rng.random() - 0.5) * length * 0.5
+        if len(pts) >= 2:
+            parts.append(shapes.tube(f"{name}_{k}", pts, lambda t: width * (1 - 0.7 * t) + 0.01, 3, "Neon", flatten=0.35))
+    if not parts:
+        return None
+    obj = core.join(parts, name)
+    core.tag(obj, "Neon", part="Ember", lod=False, detail=True)
+    return obj

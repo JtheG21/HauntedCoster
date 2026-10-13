@@ -10,6 +10,7 @@ local State = require(script.State)
 local LocalWorld = require(script.LocalWorld)
 local HauntedTrees = require(script.HauntedTrees)
 local Dressing = require(script.Art.Dressing)
+local Creatures = require(script.Art.Creatures)
 local Hud = require(script.UI.Hud)
 local CaptureUI = require(script.UI.CaptureUI)
 local MansionUI = require(script.UI.MansionUI)
@@ -45,6 +46,7 @@ end
 
 State.start()
 Dressing.start()
+Creatures.start()
 LocalWorld.start()
 HauntedTrees.start()
 require(script.DevProbe).start() -- Studio-only; inert unless a test arms it
