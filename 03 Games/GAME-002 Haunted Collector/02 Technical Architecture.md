@@ -21,7 +21,7 @@ The server is authoritative. Code lives in `games/haunted/src/{server,shared,cli
 | System | Side | Responsibility | Remotes |
 |---|---|---|---|
 | PlayerDataService | S | Load/save profile (UpdateAsync, session lock, retries, schema version, migration that never drops fields), in-memory fallback flagged in the UI | — |
-| PlotService | S | Assign/release home plots, ownership checks, plot bounds (in plot-local space) | — |
+| PlotService | S | Assign/release home plots (lowest free plot, `PlotRules.firstFree`), ownership checks, plot bounds (in plot-local space) | — |
 | ~~LandmarkService~~ | — | Removed with clue hunting ([[TASK-0025-Clue-Hunting-Removal]], [[ADR-0007-World-Retrofit-Direction]]). Landmarks are scenery. Crypt access is the pure rule `EconomyRules.cryptOpen(houseTier)`; EconomyService adds `cryptOpen` to the snapshot and CaptureService refuses captures in gated zones below it | — |
 | EncounterService | S | Spawn and roam monsters in zones, roll variants, inspect payload; startle hops and fleeing escaped captures | — |
 | CaptureService | S | Capture sessions, server-timed meter, carry state, return timer, escape chase and grab; carry speed budget and deadline checks on secure (TASK-0021) | `Capture` (start/release), `Grab` prompt |
@@ -35,6 +35,7 @@ The server is authoritative. Code lives in `games/haunted/src/{server,shared,cli
 
 ## World layout (M3, [[ADR-0007-World-Retrofit-Direction]])
 - `shared/Config/World`: the hub (wall r 115, footprint r 112, ring road r 120–132, gates at 0°/120°/240°) and the plot ring (centres at r 185, angles 30° + 60k). Each plot has a frame, `World.plotFrame(i)`, whose -Z faces the hub. Every plot-local point or direction goes through `plotToWorld`, `worldToPlot` or `plotDirToWorld`. Plot geometry is built at local coordinates and placed with `Build.toFrame`. Saved routes and `TrackRules` stay plot-local, so they're unchanged.
+- **Player cap:** one plot per player and 6 plots, so the place's Max Players (Game Settings) must be 6. `World.MaxPlayers = 6` records it, a spec ties it to the plot count, and a live server warns if Max Players is higher ([[TASK-0037-Plot-Capacity]]). A player without a plot can explore but not progress.
 - `shared/Config/Habitats`: the module contract (zones, landmarks, paths, one path per gate, plaza, crypt, starter) and the four modules in rotation order (Ghost Cemetery, Cursed Woodland, Spider Woodland, Zombie Settlement). `Habitats.active()` is the live module; the server sets it and mirrors it to the Workspace attribute `ActiveHabitat`, which the client follows.
 - `shared/Rules/HabitatRules`: pure footprint, corridor and path checks, plus `validate` (species, weights, landmark zones; warnings at server start).
 - `server/Services/HabitatService`: prebuilds every module into `ServerStorage.HabitatModules` and parents one under `Workspace.Habitat`. `activate` / `deactivate` hooks clear wild monsters (`EncounterService.clearWild`, fleeing escapes kept) and repopulate (`EncounterService.populate`). In Studio test runs the `habitat` argument picks the starting module.

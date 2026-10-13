@@ -52,6 +52,9 @@ World.PlotRing = {
 	step = 60,
 	count = 6,
 }
+-- One plot per player: the place's Max Players (Game Settings) must be this value (TASK-0037). A player
+-- beyond the plots could explore but never progress.
+World.MaxPlayers = 6
 
 local function polar(angle: number, radius: number): Vector3
 	local a = math.rad(angle)

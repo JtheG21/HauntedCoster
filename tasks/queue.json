@@ -2924,6 +2924,54 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0037",
+      "title": "Plot Capacity",
+      "project": "GAME-002",
+      "status": "in_review",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0036"
+      ],
+      "branch": "task/TASK-0037-Plot-Capacity",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0037-Plot-Capacity.md",
+      "acceptance_criteria": [
+        "World.MaxPlayers = 6 records the cap, and a spec ties it to the plot count (cap <= plots).",
+        "Plot assignment uses a pure PlotRules.firstFree; specs cover six occupied plots plus a 7th player (no plot, nobody's plot taken) and reuse of a freed plot; a negative control fails them.",
+        "A live server warns if the place's Max Players exceeds the plots; Studio is not checked.",
+        "jg sets Max Players to 6 in Game Settings (recorded as done or pending); FullLoop and ExploitProbe pass; scripts/check.sh passes."
+      ],
+      "history": [
+        {
+          "time": "2026-10-12T20:39:51",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-12T20:39:51",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-12T20:54:17",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-12T20:54:17",
+          "result": "pass",
+          "notes": "check.sh pass; specs 121/0; negative control fails 3 of 4 specs; ExploitProbe 13/13; FullLoop 85/85 twice (one 84/85 from a template SpawnLocation in the scratch place); Max Players 6 set by jg (TEST-20261012-15)"
+        }
+      ],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg"
     }
   ]
 }
