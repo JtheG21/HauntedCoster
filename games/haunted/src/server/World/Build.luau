@@ -1,5 +1,8 @@
 --!strict
--- Small helpers for building anchored placeholder geometry from code.
+-- Small helpers for building anchored geometry from code. Visible art is client-side (client/Art): the
+-- server builds invisible colliders, lights and prompts, plus `artSlot` anchors the client dresses.
+
+local CollectionService = game:GetService("CollectionService")
 
 local Build = {}
 
@@ -131,6 +134,38 @@ function Build.toFrame(container: Instance, frame: CFrame)
 			d.CFrame = frame * d.CFrame
 		end
 	end
+end
+
+-- An invisible anchor at an asset's origin (base centre, front = LookVector) tagged for client art.
+-- `attrs` may set ArtScale, ArtFollow, ArtLod, ArtCull, Tint_<Part>, Mat_<Part> (client/Art/Dressing).
+function Build.artSlot(parent: Instance, key: string, cframe: CFrame, attrs: { [string]: any }?): Part
+	local p = Instance.new("Part")
+	p.Name = "Art_" .. key
+	p.Anchored = true
+	p.Size = Vector3.new(0.2, 0.2, 0.2)
+	p.CFrame = cframe
+	p.Transparency = 1
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
+	p.CastShadow = false
+	p:SetAttribute("ArtKey", key)
+	if attrs then
+		for k, v in attrs do
+			p:SetAttribute(k, v)
+		end
+	end
+	CollectionService:AddTag(p, "ArtSlot")
+	p.Parent = parent
+	return p
+end
+
+-- An invisible collider (the art supplies the look). Keeps gameplay collision independent of meshes.
+function Build.collider(parent: Instance, name: string, size: Vector3, cframe: CFrame, shape: Enum.PartType?): Part
+	local p =
+		Build.part({ name = name, size = size, cframe = cframe, shape = shape, transparency = 1, parent = parent })
+	p.CanTouch = false
+	return p
 end
 
 function Build.folder(parent: Instance, name: string): Folder

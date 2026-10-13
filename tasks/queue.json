@@ -3229,6 +3229,356 @@
       "revisions": 1,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0042",
+      "title": "Art Pipeline and Direction",
+      "project": "GAME-002",
+      "status": "in_progress",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": null,
+      "branch": "task/TASK-0042-Art-Pipeline-And-Direction",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0042-Art-Pipeline-And-Direction.md",
+      "acceptance_criteria": [
+        "A headless Blender pipeline (games/haunted/art) builds, paints, previews and exports assets; HCM1 codec has matching Python and Luau specs; generated data syncs through Rojo with no upload or generator call.",
+        "A client ArtLoader renders HCM1 assets as EditableMesh MeshParts with shared templates, LOD switching and a fail-safe fallback; server builders place tagged ArtSlot anchors that keep the existing colliders, lights and interaction points.",
+        "SYS-Haunted-Art-Direction records the selected references (positive and rejected), style, palette, materials, budgets, the full asset/UI inventory with replace/refine/retain/new decisions, and the dual live path (jg batch import or Mesh/Image API toggle).",
+        "The lamp post family replaces the rejected lamps in game, compared with MIN-064/MIN-069 and BAD-015/016 in front, side, rear and three-quarter views, neutral and night light, and without glow.",
+        "scripts/check.sh passes; FullLoop still passes in Studio; EditableMesh memory and triangle cost measured."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:49",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        },
+        {
+          "time": "2026-10-13T05:11:50",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0043",
+      "title": "Creature Models and Animation",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0042",
+      "branch": "task/TASK-0043-Creature-Models-And-Animation",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0043-Creature-Models-And-Animation.md",
+      "acceptance_criteria": [
+        "Wisp, Stitched Hound, Hollow Gentleman and Bell Wraith are rebuilt as finished meshes that meet or exceed MIN-013/031/037-044/048-053 and avoid BAD-006-012, inspected in four views, neutral and night light, without glow.",
+        "Normal, Spectral and Ashen read as distinct natural identities on every species without hiding the form.",
+        "Client-side procedural animation covers idle, roam, startle, carried, chase, retaliation and display poses; server movement, colliders, prompts and capture behaviour are unchanged.",
+        "Wild, carried, contained and exhibited creatures all use the new art; LOD and triangle budgets hold with 8 wild plus full pens.",
+        "scripts/check.sh passes; FullLoop, CarryGuard and Retaliation scenarios pass."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:49",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0044",
+      "title": "Environment Kit and Ground",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0043",
+      "branch": "task/TASK-0044-Environment-Kit-And-Ground",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0044-Environment-Kit-And-Ground.md",
+      "acceptance_criteria": [
+        "Trees (dead, pine, haunted with faces, brood), roots, rocks, graves, fences, gates, walls, candles, pumpkins, mist and the hub wall/gates/road are rebuilt to meet MIN-010/054-056/060-070 and avoid BAD-001-005.",
+        "TASK-0041 haunted trees keep their gaze behaviour, palette rules and face controls with the new trunk and face art.",
+        "Ground and paths read as terrain rather than flat discs, with collisions and walk heights unchanged.",
+        "Each habitat and the hub are captured at gameplay distance in game lighting, before and after.",
+        "scripts/check.sh passes; Reachability and HauntedTrees scenarios pass."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:49",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0045",
+      "title": "Habitat Landmarks",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0044",
+      "branch": "task/TASK-0045-Habitat-Landmarks",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0045-Habitat-Landmarks.md",
+      "acceptance_criteria": [
+        "Weeping Angel, Bell Tower, Sealed Crypt, mausoleums, hearse, well, standing stones, hollow oak, dens, brood tree, cocoons, ruined chapel, old barn and cottages are rebuilt as finished landmark meshes.",
+        "Landmark silhouettes stay readable from 80+ studs and keep their gameplay roles (crypt gate collision and client-side opening).",
+        "Four-view and night captures compared with MIN-067-070; no landmark relies on glow to read.",
+        "scripts/check.sh passes; HabitatSwap and HabitatRotation scenarios pass."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:49",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0046",
+      "title": "Mansion, Plot and Ghost Train Art",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0045",
+      "branch": "task/TASK-0046-Mansion-Plot-And-Train-Art",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0046-Mansion-Plot-And-Train-Art.md",
+      "acceptance_criteria": [
+        "The three mansion tiers, containment pen, station and canopy, ghost-train cart, track rails and supports, Scare Arch, Fog Tunnel, exhibit plinths, trophies, beacon and plot entrance are rebuilt; BAD-013/014/017 are not repeated.",
+        "Tier upgrades, house boxes used by decorations, ride, exhibits, pen pads and prompts behave as before.",
+        "Cart and track compared with MIN-057-059 (vehicle finish) and the house tiers with MIN-069 in four views.",
+        "scripts/check.sh passes; FullLoop and Persistence scenarios pass."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:50",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0047",
+      "title": "Cosmetics Backend and Persistence",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "high",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0041",
+      "branch": "task/TASK-0047-Cosmetics-Backend-And-Persistence",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0047-Cosmetics-Backend-And-Persistence.md",
+      "acceptance_criteria": [
+        "A cosmetic catalog (skins, auras, capture effects, mansion themes, exterior decorations) with compatibility, acquisition routes and no gameplay stats; specs prove cosmetics never change income, rarity, speed, capacity or capture.",
+        "Profile schema bump with migration that preserves every existing field; account entitlements, per-ghost skin/aura, per-player capture effect, theme, decoration inventory and placements, and reward claims persist and survive rejoin.",
+        "Coin purchases, equip/remove, reward claims and decoration place/move/store are server-validated, rate-limited and idempotent; Robux grants go through ProcessReceipt with duplicate-safe receipt records, and products stay disabled until configured (test fixtures only in Studio).",
+        "Placements are validated in plot-local space against tier, footprint, paths and caps; upgrades keep compatible placements and store the rest.",
+        "scripts/check.sh passes with new specs; Persistence scenario covers the new fields; schema change awaits jg's approval before merge."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:50",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0048",
+      "title": "UI System and Core HUD",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0046",
+      "branch": "task/TASK-0048-UI-System-And-Core-HUD",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0048-UI-System-And-Core-HUD.md",
+      "acceptance_criteria": [
+        "A design system (tokens, typography, icons, components, motion) replaces Theme; every component has hover/press/focus/disabled states and controller focus.",
+        "HUD, navigation, objectives and onboarding, flashlight, rotation info, notifications, inspect card, capture meter, carry/escape/retaliation feedback, loading and error states are redesigned.",
+        "Captured at desktop and narrow/mobile sizes; touch targets and controller navigation verified in Studio emulation (no physical-device claim).",
+        "scripts/check.sh passes; FullLoop passes with the new UI."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:50",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0049",
+      "title": "Management, Track Editor and Journal UI",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0048",
+      "branch": "task/TASK-0049-Management-Track-And-Journal-UI",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0049-Management-Track-And-Journal-UI.md",
+      "acceptance_criteria": [
+        "Mansion upgrades, owned ghosts, exhibits and train information, the track editor, and the Journal/Bestiary with habitat progress, natural variants and collection rewards are redesigned in the new system.",
+        "Empty, loading, unavailable and error states exist for each screen.",
+        "Captured at desktop and narrow sizes; controller and touch flows verified in emulation.",
+        "scripts/check.sh passes; FullLoop passes."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:50",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0050",
+      "title": "Cosmetic Assets",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0049",
+      "branch": "task/TASK-0050-Cosmetic-Assets",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0050-Cosmetic-Assets.md",
+      "acceptance_criteria": [
+        "Launch assortment for all five categories is modelled to the quality baseline: ghost skins, auras, capture effects, mansion themes per supported tier, and exterior decorations.",
+        "Skins and auras keep Spectral/Ashen natural identities readable; effects stay within performance budgets.",
+        "Four-view captures of every item, with and without effects."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:50",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0051",
+      "title": "Shop, Inventory and Decoration Editor",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "high",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0050",
+      "branch": "task/TASK-0051-Shop-Inventory-And-Decoration-Editor",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0051-Shop-Inventory-And-Decoration-Editor.md",
+      "acceptance_criteria": [
+        "Shop with categories, filters, item details, rotatable/replayable previews, truthful acquisition labels and no fake prices; Robux actions hidden until products are configured.",
+        "Owned inventory with per-ghost skin/aura equipment, capture-effect selection, mansion theme apply and decoration palette; preview never changes the live world and cancel restores it.",
+        "Hybrid decoration editor with snapping, rotation, bounded fine placement, live valid/invalid indication, Confirm/Cancel/Move/Rotate/Store/Exit and count limits.",
+        "All five category journeys work locally including loading, unavailable, pending, duplicate-submit and rejoin states; multiplayer appearance checked with 2 players.",
+        "scripts/check.sh passes."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:50",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0052",
+      "title": "Overhaul Verification and Review Package",
+      "project": "GAME-002",
+      "status": "ready",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0051",
+      "branch": "task/TASK-0052-Overhaul-Verification",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0052-Overhaul-Verification.md",
+      "acceptance_criteria": [
+        "Completion matrix covers every asset category, screen, monetization journey and verification requirement, separating implemented, verified, blocked and pending human review.",
+        "Performance measured (triangles, instances, EditableMesh memory, frame time) against the budgets; persistence/rejoin and 2-player appearance tests recorded.",
+        "Review package: local playable build, before/after comparisons, evidence links, test results and the exact approvals still required."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:50",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
     }
   ]
 }

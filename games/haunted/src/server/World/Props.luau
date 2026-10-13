@@ -24,38 +24,22 @@ Props.C = {
 }
 local C = Props.C
 
--- The lamp family (TASK-0028): an iron post with a short arm and a hanging glass lantern. `shadows` is for
--- the few key lights only (the light budget allows shadows on a handful).
+-- The lamp family (TASK-0028, art TASK-0042): an iron post with a scroll arm and a hanging hexagonal
+-- lantern. The server keeps the post collider and the light; the client dresses the `lamp_post` art.
+-- `shadows` is for the few key lights only (the light budget allows shadows on a handful).
 function Props.lantern(parent: Instance, x: number, z: number, y: number?, shadows: boolean?)
 	local base = y or 0
-	Build.block(parent, "LanternPost", Vector3.new(0.5, 8, 0.5), x, base, z, C.iron, Enum.Material.Metal)
-	Build.part({
-		name = "LanternArm",
-		size = Vector3.new(0.3, 0.3, 1.6),
-		cframe = CFrame.new(x, base + 7.8, z + 0.7),
-		color = C.iron,
-		material = Enum.Material.Metal,
-		collide = false,
-		parent = parent,
-	})
-	Build.part({
-		name = "LanternCap",
-		size = Vector3.new(1.3, 0.4, 1.3),
-		cframe = CFrame.new(x, base + 7.4, z + 1.3) * CFrame.Angles(0, math.rad(45), 0),
-		color = C.iron,
-		material = Enum.Material.Metal,
-		collide = false,
-		parent = parent,
-	})
+	Build.collider(parent, "LanternPost", Vector3.new(0.6, 8, 0.6), CFrame.new(x, base + 4, z))
+	Build.artSlot(parent, "lamp_post", CFrame.new(x, base, z))
 	local head = Build.part({
 		name = "Lantern",
-		size = Vector3.new(0.9, 1.2, 0.9),
-		cframe = CFrame.new(x, base + 6.6, z + 1.3),
-		color = C.lantern,
-		material = Enum.Material.Neon,
+		size = Vector3.new(0.4, 0.4, 0.4),
+		cframe = CFrame.new(x, base + 5.1, z + 1.4),
+		transparency = 1,
 		collide = false,
 		parent = parent,
 	})
+	head.CanQuery = false
 	Build.light(head, C.lanternLight, 30, 2.6, shadows)
 end
 
