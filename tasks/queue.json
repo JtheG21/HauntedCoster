@@ -2723,6 +2723,54 @@
       "revisions": 1,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0034",
+      "title": "Post-Merge Verification",
+      "project": "GAME-002",
+      "status": "in_review",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0033"
+      ],
+      "branch": "task/TASK-0034-Post-Merge-Verification",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0034-Post-Merge-Verification.md",
+      "acceptance_criteria": [
+        "Studio is synced to main at a named SHA (checked against repo source sizes) before any run.",
+        "FullLoop, ExploitProbe, CarryGuard, Retaliation, HabitatRotation, HabitatSwap and Reachability (all four habitats) are run on that build and every result is recorded, failures included.",
+        "CrossPlot is attempted once; a harness failure is recorded as blocked, not as a gameplay result, and handed to the harness follow-up.",
+        "No game code changes; Persistence is not run (it writes DataStores)."
+      ],
+      "history": [
+        {
+          "time": "2026-10-12T19:25:18",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-12T19:25:18",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-12T19:25:24",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-12T19:25:24",
+          "result": "pass",
+          "notes": "main@502a446: FullLoop 85/85, ExploitProbe 13/13, CarryGuard 21/21, Retaliation 36/36, HabitatRotation 28/28, HabitatSwap 35/35, Reachability 28/23/23/23; CrossPlot blocked by harness (TEST-20261012-12)"
+        }
+      ],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg"
     }
   ]
 }
