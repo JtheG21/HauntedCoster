@@ -2991,6 +2991,54 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0038",
+      "title": "Encounter Review Capture Guards",
+      "project": "GAME-002",
+      "status": "in_review",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0037"
+      ],
+      "branch": "task/TASK-0038-Encounter-Review-Capture-Guards",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0038-Encounter-Review-Capture-Guards.md",
+      "acceptance_criteria": [
+        "EncounterService is reviewed line by line; findings are recorded in the task note with file:line, and any defect becomes a follow-up rather than an unapproved change.",
+        "Capture-start guards move into a pure CaptureRules.startRefusal with the same checks, order and player-facing reasons; the claim and rate limit stay in CaptureService.",
+        "Specs cover the all-clear case, every refusal and the order; a negative control (one guard removed) fails them.",
+        "FullLoop, ExploitProbe, CarryGuard and Retaliation pass in Studio; scripts/check.sh passes."
+      ],
+      "history": [
+        {
+          "time": "2026-10-12T20:58:36",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-12T20:58:36",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-12T21:06:57",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-12T21:06:57",
+          "result": "pass",
+          "notes": "check.sh pass; specs 124/0; negative control fails the pursuing case; FullLoop 85/85, ExploitProbe 13/13, CarryGuard 21/21, Retaliation 36/36 (TEST-20261012-16)"
+        }
+      ],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg"
     }
   ]
 }
