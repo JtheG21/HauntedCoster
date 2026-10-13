@@ -3,7 +3,7 @@ id: TASK-0035
 title: "CrossPlot Harness Reliability"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: high
 risk: low
 owner: executor
@@ -58,5 +58,6 @@ Make CrossPlot (2-player plot isolation) give a trustworthy result. Its "touchin
 - `scripts/check.sh` passes.
 
 ## Audits
+- [[AUD-20261012-TASK-0035-01]]: pass (3 minor notes: possible re-seat cooldown false failure, no explicit probe check line, forced-parked check doesn't need the guard)
 
 ## Outcome
