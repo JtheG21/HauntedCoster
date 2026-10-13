@@ -37,6 +37,6 @@ Option 3 (recommended, **pending jg's approval**).
 
 ## Consequences
 - **Trust boundary:** a modified client can freeze a tree it could plausibly see, and only while it stays near the tree and keeps sending rate-limited keepalives. It can't freeze distant or hidden trees, can't create or configure trees, and gains nothing in gameplay.
-- **Server cost:** one rate-limited event per watching player at about 2.5 Hz, plus a 4 Hz sweep that runs only while some tree has observers or a resume pending.
+- **Server cost:** one rate-limited event per watching player at about 2.5 Hz. Per tree, there is one `task.delay` to its next report expiry or resume, scheduled only while it has observers or a resume pending; a token cancels stale delays. There is no polling loop.
 - **Shared state:** palette, archetype and `Frozen` are server-authoritative attributes. Idle motion (glances, blinks, eye tracking) is computed per client and may differ slightly between players.
 - **Pattern:** this is a reusable shape for any cosmetic, camera-derived mechanic.

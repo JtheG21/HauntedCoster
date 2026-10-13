@@ -52,7 +52,7 @@ Statuses are copied from `tasks/queue.json` (authoritative); `validate_vault.py`
 | [[TASK-0037-Plot-Capacity]] | done (6-player cap tied to the 6 plots) | [[AUD-20261012-TASK-0037-01]] pass |
 | [[TASK-0038-Encounter-Review-Capture-Guards]] | done (EncounterService review; capture-start guards as a pure rule) | [[AUD-20261012-TASK-0038-01]] pass |
 | [[TASK-0039-Drop-Parked-Seat-Check]] | done (forced-parked-seat check dropped; decisions recorded) | [[AUD-20261012-TASK-0039-01]] pass |
-| [[TASK-0041-Interactive-Haunted-Trees]] | in_progress (Woodland haunted trees: global gaze freeze; [[TEST-20261013-01]] 20/20 two-player) | audit pending |
+| [[TASK-0041-Interactive-Haunted-Trees]] | approved, merge pending jg (Woodland haunted trees: global gaze freeze; [[TEST-20261013-01]] 20/20 two-player) | [[AUD-20261013-TASK-0041-01]] pass with notes |
 
 ## How to playtest (Studio)
 1. `rojo build haunted.project.json -o HauntedCollector.rbxl`, then open it in Studio (or `rojo serve haunted.project.json` into a new empty place). **Never sync it into the Rg1/place1 place.**

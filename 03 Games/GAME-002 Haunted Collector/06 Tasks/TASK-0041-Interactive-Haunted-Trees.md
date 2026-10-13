@@ -3,7 +3,7 @@ id: TASK-0041
 title: "Interactive Haunted Trees"
 type: task
 project: GAME-002
-status: in_progress
+status: approved
 priority: medium
 risk: medium
 owner: executor
@@ -88,13 +88,13 @@ Add stationary trees to the Cursed Woodland whose bark faces watch players and g
    - **A** follows REF-001: thick, flared, face low.
    - **B**: squat and broad, with a wide face and heavy brow.
    - **C**: narrow and leaning, with a faceted face (REF-003).
-   - Face parts are sockets, eyeballs, pupils, upper and lower lids, and a mouth. They are non-colliding and anchored, and all sit under a `Face` model with a `FaceFront` attachment.
-   - The model carries attributes (`Archetype`, `Palette`, `TreeId`) and a `HauntedFace` tag. The trunk collides as one simple part; everything else does not.
+   - Face parts are sockets, eyeballs, pupils, upper lids, brow, cheeks, nose and a mouth (cavity, lip, jaw). They are non-colliding and anchored, and are referenced from an invisible `FaceRoot` part whose LookVector is the face direction. *(As built; the original plan said lower lids and a `Face` submodel.)*
+   - The model carries attributes (`Archetype`, `Palette`, `TreeId`) and a `HauntedTree` tag. The trunk collides as one simple part; everything else does not.
 4. **Woodland placement:** about 16 trees along the trails and clearing edges, at seeded positions clear of zone centres. Faced trees face the nearest path point, and their dark eyes suit the Black Thicket.
 5. **Server** (`Services/HauntedTreeService.luau`, idempotent `start()`):
    - **Registry:** collects tagged faced trees from the built Woodland.
    - **`TreeGaze` event `(treeId, looking)`:** checks that the tree exists and is in the active habitat, and that the player is alive. Then distance from the head to the face ≤ range + slack, the head is in front of the face, and a server raycast from head to face is clear. Rate-limited.
-   - **State:** observers are aggregated through GazeRules and the `Frozen` attribute is set on the tree. The only loop runs at 4 Hz, and only while a tree has observers or a resume pending.
+   - **State:** observers are aggregated through GazeRules and the `Frozen` attribute is set on the tree. Per tree, one token-guarded `task.delay` runs to its next expiry or resume, and there is no loop. *(As built; the plan said a 4 Hz sweep.)*
    - **Cleanup:** on PlayerRemoving, CharacterRemoving and habitat deactivation.
 6. **Client** (`client/HauntedTrees.luau`):
    - Watches tagged trees via CollectionService. One RenderStepped loop runs for faced trees within about 40 studs.
@@ -117,7 +117,7 @@ Add stationary trees to the Cursed Woodland whose bark faces watch players and g
 
 ## Files expected to change
 - **New:** `games/haunted/src/shared/Config/HauntedTrees.luau`, `games/haunted/src/shared/Rules/GazeRules.luau`, `games/haunted/src/server/Services/HauntedTreeService.luau`, `games/haunted/src/client/HauntedTrees.luau`, `games/haunted/tests/GazeRules.spec.luau`, `games/haunted/tests/scenarios/HauntedTrees.luau`.
-- **Modified:** `games/haunted/src/server/World/Props.luau`, `games/haunted/src/server/World/Habitats/Woodland.luau`, `games/haunted/src/shared/Net.luau`, `games/haunted/src/server/init.server.luau`, `games/haunted/src/client/init.client.luau`.
+- **Modified:** `games/haunted/src/server/World/Habitats/Woodland.luau` (the planned `Props.luau` change became the new `World/HauntedTree.luau` plus `shared/TreeSight.luau`), `games/haunted/src/shared/Net.luau`, `games/haunted/src/server/init.server.luau`, `games/haunted/src/client/init.client.luau`.
 - **Notes:** this note, a `TEST-` note, `00 Overview`, `02 Technical Architecture` (a new C→S remote), [[Map References]] (an ASSET-REF section).
 
 ## Acceptance criteria
@@ -195,5 +195,6 @@ Add stationary trees to the Cursed Woodland whose bark faces watch players and g
 - **Reference-code reuse:** SODT `PerceptionService`. Took the separate "seen now" flag, `os.clock()` timing and the idea of sending a throttled camera report. Did not take its polling loop or beast model.
 
 ## Audits
+- [[AUD-20261013-TASK-0041-01]]: **pass with notes**. No blockers. Findings 1–4 and 6 are open follow-ups; 7 (stale plan text) is fixed.
 
 ## Outcome
