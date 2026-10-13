@@ -62,6 +62,7 @@ local mouthOverride: { [string]: number } = {}
 local remote: RemoteEvent? = nil
 local started = false
 local nextCheck = 0
+local testAim: Face? = nil -- Studio test camera: the face it last aimed at
 
 local function damp(cur: number, target: number, rate: number, dt: number): number
 	return cur + (target - cur) * (1 - math.exp(-rate * dt))
@@ -236,7 +237,7 @@ local function animate(f: Face, now: number, dt: number)
 			f.nextMouth = now + between(f.rng, F.mouthEvery)
 			f.mouthUntil, f.mouthTarget = now + f.rng:NextNumber(0.4, 1.1), f.rng:NextNumber(0.2, 0.6)
 		end
-		mouthT = mouthOverride[f.id] or (if now < f.mouthUntil then f.mouthTarget else 0)
+		mouthT = mouthOverride[f.id] or (if now < f.mouthUntil then f.mouthTarget else F.restMouth)
 	end
 	f.yaw = damp(f.yaw, f.tYaw, rate, dt)
 	f.pitch = damp(f.pitch, f.tPitch, rate, dt)
@@ -323,7 +324,11 @@ local function testCamera()
 	end
 	cam.CameraType = Enum.CameraType.Scriptable
 	cam:SetAttribute("HC_Test", true)
-	local aim = target or nearest
+	if target then
+		testAim = target
+	end
+	-- Looking away turns from the face it last aimed at (another tree may be nearer).
+	local aim = target or (if testAim and faces[testAim.model] then testAim else nearest)
 	if not aim then
 		return
 	end

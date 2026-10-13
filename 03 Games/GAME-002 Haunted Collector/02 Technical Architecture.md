@@ -5,7 +5,7 @@ type: architecture
 project: GAME-002
 status: proposed
 created: 2026-10-11
-updated: 2026-10-12
+updated: 2026-10-13
 tags:
   - game/architecture
 related:
@@ -29,7 +29,8 @@ The server is authoritative. Code lives in `games/haunted/src/{server,shared,cli
 | EconomyService | S | Currency changes and purchases (price, requirement and funds checks) | `Purchase` |
 | TrainService | S | Validate/build routes, exhibits, server cart ride, payout and cooldown | `Track`, `Ride`, `Exhibit` |
 | TutorialService | S | Step state machine, persisted | (state pushed via attributes) |
-| Client UI | C | HUD, inspect card, meter, roster, journal, upgrades, editor, ride | — |
+| HauntedTreeService | S | Haunted-tree gaze aggregation ([[TASK-0041-Interactive-Haunted-Trees]], [[ADR-0010-Client-Reported-Gaze]], proposed). Checks each report for plausibility, aggregates observers per tree (`GazeRules`), and replicates the `Frozen` attribute. Cosmetic only | `TreeGaze` |
+| Client UI | C | HUD, inspect card, meter, roster, journal, upgrades, editor, ride; `client/HauntedTrees`: local gaze test plus face animation (one render-step loop) | — |
 | `shared/Config/*` | Sh | MonsterDefs, VariantDefs, Economy, Track, Zones: every tunable | — |
 | `shared/Rules/*` | Sh | Pure functions: payout, route validation, capture timing, income | — |
 
@@ -42,12 +43,19 @@ The server is authoritative. Code lives in `games/haunted/src/{server,shared,cli
 - `shared/Config/Rotation` + `shared/Rules/RotationRules` (TASK-0029): the 15-minute, four-habitat schedule as a pure function of UTC time. `shared/HabitatState` holds the Workspace attributes (`ActiveHabitat`, `HabitatNext`, `HabitatPhase`, `HabitatSwapAt`, `HabitatFog`) the client reads.
 - `server/Services/RotationService`: a 0.25 s tick on `Workspace:GetServerTimeNow()`. It publishes the phase, closes captures in the last 15 s, and swaps under a protected fog fade: cancel meter sessions, move players in the hub out to their nearest gate, activate the next module, let chases follow their players. Studio test runs are pinned unless they pass a `rotation` schedule.
 - `server/Services/RetaliationService` + `shared/Rules/RetaliationRules` (TASK-0031): on a capture's final miss (`CaptureService.onFled`), the target and up to two neighbours pursue the failing player, stepped by the server inside the habitat region. A catch sets the character attribute `KnockedDownUntil`; the client ragdolls (Physics state, no damage). Ends on timeout, escape, death, leaving or a swap (`stopAll` before `clearWild`). The tick and each `onFled` handler run under `pcall`: a tick error ends every pursuit, and a failing handler falls back to "slipped away" (TASK-0032). `begin` releases every monster it had set if it errors part-way (TASK-0033).
-- `server/World`: `HubBuilder` (persistent ground, ring road, hub wall and gates, spokes, lights), `Atmosphere` (lighting), `Props` (the shared prop kit), `Habitats/Kit` (shared module building steps) and one builder per module in `Habitats/`. Workspace holds `World`, `Habitat/<id>`, `Plots` and `Monsters`.
+- `server/World`: `HubBuilder` (persistent ground, ring road, hub wall and gates, spokes, lights), `Atmosphere` (lighting), `Props` (the shared prop kit), `Habitats/Kit` (shared module building steps), `HauntedTree` (the three haunted-tree archetypes, TASK-0041) and one builder per module in `Habitats/`. Workspace holds `World`, `Habitat/<id>`, `Plots` and `Monsters`.
 
 ## Remotes & trust boundary
 - Clients send **intents only**: start capture, release time, investigate, secure, purchase id, route control points, ride start, exhibit slot assignment.
 - The server checks distance, ownership (the player's own plot), cooldown and rate limit, the payload's shape and bounds, the player's tutorial and tier requirements, and money. Rewards are computed only on the server.
 - Ride completion is decided by the server-driven cart reaching the end, never by a client message.
+- **Exception, cosmetic only:** `TreeGaze(treeId, looking)` is client-derived evidence, because the server can't see a client's camera. The server accepts a report only if:
+  - the tree is a registered faced tree in the active habitat;
+  - the reporter is alive;
+  - the head is within range plus slack and in front of the face;
+  - a server raycast from head to face is clear.
+
+  It is rate-limited (10/s, burst 20) and expires after 1.25 s without a keepalive. Nothing but the tree's `Frozen` attribute depends on it ([[ADR-0010-Client-Reported-Gaze]]).
 
 ## Data model (DataStores)
 `Profile v1 = { schema, coins, speedLevel, houseTier, owned = { {uid, species, variant, acquiredAt} }, journal = { species = {}, variants = {}, clues = {} }, route = { points, pieces } | nil, exhibits = { slot -> uid }, tutorialStep, lastSeen }`. Expedition state (the carried capture) is **never saved**. Saves happen on leave, every 60 s and on BindToClose, via UpdateAsync with a session-lock field; the record transforms (claim, save, release) are pure functions in `shared/Rules/SessionLockRules` (TASK-0019). A profile saved by a newer schema loads read-only, and the schema-bump rule is in [[SYS-Haunted-Player-Data]]. Verified live in a private place ([[TEST-20261012-10]]). Each save is validated against the schema and clamps values first. If DataStore access is unavailable (for example in an unpublished Studio place), the game falls back to memory only, shows a visible banner, and records that persistence is unverified.

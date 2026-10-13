@@ -4,7 +4,7 @@ title: Resource Catalog
 type: index
 status: approved
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-13
 tags:
   - studio/catalog
 related:
@@ -71,6 +71,8 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Server-validated remotes | `games/haunted/src/shared/Net.luau` and services | verified | `ExploitProbe` scenario 13/13 in [[TEST-20261011-07]] | GAME-002's remote list; reuse the shape |
 | UI kit | `games/haunted/src/client/UI/Theme.luau` | implemented | Used by 6 GAME-002 UI modules | Haunted palette is project-specific; the constructors are reusable |
 | Prop kit (lanterns, fences, graves, trees, mausoleums) | `games/haunted/src/server/World/Props.luau` | implemented | Used by the hub and habitat builders | Built from parts in Luau; GAME-002 art, which may be revamped |
+| Haunted-tree prop (3 archetypes, optional animated face) | `games/haunted/src/server/World/HauntedTree.luau` | implemented | [[TEST-20261013-01]] (scale and readability checked in Studio) | Parts only, 13–38 parts per tree; look awaits jg's review; GAME-002 art |
+| Client-reported cosmetic gaze (report edges plus keepalive; server plausibility, observer aggregation, one replicated attribute) | `games/haunted/src/shared/Rules/GazeRules.luau`, `Services/HauntedTreeService.luau`, `client/HauntedTrees.luau`, `shared/TreeSight.luau` | verified | 15 specs; [[TEST-20261013-01]] (2-player 20/20) | GAME-002; [[ADR-0010-Client-Reported-Gaze]] proposed; 6 players not verified; cosmetic only, so don't reuse it for anything that grants progress |
 | GAME-002 Figma UI kit (Haunted Theme variables, text styles, Panel / Button / Toast / Coin Counter components) | Figma file `mzc2U3QPxTfY9dwtQE7xIE`, page "GAME-002 Haunted Kit" | implemented | Built 2026-10-12 from `Theme.luau` values | Gotham isn't available in Figma, so Montserrat stands in; Figma-to-Studio direction untested; the other pages are jg's structure samples, not to be edited |
 | GAME-001 code | `src/`, `tests/luau` | implemented | GAME-001 TEST notes | Paused; source material only |
 

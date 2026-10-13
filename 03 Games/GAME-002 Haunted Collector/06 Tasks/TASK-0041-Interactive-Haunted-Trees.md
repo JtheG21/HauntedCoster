@@ -70,7 +70,7 @@ Add stationary trees to the Cursed Woodland whose bark faces watch players and g
   - The idle animation is client-local.
 
 ## Reuse assessment
-- `Props.deadTree`, and the pines in `World/Habitats/Woodland.luau`, are single-block trunks that can't hold faces. The new trees are a sibling prop, `Props.hauntedTree`, built with the same `Build.part`/`Build.block` helpers. The existing pines, dead trees, landmarks and scatter are not touched.
+- `Props.deadTree`, and the pines in `World/Habitats/Woodland.luau`, are single-block trunks that can't hold faces. The new trees are a sibling prop module, `World/HauntedTree.luau` (its own module because `Props.luau` is already 653 lines), built with the same `Build.part` helper. The existing pines, dead trees, landmarks and scatter are not touched.
 - Habitats are built once and reparented between `ServerStorage.HabitatModules` and `Workspace.Habitat` (HabitatService). So trees exist for the server's lifetime, and clients see them only while the Woodland is active. Observers are cleared in `onDeactivating`.
 - Remotes follow `Shared/Net.luau` (one new C→S event) and are rate-limited with `Remotes.allow`. Tuning goes in a `Shared/Config` module and pure logic in `Shared/Rules`, per the Luau conventions.
 
@@ -83,7 +83,7 @@ Add stationary trees to the Cursed Woodland whose bark faces watch players and g
    - `qualifies(camPos, camLook, facePos, faceFwd, faceRadius, cfg)`: distance, angle widened by `atan(radius/dist)`, and camera in front of the face.
    - Observer aggregation: `observe`, `release`, `expire`, `step(now)` → frozen/resumeAt. Covers multiple observers, the cancelled resume, the full-second rule, removal on leave, and expiry of stale reports.
    - `pickAppearance(rng)`.
-3. **Prop** (`Props.hauntedTree(parent, rng, archetype, cf, faced, palette)`):
+3. **Prop** (`World/HauntedTree.build(parent, options)`):
    - Built from irregular, slightly rotated parts.
    - **A** follows REF-001: thick, flared, face low.
    - **B**: squat and broad, with a wide face and heavy brow.
@@ -121,27 +121,32 @@ Add stationary trees to the Cursed Woodland whose bark faces watch players and g
 - **Notes:** this note, a `TEST-` note, `00 Overview`, `02 Technical Architecture` (a new C→S remote), [[Map References]] (an ASSET-REF section).
 
 ## Acceptance criteria
-- [ ] AC1 **Visuals:**
+- [ ] AC1 **Visuals:** *(everything below is evidenced except the taste call, which is jg's)*
   - Three visibly distinct archetypes, with A closest to ASSET-REF-001 and faces set into the bark.
   - Heights checked against an avatar in Studio (most 1.5–2×, some smaller).
   - About 50% of the new Woodland trees have faces.
   - The trunk, roots and branches never move.
   - Faces are readable in the darkest Woodland lighting without looking neon. Screenshots taken at gameplay distance.
-- [ ] AC2 **Palette:** black, orange-yellow or purple at equal odds (spec), set once per instance on the server and identical on both clients.
-- [ ] AC3 **Gaze:** triggers within the configured range and angle. It does not trigger when the aim misses, when the face is behind the camera, or when the face is blocked (spec plus Studio).
-- [ ] AC4 **Freeze and recovery:**
+  - Evidence: [[TEST-20261013-01]]. 3 archetypes; 8/16 faced; heights 1.4–2.0× against a 5.37-stud avatar; no trunk moved; faces readable in dark and lit spots after two fixes (heights, Pillar eyes hidden by a deep brow).
+  - **Open:** jg's judgement that Pillar is "closest to ASSET-REF-001" and that the overall quality is acceptable. The part-built faces read as carved bark totems, blockier than the reference.
+- [x] AC2 **Palette:** black, orange-yellow or purple at equal odds (spec), set once per instance on the server and identical on both clients. Evidence: `GazeRules.spec` (shares 0.28–0.39 over 3000 rolls); the server sets the `Palette` attribute once at build (`Woodland.luau`), and clients only read it. Two servers rolled different palettes, as intended ([[TEST-20261013-01]]).
+- [x] AC3 **Gaze:** triggers within the configured range and angle. It does not trigger when the aim misses, when the face is behind the camera, or when the face is blocked (spec plus Studio). Evidence: `GazeRules.spec`; [[TEST-20261013-01]] (wall: no freeze; 20 studs: no freeze; normal camera 34° off: no freeze).
+- [x] AC4 **Freeze and recovery:**
   - When caught, pupils return to rest, the face settles and animation stops.
   - The face resumes only after 1 continuous second with no observer, and reacquiring gaze cancels it. Recovery is gradual.
   - Interrupted animations always settle into a valid pose.
-- [ ] AC5 **Unobserved behavior:** eyes track the nearest visible player in range, otherwise idle glances and blinks. Eyes, lids and mouth are controlled independently. A mouth override hook exists.
-- [ ] AC6 **Multiplayer (2 clients):**
+  - Evidence: [[TEST-20261013-01]]. Froze after 0.28 s with the pupil exactly at rest; resumed at 1.07 s and 1.20 s; a twitch, then back to tracking; a re-look during the delay cancelled it. Damped targets, with no tweens, by design. Rapid toggling was checked on the server side; the client-side visual under rapid toggling was not inspected frame by frame.
+- [x] AC5 **Unobserved behavior:** eyes track the nearest visible player in range, otherwise idle glances and blinks. Eyes, lids and mouth are controlled independently. A mouth override hook exists. Evidence: [[TEST-20261013-01]] (pupils, lids and jaw moved independently on 4 unobserved faces; the eyes tracked a stationary player). `HauntedTrees.setMouthOverride` exists but is not exercised (no audio yet).
+- [x] AC6 **Multiplayer (2 clients):**
   - A looks and both clients see the freeze. With A away and B still looking, it stays frozen. Both away → resumes after 1 s on both. A look during the delay resets it.
   - Leaving or resetting leaves no stale state, and rapid toggling leaves no leaks.
-- [ ] AC7 **Security:**
+  - Evidence: [[TEST-20261013-01]] run 4, 20/20, through the real client cameras and remote. Both clients read the one replicated `Frozen` attribute. Disconnects are covered by the spec (expiry) and the `PlayerRemoving` code path, not by a Studio disconnect.
+- [x] AC7 **Security:**
   - The remote checks tree, habitat, life, distance, facing and line of sight, and is rate-limited.
   - A report expires without a keepalive. It grants no gameplay effect and can't create or configure trees.
   - The trust boundary is documented.
-- [ ] AC8 **Checks:** `scripts/check.sh` passes, existing Studio scenarios show no regression, and part and instance counts are recorded.
+  - Evidence: [[TEST-20261013-01]] (forged far-tree and malformed reports every frame: no freeze, no observer left); [[ADR-0010-Client-Reported-Gaze]] (proposed); the trust-boundary section of `02 Technical Architecture`.
+- [x] AC8 **Checks:** `scripts/check.sh` passes, existing Studio scenarios show no regression, and part and instance counts are recorded. Evidence: `scripts/check.sh` all pass (140 specs); Woodland `Reachability` 23/23 and `HabitatRotation` 28/28; 415 parts and 431 instances ([[TEST-20261013-01]]).
 
 ## Tests
 - **Automated:** `scripts/check.sh` (new `GazeRules.spec.luau`).
@@ -165,6 +170,29 @@ Add stationary trees to the Cursed Woodland whose bark faces watch players and g
 
 ---
 ## Implementation record
+- **Worktree and branch:** `/Users/jg/Desktop/Rg1-worktrees/TASK-0041`, `task/TASK-0041-Interactive-Haunted-Trees`, from `origin/main` 9ed593e.
+- **Asset method:** Studio-native parts (see Risks). Archetypes:
+  - **Pillar:** a thick cylindrical trunk with a flared base; a low face with a heavy flat brow.
+  - **Broad:** squat and wide; a wide face with a V brow and teeth that show when the mouth opens.
+  - **Angular:** an octagonal faceted trunk that leans; a narrow face with diamond sockets, a sharp V brow and thin spiky limbs.
+- **Files:**
+  - **New:** `shared/Config/HauntedTrees.luau` (all tuning), `shared/Rules/GazeRules.luau` (pure gaze test, observer aggregation, appearance), `shared/TreeSight.luau` (shared line-of-sight raycast), `server/World/HauntedTree.luau` (the prop), `server/Services/HauntedTreeService.luau`, `client/HauntedTrees.luau` (gaze reports, face animation, Studio-only test camera), `tests/GazeRules.spec.luau` (15 specs), `tests/scenarios/HauntedTrees.luau` (2 players).
+  - **Changed:** `Woodland.luau` (16 trees placed along the trails after the existing scenery, so the seeded layout is unchanged), `Net.luau` (`TreeGaze`), the server and client `init`.
+- **How it works:**
+  - The client tests gaze at 15 Hz for faces within 40 studs (`GazeRules.qualifies` plus `TreeSight`). It fires `TreeGaze` only on changes, plus a "still looking" every 0.4 s.
+  - The server checks plausibility, then applies `GazeRules.observe`, `release` and `step`, and writes `Frozen` on the tree model. One `task.delay` per tree is scheduled for the next expiry or resume, so there is no loop.
+  - The client freezes a face when `Frozen` is set, or at once while it is itself looking (so the looker never sees it move).
+  - On unfreeze, the face twitches and then blends back to idle over 1.2 s.
+- **Tuning found in Studio:**
+  - Trunk heights cut by 1–1.5 studs and the normal scale range set to 0.85–1.0. The first build measured 2.2–2.3 avatar heights.
+  - Amber dimmed and moved toward yellow.
+  - A rest mouth opening of 0.1, because a closed mouth was invisible.
+  - Shallower brow and lids, because they hid the Pillar's eyes from the gameplay camera.
+- **Scenario bug fixed (test code):** a `CharacterAdded:Wait()` after `LoadCharacter()` hung the scenario.
+- **Checks:**
+  - `scripts/check.sh` all pass: StyLua, Selene, types, 140 Lune specs, both Rojo builds, JSON, queue, vault, Python tests.
+  - Studio: [[TEST-20261013-01]] (synced through MCP `Source` writes, hash-checked, because the Rojo plugin wasn't connected).
+- **Reference-code reuse:** SODT `PerceptionService`. Took the separate "seen now" flag, `os.clock()` timing and the idea of sending a throttled camera report. Did not take its polling loop or beast model.
 
 ## Audits
 

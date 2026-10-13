@@ -229,7 +229,7 @@ local function hauntedTrees(parent: Instance, def: Habitats.Habitat, avoid: Inst
 			cframe = cf,
 			scale = if rng:NextNumber() < HauntedTrees.smallShare
 				then rng:NextNumber(0.68, 0.8)
-				else rng:NextNumber(0.95, 1.1),
+				else rng:NextNumber(0.85, 1),
 			palette = if faced[i] then GazeRules.pick(HauntedTrees.palettes, paletteRng:NextNumber()) else nil,
 			id = string.format("W%02d", i),
 			rng = rng,

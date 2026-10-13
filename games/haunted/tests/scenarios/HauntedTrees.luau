@@ -20,6 +20,8 @@ return function(args: any): { [string]: any }
 	local checks: { { name: string, ok: boolean, detail: string? } } = {}
 	local function check(name: string, ok: boolean, detail: any?)
 		table.insert(checks, { name = name, ok = ok == true, detail = if detail ~= nil then tostring(detail) else nil })
+		-- Breadcrumb for a run that hangs or is aborted: the last check and the running tally.
+		ReplicatedStorage:SetAttribute("HC_ScenarioProgress", `{#checks} {name}={ok == true}`)
 	end
 	local stats: { [string]: any } = {}
 	local function finish(infra: boolean?)
@@ -229,7 +231,11 @@ return function(args: any): { [string]: any }
 		end)
 	)
 	look(a, "")
-	a.CharacterAdded:Wait()
+	-- LoadCharacter already yielded until the new character exists; wait for its head, not CharacterAdded.
+	local t1 = os.clock()
+	while not (a.Character and a.Character:FindFirstChild("Head")) and os.clock() - t1 < 10 do
+		task.wait(0.1)
+	end
 	task.wait(1.5)
 	tp(a, spot - right * 1.5)
 	task.wait(1)

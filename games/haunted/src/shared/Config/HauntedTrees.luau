@@ -40,6 +40,7 @@ export type Config = {
 		mouthEvery: { number },
 		frozenLid: number, -- 0 open, 1 closed: the lifeless half-lidded stare
 		frozenMouth: number, -- 0 closed, 1 open
+		restMouth: number,
 		settleRate: number, -- damping toward the frozen pose (per second, high = fast)
 		idleRate: number, -- damping in normal animation
 		recoverSeconds: number, -- blend from frozen back to full idle speed
@@ -51,7 +52,7 @@ local HauntedTrees: Config = {
 	archetypes = { "Pillar", "Broad", "Angular" }, -- A (ASSET-REF-001), B, C (ASSET-REF-003)
 	palettes = {
 		{ id = "Dark", eye = Color3.fromRGB(34, 28, 24), pupil = Color3.fromRGB(4, 3, 3), neon = false },
-		{ id = "Amber", eye = Color3.fromRGB(150, 92, 24), pupil = Color3.fromRGB(12, 8, 4), neon = true },
+		{ id = "Amber", eye = Color3.fromRGB(122, 88, 18), pupil = Color3.fromRGB(12, 8, 4), neon = true },
 		{ id = "Violet", eye = Color3.fromRGB(88, 38, 128), pupil = Color3.fromRGB(10, 4, 14), neon = true },
 	},
 	faceShare = 0.5,
@@ -79,7 +80,8 @@ local HauntedTrees: Config = {
 		glanceEvery = { 1.2, 3.5 },
 		mouthEvery = { 4, 10 },
 		frozenLid = 0.38,
-		frozenMouth = 0.06,
+		restMouth = 0.1, -- idle jaw opening, so the mouth reads as a dark slit
+		frozenMouth = 0.18,
 		settleRate = 40,
 		idleRate = 9,
 		recoverSeconds = 1.2,

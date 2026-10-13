@@ -34,7 +34,7 @@ type Spec = {
 local SPECS: { [string]: Spec } = {
 	Pillar = {
 		r = 1.6,
-		h = 9.5,
+		h = 8,
 		eyeY = 4.4,
 		eyeSep = 0.62,
 		eyeR = 0.3,
@@ -49,7 +49,7 @@ local SPECS: { [string]: Spec } = {
 	},
 	Broad = {
 		r = 2.1,
-		h = 8,
+		h = 7,
 		eyeY = 4.2,
 		eyeSep = 0.82,
 		eyeR = 0.34,
@@ -64,7 +64,7 @@ local SPECS: { [string]: Spec } = {
 	},
 	Angular = {
 		r = 1.25,
-		h = 10.5,
+		h = 9,
 		eyeY = 4.8,
 		eyeSep = 0.5,
 		eyeR = 0.26,
@@ -83,7 +83,7 @@ local SOCKET = Color3.fromRGB(14, 10, 8)
 local MOSS = Color3.fromRGB(46, 62, 40)
 
 -- Movement ranges the client reads from attributes on the face parts (studs, before scale).
-HauntedTree.LID_TRAVEL = 1.55 -- times eyeR
+HauntedTree.LID_TRAVEL = 1.75 -- times eyeR
 HauntedTree.JAW_TRAVEL = 0.4
 
 export type Options = {
@@ -280,15 +280,15 @@ function HauntedTree.face(spec: Spec, palette: HauntedTrees.Palette, at: At, put
 	root:SetAttribute("Radius", radius * (root.Size.X / 0.2))
 
 	-- Brow ridge (the open lids tuck under it), cheeks and a nose ridge: forms that blend the face into bark.
-	local browY = eY + eR * 1.55
+	local browY = eY + eR + 0.25 -- just above the eye, so it shades rather than hides it
 	for side = -1, 1, 2 do
 		put(
 			"Brow",
-			Vector3.new(spec.eyeSep + eR * 1.5, 0.42, 0.45),
+			Vector3.new(spec.eyeSep + eR * 1.5, 0.42, 0.3),
 			at(
 				side * (spec.eyeSep * 0.5 + eR * 0.4),
 				browY,
-				front + eR + 0.35,
+				front + eR + 0.2,
 				CFrame.Angles(0, 0, math.rad(-side * spec.browTilt))
 			),
 			spec.barkDark
@@ -353,7 +353,7 @@ function HauntedTree.face(spec: Spec, palette: HauntedTrees.Palette, at: At, put
 			false,
 			Enum.PartType.Ball
 		):SetAttribute("Orbit", eR * 0.72 * (eye.Size.X / (eR * 2)))
-		put("Lid" .. tag, Vector3.new(eR * 2.5, eR * 2.2, 0.35), at(x, eY + eR * 1.65, front + eR + 0.2), spec.barkDark):SetAttribute(
+		put("Lid" .. tag, Vector3.new(eR * 2.5, eR * 2, 0.15), at(x, eY + eR * 1.75, front + eR + 0.11), spec.barkDark):SetAttribute(
 			"Travel",
 			HauntedTree.LID_TRAVEL * eR * (eye.Size.X / (eR * 2))
 		)
