@@ -2,6 +2,8 @@
 
 This is the permanent instruction file. `CLAUDE.md` imports it. Role details live in `04 Agents/` (the only copy), naming and metadata in `00 Studio/Obsidian Conventions.md`, and the process in `04 Agents/Workflow.md`.
 
+**Starting any task:** follow `04 Agents/Task Intake.md` (start procedure, routing to the category workflows in `04 Agents/Workflows/`, proceed-or-ask policy, handoffs). Check `00 Studio/Resource Catalog.md` before building anything that might exist. Approved in [[ADR-0009-Shared-Production-Foundation]] (jg, 2026-10-12).
+
 ## Project map
 - **Active game: GAME-002 Haunted Collector** (`03 Games/GAME-002 Haunted Collector/`). Code: `games/haunted/src/server|shared|client` and `games/haunted/tests`, synced by **`haunted.project.json`** into the separate `HauntedCollector.rbxl` place. **Only these reach that game.**
 - Paused: GAME-001 Rg1 (`03 Games/GAME-001 Rg1/`), code in `src/` and `tests/luau`, synced by `default.project.json` into the Rg1 place. It is source material only. Don't change it unless a task says so.
