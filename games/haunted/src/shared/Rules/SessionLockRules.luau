@@ -68,4 +68,20 @@ function SessionLockRules.release(old: any, jobId: string): Record?
 	return nil
 end
 
+-- What a failed load means (TASK-0036, AUDIT-003). DataStores are legitimately unavailable only in a
+-- development place (Studio, or an unpublished place); there the server runs in memory mode. On a live
+-- server the same error text is treated as an outage and retried, so a player whose save exists is never
+-- handed a fresh default profile that looks saved.
+local UNAVAILABLE = { "publish", "studioaccesstoapisnotallowed", "403", "not allowed", "api services" }
+
+function SessionLockRules.loadFailure(err: string, developmentPlace: boolean): "memory" | "retry"
+	local e = string.lower(err)
+	for _, needle in UNAVAILABLE do
+		if string.find(e, needle, 1, true) then
+			return if developmentPlace then "memory" else "retry"
+		end
+	end
+	return "retry"
+end
+
 return SessionLockRules

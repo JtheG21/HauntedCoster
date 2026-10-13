@@ -79,5 +79,32 @@ return function(t: TestRunner.T)
 		t.eq(theirs.lock.job, "B")
 		t.eq(SessionLockRules.release({}, "A"), nil)
 		t.eq(SessionLockRules.release(nil, "A"), nil)
+		-- TASK-0036 (AUDIT-003): only a development place may fall back to memory mode. On a live server the
+		-- same error text must never hand the player a fresh default profile, so it is retried (then readonly).
+		local unavailable = {
+			"You must publish this place to the web to access DataStore.",
+			"StudioAccessToApisNotAllowed",
+			"403: Forbidden",
+			"API Services are not allowed",
+		}
+		t.test("in a development place, DataStore-unavailable errors mean memory mode", function()
+			for _, msg in unavailable do
+				t.eq(SessionLockRules.loadFailure(msg, true), "memory", msg)
+			end
+		end)
+
+		t.test("on a live server the same errors are retried, never memory", function()
+			for _, msg in unavailable do
+				t.eq(SessionLockRules.loadFailure(msg, false), "retry", msg)
+			end
+		end)
+
+		t.test("other errors are retried everywhere", function()
+			for _, dev in { true, false } do
+				t.eq(SessionLockRules.loadFailure("502: Internal error", dev), "retry")
+				t.eq(SessionLockRules.loadFailure("Request was throttled", dev), "retry")
+				t.eq(SessionLockRules.loadFailure("", dev), "retry")
+			end
+		end)
 	end)
 end
