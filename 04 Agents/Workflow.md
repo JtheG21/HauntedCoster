@@ -4,7 +4,7 @@ title: Workflow
 type: agent
 status: approved
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - workflow/process
 ---
@@ -31,6 +31,11 @@ Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, proposed) → [HUMAN
 | `done` / `archived` | Terminal | | |
 
 `max_revisions` (default 2) is in `00 Studio/budget.json`. Going past it blocks the task. Nothing retries automatically.
+
+## Merge procedure (human-approved merges only)
+1. Merge on GitHub without a local checkout: `gh pr merge <N> --repo JtheG21/HauntedCoster --merge --subject "Merge pull request #<N> from JtheG21/<branch> (approved by <who>)"`, after CI passes.
+2. Stop Rojo, then `scripts/preflight.sh --root <main checkout> --clean && git -C <main checkout> switch main && git -C <main checkout> pull --ff-only`.
+3. Delete the branch locally and on the remote. Task branches run `orchestrator.py approve-merge` and the outcome notes on the branch **before** step 1, so the merge carries them.
 
 ## Isolation
 - One Git branch per task, from an up-to-date `main`. Workflow and doc changes use `chore/<slug>` branches.
