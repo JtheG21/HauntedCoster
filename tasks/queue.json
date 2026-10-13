@@ -2929,7 +2929,7 @@
       "id": "TASK-0037",
       "title": "Plot Capacity",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "low",
       "depends_on": [
         "TASK-0036"
@@ -2960,6 +2960,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T20:55:03",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -2969,7 +2975,13 @@
           "notes": "check.sh pass; specs 121/0; negative control fails 3 of 4 specs; ExploitProbe 13/13; FullLoop 85/85 twice (one 84/85 from a template SpawnLocation in the scratch place); Max Players 6 set by jg (TEST-20261012-15)"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-12T20:55:03",
+          "result": "pass",
+          "report": "06 QA/AUD-20261012-TASK-0037-01.md"
+        }
+      ],
       "revisions": 0,
       "approved_by": "jg"
     }

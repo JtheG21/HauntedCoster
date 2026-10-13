@@ -3,7 +3,7 @@ id: TASK-0037
 title: "Plot Capacity"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: medium
 risk: low
 owner: executor
@@ -53,5 +53,6 @@ Make sure every player on a server can get a home plot. There are 6 plots, but t
 - `PlotService.assign` now takes `PlotRules.firstFree(owners, #plots)` (same lowest-free order as before). `PlotService.start` warns on a live server when `Players.MaxPlayers > #plots`.
 
 ## Audits
+- [[AUD-20261012-TASK-0037-01]]: pass. Minor: the live warning is reviewed, not tested; the literal 6 in the cap spec is intentional; Max Players rests on jg's report.
 
 ## Outcome
