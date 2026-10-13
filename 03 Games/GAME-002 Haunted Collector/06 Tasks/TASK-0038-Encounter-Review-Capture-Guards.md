@@ -3,7 +3,7 @@ id: TASK-0038
 title: "Encounter Review Capture Guards"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: medium
 risk: low
 owner: executor
@@ -50,7 +50,7 @@ Close two gaps from the 2026-10-12 audit (T5). EncounterService (554 lines) had 
 ## Implementation record
 ### EncounterService review (AC1)
 No defects found. Checked:
-- **Leave cleanup.** `start()` (`EncounterService.luau:544-551`) clears `claimedBy` and `progress` for a leaving player. A monster *fleeing* from that player is removed and respawned by `CaptureService`'s PlayerRemoving (`CaptureService.luau:842-860`); a *pursuing* one is released by `RetaliationService`'s `finish(player, "left")` (`RetaliationService.luau:267-273`).
+- **Leave cleanup.** `start()` (`EncounterService.luau:544-551`) clears `claimedBy` and `progress` for a leaving player. A monster *fleeing* from that player is removed and respawned by `CaptureService`'s PlayerRemoving (`CaptureService.luau:824-842`); a *pursuing* one is released by `RetaliationService`'s `finish(player, "left")` (`RetaliationService.luau:267-273`).
 - **Claims.** `claim` (`:270`) refuses a monster claimed by someone else; `startle` (`:313-331`) releases its claim only if no newer claim happened (`claimEpoch`), so a late timer can't drop another player's capture.
 - **Inspect** (`:167-180`): the server re-checks distance (22 studs) and that the monster is alive; it only marks the journal and sends a card, so no rate limit is needed beyond the prompt.
 - **Tweens.** `roam` (`:101-137`) only cancels its own tween; `tweenTo` (`:296`) cancels the previous one; `remove` cancels before destroying.
@@ -66,5 +66,6 @@ Observations (not defects, no change):
 - `onCaptureStart` now gathers the facts and calls `CaptureRules.startRefusal`. The order and reasons match the old `if` chain; the rate limit (first) and the claim (last) stay in the service.
 
 ## Audits
+- [[AUD-20261012-TASK-0038-01]]: pass (Opus). Two minor findings fixed after the audit: a monster-guard order spec added (125 specs), and the cleanup line range corrected.
 
 ## Outcome

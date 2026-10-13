@@ -298,4 +298,16 @@ return function(t: TestRunner.T)
 		f.carrying, f.pursuing = true, true
 		t.eq(string.find(CaptureRules.startRefusal(f) or "", "already carrying", 1, true) ~= nil, true)
 	end)
+
+	t.test("monster guards keep their order: gone, fleeing, pursuing, startled, distance, crypt", function()
+		local f = clear()
+		f.alive, f.distance, f.needsCrypt = false, nil, true
+		t.eq(CaptureRules.startRefusal(f), "It's gone")
+		f = clear()
+		f.startled, f.distance = true, nil
+		t.eq(string.find(CaptureRules.startRefusal(f) or "", "skittish", 1, true) ~= nil, true)
+		f = clear()
+		f.distance, f.needsCrypt = 30, true
+		t.eq(CaptureRules.startRefusal(f), "Get closer")
+	end)
 end
