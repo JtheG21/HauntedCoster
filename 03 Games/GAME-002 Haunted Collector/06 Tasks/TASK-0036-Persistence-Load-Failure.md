@@ -3,7 +3,7 @@ id: TASK-0036
 title: "Persistence Load Failure"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -58,3 +58,6 @@ Stop a live server from silently handing a player a fresh, unsaved default profi
 - [[AUD-20261012-TASK-0036-01]]: pass (Opus). Minor notes: a published place playtested in Studio still counts as a development place (intended); AC2 is evidenced by code review, not a test; two existing (non-regression) delays.
 
 ## Outcome
+- Merge approved by jg in chat on 2026-10-12 ("merge it once CI passes"); PR #37.
+- AUDIT-003 is resolved. A live server never enters memory mode; failed live loads retry, then go readonly. The live path is evidenced by specs and code review only (no live DataStore test).
+- Accepted, not changed: a slow failing live load (about 14 s or more before readonly) and the 30 s lock takeover after an unreleased lock (AUDIT-004 class).
