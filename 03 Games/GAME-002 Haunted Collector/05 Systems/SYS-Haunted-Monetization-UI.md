@@ -14,13 +14,13 @@ tags:
   - game/monetization
   - game/ui
 related:
-  - "[[ADR-0009-Monetization-UI-Scope]]"
+  - "[[ADR-0011-Monetization-UI-Scope]]"
   - "[[RSH-20261013-Haunted-Monetization-Discovery]]"
   - "[[3D Model Quality Baseline]]"
 ---
 # Haunted Collector — Monetization UI Baseline v1.0
 
-This is the approved product/UI scope baseline for the next major UI update (jg, 2026-10-13, approval of the presented baseline and local merge). The category, currency and equipment choices are recorded in [[ADR-0009-Monetization-UI-Scope]]. The screen arrangement, interactions and acceptance checklist establish the intended update; they are not implemented features. Discovery's confirmed decisions are carried forward; original evidence gaps are retained rather than reconstructed. Item/backend readiness decisions remain explicit below.
+This is the approved product/UI scope baseline for the next major UI update (jg, 2026-10-13, approval of the presented baseline and local merge). The category, currency and equipment choices are recorded in [[ADR-0011-Monetization-UI-Scope]]. The screen arrangement, interactions and acceptance checklist establish the intended update; they are not implemented features. Discovery's confirmed decisions are carried forward; original evidence gaps are retained rather than reconstructed. Item/backend readiness decisions remain explicit below.
 
 ## Purpose
 Carry the approved monetization scope into the next major UI update.
@@ -133,7 +133,7 @@ These are item/backend readiness gates, not reasons to reopen the approved five-
 - Original MON-D-001–016 and MON-REF-013–029 recovery. Missing records are preserved in discovery; no new IDs are fabricated.
 
 ## Session outcome
-Created this baseline and [[ADR-0009-Monetization-UI-Scope]]; linked them from Game Design, Overview and Roadmap. Discovery remains a historical research record; this note is the forward UI scope reference. No implementation task/state was invented, no game code changed, and no final Claude handoff prepared.
+Created this baseline and [[ADR-0011-Monetization-UI-Scope]]; linked them from Game Design, Overview and Roadmap. Discovery remains a historical research record; this note is the forward UI scope reference. No implementation task/state was invented, no game code changed, and no final Claude handoff prepared.
 
 ## Interfaces
 No new API or remote names are approved here. Screen-to-service interfaces must carry stable catalog IDs, validated targets and authoritative ownership/purchase results; the exact contracts belong to scoped implementation tasks.
@@ -149,5 +149,5 @@ The client previews and requests actions; the server validates ownership, compat
 - Playtest: all category journeys, rejoin, multiplayer appearance, house upgrades, cancellation and physical devices. No feature playtest has been run for this baseline.
 
 ## History
-- 2026-10-13: baseline drafted from discovery and explicit choices in [[ADR-0009-Monetization-UI-Scope]].
+- 2026-10-13: baseline drafted from discovery and explicit choices in [[ADR-0011-Monetization-UI-Scope]].
 - 2026-10-13: jg approved the presented baseline and its local vault merge in chat. Pricing, product configuration, schema changes, implementation and publishing remain separately gated.

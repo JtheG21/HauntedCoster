@@ -1,5 +1,5 @@
 ---
-id: ADR-0009
+id: ADR-0011
 title: Monetization UI Scope
 type: adr
 project: GAME-002
@@ -38,3 +38,7 @@ These approve product scope and ownership direction. They do not approve prices,
 - Cosmetic identity stays separate from natural variants and gameplay strength. Existing Coin progression remains independent.
 - Every category needs finished assets meeting [[3D Model Quality Baseline]]; new entitlements, equipment persistence and purchase processing require scoped tasks and verification.
 - Seasonal/events, social customization and convenience are future work. Permanent catalog does not require fabricated limited-time urgency.
+
+## History
+- 2026-10-13: approved by jg as ADR-0009.
+- 2026-10-13: renumbered ADR-0009 → ADR-0011 on jg's instruction in chat, because [[ADR-0009-Shared-Production-Foundation]] reached origin/main first with the same ID (ADR-0010 was already taken by [[ADR-0010-Client-Reported-Gaze]]). Content and approval unchanged.
