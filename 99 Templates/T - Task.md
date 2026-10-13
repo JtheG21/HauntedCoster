@@ -22,7 +22,15 @@ tags:
 
 ## Scope
 - **In:**
-- **Out:**
+- **Out (non-goals):**
+- **Keep unchanged:**
+
+## Intake
+*([[Task Intake]]: keep this short for a light task.)*
+- **Category → workflow, depth:** e.g. Audio → [[Audio Workflow]], standard
+- **References:** `REF-…` IDs, or "none relevant in `10 References/<area>`"
+- **Reuse:** [[Resource Catalog]] / code reference hits, and the decision (reuse, adapt, or replace, and why)
+- **Decisions / assumptions / open questions:** each labelled, with who decided and when
 
 ## Files expected to change
 -
