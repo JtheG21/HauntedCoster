@@ -11,5 +11,6 @@
 ## Commands
 - `rojo serve haunted.project.json`: sync GAME-002 to the `HauntedCollector.rbxl` place (never a bare `rojo serve`, which serves GAME-001)
 - `scripts/check.sh`: all cheap checks
+- `scripts/preflight.sh --root <checkout> --branch <name> [--clean]`: run before any state-changing Git operation (AGENTS.md "Git safety")
 - `python3 scripts/orchestrator.py status|next|approve|start|record-exec|record-audit|approve-merge|report ...` (`--help`)
 - `python3 scripts/validate_vault.py`: note conventions, links, and queue/note sync

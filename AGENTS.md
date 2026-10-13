@@ -7,7 +7,7 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 - Paused: GAME-001 Rg1 (`03 Games/GAME-001 Rg1/`), code in `src/` and `tests/luau`, synced by `default.project.json` into the Rg1 place. It is source material only. Don't change it unless a task says so.
 - **One Rojo server, matched to its place.** Before connecting Studio, check what is serving (`ps aux | grep "rojo serve"`). Never connect a `default.project.json` server to the Haunted Collector place or the reverse: it pulls the other game's Baseplate, Lighting and scripts into the place ([[TEST-20261011-02]]). Switching branches under a running server can crash Rojo ([[LES-0003-Rojo-Crash-On-Branch-Switch]]); use a git worktree for other branches.
 - Machine state, which is authoritative for task status: `tasks/queue.json`, `tasks/usage-ledger.jsonl`, `project-state.json`. Policy: `00 Studio/budget.json`.
-- Tools: `scripts/check.sh` (all cheap checks), `scripts/orchestrator.py` (task gates), `scripts/validate_vault.py` (note conventions), `scripts/typecheck.sh`.
+- Tools: `scripts/check.sh` (all cheap checks), `scripts/orchestrator.py` (task gates), `scripts/validate_vault.py` (note conventions), `scripts/typecheck.sh`, `scripts/preflight.sh` (read-only Git checkout guard).
 - Roblox API reference: a local clone of `Roblox/creator-docs` at `~/Code/creator-docs` (outside the vault; refresh with `git -C ~/Code/creator-docs pull`). Before using an engine API you aren't sure of, grep `content/en-us/reference/engine/{classes,datatypes,enums}/<Name>.yaml`. If the clone is missing, say so; don't guess.
 - The vault is this repo. Notes go in numbered folders (`00 Studio` … `99 Templates`). Game notes live in `03 Games/<GAME-ID> <Name>/`.
 - **Do not edit:** `Agents/`, `Chats/` (the Smart Second Brain plugin), `.obsidian/` (plugin settings).
@@ -19,6 +19,11 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 - At most 2 revision attempts per task. Then stop and report.
 - Run `scripts/check.sh` before any AI review. Read only the files a task needs; don't scan the whole repo.
 - Never read, print or store credentials (`.env`, keys) in code or notes.
+
+## Git safety (2026-10-11, after a merge ran in the wrong checkout: LES-0006)
+- Before any local switch, merge, rebase, cherry-pick, reset, clean, commit, push or branch deletion, run `scripts/preflight.sh --root <checkout> --branch <expected>` and chain the operation with `&&`. Address the checkout explicitly (`git -C <checkout>`); never rely on the current directory.
+- If the intended checkout or worktree is missing or stale, **stop** and re-discover it. Never fall back to whatever directory is current.
+- Never discard unrelated or user edits, force-push, or delete untracked files without explicit authorization.
 
 ## Session and delegation budget
 - One primary agent. No subagents for reads, simple edits, single checks or note upkeep.
