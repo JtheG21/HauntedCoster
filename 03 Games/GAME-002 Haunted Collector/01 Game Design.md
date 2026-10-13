@@ -6,7 +6,7 @@ project: GAME-002
 status: proposed
 version: 0.4
 created: 2026-10-11
-updated: 2026-10-12
+updated: 2026-10-13
 tags:
   - game/design
 related:
@@ -60,6 +60,8 @@ Players visit each other's plots, and one guest can ride with the owner if that'
 
 ## Monetization
 None in the MVP. No product IDs, crates or paid monsters. Cosmetics first later ([[INBOX-20261011-Haunted-Collector-Brief]] §14).
+
+**Next major UI update:** [[SYS-Haunted-Monetization-UI|Monetization UI Baseline]] carries the approved five-category scope (ghost skins, auras, capture effects, mansion themes and exterior decorations), permanent catalog first; earned Coins/rewards plus direct Robux, with premium currency and paid convenience deferred. Account unlocks equip skins/auras per ghost and capture effects per player. Approval record: [[ADR-0009-Monetization-UI-Scope]]. Original MVP scope is historical; prices, exact products, schema changes and implementation remain separately gated.
 
 ## MVP scope
 | Feature | Priority | Status |

@@ -71,5 +71,8 @@ From the formal project audit (chat report, 2026-10-12). Each task was approved 
 
 Decisions (jg, 2026-10-12): the current art is accepted for now, with a full revamp expected later (AUDIT-010; audio/VFX not started); map references on hold until jg adds more; the device checks (TASK-0020's replacement) wait until the game is nearly finished; 6-player profiling (AUDIT-015) waits until several devices can join, and until then Studio tests use at most 2 players while the game is built for a full 6-player server. Accepted risks, documented, no change: AUDIT-004 (save-failure edge cases), AUDIT-011 (per-server limits, client-performed ragdoll).
 
+## Next major UI update — monetization baseline
+Scope: [[SYS-Haunted-Monetization-UI|Monetization UI Baseline]], choices approved by jg on 2026-10-13 in [[ADR-0009-Monetization-UI-Scope]]. Include Shop/owned inventory/previews, all five cosmetic categories, equipment and exterior placement, and Journal collection reward states. Permanent catalog first; direct Robux plus earned Coins/rewards; premium currency and paid convenience deferred. Implementation tasks are not yet added to the queue. Baseline dependencies cover assets, prices, persistence, commerce, geometry and device verification.
+
 ## Later (not planned in detail)
 - Haunted Forest and Mine region (brief §15). The woodland habitats in M3 may cover part of it.

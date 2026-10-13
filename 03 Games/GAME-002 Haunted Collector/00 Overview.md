@@ -18,7 +18,7 @@ Hook (Round 20): **"Build your haunted train."** Pitch: hunt strange creatures i
 ## Documents
 Shared art standard: [[3D Model Quality Baseline]] · [[3D Model Quality Gallery]] — minimum visual finish for every finished model request; existing prototypes do not establish the target.
 
-Monetization discovery: [[RSH-20261013-Haunted-Monetization-Discovery]] — recovered Rounds 6–8, local code evidence and provisional product order; missing original references/early decisions remain explicit. Implementation and pricing are pending.
+Next UI update: [[SYS-Haunted-Monetization-UI|Monetization UI Baseline]] — all five cosmetic categories, permanent catalog, earned Coins/rewards plus direct Robux; skins/auras per ghost and capture effect per player. Scope approved in [[ADR-0009-Monetization-UI-Scope]]; detailed layout, prices, assets and backend readiness remain explicit. Historical evidence: [[RSH-20261013-Haunted-Monetization-Discovery]].
 
 [[GAME-002 Haunted Collector/01 Game Design]] · [[GAME-002 Haunted Collector/02 Technical Architecture]] · [[GAME-002 Haunted Collector/03 Roadmap]] · source brief: [[INBOX-20261011-Haunted-Collector-Brief]]
 
