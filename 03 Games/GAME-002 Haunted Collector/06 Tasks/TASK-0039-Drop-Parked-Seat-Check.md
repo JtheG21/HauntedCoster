@@ -3,7 +3,7 @@ id: TASK-0039
 title: "Drop Parked Seat Check"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: low
 risk: low
 owner: executor
@@ -53,3 +53,5 @@ Remove CrossPlot's "A forced into B's parked front seat doesn't keep it" check. 
 - [[AUD-20261012-TASK-0039-01]]: pass (minor: Overview status, close-out pending)
 
 ## Outcome
+- Merge approved by jg in chat on 2026-10-12 ("merge it once CI passes"); PR #43.
+- CrossPlot drops a check that proved nothing (21 checks now). The 2-player baseline shows ample server headroom; 6-player profiling and device checks are deferred by jg's decision.

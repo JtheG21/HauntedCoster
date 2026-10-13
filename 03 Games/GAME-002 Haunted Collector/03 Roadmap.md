@@ -67,7 +67,7 @@ From the formal project audit (chat report, 2026-10-12). Each task was approved 
 | T5 | [[TASK-0038-Encounter-Review-Capture-Guards]] | AUDIT-009 | EncounterService reviewed; capture-start guards specced (done) |
 | T6/T7 | `chore/doc-sync-and-links` | AUDIT-005, 006, 008, 014 | Overview and roadmap synced to the queue; 45 ambiguous links qualified (done) |
 | T10/T11 | `chore/reference-images`, `chore/git-safety-port` | AUDIT-016 | Map screenshots moved to `10 References/02 Map`; Git checkout guard ported (done) |
-| — | [[TASK-0039-Drop-Parked-Seat-Check]] | AUDIT-001 follow-up | Forced-parked-seat check dropped; 2-player baseline ([[TEST-20261012-17]]) |
+| — | [[TASK-0039-Drop-Parked-Seat-Check]] | AUDIT-001 follow-up | Forced-parked-seat check dropped; 2-player baseline ([[TEST-20261012-17]]) (done) |
 
 Decisions (jg, 2026-10-12): the current art is accepted for now, with a full revamp expected later (AUDIT-010; audio/VFX not started); map references on hold until jg adds more; the device checks (TASK-0020's replacement) wait until the game is nearly finished; 6-player profiling (AUDIT-015) waits until several devices can join, and until then Studio tests use at most 2 players while the game is built for a full 6-player server. Accepted risks, documented, no change: AUDIT-004 (save-failure edge cases), AUDIT-011 (per-server limits, client-performed ragdoll).
 
