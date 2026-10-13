@@ -94,7 +94,9 @@ local function onGaze(player: Player, id: unknown, looking: unknown)
 		return
 	end
 	local g = HauntedTrees.gaze
-	if not Remotes.allow(player, "TreeGaze", g.rate, g.burst) then
+	-- Releases get their own bucket, so a player who spent the "looking" bucket on fast sweeps can still end a
+	-- freeze on time (AUD-20261013-TASK-0041-01 finding 1). A release only ever shortens a freeze.
+	if not Remotes.allow(player, if looking then "TreeGaze" else "TreeGazeRelease", g.rate, g.burst) then
 		return
 	end
 	local t = trees[id]
@@ -103,6 +105,9 @@ local function onGaze(player: Player, id: unknown, looking: unknown)
 	end
 	local now = os.clock()
 	if not looking then
+		if t.state.observers[player] == nil then
+			return -- not observing this tree: nothing to release or reschedule
+		end
 		GazeRules.release(t.state, player, now)
 		GazeRules.step(t.state, now)
 		apply(t)

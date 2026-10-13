@@ -172,15 +172,24 @@ local function hauntedTrees(parent: Instance, def: Habitats.Habitat, avoid: Inst
 	local folder = Build.folder(parent, "HauntedTrees")
 	local rng = Random.new(4141)
 	local paletteRng = Random.new()
-	local taken: { Vector3 } = {}
+	-- Obstacles as circles: centre plus horizontal reach (half the footprint diagonal), so long logs and den
+	-- mounds count by their ends, not their centres (AUD-20261013-TASK-0041-01 finding 4). The ground, plaza,
+	-- paths and mist are left to Kit.freeGround.
+	type Circle = { pos: Vector3, r: number }
+	local taken: { Circle } = {}
+	local paths = avoid:FindFirstChild("Paths")
 	for _, d in avoid:GetDescendants() do
-		if d:IsA("BasePart") and d.CanCollide and d.Name ~= "Mist" then
-			table.insert(taken, Vector3.new(d.Position.X, 0, d.Position.Z))
+		if d:IsA("BasePart") and d.CanCollide and not (paths and d:IsDescendantOf(paths)) then
+			local reach = math.sqrt(d.Size.X ^ 2 + d.Size.Z ^ 2) / 2
+			if reach < 15 then
+				table.insert(taken, { pos = Vector3.new(d.Position.X, 0, d.Position.Z), r = reach })
+			end
 		end
 	end
-	local function clear(p: Vector3, radius: number): boolean
+	local FOOTPRINT = 3.2 -- widest tree footprint at scale 1 (Broad flare plus roots)
+	local function clear(p: Vector3): boolean
 		for _, q in taken do
-			if (p - q).Magnitude < radius then
+			if (p - q.pos).Magnitude < q.r + FOOTPRINT + 0.5 then
 				return false
 			end
 		end
@@ -214,9 +223,9 @@ local function hauntedTrees(parent: Instance, def: Habitats.Habitat, avoid: Inst
 		if #chosen >= HauntedTrees.treeCount then
 			break
 		end
-		if clear(spot.pos, 5) then
+		if clear(spot.pos) then
 			table.insert(chosen, spot)
-			table.insert(taken, spot.pos)
+			table.insert(taken, { pos = spot.pos, r = FOOTPRINT })
 		end
 	end
 	local faced = GazeRules.facedSlots(#chosen, HauntedTrees.faceShare, rng)

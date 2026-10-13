@@ -4,16 +4,14 @@
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "haunted.project.json",
   "dispatch_mode": "dry-run",
-  "updated": "2026-10-13T02:00:21",
+  "updated": "2026-10-13T02:03:38",
   "task_counts": {
     "done": 36,
     "archived": 3,
-    "approved": 1
+    "in_progress": 1
   },
   "ready": [],
-  "needs_human": [
-    "TASK-0041"
-  ],
+  "needs_human": [],
   "api_spend_this_month_usd": 0.0,
   "active_game": "GAME-002",
   "conventions": "00 Studio/Obsidian Conventions.md",

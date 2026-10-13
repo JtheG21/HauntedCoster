@@ -3,7 +3,7 @@ id: TASK-0041
 title: "Interactive Haunted Trees"
 type: task
 project: GAME-002
-status: approved
+status: in_progress
 priority: medium
 risk: medium
 owner: executor
@@ -140,12 +140,12 @@ Add stationary trees to the Cursed Woodland whose bark faces watch players and g
 - [x] AC6 **Multiplayer (2 clients):**
   - A looks and both clients see the freeze. With A away and B still looking, it stays frozen. Both away → resumes after 1 s on both. A look during the delay resets it.
   - Leaving or resetting leaves no stale state, and rapid toggling leaves no leaks.
-  - Evidence: [[TEST-20261013-01]] run 4, 20/20, through the real client cameras and remote. Both clients read the one replicated `Frozen` attribute. Disconnects are covered by the spec (expiry) and the `PlayerRemoving` code path, not by a Studio disconnect.
+  - Evidence: [[TEST-20261013-01]], run 4 (20/20) and revision 1 (28/28), through the real client cameras and remote. Revision 1 also takes each client's own view: both saw `Frozen`, with pupils at rest, and both saw the resume. Disconnects are covered by the spec (expiry) and the `PlayerRemoving` code path, not by a Studio disconnect.
 - [x] AC7 **Security:**
   - The remote checks tree, habitat, life, distance, facing and line of sight, and is rate-limited.
   - A report expires without a keepalive. It grants no gameplay effect and can't create or configure trees.
   - The trust boundary is documented.
-  - Evidence: [[TEST-20261013-01]] (forged far-tree and malformed reports every frame: no freeze, no observer left); [[ADR-0010-Client-Reported-Gaze]] (proposed); the trust-boundary section of `02 Technical Architecture`.
+  - Evidence: [[TEST-20261013-01]]. Forged far-tree and malformed reports every frame: no freeze, no observer left. Revision 1: forced reports skipping the client filter were rejected through a wall and from behind the tree, while the clear-view control froze. Also [[ADR-0010-Client-Reported-Gaze]] (proposed) and the trust-boundary section of `02 Technical Architecture`.
 - [x] AC8 **Checks:** `scripts/check.sh` passes, existing Studio scenarios show no regression, and part and instance counts are recorded. Evidence: `scripts/check.sh` all pass (140 specs); Woodland `Reachability` 23/23 and `HabitatRotation` 28/28; 415 parts and 431 instances ([[TEST-20261013-01]]).
 
 ## Tests
@@ -192,9 +192,18 @@ Add stationary trees to the Cursed Woodland whose bark faces watch players and g
 - **Checks:**
   - `scripts/check.sh` all pass: StyLua, Selene, types, 140 Lune specs, both Rojo builds, JSON, queue, vault, Python tests.
   - Studio: [[TEST-20261013-01]] (synced through MCP `Source` writes, hash-checked, because the Rojo plugin wasn't connected).
+- **Revision 1** (jg, 2026-10-13: "fix the audit items now, then merge"). Fixes for [[AUD-20261013-TASK-0041-01]] findings 1–6:
+  1. Releases have their own rate bucket, and a release from someone not observing that tree is ignored.
+  2. A Studio-only `force:<id>` hook sends "looking" reports past the client filter, so the scenario now tests the server's wall and facing rejections.
+  3. A Studio-only client-view report: each client tells the scenario whether it sees `Frozen` and where its pupils are.
+  4. Woodland clearance uses each part's horizontal reach plus a 3.2-stud tree footprint.
+  5. The client also requires head line of sight, matching the server.
+  6. The resume-after-cancel step is bounded at 0.05–1.0 s.
+
+  Checks: `check.sh` all pass; [[TEST-20261013-01]] revision 1 (28/28 two-player, `Reachability` 23/23).
 - **Reference-code reuse:** SODT `PerceptionService`. Took the separate "seen now" flag, `os.clock()` timing and the idea of sending a throttled camera report. Did not take its polling loop or beast model.
 
 ## Audits
-- [[AUD-20261013-TASK-0041-01]]: **pass with notes**. No blockers. Findings 1–4 and 6 are open follow-ups; 7 (stale plan text) is fixed.
+- [[AUD-20261013-TASK-0041-01]]: **pass with notes**. No blockers. Finding 7 (stale plan text) was fixed after the audit; findings 1–6 were fixed in revision 1.
 
 ## Outcome

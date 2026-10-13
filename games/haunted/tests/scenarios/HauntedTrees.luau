@@ -11,6 +11,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Workspace = game:GetService("Workspace")
 
 local HauntedTrees = require(ReplicatedStorage.Shared.Config.HauntedTrees)
+local G = HauntedTrees.gaze
 local TreeSight = require(ReplicatedStorage.Shared.TreeSight)
 local Services = ServerScriptService:WaitForChild("Server"):WaitForChild("Services")
 local HauntedTreeService = require(Services.HauntedTreeService) :: any
@@ -24,8 +25,13 @@ return function(args: any): { [string]: any }
 		ReplicatedStorage:SetAttribute("HC_ScenarioProgress", `{#checks} {name}={ok == true}`)
 	end
 	local stats: { [string]: any } = {}
+	local reportRemote: RemoteEvent? = nil
 	local function finish(infra: boolean?)
 		ReplicatedStorage:SetAttribute("HC_GazeTest", nil)
+		ReplicatedStorage:SetAttribute("HC_TestTree", nil)
+		if reportRemote then
+			reportRemote:Destroy()
+		end
 		local failed = 0
 		for _, c in checks do
 			if not c.ok then
@@ -119,6 +125,26 @@ return function(args: any): { [string]: any }
 	end
 	local id = tree:GetAttribute("TreeId") :: string
 	stats.tree = id
+	-- What each client sees on this tree (test-only remote; the client hook fires it in Studio only).
+	local seen: { [Player]: { frozen: boolean, pupil: number } } = {}
+	local rr = Instance.new("RemoteEvent")
+	rr.Name = "HC_TestReport"
+	rr.OnServerEvent:Connect(function(p: Player, frozenSeen: unknown, pupil: unknown)
+		if typeof(frozenSeen) == "boolean" and typeof(pupil) == "number" then
+			seen[p] = { frozen = frozenSeen, pupil = pupil }
+		end
+	end)
+	rr.Parent = ReplicatedStorage
+	reportRemote = rr
+	ReplicatedStorage:SetAttribute("HC_TestTree", id)
+	local function bothSee(isFrozen: boolean): boolean
+		local sa, sb = seen[a], seen[b]
+		return sa ~= nil and sb ~= nil and sa.frozen == isFrozen and sb.frozen == isFrozen
+	end
+	local function pupilsAtRest(): boolean
+		local sa, sb = seen[a], seen[b]
+		return sa ~= nil and sb ~= nil and sa.pupil < 0.01 and sb.pupil < 0.01
+	end
 	local right = root.CFrame.RightVector
 
 	local function tp(p: Player, pos: Vector3)
@@ -183,6 +209,13 @@ return function(args: any): { [string]: any }
 		end),
 		snap().observers
 	)
+	check(
+		"A looks: both clients see Frozen",
+		within(1, function()
+			return bothSee(true)
+		end)
+	)
+	check("A looks: pupils at rest on both clients", within(1, pupilsAtRest), seen[a] and seen[a].pupil)
 	-- B joins; A looks away; B keeps it frozen.
 	look(b, id)
 	check(
@@ -200,6 +233,12 @@ return function(args: any): { [string]: any }
 	local t = unfrozenTime()
 	stats.resumeAfterBothAway = math.floor(t * 100) / 100
 	check("both away: resumes after the 1 s delay (0.9-2.2 s incl. report latency)", t >= 0.9 and t <= 2.2, t)
+	check(
+		"both away: both clients see it resume",
+		within(1, function()
+			return bothSee(false)
+		end)
+	)
 
 	-- Reacquire during the delay cancels it.
 	look(a, id)
@@ -211,7 +250,8 @@ return function(args: any): { [string]: any }
 	look(b, "")
 	check("look during the delay: still frozen 0.7 s after the new release", holds(0.7, frozen))
 	t = unfrozenTime()
-	check("then resumes", not frozen(), t)
+	-- 0.7 s of the new 1 s delay already passed in the hold above: about 0.3 s plus report latency remains.
+	check("then resumes within the rest of the delay (0.05-1.0 s)", not frozen() and t >= 0.05 and t <= 1, t)
 
 	-- Character reset clears A's observation at once.
 	look(a, id)
@@ -282,6 +322,45 @@ return function(args: any): { [string]: any }
 		end)
 	)
 	look(a, "")
+
+	-- AC7, server side: forced "looking" reports that skip the client's own filter.
+	tp(a, spot - right * 1.5)
+	task.wait(0.8)
+	look(a, "force:" .. id)
+	check("forced report, clear view in front: server freezes (control)", within(1.5, frozen))
+	look(a, "")
+	check(
+		"forced reports stop: resumes after ttl + delay",
+		within(G.ttl + G.resumeDelay + 1.5, function()
+			return not frozen()
+		end)
+	)
+	local wall2 = Instance.new("Part")
+	wall2.Anchored = true
+	wall2.Size = Vector3.new(8, 10, 0.5)
+	wall2.CFrame = CFrame.lookAt(root.Position + root.CFrame.LookVector * 3.5, root.Position)
+	wall2.Parent = Workspace
+	task.wait(0.3)
+	look(a, "force:" .. id)
+	check(
+		"forced report through a wall: server rejects",
+		holds(2, function()
+			return not frozen()
+		end)
+	)
+	look(a, "")
+	wall2:Destroy()
+	tp(a, Vector3.new(root.Position.X, 0, root.Position.Z) - root.CFrame.LookVector * 7)
+	task.wait(0.8)
+	look(a, "force:" .. id)
+	check(
+		"forced report from behind the tree: server rejects",
+		holds(2, function()
+			return not frozen()
+		end)
+	)
+	look(a, "")
+	check("forced rejections left no observer", snap().observers == 0, snap().observers)
 
 	-- AC7: forged reports (a far tree's id, malformed arguments, every frame) through the real remote.
 	if far then

@@ -63,6 +63,8 @@ local remote: RemoteEvent? = nil
 local started = false
 local nextCheck = 0
 local testAim: Face? = nil -- Studio test camera: the face it last aimed at
+local testForceAt = 0 -- Studio test: last forced report
+local testReportAt = 0 -- Studio test: last client-view report
 
 local function damp(cur: number, target: number, rate: number, dt: number): number
 	return cur + (target - cur) * (1 - math.exp(-rate * dt))
@@ -260,8 +262,11 @@ local function checkGaze(now: number)
 			local headPos = (head :: BasePart).Position
 			if (headPos - geom.pos).Magnitude <= G.checkRadius then
 				local view = { camPos = cam.CFrame.Position, camLook = cam.CFrame.LookVector, headPos = headPos }
+				-- The server checks from the head, so require both: the looker then never sees a local-only
+				-- freeze the server would reject (AUD-20261013-TASK-0041-01 finding 5).
 				looking = GazeRules.qualifies(view, geom, f.looking)
 					and TreeSight.clear(view.camPos, geom.pos, { f.model, char :: Model })
+					and TreeSight.clear(headPos, geom.pos, { f.model, char :: Model })
 			end
 		end
 		if looking ~= f.looking then
@@ -307,6 +312,35 @@ local function testCamera()
 		remote:FireServer(forged, "yes")
 		remote:FireServer(nil, nil)
 		id = ""
+	end
+	-- "force:<id>": claim to be looking at that tree, whatever the camera shows, at the keepalive rate. Tests
+	-- the server's own range, facing and line-of-sight checks (AUD-20261013-TASK-0041-01 finding 2).
+	local forcedLook = string.match(id, "^force:(.+)$")
+	if forcedLook then
+		if remote and os.clock() - testForceAt >= G.keepalive then
+			testForceAt = os.clock()
+			remote:FireServer(forcedLook, true)
+		end
+		id = ""
+	end
+	-- What this client sees on the scenario's tree, sent back on a test-only remote the scenario creates
+	-- (AUD-20261013-TASK-0041-01 finding 3).
+	local reportTo = ReplicatedStorage:FindFirstChild("HC_TestReport")
+	local reportTree = ReplicatedStorage:GetAttribute("HC_TestTree")
+	if
+		reportTo
+		and reportTo:IsA("RemoteEvent")
+		and typeof(reportTree) == "string"
+		and os.clock() - testReportAt >= 0.1
+	then
+		testReportAt = os.clock()
+		for _, f in faces do
+			if f.id == reportTree then
+				local e = f.eyes[1]
+				local rest = e.center + f.root.CFrame.LookVector * e.orbit
+				reportTo:FireServer(f.model:GetAttribute("Frozen") == true, (e.pupil.Position - rest).Magnitude)
+			end
+		end
 	end
 	if not (head and head:IsA("BasePart")) then
 		return
