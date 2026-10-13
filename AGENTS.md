@@ -21,6 +21,8 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 - At most 2 revision attempts per task. Then stop and report.
 - Run `scripts/check.sh` before any AI review. Read only the files a task needs; don't scan the whole repo.
 - Never read, print or store credentials (`.env`, keys) in code or notes.
+- **No spend on asset generation** (fal or any paid generator), even small amounts, unless the user lifts this (2026-10-13).
+- **Check triangles on every mesh before it enters the game:** under 20,000 per mesh (engine limit) and within the project budget in [[RSH-20261013-Universal-Modder-Evaluation]] (prop ≤ 2k, medium ≤ 5k, hero/NPC ≤ 10k). Decimate or reject anything over budget, and record the count.
 
 ## Git safety (2026-10-11, after a merge ran in the wrong checkout: LES-0006)
 - Before any local switch, merge, rebase, cherry-pick, reset, clean, commit, push or branch deletion, run `scripts/preflight.sh --root <checkout> --branch <expected>` and chain the operation with `&&`. Address the checkout explicitly (`git -C <checkout>`); never rely on the current directory.

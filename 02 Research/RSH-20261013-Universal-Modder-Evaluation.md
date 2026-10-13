@@ -8,7 +8,7 @@ sources:
   - rehan-remade/universal-modder@5ba8150 (cloned to a session scratch dir, never opened as a Claude project)
   - .claude/skills/PROVENANCE.md
   - 10 References/06 Code/Reference_Code/Reference_Code_Index.md
-confidence: medium
+confidence: high
 created: 2026-10-13
 updated: 2026-10-13
 tags:
@@ -28,6 +28,10 @@ Does `universal-modder` (UM) give GAME-002 measurable gains in asset generation,
 | Source | URL | Accessed |
 |---|---|---|
 | UM repo, commit `5ba8150` (2026-10-12), MIT | https://github.com/rehan-remade/universal-modder | 2026-10-13 |
+| Roblox general mesh specs (20,000 triangles per mesh) | https://github.com/Roblox/creator-docs/blob/main/content/en-us/art/modeling/specifications.md | 2026-10-13 |
+| Roblox texture specs (SurfaceAppearance maps max 1024×1024; 256/512/1024 px for 5/10/20-stud objects) | https://create.roblox.com/docs/art/modeling/texture-specifications | 2026-10-13 |
+| Studio Assistant: mesh generation (`GenerateModelAsync`) + Material Generator | https://devforum.roblox.com/t/assistant-updates-mesh-generation-new-mcp-server-tools-screenshot-tool-and-more/4527258 ; https://create.roblox.com/docs/assistant/guide | 2026-10-13 |
+| fal Trellis 2 price: $0.25 / $0.30 / $0.35 per call (512/1024/1536p) | https://fal.ai/models/fal-ai/trellis-2/llms.txt | 2026-10-13 |
 | Files read: `skills/fal-assets`, `skills/asset-pipeline`, `hooks/*`, `.claude/settings.json`, `.mcp.json`, `mcp.json`, `pyproject.toml`, `bin/um`, `SECURITY.md`, `.github/workflows/test.yml`, `examples/aoe2-de-civ/assets/gen.sh`, grep of `um/*.py` for subprocess, network and secrets | (in repo) | 2026-10-13 |
 
 Not opened: the other 10 skills (modding, RE, video and Windows automation, which don't apply to Roblox), `um/sprite.py` and `um/blender/render_sprites.py` beyond grep, and the `knowledge/` contents. The KB has **no Roblox entries** (`grep -ri roblox` finds nothing in the repo).
@@ -108,7 +112,38 @@ Success bar: ≤ 20 min agent + human time per prop, ≤ $1 per accepted prop, w
 2. Run the gated PoC above for **props only** before deciding on any fal integration.
 3. Keep audio on `roblox-sfx` and rigging in Studio. Revisit generated SFX only for a sound the Creator Store lacks.
 
+## Review results (2026-10-13)
+Done by the agent at the user's request. The local `~/Code/creator-docs` clone is missing in this environment, so these come from the sources above.
+
+| Open item | Result |
+|---|---|
+| Triangle limit | **20,000 triangles per mesh** (engine hard limit; avatar items are lower). Older forum posts saying 10,000 are outdated. |
+| Texture size | SurfaceAppearance PBR maps max **1024×1024**. Size by object: 256 px (≈5 studs), 512 (≈10), 1024 (≈20). Generating at 2048 px is wasted. |
+| fal cost | Not free: Trellis 2 costs $0.25–0.35 per call, plus the concept image and remesh. |
+| Licences | Moot under the no-spend decision. Recheck per model if fal is ever reconsidered. |
+| Free alternative | **Studio Assistant mesh generation and Material Generator**, built into Studio, no API key and no fal. I found no Robux or credit charge in the docs; confirm in Studio that nothing prompts for payment before using it. Roblox's open-source Cube 3D needs a large GPU and isn't practical on an 8 GB Mac. |
+
+### Decisions (user, 2026-10-13)
+- **No spend.** No fal, no paid generators, not even a capped PoC. The paid PoC plan above is **cancelled**.
+- **Triangle check on every mesh**, recorded as a rule in `AGENTS.md`.
+
+### Triangle budget (project default; the user can change it)
+| Asset | Budget |
+|---|---|
+| Small prop or collectible | ≤ 2,000 |
+| Medium prop or furniture | ≤ 5,000 |
+| Hero object or NPC/ghost | ≤ 10,000 |
+| Any single mesh (engine limit) | < 20,000, never reached |
+
+How to check: in Blender use Viewport Overlays → Statistics, or headless `sum(len(o.data.loop_triangles) for o in mesh objects)` after `calc_loop_triangles()`. Decimate (Collapse) to the budget, then import. Record the count in the asset manifest. Assistant-generated meshes are checked the same way (export and inspect) before they go into the game.
+
+### Revised free proof of concept (needs a task, no spend)
+1. In an **unpublished scratch place**, generate one ghost-lantern prop with Studio Assistant mesh generation.
+2. Check its triangles against the budget and its textures against the size table. Decimate in Blender if it's over.
+3. Compare it next to existing props (screenshot), score visual fit 1–5, and record time spent.
+4. Save to Rojo source as `.rbxmx` only through a separate approved task.
+
 ## Needs human review
-- Unverified: Roblox's current mesh triangle and texture-size limits, fal pricing, and per-model commercial licences (none fetched this session).
-- Decision: PoC spend cap and target prop.
+- Confirm in Studio that Assistant mesh generation shows no Robux or credit charge.
+- Approve or change the triangle budget table.
 - Whether a secret-regex scan should be added to `scripts/check.sh` (separate chore).
