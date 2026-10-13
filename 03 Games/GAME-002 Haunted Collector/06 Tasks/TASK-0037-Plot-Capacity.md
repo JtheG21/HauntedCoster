@@ -3,7 +3,7 @@ id: TASK-0037
 title: "Plot Capacity"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -56,3 +56,6 @@ Make sure every player on a server can get a home plot. There are 6 plots, but t
 - [[AUD-20261012-TASK-0037-01]]: pass. Minor: the live warning is reviewed, not tested; the literal 6 in the cap spec is intentional; Max Players rests on jg's report.
 
 ## Outcome
+- Merge approved by jg in chat on 2026-10-12 ("merge it once CI passes"); PR #38.
+- AUDIT-002 and AUDIT-012 are resolved: the cap is 6 (Game Settings, set by jg), recorded in `World.MaxPlayers` and tied to the plots by a spec; the 7th-player case is specced.
+- Procedure lesson: scratch places for scenario runs must not keep the File → New template SpawnLocation ([[TEST-20261012-15]]).
