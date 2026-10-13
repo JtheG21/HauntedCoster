@@ -143,6 +143,18 @@ How to check: in Blender use Viewport Overlays → Statistics, or headless `sum(
 3. Compare it next to existing props (screenshot), score visual fit 1–5, and record time spent.
 4. Save to Rojo source as `.rbxmx` only through a separate approved task.
 
+### Other free sources (user request, 2026-10-13)
+| Source | Free allowance | Licence | Triangle control | Verdict |
+|---|---|---|---|---|
+| **Studio Assistant** `/generate_mesh` | Free; per-minute rate limit on mesh generation, 50 procedural models per rolling 24 h | Roblox platform | **Built-in max triangle setting** (default 10,000; set it to the budget) plus a bounding-box Part | **Primary** |
+| **Meshy free plan** (web app only, no API on free) | 100 credits/month, about 20 per model, so **about 5 models a month** | **CC BY 4.0**: commercial use allowed, but Meshy must be credited | Remesh is a separate credit cost; otherwise decimate in Blender | **Backup.** Its help centre says Meshy 6/7 **downloads are paywalled on free**, so check this in TASK-0042. |
+| **GPT (ChatGPT) / Claude** | Your existing chat plan, $0 extra. APIs are paid, so not via API. | Output is ours | **Exact**: the AI writes a Blender Python script that builds a low-poly model procedurally | **Unlimited fallback** for simple props (lanterns, crates, gravestones). GPT and Claude don't output real 3D models themselves; they produce scripts, concept images and textures. |
+| GPT image generation (ChatGPT) | Within plan limits | Ours under OpenAI terms | n/a (2D) | Concept art and textures only. Could feed Assistant's image-to-mesh. |
+
+Sources: https://create.roblox.com/docs/assistant/guide ; https://create.roblox.com/docs/reference/engine/classes/GenerationService ; https://help.meshy.ai/en/articles/15696428-what-is-included-on-the-free-plan ; https://docs.meshy.team/en/webapp/pricing (accessed 2026-10-13).
+
+**Pipeline order:** Assistant → AI-written Blender script → Meshy free. Every output goes through the same triangle check. Trial: [[TASK-0042-Free-AI-Prop-Pipeline-Trial]].
+
 ## Needs human review
 - Confirm in Studio that Assistant mesh generation shows no Robux or credit charge.
 - Approve or change the triangle budget table.

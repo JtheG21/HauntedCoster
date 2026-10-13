@@ -3229,6 +3229,28 @@
       "revisions": 1,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0042",
+      "title": "Free AI Prop Pipeline Trial",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0042-Free-AI-Prop-Pipeline-Trial",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0042-Free-AI-Prop-Pipeline-Trial.md",
+      "acceptance_criteria": [
+        "Each candidate <= 2,000 triangles, measured and recorded.",
+        "Textures <= 512 px, one material per mesh.",
+        "Manifest line per candidate: source, licence, prompt/script.",
+        "Gameplay-distance screenshots with user visual score 1-5.",
+        "$0 spent, no key stored, nothing published.",
+        "Outcome names default pipeline and fallback."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
     }
   ]
 }
