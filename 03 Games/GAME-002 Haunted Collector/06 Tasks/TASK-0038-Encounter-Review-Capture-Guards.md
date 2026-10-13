@@ -3,7 +3,7 @@ id: TASK-0038
 title: "Encounter Review Capture Guards"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -69,3 +69,5 @@ Observations (not defects, no change):
 - [[AUD-20261012-TASK-0038-01]]: pass (Opus). Two minor findings fixed after the audit: a monster-guard order spec added (125 specs), and the cleanup line range corrected.
 
 ## Outcome
+- Merge approved by jg in chat on 2026-10-12 ("merge it once CI passes"); PR #39.
+- EncounterService reviewed with no defects; capture-start guards are now specced headlessly (AUDIT-009 partly closed: other service state machines still rely on Studio scenarios).

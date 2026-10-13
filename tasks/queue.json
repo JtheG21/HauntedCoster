@@ -2996,7 +2996,7 @@
       "id": "TASK-0038",
       "title": "Encounter Review Capture Guards",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "low",
       "depends_on": [
         "TASK-0037"
@@ -3033,6 +3033,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-12T21:08:21",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -3050,7 +3056,8 @@
         }
       ],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }
