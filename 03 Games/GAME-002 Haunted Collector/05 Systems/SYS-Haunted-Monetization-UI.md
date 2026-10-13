@@ -3,7 +3,9 @@ id: SYS-Haunted-Monetization-UI
 title: Monetization UI Baseline
 type: system
 project: GAME-002
-status: proposed
+status: approved
+approved_by: jg
+approved_on: 2026-10-13
 version: 1.0
 created: 2026-10-13
 updated: 2026-10-13
@@ -18,7 +20,7 @@ related:
 ---
 # Haunted Collector — Monetization UI Baseline v1.0
 
-This is the complete product/UI scope baseline for the next major UI update. The category, currency and equipment choices are approved in [[ADR-0009-Monetization-UI-Scope]]. The screen arrangement, detailed interactions and acceptance checklist below are authored design proposals ready for review. They are not implemented features. Discovery's confirmed decisions are carried forward; original evidence gaps are retained rather than reconstructed.
+This is the approved product/UI scope baseline for the next major UI update (jg, 2026-10-13, approval of the presented baseline and local merge). The category, currency and equipment choices are recorded in [[ADR-0009-Monetization-UI-Scope]]. The screen arrangement, interactions and acceptance checklist establish the intended update; they are not implemented features. Discovery's confirmed decisions are carried forward; original evidence gaps are retained rather than reconstructed. Item/backend readiness decisions remain explicit below.
 
 ## Purpose
 Carry the approved monetization scope into the next major UI update.
@@ -148,3 +150,4 @@ The client previews and requests actions; the server validates ownership, compat
 
 ## History
 - 2026-10-13: baseline drafted from discovery and explicit choices in [[ADR-0009-Monetization-UI-Scope]].
+- 2026-10-13: jg approved the presented baseline and its local vault merge in chat. Pricing, product configuration, schema changes, implementation and publishing remain separately gated.
