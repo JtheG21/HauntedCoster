@@ -4,9 +4,11 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local World = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("World"))
+local PlotRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Rules"):WaitForChild("PlotRules"))
 local PlotBuilder = require(script.Parent.Parent.World.PlotBuilder)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local StateService = require(script.Parent.StateService)
@@ -126,23 +128,22 @@ local function assign(player: Player)
 	if not profile or not player.Parent then
 		return
 	end
-	for i = 1, #plots do
-		if not owners[i] then
-			owners[i] = player
-			byPlayer[player] = i
-			PlotBuilder.setOwner(plots[i], player)
-			PlotBuilder.buildHouse(plots[i], i, profile.houseTier)
-			player:SetAttribute("PlotIndex", i)
-			PlotService.rebuildTrophies(player)
-			for _, cb in assignedCallbacks do
-				task.spawn(cb, player, i)
-			end
-			if player.Character then
-				task.spawn(spawnAtHome, player, player.Character)
-			end
-			StateService.markDirty(player)
-			return
+	local i = PlotRules.firstFree(owners, #plots)
+	if i then
+		owners[i] = player
+		byPlayer[player] = i
+		PlotBuilder.setOwner(plots[i], player)
+		PlotBuilder.buildHouse(plots[i], i, profile.houseTier)
+		player:SetAttribute("PlotIndex", i)
+		PlotService.rebuildTrophies(player)
+		for _, cb in assignedCallbacks do
+			task.spawn(cb, player, i)
 		end
+		if player.Character then
+			task.spawn(spawnAtHome, player, player.Character)
+		end
+		StateService.markDirty(player)
+		return
 	end
 	warn(`[Plots] no free plot for {player.Name}`)
 	StateService.toast(
@@ -179,6 +180,11 @@ function PlotService.start()
 	folder.Parent = Workspace
 	for i = 1, #World.PlotCenters do
 		plots[i] = PlotBuilder.build(folder, i)
+	end
+	-- The place's Max Players must not exceed the plots (World.MaxPlayers, TASK-0037). Studio test servers
+	-- use their own player count, so only live servers are checked.
+	if not RunService:IsStudio() and Players.MaxPlayers > #plots then
+		warn(`[Plots] Max Players is {Players.MaxPlayers} but there are only {#plots} plots`)
 	end
 	-- Neutral spawn on the ring road; players are moved home once their plot is assigned.
 	local spawn = Instance.new("SpawnLocation")
