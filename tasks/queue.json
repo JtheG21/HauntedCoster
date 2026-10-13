@@ -2862,7 +2862,7 @@
       "id": "TASK-0036",
       "title": "Persistence Load Failure",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [
         "TASK-0035"
@@ -2893,6 +2893,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-12T20:36:45",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -2902,7 +2908,13 @@
           "notes": "check.sh pass; specs 117/0; negative control fails the live spec; FullLoop 85/85 in an unpublished place (TEST-20261012-14)"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-12T20:36:45",
+          "result": "pass",
+          "report": "06 QA/AUD-20261012-TASK-0036-01.md"
+        }
+      ],
       "revisions": 0,
       "approved_by": "jg"
     }

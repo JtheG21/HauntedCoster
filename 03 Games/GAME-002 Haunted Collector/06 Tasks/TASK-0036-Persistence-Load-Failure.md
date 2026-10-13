@@ -3,7 +3,7 @@ id: TASK-0036
 title: "Persistence Load Failure"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: high
 risk: medium
 owner: executor
@@ -46,6 +46,7 @@ Stop a live server from silently handing a player a fresh, unsaved default profi
 
 ## Risks / notes
 - Approved in chat on 2026-10-12: jg accepted the recommended policy (memory only in development places; live: bounded retries, then readonly with the existing banner) and said "start T3".
+- A published place playtested in Studio counts as a development place (`RunService:IsStudio()`), so it keeps the old memory fallback. Intended: Studio is never a live server.
 - Residual: a live outage still costs that player's session progress (readonly), but never their saved data. Kicking with a "rejoin" message was the rejected alternative.
 
 ---
@@ -54,5 +55,6 @@ Stop a live server from silently handing a player a fresh, unsaved default profi
 - `PlayerDataService`: `isUnavailableError` removed; `DEVELOPMENT_PLACE = RunService:IsStudio() or game.PlaceId == 0`. `getStore` keeps the old Studio behaviour (any failure means memory) and only warns on a live server. `loadRecord` returns `readonly` (not `memory`) when there is no store on a live server.
 
 ## Audits
+- [[AUD-20261012-TASK-0036-01]]: pass (Opus). Minor notes: a published place playtested in Studio still counts as a development place (intended); AC2 is evidenced by code review, not a test; two existing (non-regression) delays.
 
 ## Outcome
