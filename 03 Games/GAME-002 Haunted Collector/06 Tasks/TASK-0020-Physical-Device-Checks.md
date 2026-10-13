@@ -3,7 +3,7 @@ id: TASK-0020
 title: Physical Device Checks
 type: task
 project: GAME-002
-status: ready
+status: archived
 priority: high
 risk: medium
 owner: executor
@@ -11,7 +11,7 @@ milestone: M2
 depends_on: []
 branch: task/TASK-0020-Physical-Device-Checks
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-12
 tags:
   - workflow/task
   - milestone/m2
@@ -54,3 +54,5 @@ Proposed in [[RETRO-M1-Playable-MVP-Loop]]; created as `ready` with jg's approva
 
 ## Outcome
 *(after merge: result, lessons, follow-ups)*
+
+- **Parked** 2026-10-12 by jg: archived until after the upcoming audit and the changes that follow; to be revived then.

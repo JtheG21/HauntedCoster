@@ -603,7 +603,7 @@
       "id": "TASK-0008",
       "title": "Prototype Telemetry",
       "project": "GAME-001",
-      "status": "ready",
+      "status": "archived",
       "risk": "low",
       "depends_on": [
         "TASK-0006"
@@ -622,6 +622,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-12T18:07:14",
+          "from": "ready",
+          "to": "archived",
+          "note": "archived by jg"
         }
       ]
     },
@@ -692,7 +698,7 @@
       "id": "TASK-0010",
       "title": "Ability and Harness Hardening",
       "project": "GAME-001",
-      "status": "proposed",
+      "status": "archived",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0010-Ability-And-Harness-Hardening",
@@ -711,6 +717,14 @@
         "Evidence (AUD-0007-01 F6 / AUD-0007-02 F4): a 3-client finale run; G/V Echo spends through the real remote; a mid-finale leave and respawn; root-cause note on AddPlayers sessions",
         "Leftover minors from AUD-0003/0004/0005 reviewed at task start; each fixed or explicitly deferred with a reason",
         "scripts/check.sh passes"
+      ],
+      "history": [
+        {
+          "time": "2026-10-12T18:07:14",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
       ]
     },
     {
@@ -1656,7 +1670,7 @@
       "id": "TASK-0020",
       "title": "Physical Device Checks",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "archived",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0020-Physical-Device-Checks",
@@ -1674,6 +1688,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg (M1 retro)"
+        },
+        {
+          "time": "2026-10-12T18:07:14",
+          "from": "ready",
+          "to": "archived",
+          "note": "archived by jg"
         }
       ],
       "executions": [],
