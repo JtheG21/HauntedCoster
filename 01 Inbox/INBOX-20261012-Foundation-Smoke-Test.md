@@ -23,7 +23,7 @@ related:
 - **Proceed or ask:** proceed with the analysis. **Ask** before any build, because the art direction is "accepted for now, revamp later" (jg, 2026-10-12), so a new art style is jg's call.
 
 ## 2. Reference analysis (would become `REF-MAP-001-…`)
-- **File:** `10 References/02 Map/Screenshot 2026-10-11 at 11.30.10 PM.png`, embedded by [[Reference1]]. Source and licence not recorded.
+- **File:** `10 References/02 Map/Screenshot 2026-10-11 at 11.30.10 PM.png`, embedded by `Reference1` (note removed by jg 2026-10-13). Source and licence not recorded.
 - **Observations:**
   - A dense conifer forest at night under a blue-green canopy, with a dirt floor and sparse broad-leaf plants.
   - Two foreground trees have large carved faces: glowing orange eye rims and lit teeth, with branch-arms.
