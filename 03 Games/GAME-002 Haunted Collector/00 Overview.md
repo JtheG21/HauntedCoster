@@ -5,7 +5,7 @@ type: overview
 project: GAME-002
 status: in_progress
 created: 2026-10-11
-updated: 2026-10-12
+updated: 2026-10-13
 tags:
   - game/overview
 ---
@@ -39,10 +39,10 @@ Statuses are copied from `tasks/queue.json` (authoritative); `validate_vault.py`
 | [[TASK-0024-FullLoop-Landmark-Flake]] | done (landmark diagnostics; flake not reproduced) | [[AUD-20261011-TASK-0024-01]] pass |
 | [[TASK-0025-Clue-Hunting-Removal]] | done (clue hunting removed; crypt and Bell Wraith need the Restored Manor) | [[AUD-20261012-TASK-0025-01]] fail, [[AUD-20261012-TASK-0025-02]] pass |
 | [[TASK-0026-Radial-Plot-Layout]] | done (six plots around the hub; the cemetery is the first habitat module) | [[AUD-20261012-TASK-0026-01]] pass |
-| [[TASK-0027-Habitat-Modules-And-Blockouts]] | done (four habitat modules, swap lifecycle; blockout look awaits jg's review) | [[AUD-20261012-TASK-0027-01]] pass |
-| [[TASK-0028-Cemetery-Vignette-And-Atmosphere]] | done (twilight sky, lamp family, cemetery vignette; look awaits jg) | [[AUD-20261012-TASK-0028-01]] pass |
+| [[TASK-0027-Habitat-Modules-And-Blockouts]] | done (four habitat modules, swap lifecycle; current art accepted provisionally by jg, 2026-10-12) | [[AUD-20261012-TASK-0027-01]] pass |
+| [[TASK-0028-Cemetery-Vignette-And-Atmosphere]] | done (twilight sky, lamp family, cemetery vignette; current art accepted provisionally) | [[AUD-20261012-TASK-0028-01]] pass |
 | [[TASK-0029-Habitat-Rotation]] | done (15-minute rotation, capture-safe swaps) | [[AUD-20261012-TASK-0029-01]] fail, [[AUD-20261012-TASK-0029-02]] pass |
-| [[TASK-0030-House-And-Train-Presentation]] | done (house tiers, plot dressing, station canopy; look awaits jg) | [[AUD-20261012-TASK-0030-01]] pass |
+| [[TASK-0030-House-And-Train-Presentation]] | done (house tiers, plot dressing, station canopy; current art accepted provisionally) | [[AUD-20261012-TASK-0030-01]] pass |
 | [[TASK-0031-Failed-Capture-Retaliation]] | done (retaliation on the final miss; follow-ups listed) | [[AUD-20261012-TASK-0031-01]] pass |
 | [[TASK-0032-Retaliation-Hardening]] | done (TASK-0031 audit follow-ups: protected tick and fled handlers, counters cleared on fled) | [[AUD-20261012-TASK-0032-01]] pass |
 | [[TASK-0033-Retaliation-Begin-Cleanup]] | done (a failed `begin` releases every monster it had set) | [[AUD-20261012-TASK-0033-01]] fail, [[AUD-20261012-TASK-0033-02]] pass |
@@ -69,9 +69,9 @@ Statuses are copied from `tasks/queue.json` (authoritative); `validate_vault.py`
 - [[ADR-0005-Haunted-Collector-Direction]]: approved (jg, 2026-10-11)
 - [[ADR-0006-M1-Tuning-And-Scope-Decisions]]: approved
 - [[ADR-0007-World-Retrofit-Direction]]: approved
+- The habitat, house and train art (TASK-0027, 0028, 0030) was accepted for now by jg on 2026-10-12; a later revamp is expected ([[GAME-002 Haunted Collector/03 Roadmap]]). This closes the earlier pending review of those versions.
+- ADR-0005 open question 4 (migrating the old links): done 2026-10-12, the 45 ambiguous links are qualified (GAME-001 notes link to `GAME-001 Rg1/…`).
 
 ## Needs human review
 - Review the draft economy numbers in the design note. They are guesses until playtested.
 - Hands-on playtest by the user. Keep the GAME-001 `rojo serve` away from this place (it injected a Baseplate that caused z-fighting).
-- ADR-0005 open question 4 (migrating the old links): done 2026-10-12, the 45 ambiguous links are qualified (GAME-001 notes link to `GAME-001 Rg1/…`).
-- The habitat, house and train looks (TASK-0027, 0028, 0030) await jg's review.

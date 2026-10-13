@@ -115,6 +115,34 @@ class VaultTest(unittest.TestCase):
         self.write("09 Knowledge/LES-0001-X.md", note("LES-0001", "lesson", body="[[GAME-001 Test/00 Overview|ov]]"))
         self.assertEqual(self.errors(), "")
 
+    def test_paused_task_and_assignment_sync(self):
+        rel = f"{GAME}/06 Tasks/TASK-0001-Thing.md"
+        self.write(rel, note("TASK-0001", "task", status="paused", project="GAME-001",
+                             owner="codex", reviewer="claude"))
+        self.queue([{"id": "TASK-0001", "status": "paused", "note": rel,
+                     "owner": "codex", "reviewer": "claude"}])
+        self.assertEqual(self.errors(), "")
+        self.write(rel, note("TASK-0001", "task", status="in_progress", project="GAME-001",
+                             owner="claude", reviewer="codex"))
+        errs = self.errors()
+        for field in ("status", "owner", "reviewer"):
+            self.assertIn(f"{field} mismatch", errs)
+
+    def test_optional_assignments_preserve_legacy_note_owner(self):
+        self.write(f"{GAME}/06 Tasks/TASK-0001-Thing.md",
+                   note("TASK-0001", "task", project="GAME-001", owner="executor"))
+        self.assertEqual(self.errors(), "")
+
+    def test_invalid_queue_assignments(self):
+        rel = f"{GAME}/06 Tasks/TASK-0001-Thing.md"
+        for field in ("owner", "reviewer"):
+            for value in ("executor", "", None, [], {}):
+                self.queue([{"id": "TASK-0001", "status": "done", "note": rel, field: value}])
+                self.assertIn(f"'{field}' must be claude or codex", self.errors())
+        self.queue([{"id": "TASK-0001", "status": "done", "note": rel,
+                     "owner": "claude", "reviewer": "claude"}])
+        self.assertIn("different assistants", self.errors())
+
 
 if __name__ == "__main__":
     unittest.main()

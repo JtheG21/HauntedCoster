@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 
 STATES = {
-    "inbox", "research", "proposed", "ready", "in_progress", "blocked",
+    "inbox", "research", "proposed", "ready", "in_progress", "paused", "blocked",
     "in_review", "changes_requested", "approved", "done", "archived",
 }
 TERMINAL = {"done", "archived"}
@@ -32,6 +32,7 @@ RISKS = {"low", "medium", "high"}
 ID_RE = re.compile(r"^TASK-\d{4}$")
 REQUIRED = ("id", "title", "status", "risk", "depends_on", "acceptance_criteria")
 USAGE_KINDS = {"subscription", "api"}
+ASSISTANTS = {"claude", "codex"}
 
 
 class OrchestratorError(Exception):
@@ -96,6 +97,11 @@ class Project:
                 errors.append(f"{tid}: invalid status '{t.get('status')}'")
             if t.get("risk") not in RISKS:
                 errors.append(f"{tid}: invalid risk '{t.get('risk')}'")
+            for field in ("owner", "reviewer"):
+                if field in t and (not isinstance(t[field], str) or t[field] not in ASSISTANTS):
+                    errors.append(f"{tid}: '{field}' must be claude or codex when present")
+            if "owner" in t and "reviewer" in t and t["owner"] == t["reviewer"]:
+                errors.append(f"{tid}: owner and reviewer must be different assistants")
             if not t.get("acceptance_criteria"):
                 errors.append(f"{tid}: needs at least one acceptance criterion")
             for dep in t.get("depends_on", []):
@@ -179,7 +185,7 @@ class Project:
         self._sync_note(t)
 
     def _sync_note(self, t: dict) -> None:
-        """Mirror status/updated into the task note's frontmatter (queue is authoritative)."""
+        """Mirror status, updated and explicit assignments (queue is authoritative)."""
         rel = t.get("note")
         if not rel:
             return
@@ -192,7 +198,9 @@ class Project:
             raise OrchestratorError(f"{rel}: no frontmatter")
         fm = m.group(1)
         today = dt.date.today().isoformat()
-        for key, value in (("status", t["status"]), ("updated", today)):
+        fields = [("status", t["status"]), ("updated", today)]
+        fields += [(key, t[key]) for key in ("owner", "reviewer") if key in t]
+        for key, value in fields:
             if re.search(rf"^{key}:.*$", fm, re.M):
                 fm = re.sub(rf"^{key}:.*$", f"{key}: {value}", fm, count=1, flags=re.M)
             else:
@@ -225,6 +233,35 @@ class Project:
         if reason:
             raise OrchestratorError(f"{task_id}: {reason}")
         self._move(t, "in_progress", "started")
+
+    def assign(self, task_id: str, owner: str | None, reviewer: str | None) -> None:
+        t = self.task(task_id)
+        if owner is None and reviewer is None:
+            raise OrchestratorError("assign requires --owner or --reviewer")
+        assignments = {key: value for key, value in (("owner", owner), ("reviewer", reviewer))
+                       if value is not None}
+        if any(value not in ASSISTANTS for value in assignments.values()):
+            raise OrchestratorError("owner and reviewer must be claude or codex")
+        candidate = {**t, **assignments}
+        if candidate.get("owner") == candidate.get("reviewer"):
+            raise OrchestratorError("owner and reviewer must be different assistants")
+        t.update(assignments)
+        self._move(t, t["status"], "assigned " + ", ".join(f"{k}={v}" for k, v in assignments.items()))
+
+    def pause(self, task_id: str, by: str, reason: str) -> None:
+        t = self.task(task_id)
+        self._expect(t, "in_progress")
+        self._move(t, "paused", f"paused by {by}: {reason}")
+
+    def resume(self, task_id: str, by: str) -> None:
+        t = self.task(task_id)
+        self._expect(t, "paused")
+        if not self.deps_done(t):
+            raise OrchestratorError(f"{task_id}: dependencies not done: {t['depends_on']}")
+        reason = self.budget_block_reason(task_id)
+        if reason:
+            raise OrchestratorError(f"{task_id}: {reason}")
+        self._move(t, "in_progress", f"resumed by {by}")
 
     def _fail(self, t: dict, note: str) -> None:
         t["revisions"] = t.get("revisions", 0) + 1
@@ -297,9 +334,12 @@ class Project:
         note = t.get("note", f"(task note for {t['id']})")
         lines = [
             f"You are the {role.upper()} for task {t['id']}: {t['title']}.",
-            f"Follow '04 Agents/{role.capitalize()}.md' exactly. Read CLAUDE.md and '{note}'.",
+            f"Follow '04 Agents/{role.capitalize()}.md' exactly. Read AGENTS.md and '{note}'.",
             "Read only the files listed in the spec unless blocked; do not scan the whole repo.",
         ]
+        assistant = t.get("reviewer" if role == "auditor" else "owner")
+        if assistant:
+            lines.append(f"Assigned assistant: {assistant}.")
         if role == "executor":
             lines.append(f"Work on branch {t.get('branch', 'task/' + t['id'])}. Run scripts/check.sh before finishing.")
         if role == "auditor":
@@ -321,10 +361,10 @@ class Project:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(prompt)
         if live or self.budget.get("dispatch_mode") == "live":
-            raise OrchestratorError("live dispatch is not enabled yet: run the prompt manually in Claude Code")
+            raise OrchestratorError("live dispatch is not enabled yet: run the prompt manually in the assigned assistant")
         rel = out.relative_to(self.root)
         return (f"[dry-run] prompt written to {rel}\n"
-                f"[dry-run] would run (subscription, interactive): claude \"$(cat {rel})\"\n"
+                f"[dry-run] open the prompt manually in {t.get('reviewer' if role == 'auditor' else 'owner', 'an assistant chosen by jg')}\n"
                 f"[dry-run] no AI call made; nothing recorded in the ledger")
 
     # ---- state & reports -------------------------------------------------
@@ -400,6 +440,12 @@ def main(argv: list[str] | None = None) -> int:
         s.add_argument("id")
         s.add_argument("--by", required=True, help="name of the human approving")
     s = sub.add_parser("start"); s.add_argument("id")
+    s = sub.add_parser("assign", help="record optional implementation owner and independent reviewer")
+    s.add_argument("id"); s.add_argument("--owner", choices=sorted(ASSISTANTS)); s.add_argument("--reviewer", choices=sorted(ASSISTANTS))
+    s = sub.add_parser("pause", help="HUMAN: pause an in_progress task without using a revision")
+    s.add_argument("id"); s.add_argument("--by", required=True); s.add_argument("--reason", required=True)
+    s = sub.add_parser("resume", help="HUMAN: resume a paused task after dependency and budget checks")
+    s.add_argument("id"); s.add_argument("--by", required=True)
     s = sub.add_parser("request-changes", help="HUMAN: send an in_review/approved task back for fixes (counts as a revision)")
     s.add_argument("id"); s.add_argument("--by", required=True); s.add_argument("--reason", required=True)
     s = sub.add_parser("unblock"); s.add_argument("id"); s.add_argument("--to", required=True); s.add_argument("--by", required=True)
@@ -425,7 +471,8 @@ def main(argv: list[str] | None = None) -> int:
         if a.cmd == "status":
             for t in proj.tasks:
                 deps = ",".join(t["depends_on"]) or "-"
-                print(f"{t['id']:9} {t['status']:15} {t['risk']:6} deps={deps:10} {t['title']}")
+                print(f"{t['id']:9} {t['status']:15} {t['risk']:6} deps={deps:10} "
+                      f"owner={t.get('owner', '-')} reviewer={t.get('reviewer', '-')} {t['title']}")
             print(f"API spend this month: ${proj.api_spend():.2f}")
             return 0
         if a.cmd == "next":
@@ -451,6 +498,9 @@ def main(argv: list[str] | None = None) -> int:
             "approve-merge": lambda: proj.approve_merge(a.id, a.by),
             "archive": lambda: proj.archive(a.id, a.by),
             "start": lambda: proj.start(a.id),
+            "assign": lambda: proj.assign(a.id, a.owner, a.reviewer),
+            "pause": lambda: proj.pause(a.id, a.by, a.reason),
+            "resume": lambda: proj.resume(a.id, a.by),
             "unblock": lambda: proj.unblock(a.id, a.to, a.by),
             "request-changes": lambda: proj.request_changes(a.id, a.by, a.reason),
             "record-exec": lambda: proj.record_exec(a.id, a.result, a.notes),

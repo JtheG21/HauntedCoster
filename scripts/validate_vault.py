@@ -16,7 +16,7 @@ import re
 import sys
 from pathlib import Path
 
-STATUSES = {"inbox", "research", "proposed", "ready", "in_progress", "blocked",
+STATUSES = {"inbox", "research", "proposed", "ready", "in_progress", "paused", "blocked",
             "in_review", "changes_requested", "approved", "done", "archived"}
 TYPES = {"index", "overview", "design", "architecture", "roadmap", "task", "bug", "audit", "adr",
          "system", "playtest", "release", "review", "health", "lesson", "retro", "research",
@@ -221,6 +221,13 @@ def check_queue(rep, root, task_notes):
     for t in tasks:
         tid = t.get("id")
         seen.add(tid)
+        if t.get("status") not in STATUSES:
+            rep.error("tasks/queue.json", f"{tid}: invalid status '{t.get('status')}'")
+        for field in ("owner", "reviewer"):
+            if field in t and (not isinstance(t[field], str) or t[field] not in ("claude", "codex")):
+                rep.error("tasks/queue.json", f"{tid}: '{field}' must be claude or codex when present")
+        if "owner" in t and "reviewer" in t and t["owner"] == t["reviewer"]:
+            rep.error("tasks/queue.json", f"{tid}: owner and reviewer must be different assistants")
         note = t.get("note")
         if not note:
             rep.error("tasks/queue.json", f"{tid}: no 'note' path")
@@ -237,6 +244,10 @@ def check_queue(rep, root, task_notes):
         if fm.get("status") != t.get("status"):
             rep.error(str(rel), f"status mismatch: note '{fm.get('status')}' vs queue '{t.get('status')}' "
                                  "(queue is authoritative; flag, don't guess)")
+        for field in ("owner", "reviewer"):
+            if field in t and fm.get(field) != t[field]:
+                rep.error(str(rel), f"{field} mismatch: note '{fm.get(field)}' vs queue '{t[field]}' "
+                                    "(queue is authoritative; flag, don't guess)")
     for tid, (rel, _) in task_notes.items():
         if tid not in seen:
             rep.warn(str(rel), f"{tid} isn't in tasks/queue.json")

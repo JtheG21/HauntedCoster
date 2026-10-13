@@ -222,5 +222,122 @@ class TestBudgetAndDispatch(Base):
         self.assertTrue(list((self.root / "08 Reviews").glob("HLT-*.md")))
 
 
+class TestOwnershipAndPause(Base):
+    def setUp(self):
+        super().setUp()
+        self.note = self.root / "TASK-0001-X.md"
+        self.note.write_text("---\nid: TASK-0001\nstatus: proposed\nupdated: 2000-01-01\n---\n# Body\n")
+        self.write_queue([task("TASK-0001", note="TASK-0001-X.md")])
+
+    def test_assignment_cli_mirrors_and_preserves_state(self):
+        code, out = self.cli("assign", "TASK-0001", "--owner", "codex", "--reviewer", "claude")
+        self.assertEqual(code, 0, out)
+        t = self.proj().task("TASK-0001")
+        self.assertEqual((t["status"], t["owner"], t["reviewer"]), ("proposed", "codex", "claude"))
+        self.assertIn("owner: codex", self.note.read_text())
+        self.assertIn("reviewer: claude", self.note.read_text())
+        self.assertIn("owner=codex reviewer=claude", self.cli("status")[1])
+
+    def test_partial_assignment_keeps_other_field_and_rejects_conflict(self):
+        p = self.proj()
+        p.assign("TASK-0001", "claude", "codex")
+        p.assign("TASK-0001", None, "codex")
+        self.assertEqual(p.task("TASK-0001")["owner"], "claude")
+        before = self.note.read_text()
+        with self.assertRaises(orch.OrchestratorError):
+            p.assign("TASK-0001", "codex", None)
+        self.assertEqual(self.note.read_text(), before)
+        self.assertEqual(p.task("TASK-0001")["owner"], "claude")
+
+    def test_unassigned_transition_preserves_legacy_note_owner(self):
+        self.note.write_text(self.note.read_text().replace("status: proposed", "owner: executor\nstatus: proposed"))
+        self.proj().approve("TASK-0001", "jg")
+        self.assertIn("owner: executor", self.note.read_text())
+
+    def test_bad_assignments_rejected_without_writes(self):
+        for args in ((), ("--owner", "executor"), ("--owner", "codex", "--reviewer", "codex")):
+            before = self.note.read_text(), (self.root / "tasks/queue.json").read_text()
+            if args == ("--owner", "executor"):
+                with self.assertRaises(SystemExit):
+                    self.cli("assign", "TASK-0001", *args)
+            else:
+                self.assertEqual(self.cli("assign", "TASK-0001", *args)[0], 2)
+            self.assertEqual(before, (self.note.read_text(), (self.root / "tasks/queue.json").read_text()))
+
+    def test_validation_rejects_invalid_optional_fields(self):
+        for field in ("owner", "reviewer"):
+            for value in ("executor", "", None, [], {}):
+                t = task("TASK-0001")
+                t[field] = value
+                self.write_queue([t])
+                self.assertTrue(any(field in e for e in self.proj().validate()))
+        t.update(owner="claude", reviewer="claude")
+        self.write_queue([t])
+        self.assertTrue(any("different assistants" in e for e in self.proj().validate()))
+
+    def test_assigned_dispatch_uses_owner_and_reviewer(self):
+        p = self.proj()
+        p.assign("TASK-0001", "codex", "claude")
+        p.approve("TASK-0001", "jg")
+        p.start("TASK-0001")
+        msg = p.dispatch("TASK-0001", "executor", False)
+        self.assertIn("manually in codex", msg)
+        prompt = (self.root / "tasks/prompts/TASK-0001-executor.md").read_text()
+        self.assertIn("Assigned assistant: codex", prompt)
+        self.assertIn("AGENTS.md", prompt)
+        p.record_exec("TASK-0001", "pass", "")
+        self.assertIn("manually in claude", p.dispatch("TASK-0001", "auditor", False))
+        self.assertIn("Assigned assistant: claude", p.build_prompt(p.task("TASK-0001"), "auditor"))
+
+    def test_pause_resume_cli_mirrors_and_keeps_revisions(self):
+        p = self.proj()
+        p.approve("TASK-0001", "jg")
+        p.start("TASK-0001")
+        p.task("TASK-0001")["revisions"] = 1
+        p.save()
+        self.assertEqual(self.cli("pause", "TASK-0001", "--by", "jg", "--reason", "other work first")[0], 0)
+        p = self.proj()
+        self.assertEqual(p.ready(), [])
+        self.assertIn("status: paused", self.note.read_text())
+        state = json.loads((self.root / "project-state.json").read_text())
+        self.assertEqual(state["task_counts"], {"paused": 1})
+        self.assertEqual(state["ready"], [])
+        for action in (lambda: p.start("TASK-0001"),
+                       lambda: p.record_exec("TASK-0001", "pass", ""),
+                       lambda: p.dispatch("TASK-0001", "executor", False),
+                       lambda: p.pause("TASK-0001", "jg", "again")):
+            with self.assertRaises(orch.OrchestratorError):
+                action()
+        self.assertEqual(self.cli("resume", "TASK-0001", "--by", "jg")[0], 0)
+        t = self.proj().task("TASK-0001")
+        self.assertEqual((t["status"], t["revisions"]), ("in_progress", 1))
+        self.assertEqual(t["history"][-2]["note"], "paused by jg: other work first")
+        self.assertIn("status: in_progress", self.note.read_text())
+
+    def test_pause_and_resume_reject_other_states(self):
+        for status in orch.STATES - {"in_progress"}:
+            p = self.proj()
+            p.task("TASK-0001")["status"] = status
+            with self.assertRaises(orch.OrchestratorError):
+                p.pause("TASK-0001", "jg", "pause")
+        for status in orch.STATES - {"paused"}:
+            p = self.proj()
+            p.task("TASK-0001")["status"] = status
+            with self.assertRaises(orch.OrchestratorError):
+                p.resume("TASK-0001", "jg")
+
+    def test_resume_enforces_budget_and_dependencies(self):
+        p = self.proj()
+        p.task("TASK-0001")["status"] = "paused"
+        p.record_usage("TASK-0001", "api", "executor", 10.0, None, None, "m", "")
+        with self.assertRaisesRegex(orch.OrchestratorError, "monthly API limit"):
+            p.resume("TASK-0001", "jg")
+        self.assertEqual(p.task("TASK-0001")["status"], "paused")
+        p.task("TASK-0001")["depends_on"] = ["TASK-0002"]
+        p.queue["tasks"].append(task("TASK-0002"))
+        with self.assertRaisesRegex(orch.OrchestratorError, "dependencies not done"):
+            p.resume("TASK-0001", "jg")
+
+
 if __name__ == "__main__":
     unittest.main()

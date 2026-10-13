@@ -4,16 +4,16 @@ title: Obsidian Conventions
 type: index
 status: approved
 created: 2026-10-10
-updated: 2026-10-12
+updated: 2026-10-13
 tags:
   - studio/conventions
 ---
 # Obsidian conventions
 
-This is the canonical spec for how project knowledge is stored. `scripts/validate_vault.py` enforces it, and Claude follows it through [[AGENTS]].
+This is the canonical spec for how project knowledge is stored. `scripts/validate_vault.py` enforces it, and both Claude and Codex follow it through [[AGENTS]].
 
 ## 1. Vault layout
-The vault is the `Rg1` repo folder (approved, see [[ADR-0001-Repo-Is-Vault]]). Game code stays in `src/`. Machine files stay in `tasks/`, `project-state.json` and `scripts/`.
+The vault is the `Rg1` repo folder (approved, see [[ADR-0001-Repo-Is-Vault]]). GAME-002 code stays in `games/haunted/`; paused GAME-001 code stays in `src/`. Machine files stay in `tasks/`, `project-state.json` and `scripts/`.
 
 | Folder | Holds |
 |---|---|
@@ -72,7 +72,7 @@ Every note except templates has these fields: `id`, `title`, `type`, `status`, `
 `type` values: `index, overview, design, architecture, roadmap, task, bug, audit, adr, system, playtest, release, review, health, lesson, retro, research, experiment, inbox, agent`.
 
 ### Controlled statuses (no alternative spellings)
-`inbox · research · proposed · ready · in_progress · blocked · in_review · changes_requested · approved · done · archived`
+`inbox · research · proposed · ready · in_progress · paused · blocked · in_review · changes_requested · approved · done · archived`
 
 For **tasks**, `tasks/queue.json` is authoritative and the note mirrors it (the orchestrator updates both):
 
@@ -81,6 +81,7 @@ For **tasks**, `tasks/queue.json` is authoritative and the note mirrors it (the 
 | `proposed` | Planner wrote it, waiting for human plan approval |
 | `ready` | Plan approved, can start once dependencies are `done` |
 | `in_progress` | Executor working on its branch |
+| `paused` | Work suspended at jg's request; resume rechecks dependencies and budget without consuming a revision |
 | `in_review` | Auditor reviewing |
 | `changes_requested` | A check or audit failed (counts toward the 2-revision limit) |
 | `approved` | Audit passed, **waiting for human merge approval** |
@@ -88,12 +89,14 @@ For **tasks**, `tasks/queue.json` is authoritative and the note mirrors it (the 
 | `blocked` | Retry limit hit or a human decision needed |
 | `archived` | Cancelled or superseded |
 
+Optional task queue fields `owner` and `reviewer` identify `claude` or `codex` and are mirrored to the note when present. They must differ when both are set. The queue remains authoritative for explicit assignments; notes on older tasks may retain role labels such as `owner: executor` when the queue has no assignment. Use `orchestrator.py assign`, `pause` and `resume` as documented in [[Workflow]].
+
 For an **ADR**, `approved` means accepted by a human. For an **audit**, `done` means the report is final, and the verdict goes in the `verdict` field.
 
 ## 4. Where each kind of information is authoritative
 | Information | Authority |
 |---|---|
-| Game code | Git (`src/`) |
+| Game code | Git (`games/haunted/` for GAME-002; `src/` for GAME-001) |
 | Task status | `tasks/queue.json` (mirrored to the task note). If they disagree, the validator flags it; nobody guesses |
 | Approved game design | `01 Game Design.md` plus approved ADRs |
 | Research, lessons | Obsidian notes |
