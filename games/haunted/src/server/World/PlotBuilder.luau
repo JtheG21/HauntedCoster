@@ -9,6 +9,7 @@ local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
 local World = require(Config:WaitForChild("World"))
 local Monsters = require(Config:WaitForChild("Monsters"))
 local PlotDecor = require(Config:WaitForChild("PlotDecor"))
+local Cosmetics = require(Config:WaitForChild("Cosmetics"))
 local Build = require(script.Parent.Build)
 local GroundPainter = require(script.Parent.GroundPainter)
 local Props = require(script.Parent.Props)
@@ -282,7 +283,7 @@ end
 -- at the art's lit windows; the Grand Mansion's tower lamp keeps its purple light.
 local HOUSE_ART = { [0] = "house_t0", [1] = "house_t1", [2] = "house_t2" }
 local WARM = Color3.fromRGB(255, 200, 110)
-function PlotBuilder.buildHouse(plot: Model, index: number, tier: number)
+function PlotBuilder.buildHouse(plot: Model, index: number, tier: number, tint: { [string]: Color3 }?)
 	local houseFolder = plot:FindFirstChild("House") :: Folder
 	houseFolder:ClearAllChildren()
 	local t = math.clamp(tier, 0, 2)
@@ -296,6 +297,10 @@ function PlotBuilder.buildHouse(plot: Model, index: number, tier: number)
 	end
 	local anchor = Build.artSlot(houseFolder, HOUSE_ART[t], CFrame.new(World.Plot.house))
 	anchor.Name = "HouseArt"
+	-- A mansion theme (TASK-0047) tints the art's theme slots (Walls, Trim, Roof, Glass...).
+	for part, color in (tint or {}) :: { [string]: Color3 } do
+		anchor:SetAttribute("Tint_" .. part, color)
+	end
 	local label: string
 	if t == 0 then
 		local shack = findBox(0, "Shack")
@@ -327,6 +332,42 @@ function PlotBuilder.buildHouse(plot: Model, index: number, tier: number)
 	local lp = labelPart :: BasePart
 	Build.billboard(lp, label, Color3.fromRGB(255, 220, 170), lp.Size.Y / 2 + 8, 150, 1.1)
 	Build.toFrame(houseFolder, World.plotFrame(index))
+end
+
+-- Exterior decorations (TASK-0047): the owner's validated placements, rebuilt whenever they change. Art only (no
+-- collision: PlacementRules already keeps them off paths and gameplay areas); lamps and candles add a light.
+function PlotBuilder.buildDecorations(plot: Model, index: number, placements: { any })
+	local folder = plot:FindFirstChild("Decorations") :: Folder?
+	if not folder then
+		local f = Instance.new("Folder")
+		f.Name = "Decorations"
+		f.Parent = plot
+		folder = f
+	end
+	local root = folder :: Folder
+	root:ClearAllChildren()
+	for _, p in placements do
+		local item = Cosmetics.ById[p.id]
+		if item and item.look.art then
+			local cf = CFrame.new(p.x, 0, p.z) * CFrame.Angles(0, math.rad(p.rot), 0)
+			local anchor = Build.artSlot(root, item.look.art, cf, { ArtScale = item.look.scale or 1, ArtCull = 220 })
+			anchor.Name = p.key
+			anchor:SetAttribute("Decoration", p.id)
+			if item.look.light then
+				local glow = Build.part({
+					name = "Glow",
+					size = Vector3.new(0.3, 0.3, 0.3),
+					cframe = cf * CFrame.new(0, 2, 0),
+					transparency = 1,
+					collide = false,
+					parent = root,
+				})
+				glow.CanQuery = false
+				Build.light(glow, Color3.fromRGB(255, 160, 80), 14, 1)
+			end
+		end
+	end
+	Build.toFrame(root, World.plotFrame(index))
 end
 
 -- Cosmetic trophies for journal milestones (no gameplay effect).
