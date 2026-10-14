@@ -10,6 +10,8 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Monsters = require(Shared:WaitForChild("Config"):WaitForChild("Monsters"))
 local CaptureRules = require(Shared:WaitForChild("Rules"):WaitForChild("CaptureRules"))
+local SoundBank = require(Shared:WaitForChild("Config"):WaitForChild("SoundBank"))
+local Sfx = require(script.Parent.Parent.Sfx)
 local Theme = require(script.Parent.Theme)
 local State = require(script.Parent.Parent.State)
 
@@ -117,6 +119,7 @@ local function startCapture()
 		return
 	end
 	closeCard()
+	Sfx.play("capture_start")
 	active = {
 		period = result.period,
 		zoneWidth = result.zoneWidth,
@@ -272,6 +275,12 @@ function CaptureUI.mount(gui: ScreenGui, toastFn: (string, string?) -> ())
 	end)
 	local endedEvent = State.remote("CaptureEnded") :: RemoteEvent
 	endedEvent.OnClientEvent:Connect(function(info)
+		if type(info) == "table" then
+			local role = SoundBank.captureEndRole(info.result)
+			if role then
+				Sfx.play(role)
+			end
+		end
 		if type(info) == "table" and info.result == "timeout" then
 			toast("You hesitated too long and it wandered off.", "error")
 		elseif type(info) == "table" and info.result == "startled" then

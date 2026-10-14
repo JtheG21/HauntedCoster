@@ -1,6 +1,8 @@
 --!strict
 -- Shared look for the haunted-attraction UI, plus tiny constructors so screens stay short.
 
+local Sfx = require(script.Parent.Parent.Sfx)
+
 local Theme = {}
 
 Theme.Colors = {
@@ -108,7 +110,10 @@ function Theme.button(parent: Instance, text: string, onClick: () -> (), props: 
 	b.Size = UDim2.fromOffset(120, 40)
 	apply(b, props)
 	Theme.corner(b, 8)
-	b.Activated:Connect(onClick)
+	b.Activated:Connect(function()
+		Sfx.play("ui_click")
+		onClick()
+	end)
 	b.Parent = parent
 	return b
 end

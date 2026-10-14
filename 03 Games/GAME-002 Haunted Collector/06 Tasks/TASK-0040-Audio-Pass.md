@@ -57,6 +57,14 @@ Give the game's existing moments sound with free Creator Store audio sourced by 
 - **Gap against AC1:** two shortlisted ids have no measured length in the report and are therefore unproven: `amb_woodland` 9112764040 and `monster_call` 129823359634605. They must be probed (IsLoaded and `TimeLength`) before jg's tour. Every other shortlisted id loaded with a length inside its role band.
 - **Next:** probe those two (or swap them), run the shortlist tour in Studio for jg (AC2), then build `SoundBank`, `Sfx`, hooks and mute toggle (AC3, AC4).
 
+### Implemented with placeholder sounds 2026-10-14
+jg deferred the by-ear choice ("use placeholders"), so the code path is built and wired with the first proven shortlist candidate per role. These ids are **placeholders, not jg's picks**.
+- **Added:** `src/shared/Config/SoundBank.luau` (data + pure mapping: habitat to ambience, capture ending to role), `src/client/Sfx.luau` (SoundGroup, fails silent, rate-limited one-shots, one looping ambience, mute), `tests/SoundBank.spec.luau` (5 tests).
+- **Hooks (client only, no server or remote changes):** toasts and button clicks (`Hud.toast`, `Theme.button`), capture start and end (`CaptureUI`), retaliation knockdown (`LocalWorld`), ride start/end plus payout, inspect card (monster call), habitat ambience, rotation warning phase, and coin jumps (`init.client.luau`). HUD **Sound: ON/OFF** button mutes the group.
+- **Avoided the two unproven ids** (amb_woodland 9112764040, monster_call 129823359634605) by taking the next candidate.
+- **Verification:** `scripts/check.sh` passes (145 specs). **Not done:** no Studio run yet, so AC5 (2-player session, sounds at the right moments, no script errors) is unproven, and nothing has been heard.
+- **Open:** AC1 needs the two flagged ids probed or dropped from the shortlist; AC2 (jg picks by ear) is open, and swapping ids is a data-only change in `SoundBank.luau` (`placeholder = true` marks the set). `Sound References` rows wait for the real picks.
+
 
 ## Audits
 

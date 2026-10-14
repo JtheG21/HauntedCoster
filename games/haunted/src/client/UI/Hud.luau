@@ -16,6 +16,7 @@ local RotationRules = require(ReplicatedStorage.Shared:WaitForChild("Rules"):Wai
 local HabitatState = require(ReplicatedStorage.Shared:WaitForChild("HabitatState"))
 local Theme = require(script.Parent.Theme)
 local State = require(script.Parent.Parent.State)
+local Sfx = require(script.Parent.Parent.Sfx)
 
 local Hud = {}
 
@@ -30,6 +31,7 @@ local player = Players.LocalPlayer
 local toastHolder: Frame
 local editorButton: TextButton
 local lightButton: TextButton? = nil
+local muteButton: TextButton? = nil
 
 -- Keeps the Light button label in step however the light was toggled (button, F or DPadDown).
 function Hud.setLight(on: boolean)
@@ -38,10 +40,18 @@ function Hud.setLight(on: boolean)
 	end
 end
 
+-- Keeps the Sound button label in step with the mute state.
+function Hud.setMuteLabel(muted: boolean)
+	if muteButton then
+		muteButton.Text = if muted then "Sound: OFF" else "Sound: ON"
+	end
+end
+
 function Hud.toast(text: string, kind: string?)
 	if not toastHolder then
 		return
 	end
+	Sfx.play(if kind == "error" then "toast_error" else "toast")
 	local color = if kind == "success"
 		then Theme.Colors.good
 		elseif kind == "error" then Theme.Colors.bad
@@ -266,6 +276,9 @@ function Hud.mount(gui: ScreenGui, cb: Callbacks)
 	lightButton = Theme.button(bar2, "Light: ON", function()
 		Hud.setLight(cb.toggleLight())
 	end, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 1 })
+	muteButton = Theme.button(bar2, "Sound: ON", function()
+		Hud.setMuteLabel(Sfx.toggleMuted())
+	end, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 0 })
 	Theme.button(bar2, "Journal", cb.openJournal, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 2 })
 	Theme.button(bar2, "Mansion", cb.openMansion, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 3 })
 	editorButton = Theme.button(bar2, "Edit Track", cb.openEditor, {

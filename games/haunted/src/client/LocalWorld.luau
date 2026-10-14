@@ -14,6 +14,7 @@ local Monsters = require(Config:WaitForChild("Monsters"))
 local Habitats = require(Config:WaitForChild("Habitats"))
 local HabitatState = require(ReplicatedStorage.Shared:WaitForChild("HabitatState"))
 local State = require(script.Parent.State)
+local Sfx = require(script.Parent.Sfx)
 
 local LocalWorld = {}
 
@@ -188,6 +189,7 @@ local function watchKnockdown(character: Model)
 		if left <= 0 then
 			return
 		end
+		Sfx.play("retaliation_sting")
 		hum:ChangeState(Enum.HumanoidStateType.Physics)
 		local root = character:FindFirstChild("HumanoidRootPart")
 		if root and root:IsA("BasePart") then
