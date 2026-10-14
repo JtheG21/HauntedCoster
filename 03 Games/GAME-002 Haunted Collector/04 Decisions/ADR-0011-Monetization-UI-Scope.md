@@ -1,5 +1,5 @@
 ---
-id: ADR-0009
+id: ADR-0011
 title: Monetization UI Scope
 type: adr
 project: GAME-002
@@ -10,7 +10,7 @@ related:
   - "[[RSH-20261013-Haunted-Monetization-Discovery]]"
   - "[[SYS-Haunted-Monetization-UI|Monetization UI Baseline]]"
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-14
 tags:
   - workflow/decision
   - game/monetization
@@ -38,3 +38,6 @@ These approve product scope and ownership direction. They do not approve prices,
 - Cosmetic identity stays separate from natural variants and gameplay strength. Existing Coin progression remains independent.
 - Every category needs finished assets meeting [[3D Model Quality Baseline]]; new entitlements, equipment persistence and purchase processing require scoped tasks and verification.
 - Seasonal/events, social customization and convenience are future work. Permanent catalog does not require fabricated limited-time urgency.
+
+## Revision note
+2026-10-14: renumbered from ADR-0009 to ADR-0011 because ADR-0009 (Shared Production Foundation) and ADR-0010 (Client-Reported Gaze) landed on `main` first (duplicate-id CI failure). Content and approval (jg, 2026-10-13) are unchanged.

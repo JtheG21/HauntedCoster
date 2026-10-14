@@ -15,7 +15,7 @@ tags:
 # Haunted Collector Monetization Discovery
 
 ## Question
-**Forward scope reference (2026-10-13):** [[SYS-Haunted-Monetization-UI|Monetization UI Baseline]] and [[ADR-0009-Monetization-UI-Scope]] now carry jg's approved category, acquisition and equipment choices. This research record preserves discovery history; its previously unresolved currency and equipment choices were resolved in that ADR. Its measurements and original-source gaps remain unchanged.
+**Forward scope reference (2026-10-13):** [[SYS-Haunted-Monetization-UI|Monetization UI Baseline]] and [[ADR-0011-Monetization-UI-Scope]] now carry jg's approved category, acquisition and equipment choices. This research record preserves discovery history; its previously unresolved currency and equipment choices were resolved in that ADR. Its measurements and original-source gaps remain unchanged.
 
 Which cosmetic purchases fit Haunted Collector, and what evidence is needed before implementation? This closes the current discovery pass with a provisional recommendation; it does not authorize implementation, prices, commerce configuration, or a final Claude handoff.
 

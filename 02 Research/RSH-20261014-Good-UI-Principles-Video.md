@@ -61,7 +61,7 @@ Observed in the transcript only (speaker claims, not measured facts). Timestamps
 - Icon-first labeling suits a haunted theme but may fail for abstract items (cosmetic categories) that need a label. *(confidence: low; test in a Shop mockup)*
 
 ## Relevance to our game
-- **Shop / monetization UI**: [[SYS-Haunted-Monetization-UI]] has five categories, filters and acquisition labels. Best overlap: *collapse to one entry, detail on demand* and *no text that repeats an icon*. Acquisition and ownership states stay explicit, even as labels. That rule wins ([[ADR-0009-Monetization-UI-Scope]]).
+- **Shop / monetization UI**: [[SYS-Haunted-Monetization-UI]] has five categories, filters and acquisition labels. Best overlap: *collapse to one entry, detail on demand* and *no text that repeats an icon*. Acquisition and ownership states stay explicit, even as labels. That rule wins ([[ADR-0011-Monetization-UI-Scope]]).
 - **HUD**: small, icon-led always-visible set. Journal and Mansion open from single, consistently iconed buttons.
 - **Theme**: palette and font stay in `games/haunted/src/client/UI/Theme.luau` as one source, not per screen.
 - Related: [[UI References]], [[RSH-20261013-Haunted-Monetization-Discovery]].
