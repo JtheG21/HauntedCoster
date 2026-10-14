@@ -10,6 +10,7 @@ tags:
   - research
 related:
   - "[[RSH-20261014-Good-UI-Principles-Video]]"
+  - "[[RSH-20261014-Roblox-Game-95k-Monthly-Revenue-Video]]"
 ---
 # Video Research Prompt
 
@@ -22,32 +23,59 @@ Repeatable way to turn a video into one `RSH-` note. Draft process, not yet appr
 
 ## Prompt (paste into Claude Code)
 
+Local engine only (decided by jg, 2026-10-14; `WATCH_ENGINE=local` in `~/.config/watch/.env`).
+
 ```
-/watch <VIDEO_URL>
+/watch:watch <VIDEO_URL>
 
-Then write ONE research note for GAME-002 from this video.
+Local engine only. Write ONE research note for GAME-002 from this video.
+Context (required; ask me if blank): <the feature or decision this informs, e.g. "Journal UI redesign">
+Not tied to the branch's current task unless stated here: <task id or "none">
 
-Context for relevance: <one line: the feature or task this is for, e.g. "Journal UI redesign">
+Evidence recipe:
+1. Transcript pass first; read the captions and pick cue timestamps.
+2. Cue frames at --resolution 1024 for every "as you can see" moment, chart, dashboard or UI.
+3. Sparse sweep (--fps 0.1, or keyframes) over any stretch with no scene changes; review as contact sheets.
+   Skip steps 2-3 only if the transcript shows no on-screen visuals are referenced, and say so.
+4. If the network drops, reuse the already-downloaded local media. If media fails, captions-only and confidence low.
+5. Prefer on-screen text over auto-captions when they conflict, and note the conflict.
 
 Do:
-1. Check for an existing note first: grep -rl "<video id or title>" "02 Research" and update it instead of duplicating.
-2. Check the matching folder in "10 References/" for related material and name the reference you compared against. Do not edit anything there.
-3. Create "02 Research/RSH-<YYYYMMDD>-<Short-Topic>.md" from "99 Templates/T - Research.md". Use resolved values (real date, title). Keep every template heading. type: research, status: research, confidence: low unless frames AND audio/captions were both reviewed.
-4. Sources table: video title, uploader, length, URL, access date. Add "Evidence limits": caption language/quality, whether frames were actually viewed.
-5. "Observed mechanics (verified)": only what the video says or shows, each with a timestamp (m:ss). Mark speaker opinions as opinions. No measured claims without evidence.
-6. Add "Visual check needed": timestamps where the transcript alone is insufficient. If frames were not viewed, say so.
+1. grep -rl "<video id>" "02 Research"; update an existing note instead of duplicating.
+2. Check the matching folder in "10 References/"; name what you compared against, or say none found. List the related RSH- notes you link. Edit nothing there.
+3. Create "02 Research/RSH-<YYYYMMDD>-<Short-Topic>.md" from "99 Templates/T - Research.md". Real values (date, title). Keep every template heading. type: research, status: research, project: GAME-002. Put a "> Draft" line under the title.
+   Confidence: low = captions only; medium = captions AND frames reviewed across the whole video; never high from one creator's video.
+4. Sources table: title, uploader, length, URL, access date. "Evidence limits": caption language/quality; frames viewed individually / via contact sheet / not viewed (give ranges).
+5. "Observed mechanics (verified)": max ~10 bullets, each timestamped (m:ss) and tagged (speaker claim) / (shown on screen) / (opinion). No measured claims without evidence. Dashboard screenshots are still the creator's own unverified numbers.
+6. "Visual check needed": timestamps still unresolved after the frame passes.
 7. "Hypotheses": each with confidence and how we would test it.
-8. "Relevance to our game": link real notes with [[ID-Title]] (SYS-, ADR-, TASK-). Server authority, approved ADRs and AGENTS.md win over anything in the video.
+8. "Relevance to our game": link real notes with [[ID-Title]] (SYS-, ADR-, TASK-). Add one "Transferability" line (genre, audience, platform mismatch with GAME-002). Server authority, approved ADRs and AGENTS.md win over anything in the video.
 9. "Original implementation ideas": our own. No copied assets, names, layouts or code.
-10. "Recommendations" max 3. "Needs human review" lists every unverified conclusion. Put a "> Draft" line under the title.
+10. "Recommendations" max 3. "Needs human review" lists every unverified conclusion.
 11. Run python3 scripts/validate_vault.py and fix issues in this note only.
 
-Don't: save the transcript, download media into the vault, create LES- or ADR- notes, or change existing approved notes.
+Don't: save the transcript, put media in the vault, create LES- or ADR- notes, change approved notes, touch tasks/queue.json, or use Gemini. Delete only this run's disposable work dir.
 
-End with: note path, what is unverified, and which timestamps I should view myself.
+End with: note path; what changed in confidence between passes; what is unverified; which timestamps I should view myself.
 ```
 
-## Long videos: segmented Gemini (`scripts/watch_chunked.py`)
+## Evidence recipe: commands
+Set `S` to a scratchpad dir and `W` to the watch skill's `scripts/watch.py`.
+
+```bash
+# 1. captions + metadata, no frames
+python3 $W "<URL>" --detail transcript --out-dir $S
+# 2. cue frames (timestamps chosen from the transcript)
+python3 $W "<URL>" --detail transcript --timestamps 0:21,1:03,4:29 --resolution 1024 --out-dir $S
+# 3. sparse sweep over a range, reusing the local video.mp4 from step 2 if the network is flaky
+python3 $W "<URL or local video.mp4>" --detail efficient --start 5:33 --end 16:38 --fps 0.1 --max-frames 70 --resolution 640 --no-dedup --no-whisper --out-dir $S
+```
+
+Why: the default scene-change sampler finds no frames in talking-head or slide-text stretches (2026-10-14: [[RSH-20261014-Roblox-Game-95k-Monthly-Revenue-Video]] had none past 5:33). Cue frames at 1024 px made dashboard and chart numbers legible that 512 px did not. Tile many sweep frames into a contact sheet with `ffmpeg ... -vf "scale=480:-2,tile=4x4"` to review them cheaply.
+
+## Optional, not default: segmented Gemini (`scripts/watch_chunked.py`)
+The default is now local only (see above). Kept for reference; use it only if jg asks for the Gemini engine.
+
 Whole-video Gemini requests for long videos often fail with HTTP 503 (2026-10-14: a 27-minute video failed on every attempt while short clips succeeded). The wrapper runs the `/watch` Gemini engine in 2-5 minute segments with retries and writes one combined report outside the vault.
 
 ```bash
