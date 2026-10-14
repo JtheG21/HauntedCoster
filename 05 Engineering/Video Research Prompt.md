@@ -47,6 +47,20 @@ Don't: save the transcript, download media into the vault, create LES- or ADR- n
 End with: note path, what is unverified, and which timestamps I should view myself.
 ```
 
+## Long videos: segmented Gemini (`scripts/watch_chunked.py`)
+Whole-video Gemini requests for long videos often fail with HTTP 503 (2026-10-14: a 27-minute video failed on every attempt while short clips succeeded). The wrapper runs the `/watch` Gemini engine in 2-5 minute segments with retries and writes one combined report outside the vault.
+
+```bash
+python3 scripts/watch_chunked.py "<VIDEO_URL>" --dry-run        # show the segment plan, no requests
+python3 scripts/watch_chunked.py "<VIDEO_URL>" --question "<what you need>" --segment 300 --retries 3
+```
+
+- It prints the path of `report.md` (a temp dir by default). Use it as evidence for the `RSH-` note; never copy it into the vault whole.
+- **Free-tier limit:** `gemini-3.7-flash` allowed 20 requests per day on the free tier (2026-10-14), and retries count. A daily-quota 429 stops the run. Plan roughly one request per 5 minutes of video plus retries.
+- **No silent fallback.** Failed segments are listed in the report. Decide yourself whether to rerun later or use `watch.py --engine local`.
+- **Provenance.** Gemini's answer is secondary evidence. Segments can contradict each other (it did once on 2026-10-14). Say so in "Evidence limits" and keep `confidence` at `medium` or lower until frames are viewed.
+- Tests: `python3 -m unittest tests.test_watch_chunked`.
+
 ## Optional NotebookLM pre-pass
 
 ```
