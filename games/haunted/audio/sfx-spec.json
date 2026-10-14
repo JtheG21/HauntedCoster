@@ -1,0 +1,154 @@
+{
+ "name": "haunted",
+ "roles": [
+  {
+   "name": "amb_cemetery",
+   "query": "graveyard night ambience",
+   "kind": "SoundEffect",
+   "min_len": 15,
+   "max_len": 300,
+   "volume": 0.25,
+   "looped": true
+  },
+  {
+   "name": "amb_woodland",
+   "query": "forest night ambience",
+   "kind": "SoundEffect",
+   "min_len": 15,
+   "max_len": 300,
+   "volume": 0.25,
+   "looped": true
+  },
+  {
+   "name": "amb_spider_woodland",
+   "query": "creepy forest ambience",
+   "kind": "SoundEffect",
+   "min_len": 15,
+   "max_len": 300,
+   "volume": 0.25,
+   "looped": true
+  },
+  {
+   "name": "amb_settlement",
+   "query": "abandoned village wind ambience",
+   "kind": "SoundEffect",
+   "min_len": 15,
+   "max_len": 300,
+   "volume": 0.25,
+   "looped": true
+  },
+  {
+   "name": "amb_hub",
+   "query": "spooky wind ambience",
+   "kind": "SoundEffect",
+   "min_len": 15,
+   "max_len": 300,
+   "volume": 0.25,
+   "looped": true
+  },
+  {
+   "name": "capture_start",
+   "query": "magic whoosh",
+   "kind": "SoundEffect",
+   "min_len": 0.2,
+   "max_len": 2.5,
+   "volume": 0.5
+  },
+  {
+   "name": "capture_success",
+   "query": "magic chime success",
+   "kind": "SoundEffect",
+   "min_len": 0.3,
+   "max_len": 3,
+   "volume": 0.6
+  },
+  {
+   "name": "capture_fled",
+   "query": "ghost whoosh",
+   "kind": "SoundEffect",
+   "min_len": 0.2,
+   "max_len": 3,
+   "volume": 0.5
+  },
+  {
+   "name": "retaliation_sting",
+   "query": "horror sting",
+   "kind": "SoundEffect",
+   "min_len": 0.5,
+   "max_len": 4,
+   "volume": 0.6
+  },
+  {
+   "name": "monster_call",
+   "query": "ghost moan",
+   "kind": "SoundEffect",
+   "min_len": 0.5,
+   "max_len": 6,
+   "volume": 0.5
+  },
+  {
+   "name": "ride_start",
+   "query": "train whistle",
+   "kind": "SoundEffect",
+   "min_len": 0.5,
+   "max_len": 4,
+   "volume": 0.5
+  },
+  {
+   "name": "ride_end",
+   "query": "train brake",
+   "kind": "SoundEffect",
+   "min_len": 0.5,
+   "max_len": 4,
+   "volume": 0.4
+  },
+  {
+   "name": "coins",
+   "query": "coins",
+   "kind": "SoundEffect",
+   "min_len": 0.1,
+   "max_len": 2,
+   "volume": 0.5
+  },
+  {
+   "name": "payout",
+   "query": "cash register",
+   "kind": "SoundEffect",
+   "min_len": 0.2,
+   "max_len": 2.5,
+   "volume": 0.5
+  },
+  {
+   "name": "rotation_warning",
+   "query": "bell toll",
+   "kind": "SoundEffect",
+   "min_len": 0.5,
+   "max_len": 9,
+   "volume": 0.5
+  },
+  {
+   "name": "ui_click",
+   "query": "ui click",
+   "kind": "SoundEffect",
+   "min_len": 0.05,
+   "max_len": 0.6,
+   "volume": 0.4
+  },
+  {
+   "name": "toast",
+   "query": "notification pop",
+   "kind": "SoundEffect",
+   "min_len": 0.05,
+   "max_len": 1.2,
+   "volume": 0.4
+  },
+  {
+   "name": "toast_error",
+   "query": "ui error",
+   "kind": "SoundEffect",
+   "min_len": 0.05,
+   "max_len": 1.2,
+   "volume": 0.4
+  }
+ ]
+}
