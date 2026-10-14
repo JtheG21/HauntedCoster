@@ -87,7 +87,7 @@ function ContainmentService.refreshVisuals(player: Player)
 					old:Destroy()
 				end
 				local active = slot <= slots
-				ped.Transparency = if active then 0 else 0.7
+				ped.Transparency = 1 -- the plinth is art (TASK-0046); locked slots say so on the label
 				ped:SetAttribute("Active", active)
 				local label = ped:FindFirstChild("Label")
 				local text = label and label:FindFirstChild("Text")

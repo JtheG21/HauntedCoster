@@ -39,8 +39,7 @@ type PlotTrain = {
 	prompt: ProximityPrompt?,
 }
 
-local RAIL_COLOR = Color3.fromRGB(60, 50, 70)
-local TIE_COLOR = Color3.fromRGB(70, 50, 40)
+local RAIL_COLOR = Color3.fromRGB(46, 46, 56) -- dark iron rails over the art ties (TASK-0046)
 local GLOW = Color3.fromRGB(170, 110, 255)
 
 local started = false
@@ -101,10 +100,13 @@ local function buildCart(parent: Instance): (Model, Seat)
 		cframe = CFrame.new(),
 		color = Color3.fromRGB(35, 25, 45),
 		material = Enum.Material.Wood,
+		transparency = 1,
 		collide = false,
 		parent = cart,
 	})
 	cart.PrimaryPart = base
+	-- Art (TASK-0046): the lacquered coffin-gondola, welded to an anchor so it rides with every PivotTo.
+	Build.artSlot(cart, "ghost_cart", base.CFrame * CFrame.new(0, -0.5, 0), { ArtFollow = true })
 	local function seat(name: string, z: number): Seat
 		local s = Instance.new("Seat")
 		s.Name = name
@@ -113,6 +115,7 @@ local function buildCart(parent: Instance): (Model, Seat)
 		s.CFrame = base.CFrame * CFrame.new(0, 1, z)
 		s.Color = Color3.fromRGB(110, 30, 50)
 		s.Material = Enum.Material.Fabric
+		s.Transparency = 1 -- the cushions are art
 		s.CanCollide = false
 		s.Parent = cart
 		return s
@@ -128,6 +131,7 @@ local function buildCart(parent: Instance): (Model, Seat)
 		cframe = base.CFrame * CFrame.new(0, 1.4, -3.2),
 		color = Color3.fromRGB(230, 225, 210),
 		material = Enum.Material.SmoothPlastic,
+		transparency = 1, -- the figurehead is art
 		collide = false,
 		parent = cart,
 	})
@@ -137,6 +141,7 @@ local function buildCart(parent: Instance): (Model, Seat)
 		cframe = base.CFrame * CFrame.new(0, 2.6, -3.2),
 		color = GLOW,
 		material = Enum.Material.Neon,
+		transparency = 1, -- the art lamp glows; this part keeps the light
 		collide = false,
 		parent = cart,
 	})
@@ -156,48 +161,30 @@ end
 
 local function buildPiece(parent: Instance, kind: string, pos: Vector3, dir: Vector3)
 	local cf = CFrame.lookAt(pos, pos + dir)
+	-- Art (TASK-0046): both pieces stand on the ground under the rail point; neither collides.
+	local ground = cf * CFrame.new(0, -Track.RailHeight, 0)
 	if kind == "ScareArch" then
-		for _, side in { -1, 1 } do
-			Build.part({
-				name = "ArchPost",
-				size = Vector3.new(0.8, 9, 0.8),
-				cframe = cf * CFrame.new(side * 3.4, 4.5, 0),
-				color = Color3.fromRGB(40, 30, 30),
-				material = Enum.Material.Wood,
-				collide = false,
-				parent = parent,
-			})
-		end
-		Build.part({
-			name = "ArchTop",
-			size = Vector3.new(8, 1, 1),
-			cframe = cf * CFrame.new(0, 9, 0),
-			color = Color3.fromRGB(40, 30, 30),
-			material = Enum.Material.Wood,
-			collide = false,
-			parent = parent,
-		})
+		Build.artSlot(parent, "scare_arch", ground)
 		local skull = Build.part({
 			name = "ArchSkull",
-			size = Vector3.new(2, 2, 2),
-			cframe = cf * CFrame.new(0, 10.4, 0),
-			color = Color3.fromRGB(235, 230, 215),
-			shape = Enum.PartType.Ball,
+			size = Vector3.new(1, 1, 1),
+			cframe = ground * CFrame.new(0, 11.3, 0),
+			transparency = 1,
 			collide = false,
 			parent = parent,
 		})
 		Build.light(skull, Color3.fromRGB(255, 80, 60), 14, 1.5)
 	elseif kind == "FogTunnel" then
+		Build.artSlot(parent, "fog_tunnel", ground)
 		local tunnel = Build.part({
 			name = "FogTunnel",
 			size = Vector3.new(7, 7, 10),
 			cframe = cf * CFrame.new(0, 3.5, 0),
-			color = Color3.fromRGB(60, 70, 90),
-			material = Enum.Material.Glass,
-			transparency = 0.6,
+			transparency = 1,
 			collide = false,
 			parent = parent,
 		})
+		tunnel.CanQuery = false
 		local smoke = Instance.new("Smoke")
 		smoke.Color = Color3.fromRGB(180, 190, 220)
 		smoke.Opacity = 0.15
@@ -242,40 +229,24 @@ local function rebuild(index: number, points: { TrackRules.P }, pieces: { TrackR
 					parent = folder,
 				})
 			end
-			Build.part({
-				name = "Tie",
-				size = Vector3.new(3.4, if i % 2 == 0 then 0.25 else 0.28, 0.7), -- alternate: ties overlap on tight bends
-				cframe = cf * CFrame.new(0, -0.25, 0),
-				color = TIE_COLOR,
-				material = Enum.Material.Wood,
-				collide = false,
-				parent = folder,
-			})
+			-- Art (TASK-0046): a sleeper with iron chairs under each segment, a timber trestle every fourth.
+			Build.artSlot(folder, "track_tie", cf, { ArtCull = 140 })
 			if i % 4 == 0 then
-				Build.part({
-					name = "Support",
-					size = Vector3.new(0.5, y, 0.5),
-					cframe = CFrame.new(a.X, y / 2 - 0.2, a.Z),
-					color = TIE_COLOR,
-					material = Enum.Material.Wood,
-					collide = false,
-					parent = folder,
-				})
+				local flat = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+				local at = Vector3.new(a.X, 0, a.Z)
+				Build.artSlot(
+					folder,
+					"track_trestle",
+					if flat.Magnitude > 0.01 then CFrame.lookAt(at, at + flat) else CFrame.new(at),
+					{ ArtStretchY = (y - 0.2) / 4, ArtCull = 200 }
+				)
 			end
 		end
 	end
 	-- Control-point markers (glowing posts) so the route reads clearly
 	for _, p in points do
-		local post = Build.part({
-			name = "Waypoint",
-			size = Vector3.new(0.4, 3, 0.4),
-			cframe = CFrame.new(toWorld(index, p, 1.5)),
-			color = GLOW,
-			material = Enum.Material.Neon,
-			collide = false,
-			parent = folder,
-		})
-		post.Transparency = 0.3
+		-- Art (TASK-0046): an iron marker post with a caged ghost-flame.
+		Build.artSlot(folder, "track_marker", CFrame.new(toWorld(index, p, 0)))
 	end
 	for _, piece in pieces do
 		local p = points[piece.i]
@@ -311,53 +282,34 @@ local function rebuild(index: number, points: { TrackRules.P }, pieces: { TrackR
 		Enum.Material.WoodPlanks,
 		World.PlotAngles[index] -- square with its plot
 	)
+	station.Transparency = 1 -- the deck, canopy and lanterns are art (TASK-0046); this part keeps the prompt
 	Build.billboard(station, "Ghost Train", GLOW, 10, 120, 1.1)
-	-- Station presentation (TASK-0030): a canopy on four iron posts with two hanging lanterns and a name
-	-- board. None of it collides, so the cart, riders and the Ride prompt work exactly as before.
-	local function deco(name: string, size: Vector3, offset: CFrame, color: Color3, material: Enum.Material): Part
-		return Build.part({
-			name = name,
-			size = size,
-			cframe = station.CFrame * offset,
-			color = color,
-			material = material,
+	local base = station.CFrame * CFrame.new(0, -0.5, 0)
+	Build.artSlot(folder, "train_station", base)
+	for _, s2 in { -1, 1 } do
+		local glass = Build.part({
+			name = "StationLantern",
+			size = Vector3.new(0.6, 0.6, 0.6),
+			cframe = base * CFrame.new(s2 * 2.6, 7.4, 0),
+			transparency = 1,
 			collide = false,
 			parent = folder,
 		})
-	end
-	for _, c in { { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } } do
-		deco(
-			"CanopyPost",
-			Vector3.new(0.4, 8, 0.4),
-			CFrame.new(c[1] * 3.3, 4.5, c[2] * 3.3),
-			Color3.fromRGB(25, 25, 28),
-			Enum.Material.Metal
-		)
-	end
-	for _, s2 in { -1, 1 } do
-		deco(
-			"CanopyRoof",
-			Vector3.new(8.4, 0.4, 4.6),
-			CFrame.new(0, 9, s2 * 2) * CFrame.Angles(s2 * math.rad(18), 0, 0),
-			Color3.fromRGB(58, 42, 70),
-			Enum.Material.Slate
-		)
-		local glass = deco(
-			"StationLantern",
-			Vector3.new(0.8, 1.1, 0.8),
-			CFrame.new(s2 * 2.6, 7.4, 0),
-			Props.C.lantern,
-			Enum.Material.Neon
-		)
+		glass.CanQuery = false
 		Build.light(glass, Props.C.lanternLight, 20, 1.6)
 	end
-	deco(
-		"StationBoard",
-		Vector3.new(6, 1.2, 0.3),
-		CFrame.new(0, 8.1, -3.5),
-		Color3.fromRGB(70, 52, 38),
-		Enum.Material.Wood
-	)
+	local board = Build.part({
+		name = "StationBoard",
+		size = Vector3.new(5.6, 1.0, 0.3),
+		cframe = base * CFrame.new(0, 8.1, -3.5),
+		transparency = 1,
+		collide = false,
+		parent = folder,
+	})
+	board.CanQuery = false
+	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
+		Build.lettering(board, face, "Ghost Train")
+	end
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.Name = "Ride"
 	prompt.ActionText = "Ride Ghost Train"
