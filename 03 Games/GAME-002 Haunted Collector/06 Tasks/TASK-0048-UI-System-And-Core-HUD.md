@@ -3,7 +3,7 @@ id: TASK-0048
 title: "UI System and Core HUD"
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -56,6 +56,12 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 
 ---
 ## Implementation record
+- **Theme (`client/UI/Theme.luau`):** ink panels with a gilt gradient edge, parchment text, Grenze Gotisch display (headings), Builder Sans body/bold; touch-sized buttons (44 px min) with hover/press feedback, a shared gold controller selection ring, primary/secondary/danger/robux styles; chips, key hints, modal windows with one close button, tabs, scrolling areas, loading/empty/error notices. The existing API is kept, so every screen restyled at once.
+- **Navigation (`client/UI/Nav.luau`):** one menu at a time; Escape or controller B goes back (an inner step first, e.g. Shop details to catalog) or closes; controller focus lands in the opened screen and returns to the dock.
+- **HUD:** coin purse with income, objective card, carry/chase bar, rotation line, area banner, and a dock (Lantern, Journal, Mansion, Shop, Edit Track) whose hints follow the last input (keys J/M/B/F, D-pad and Select on controller, none on touch); no screen opens by itself.
+- **3D previews (`client/UI/Preview.luau`):** ViewportFrame previews built from the baked art, drag to turn, never touching the live world.
+- **Commit:** the client UI for TASK-0048/0049/0051 landed in one commit because the screens share the new theme and navigation.
+- **Not verified:** layouts on a phone, tablet or with a controller (Studio stalled at plugin initialisation for the rest of this session; device checks need jg).
 
 ## Audits
 

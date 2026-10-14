@@ -3,7 +3,7 @@ id: TASK-0051
 title: "Shop, Inventory and Decoration Editor"
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: high
 risk: high
 owner: executor
@@ -57,6 +57,9 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 
 ---
 ## Implementation record
+- **Curio Shop:** category tabs (five categories), filters (All, Owned, Coins, Robux, Rewards), cards with live 3D previews or an effect swatch and an acquisition or Owned/Equipped chip; details view with a rotatable preview or a replayable effect preview (played beside the player, local only), compatibility text, exact Coin price with affordability, Robux button only for a configured product (otherwise "isn't on sale yet"), reward progress and Claim; owned actions: per-ghost Equip/Remove for skins and auras, Equip/Remove for capture effects, Apply/Remove for themes, Place for decorations. Back returns to the same tab, filter and list. Saving-unavailable and loading states disable actions with a clear message. Re-renders only when shown state changes.
+- **Decoration editor:** see-through preview following the mouse, touch tap or screen centre (controller), grid snap with a Fine mode, R/bumpers rotate 15 degrees, live valid/invalid colour from the shared PlacementRules, Confirm (click, Enter, X), Cancel restores, Store returns a placed decoration, list of owned decorations with counts and placed ones to move.
+- **Not verified in Studio** (stall); controller/touch/device checks need jg.
 
 ## Audits
 

@@ -14,6 +14,11 @@ local CaptureUI = require(script.UI.CaptureUI)
 local MansionUI = require(script.UI.MansionUI)
 local JournalUI = require(script.UI.JournalUI)
 local TrackEditor = require(script.UI.TrackEditor)
+local ShopUI = require(script.UI.ShopUI)
+local DecorEditor = require(script.UI.DecorEditor)
+local Nav = require(script.UI.Nav)
+local Effects = require(script.Art.Effects)
+local Cosmetics = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("Cosmetics"))
 
 local BuildInfo = require(ReplicatedStorage.Shared.BuildInfo)
 
@@ -65,33 +70,94 @@ HauntedTrees.start()
 require(script.DevProbe).start() -- Studio-only; inert unless a test arms it
 
 local function closeMenus()
-	MansionUI.close()
-	JournalUI.close()
+	Nav.closeAll()
 end
 
 Hud.mount(gui, {
 	openJournal = function()
-		MansionUI.close()
-		JournalUI.toggle()
+		Nav.toggle("Journal")
 	end,
 	openMansion = function()
-		JournalUI.close()
-		MansionUI.toggle()
+		Nav.toggle("Mansion")
 	end,
 	openEditor = function()
-		closeMenus()
-		if TrackEditor.isOpen() then
-			TrackEditor.close()
-		else
-			TrackEditor.open()
-		end
+		Nav.toggle("TrackEditor")
+	end,
+	openShop = function()
+		Nav.toggle("Shop")
 	end,
 	toggleLight = LocalWorld.toggleLight,
 })
 CaptureUI.mount(gui, Hud.toast)
-MansionUI.mount(gui, Hud.toast)
-JournalUI.mount(gui)
-TrackEditor.mount(gui, Hud.toast);
+MansionUI.mount(gui, Hud.toast, function(id)
+	Nav.open("Shop")
+	if id then
+		ShopUI.open(id)
+	end
+end, function()
+	Nav.open("Decorate")
+end)
+JournalUI.mount(gui, Hud.toast, function(id)
+	Nav.open("Shop")
+	if id then
+		ShopUI.open(id)
+	end
+end)
+TrackEditor.mount(gui, Hud.toast)
+DecorEditor.mount(gui, Hud.toast)
+ShopUI.mount(gui, Hud.toast, function(id, key)
+	Nav.open("Decorate")
+	DecorEditor.begin(id, key)
+end)
+
+-- One menu at a time, one back behaviour (TASK-0048).
+Nav.register(
+	"Journal",
+	{ open = JournalUI.open, close = JournalUI.close, isOpen = JournalUI.isOpen, root = JournalUI.root }
+)
+Nav.register("Mansion", {
+	open = function()
+		MansionUI.open()
+	end,
+	close = MansionUI.close,
+	isOpen = MansionUI.isOpen,
+	root = MansionUI.root,
+})
+Nav.register("Shop", {
+	open = function()
+		ShopUI.open()
+	end,
+	close = ShopUI.close,
+	isOpen = ShopUI.isOpen,
+	root = ShopUI.root,
+	back = ShopUI.back,
+})
+Nav.register("TrackEditor", { open = TrackEditor.open, close = TrackEditor.close, isOpen = TrackEditor.isOpen })
+Nav.register("Decorate", {
+	open = function()
+		DecorEditor.open()
+	end,
+	close = DecorEditor.close,
+	isOpen = DecorEditor.isOpen,
+	root = DecorEditor.root,
+	back = DecorEditor.back,
+})
+Nav.start();
+
+-- Capture effects other players and I have equipped (TASK-0047): purely visual bursts.
+(State.remote("CosmeticFx") :: RemoteEvent).OnClientEvent:Connect(function(fx)
+	if
+		type(fx) == "table"
+		and fx.kind == "capture"
+		and type(fx.id) == "string"
+		and typeof(fx.position) == "Vector3"
+	then
+		local item = Cosmetics.ById[fx.id]
+		if item and item.category == "CaptureEffect" then
+			Effects.burst(fx.position, item.look)
+		end
+	end
+end);
 
 (State.remote("Toast") :: RemoteEvent).OnClientEvent:Connect(function(t)
 	if type(t) == "table" and type(t.text) == "string" then
@@ -112,9 +178,11 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 	if input.KeyCode == Enum.KeyCode.F or input.KeyCode == Enum.KeyCode.DPadDown then -- DPadUp is reserved by Roblox (TEST-20261011-05)
 		Hud.setLight(LocalWorld.toggleLight())
-	elseif input.KeyCode == Enum.KeyCode.J then
-		JournalUI.toggle()
-	elseif input.KeyCode == Enum.KeyCode.M then
-		MansionUI.toggle()
+	elseif input.KeyCode == Enum.KeyCode.J or input.KeyCode == Enum.KeyCode.DPadLeft then
+		Nav.toggle("Journal")
+	elseif input.KeyCode == Enum.KeyCode.M or input.KeyCode == Enum.KeyCode.DPadRight then
+		Nav.toggle("Mansion")
+	elseif input.KeyCode == Enum.KeyCode.B or input.KeyCode == Enum.KeyCode.ButtonSelect then
+		Nav.toggle("Shop")
 	end
 end)

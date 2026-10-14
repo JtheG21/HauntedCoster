@@ -14,7 +14,10 @@ local Habitats = require(Config:WaitForChild("Habitats"))
 local Economy = require(Config:WaitForChild("Economy"))
 local RotationRules = require(ReplicatedStorage.Shared:WaitForChild("Rules"):WaitForChild("RotationRules"))
 local HabitatState = require(ReplicatedStorage.Shared:WaitForChild("HabitatState"))
+local UserInputService = game:GetService("UserInputService")
+
 local Theme = require(script.Parent.Theme)
+local Nav = require(script.Parent.Nav)
 local State = require(script.Parent.Parent.State)
 
 local Hud = {}
@@ -23,6 +26,7 @@ export type Callbacks = {
 	openJournal: () -> (),
 	openMansion: () -> (),
 	openEditor: () -> (),
+	openShop: () -> (),
 	toggleLight: () -> boolean,
 }
 
@@ -34,7 +38,7 @@ local lightButton: TextButton? = nil
 -- Keeps the Light button label in step however the light was toggled (button, F or DPadDown).
 function Hud.setLight(on: boolean)
 	if lightButton then
-		lightButton.Text = if on then "Light: ON" else "Light: OFF"
+		lightButton.Text = if on then "Lantern  On" else "Lantern  Off"
 	end
 end
 
@@ -138,20 +142,37 @@ end
 
 function Hud.mount(gui: ScreenGui, cb: Callbacks)
 	mountRotation(gui)
-	-- Coins
+	-- Coin purse: amount in gold, income underneath.
 	local coinPanel = Theme.panel(gui, {
+		Name = "Purse",
 		Position = UDim2.fromOffset(12, 12),
-		Size = UDim2.fromOffset(210, 62),
+		Size = UDim2.fromOffset(230, 64),
 	})
-	Theme.pad(coinPanel, 8)
-	local coins = Theme.label(coinPanel, "Coins: 0", {
+	Theme.pad(coinPanel, 10, 8)
+	local coinIcon = Theme.label(coinPanel, "", {
+		Size = UDim2.fromOffset(30, 30),
+		BackgroundTransparency = 0,
+		BackgroundColor3 = Theme.Colors.gold,
+	})
+	Theme.corner(coinIcon, 15)
+	Theme.stroke(coinIcon, Color3.fromRGB(120, 84, 30), 2)
+	Theme.label(coinIcon, "C", {
+		Size = UDim2.fromScale(1, 1),
+		Font = Theme.Title,
+		TextSize = 22,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextColor3 = Color3.fromRGB(110, 70, 20),
+	})
+	local coins = Theme.label(coinPanel, "0", {
+		Position = UDim2.fromOffset(40, -2),
+		Size = UDim2.new(1, -40, 0, 30),
 		Font = Theme.Bold,
-		TextSize = 24,
+		TextSize = 26,
 		TextColor3 = Theme.Colors.gold,
-		Size = UDim2.new(1, 0, 0, 26),
 	})
 	local income = Theme.label(coinPanel, "+0/s", {
-		Position = UDim2.fromOffset(0, 26),
+		Position = UDim2.fromOffset(40, 26),
+		Size = UDim2.new(1, -40, 0, 20),
 		TextSize = 14,
 		TextColor3 = Theme.Colors.dim,
 	})
@@ -162,7 +183,7 @@ function Hud.mount(gui: ScreenGui, cb: Callbacks)
 		Position = UDim2.new(0.5, 0, 0, 6),
 		Size = UDim2.fromOffset(520, 24),
 		BackgroundTransparency = 0.2,
-		BackgroundColor3 = Color3.fromRGB(120, 40, 30),
+		BackgroundColor3 = Theme.Colors.danger,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextSize = 14,
 		Visible = false,
@@ -177,10 +198,9 @@ function Hud.mount(gui: ScreenGui, cb: Callbacks)
 	})
 	Theme.pad(obj, 10)
 	Theme.list(obj, 4)
-	local objTitle = Theme.label(obj, "Objective", {
-		Font = Theme.Title,
+	local objTitle = Theme.heading(obj, "Objective", {
 		TextSize = 22,
-		TextColor3 = Theme.Colors.gold,
+		Size = UDim2.new(1, 0, 0, 24),
 		LayoutOrder = 1,
 	})
 	local objText = Theme.label(obj, "", {
@@ -206,7 +226,7 @@ function Hud.mount(gui: ScreenGui, cb: Callbacks)
 	local barBack = Theme.frame(carry, {
 		Position = UDim2.fromOffset(0, 26),
 		Size = UDim2.new(1, 0, 0, 10),
-		BackgroundColor3 = Color3.fromRGB(50, 40, 60),
+		BackgroundColor3 = Theme.Colors.panel3,
 	})
 	Theme.corner(barBack, 5)
 	local bar = Theme.frame(barBack, { Size = UDim2.fromScale(1, 1), BackgroundColor3 = Theme.Colors.good })
@@ -253,32 +273,64 @@ function Hud.mount(gui: ScreenGui, cb: Callbacks)
 	local tl = Theme.list(toastHolder, 6)
 	tl.VerticalAlignment = Enum.VerticalAlignment.Bottom
 
-	-- Buttons
+	-- Navigation dock: labelled buttons with key hints (keyboard), controller hints (gamepad) or none (touch).
 	local bar2 = Theme.frame(gui, {
+		Name = "Dock",
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1, -12, 1, -12),
-		Size = UDim2.fromOffset(0, 48),
+		Size = UDim2.fromOffset(0, 52),
 		AutomaticSize = Enum.AutomaticSize.X,
 		BackgroundTransparency = 1,
 	})
 	local bl = Theme.list(bar2, 8, true)
 	bl.HorizontalAlignment = Enum.HorizontalAlignment.Right
-	lightButton = Theme.button(bar2, "Light: ON", function()
+	Nav.setDock(bar2)
+	local hints: { { label: TextLabel, key: string, pad: string? } } = {}
+	local function dockButton(
+		text: string,
+		key: string,
+		pad: string?,
+		order: number,
+		onClick: () -> (),
+		style: string?
+	): TextButton
+		local b = Theme.button(bar2, text, onClick, {
+			Size = UDim2.fromOffset(118, 52),
+			LayoutOrder = order,
+			TextSize = 16,
+		}, style)
+		if key ~= "" then
+			local hint = Theme.keyHint(b, key, { Position = UDim2.fromOffset(4, 4) })
+			table.insert(hints, { label = hint, key = key, pad = pad })
+		end
+		return b
+	end
+	lightButton = dockButton("Lantern  On", "F", "DOWN", 1, function()
 		Hud.setLight(cb.toggleLight())
-	end, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 1 })
-	Theme.button(bar2, "Journal", cb.openJournal, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 2 })
-	Theme.button(bar2, "Mansion", cb.openMansion, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 3 })
-	editorButton = Theme.button(bar2, "Edit Track", cb.openEditor, {
-		Size = UDim2.fromOffset(110, 48),
-		LayoutOrder = 4,
-		Visible = false,
-		BackgroundColor3 = Color3.fromRGB(150, 70, 120),
-	})
+	end, "secondary")
+	dockButton("Journal", "J", "LEFT", 2, cb.openJournal)
+	dockButton("Mansion", "M", "RIGHT", 3, cb.openMansion)
+	dockButton("Shop", "B", "SEL", 4, cb.openShop)
+	editorButton = dockButton("Edit Track", "", nil, 5, cb.openEditor)
+	editorButton.Visible = false
+	-- Hints follow the last input: keys on keyboard, pad buttons on controller, none on touch.
+	local function updateHints()
+		local last = UserInputService:GetLastInputType()
+		local pad = string.find(last.Name, "Gamepad") ~= nil
+		local touch = last == Enum.UserInputType.Touch
+		for _, h in hints do
+			h.label.Visible = not touch and (not pad or h.pad ~= nil)
+			h.label.Text = if pad then (h.pad or "") else h.key
+			h.label.Size = UDim2.fromOffset(if pad then 40 else 22, 18)
+		end
+	end
+	updateHints()
+	UserInputService.LastInputTypeChanged:Connect(updateHints)
 
 	local function render(snap: { [string]: any })
-		coins.Text = `Coins: {Theme.fmt(snap.coins or 0)}`
+		coins.Text = Theme.fmt(snap.coins or 0)
 		local rate = snap.incomeRate or 0
-		income.Text = string.format("+%.1f/s from %d monsters", rate, #(snap.owned or {}))
+		income.Text = string.format("+%.1f coins/s  ·  %d ghosts", rate, #(snap.owned or {}))
 		local p = snap.persistence
 		banner.Visible = p == "memory" or p == "readonly"
 		banner.Text = if p == "memory"

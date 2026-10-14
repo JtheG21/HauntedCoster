@@ -3,7 +3,7 @@ id: TASK-0049
 title: "Management, Track Editor and Journal UI"
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -56,6 +56,10 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 
 ---
 ## Implementation record
+- **Mansion:** modal with Upgrades (3D preview of the next house with the selected theme; Coin upgrades in gold buttons, distinct from cosmetics), Ghosts (roster with rarity, status and each ghost's look; an Appearance picker equips owned compatible skins and auras per ghost or restores the natural look), Exhibits (unchanged rules) and Customize (owned mansion themes and capture effects, Decorate my plot, Shop only on request).
+- **Bestiary (Journal):** Creatures (a 3D preview per species, black silhouettes for the undiscovered, variant chips for obtainable natural variants), Habitats (species per hunting ground with caught progress) and Rewards (milestone progress bars, the reward item, server-confirmed Claim, Preview reward opens the Shop item).
+- **Track editor:** restyled through the shared theme and registered with navigation; its layout is unchanged (not redesigned in this pass).
+- **Not verified in Studio** (stall); device checks need jg.
 
 ## Audits
 
