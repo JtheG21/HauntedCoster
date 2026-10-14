@@ -231,225 +231,88 @@ function Props.deadTree(parent: Instance, rng: Random, x: number, z: number)
 	)
 end
 
+-- Faces a landmark's art front (its LookVector) toward +Z, the way the old part builds faced their paths.
+local function facingSouth(x: number, z: number, yaw: number?): CFrame
+	return CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(180 + (yaw or 0)), 0)
+end
+
+-- A classical tomb (art TASK-0045, `landmark_mausoleum`, scaled 0.7-1.3): stepped base and body colliders; the
+-- iron door faces +Z as before.
 function Props.mausoleum(parent: Instance, x: number, z: number, scale: number, name: string): Part
 	local s = scale
-	local base = Build.block(parent, name, Vector3.new(12 * s, 1, 10 * s), x, 0, z, C.darkStone, Enum.Material.Slate)
-	Build.block(parent, name .. "Body", Vector3.new(10 * s, 9 * s, 8 * s), x, 1, z, C.stone, Enum.Material.Marble)
-	Build.block(
-		parent,
-		name .. "Roof",
-		Vector3.new(12 * s, 1.5, 10 * s),
-		x,
-		1 + 9 * s,
-		z,
-		C.darkStone,
-		Enum.Material.Slate
-	)
-	Build.block(
-		parent,
-		name .. "Door",
-		Vector3.new(3 * s, 5 * s, 0.4),
-		x,
-		1,
-		z + 4 * s + 0.1,
-		C.iron,
-		Enum.Material.Metal
-	)
-	for _, dx in { -4, 4 } do
-		Build.block(
-			parent,
-			"Column",
-			Vector3.new(1, 9 * s + 0.6, 1), -- reaches into the roof so its top isn't level with the body
-			x + dx * s,
-			1,
-			z + 4.6 * s,
-			C.stone,
-			Enum.Material.Marble
-		)
-	end
+	local base = Build.collider(parent, name, Vector3.new(12 * s, s, 10 * s), CFrame.new(x, s / 2, z))
+	Build.collider(parent, name .. "Body", Vector3.new(10 * s, 10 * s, 8 * s), CFrame.new(x, s + 5 * s, z))
+	Build.artSlot(parent, "landmark_mausoleum", facingSouth(x, z), { ArtScale = s })
 	return base
 end
 
--- The Weeping Angel (TASK-0028): a stepped plinth, a flared robe, a bowed head with both hands over the
--- face, and tall folded wings, so the silhouette reads from 80+ studs. Faces south (+Z), towards the main
--- gate path. Two shadow-casting lanterns light it (key lights).
+-- The Weeping Angel (TASK-0028, art TASK-0045): a robed figure on a stepped plinth with both hands over her face
+-- and tall folded wings, facing the main gate path (+Z). Two shadow-casting lanterns light it (key lights).
 function Props.angel(parent: Instance, pos: Vector3): BasePart
 	local x, z = pos.X, pos.Z
-	local anchor =
-		Build.block(parent, "AngelPedestal", Vector3.new(8, 1.2, 8), x, 0, z, C.darkStone, Enum.Material.Slate)
-	Build.block(parent, "AngelStep", Vector3.new(6, 1.2, 6), x, 1.2, z, C.stone, Enum.Material.Slate)
-	Build.block(parent, "AngelPlinth", Vector3.new(4, 2.6, 4), x, 2.4, z, C.darkStone, Enum.Material.Marble)
-	local function piece(name: string, size: Vector3, cf: CFrame, shape: Enum.PartType?)
-		return Build.part({
-			name = name,
-			size = size,
-			cframe = cf,
-			color = C.marble,
-			material = Enum.Material.Marble,
-			shape = shape,
-			parent = parent,
-		})
-	end
-	local base = CFrame.new(x, 5, z) -- top of the plinth
-	piece("AngelRobeHem", Vector3.new(3.4, 1.6, 2.8), base * CFrame.new(0, 0.8, 0))
-	piece("AngelRobe", Vector3.new(2.8, 4.4, 2.2), base * CFrame.new(0, 3.8, 0))
-	piece("AngelChest", Vector3.new(2.4, 2, 1.8), base * CFrame.new(0, 6.6, 0.1) * CFrame.Angles(math.rad(-10), 0, 0))
-	piece("AngelHead", Vector3.new(1.5, 1.5, 1.5), base * CFrame.new(0, 8.2, 0.5), Enum.PartType.Ball)
-	for side = -1, 1, 2 do
-		-- Forearms raised so the hands cover the face (the weeping pose)
-		piece(
-			"AngelArm",
-			Vector3.new(0.6, 2.4, 0.6),
-			base * CFrame.new(side * 0.9, 7.3, 0.9) * CFrame.Angles(math.rad(35), 0, math.rad(side * -25))
-		)
-		piece("AngelHand", Vector3.new(0.6, 0.8, 0.4), base * CFrame.new(side * 0.35, 8.3, 1.25))
-		-- Wings: three overlapping feathered slabs per side, swept back and up
-		for i = 0, 2 do
-			piece(
-				"AngelWing",
-				Vector3.new(0.35, 6 - i * 1.4, 2.4 - i * 0.4),
-				base
-					* CFrame.new(side * (1.3 + i * 0.25), 7 + i * 0.6, -1.1 - i * 0.5)
-					* CFrame.Angles(math.rad(-18 - i * 8), math.rad(side * (28 + i * 6)), math.rad(side * -6))
-			)
-		end
-	end
+	local anchor = Build.collider(parent, "AngelPedestal", Vector3.new(8, 1.2, 8), CFrame.new(x, 0.6, z))
+	Build.collider(parent, "AngelStep", Vector3.new(6, 1.2, 6), CFrame.new(x, 1.8, z))
+	Build.collider(parent, "AngelPlinth", Vector3.new(4, 2.6, 4), CFrame.new(x, 3.7, z))
+	Build.collider(parent, "AngelFigure", Vector3.new(3.2, 8.6, 3), CFrame.new(x, 9.3, z))
+	Build.artSlot(parent, "landmark_angel", facingSouth(x, z))
 	Props.lantern(parent, x + 5.5, z + 4, nil, true)
 	Props.lantern(parent, x - 5.5, z + 4, nil, true)
 	return anchor
 end
 
+-- A Victorian funeral carriage (art TASK-0045), turned 15 degrees as before, one wheel off beside it.
 function Props.hearse(parent: Instance, pos: Vector3): BasePart
-	local x, z = pos.X, pos.Z
-	local black = Color3.fromRGB(20, 18, 22)
-	local anchor = Build.block(parent, "HearseBody", Vector3.new(6, 4, 12), x, 1, z, black, Enum.Material.Wood, 15)
-	Build.block(parent, "HearseRoof", Vector3.new(5, 1, 9), x, 5, z, black, Enum.Material.Wood, 15)
-	for i, off in { Vector3.new(-3, 0, -4), Vector3.new(3, 0, -4), Vector3.new(-3, 0, 4) } do
-		local wp = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(15), 0) * CFrame.new(off)
-		Build.part({
-			name = "Wheel" .. i,
-			size = Vector3.new(0.6, 2.4, 2.4),
-			cframe = CFrame.new(wp.Position + Vector3.new(0, 1.2, 0)) * CFrame.Angles(0, math.rad(15), 0),
-			color = C.wood,
-			material = Enum.Material.Wood,
-			shape = Enum.PartType.Cylinder,
-			parent = parent,
-		})
-	end
+	local cf = CFrame.new(pos.X, 0, pos.Z) * CFrame.Angles(0, math.rad(15), 0)
+	local anchor = Build.collider(parent, "HearseBody", Vector3.new(5.2, 5.6, 11), cf * CFrame.new(0, 2.8, 0))
+	Build.artSlot(parent, "landmark_hearse", cf)
 	return anchor
 end
 
+-- The old well (art TASK-0045): a stone ring collider; posts, roof, crank and bucket are art.
 function Props.well(parent: Instance, pos: Vector3): BasePart
 	local x, z = pos.X, pos.Z
-	local anchor = Build.part({
-		name = "WellRing",
-		size = Vector3.new(3, 6, 6),
-		cframe = CFrame.new(x, 1.5, z) * CFrame.Angles(0, 0, math.rad(90)),
-		color = C.stone,
-		material = Enum.Material.Cobblestone,
-		shape = Enum.PartType.Cylinder,
-		parent = parent,
-	})
+	local anchor = Build.collider(
+		parent,
+		"WellRing",
+		Vector3.new(2.7, 6, 6),
+		CFrame.new(x, 1.35, z) * CFrame.Angles(0, 0, math.rad(90)),
+		Enum.PartType.Cylinder
+	)
 	for _, dx in { -2.6, 2.6 } do
-		Build.block(parent, "WellPost", Vector3.new(0.5, 6, 0.5), x + dx, 0, z, C.wood, Enum.Material.Wood)
+		Build.collider(parent, "WellPost", Vector3.new(0.5, 6, 0.5), CFrame.new(x + dx, 3, z))
 	end
-	Build.block(parent, "WellRoof", Vector3.new(7, 0.6, 4), x, 6, z, C.wood, Enum.Material.Wood)
+	Build.artSlot(parent, "landmark_well", CFrame.new(x, 0, z))
 	return anchor
 end
 
--- The Bell Tower (TASK-0028): a buttressed stone shaft, an open belfry with four corner piers and arches,
--- the bell lit warm inside (the one shadow-casting light up high), and a steep stepped spire - a tall,
--- distinct silhouette from anywhere in the cemetery.
+-- The Bell Tower (TASK-0028, art TASK-0045): buttressed shaft, open belfry with a lit bell (the one
+-- shadow-casting light up high) and a steep spire with an iron cross, ~45 studs. Colliders cover what a player
+-- can touch; the belfry and spire are art only.
 function Props.bellTower(parent: Instance, pos: Vector3): BasePart
 	local x, z = pos.X, pos.Z
-	local anchor = Build.block(parent, "TowerBase", Vector3.new(10, 2, 10), x, 0, z, C.darkStone, Enum.Material.Slate)
-	Build.block(parent, "Tower", Vector3.new(7, 22, 7), x, 2, z, C.stone, Enum.Material.Cobblestone)
+	local anchor = Build.collider(parent, "TowerBase", Vector3.new(10, 2, 10), CFrame.new(x, 1, z))
+	Build.collider(parent, "Tower", Vector3.new(7, 22, 7), CFrame.new(x, 13, z))
 	for _, c in { { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 } } do
-		-- Buttresses: stepped blocks at each corner
-		Build.block(
-			parent,
-			"Buttress",
-			Vector3.new(2, 10, 2),
-			x + c[1] * 4,
-			2,
-			z + c[2] * 4,
-			C.darkStone,
-			Enum.Material.Slate
-		)
-		Build.block(
-			parent,
-			"ButtressTop",
-			Vector3.new(1.4, 6, 1.4),
-			x + c[1] * 3.8,
-			12,
-			z + c[2] * 3.8,
-			C.darkStone,
-			Enum.Material.Slate
-		)
-		-- Belfry piers
-		Build.block(
-			parent,
-			"BelfryPier",
-			Vector3.new(1.4, 7, 1.4),
-			x + c[1] * 3,
-			24,
-			z + c[2] * 3,
-			C.stone,
-			Enum.Material.Cobblestone
-		)
+		Build.collider(parent, "Buttress", Vector3.new(2, 10, 2), CFrame.new(x + c[1] * 3.6, 7, z + c[2] * 3.6))
 	end
-	Build.block(parent, "BelfryFloor", Vector3.new(8, 0.6, 8), x, 23.4, z, C.darkStone, Enum.Material.Slate)
-	for _, d in { { 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 } } do
-		Build.block(
-			parent,
-			"BelfryArch",
-			if d[1] == 0 then Vector3.new(6, 1.2, 1.2) else Vector3.new(1.2, 1.2, 6),
-			x + d[1] * 3,
-			29.6,
-			z + d[2] * 3,
-			C.stone,
-			Enum.Material.Cobblestone
-		)
-	end
-	Build.block(parent, "BelfryRoof", Vector3.new(8.4, 0.8, 8.4), x, 31, z, C.darkStone, Enum.Material.Slate)
-	for i = 0, 4 do
-		local w = 7 - i * 1.5
-		Build.part({
-			name = "Spire",
-			size = Vector3.new(w, 2.2, w),
-			cframe = CFrame.new(x, 32.9 + i * 2.2, z) * CFrame.Angles(0, math.rad(45), 0),
-			color = Color3.fromRGB(58, 50, 70),
-			material = Enum.Material.Slate,
-			parent = parent,
-		})
-	end
-	Build.block(parent, "SpireCross", Vector3.new(0.3, 2.4, 0.3), x, 43.9, z, C.iron, Enum.Material.Metal)
+	Build.artSlot(parent, "landmark_belltower", facingSouth(x, z))
+	anchor:SetAttribute("LabelHeight", 47) -- above the spire cross
 	local bell = Build.part({
 		name = "Bell",
-		size = Vector3.new(3, 3, 3),
-		cframe = CFrame.new(x, 27, z),
-		color = Color3.fromRGB(180, 140, 60),
-		material = Enum.Material.Metal,
-		shape = Enum.PartType.Ball,
+		size = Vector3.new(1, 1, 1),
+		cframe = CFrame.new(x, 26.5, z),
+		transparency = 1,
+		collide = false,
 		parent = parent,
 	})
 	Build.light(bell, Color3.fromRGB(255, 190, 90), 34, 1.4, true)
-	Build.block(
-		parent,
-		"TowerDoor",
-		Vector3.new(3, 5, 0.4),
-		x,
-		2,
-		z + 3.6,
-		Color3.fromRGB(30, 22, 18),
-		Enum.Material.Wood
-	)
 	Props.lantern(parent, x + 2.6, z + 6)
 	return anchor
 end
 
--- A walled crypt with an iron gate in one wall. Returns the gate (closed: it collides on the server; the
--- client opens it locally for players whose house tier unlocks the crypt).
+-- A walled crypt with an iron gate in one wall (art TASK-0045: ashlar `crypt_wall` runs with spiked cresting
+-- and two `crypt_gate_leaf` leaves). Returns the gate: an invisible collider, closed on the server; the client
+-- opens it locally (clears CanCollide and swings the leaves) for players whose house tier unlocks the crypt.
 function Props.crypt(
 	parent: Instance,
 	r: { x1: number, x2: number, z1: number, z2: number },
@@ -458,6 +321,7 @@ function Props.crypt(
 	gateWidth: number
 ): BasePart
 	local h = 12
+	local centre = Vector3.new((r.x1 + r.x2) / 2, 0, (r.z1 + r.z2) / 2)
 	local function wall(a: Vector3, b: Vector3)
 		local len = (b - a).Magnitude
 		if len < 0.5 then
@@ -466,14 +330,27 @@ function Props.crypt(
 		local mid = (a + b) / 2
 		-- Walls along X are 0.2 taller so overlapping corner tops never share a plane.
 		local wh = if math.abs(a.Z - b.Z) < 0.01 then h + 0.2 else h
-		Build.part({
-			name = "CryptWall",
-			size = Vector3.new(2, wh, len + 2),
-			cframe = CFrame.lookAt(Vector3.new(mid.X, wh / 2, mid.Z), Vector3.new(b.X, wh / 2, b.Z)),
-			color = C.darkStone,
-			material = Enum.Material.Cobblestone,
-			parent = parent,
-		})
+		Build.collider(
+			parent,
+			"CryptWall",
+			Vector3.new(2, wh, len + 2),
+			CFrame.lookAt(Vector3.new(mid.X, wh / 2, mid.Z), Vector3.new(b.X, wh / 2, b.Z))
+		)
+		-- Art runs of about 8 studs (the buttress side faces out of the crypt).
+		local along = (b - a).Unit
+		local out = Vector3.new(mid.X - centre.X, 0, mid.Z - centre.Z)
+		local right = if out:Dot(Vector3.new(0, 1, 0):Cross(along)) > 0 then along else -along -- LookVector = up x right
+		local total = len + 2
+		local n = math.max(1, math.round(total / 8))
+		for i = 0, n - 1 do
+			local c = mid + along * ((i + 0.5) / n - 0.5) * total
+			Build.artSlot(
+				parent,
+				"crypt_wall",
+				CFrame.fromMatrix(Vector3.new(c.X, 0, c.Z), right, Vector3.yAxis),
+				{ ArtStretchX = total / n / 8, ArtStretchY = wh / 12 }
+			)
+		end
 	end
 	local corners: { [string]: { Vector3 } } = {
 		x1 = { Vector3.new(r.x1, 0, r.z1), Vector3.new(r.x1, 0, r.z2) },
@@ -483,11 +360,13 @@ function Props.crypt(
 	}
 	local gateCenter: Vector3 = Vector3.zero
 	local alongX = false
+	local gateUnit = Vector3.xAxis
 	for side, ends in corners do
 		local a, b = ends[1], ends[2]
 		if side == gateSide then
 			alongX = side == "z1" or side == "z2"
 			local unit = (b - a).Unit
+			gateUnit = unit
 			gateCenter = if alongX then Vector3.new(gateAt, 0, a.Z) else Vector3.new(a.X, 0, gateAt)
 			wall(a, gateCenter - unit * (gateWidth / 2))
 			wall(gateCenter + unit * (gateWidth / 2), b)
@@ -495,30 +374,35 @@ function Props.crypt(
 			wall(a, b)
 		end
 	end
-	local gate = Build.part({
-		name = "CryptGate",
-		size = if alongX then Vector3.new(gateWidth, h - 2, 1) else Vector3.new(1, h - 2, gateWidth),
-		cframe = CFrame.new(gateCenter.X, (h - 2) / 2, gateCenter.Z),
-		color = C.iron,
-		material = Enum.Material.DiamondPlate,
-		transparency = 0.25,
-		parent = parent,
-	})
+	local gate = Build.collider(
+		parent,
+		"CryptGate",
+		if alongX then Vector3.new(gateWidth, h - 2, 1) else Vector3.new(1, h - 2, gateWidth),
+		CFrame.new(gateCenter.X, (h - 2) / 2, gateCenter.Z)
+	)
+	gate:SetAttribute("Solid", nil) -- iron bars: sight passes through
+	-- Two leaves hinged at the gateposts. A leaf mesh runs from its hinge along the anchor's -RightVector, so the
+	-- right vector points away from the gate centre; `Swing` (degrees about the hinge) turns it into the crypt.
+	local outward = Vector3.new(gateCenter.X - centre.X, 0, gateCenter.Z - centre.Z)
+	for _, s in { -1, 1 } do
+		local right = gateUnit * s
+		local rest = CFrame.fromMatrix(gateCenter + right * (gateWidth / 2), right, Vector3.yAxis)
+		local leaf = Build.artSlot(gate, "crypt_gate_leaf", rest, {
+			ArtFollow = true,
+			ArtStretchX = gateWidth / 2 / 4,
+			GateRest = rest,
+			Swing = if outward:Dot(rest.LookVector) > 0 then 100 else -100,
+		})
+		leaf.Name = "GateLeaf"
+	end
 	Build.billboard(gate, "SEALED CRYPT", Color3.fromRGB(200, 120, 255), 7, 120, 1.2)
-	-- Coffins and an eerie glow inside
+	-- Coffins and an eerie glow inside (same seeded draws as before)
 	local rng = Random.new(77)
 	for _ = 1, 6 do
-		Build.block(
-			parent,
-			"Coffin",
-			Vector3.new(3, 1.4, 7),
-			rng:NextNumber(r.x1 + 6, r.x2 - 6),
-			0,
-			rng:NextNumber(r.z1 + 6, r.z2 - 6),
-			C.wood,
-			Enum.Material.Wood,
-			rng:NextNumber(0, 180)
-		)
+		local cx, cz = rng:NextNumber(r.x1 + 6, r.x2 - 6), rng:NextNumber(r.z1 + 6, r.z2 - 6)
+		local cf = CFrame.new(cx, 0, cz) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 180)), 0)
+		Build.collider(parent, "Coffin", Vector3.new(3, 1.4, 7), cf * CFrame.new(0, 0.7, 0))
+		Build.artSlot(parent, "coffin", cf)
 	end
 	local glow = Build.part({
 		name = "CryptGlow",

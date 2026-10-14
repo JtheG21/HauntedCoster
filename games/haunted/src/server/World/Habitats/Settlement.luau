@@ -58,27 +58,13 @@ local function ruinedChapel(parent: Instance, pos: Vector3): BasePart
 	wall(parent, v(x1, z1), v(x1, z2), 10, C.wall)
 	wall(parent, v(x2, z1), v(x2, pos.Z - 3), 10, C.wall)
 	wall(parent, v(x2, pos.Z + 3), v(x2, z2), 8, C.wall)
-	local steeple = Build.block(parent, "Steeple", Vector3.new(5, 22, 5), x1 + 3, 0, pos.Z, C.wall, Enum.Material.Brick)
-	Build.part({
-		name = "SteepleCap",
-		size = Vector3.new(4, 6, 4),
-		cframe = CFrame.new(x1 + 3, 25, pos.Z) * CFrame.Angles(0, math.rad(45), 0),
-		color = C.roof,
-		material = Enum.Material.Slate,
-		parent = parent,
-	})
-	-- Fallen roof beams inside
+	-- Art (TASK-0045): a brick steeple with an open belfry and a snapped spire, and charred fallen beams.
+	local steeple = Build.collider(parent, "Steeple", Vector3.new(5, 22, 5), CFrame.new(x1 + 3, 11, pos.Z))
+	Build.artSlot(parent, "chapel_steeple", CFrame.new(x1 + 3, 0, pos.Z) * CFrame.Angles(0, math.rad(-90), 0))
 	for i = 0, 2 do
-		Build.part({
-			name = "FallenBeam",
-			size = Vector3.new(1, 1, 12),
-			cframe = CFrame.new(pos.X + 1 + i * 2, 0.5 + i * 0.4, pos.Z - 4 + i * 4)
-				* CFrame.Angles(math.rad(8), math.rad(30 + i * 40), 0),
-			color = C.timber,
-			material = Enum.Material.Wood,
-			collide = false,
-			parent = parent,
-		})
+		local cf = CFrame.new(pos.X + 1 + i * 2, 0.5 + i * 0.4, pos.Z - 4 + i * 4)
+			* CFrame.Angles(math.rad(8), math.rad(30 + i * 40), 0)
+		Build.artSlot(parent, "beam_fallen", cf * CFrame.new(0, -0.5, 0))
 	end
 	return steeple
 end
@@ -86,23 +72,18 @@ end
 -- The barn: open to the square (south, +Z), with a sagging two-slope roof (the anchor is the back wall).
 local function oldBarn(parent: Instance, pos: Vector3): BasePart
 	local x1, x2, z1, z2 = pos.X - 9, pos.X + 9, pos.Z - 8, pos.Z + 8
-	local back = wall(parent, Vector3.new(x1, 0, z1), Vector3.new(x2, 0, z1), 12, C.timber)
-	back.Material = Enum.Material.WoodPlanks
+	local back = wall(parent, Vector3.new(x1, 0, z1), Vector3.new(x2, 0, z1), 12, C.timber, "barn_wall")
 	for _, x in { x1, x2 } do
-		local side = wall(parent, Vector3.new(x, 0, z1), Vector3.new(x, 0, z2), 12, C.timber)
-		side.Material = Enum.Material.WoodPlanks
+		wall(parent, Vector3.new(x, 0, z1), Vector3.new(x, 0, z2), 12, C.timber, "barn_wall")
 	end
+	-- Art (TASK-0045): a sagging shingle roof with torn rafters, and a tied hay bale.
 	for _, s in { -1, 1 } do
-		Build.part({
-			name = "Roof",
-			size = Vector3.new(11, 0.8, 18),
-			cframe = CFrame.new(pos.X + s * 4.6, 15, pos.Z) * CFrame.Angles(0, 0, math.rad(-s * 35)),
-			color = C.roof,
-			material = Enum.Material.WoodPlanks,
-			parent = parent,
-		})
+		local cf = CFrame.new(pos.X + s * 4.6, 15, pos.Z) * CFrame.Angles(0, 0, math.rad(-s * 35))
+		Build.collider(parent, "Roof", Vector3.new(11, 0.8, 18), cf)
+		Build.artSlot(parent, "barn_roof", if s < 0 then cf else cf * CFrame.Angles(0, math.pi, 0))
 	end
-	Build.block(parent, "HayBale", Vector3.new(4, 3, 3), pos.X - 5, 0, pos.Z - 5, C.hay, Enum.Material.Fabric)
+	Build.collider(parent, "HayBale", Vector3.new(4, 3, 3), CFrame.new(pos.X - 5, 1.5, pos.Z - 5))
+	Build.artSlot(parent, "hay_bale", CFrame.new(pos.X - 5, 0, pos.Z - 5) * CFrame.Angles(0, math.rad(8), 0))
 	return back
 end
 

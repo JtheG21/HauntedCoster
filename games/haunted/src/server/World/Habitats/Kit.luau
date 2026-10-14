@@ -97,7 +97,13 @@ function Kit.landmarks(
 			local m = Build.model(folder, lm.id)
 			local anchor = builder(m, lm.position)
 			anchor.Name = "Anchor"
-			Build.billboard(anchor, lm.name, Color3.fromRGB(230, 220, 255), 9, 90, 0.9)
+			-- The label floats above the landmark: its LabelHeight (art taller than its colliders) or its bounds.
+			local height = anchor:GetAttribute("LabelHeight")
+			if type(height) ~= "number" then
+				local cf, size = m:GetBoundingBox()
+				height = cf.Y + size.Y / 2 + 2.5 - anchor.Position.Y
+			end
+			Build.billboard(anchor, lm.name, Color3.fromRGB(230, 220, 255), height :: number, 90, 0.9)
 			anchors[lm.id] = anchor
 			m.PrimaryPart = anchor
 		end

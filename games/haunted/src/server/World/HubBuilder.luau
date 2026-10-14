@@ -70,27 +70,7 @@ end
 
 -- One face of the hanging gate sign: the habitat name lettered on the board (TASK-0044).
 local function signFace(sign: BasePart, face: Enum.NormalId): TextLabel
-	local sg = Instance.new("SurfaceGui")
-	sg.Name = "Lettering" .. face.Name
-	sg.Face = face
-	sg.LightInfluence = 0.6
-	sg.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	sg.PixelsPerStud = 40
-	sg.MaxDistance = 260
-	local label = Instance.new("TextLabel")
-	label.Name = "Text"
-	label.BackgroundTransparency = 1
-	label.Size = UDim2.fromScale(0.92, 0.8)
-	label.Position = UDim2.fromScale(0.04, 0.1)
-	label.FontFace = Font.fromEnum(Enum.Font.GrenzeGotisch)
-	label.TextScaled = true
-	label.TextColor3 = Color3.fromRGB(255, 214, 150)
-	label.TextStrokeColor3 = Color3.fromRGB(40, 20, 10)
-	label.TextStrokeTransparency = 0.35
-	label.Text = "HUNTING GROUNDS"
-	label.Parent = sg
-	sg.Parent = sign
-	return label
+	return Build.lettering(sign, face, "HUNTING GROUNDS")
 end
 
 local function gate(parent: Instance, index: number): { TextLabel }

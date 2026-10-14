@@ -28,67 +28,28 @@ local C = {
 }
 
 -- A ring of tall slabs round a flat altar (the anchor). Gaps between slabs keep the clearing walkable.
+-- Art (TASK-0045): weathered `standing_stone` slabs (stretched to each height) and a `stone_altar`.
 local function standingStones(parent: Instance, pos: Vector3): BasePart
-	local altar = Build.block(parent, "Altar", Vector3.new(5, 1.6, 3), pos.X, 0, pos.Z, C.stone, Enum.Material.Slate)
+	local altar = Build.collider(parent, "Altar", Vector3.new(5, 1.6, 3), CFrame.new(pos.X, 0.8, pos.Z))
+	Build.artSlot(parent, "stone_altar", CFrame.new(pos.X, 0, pos.Z))
 	for i = 0, 6 do
 		local a = math.rad(i * 360 / 7 + 10)
 		local x, z = pos.X + math.sin(a) * 10, pos.Z + math.cos(a) * 10
 		local h = if i % 2 == 0 then 11 else 8
-		Build.block(parent, "Stone", Vector3.new(3, h, 1.6), x, 0, z, C.stone, Enum.Material.Slate, math.deg(a))
+		local cf = CFrame.new(x, 0, z) * CFrame.Angles(0, a, 0)
+		Build.collider(parent, "Stone", Vector3.new(3, h, 1.6), cf * CFrame.new(0, h / 2, 0))
+		-- The carved face looks into the ring.
+		Build.artSlot(parent, "standing_stone", cf * CFrame.Angles(0, math.pi, 0), { ArtStretchY = h / 11 })
 	end
 	return altar
 end
 
--- A huge oak with a split trunk, splayed roots and a few heavy limbs (the anchor is the trunk).
+-- A huge dead oak with a hollow facing the clearing (south, +Z), splayed roots and heavy bare limbs (art
+-- TASK-0045, `landmark_hollowoak`). The anchor is the trunk collider; roots and limbs are art only.
 local function hollowOak(parent: Instance, pos: Vector3): BasePart
-	local trunk = Build.block(parent, "Trunk", Vector3.new(8, 28, 8), pos.X, 0, pos.Z - 2, C.bark, Enum.Material.Wood)
-	-- The hollow: a dark opening facing the clearing (south, +Z).
-	Build.part({
-		name = "Hollow",
-		size = Vector3.new(3.6, 6, 0.4),
-		cframe = CFrame.new(pos.X, 3.2, pos.Z + 2.1),
-		color = Color3.fromRGB(10, 8, 8),
-		material = Enum.Material.SmoothPlastic,
-		collide = false,
-		parent = parent,
-	})
-	for i = 0, 5 do
-		local a = math.rad(i * 60 + 15)
-		Build.part({
-			name = "Root",
-			size = Vector3.new(2, 2, 9),
-			cframe = CFrame.new(pos.X + math.sin(a) * 6, 0.6, pos.Z - 2 + math.cos(a) * 6)
-				* CFrame.Angles(0, a, 0)
-				* CFrame.Angles(math.rad(12), 0, 0),
-			color = C.bark,
-			material = Enum.Material.Wood,
-			parent = parent,
-		})
-	end
-	for i = 0, 3 do
-		local a = math.rad(i * 90 + 40)
-		Build.part({
-			name = "Limb",
-			size = Vector3.new(2.4, 2.4, 16),
-			cframe = CFrame.new(pos.X, 22 + i, pos.Z - 2)
-				* CFrame.Angles(0, a, 0)
-				* CFrame.Angles(math.rad(-25), 0, 0)
-				* CFrame.new(0, 0, -8),
-			color = C.bark,
-			material = Enum.Material.Wood,
-			collide = false,
-			parent = parent,
-		})
-	end
-	Build.part({
-		name = "Canopy",
-		size = Vector3.new(26, 8, 26),
-		cframe = CFrame.new(pos.X, 31, pos.Z - 2),
-		color = C.pine,
-		material = Enum.Material.LeafyGrass,
-		collide = false,
-		parent = parent,
-	})
+	local base = Vector3.new(pos.X, 0, pos.Z - 2)
+	local trunk = Build.collider(parent, "Trunk", Vector3.new(8, 28, 8), CFrame.new(base + Vector3.new(0, 14, 0)))
+	Build.artSlot(parent, "landmark_hollowoak", CFrame.new(base) * CFrame.Angles(0, math.pi, 0))
 	return trunk
 end
 
@@ -123,28 +84,16 @@ end
 
 -- A hound den: an earth mound with a dark mouth and two glowing eyes inside.
 local function den(parent: Instance, x: number, z: number, facing: number)
+	-- Art (TASK-0045): a mossy rock mound with a burrow mouth and bones; the server keeps the mound collider and
+	-- the two glowing eyes in the dark.
 	local cf = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(facing), 0)
-	Build.part({
-		name = "DenMound",
-		size = Vector3.new(10, 5, 8),
-		cframe = cf * CFrame.new(0, 2.5, 0),
-		color = C.den,
-		material = Enum.Material.Ground,
-		parent = parent,
-	})
-	Build.part({
-		name = "DenMouth",
-		size = Vector3.new(4, 3, 0.4),
-		cframe = cf * CFrame.new(0, 1.5, -4.1),
-		color = Color3.fromRGB(8, 6, 6),
-		collide = false,
-		parent = parent,
-	})
+	Build.collider(parent, "DenMound", Vector3.new(10, 5, 8), cf * CFrame.new(0, 2.5, 0))
+	Build.artSlot(parent, "landmark_den", cf)
 	for _, dx in { -0.7, 0.7 } do
 		Build.part({
 			name = "DenEye",
 			size = Vector3.new(0.4, 0.3, 0.2),
-			cframe = cf * CFrame.new(dx, 2, -4.4),
+			cframe = cf * CFrame.new(dx, 1.6, -2.6),
 			color = C.eye,
 			material = Enum.Material.Neon,
 			collide = false,
