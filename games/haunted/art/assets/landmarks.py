@@ -249,7 +249,6 @@ def hearse():
 
 def well():
     """Old stone well (radius 3) with timber posts, a shingled roof, crank, rope and bucket."""
-    rng = random.Random(3)
     stones = []
     for ring in range(4):
         n = 14
@@ -283,7 +282,6 @@ def well():
     core.tag(timber, "Wood")
     core.uv_box(timber, 2.0)
     paint.paint([timber], lambda c, n, o: paint.mix(P.WOOD, P.WOOD_GREY, 0.4), ao=0.5, ground=0.0, edge=0.3, mottle=0.1)
-    _ = rng
     return {"Kind": "landmark", "LodDistance": 160}
 
 
@@ -384,7 +382,7 @@ def brood_tree():
         v.co.x = v.co.x * k + 0.8 * math.sin(v.co.z * 0.15)
         v.co.y *= k
     parts = [trunk] + roots(rng, 3.4, 6, 5.0)
-    for k in range(4):  # server limbs: yaw 45 + 90k degrees, drooping 30 degrees from 24 high (Blender dir = (sin a, -cos a))
+    for k in range(4):  # server limbs: yaw 45 + 90k degrees, drooping 30 degrees from 24 high (the four diagonals)
         a = math.radians(45 + 90 * k)
         d = Vector((math.sin(a), -math.cos(a), -0.45)).normalized()
         gnarled(rng, parts, Vector((0, 0, 24)), d, 17, 1.0, 0, 2, spread=0.5, droop=0.2, n_branches=2, name=f"Limb{k}")
@@ -525,7 +523,7 @@ def hay_bale():
 def beam_fallen():
     """A charred fallen roof beam 1 x 1 x 12 with a splintered end."""
     beam = shapes.box("Beam", (1.0, 12.0, 1.0), (0, 0, 0.5), bevel=0.08, material="Wood")
-    core.subdivide(beam, 2, simple=True)
+    core.subdivide(beam, 1, simple=True)
     for v in beam.data.vertices:
         if v.co.y > 5.4:
             v.co.y += 0.6 * noise.noise(v.co * 3)
@@ -670,7 +668,6 @@ def stone_altar():
 
 def coffin():
     """A wooden coffin 3 x 7 x 1.4 (hexagonal) with its lid slid aside."""
-    hexa = [(0.0, -3.5), (1.25, -2.4), (1.5, 1.2), (0.0, 3.5)]
     def outline(sc):
         pts = [(1.0 * sc, -3.4), (1.5 * sc, -1.8), (1.2 * sc, 3.4), (-1.2 * sc, 3.4), (-1.5 * sc, -1.8), (-1.0 * sc, -3.4)]
         return pts
@@ -699,7 +696,6 @@ def coffin():
     core.smooth(obj, 30)
     paint.paint([obj], lambda c, n, o: paint.mix(P.WOOD_DARK, P.WOOD, 0.4 + 0.3 * noise.noise(c * 1.2)), ao=0.6, ao_distance=1.0, ground=0.0,
                 edge=0.25, crease=0.5, mottle=0.1)
-    _ = hexa
     return {"Kind": "prop", "LodDistance": 120}
 
 

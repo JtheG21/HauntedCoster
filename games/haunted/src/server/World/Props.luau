@@ -206,9 +206,9 @@ function Props.tombstone(parent: Instance, rng: Random, x: number, z: number)
 	local rot = rng:NextNumber(-12, 12)
 	local scale = rng:NextNumber(0.9, 1.08)
 	local base = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(rot), 0)
-	local lean = if kind == 4
-		then CFrame.Angles(math.rad(rng:NextNumber(-14, 14)), 0, math.rad(rng:NextNumber(-6, 6)))
-		else CFrame.identity
+	-- One draw for the lean, as the old builder took (AUD-20261013-TASK-0044-01 finding 1).
+	local l = if kind == 4 then rng:NextNumber(-1, 1) else 0
+	local lean = if kind == 4 then CFrame.Angles(math.rad(14 * l), 0, math.rad(-6 * l)) else CFrame.identity
 	local size = GRAVE_SIZE[kind] * scale
 	Build.collider(parent, "Tombstone", size, base * lean * CFrame.new(0, size.Y / 2, 0))
 	Build.artSlot(parent, GRAVE_ART[kind], base * lean, { ArtScale = scale })
@@ -222,10 +222,10 @@ local DEAD_TREES = { "tree_dead_a", "tree_dead_b", "tree_dead_c" }
 function Props.deadTree(parent: Instance, rng: Random, x: number, z: number)
 	local h = rng:NextNumber(10, 16)
 	Props.burn(rng, 10) -- the old builder drew 13 numbers per tree
-	Build.collider(parent, "Trunk", Vector3.new(1.4, h * 0.7, 1.4), CFrame.new(x, h * 0.35, z))
+	Build.collider(parent, "Trunk", Vector3.new(1.4, h, 1.4), CFrame.new(x, h / 2, z)) -- the old trunk's full height
 	Build.artSlot(
 		parent,
-		DEAD_TREES[rng:NextInteger(1, #DEAD_TREES)],
+		DEAD_TREES[math.floor(rng:NextNumber() * #DEAD_TREES) + 1], -- a NextNumber, like the old root draw it replaces
 		CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 360)), 0),
 		{ ArtScale = h / 13 }
 	)
@@ -243,6 +243,7 @@ function Props.mausoleum(parent: Instance, x: number, z: number, scale: number, 
 	local base = Build.collider(parent, name, Vector3.new(12 * s, s, 10 * s), CFrame.new(x, s / 2, z))
 	Build.collider(parent, name .. "Body", Vector3.new(10 * s, 10 * s, 8 * s), CFrame.new(x, s + 5 * s, z))
 	Build.artSlot(parent, "landmark_mausoleum", facingSouth(x, z), { ArtScale = s })
+	base:SetAttribute("LabelHeight", 13.4 * s + 2.5) -- above the pediment
 	return base
 end
 
@@ -386,10 +387,11 @@ function Props.crypt(
 	local outward = Vector3.new(gateCenter.X - centre.X, 0, gateCenter.Z - centre.Z)
 	for _, s in { -1, 1 } do
 		local right = gateUnit * s
-		local rest = CFrame.fromMatrix(gateCenter + right * (gateWidth / 2), right, Vector3.yAxis)
+		-- Hinges sit 1 stud inside each gate edge, clear of the walls (which overlap the opening by 1).
+		local rest = CFrame.fromMatrix(gateCenter + right * (gateWidth / 2 - 1), right, Vector3.yAxis)
 		local leaf = Build.artSlot(gate, "crypt_gate_leaf", rest, {
 			ArtFollow = true,
-			ArtStretchX = gateWidth / 2 / 4,
+			ArtStretchX = (gateWidth / 2 - 1) / 4,
 			GateRest = rest,
 			Swing = if outward:Dot(rest.LookVector) > 0 then 100 else -100,
 		})

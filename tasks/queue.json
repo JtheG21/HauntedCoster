@@ -3358,7 +3358,7 @@
       "id": "TASK-0044",
       "title": "Environment Kit and Ground",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "changes_requested",
       "risk": "medium",
       "depends_on": [
         "TASK-0041"
@@ -3391,6 +3391,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-13T20:56:24",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
         }
       ],
       "executions": [
@@ -3400,15 +3406,21 @@
           "notes": "check.sh pass; Reachability 4/4 habitats pass; HabitatSwap 35/35; HabitatRotation 28/28; HauntedTrees 1p live pass, 2p 23/28 latency-only under memory pressure (not counted as pass, re-run in TASK-0052)"
         }
       ],
-      "audits": [],
-      "revisions": 0,
+      "audits": [
+        {
+          "time": "2026-10-13T20:56:24",
+          "result": "fail",
+          "report": "06 QA/AUD-20261013-TASK-0044-01.md"
+        }
+      ],
+      "revisions": 1,
       "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
     },
     {
       "id": "TASK-0045",
       "title": "Habitat Landmarks",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [
         "TASK-0041"
@@ -3440,6 +3452,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-13T20:59:44",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -3449,7 +3467,13 @@
           "notes": "check.sh pass; HabitatSwap 35/35; HabitatRotation 28/28; Reachability 4 habitats pass; crypt gate opens for tier 1 (tour); intermittent oak/brood draw miss after a swap in one long session, not reproduced"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-13T20:59:44",
+          "result": "pass",
+          "report": "06 QA/AUD-20261013-TASK-0045-01.md"
+        }
+      ],
       "revisions": 0,
       "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
     },
@@ -3457,7 +3481,7 @@
       "id": "TASK-0046",
       "title": "Mansion, Plot and Ghost Train Art",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [
         "TASK-0041"
@@ -3477,6 +3501,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        },
+        {
+          "time": "2026-10-13T20:50:19",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [],

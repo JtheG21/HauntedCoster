@@ -61,6 +61,7 @@ local function ruinedChapel(parent: Instance, pos: Vector3): BasePart
 	-- Art (TASK-0045): a brick steeple with an open belfry and a snapped spire, and charred fallen beams.
 	local steeple = Build.collider(parent, "Steeple", Vector3.new(5, 22, 5), CFrame.new(x1 + 3, 11, pos.Z))
 	Build.artSlot(parent, "chapel_steeple", CFrame.new(x1 + 3, 0, pos.Z) * CFrame.Angles(0, math.rad(-90), 0))
+	steeple:SetAttribute("LabelHeight", 18) -- anchor at 11; spire and finial reach about 27
 	for i = 0, 2 do
 		local cf = CFrame.new(pos.X + 1 + i * 2, 0.5 + i * 0.4, pos.Z - 4 + i * 4)
 			* CFrame.Angles(math.rad(8), math.rad(30 + i * 40), 0)
@@ -102,13 +103,14 @@ end
 local function brokenFence(parent: Instance, rng: Random, x: number, z: number)
 	local cf = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 180)), 0)
 	-- Same draws as the old post-by-post builder, so the settlement layout is unchanged.
-	for _ = -2, 2 do
+	-- Posts collide where the old builder put them (gaps kept); the rail never collided.
+	for i = -2, 2 do
 		if rng:NextNumber() < 0.75 then
 			rng:NextNumber()
+			Build.collider(parent, "FencePost", Vector3.new(0.5, 3.5, 0.5), cf * CFrame.new(i * 2.5, 1.75, 0))
 		end
 	end
 	rng:NextNumber()
-	Build.collider(parent, "Fence", Vector3.new(10, 3, 0.6), cf * CFrame.new(0, 1.5, 0))
 	Build.artSlot(parent, "fence_wood", cf)
 end
 

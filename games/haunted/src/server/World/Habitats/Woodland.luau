@@ -38,8 +38,8 @@ local function standingStones(parent: Instance, pos: Vector3): BasePart
 		local h = if i % 2 == 0 then 11 else 8
 		local cf = CFrame.new(x, 0, z) * CFrame.Angles(0, a, 0)
 		Build.collider(parent, "Stone", Vector3.new(3, h, 1.6), cf * CFrame.new(0, h / 2, 0))
-		-- The carved face looks into the ring.
-		Build.artSlot(parent, "standing_stone", cf * CFrame.Angles(0, math.pi, 0), { ArtStretchY = h / 11 })
+		-- The carved face (the art's front) looks into the ring: cf's LookVector already points at the centre.
+		Build.artSlot(parent, "standing_stone", cf, { ArtStretchY = h / 11 })
 	end
 	return altar
 end
@@ -48,7 +48,7 @@ end
 -- TASK-0045, `landmark_hollowoak`). The anchor is the trunk collider; roots and limbs are art only.
 local function hollowOak(parent: Instance, pos: Vector3): BasePart
 	local base = Vector3.new(pos.X, 0, pos.Z - 2)
-	local trunk = Build.collider(parent, "Trunk", Vector3.new(8, 28, 8), CFrame.new(base + Vector3.new(0, 14, 0)))
+	local trunk = Build.collider(parent, "Trunk", Vector3.new(8, 21, 8), CFrame.new(base + Vector3.new(0, 10.5, 0)))
 	Build.artSlot(parent, "landmark_hollowoak", CFrame.new(base) * CFrame.Angles(0, math.pi, 0))
 	return trunk
 end
@@ -69,10 +69,8 @@ local ROCKS = { "rock_a", "rock_b", "rock_c" }
 local function boulder(parent: Instance, rng: Random, x: number, z: number)
 	local s = rng:NextNumber(3, 6)
 	local cf = CFrame.new(x, 0, z) * CFrame.Angles(0, math.rad(rng:NextNumber(0, 180)), 0)
-	local box =
-		Build.collider(parent, "Boulder", Vector3.new(s * 1.2, s * 0.62, s * 0.9), cf * CFrame.new(0, s * 0.31, 0))
-	box.CanQuery = true
-	Build.artSlot(parent, ROCKS[rng:NextInteger(1, #ROCKS)], cf, { ArtScale = s / 4.5 })
+	Build.collider(parent, "Boulder", Vector3.new(s * 1.2, s * 0.62, s * 0.9), cf * CFrame.new(0, s * 0.31, 0))
+	Build.artSlot(parent, ROCKS[math.floor(rng:NextNumber() * #ROCKS) + 1], cf, { ArtScale = s / 4.5 })
 end
 
 local function fallenLog(parent: Instance, rng: Random, x: number, z: number)

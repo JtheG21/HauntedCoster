@@ -47,6 +47,7 @@ end
 local function broodTree(parent: Instance, pos: Vector3): BasePart
 	local trunk = Build.collider(parent, "Trunk", Vector3.new(7, 30, 7), CFrame.new(pos.X, 15, pos.Z))
 	Build.artSlot(parent, "landmark_broodtree", CFrame.new(pos.X, 0, pos.Z) * CFrame.Angles(0, math.pi, 0))
+	trunk:SetAttribute("LabelHeight", 21) -- the anchor sits at 15; the art tops out at 33
 	local tips: { Vector3 } = {}
 	for i = 0, 3 do
 		local a = math.rad(i * 90 + 45)

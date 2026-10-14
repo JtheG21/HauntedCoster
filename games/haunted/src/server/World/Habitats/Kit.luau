@@ -237,10 +237,9 @@ function Kit.darkCandles(parent: Instance, def: Habitats.Habitat, rng: Random, c
 					)
 					local glow = Build.part({
 						name = "GhostCandle",
-						size = Vector3.new(0.3, 0.3, 0.3),
-						cframe = CFrame.new(x, 1.4, z),
+						size = Vector3.new(0.4, 1.2, 0.4), -- the old candle block's footprint, still colliding
+						cframe = CFrame.new(x, 0.6, z),
 						transparency = 1,
-						collide = false,
 						parent = parent,
 					})
 					glow.CanQuery = false

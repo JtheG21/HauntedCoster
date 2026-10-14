@@ -15,6 +15,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Habitats = require(Shared:WaitForChild("Config"):WaitForChild("Habitats"))
 local HabitatRules = require(Shared:WaitForChild("Rules"):WaitForChild("HabitatRules"))
 local HabitatState = require(Shared:WaitForChild("HabitatState"))
+local WorldConfig = require(Shared.Config:WaitForChild("World"))
 local World = script.Parent.Parent.World
 local GroundPainter = require(World.GroundPainter)
 local HubBuilder = require(World.HubBuilder)
@@ -35,6 +36,7 @@ local storage: Folder
 local stage: Folder
 local built: { [string]: Kit.Result } = {}
 local activeId: string? = nil
+local generation = 0 -- bumped by each activation; an older one still painting stops
 local onActivatedFns: { (string) -> () } = {}
 local onDeactivatingFns: { (string) -> () } = {}
 
@@ -79,9 +81,20 @@ function HabitatService.activate(id: string): boolean
 	HabitatService.deactivate()
 	Habitats.setActive(id)
 	activeId = id
+	generation += 1
+	local gen = generation
 	result.model.Parent = stage
-	-- The module's ground and paths become terrain (TASK-0044); no grass blades where creatures roam.
-	GroundPainter.paint(result.model, { [Enum.Material.Grass] = Enum.Material.LeafyGrass })
+	-- The module's ground and paths become terrain (TASK-0044); no grass blades where creatures roam. The old
+	-- module's ground is cleared first and the hub repainted over it; a newer activation stops this one.
+	local function current(): boolean
+		return generation == gen
+	end
+	local leafy = { [Enum.Material.Grass] = Enum.Material.LeafyGrass }
+	-- Only inside the wall: players evacuated to just outside the gates stand on terrain that must not be rewritten.
+	GroundPainter.reset(Vector3.zero, WorldConfig.Hub.wallRadius)
+	if not (GroundPainter.paint(hub.folder, leafy, current) and GroundPainter.paint(result.model, leafy, current)) then
+		return false
+	end
 	Workspace:SetAttribute(HabitatState.Attr.active, id)
 	HubBuilder.setGateLabel(hub, Habitats.ById[id].name)
 	for _, fn in onActivatedFns do

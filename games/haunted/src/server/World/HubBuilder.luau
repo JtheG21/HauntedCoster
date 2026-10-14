@@ -48,13 +48,12 @@ local function wallArc(parent: Instance, fromAngle: number, toAngle: number)
 			CFrame.fromMatrix(Vector3.new(mid.X, 0, mid.Z), along, Vector3.yAxis),
 			{ ArtStretchX = (len + 0.6) / 12 }
 		)
-		local wall = Build.collider(
+		Build.collider(
 			parent,
 			"HubWall",
 			Vector3.new(1.6, WALL_HEIGHT, len + 0.6),
 			CFrame.lookAt(Vector3.new(mid.X, WALL_HEIGHT / 2, mid.Z), Vector3.new(b.X, WALL_HEIGHT / 2, b.Z))
 		)
-		wall.CanQuery = true
 		Build.part({
 			name = "HubWallCollider",
 			size = Vector3.new(1, WALL_COLLIDER, len + 0.8),

@@ -70,6 +70,11 @@ local function fillBlock(terrain: Terrain, cf: CFrame, size: Vector2, surface: n
 end
 
 local function fillDisc(terrain: Terrain, centre: Vector3, radius: number, surface: number, material: Enum.Material)
+	-- Ground in this game tops out below y = 2 (two 4-stud voxel layers between y -8 and 0 carry it); anything
+	-- higher would be silently capped, so say so (AUD-20261013-TASK-0044-01 finding 6).
+	if surface > 2 then
+		warn(`[GroundPainter] disc surface {surface} above 2 is capped`)
+	end
 	local region = Region3.new(
 		Vector3.new(centre.X - radius, -8, centre.Z - radius),
 		Vector3.new(centre.X + radius, 0, centre.Z + radius)
@@ -78,11 +83,13 @@ local function fillDisc(terrain: Terrain, centre: Vector3, radius: number, surfa
 	local size = mats.Size
 	local origin = region.CFrame.Position - region.Size / 2
 	local topOcc = math.clamp((surface + 2) / 4, 0.05, 1)
+	-- A disc smaller than a voxel still writes the cell under its centre.
+	local r2 = math.max(radius * radius, 8)
 	for x = 1, size.X do
 		local cx = origin.X + (x - 0.5) * 4
 		for z = 1, size.Z do
 			local cz = origin.Z + (z - 0.5) * 4
-			if (cx - centre.X) ^ 2 + (cz - centre.Z) ^ 2 <= radius * radius then
+			if (cx - centre.X) ^ 2 + (cz - centre.Z) ^ 2 <= r2 then
 				mats[x][1][z] = material
 				occs[x][1][z] = 1
 				mats[x][2][z] = material
@@ -110,7 +117,13 @@ end
 
 -- Paints every marked part under `container`, lowest top first. `remap` swaps materials (the hunting habitats
 -- use LeafyGrass, which has no grass blades, so graves and creatures stay readable).
-function GroundPainter.paint(container: Instance, remap: { [Enum.Material]: Enum.Material }?)
+-- `current` (optional) is checked between batches: painting stops once it returns false, so a superseded habitat
+-- activation never paints a module that has gone back to storage.
+function GroundPainter.paint(
+	container: Instance,
+	remap: { [Enum.Material]: Enum.Material }?,
+	current: (() -> boolean)?
+): boolean
 	local terrain = Workspace.Terrain
 	local parts: { BasePart } = {}
 	for _, d in container:GetDescendants() do
@@ -122,16 +135,22 @@ function GroundPainter.paint(container: Instance, remap: { [Enum.Material]: Enum
 		return top(a) < top(b)
 	end)
 	for i, part in parts do
+		if current and not current() then
+			return false
+		end
 		paintPart(terrain, part, remap)
 		if i % 40 == 0 then
 			task.wait()
 		end
 	end
+	return true
 end
 
 -- The outer world ground: paint a bounded square of grass over it, slightly raised, and keep the part visible
 -- beyond (far away, where terrain would only cost memory).
+local outer: { material: Enum.Material, surface: number }? = nil
 function GroundPainter.paintOuter(part: BasePart, halfExtent: number)
+	outer = { material = part.Material, surface = top(part) + 0.08 }
 	fillBlock(
 		Workspace.Terrain,
 		CFrame.new(part.Position),
@@ -139,6 +158,15 @@ function GroundPainter.paintOuter(part: BasePart, halfExtent: number)
 		top(part) + 0.08,
 		part.Material
 	)
+end
+
+-- Puts the outer ground back over a disc (a habitat footprint), clearing whatever the previous module painted
+-- there, including its gate-path ends past the wall (finding 5). Callers repaint what sits on top.
+function GroundPainter.reset(centre: Vector3, radius: number)
+	local o = outer
+	if o then
+		fillDisc(Workspace.Terrain, centre, radius, o.surface, o.material)
+	end
 end
 
 local styled = false

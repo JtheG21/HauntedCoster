@@ -34,6 +34,7 @@ return function(args: any): { [string]: any }
 		end
 		table.insert(checks, { name = "house tier reached", ok = profile.houseTier >= tier })
 	end
+	local startId = HabitatService.activeId()
 	for _, def in Habitats.List do
 		if HabitatService.activeId() ~= def.id then
 			HabitatService.activate(def.id)
@@ -43,6 +44,9 @@ return function(args: any): { [string]: any }
 		task.wait(seconds)
 	end
 	ReplicatedStorage:SetAttribute("HC_Tour", nil)
+	if startId then
+		HabitatService.activate(startId)
+	end
 	local ok = true
 	for _, c in checks do
 		ok = ok and c.ok

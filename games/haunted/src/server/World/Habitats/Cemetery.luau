@@ -150,7 +150,7 @@ function Cemetery.build(def: Habitats.Habitat): Result
 		Build.artSlot(cryptFolder, "sign_hanging", at)
 		local board = Build.part({
 			name = "CryptSign",
-			size = Vector3.new(3.4, 1.4, 0.2),
+			size = Vector3.new(3.4, 1.4, 0.26), -- clear of the warped art board
 			cframe = at * CFrame.new(-2.1, 3.4, 0),
 			transparency = 1,
 			collide = false,

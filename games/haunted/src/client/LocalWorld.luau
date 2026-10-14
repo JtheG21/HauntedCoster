@@ -256,6 +256,10 @@ function LocalWorld.start()
 		folder.DescendantAdded:Connect(function(d)
 			if d.Name == "CryptGate" then
 				updateMarkers()
+			elseif d.Name == "GateLeaf" and d.Parent and d.Parent.Name == "CryptGate" then
+				-- A leaf that streams in after its gate: re-apply the gate's state to every leaf.
+				(d.Parent :: Instance):SetAttribute("LocalOpen", nil)
+				updateMarkers()
 			end
 		end)
 	end)
