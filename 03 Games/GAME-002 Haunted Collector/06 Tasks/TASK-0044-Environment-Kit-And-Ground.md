@@ -3,7 +3,7 @@ id: TASK-0044
 title: "Environment Kit and Ground"
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: high
 risk: medium
 owner: executor
@@ -57,6 +57,15 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 
 ---
 ## Implementation record
+- **Commits:** `1a178b6` (kit, terrain ground, haunted-tree meshes), `fb9dfcc` (habitat decor, layout-preserving RNG burns, vertical stretch). Stacked on TASK-0043; the TASK-0043 audit fixes ride in a separate commit on this branch.
+- **Art (Blender, offline):** dead trees, pines, rocks, fallen log, haunted trunks (Pillar/Broad/Angular, faced and plain) carved to the TASK-0041 face layout with bark lids and jaw; graveyard kit (headstone, Celtic cross, obelisk, leaning slab, mound, pumpkins, candles, iron fence panel/post, gate pillar/arch, ruined wall, edge stones); hub wall, gate pillars, arch, hanging sign; habitat decor (torn web sheets, cocoons, ruined brick walls, broken picket fence). References MIN-010, MIN-054–056, MIN-060–070; BAD-001–005 avoided (no flat-faced primitive trunks, faces carved into bark).
+- **Server:** builders keep their gameplay footprints as invisible colliders (attribute `Solid`, which `TreeSight` treats as blocking) plus `ArtSlot` anchors; lights and prompts unchanged. `Props.burn` keeps each builder's seeded draw count identical to the old part builders, so validated layouts don't move.
+- **Ground:** `GroundPainter` turns ground discs and path strips into terrain at the same top height (measured: block fills surface 2 studs above the fill top; `FillCylinder` rounds up a voxel, so discs are written as voxels). Hunting habitats and plots use LeafyGrass (no blades over graves and creatures); the outer ground keeps grass blades (`Terrain.Decoration`).
+- **Checks:** `scripts/check.sh` passes (specs 143/0).
+- **Scenarios (local `Overhaul.rbxl`, synced by rebuild, stacked head):** Reachability Cemetery 28/28, Woodland 23/23, SpiderWoodland 23/23, Settlement 23/23; HabitatSwap 35/35 (parts: Cemetery 933, Woodland 348, SpiderWoodland 204, Settlement 178); HabitatRotation 28/28.
+- **HauntedTrees (AC2):** 1 player: looking at a faced tree froze it immediately and both sight lines were clear through the new trunk colliders (checked live). 2 players: 23/28; all 5 failures are latency windows (freeze seen after >1.5 s, resume 2.1–2.7 s against ≤2.2 s) while Studio held ~3.9 GB in Edit alone plus two client processes on this 8 GB Mac. Not counted as a pass; re-run in TASK-0052 on a quieter machine state.
+- **Evidence (AC4):** before: [[TEST-20261012-03]] captures (cemetery daylight, woodland, spider woodland, settlement night) and `overhaul/before-hub-night.jpg`; after: `07 Playtests/assets/overhaul/T44-*.jpg` and the TASK-0045 landmark captures (same session).
+- **Not verified:** grass/terrain on devices; frame time with 6 players (Studio cap is 2).
 
 ## Audits
 
