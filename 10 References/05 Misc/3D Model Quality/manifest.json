@@ -1,0 +1,959 @@
+[
+  {
+    "id": "MODEL-BAD-001",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.18.25\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-001.png",
+    "sha256": "6eff815adca7a18c22f26e63e00596e1e33e74d27ff5c656d6108ff186f1ff45",
+    "dimensions": [
+      512,
+      824
+    ]
+  },
+  {
+    "id": "MODEL-BAD-002",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.18.33\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-002.png",
+    "sha256": "37e0ec197695e1388909aa867ec211e0960470c66449e99e8fc0714d2e909b4d",
+    "dimensions": [
+      440,
+      722
+    ]
+  },
+  {
+    "id": "MODEL-BAD-003",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.18.51\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-003.png",
+    "sha256": "6c950944347c6cc098a8d361098c28e6186532227540c4bd80990f4a00fa6318",
+    "dimensions": [
+      474,
+      656
+    ]
+  },
+  {
+    "id": "MODEL-BAD-004",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.19.00\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-004.png",
+    "sha256": "a3be0a231be7587abe9032d6a4f227eebb46e24f499a9d0f646a727a89dcc7a5",
+    "dimensions": [
+      554,
+      650
+    ]
+  },
+  {
+    "id": "MODEL-BAD-005",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.19.24\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-005.png",
+    "sha256": "8543558d19086bb27f1fedbf7866bb9d37bbf27009672a00d4a9dcf63945eb39",
+    "dimensions": [
+      742,
+      632
+    ]
+  },
+  {
+    "id": "MODEL-BAD-006",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.20.16\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-006.png",
+    "sha256": "7fd8acfd5cbc6ac9b60d9315564d25c6adc254b01d8144a6c10ffc4e01da1510",
+    "dimensions": [
+      554,
+      324
+    ]
+  },
+  {
+    "id": "MODEL-BAD-007",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.20.21\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-007.png",
+    "sha256": "b5a072dc794fc3be83ac302fec28b0a5810bd21aacaadb3880c7ab6a304028f7",
+    "dimensions": [
+      364,
+      408
+    ]
+  },
+  {
+    "id": "MODEL-BAD-008",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.20.28\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-008.png",
+    "sha256": "4391fdbe08a44fbf64c8c8b96d36978497f9a4825e5ac514e9b21204b63eb452",
+    "dimensions": [
+      764,
+      344
+    ]
+  },
+  {
+    "id": "MODEL-BAD-009",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.20.31\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-009.png",
+    "sha256": "7bf169c62e5fd0eb1ae77114763c264704b8a783d65a2bbdf7eec5548a24b6e9",
+    "dimensions": [
+      490,
+      438
+    ]
+  },
+  {
+    "id": "MODEL-BAD-010",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.20.33\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-010.png",
+    "sha256": "e1a2e4047cc58ff3b90d222a46f1692a41c25c5e9c45a6ad125e46c7d2e3ab8d",
+    "dimensions": [
+      488,
+      208
+    ]
+  },
+  {
+    "id": "MODEL-BAD-011",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.21.08\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-011.png",
+    "sha256": "a7e70a161c0269391d9580d127d0b775307c1053d102d94fa045a284510b67ca",
+    "dimensions": [
+      442,
+      222
+    ]
+  },
+  {
+    "id": "MODEL-BAD-012",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.21.21\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-012.png",
+    "sha256": "21c738998899e1067f9a8ceb447d2c8389184357867bd7ea0655743a52433a78",
+    "dimensions": [
+      546,
+      346
+    ]
+  },
+  {
+    "id": "MODEL-BAD-013",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.21.48\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-013.png",
+    "sha256": "fa0ec73d6a509df76687f4269b6e2c361ffabfa7a6fbd4a7fa61c29b76f8c936",
+    "dimensions": [
+      454,
+      344
+    ]
+  },
+  {
+    "id": "MODEL-BAD-014",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.21.53\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-014.png",
+    "sha256": "37318cc11f8e2bf9952eff3fdaf4399d2d5d3dc2dc0ef4c6abb351fb8d52b450",
+    "dimensions": [
+      560,
+      422
+    ]
+  },
+  {
+    "id": "MODEL-BAD-015",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.21.59\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-015.png",
+    "sha256": "958b10b47099af3c2361922f66edef164ea9ed92d461c34fe1d2b59c5ce9568c",
+    "dimensions": [
+      216,
+      340
+    ]
+  },
+  {
+    "id": "MODEL-BAD-016",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.22.04\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-016.png",
+    "sha256": "048b75999300fbe4afcd7859ed58d42c243dc0261fc01388aae8fea1ec3f9d21",
+    "dimensions": [
+      198,
+      346
+    ]
+  },
+  {
+    "id": "MODEL-BAD-017",
+    "category": "Rejected",
+    "original": "/Users/jg/Desktop/3dModels/Screenshot 2026-10-13 at 2.22.50\u202fAM.png",
+    "path": "Rejected/MODEL-BAD-017.png",
+    "sha256": "1c884d058c27c1c4f97a3cd9a8cf8c0554dc40111f9dcfc301d098264931760b",
+    "dimensions": [
+      676,
+      488
+    ]
+  },
+  {
+    "id": "MODEL-MIN-001",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-11 at 11.35.05\u202fPM.png",
+    "path": "Minimum Standard/MODEL-MIN-001.png",
+    "sha256": "55b751f7ceb675db727469be2e438edd2dc660fedac1342ebd8b952dfbd7b11e",
+    "dimensions": [
+      754,
+      758
+    ]
+  },
+  {
+    "id": "MODEL-MIN-002",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-11 at 11.35.16\u202fPM.png",
+    "path": "Minimum Standard/MODEL-MIN-002.png",
+    "sha256": "a82777b7f5591d3a4d402a868f1a597956fde05683a7fe4d3408e4c8de6f3780",
+    "dimensions": [
+      932,
+      852
+    ]
+  },
+  {
+    "id": "MODEL-MIN-003",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-11 at 11.35.33\u202fPM.png",
+    "path": "Minimum Standard/MODEL-MIN-003.png",
+    "sha256": "5d8033609cfcf821e22df4912f0b73e4c80ccff18e43ef070f9ee74dbe778026",
+    "dimensions": [
+      738,
+      968
+    ]
+  },
+  {
+    "id": "MODEL-MIN-004",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-11 at 11.36.18\u202fPM.png",
+    "path": "Minimum Standard/MODEL-MIN-004.png",
+    "sha256": "a50afd33b5a49dba7d7e85c6ad88f087a2fdbb76d92691f9083f80ba49629b21",
+    "dimensions": [
+      570,
+      1068
+    ]
+  },
+  {
+    "id": "MODEL-MIN-005",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-11 at 11.36.44\u202fPM.png",
+    "path": "Minimum Standard/MODEL-MIN-005.png",
+    "sha256": "06dcfd3ee164565456251cf414abebee898cdb7d14ad25a5c622b2dcc72bfec4",
+    "dimensions": [
+      776,
+      720
+    ]
+  },
+  {
+    "id": "MODEL-MIN-006",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-11 at 11.36.55\u202fPM.png",
+    "path": "Minimum Standard/MODEL-MIN-006.png",
+    "sha256": "8f6b0f711e87bb2abddfe9ceeeea639c57dce57fed2bebdce656fa9b525677b5",
+    "dimensions": [
+      774,
+      1208
+    ]
+  },
+  {
+    "id": "MODEL-MIN-007",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-11 at 11.37.26\u202fPM.png",
+    "path": "Minimum Standard/MODEL-MIN-007.png",
+    "sha256": "df34590f7cc69a20a6921ce243f9f42bd938ef2c0d72cdcdfae5db82bc7d0dc1",
+    "dimensions": [
+      676,
+      912
+    ]
+  },
+  {
+    "id": "MODEL-MIN-008",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-11 at 11.37.49\u202fPM.png",
+    "path": "Minimum Standard/MODEL-MIN-008.png",
+    "sha256": "395dbd2c1fca4f4a3839d1a10d8091b059ac6c4faf0c1826042fd994d95b7481",
+    "dimensions": [
+      714,
+      762
+    ]
+  },
+  {
+    "id": "MODEL-MIN-009",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-11 at 11.40.51\u202fPM.png",
+    "path": "Minimum Standard/MODEL-MIN-009.png",
+    "sha256": "f7a5286c74213db8647c48718f7ae123bc6c8bbc71113b2d5d6aa7f008b1dbf6",
+    "dimensions": [
+      698,
+      1214
+    ]
+  },
+  {
+    "id": "MODEL-MIN-010",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 12.44.01\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-010.png",
+    "sha256": "28da540a2f294d7b340e0ed7c00c5dedf52a6b610b504724e4d2cb8bade82c8d",
+    "dimensions": [
+      1736,
+      1460
+    ]
+  },
+  {
+    "id": "MODEL-MIN-011",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.47.59\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-011.png",
+    "sha256": "44114a9121fc671c54ffb442317379afffe1fe7d21dbeffe4579f0afb30c2725",
+    "dimensions": [
+      218,
+      230
+    ]
+  },
+  {
+    "id": "MODEL-MIN-012",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.48.02\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-012.png",
+    "sha256": "cc03f8f8b527e70872ac21a4e2208e43ad97bda1e64aaabdc39247edd759e061",
+    "dimensions": [
+      196,
+      206
+    ]
+  },
+  {
+    "id": "MODEL-MIN-013",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.50.16\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-013.png",
+    "sha256": "26a48bd6e7435e8e13459037a88b513e732372d4dfb087fe084355a07970e5ee",
+    "dimensions": [
+      2880,
+      1800
+    ]
+  },
+  {
+    "id": "MODEL-MIN-014",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.50.23\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-014.png",
+    "sha256": "3a2198a81854c51d4423da23b4e69127f420b623523e5fb0d5f93ce2206ae097",
+    "dimensions": [
+      874,
+      622
+    ]
+  },
+  {
+    "id": "MODEL-MIN-015",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.50.28\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-015.png",
+    "sha256": "5d88da49fdfb9977dabf4d272854556a7bba96263cb7f5e37cf23170d22cba58",
+    "dimensions": [
+      840,
+      490
+    ]
+  },
+  {
+    "id": "MODEL-MIN-016",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.50.51\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-016.png",
+    "sha256": "0e3927d764790d634d311b1361a56fe40b3189ed9575c116e421603ae3322ab4",
+    "dimensions": [
+      1562,
+      1138
+    ]
+  },
+  {
+    "id": "MODEL-MIN-017",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.51.06\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-017.png",
+    "sha256": "d5aa9f215c61db4c6c00b5e55d623242f3a4c97ee6055bf453ca202c0e73e77d",
+    "dimensions": [
+      2880,
+      1800
+    ]
+  },
+  {
+    "id": "MODEL-MIN-018",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.51.20\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-018.png",
+    "sha256": "117e8ef0ef165aa57eac1b7f3eac92693a9d495153361125cffc0fc54875bce1",
+    "dimensions": [
+      1894,
+      1096
+    ]
+  },
+  {
+    "id": "MODEL-MIN-019",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.51.35\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-019.png",
+    "sha256": "e347e6191b290b8629ca0495e18537b1c862bdbee3c7b7d9b40c9621b95db5a1",
+    "dimensions": [
+      1592,
+      992
+    ]
+  },
+  {
+    "id": "MODEL-MIN-020",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.52.05\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-020.png",
+    "sha256": "1c9150364696f6e8f95b55fbdddcf6136ab0055a9ef1bbc33ac50c9ff2e08e92",
+    "dimensions": [
+      1532,
+      1012
+    ]
+  },
+  {
+    "id": "MODEL-MIN-021",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.52.20\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-021.png",
+    "sha256": "e2afaeaad2f911533d6f92afc2a1f2767e21e28da65eadac108c86c7b2bc89d8",
+    "dimensions": [
+      944,
+      1184
+    ]
+  },
+  {
+    "id": "MODEL-MIN-022",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.52.42\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-022.png",
+    "sha256": "e6f88c32e0cdce77f3fa9875dd10e38f0aa9de52ec142d6502c6613579509a8c",
+    "dimensions": [
+      850,
+      1096
+    ]
+  },
+  {
+    "id": "MODEL-MIN-023",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.52.57\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-023.png",
+    "sha256": "6a085c8dbfe5a5a534554c6d20b355fec9caec42ae90086d8c2dc503d8ab0f0f",
+    "dimensions": [
+      1716,
+      1050
+    ]
+  },
+  {
+    "id": "MODEL-MIN-024",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.53.10\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-024.png",
+    "sha256": "af9b4f17b4c710a9bc494ce380ed43493747683fe1e9516d399e0e77716170ce",
+    "dimensions": [
+      1774,
+      1150
+    ]
+  },
+  {
+    "id": "MODEL-MIN-025",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.53.21\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-025.png",
+    "sha256": "7ec5347d447f738bc271e4bc611af82b70e02c433b938f8980d839b81148b0a3",
+    "dimensions": [
+      592,
+      1086
+    ]
+  },
+  {
+    "id": "MODEL-MIN-026",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.53.32\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-026.png",
+    "sha256": "23d05bb4548376b5d4296bb3c7d586e01caaa7cf95e81c96e7766f4e571fe81c",
+    "dimensions": [
+      1192,
+      1122
+    ]
+  },
+  {
+    "id": "MODEL-MIN-027",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.53.42\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-027.png",
+    "sha256": "b3be472064c52ac9f793e9f1374de696093a8b093ec707f1b9b0a1b0acb57acf",
+    "dimensions": [
+      544,
+      644
+    ]
+  },
+  {
+    "id": "MODEL-MIN-028",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.53.56\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-028.png",
+    "sha256": "43d3bd7e854d559e3de61eb4b08e313acdf68a870150a5c027ef8ef507511af7",
+    "dimensions": [
+      974,
+      960
+    ]
+  },
+  {
+    "id": "MODEL-MIN-029",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.54.07\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-029.png",
+    "sha256": "42cbd8ad2535d69db51b618fd5a23b8ea95eb25f1de14c24997fcf97a70f47c1",
+    "dimensions": [
+      992,
+      922
+    ]
+  },
+  {
+    "id": "MODEL-MIN-030",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.54.16\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-030.png",
+    "sha256": "0b326328715d3489a66ad78d0317f86868e35fa6df78e68167154514008aad01",
+    "dimensions": [
+      658,
+      732
+    ]
+  },
+  {
+    "id": "MODEL-MIN-031",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.54.27\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-031.png",
+    "sha256": "ed1e2b8a4708543f722c61bb0c81428cf8d08e7992e7afb98883ba8325698667",
+    "dimensions": [
+      972,
+      798
+    ]
+  },
+  {
+    "id": "MODEL-MIN-032",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.54.34\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-032.png",
+    "sha256": "938fedb3cc3fa6bf0092285fa3fe436cffb449776e9c76aa62414dc623ee7c3e",
+    "dimensions": [
+      836,
+      780
+    ]
+  },
+  {
+    "id": "MODEL-MIN-033",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.54.39\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-033.png",
+    "sha256": "40b5bdda7d854639948af0e0fea2cc92f9483a8b0da31274096573e223eb337d",
+    "dimensions": [
+      1126,
+      948
+    ]
+  },
+  {
+    "id": "MODEL-MIN-034",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.55.02\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-034.png",
+    "sha256": "4a6bc86b2ece51626dfbf6ff1833b12a2c7a83c3ab96b5fb847fcd7e51ba4911",
+    "dimensions": [
+      1412,
+      996
+    ]
+  },
+  {
+    "id": "MODEL-MIN-035",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.55.07\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-035.png",
+    "sha256": "2f5c112d6be610a8ac00de9ec37f5160708f12fa0bab5585447b6a9155907240",
+    "dimensions": [
+      1484,
+      1222
+    ]
+  },
+  {
+    "id": "MODEL-MIN-036",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.55.12\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-036.png",
+    "sha256": "5350ffa57b50b0c8bcd5f5476866c143bc877c629bf4fc247de32ea1ae41c03b",
+    "dimensions": [
+      1606,
+      1302
+    ]
+  },
+  {
+    "id": "MODEL-MIN-037",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.55.33\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-037.png",
+    "sha256": "3bb8f053ce295025aeaa874f129a6c326c24939daf512f15caf937da164ecec0",
+    "dimensions": [
+      986,
+      1094
+    ]
+  },
+  {
+    "id": "MODEL-MIN-038",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.55.39\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-038.png",
+    "sha256": "206727d9ba726c9de5c625558f9ba4bff94a36145d29d9ef6c1f46e77e8ecd8b",
+    "dimensions": [
+      558,
+      1038
+    ]
+  },
+  {
+    "id": "MODEL-MIN-039",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.55.43\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-039.png",
+    "sha256": "ca021d7d1acb7109ab300742db32eea4232f4f53e362bee0e843b230487f2893",
+    "dimensions": [
+      624,
+      918
+    ]
+  },
+  {
+    "id": "MODEL-MIN-040",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.55.48\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-040.png",
+    "sha256": "ed46afd9769d03d54767f3c56afd60ab21bd6fcdd6bca0c36bea3102ceea303b",
+    "dimensions": [
+      540,
+      688
+    ]
+  },
+  {
+    "id": "MODEL-MIN-041",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.55.53\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-041.png",
+    "sha256": "e7069d4e19e532b852e86d89b6d6d4d5d557cf84e2aed541d5b93339e81d5275",
+    "dimensions": [
+      640,
+      516
+    ]
+  },
+  {
+    "id": "MODEL-MIN-042",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.55.58\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-042.png",
+    "sha256": "94880509525ef85bf7a6d20965174bcd49a2fe7426f9aed2886e3a2c3db5d926",
+    "dimensions": [
+      730,
+      524
+    ]
+  },
+  {
+    "id": "MODEL-MIN-043",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.56.04\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-043.png",
+    "sha256": "8c88b233e524ea1022644bf9ac0708a07f8126933faf7a97a8e1bdb87c86d883",
+    "dimensions": [
+      898,
+      564
+    ]
+  },
+  {
+    "id": "MODEL-MIN-044",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.56.13\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-044.png",
+    "sha256": "6dbe78d4cbea44f2f59bc47aae70ac4af194a826429dd60728d9f8489d36dc01",
+    "dimensions": [
+      406,
+      260
+    ]
+  },
+  {
+    "id": "MODEL-MIN-045",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.56.23\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-045.png",
+    "sha256": "a6895cf47583445c232474d10a041e7608af39b1246d741ac6f21735258f8ca4",
+    "dimensions": [
+      904,
+      860
+    ]
+  },
+  {
+    "id": "MODEL-MIN-046",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.56.26\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-046.png",
+    "sha256": "5757c69e9142faa0f1ec6f6e2a4eaa4660fe0bcde73330f5a30689752a0a8bc3",
+    "dimensions": [
+      656,
+      880
+    ]
+  },
+  {
+    "id": "MODEL-MIN-047",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.56.28\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-047.png",
+    "sha256": "e6fe4d7c81192e42dffd0d5912e982e3823132e4fc91c81e43fed6a366d3b23b",
+    "dimensions": [
+      626,
+      632
+    ]
+  },
+  {
+    "id": "MODEL-MIN-048",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.56.36\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-048.png",
+    "sha256": "e0c551344b3ba2e8160c807c205c52342a04eb5649348e2680d346d7db0c4a40",
+    "dimensions": [
+      678,
+      658
+    ]
+  },
+  {
+    "id": "MODEL-MIN-049",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.56.39\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-049.png",
+    "sha256": "358434bc1628f9995b7e82e0108fac10d108ad9647defa5f183171aae5c1d18a",
+    "dimensions": [
+      928,
+      584
+    ]
+  },
+  {
+    "id": "MODEL-MIN-050",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.56.44\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-050.png",
+    "sha256": "3355883db873170d063cf5a8e241a5f5d1a27b3fabe1831b7cafcfc31c7556e1",
+    "dimensions": [
+      902,
+      502
+    ]
+  },
+  {
+    "id": "MODEL-MIN-051",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.56.46\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-051.png",
+    "sha256": "7a3604eb4457372ffadc9ca994af258ff8c57aa8cc0a3522879b5a64e7619eac",
+    "dimensions": [
+      1134,
+      536
+    ]
+  },
+  {
+    "id": "MODEL-MIN-052",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.56.52\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-052.png",
+    "sha256": "1818feecf9af158ef68f9912339be5561b9e4b33397ef11f78c7f527e99cc0cf",
+    "dimensions": [
+      828,
+      1064
+    ]
+  },
+  {
+    "id": "MODEL-MIN-053",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.56.57\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-053.png",
+    "sha256": "948f9df36e13fdc958c4646b4bf07a48c793d9e10c35a5950ea228473e912c62",
+    "dimensions": [
+      780,
+      774
+    ]
+  },
+  {
+    "id": "MODEL-MIN-054",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.57.07\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-054.png",
+    "sha256": "f49d07c47f0ef4ceae5ff8f2c11ec21789a9f489a99876091d9b96178ef80920",
+    "dimensions": [
+      1376,
+      1046
+    ]
+  },
+  {
+    "id": "MODEL-MIN-055",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.57.15\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-055.png",
+    "sha256": "4154de3dfdb5db458d9ab02efa8f45259811ef8c14a0af59d97bdf32dcbd08ec",
+    "dimensions": [
+      1014,
+      1324
+    ]
+  },
+  {
+    "id": "MODEL-MIN-056",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.57.18\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-056.png",
+    "sha256": "5610822e1045c700a629d892f5c62e1fa322afe79a6d5eff49c8b7ffadd3fdfe",
+    "dimensions": [
+      1042,
+      1340
+    ]
+  },
+  {
+    "id": "MODEL-MIN-057",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.57.23\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-057.png",
+    "sha256": "b0741a2ccb8ce986239e250e1f4dd98b0b1f67b763ec7c17a73b63fed0d09068",
+    "dimensions": [
+      828,
+      880
+    ]
+  },
+  {
+    "id": "MODEL-MIN-058",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.57.28\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-058.png",
+    "sha256": "3b86ebd23f82fce0a25e301a244036e9e196fafa7a05c6922c8cf8868e3d8d30",
+    "dimensions": [
+      942,
+      638
+    ]
+  },
+  {
+    "id": "MODEL-MIN-059",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.57.36\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-059.png",
+    "sha256": "3df612e9c06174bf7f64f14cea6bbc8d956c0e3b255efee17538d9a7e7bae661",
+    "dimensions": [
+      942,
+      464
+    ]
+  },
+  {
+    "id": "MODEL-MIN-060",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.57.53\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-060.png",
+    "sha256": "02cf6cffe521931db7b2974498e784e0a91620215978e91bf3c66dd6273adfaa",
+    "dimensions": [
+      1490,
+      672
+    ]
+  },
+  {
+    "id": "MODEL-MIN-061",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.57.58\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-061.png",
+    "sha256": "b755c294fda30f5fd6665be12108b30d85bd0d77dd2ba94603eec9dd0b5ce85a",
+    "dimensions": [
+      1280,
+      542
+    ]
+  },
+  {
+    "id": "MODEL-MIN-062",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.58.03\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-062.png",
+    "sha256": "eeefb1501d34cf1d49ac76e54671b3b5bbea9e05b94adc5c3c6b555f5af17232",
+    "dimensions": [
+      1188,
+      682
+    ]
+  },
+  {
+    "id": "MODEL-MIN-063",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.58.08\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-063.png",
+    "sha256": "614b645e6063ac130a1d87bac5a3bef567b6db7ed4a514972a23002c71b38cf2",
+    "dimensions": [
+      878,
+      568
+    ]
+  },
+  {
+    "id": "MODEL-MIN-064",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.58.12\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-064.png",
+    "sha256": "cda43e9682e667de8d5f4b77f8f586c86c15b1b4c6bee965a8e65705d6578ee4",
+    "dimensions": [
+      1058,
+      780
+    ]
+  },
+  {
+    "id": "MODEL-MIN-065",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.58.20\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-065.png",
+    "sha256": "4ebd4757556de317b2b99e0ee6d7ea1272b360ac725d2ba3626d54cad6b1cc8c",
+    "dimensions": [
+      846,
+      646
+    ]
+  },
+  {
+    "id": "MODEL-MIN-066",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.58.26\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-066.png",
+    "sha256": "5d7c76bb2cdc358ee8dd404b7fc58ab545aa5830cd9d0194bbb2e2085368ac8a",
+    "dimensions": [
+      1438,
+      866
+    ]
+  },
+  {
+    "id": "MODEL-MIN-067",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.58.31\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-067.png",
+    "sha256": "f6bc580654deb2003dd58dfb527f2fd4ce183284153a0796b73c5080a0bce2bc",
+    "dimensions": [
+      1514,
+      1030
+    ]
+  },
+  {
+    "id": "MODEL-MIN-068",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.58.36\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-068.png",
+    "sha256": "720f52fb1d18bdb4cf862e8add5c9493f67e642039543d04d3ceff58f7c4a551",
+    "dimensions": [
+      1256,
+      900
+    ]
+  },
+  {
+    "id": "MODEL-MIN-069",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.58.56\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-069.png",
+    "sha256": "3e59104a420da1adb1d6a112f2c3f26c4d5ac409cd7dd569a0ff4830dde4d13a",
+    "dimensions": [
+      1808,
+      1222
+    ]
+  },
+  {
+    "id": "MODEL-MIN-070",
+    "category": "Minimum Standard",
+    "original": "/Users/jg/Desktop/3dModelRef/Screenshot 2026-10-13 at 2.59.11\u202fAM.png",
+    "path": "Minimum Standard/MODEL-MIN-070.png",
+    "sha256": "baeac813ddb02300473d99557ca927cf85cacbea114d9c994237d86206e694b6",
+    "dimensions": [
+      1546,
+      1370
+    ]
+  }
+]
