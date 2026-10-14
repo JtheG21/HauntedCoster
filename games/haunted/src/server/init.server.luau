@@ -26,6 +26,7 @@ local ContainmentService = require(Services.ContainmentService)
 local EconomyService = require(Services.EconomyService)
 local TrainService = require(Services.TrainService)
 local TutorialService = require(Services.TutorialService)
+local HauntedTreeService = require(Services.HauntedTreeService)
 
 -- The persistent outer world, then every habitat module (one active inside the hub wall, ADR-0007). The
 -- rotation schedule picks the active module. Studio test runs (a `scenario` argument) are pinned to the
@@ -57,6 +58,7 @@ TrainService.start()
 TutorialService.start()
 RetaliationService.start()
 RotationService.start(pinned)
+HauntedTreeService.start()
 
 -- A habitat swap clears the old module's wild monsters and populates the new one.
 HabitatService.onDeactivating(function()

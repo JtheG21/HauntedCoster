@@ -4,7 +4,7 @@ title: Obsidian Conventions
 type: index
 status: approved
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-12
 tags:
   - studio/conventions
 ---
@@ -56,8 +56,9 @@ Per-game layout:
 | Retrospective | `RETRO-Short-Title.md` | `RETRO-M0-Workflow-Foundation.md` |
 | Experiment | `EXP-####-Short-Title.md` | `EXP-0001-Starter-Pack.md` |
 | Health report (generated) | `HLT-YYYYMMDD.md` | `HLT-20261010.md` |
+| Reference (in `10 References/<area>/`) | `REF-AREA-NNN-Short-Title.md` | `REF-MAP-001-Graveyard-Gate.md` |
 
-The last three rows (retrospectives, experiments, health reports) are local additions to the original spec.
+The last four rows (retrospectives, experiments, health reports, references) are local additions to the original spec. Reference notes use `type: reference` and [[T - Reference]]; `10 References/` is outside the validator's frontmatter checks, and the existing `referenceN` notes keep their names ([[ADR-0009-Shared-Production-Foundation]]).
 
 Rules:
 - An ID never changes once assigned. Generated names use hyphens, not spaces. Status never goes in a filename.

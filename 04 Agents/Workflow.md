@@ -10,6 +10,8 @@ tags:
 ---
 # Development workflow
 
+Start every task with [[Task Intake]] (routing, depth, proceed-or-ask). This note covers task states, gates and merges.
+
 ```
 Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, proposed) → [HUMAN: approve → ready]
   → Implementation (in_progress) → Automated checks → Independent audit (in_review → AUD)

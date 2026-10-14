@@ -56,6 +56,7 @@ Statuses are copied from `tasks/queue.json` (authoritative); `validate_vault.py`
 | [[TASK-0037-Plot-Capacity]] | done (6-player cap tied to the 6 plots) | [[AUD-20261012-TASK-0037-01]] pass |
 | [[TASK-0038-Encounter-Review-Capture-Guards]] | done (EncounterService review; capture-start guards as a pure rule) | [[AUD-20261012-TASK-0038-01]] pass |
 | [[TASK-0039-Drop-Parked-Seat-Check]] | done (forced-parked-seat check dropped; decisions recorded) | [[AUD-20261012-TASK-0039-01]] pass |
+| [[TASK-0041-Interactive-Haunted-Trees]] | done (Woodland haunted trees: global gaze freeze; [[TEST-20261013-01]] 28/28 two-player) | [[AUD-20261013-TASK-0041-01]] pass with notes; [[AUD-20261013-TASK-0041-02]] delta pass |
 
 ## How to playtest (Studio)
 1. `rojo build haunted.project.json -o HauntedCollector.rbxl`, then open it in Studio (or `rojo serve haunted.project.json` into a new empty place). **Never sync it into the Rg1/place1 place.**
@@ -63,7 +64,7 @@ Statuses are copied from `tasks/queue.json` (authoritative); `validate_vault.py`
 3. Follow the Objective panel: walk the lantern road north past the Weeping Angel, Inspect a Wisp (R), Try Capture, press CATCH (Space / tap / A) in the green zone, run home and Secure at your purple pen.
 4. Mansion menu (M): buy Speed, then Restore your house (250). Edit Track appears: tap to add/select points, Confirm.
 5. Mansion > Exhibits: place a monster. Ride at the station. With the Restored Manor the Sealed Crypt (south, behind the Bell Tower) opens: the Bell Wraith lives there. Clue hunting was removed in [[TASK-0025-Clue-Hunting-Removal]].
-6. Automated: `game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "FullLoop" })` from the command bar (Edit mode) prints PASS/FAIL per check. Other single-player scenarios: `Reachability`, `ExploitProbe`, `CarryGuard`, `Retaliation`, `HabitatRotation`, `HabitatSwap`. `HoldForManual` keeps a session open for hands-on checks. Unit specs: `require(game.TestService.Tests.TestRunner).run()`.
+6. Automated: `game:GetService("StudioTestService"):ExecutePlayModeAsync({ scenario = "FullLoop" })` from the command bar (Edit mode) prints PASS/FAIL per check. 2-player: `HauntedTrees` (`ExecuteMultiplayerTestAsync(2, { scenario = "HauntedTrees", habitat = "Woodland" })`). Other single-player scenarios: `Reachability`, `ExploitProbe`, `CarryGuard`, `Retaliation`, `HabitatRotation`, `HabitatSwap`. `HoldForManual` keeps a session open for hands-on checks. Unit specs: `require(game.TestService.Tests.TestRunner).run()`.
 7. `CrossPlot` (2 players): `ExecuteMultiplayerTestAsync(2, …)` rarely gets its 2nd client on an 8 GB Mac. Use Test → Clients and Servers → 2 Players, one fresh session per run, and run the scenario from a temporary server Script that first pins the Cemetery ([[TEST-20261012-13]]). Scratch places must not keep the template SpawnLocation ([[TEST-20261012-15]]).
 
 ## Systems
@@ -73,9 +74,11 @@ Statuses are copied from `tasks/queue.json` (authoritative); `validate_vault.py`
 - [[ADR-0005-Haunted-Collector-Direction]]: approved (jg, 2026-10-11)
 - [[ADR-0006-M1-Tuning-And-Scope-Decisions]]: approved
 - [[ADR-0007-World-Retrofit-Direction]]: approved
+- [[ADR-0010-Client-Reported-Gaze]]: **proposed**, awaiting jg
 
 ## Needs human review
 - Review the draft economy numbers in the design note. They are guesses until playtested.
 - Hands-on playtest by the user. Keep the GAME-001 `rojo serve` away from this place (it injected a Baseplate that caused z-fighting).
 - ADR-0005 open question 4 (migrating the old links): done 2026-10-12, the 45 ambiguous links are qualified (GAME-001 notes link to `GAME-001 Rg1/…`).
 - The habitat, house and train looks (TASK-0027, 0028, 0030) await jg's review.
+- The haunted-tree look ([[TASK-0041-Interactive-Haunted-Trees]], [[TEST-20261013-01]] screenshots) and [[ADR-0010-Client-Reported-Gaze]] await jg's review.
