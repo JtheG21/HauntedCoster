@@ -3126,6 +3126,43 @@
       "merge_approved_by": "jg"
     },
     {
+      "id": "TASK-0040",
+      "title": "Audio Pass",
+      "project": "GAME-002",
+      "status": "in_progress",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0039"
+      ],
+      "branch": "task/TASK-0040-Audio-Pass",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0040-Audio-Pass.md",
+      "acceptance_criteria": [
+        "Every role in the sound spec (habitat and hub ambience, capture, retaliation sting, ride, coins/payout, rotation warning, UI) is filled by a free Creator Store asset that loaded in Studio with a measured length inside its band; no music, no uploads.",
+        "jg chose each sound by ear from a measured shortlist of up to 3 during a Studio sound tour.",
+        "Sound is client-only: a SoundBank data module and an Sfx helper that fails silent, driven by existing client events; no server or remote changes.",
+        "A HUD mute toggle silences all game sound; specs cover the bank data and role mapping; scripts/check.sh passes.",
+        "A 2-player Studio session plays the sounds at the right moments with no script errors; chosen ids and creators are listed in Sound References."
+      ],
+      "history": [
+        {
+          "time": "2026-10-12T22:00:48",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-12T22:00:48",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg"
+    },
+    {
       "id": "TASK-0041",
       "title": "Interactive Haunted Trees",
       "project": "GAME-002",
