@@ -6,7 +6,7 @@ project: GAME-002
 status: research
 sources:
   - https://youtu.be/haf0V--67Ac
-confidence: low
+confidence: medium
 created: 2026-10-14
 updated: 2026-10-14
 tags:
@@ -15,7 +15,7 @@ tags:
 ---
 # Good vs Bad Roblox UI Principles (video)
 
-> **Draft.** Speaker opinion from machine-translated captions, frames not viewed. Nothing here is verified or approved.
+> **Draft.** Speaker opinion. Evidence is captions plus Gemini's video read (picture and audio), not our own viewing of frames. Nothing here is approved.
 
 ## Question
 Which practical UI principles from a Roblox creator's "psychology of good UI" lesson can shape Haunted Collector's HUD, Journal, Mansion and the approved Shop/monetization UI, without copying any game's assets or layout?
@@ -25,7 +25,11 @@ Which practical UI principles from a Roblox creator's "psychology of good UI" le
 |---|---|---|
 | "the psychology behind good ui within roblox games" (uploader: Twine, 27:38). Free sample module from the creator's paid course. | https://youtu.be/haf0V--67Ac | 2026-10-14 |
 
-**Evidence limits.** Auto-generated Arabic captions (apparently machine-translated), not the audio. Frames were **not** viewed, so the on-screen examples (Pet Simulator 99 and others) are known only as narrated. Timestamps show where to re-check.
+**Evidence and method.** Two passes on 2026-10-14:
+1. Auto-generated Arabic captions (apparently machine-translated), via the local engine. No frames viewed.
+2. Gemini (`gemini-3.7-flash`, agentic video) over the whole video in 2–5 minute segments. It reports slide text, on-screen examples and timestamps, and was cross-checked against the captions.
+
+Gemini output is secondary evidence, not our own observation. It was **internally inconsistent in one place**: segment 20:00–25:00 calls the Rewards/Daily modal bad, while 25:00–27:37 lists a "Rewards / Daily Streak" modal as good. Game names it gives (e.g. "TiresomeNewbie") are avatar or UI text it read, not verified titles. Timestamps show where to re-check.
 
 ## Observed mechanics (verified)
 Observed in the transcript only (speaker claims, not measured facts). Timestamps in *(m:ss)*.
@@ -39,7 +43,18 @@ Observed in the transcript only (speaker claims, not measured facts). Timestamps
 - **Uniform sizes, spacing, alignment** *(19:48)*.
 - **Not a guarantee** *(24:20–26:00)*: the speaker concedes weak-UI games can succeed.
 
-**Visual check needed** (the transcript alone is insufficient): 0:30–5:00 icon examples, 5:00–11:00 HUD counts, 16:13–17:10 collapsed menu, 19:48–20:18 palette and font comparisons.
+### Added by the Gemini pass (slides and on-screen detail)
+- **The speaker's own checklists** *(slides at 0:58, 5:36, 9:25)*: Good UI = *Show, not tell · Conveys the purpose · Simple · Clean font*. Bad UI = *Bad color palette · Chunky, blocky font · Cluttered · Too complex · Can't be discerned from first glance*.
+- **Progressive disclosure is the main fix** *(13:40–14:06, 16:32–17:07)*: five separate crate buttons should be one button that opens a sub-screen. Reference game: Pet Simulator 99's basket/shop and inventory.
+- **Tier scale shown visually** *(7:16–7:49)*: speed packs use one shoe, a pair, a pile, a bag, a chest, so value reads without numbers.
+- **Remove heavy frames and borders** *(18:18–18:36)*: thick black backings around every button add noise.
+- **Merge near-duplicate surfaces** *(18:37–18:50)*: separate "Shop" (in-game currency) and "Store" (Robux) could be tabs in one window.
+- **Avoid duplicate controls** *(21:24–21:30)*: e.g. Rebirth in the sidebar and again in the bottom bar.
+- **Avoid AI-generated UI art** *(22:24–23:44)*: the speaker says players notice and are put off; a tinted frame, UI stroke, subtle texture, clear text and simple vector icons are enough.
+- **Fredoka-style fonts read as dated** *(20:13–20:23)* — his opinion, not a measured fact.
+- **Hierarchy of attention** *(15:37–16:00, 19:30–19:41)*: stats crammed in the bottom-left are called poor; Server/Invite belong upper-right.
+
+**Still worth checking visually** (not independently verified): 0:30–5:00 icon examples, 5:00–11:00 HUD counts, 16:13–17:10 collapsed menu, 19:48–20:18 palette and font comparisons.
 
 ## Hypotheses
 - Following these reduces first-session confusion for the young audience. *(confidence: medium; test with a playtest note and a "what is this button?" check)*
@@ -65,13 +80,15 @@ Ours, to validate in a mockup first.
 5. **Palette and font** come from `Theme.luau`.
 6. **Placement**: critical info near the play area; secondary behind one entry.
 7. **Consistency**: sizes, spacing, alignment match siblings.
+8. **Disclosure**: are parallel buttons that serve one purpose grouped behind one entry?
+9. **Chrome**: do heavy frames or borders add noise, and are two surfaces doing one job (Shop vs Store)?
 
 ## Recommendations (max 3)
 1. Use the checklist as an optional review step in UI task notes. Don't make it a gate until a playtest supports it.
 2. For the next UI task, cite this note and name the two principles that will shape the work (reference-first development).
-3. Before promoting anything to a `LES-` lesson, view the frames at the "Visual check needed" timestamps (`/watch`, or Gemini).
+3. Before promoting anything to a `LES-` lesson, view the frames at the "Still worth checking visually" timestamps.
 
 ## Needs human review
-- Unverified conclusions: every principle is the speaker's opinion from machine-translated captions without frames.
+- Unverified conclusions: every principle is the speaker's opinion, read through captions and Gemini rather than our own viewing. Gemini was inconsistent on the Rewards modal.
 - Whether the checklist becomes part of the UI review workflow, and where.
 - Whether any principle conflicts with the approved Shop/monetization scope.
