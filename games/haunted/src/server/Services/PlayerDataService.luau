@@ -45,6 +45,7 @@ type Session = {
 	queued: boolean,
 	queuedRelease: boolean,
 	released: boolean,
+	lastOk: boolean?, -- whether the last completed save landed
 }
 local sessions: { [Player]: Session } = {}
 local loadedCallbacks: { (Player, Profile) -> () } = {}
@@ -145,15 +146,20 @@ local function loadRecord(player: Player): (string, any)
 	return "readonly", nil
 end
 
-local function saveNow(player: Player, release: boolean)
+local function saveNow(player: Player, release: boolean): boolean
 	local session = sessions[player]
 	if not session or not session.profile or session.persistence ~= "saved" or session.released then
-		return
+		return false
 	end
 	if session.saving then
 		session.queued = true
 		session.queuedRelease = session.queuedRelease or release
-		return
+		-- A save is already running; wait for the queued one so the caller learns whether its change landed.
+		local t0 = os.clock()
+		while session.saving and os.clock() - t0 < 30 do
+			task.wait(0.1)
+		end
+		return session.lastOk == true and not session.queued
 	end
 	session.saving = true
 	local ds = getStore()
@@ -163,6 +169,7 @@ local function saveNow(player: Player, release: boolean)
 	-- Re-validate the snapshot so a bug elsewhere can never write an impossible value.
 	local snapshot = ProfileRules.sanitize(deepCopy(profile), os.time())
 	local lost = false
+	local wrote = false
 	for attempt = 1, RETRIES do
 		if not ds then
 			break
@@ -177,6 +184,7 @@ local function saveNow(player: Player, release: boolean)
 			end)
 		end)
 		if ok then
+			wrote = not lost
 			break
 		end
 		warn(`[PlayerData] save failed for {player.Name} (try {attempt}): {err}`)
@@ -193,12 +201,14 @@ local function saveNow(player: Player, release: boolean)
 		session.released = true
 	end
 	session.saving = false
+	session.lastOk = wrote
 	if session.queued and not session.released then
 		local rel = session.queuedRelease
 		session.queued = false
 		session.queuedRelease = false
-		saveNow(player, rel)
+		return saveNow(player, rel)
 	end
+	return wrote
 end
 
 -- Clears our session lock without writing the profile (used when we must not save it).
@@ -369,9 +379,10 @@ function PlayerDataService.onDirty(cb: (Player) -> ())
 	table.insert(dirtyCallbacks, cb)
 end
 
--- Test helper: force a save now (used by the Studio persistence probe).
-function PlayerDataService.saveNow(player: Player)
-	saveNow(player, false)
+-- Saves now and returns whether the write landed (Robux grants are acknowledged only after it does; also used by
+-- the Studio persistence probe).
+function PlayerDataService.saveNow(player: Player): boolean
+	return saveNow(player, false)
 end
 
 return PlayerDataService

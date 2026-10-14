@@ -34,13 +34,17 @@ end
 -- `facing` is the world direction the model looks (the plot's front, towards the hub).
 local function placeModel(
 	parent: Instance,
-	speciesId: string,
-	variantId: string,
+	m: ProfileRules.OwnedMonster,
+	cosmetics: any,
 	pos: Vector3,
 	scale: number,
 	facing: Vector3
 )
-	local model = MonsterModels.build(speciesId, variantId)
+	local speciesId = m.species
+	local model = MonsterModels.build(speciesId, m.variant)
+	-- Equipped cosmetics (TASK-0047) are presentation only: the client art reads them.
+	model:SetAttribute("Skin", cosmetics and cosmetics.skins[m.uid])
+	model:SetAttribute("Aura", cosmetics and cosmetics.auras[m.uid])
 	local species = Monsters.Species[speciesId]
 	if scale ~= 1 then
 		model:ScaleTo(scale)
@@ -72,7 +76,7 @@ function ContainmentService.refreshVisuals(player: Player)
 				local col = (shown - 1) % 3
 				local row = math.floor((shown - 1) / 3)
 				local pos = World.plotToWorld(i, World.Plot.pen + Vector3.new(-4.5 + col * 4.5, 0.4, -3 + row * 5))
-				placeModel(residents, m.species, m.variant, pos, 0.55, facing)
+				placeModel(residents, m, profile.cosmetics, pos, 0.55, facing)
 			end
 		end
 	end
@@ -108,7 +112,7 @@ function ContainmentService.refreshVisuals(player: Player)
 					local holder = Instance.new("Folder")
 					holder.Name = "Display"
 					holder.Parent = ped
-					placeModel(holder, m.species, m.variant, ped.Position + Vector3.new(0, 0.5, 0), 0.8, facing)
+					placeModel(holder, m, profile.cosmetics, ped.Position + Vector3.new(0, 0.5, 0), 0.8, facing)
 				end
 			end
 		end

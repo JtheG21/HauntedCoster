@@ -55,7 +55,14 @@ local items: { Item } = {
 		blurb = "Dripping wax and a warm wick. The lantern burns a little brighter.",
 		species = { "Wisp" },
 		acquire = { coins = 400 },
-		look = { tint = { Body = c3(232, 214, 176), Lamp = c3(255, 170, 70) } },
+		look = {
+			tint = {
+				Body = c3(255, 226, 170),
+				ArmL = c3(255, 226, 170),
+				ArmR = c3(255, 226, 170),
+				Lamp = c3(255, 170, 70),
+			},
+		},
 		order = 1,
 	},
 	{
@@ -65,7 +72,14 @@ local items: { Item } = {
 		blurb = "Silvered by a cold moon, with a pale blue lantern.",
 		species = { "Wisp" },
 		acquire = { product = "skin_wisp_moonlit" },
-		look = { tint = { Body = c3(196, 214, 236), Lamp = c3(150, 200, 255) } },
+		look = {
+			tint = {
+				Body = c3(190, 214, 255),
+				ArmL = c3(190, 214, 255),
+				ArmR = c3(190, 214, 255),
+				Lamp = c3(150, 200, 255),
+			},
+		},
 		order = 2,
 	},
 	{
@@ -75,7 +89,14 @@ local items: { Item } = {
 		blurb = "Three patterns, three heads' worth of opinions.",
 		species = { "Hound" },
 		acquire = { coins = 600 },
-		look = { tint = { Body = c3(196, 140, 92), Head = c3(232, 214, 190) } },
+		look = {
+			tint = {
+				Body = c3(255, 186, 120),
+				Head = c3(255, 240, 220),
+				Head2 = c3(150, 110, 80),
+				Tail = c3(255, 186, 120),
+			},
+		},
 		order = 3,
 	},
 	{
@@ -85,7 +106,10 @@ local items: { Item } = {
 		blurb = "Polished bone over the stitches. Rattles when it runs.",
 		species = { "Hound" },
 		acquire = { reward = "habitat_woodland" },
-		look = { tint = { Body = c3(216, 206, 182) }, material = { Body = "Marble" } },
+		look = {
+			tint = { Body = c3(255, 246, 225), Head = c3(255, 246, 225), Head2 = c3(255, 246, 225) },
+			material = { Body = "Marble", Head = "Marble", Head2 = "Marble" },
+		},
 		order = 4,
 	},
 	{
@@ -95,7 +119,9 @@ local items: { Item } = {
 		blurb = "A velvet coat for the finest of empty heads.",
 		species = { "Gentleman" },
 		acquire = { coins = 900 },
-		look = { tint = { Coat = c3(120, 26, 40), Hat = c3(40, 14, 20) } },
+		look = {
+			tint = { Body = c3(255, 90, 100), ArmL = c3(255, 90, 100), ArmR = c3(255, 90, 100), Hat = c3(140, 50, 60) },
+		},
 		order = 5,
 	},
 	{
@@ -105,7 +131,15 @@ local items: { Item } = {
 		blurb = "Country tweed and a hunting cap. Still no face.",
 		species = { "Gentleman" },
 		acquire = { product = "skin_gentleman_tweed" },
-		look = { tint = { Coat = c3(110, 92, 64), Hat = c3(84, 70, 50) }, material = { Coat = "Fabric" } },
+		look = {
+			tint = {
+				Body = c3(220, 190, 140),
+				ArmL = c3(220, 190, 140),
+				ArmR = c3(220, 190, 140),
+				Hat = c3(200, 170, 120),
+			},
+			material = { Body = "Fabric", ArmL = "Fabric", ArmR = "Fabric" },
+		},
 		order = 6,
 	},
 	{
@@ -115,7 +149,7 @@ local items: { Item } = {
 		blurb = "Freshly cast bronze. It tolls a full tone lower.",
 		species = { "BellWraith" },
 		acquire = { reward = "habitat_cemetery" },
-		look = { tint = { Bell = c3(176, 112, 52) }, material = { Bell = "Metal" } },
+		look = { tint = { Body = c3(255, 170, 90), Clapper = c3(200, 130, 60) }, material = { Body = "Metal" } },
 		order = 7,
 	},
 	-- Auras: one particle layer around the creature, readable next to the natural variant cues.

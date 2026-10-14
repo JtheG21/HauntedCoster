@@ -8,10 +8,14 @@ local Economy = require(Shared.Config.Economy)
 local Monsters = require(Shared.Config.Monsters)
 local Variants = require(Shared.Config.Variants)
 local Track = require(Shared.Config.Track)
+local CosmeticRules = require(script.Parent.CosmeticRules)
 
 local ProfileRules = {}
 
-ProfileRules.Schema = 1
+-- Schema 2 (TASK-0047, pending jg's approval before merge): adds `cosmetics`. A schema-1 profile migrates by
+-- sanitising (cosmetics start empty, every schema-1 field is kept); a schema-1 server treats schema-2 data as
+-- newer and read-only, so it never strips the field.
+ProfileRules.Schema = 2
 ProfileRules.MaxOwned = 40
 
 export type OwnedMonster = { uid: string, species: string, variant: string, acquiredAt: number }
@@ -39,6 +43,7 @@ export type Profile = {
 	exhibits: { Exhibit },
 	tutorialStep: number,
 	lastSeen: number,
+	cosmetics: CosmeticRules.State,
 	[string]: any,
 }
 
@@ -70,6 +75,7 @@ function ProfileRules.default(): Profile
 		exhibits = {},
 		tutorialStep = 1,
 		lastSeen = 0,
+		cosmetics = CosmeticRules.default(),
 	}
 end
 
@@ -270,6 +276,12 @@ function ProfileRules.sanitize(raw: any, now: number): (Profile, { string })
 			end
 		end
 	end
+
+	-- Cosmetics last: their selections and placements depend on the sanitised roster and house tier.
+	if raw.cosmetics ~= nil and type(raw.cosmetics) ~= "table" then
+		fix("cosmetics", false)
+	end
+	p.cosmetics = CosmeticRules.sanitize(raw.cosmetics, p.owned, p.houseTier)
 
 	p.schema = ProfileRules.Schema
 	return p, repaired

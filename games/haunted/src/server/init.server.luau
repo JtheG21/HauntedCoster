@@ -28,6 +28,7 @@ local TrainService = require(Services.TrainService)
 local TutorialService = require(Services.TutorialService)
 local HauntedTreeService = require(Services.HauntedTreeService)
 local ArtBakeService = require(Services.ArtBakeService)
+local CosmeticsService = require(Services.CosmeticsService)
 
 -- The persistent outer world, then every habitat module (one active inside the hub wall, ADR-0007). The
 -- rotation schedule picks the active module. Studio test runs (a `scenario` argument) are pinned to the
@@ -56,6 +57,7 @@ EncounterService.start()
 CaptureService.start()
 ContainmentService.start()
 EconomyService.start()
+CosmeticsService.start() -- after Economy, Containment and Capture: it hooks their callbacks
 TrainService.start()
 TutorialService.start()
 RetaliationService.start()

@@ -9,6 +9,7 @@ local Workspace = game:GetService("Workspace")
 
 local World = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("World"))
 local PlotRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Rules"):WaitForChild("PlotRules"))
+local Cosmetics = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("Cosmetics"))
 local PlotBuilder = require(script.Parent.Parent.World.PlotBuilder)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local StateService = require(script.Parent.StateService)
@@ -65,11 +66,27 @@ function PlotService.onAssigned(cb: (Player, number) -> ())
 	end
 end
 
+-- The selected mansion theme's tints (TASK-0047), or nil for the default look.
+function PlotService.themeTint(profile: any): { [string]: Color3 }?
+	local id = profile.cosmetics and profile.cosmetics.theme
+	local item = id and Cosmetics.ById[id]
+	return if item then item.look.tint else nil
+end
+
+-- Rebuilds the owner's placed decorations.
+function PlotService.rebuildDecorations(player: Player)
+	local i = byPlayer[player]
+	local profile = PlayerDataService.get(player)
+	if i and profile then
+		PlotBuilder.buildDecorations(plots[i], i, profile.cosmetics.placements)
+	end
+end
+
 function PlotService.rebuildHouse(player: Player)
 	local i = byPlayer[player]
 	local profile = PlayerDataService.get(player)
 	if i and profile then
-		PlotBuilder.buildHouse(plots[i], i, profile.houseTier)
+		PlotBuilder.buildHouse(plots[i], i, profile.houseTier, PlotService.themeTint(profile))
 	end
 end
 
@@ -133,7 +150,7 @@ local function assign(player: Player)
 		owners[i] = player
 		byPlayer[player] = i
 		PlotBuilder.setOwner(plots[i], player)
-		PlotBuilder.buildHouse(plots[i], i, profile.houseTier)
+		PlotBuilder.buildHouse(plots[i], i, profile.houseTier, PlotService.themeTint(profile))
 		player:SetAttribute("PlotIndex", i)
 		PlotService.rebuildTrophies(player)
 		for _, cb in assignedCallbacks do
@@ -162,6 +179,7 @@ local function release(player: Player)
 	owners[i] = nil
 	PlotBuilder.setOwner(plots[i], nil)
 	PlotBuilder.buildHouse(plots[i], i, 0)
+	PlotBuilder.buildDecorations(plots[i], i, {})
 	PlotBuilder.buildTrophies(plots[i], i, 0, 0)
 	local residents = plots[i]:FindFirstChild("Pen")
 	residents = residents and residents:FindFirstChild("Residents")

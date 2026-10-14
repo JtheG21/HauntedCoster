@@ -12,6 +12,7 @@ Net.Events = {
 	"RequestState", -- C->S
 	"CaptureCancel", -- C->S
 	"TreeGaze", -- C->S (treeId: string, looking: boolean) cosmetic haunted-tree gaze report (ADR-0010)
+	"CosmeticFx", -- S->C { kind = "capture", id, position } cosmetic effects to play (TASK-0047)
 }
 
 Net.Functions = {
@@ -21,6 +22,7 @@ Net.Functions = {
 	"SubmitRoute", -- C->S (points, pieces) -> ok, reason
 	"SetExhibit", -- C->S (slot: number, uid: string?) -> ok, reason
 	"Ack", -- C->S (what: string) -> () UI-only acknowledgements (journal opened)
+	"Cosmetic", -- C->S (action: string, ...) -> ok, reason, data (TASK-0047: buy, equip, select, claim, place...)
 }
 
 return table.freeze(Net)
