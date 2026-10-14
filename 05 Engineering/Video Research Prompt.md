@@ -59,6 +59,37 @@ Don't: save the transcript, put media in the vault, create LES- or ADR- notes, c
 End with: note path; what changed in confidence between passes; what is unverified; which timestamps I should view myself.
 ```
 
+## Variants by video type
+Use the prompt above and replace its two Context lines (and add the extra rules) for the video type. A variant changes the Context line, which reference folder to check, and a few extra requirements; it never relaxes the Don'ts or the evidence recipe. Drafts, not yet approved by jg; add new variants here as new video types come up.
+
+### Variant: 3D models (modeling, topology, texturing/UVs, rigging)
+Reference folder to check: `10 References/05 Misc/3D Model Quality Baseline.md` and the gallery. Never edit them from a video note.
+```
+Context (required): Build a shared vocabulary and checklist for what a professional, game-ready 3D model is, giving modeling, topology, texturing/UVs and rigging equal weight, so jg and Claude can judge model quality and write precise asset requests for GAME-002. Informs how we apply [[3D Model Quality Baseline]] and the finished-assets requirement in ADR-0011. Tag each point (general) or (Roblox-specific); add a Roblox-constraints line. Not tied to any task; do not change the baseline or gallery. One note per video, no synthesis note.
+```
+Extra rules: do not skip the frame passes (wireframes, UV layouts, texture maps and rig views are the evidence); add a Glossary group of defined terms with timestamps; add a "Roblox constraints" line (triangle budget, texture size, rig type, MeshPart import) and mark what the video does not cover as unverified.
+
+### Variant: game systems / mechanics
+Reference folder to check: `06 Code/Reference_Code/Reference_Code_Index.md`, and the matching `SYS-` notes.
+```
+Context (required): Understand how <system, e.g. an economy, capture loop, rotation or progression system> works in the video's game and which parts could inform <named GAME-002 system or SYS- note>. Separate what is shown from what is inferred. Server authority and approved ADRs win. Not tied to any task unless stated: <task id or none>.
+```
+Extra rules: write each mechanic as input, rule, output and where authority would sit (server or client); mark every number as a speaker claim unless a frame shows it; add a "Server-authority risk" line for anything that would need client trust.
+
+### Variant: maps / environments
+Reference folder to check: `10 References/02 Map/`.
+```
+Context (required): Learn layout, readability and pacing principles from the video's map or environment work that could inform GAME-002 <named area or habitat>, without copying its layout or assets. Not tied to any task unless stated: <task id or none>.
+```
+Extra rules: use cue frames for overhead views and landmarks; record scale and flow only if a frame shows them; add a "Playability" line (routes, sightlines, dead ends) that is marked unverified unless a frame shows it.
+
+### Variant: UI
+Reference folder to check: `10 References/01 UI/`.
+```
+Context (required): Extract UI principles from the video that could inform <named GAME-002 screen, e.g. HUD, Journal, Shop> without copying layouts or assets.
+```
+Extra rules: cue frames at 1024 px for every screen; list each principle with the on-screen example; add a "Readability on phone" line.
+
 ## Evidence recipe: commands
 Set `S` to a scratchpad dir and `W` to the watch skill's `scripts/watch.py`.
 
