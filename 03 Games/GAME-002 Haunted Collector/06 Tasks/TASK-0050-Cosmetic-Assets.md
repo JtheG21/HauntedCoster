@@ -3,7 +3,7 @@ id: TASK-0050
 title: "Cosmetic Assets"
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -55,6 +55,9 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 
 ---
 ## Implementation record
+- **Approach (no uploads, no paid generation):** skins are per-part tint/material palettes over the finished creature art (part names verified against the exported assets: Body, Arms, Lamp, Head, Head2, Tail, Hat, Clapper); auras and capture effects are client particle effects using built-in particle textures only (`client/Art/Effects.luau`); mansion themes tint the house art's theme slots (Walls, Trim, Roof, Glass) on every tier; decorations reuse finished kit and landmark meshes (lit pumpkin, lamp post, headstone, Celtic cross, hay bale, coffin, a 0.4-scale Weeping Angel, candles).
+- **Natural variants stay dominant:** `Creatures` applies the skin first and lets Spectral/Ashen keep their identity (Spectral 35% skin hue over the pale translucent body and shell, Ashen 20% over the charcoal ash); aura intensity is capped (rate <= 8) and every emitter is local to the client.
+- **Honest limits:** palette skins are a lighter-weight product than modelled skins; jg judges whether they meet the quality floor for sale. Effects use stock textures (sparkles, smoke, fire). Evidence captures were blocked by the Studio stall in this session.
 
 ## Audits
 

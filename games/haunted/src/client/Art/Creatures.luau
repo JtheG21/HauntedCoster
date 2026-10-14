@@ -12,13 +12,19 @@ local CollectionService = game:GetService("CollectionService")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local ArtLoader = require(script.Parent.ArtLoader)
+local Effects = require(script.Parent.Effects)
+local Cosmetics = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("Cosmetics"))
+local CosmeticRules = require(ReplicatedStorage.Shared:WaitForChild("Rules"):WaitForChild("CosmeticRules"))
 
 local Creatures = {}
 
 type PartRec = { part: BasePart, logical: string, rel: CFrame, pivot: Vector3? }
 
 type Rig = {
+	aura: Attachment?, -- equipped aura's emitters (TASK-0047), local to this client
 	host: Instance, -- server model or carried jar part
 	root: BasePart,
 	art: Model,
@@ -84,8 +90,10 @@ local function variantPart(p: BasePart, variant: string, shells: { BasePart })
 	if p.Material == Enum.Material.Neon then
 		return
 	end
+	-- An equipped skin shows through the natural variant, which stays dominant (its identity must read first).
+	local skin = p:GetAttribute("SkinTint")
 	if variant == "Spectral" then
-		p.Color = SPECTRAL_TINT
+		p.Color = if typeof(skin) == "Color3" then SPECTRAL_TINT:Lerp(skin, 0.35) else SPECTRAL_TINT
 		p.Transparency = math.max(p.Transparency, 0.45)
 		p.CastShadow = false
 		if not p:GetAttribute("Detail") then
@@ -99,7 +107,7 @@ local function variantPart(p: BasePart, variant: string, shells: { BasePart })
 			table.insert(shells, shell)
 		end
 	elseif variant == "Ashen" then
-		p.Color = ASHEN_TINT
+		p.Color = if typeof(skin) == "Color3" then ASHEN_TINT:Lerp(skin, 0.2) else ASHEN_TINT
 		p.Material = Enum.Material.Slate -- burnt, ashy surface under the glowing cracks
 		p.Transparency = 0 -- ash is solid, even on ghosts
 	end
@@ -213,7 +221,24 @@ local function attach(host: Instance)
 	if not key then
 		return
 	end
-	local built = ArtLoader.build(key, { castShadow = not carried })
+	-- An equipped skin (TASK-0047): per-part tints/materials from the catalog, only for a compatible species.
+	local opts: ArtLoader.Options = { castShadow = not carried }
+	local skinId = host:GetAttribute("Skin")
+	local skin = if type(skinId) == "string" then Cosmetics.ById[skinId] else nil
+	if skin and skin.category == "Skin" and CosmeticRules.compatible(skin, species :: string) then
+		opts.tint = skin.look.tint
+		local mats: { [string]: Enum.Material } = {}
+		for part, name in (skin.look.material or {}) :: { [string]: string } do
+			local ok, m = pcall(function()
+				return (Enum.Material :: any)[name]
+			end)
+			if ok and m then
+				mats[part] = m
+			end
+		end
+		opts.material = mats
+	end
+	local built = ArtLoader.build(key, opts)
 	if built and rigs[host] then -- attached by another path while this one was building
 		built.model:Destroy()
 		return
@@ -223,6 +248,16 @@ local function attach(host: Instance)
 			built.model:Destroy()
 		end
 		return
+	end
+	if opts.tint then
+		for logical, parts in built.parts do
+			local t = (opts.tint :: { [string]: Color3 })[logical]
+			if t then
+				for _, p in parts do
+					p:SetAttribute("SkinTint", t)
+				end
+			end
+		end
 	end
 	applyVariant(built, if type(variant) == "string" then variant else "Normal")
 	local scale = if carried
@@ -263,6 +298,11 @@ local function attach(host: Instance)
 	art.Parent = host
 	rigs[host] = rig
 	table.insert(list, rig)
+	local auraId = host:GetAttribute("Aura")
+	local aura = if type(auraId) == "string" then Cosmetics.ById[auraId] else nil
+	if aura and aura.category == "Aura" then
+		rig.aura = Effects.aura(root, aura.look, scale)
+	end
 end
 
 local function detach(host: Instance)
@@ -282,6 +322,9 @@ local function detach(host: Instance)
 		r.part:Destroy()
 	end
 	rig.art:Destroy()
+	if rig.aura then
+		rig.aura:Destroy()
+	end
 end
 
 -- Per-species pose: returns the whole-body offset and a function giving each logical part's local motion.
