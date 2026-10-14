@@ -4,7 +4,7 @@ title: Workflow
 type: agent
 status: approved
 created: 2026-10-10
-updated: 2026-10-12
+updated: 2026-10-13
 tags:
   - workflow/process
 ---
@@ -53,3 +53,6 @@ Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, proposed) → [HUMAN
 
 ## Human gates (always)
 Approving a plan · approving a merge · major design changes · DataStore schema changes · anything that touches Robux · publishing · paid API calls · changes to a live experience · deciding what happens to Inbox items · accepting an ADR.
+
+## Finished model production
+Use [[Model Approval Workflow]] and [[Asset Workflow]]. A formal audit pass requires evidence for every required criterion; unresolved required criteria keep the task in review or changes requested. Technical checks, visual review and jg acceptance are separate records. Review a stable commit with its evidence; do not review a moving checkout as a completed deliverable.

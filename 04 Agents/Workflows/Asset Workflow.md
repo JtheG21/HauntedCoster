@@ -4,7 +4,7 @@ title: Asset Workflow
 type: agent
 status: approved
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-13
 tags:
   - workflow/production
 related:
@@ -12,6 +12,9 @@ related:
   - "[[Map Workflow]]"
 ---
 # 3D assets and props
+
+## Visual pilot gate (jg authorized 2026-10-13)
+Follow [[Model Approval Workflow]] for finished model requests and revisions. Codex interviews and creates concepts; jg approves the visual target; Claude builds and implements in Studio; Codex independently verifies the actual result. Prove one representative asset before expanding its family. Existing work may finish its current bounded step, then enters the same visual acceptance gate.
 
 ## Gather
 - The intended use (gameplay-critical, interactive or decor), where it appears, and how close the camera gets.
@@ -47,4 +50,5 @@ related:
 - The pivot, orientation and collision match the decisions above. The player cannot get stuck on it, which a quick walk test checks.
 - The performance cost is noted (parts or triangles, instance count).
 - It is added to the [[Resource Catalog]] if reusable, with its lifecycle state.
-- Visual quality is a manual check by jg.
+- Visual quality is a manual check by jg, supported by independent reference comparison. Required visual evidence must be demonstrated before a pass; pending criteria are not a completed asset.
+- Save the accepted model and verified production method using [[T - Model Recipe]].
