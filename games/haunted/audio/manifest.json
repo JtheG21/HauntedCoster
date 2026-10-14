@@ -1,0 +1,278 @@
+{
+ "name": "haunted",
+ "sounds": [
+  {
+   "role": "amb_cemetery",
+   "id": 179507208,
+   "name": "Night Ambience",
+   "creator": "Soybeen",
+   "length": 120.007,
+   "volume": 0.25,
+   "looped": true,
+   "kind": "Unknown",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "amb_woodland",
+   "id": 136133461808676,
+   "name": "Forest Night Ambience",
+   "creator": "DistrokidOfficial",
+   "length": 173.259,
+   "volume": 0.25,
+   "looped": true,
+   "kind": "Music",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "amb_spider_woodland",
+   "id": 9112781510,
+   "name": "Forest Ambience 1 (SFX)",
+   "creator": "ProSoundEffects",
+   "length": 36.011,
+   "volume": 0.25,
+   "looped": true,
+   "kind": "Unknown",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "amb_settlement",
+   "id": 9112829678,
+   "name": "Marina Ambience 5 (SFX)",
+   "creator": "ProSoundEffects",
+   "length": 62.005,
+   "volume": 0.25,
+   "looped": true,
+   "kind": "Unknown",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "amb_hub",
+   "id": 9112775175,
+   "name": "Eerie Ambience 1 (SFX)",
+   "creator": "ProSoundEffects",
+   "length": 56.01,
+   "volume": 0.25,
+   "looped": true,
+   "kind": "Unknown",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "capture_start",
+   "id": 9125648149,
+   "name": "Magic Zoom Up Sharp Tubular Whoosh Fast Hiss (SFX)",
+   "creator": "ProSoundEffects",
+   "length": 0.723,
+   "volume": 0.5,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload.",
+   "listing_was_wrong": "listing said 1.0s, Studio measured 0.723s"
+  },
+  {
+   "role": "capture_success",
+   "id": 118041409564450,
+   "name": "eksdee12 success",
+   "creator": "eksdee12",
+   "length": 1.3,
+   "volume": 0.6,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload.",
+   "listing_was_wrong": "listing said 1.0s, Studio measured 1.300s"
+  },
+  {
+   "role": "capture_fled",
+   "id": 114989963690677,
+   "name": "Ghost Whoosh",
+   "creator": "Pickled_Jeans",
+   "length": 1.982,
+   "volume": 0.5,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "retaliation_sting",
+   "id": 139966300077528,
+   "name": "louder horror sting",
+   "creator": "santipansy",
+   "length": 3.789,
+   "volume": 0.6,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "monster_call",
+   "id": 87767262209513,
+   "name": "sfx6_0C",
+   "creator": "BuilderBillbert",
+   "length": 1.174,
+   "volume": 0.5,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "ride_start",
+   "id": 120907161220146,
+   "name": "Dead rails train whistle ",
+   "creator": "Kaikoax808",
+   "length": 3.876,
+   "volume": 0.5,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "ride_end",
+   "id": 115235942061332,
+   "name": "Train brake screech loop sound sfx",
+   "creator": "Cursed_Osvvald",
+   "length": 3.58,
+   "volume": 0.4,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "coins",
+   "id": 107132538017055,
+   "name": "coins-sound-effect-1-full-pack",
+   "creator": "Akin_TR",
+   "length": 0.601,
+   "volume": 0.5,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload.",
+   "listing_was_wrong": "listing said 1.0s, Studio measured 0.601s"
+  },
+  {
+   "role": "payout",
+   "id": 120891770644830,
+   "name": "cash-register-sound-fx",
+   "creator": "hotmoldybanana",
+   "length": 1.045,
+   "volume": 0.5,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "rotation_warning",
+   "id": 140225556550357,
+   "name": "Bit crushed bell toll",
+   "creator": "DivergentBin1",
+   "length": 5.684,
+   "volume": 0.5,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload."
+  },
+  {
+   "role": "ui_click",
+   "id": 15675059323,
+   "name": "Roblox_UI_Bright_Click",
+   "creator": "Roblox",
+   "length": 0.371,
+   "volume": 0.4,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload.",
+   "listing_was_wrong": "listing said 0.0s, Studio measured 0.371s"
+  },
+  {
+   "role": "toast",
+   "id": 17669542615,
+   "name": "Audio/mixkit-dry-pop-up-notification-alert-2356",
+   "creator": "RedCrafter0",
+   "length": 0.305,
+   "volume": 0.4,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload.",
+   "listing_was_wrong": "listing said 0.0s, Studio measured 0.305s"
+  },
+  {
+   "role": "toast_error",
+   "id": 87519554692663,
+   "name": "ui-simple-negative-error",
+   "creator": "AmbientSorcery",
+   "length": 0.31,
+   "volume": 0.4,
+   "looped": false,
+   "kind": "SoundEffect",
+   "source": "Roblox Creator Store, free, inserted by id. No upload.",
+   "listing_was_wrong": "listing said 0.0s, Studio measured 0.310s"
+  }
+ ],
+ "unfilled": [],
+ "rejected": [
+  {
+   "role": "amb_woodland",
+   "id": 7274920568,
+   "name": "Night Forest Ambience Sound",
+   "reason": "length 14.118s outside the 15-300s band for this role"
+  },
+  {
+   "role": "amb_woodland",
+   "id": 138089070,
+   "name": "Forest Ambience (Night)",
+   "reason": "length 14.472s outside the 15-300s band for this role"
+  },
+  {
+   "role": "amb_spider_woodland",
+   "id": 136602785808304,
+   "name": "Gentle Birdsong for Baby",
+   "reason": "length 327.672s outside the 15-300s band for this role"
+  },
+  {
+   "role": "amb_spider_woodland",
+   "id": 117115620012048,
+   "name": "far tail",
+   "reason": "length 3.985s outside the 15-300s band for this role"
+  },
+  {
+   "role": "capture_start",
+   "id": 126941244422484,
+   "name": "Magic WHOOSH  Sound FX",
+   "reason": "length 4.536s outside the 0.2-2.5s band for this role"
+  },
+  {
+   "role": "capture_start",
+   "id": 108306323478967,
+   "name": "Whoosh Magic Spell",
+   "reason": "length 6.750s outside the 0.2-2.5s band for this role"
+  },
+  {
+   "role": "monster_call",
+   "id": 9113123369,
+   "name": "Angel Wails 1 (SFX)",
+   "reason": "length 9.728s outside the 0.5-4s band for this role"
+  },
+  {
+   "role": "monster_call",
+   "id": 9120052193,
+   "name": "Timber Wolves Large Pack Sustained Howling 6 (SFX)",
+   "reason": "length 5.497s outside the 0.5-4s band for this role"
+  },
+  {
+   "role": "monster_call",
+   "id": 9113951479,
+   "name": "Coyote Cu Whimpering Yelping Crying 1 (SFX)",
+   "reason": "length 4.073s outside the 0.5-4s band for this role"
+  },
+  {
+   "role": "monster_call",
+   "id": 88534742626988,
+   "name": "sing",
+   "reason": "length 4.496s outside the 0.5-4s band for this role"
+  },
+  {
+   "role": "toast",
+   "id": 8486683243,
+   "name": "Slime Rancher - UI Notification Pop-Up",
+   "reason": "length 2.003s outside the 0.05-1.2s band for this role"
+  }
+ ]
+}

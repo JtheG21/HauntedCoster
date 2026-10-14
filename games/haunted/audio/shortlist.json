@@ -1,0 +1,326 @@
+{
+ "amb_cemetery": [
+  {
+   "id": 179507208,
+   "name": "Night Ambience",
+   "creator": "Soybeen",
+   "len": 120.007
+  },
+  {
+   "id": 6189441072,
+   "name": "Night Ambience",
+   "creator": "sI0_th",
+   "len": 88.496
+  },
+  {
+   "id": 9117114084,
+   "name": "Night Jungle 6 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 36.011
+  }
+ ],
+ "amb_woodland": [
+  {
+   "id": 136133461808676,
+   "name": "Forest Night Ambience",
+   "creator": "DistrokidOfficial",
+   "len": 173.259
+  },
+  {
+   "id": 9112764040,
+   "name": "Crickets Canyon 1 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 36.011
+  },
+  {
+   "id": 115444494677763,
+   "name": "Sleep & Relaxation Silent Night Forest",
+   "creator": "DistrokidOfficial",
+   "len": 129.88
+  }
+ ],
+ "amb_spider_woodland": [
+  {
+   "id": 9112781510,
+   "name": "Forest Ambience 1 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 36.011
+  },
+  {
+   "id": 9112781689,
+   "name": "Forest Ambience 2 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 56.736
+  },
+  {
+   "id": 9114891426,
+   "name": "Jungle Ambience 5 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 41.621
+  }
+ ],
+ "amb_settlement": [
+  {
+   "id": 9113286969,
+   "name": "Barstow Wind Light Blustery Low Howl 2 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 37.02
+  },
+  {
+   "id": 9114057128,
+   "name": "Desert Wind Whistley Light Gusts 2 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 92.014
+  },
+  {
+   "id": 9112829678,
+   "name": "Marina Ambience 5 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 62.005
+  }
+ ],
+ "amb_hub": [
+  {
+   "id": 9112775175,
+   "name": "Eerie Ambience 1 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 56.01
+  },
+  {
+   "id": 9112775414,
+   "name": "Eerie Ambience 2 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 63.652
+  },
+  {
+   "id": 9114574159,
+   "name": "Ghost Wind Slow Build And Decay Swirling 2 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 21.6
+  }
+ ],
+ "capture_start": [
+  {
+   "id": 9125648149,
+   "name": "Magic Zoom Up Sharp Tubular Whoosh Fast Hiss (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 0.723
+  },
+  {
+   "id": 9125647922,
+   "name": "Magic Zoom Up Sharp Tubular Whoosh Fast Hiss (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 1.21
+  }
+ ],
+ "capture_success": [
+  {
+   "id": 118041409564450,
+   "name": "eksdee12 success",
+   "creator": "eksdee12",
+   "len": 1.3
+  },
+  {
+   "id": 4612374036,
+   "name": "bling_big_diamond_pickup",
+   "creator": "thienbao2109",
+   "len": 2.01
+  },
+  {
+   "id": 116368587548012,
+   "name": "bling_big_diamond_pickup",
+   "creator": "TheBaconHair_745",
+   "len": 2.0
+  }
+ ],
+ "capture_fled": [
+  {
+   "id": 114989963690677,
+   "name": "Ghost Whoosh",
+   "creator": "Pickled_Jeans",
+   "len": 1.982
+  },
+  {
+   "id": 9126234246,
+   "name": "Whoosh Slam Whoosh Bys Doppler Various Versi (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 2.613
+  }
+ ],
+ "retaliation_sting": [
+  {
+   "id": 139966300077528,
+   "name": "louder horror sting",
+   "creator": "santipansy",
+   "len": 3.789
+  },
+  {
+   "id": 1014740409,
+   "name": "horror sting",
+   "creator": "loley_y",
+   "len": 3.39
+  },
+  {
+   "id": 92754043407601,
+   "name": "horror sting",
+   "creator": "santipansy",
+   "len": 3.789
+  }
+ ],
+ "monster_call": [
+  {
+   "id": 129823359634605,
+   "name": "Ghost Wail - Daily Sounds",
+   "creator": "DailySoundsFX",
+   "len": 5.199
+  },
+  {
+   "id": 87767262209513,
+   "name": "sfx6_0C",
+   "creator": "BuilderBillbert",
+   "len": 1.174
+  },
+  {
+   "id": 9113951479,
+   "name": "Coyote Cu Whimpering Yelping Crying 1 (SFX)",
+   "creator": "ProSoundEffects",
+   "len": 4.073
+  }
+ ],
+ "ride_start": [
+  {
+   "id": 120907161220146,
+   "name": "Dead rails train whistle",
+   "creator": "Kaikoax808",
+   "len": 3.876
+  },
+  {
+   "id": 17682607094,
+   "name": "CD 714 High Horn Whistle Diesel Locomotive Train",
+   "creator": "Cursed_Osvvald",
+   "len": 3.092
+  }
+ ],
+ "ride_end": [
+  {
+   "id": 115235942061332,
+   "name": "Train brake screech loop sound sfx",
+   "creator": "Cursed_Osvvald",
+   "len": 3.58
+  },
+  {
+   "id": 7918847904,
+   "name": "Train Brake Release",
+   "creator": "ThatHLScientist",
+   "len": 1.168
+  },
+  {
+   "id": 17682456001,
+   "name": "SM42 Brake Release Hiss Diesel Locomotive Train",
+   "creator": "Cursed_Osvvald",
+   "len": 1.297
+  }
+ ],
+ "coins": [
+  {
+   "id": 107132538017055,
+   "name": "coins-sound-effect-1-full-pack",
+   "creator": "Akin_TR",
+   "len": 0.601
+  },
+  {
+   "id": 607665037,
+   "name": "coins_get",
+   "creator": "HeyOverHere",
+   "len": 0.524
+  },
+  {
+   "id": 71081254550638,
+   "name": "coins-and-gems-treasure-sound-effect",
+   "creator": "Akin_TR",
+   "len": 1.489
+  }
+ ],
+ "payout": [
+  {
+   "id": 120891770644830,
+   "name": "cash-register-sound-fx",
+   "creator": "hotmoldybanana",
+   "len": 1.045
+  },
+  {
+   "id": 134810204798705,
+   "name": "Cash Register",
+   "creator": "CoderSays",
+   "len": 2.09
+  },
+  {
+   "id": 111773238101465,
+   "name": "Cash Register Sound",
+   "creator": "WengerLylia_35",
+   "len": 1.019
+  }
+ ],
+ "rotation_warning": [
+  {
+   "id": 140225556550357,
+   "name": "Bit crushed bell toll",
+   "creator": "DivergentBin1",
+   "len": 5.684
+  },
+  {
+   "id": 106399723585350,
+   "name": "Bell Toll",
+   "creator": "throwrod",
+   "len": 7.886
+  },
+  {
+   "id": 8558107873,
+   "name": "Bell Toll",
+   "creator": "nysterical",
+   "len": 6.571
+  }
+ ],
+ "ui_click": [
+  {
+   "id": 15675059323,
+   "name": "Roblox_UI_Bright_Click",
+   "creator": "Roblox",
+   "len": 0.371
+  },
+  {
+   "id": 15675032796,
+   "name": "Roblox_UI_Small_Click",
+   "creator": "Roblox",
+   "len": 0.133
+  }
+ ],
+ "toast": [
+  {
+   "id": 17669542615,
+   "name": "Audio/mixkit-dry-pop-up-notification-alert-2356",
+   "creator": "RedCrafter0",
+   "len": 0.305
+  },
+  {
+   "id": 104471847212825,
+   "name": "PS Magical Pop",
+   "creator": "Server Not Responding",
+   "len": 0.939
+  }
+ ],
+ "toast_error": [
+  {
+   "id": 87519554692663,
+   "name": "ui-simple-negative-error",
+   "creator": "AmbientSorcery",
+   "len": 0.31
+  },
+  {
+   "id": 97329712338974,
+   "name": "MWII UI Navigation Error",
+   "creator": "Arad19961",
+   "len": 0.92
+  }
+ ]
+}

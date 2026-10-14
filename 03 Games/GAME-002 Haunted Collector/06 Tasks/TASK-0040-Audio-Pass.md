@@ -14,7 +14,7 @@ related:
   - "[[GAME-002 Haunted Collector/01 Game Design]]"
   - "[[Sound References]]"
 created: 2026-10-12
-updated: 2026-10-13
+updated: 2026-10-14
 tags:
   - workflow/task
 ---
@@ -51,6 +51,12 @@ Give the game's existing moments sound with free Creator Store audio sourced by 
 
 ---
 ## Implementation record
+### Resumed 2026-10-14 (after TASK-0041 merged)
+- **References:** `10 References/03 Sounds` is still empty ([[Sound References]]), so choices follow [[GAME-002 Haunted Collector/01 Game Design]]: a dark, readable haunted mood driven by Lighting and Atmosphere, ambience only, no music. No reference assets were opened or copied.
+- **Existing work found (2026-10-12, Studio `Place1`):** the `roblox-sfx` run already produced candidates, a Studio load/length report, and a shortlist of up to 3 per role for all 18 roles of `sfx-spec.json`; no role is unfilled and 11 candidates were rejected. Data copied to `games/haunted/audio/` as `shortlist.json`, `manifest.json`, `report.txt`.
+- **Gap against AC1:** two shortlisted ids have no measured length in the report and are therefore unproven: `amb_woodland` 9112764040 and `monster_call` 129823359634605. They must be probed (IsLoaded and `TimeLength`) before jg's tour. Every other shortlisted id loaded with a length inside its role band.
+- **Next:** probe those two (or swap them), run the shortlist tour in Studio for jg (AC2), then build `SoundBank`, `Sfx`, hooks and mute toggle (AC3, AC4).
+
 
 ## Audits
 
