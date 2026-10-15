@@ -66,8 +66,8 @@ PANE_EDGE = H("1d4a4f")
 MB = 1 / 0.574
 LIFT = 0.43
 ASSET_SCALE = 0.85  # whole perch scaled uniformly about the Root after the lift (6.1 studs tall, lantern 0.85 off the ground)
-HEAD_SCALE = 1.15  # head sculpted at design size, then scaled about the chin socket to the concept proportion
-HEAD_TURN = (6.0, -8.0, 22.0)  # pitch forward, cock, turn to its left (degrees): the approved pose
+HEAD_SCALE = 1.05  # head sculpted at design size, then scaled about the chin socket to the concept proportion
+HEAD_TURN = (10.0, -8.0, 12.0)  # pitch forward, cock, turn to its left (degrees): the approved pose
 
 # Pole: a line through both grips. G2 = lower (left) hand; D = direction per stud of drop.
 G2 = Vector((-0.2, -0.66, -0.4))
@@ -397,28 +397,28 @@ AN_R, AN_L = Vector((-0.21, 0.07, -1.58)), Vector((0.2, 0.07, -1.58))
 def build_body(wrist_r, wrist_l):
     """The stuffed sack: torso, arms and legs as one metaball sculpt, lumpy where the stuffing settles."""
     els = [
-        E((0, 0.2, -0.32), (0.44, 0.35, 0.24)),                      # pelvis
-        E((-0.2, 0.38, -0.4), (0.25, 0.24, 0.22)),                   # sagging seat
-        E((0.2, 0.38, -0.4), (0.25, 0.24, 0.22)),
-        E((0, -0.13, -0.04), (0.43, 0.36, 0.3)),                     # stuffed pot belly
-        E((0, -0.08, 0.4), (0.43, 0.32, 0.32), rot=(22, 0, 0)),       # chest, pitched forward
-        E((0, 0.16, 0.56), (0.43, 0.32, 0.29), rot=(30, 0, 0)),      # hunched back
-        E((0, 0.08, 0.17), (0.33, 0.25, 0.18)),                      # waist
+        E((0, 0.2, -0.32), (0.572, 0.438, 0.264)),                      # pelvis
+        E((-0.2, 0.38, -0.4), (0.325, 0.3, 0.242)),                   # sagging seat
+        E((0.2, 0.38, -0.4), (0.325, 0.3, 0.242)),
+        E((0, -0.17, -0.04), (0.53, 0.5, 0.36)),                     # stuffed pot belly
+        E((0, -0.08, 0.4), (0.47, 0.38, 0.34), rot=(22, 0, 0)),       # chest, pitched forward
+        E((0, 0.16, 0.56), (0.46, 0.38, 0.31), rot=(30, 0, 0)),      # hunched back
+        E((0, 0.08, 0.17), (0.429, 0.312, 0.198)),                      # waist
         E((0, -0.13, 0.28), (0.2, 0.06, 0.1), negative=True, stiffness=0.9),  # a slack fold under the chest
         CAP((0, -0.06, 0.62), (0, -0.16, 1.1), 0.1),                 # neck thrust forward
-        B(SH_R, 0.13), B(SH_L, 0.13),
+        B(SH_R, 0.16), B(SH_L, 0.16),
         B((-0.2, 0.27, 0.47), 0.07), B((0.2, 0.27, 0.47), 0.07),     # lumps of stuffing on the back
-        B(HIP_R, 0.13), B(HIP_L, 0.13),
+        B(HIP_R, 0.16), B(HIP_L, 0.16),
     ]
-    els += limb_caps([SH_R, SH_R.lerp(EL_R, 0.5) + Vector((0, 0, 0.04)), EL_R], [0.112, 0.1, 0.088])
-    els += limb_caps([EL_R, EL_R.lerp(wrist_r, 0.45), wrist_r], [0.088, 0.096, 0.07])
-    els += limb_caps([SH_L, SH_L.lerp(EL_L, 0.5) + Vector((0.03, 0, 0)), EL_L], [0.112, 0.1, 0.088])
-    els += limb_caps([EL_L, EL_L.lerp(wrist_l, 0.45), wrist_l], [0.088, 0.096, 0.07])
+    els += limb_caps([SH_R, SH_R.lerp(EL_R, 0.5) + Vector((0, 0, 0.04)), EL_R], [0.14, 0.125, 0.11])
+    els += limb_caps([EL_R, EL_R.lerp(wrist_r, 0.45), wrist_r], [0.11, 0.12, 0.0875])
+    els += limb_caps([SH_L, SH_L.lerp(EL_L, 0.5) + Vector((0.03, 0, 0)), EL_L], [0.14, 0.125, 0.11])
+    els += limb_caps([EL_L, EL_L.lerp(wrist_l, 0.45), wrist_l], [0.11, 0.12, 0.0875])
     els += [B(EL_R, 0.112), B(EL_L, 0.112), B(wrist_r, 0.075), B(wrist_l, 0.075)]
     for hip, kn, an, s in ((HIP_R, KN_R, AN_R, -1), (HIP_L, KN_L, AN_L, 1)):
-        els += limb_caps([hip, hip.lerp(kn, 0.5) + Vector((0, 0, 0.03)), kn], [0.13, 0.115, 0.095])
+        els += limb_caps([hip, hip.lerp(kn, 0.5) + Vector((0, 0, 0.03)), kn], [0.163, 0.144, 0.119])
         calf = kn.lerp(an, 0.3) + Vector((0, 0.05, 0))
-        els += limb_caps([kn, calf, an], [0.085, 0.09, 0.058])
+        els += limb_caps([kn, calf, an], [0.106, 0.112, 0.0725])
         els += [B(kn, 0.122), B(kn + Vector((0, -0.05, 0.02)), 0.08), B(an, 0.065), B(an + Vector((s * 0.045, 0.0, -0.01)), 0.045)]
     body = A.organic("Torso", els, 7500, resolution=0.02, material="Fabric", smooth_iters=1)
     displace(body, lambda p: 0.012 * fbm(p, 0.2, 2, 1.0) + 0.004 * ridged(p, 0.07, 2.0))
@@ -437,7 +437,7 @@ def grip_hand(name, g: Vector, wrist_from: Vector, seed=0):
     parts = []
     palm_c = g + n * (POLE_R + 0.072)
     axes = Matrix((u, n, u.cross(n))).transposed()
-    parts.append(ellipsoid(name + "Palm", palm_c, (0.165, 0.08, 0.125), axes, 12, 8))
+    parts.append(ellipsoid(name + "Palm", palm_c, (0.19, 0.095, 0.145), axes, 12, 8))
     R = POLE_R + 0.043
     for k, a in enumerate((-0.118, -0.04, 0.038, 0.114)):
         rr = 0.045 if k in (1, 2) else 0.039
@@ -486,7 +486,7 @@ def feet(name, an, x, seed=0):
 
 # --- head ----------------------------------------------------------------------------------------------------------
 # --- head ----------------------------------------------------------------------------------------------------------
-EYES = ((-0.27, 0.2, 0.2, -6.0), (0.36, 0.17, 0.19, 24.0))  # (x, z offset from HC, radius, cast yaw)
+EYES = ((0.0, 0.3, 0.24, 2.0), (0.42, 0.27, 0.22, 28.0))  # (x, z offset from HC, radius, cast yaw)
 # The head's back sweeps up into a curled lobe of dark sacking (head-relative, before HEAD_SCALE).
 LOBE = [(-0.3, 0.38, 0.32), (-0.64, 0.46, 0.48), (-0.96, 0.44, 0.64), (-1.2, 0.34, 0.84), (-1.28, 0.2, 1.06), (-1.2, 0.06, 1.22),
         (-1.03, -0.0, 1.27), (-0.9, 0.02, 1.2), (-0.85, 0.09, 1.1)]
@@ -495,11 +495,11 @@ LOBE_EYE = Vector((-1.06, 0.22, 0.92))  # centre of the curl's spiral (head-rela
 
 
 def grin_z(s: float) -> float:
-    return HC.z - 0.17 + 0.26 * s * s + 0.09 * s
+    return HC.z - 0.17 + 0.42 * s * s + 0.18 * s
 
 
 def scalp_plane():
-    return HC + Vector((-0.22, 0.04, 0.2)), Vector((-0.62, 0.5, 0.6)).normalized()
+    return HC + Vector((-0.1, 0.0, 0.3)), Vector((-0.4, 0.45, 0.8)).normalized()
 
 
 def dark_side(p) -> float:
@@ -512,8 +512,8 @@ def dark_side(p) -> float:
 def build_head():
     c = HC
     els = [
-        E(c + Vector((0, 0.08, 0.16)), (0.72, 0.55, 0.5)),            # cranium, wider than tall
-        E(c + Vector((0, -0.08, -0.06)), (0.79, 0.5, 0.4)),           # broad lower face carrying the grin
+        E(c + Vector((0, 0.1, 0.12)), (0.72, 0.56, 0.52)),            # cranium, wider than tall
+        E(c + Vector((0, -0.08, -0.06)), (0.75, 0.52, 0.46)),           # broad lower face carrying the grin
         E(c + Vector((0.02, -0.1, -0.3)), (0.56, 0.38, 0.22)),        # underslung jaw
         E(c + Vector((-0.5, -0.12, 0.02)), (0.28, 0.32, 0.3)),        # cheeks, uneven
         E(c + Vector((0.53, -0.1, -0.06)), (0.3, 0.34, 0.32)),
@@ -521,7 +521,7 @@ def build_head():
         E(c + Vector((0.36, -0.26, 0.24)), (0.27, 0.25, 0.2)),
         E(c + Vector((-0.16, 0.32, 0.3)), (0.5, 0.42, 0.38)),         # skull swells back into the lobe
         E(c + Vector((-0.63, 0.02, 0.26)), (0.17, 0.22, 0.2)),        # temple lump
-        E(c + Vector((0.2, 0.1, 0.5)), (0.3, 0.3, 0.16)),             # crown bump
+        E(c + Vector((0.2, 0.12, 0.4)), (0.28, 0.28, 0.14)),             # crown bump
         E(c + Vector((0.0, 0.12, -0.42)), (0.2, 0.2, 0.15)),          # chin socket over the neck
     ]
     els += [E(c + Vector((-0.26, 0.44, 0.3)), (0.68, 0.54, 0.54)),          # big hooded sack bulge at the back of the head
@@ -554,7 +554,7 @@ def crumple_dark_panel(head):
     displace(head, fn)
 
 
-def carve_mouth(head, grin, depth=0.06, half_gap=0.026):
+def carve_mouth(head, grin, depth=0.11, half_gap=0.06):
     """Opens the grin: the lips part along the seam into a dark gap the twine bridges."""
     idx = SeamIndex([grin])
 
@@ -615,7 +615,7 @@ def mouth_twine(tree, grin, rng):
     the seam on the uncarved face (it gives each loop its frame); `tree` is the carved surface the ends sink into.
     Returns rope objects, the punch-hole points and the dark mouth interior."""
     ropes, holes = [], []
-    M = 22
+    M = 23
     for k in range(M):
         s = -0.84 + 1.72 * k / (M - 1) + (rng.random() - 0.5) * 0.02
         f = (s + 1) / 2 * (len(grin) - 1)
@@ -626,8 +626,8 @@ def mouth_twine(tree, grin, rng):
         up = tang.cross(nrm).normalized()
         if up.z < 0:
             up = -up
-        L = (0.062 + 0.032 * (1 - abs(s))) * (0.9 + 0.2 * rng.random())
-        tilt = (0.16 if k % 2 else -0.1) + (rng.random() - 0.5) * 0.1
+        L = (0.078 + 0.036 * (1 - abs(s))) * (0.9 + 0.2 * rng.random())
+        tilt = 0.32 + (rng.random() - 0.5) * 0.08
         ends = []
         for sgn in (1, -1):
             q = p + up * (L + 0.03) * sgn + tang * tilt * L * sgn
@@ -637,10 +637,10 @@ def mouth_twine(tree, grin, rng):
         if (top - bot).length > 2.6 * (L + 0.03):
             continue  # an end slipped round the cheek
         holes += [top, bot]
-        mid = p + nrm * (0.018 + 0.01 * rng.random()) + tang * (0.01 if k % 2 else -0.01)  # out over the gap
+        mid = p + nrm * (0.034 + 0.01 * rng.random()) - tang * 0.022  # out over the gap
         pts = [top, top.lerp(mid, 0.55) + nrm * 0.014, mid, bot.lerp(mid, 0.55) + nrm * 0.014, bot]  # a C-shaped loop
-        ropes.append(rope(f"Twine{k}", pts, 0.031 + 0.006 * rng.random(), segs=7, per=2))  # game-weight, not decimated
-    slot = shapes.tube("GrinSlot", [p - n * 0.05 for p, n in grin], lambda t: 0.045 * math.sin(math.pi * min(1, max(0, t))) ** 0.5 + 0.006,
+        ropes.append(rope(f"Twine{k}", pts, 0.03 + 0.005 * rng.random(), segs=7, per=2))  # game-weight, not decimated
+    slot = shapes.tube("GrinSlot", [p - n * 0.05 for p, n in grin], lambda t: 0.07 * math.sin(math.pi * min(1, max(0, t))) ** 0.5 + 0.008,
                        6, "SmoothPlastic", resample=0, flatten=0.55, cap_start=False, cap_end=False)  # the dark inside of the mouth
     core.smooth(slot, 180)
     return ropes, holes, slot
@@ -657,7 +657,7 @@ def eye_parts(tree, rng):
             h = A.project(tree, Vector((x, -2.0, HC.z + dz)), Vector((0, 1, 0)))
         p, nrm = h
         fwd = (nrm * 0.5 + dirn * 0.5).normalized()
-        c = p - fwd * r * 0.1  # sitting deep in a round socket
+        c = p - fwd * r * 0.22  # sitting deep in a round socket
         eyes.append(ellipsoid(f"Eye{len(eyes)}", c, (r, r, r * 0.95), seg=18, rings=12, material="SmoothPlastic"))
         right = Vector((0, 0, 1)).cross(fwd).normalized()
         up = fwd.cross(right).normalized()
@@ -665,14 +665,14 @@ def eye_parts(tree, rng):
         for i in range(25):
             ang = math.tau * i / 24
             pts.append(c + fwd * r * 0.32 + (right * math.cos(ang) + up * math.sin(ang)) * r * 0.99)
-        rim = shapes.tube(f"Rim{len(lids)}", pts, lambda t: 0.017 + 0.012 * max(0.0, math.sin(math.tau * t)), 8, "Fabric", resample=0,
+        rim = shapes.tube(f"Rim{len(lids)}", pts, lambda t: 0.02, 8, "Fabric", resample=0,
                           cap_start=False, cap_end=False, flatten=0.75)  # heavier along the top
         core.smooth(rim, 180)
         lids.append(rim)
         arc = []
         for i in range(15):
             ang = math.radians(-58 + 116 * i / 14)
-            d_ = (fwd * math.cos(ang) + right * math.sin(ang)) + up * (-0.05 + 0.08 * (i / 14 - 0.5) ** 2)
+            d_ = (fwd * math.cos(ang) + right * math.sin(ang)) + up * (0.1 + 0.08 * (i / 14 - 0.5) ** 2)
             arc.append(c + d_.normalized() * (r + 0.002))
         sl = shapes.tube(f"Slit{len(slits)}", arc, lambda t: 0.008 + 0.024 * math.sin(math.pi * min(1, max(0, t))) ** 0.7, 6,
                          "SmoothPlastic", resample=0, flatten=0.5)
@@ -684,7 +684,7 @@ def eye_parts(tree, rng):
             tilt = (rng.random() - 0.5) * 0.12
             pts = []
             for e_ in (-1, 0, 1):
-                d_ = (bd + up * (0.3 * e_ - 0.05) + right * tilt * e_).normalized()
+                d_ = (bd + up * (0.3 * e_ + 0.1) + right * tilt * e_).normalized()
                 pts.append(c + d_ * (r + (0.016 if e_ == 0 else -0.002)))
             ropes.append(rope(f"EyeTwine{len(eyes)}_{j}", pts, 0.0095, segs=5, per=2))
     return eyes, lids, slits, ropes
@@ -873,7 +873,7 @@ def build_tray():
 
 
 # --- lantern -------------------------------------------------------------------------------------------------------
-LS = 1.15  # lantern scale about its top ring
+LS = 1.55  # lantern scale about its top ring
 Z_TOP = -2.2
 Z_APEX = -2.3
 Z_EAVE = -2.69
@@ -951,7 +951,7 @@ def build_lantern():
         c0 = rot @ Vector((EAVE_H, -EAVE_H, Z_EAVE + 0.01))
         pts = [c0 - cdir * 0.08, c0 + cdir * 0.06, c0 + cdir * 0.15 + Vector((0, 0, 0.06)), c0 + cdir * 0.19 + Vector((0, 0, 0.18)),
                c0 + cdir * 0.17 + Vector((0, 0, 0.3)), c0 + cdir * 0.13 + Vector((0, 0, 0.36))]
-        horn = shapes.tube(f"Horn{k}", pts, lambda t: 0.095 * (1 - t) ** 1.25 + 0.006, 6, "Metal", resample=2)
+        horn = shapes.tube(f"Horn{k}", [c0 + (q - c0) * 0.6 for q in pts], lambda t: 0.06 * (1 - t) ** 1.25 + 0.005, 6, "Metal", resample=2)
         core.smooth(horn, 60)
         iron.append(horn)
         zs = [Z_EAVE, Z_BT, Z_BT - 0.15, (Z_BT + Z_BB) / 2, Z_BB + 0.15, Z_BB, Z_BASE - 0.02]
