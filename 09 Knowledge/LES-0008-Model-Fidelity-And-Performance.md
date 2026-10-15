@@ -2,7 +2,9 @@
 id: LES-0008
 title: Model Fidelity And Performance
 type: lesson
-status: proposed
+status: approved
+approved_by: jg
+approved: 2026-10-15
 category: asset-production
 evidence:
   - "[[RSH-20261014-Wisp-Approved-Modeling-Handoff]]"
@@ -10,7 +12,7 @@ evidence:
 applies_to:
   - 3D asset production and visual acceptance
 created: 2026-10-14
-updated: 2026-10-14
+updated: 2026-10-15
 tags:
   - knowledge/lesson
   - art/optimization
@@ -27,7 +29,7 @@ A recognizable model can still miss approved art through facial proportions, fla
 The Wisp inspection found visible differences between the approved concept and the rendered model: protruding eyes, heavier mouth lacing and weaker panel relief/weathering. Detail representation and engine material translation need separate verification. Two concept views do not fully specify hidden surfaces or guarantee a literal pixel-for-pixel match from every angle.
 
 ## Solution
-**Draft production guidance; the complete process below has not yet been validated on an accepted Wisp.**
+**Approved as production guidance by jg on 2026-10-15.** The complete process has not yet been validated on an accepted Wisp; see "Pending validation" below.
 
 1. Preserve the approved art and an editable full-detail master. Correct silhouette, proportions, face, pose, grips and lantern construction before optimizing.
 2. Match camera angle, perspective and framing to the concept; overlay renders and compare silhouette and landmarks. Inspect front, side, rear and three-quarter views, neutral/game lighting and effects off. Document inferred hidden surfaces.
