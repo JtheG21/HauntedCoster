@@ -37,3 +37,5 @@ tasks/prompts/
 game001-sourcemap.json
 haunted-sourcemap.json
 games/haunted/src/shared/BuildStamp.txt
+.agents/skills/*/LOCAL.md
+.agents/skills/*/work/

@@ -4,7 +4,7 @@ title: Video Research Index
 type: index
 status: in_progress
 created: 2026-10-14
-updated: 2026-10-14
+updated: 2026-10-15
 tags:
   - research/index
 related:
@@ -31,6 +31,8 @@ One row per video note. This is a lookup table, not a synthesis: each note stand
 | 3D + AI pipeline | [[RSH-20261014-Procedural-Spider-Animation-MCP-Video]] | medium | Image-to-3D, remesh budget, Blender rig via MCP, procedural leg stepping | Finish quality, licences |
 | 3D + AI pipeline | [[RSH-20261014-Pet-RPG-Claude-MCP-Full-Tutorial-Video]] | medium | Rig-aware creature design, export settings, spec-driven MCP building | Finish quality, licences |
 | 3D + AI pipeline | [[RSH-20261014-Pet-Shop-Summon-Prototype-Video]] | medium | Shape of a summon/shop prototype and its UI patterns | Balance or monetization data |
+| 3D: rigging / import | [[RSH-20261014-CSM-Custom-Rig-Import-Video]] | medium | Importing an AI-generated character onto a custom Roblox rig | Model quality, licences |
+| Blender to Roblox | [[RSH-20261014-Blender-To-Roblox-Animation-Import-Export-Video]] | medium | Animation import and export settings between Blender and Roblox | Animation craft |
 | Blender to Roblox | [[RSH-20261014-Blender-R6-Animation-To-Roblox-Video]] | medium | Rig prep and animation import checks (R6) | Non-R6 rigs |
 | Blender to Roblox | [[RSH-20261014-Blender-Remove-Animation-Actions-Video]] | medium | Removing stale actions, resetting a posed rig | Anything beyond file cleanup |
 | Systems: movement | [[RSH-20261014-Advanced-Movement-System-Video]] | medium | Config-driven single-state traversal, collision-group trick, mobile parity | Server validation of movement |
@@ -58,7 +60,11 @@ One row per video note. This is a lookup table, not a synthesis: each note stand
 
 Earlier non-video research: [[RSH-20261013-Haunted-Monetization-Discovery]], [[RSH-20261012-World-Retrofit-Audit]], [[RSH-20261010-Roblox-Platform-Economics]].
 
-In flight on other branches (add here once merged): a Blender import-for-Roblox video note.
+Workflow audits and proposals drawn from the video notes (not video notes themselves): [[RSH-20261014-Video-Production-Workflow-Audit]] (+ [[RSH-20261014-Video-Production-Workflow-Audit-Batch-02]], [[RSH-20261014-Video-Production-Workflow-Audit-Batch-03]]), [[RSH-20261014-Animation-Rigging-And-VFX-Workflow-Proposals]], [[RSH-20261014-Event-Timing-Restoration-And-Visual-Polish-Proposals]].
+
+Wisp pilot: start at [[Wisp Pilot Start Here]], then [[RSH-20261014-Wisp-Revision-Readiness]], [[RSH-20261014-Wisp-Four-Note-Prebuild-Review]] and [[RSH-20261014-Wisp-Approved-Modeling-Handoff]].
+
+In flight on other branches (add here once merged): the Universal Modder evaluation (`chore/universal-modder-evaluation`).
 
 ## Gaps (what we still don't know)
 These are the subjects the next videos should cover. Updated 2026-10-14 after the MrWonderHow batch (24 notes); remove a line when a note covers it at `medium` confidence.
