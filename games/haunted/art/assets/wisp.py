@@ -33,9 +33,9 @@ from hcart import core, paint, shapes
 
 H = paint.hex3
 # Palette read from the concept: cold grey-green sacking, slate panels, blue-black crevices.
-SKIN_HI = H("e8f4ee")
-SKIN = H("c4d7ce")
-SKIN_MID = H("86998f")
+SKIN_HI = H("e6f8f3")
+SKIN = H("bcdcd4")
+SKIN_MID = H("86a7a0")
 SKIN_BONE = H("a4a896")  # a dirtier, yellower sack panel
 PATCH = H("5f706b")
 PATCH_DK = H("33403f")
@@ -64,27 +64,27 @@ PANE_EDGE = H("1d4a4f")
 # Metaball sizes are half-extents in studs: a Blender element's surface sits at ~0.574 x its radius/size
 # (threshold 0.6, stiffness 2; capsule size_x is the half segment length; measured 2026-10-14).
 MB = 1 / 0.574
-LIFT = 0.43
+LIFT = 1.1
 ASSET_SCALE = 0.85  # whole perch scaled uniformly about the Root after the lift (6.1 studs tall, lantern 0.85 off the ground)
 HEAD_SCALE = 1.05  # head sculpted at design size, then scaled about the chin socket to the concept proportion
 HEAD_TURN = (10.0, -8.0, 12.0)  # pitch forward, cock, turn to its left (degrees): the approved pose
 
 # Pole: a line through both grips. G2 = lower (left) hand; D = direction per stud of drop.
-G2 = Vector((-0.2, -0.66, -0.4))
+G2 = Vector((-0.42, -0.72, -0.35))
 D = Vector((0.95, 0.2, -1.0))
-POLE_R = 0.064
-TOP_Z, BOT_Z = 1.42, -3.3
+POLE_R = 0.1
+TOP_Z, BOT_Z = 1.85, -4.1
 
 
 def pole_at(z: float) -> Vector:
     return G2 + D * (G2.z - z)
 
 
-G1 = pole_at(0.6)  # upper (right) hand
-TRAY_Z = -1.73  # tray floor top
-LIP_TOP = -1.64
+G1 = pole_at(0.85)  # upper (right) hand
+TRAY_Z = -2.110  # tray floor top
+LIP_TOP = -2.020
 LIP_Y = 0.15  # lip outer face |y|
-RING_Z = -1.825
+RING_Z = -2.205
 HC = Vector((0.0, -0.22, 1.58))  # head centre
 NECK = Vector((0, -0.14, 1.04))
 CHIN = HC + Vector((0, 0.12, -0.42))  # the head scales about this point, so it stays seated on the neck
@@ -358,18 +358,21 @@ def burlap(p, n, cv, op, base, seams: SeamIndex | None, seed):
     c = paint.mul(base, 1.0 + 0.32 * g)  # blotchy dye within the panel
     c = paint.mix(c, paint.mul(base, 1.3), max(0.0, -g - 0.25) * 0.8)
     st = fbm(p, 0.14, 2, seed + 9.0)
-    if st > 0.25:
-        c = paint.mix(c, STAIN, min(0.45, (st - 0.25) * 1.6))
+    if st > 0.12:
+        c = paint.mix(c, STAIN, min(0.6, (st - 0.12) * 1.8))
+    tb = fbm(p, 0.18, 2, seed + 17.0)
+    if tb > 0.08:
+        c = paint.mix(c, DARK_TEAL, min(0.3, (tb - 0.08) * 1.0))  # teal-black blotches soaked into the sacking
     smudge = fbm(p, 0.07, 2, seed + 4.0)
-    if smudge > 0.22:
-        c = paint.mix(c, paint.mul(base, 0.62), min(0.45, (smudge - 0.22) * 1.6))  # grimy smudges
-    if noise.noise(p / 0.028 + Vector((seed, 0, 5.0))) > 0.42:
-        c = paint.mul(c, 0.78)  # coarse dark speckle
+    if smudge > 0.1:
+        c = paint.mix(c, paint.mul(base, 0.5), min(0.6, (smudge - 0.1) * 1.8))  # grimy smudges
+    if noise.noise(p / 0.05 + Vector((seed, 0, 5.0))) > 0.5:
+        c = paint.mul(c, 0.9)  # coarse dark speckle
     fib = noise.noise(p / 0.011 + Vector((seed, 1.7, 0)))
     weave = math.sin((p.x + p.y * 0.6) * math.tau / 0.045) * math.sin((p.z - p.y * 0.4) * math.tau / 0.045)
-    k = 1.0 + 0.11 * fib + 0.05 * weave
-    if noise.noise(p / 0.02 + Vector((0, seed, 3.1))) > 0.55:
-        c = paint.mix(c, PATCH_DK, 0.4)  # dark fibre flecks
+    k = 1.0 + 0.035 * fib + 0.015 * weave
+    if noise.noise(p / 0.04 + Vector((0, seed, 3.1))) > 0.62:
+        c = paint.mix(c, PATCH_DK, 0.2)  # dark fibre flecks
     occl = 1 - op
     c = paint.mix(c, SHADOW, min(1.0, occl * 1.1))
     c = paint.mix(c, CREVICE, max(0.0, occl - 0.25) * 1.5)
@@ -388,40 +391,40 @@ def burlap(p, n, cv, op, base, seams: SeamIndex | None, seed):
 
 # --- body ----------------------------------------------------------------------------------------------------------
 SH_R, SH_L = Vector((-0.55, -0.06, 0.74)), Vector((0.55, -0.04, 0.71))
-EL_R, EL_L = Vector((-1.0, -0.36, 0.86)), Vector((0.64, -0.24, -0.06))
+EL_R, EL_L = Vector((-1.3, -0.4, 0.92)), Vector((0.86, -0.3, 0.16))
 HIP_R, HIP_L = Vector((-0.24, 0.2, -0.44)), Vector((0.24, 0.2, -0.44))
-KN_R, KN_L = Vector((-0.56, -0.36, -0.66)), Vector((0.54, -0.38, -0.68))
-AN_R, AN_L = Vector((-0.21, 0.07, -1.58)), Vector((0.2, 0.07, -1.58))
+KN_R, KN_L = Vector((-0.78, -0.58, -0.72)), Vector((0.74, -0.6, -0.76))
+AN_R, AN_L = Vector((-0.21, 0.07, -1.96)), Vector((0.2, 0.07, -1.96))
 
 
 def build_body(wrist_r, wrist_l):
     """The stuffed sack: torso, arms and legs as one metaball sculpt, lumpy where the stuffing settles."""
     els = [
-        E((0, 0.2, -0.32), (0.572, 0.438, 0.264)),                      # pelvis
+        E((0, 0.2, -0.32), (0.5, 0.42, 0.26)),                      # pelvis
         E((-0.2, 0.38, -0.4), (0.325, 0.3, 0.242)),                   # sagging seat
         E((0.2, 0.38, -0.4), (0.325, 0.3, 0.242)),
-        E((0, -0.17, -0.04), (0.53, 0.5, 0.36)),                     # stuffed pot belly
-        E((0, -0.08, 0.4), (0.47, 0.38, 0.34), rot=(22, 0, 0)),       # chest, pitched forward
-        E((0, 0.16, 0.56), (0.46, 0.38, 0.31), rot=(30, 0, 0)),      # hunched back
-        E((0, 0.08, 0.17), (0.429, 0.312, 0.198)),                      # waist
+        E((0, -0.2, -0.06), (0.46, 0.48, 0.36)),                     # stuffed pot belly
+        E((0, -0.12, 0.4), (0.41, 0.36, 0.33), rot=(30, 0, 0)),       # chest, pitched forward
+        E((0, 0.14, 0.58), (0.4, 0.36, 0.3), rot=(38, 0, 0)),      # hunched back
+        E((0, 0.06, 0.17), (0.36, 0.3, 0.2)),                      # waist
         E((0, -0.13, 0.28), (0.2, 0.06, 0.1), negative=True, stiffness=0.9),  # a slack fold under the chest
         CAP((0, -0.06, 0.62), (0, -0.16, 1.1), 0.1),                 # neck thrust forward
         B(SH_R, 0.16), B(SH_L, 0.16),
         B((-0.2, 0.27, 0.47), 0.07), B((0.2, 0.27, 0.47), 0.07),     # lumps of stuffing on the back
         B(HIP_R, 0.16), B(HIP_L, 0.16),
     ]
-    els += limb_caps([SH_R, SH_R.lerp(EL_R, 0.5) + Vector((0, 0, 0.04)), EL_R], [0.14, 0.125, 0.11])
-    els += limb_caps([EL_R, EL_R.lerp(wrist_r, 0.45), wrist_r], [0.11, 0.12, 0.0875])
-    els += limb_caps([SH_L, SH_L.lerp(EL_L, 0.5) + Vector((0.03, 0, 0)), EL_L], [0.14, 0.125, 0.11])
-    els += limb_caps([EL_L, EL_L.lerp(wrist_l, 0.45), wrist_l], [0.11, 0.12, 0.0875])
+    els += limb_caps([SH_R, SH_R.lerp(EL_R, 0.5) + Vector((0, 0, 0.04)), EL_R], [0.112, 0.1, 0.088])
+    els += limb_caps([EL_R, EL_R.lerp(wrist_r, 0.45), wrist_r], [0.088, 0.096, 0.07])
+    els += limb_caps([SH_L, SH_L.lerp(EL_L, 0.5) + Vector((0.03, 0, 0)), EL_L], [0.112, 0.1, 0.088])
+    els += limb_caps([EL_L, EL_L.lerp(wrist_l, 0.45), wrist_l], [0.088, 0.096, 0.07])
     els += [B(EL_R, 0.112), B(EL_L, 0.112), B(wrist_r, 0.075), B(wrist_l, 0.075)]
     for hip, kn, an, s in ((HIP_R, KN_R, AN_R, -1), (HIP_L, KN_L, AN_L, 1)):
         els += limb_caps([hip, hip.lerp(kn, 0.5) + Vector((0, 0, 0.03)), kn], [0.163, 0.144, 0.119])
         calf = kn.lerp(an, 0.3) + Vector((0, 0.05, 0))
         els += limb_caps([kn, calf, an], [0.106, 0.112, 0.0725])
         els += [B(kn, 0.122), B(kn + Vector((0, -0.05, 0.02)), 0.08), B(an, 0.065), B(an + Vector((s * 0.045, 0.0, -0.01)), 0.045)]
-    body = A.organic("Torso", els, 7500, resolution=0.02, material="Fabric", smooth_iters=1)
-    displace(body, lambda p: 0.012 * fbm(p, 0.2, 2, 1.0) + 0.004 * ridged(p, 0.07, 2.0))
+    body = A.organic("Torso", els, 30000, resolution=0.016, material="Fabric", smooth_iters=1)
+    displace(body, lambda p: 0.012 * fbm(p, 0.2, 2, 1.0) + 0.005 * ridged(p, 0.1, 2.0) + 0.002 * fbm(p, 0.04, 2, 7.0))
     core.smooth(body, 180)
     return body
 
@@ -490,7 +493,7 @@ EYES = ((0.0, 0.3, 0.24, 2.0), (0.42, 0.27, 0.22, 28.0))  # (x, z offset from HC
 # The head's back sweeps up into a curled lobe of dark sacking (head-relative, before HEAD_SCALE).
 LOBE = [(-0.3, 0.38, 0.32), (-0.64, 0.46, 0.48), (-0.96, 0.44, 0.64), (-1.2, 0.34, 0.84), (-1.28, 0.2, 1.06), (-1.2, 0.06, 1.22),
         (-1.03, -0.0, 1.27), (-0.9, 0.02, 1.2), (-0.85, 0.09, 1.1)]
-LOBE_R = [0.44, 0.39, 0.34, 0.29, 0.235, 0.18, 0.13, 0.085, 0.045]
+LOBE_R = [0.57, 0.51, 0.44, 0.38, 0.31, 0.24, 0.17, 0.11, 0.06]
 LOBE_EYE = Vector((-1.06, 0.22, 0.92))  # centre of the curl's spiral (head-relative)
 
 
@@ -499,7 +502,7 @@ def grin_z(s: float) -> float:
 
 
 def scalp_plane():
-    return HC + Vector((-0.1, 0.0, 0.3)), Vector((-0.4, 0.45, 0.8)).normalized()
+    return HC + Vector((0.0, -0.05, 0.36)), Vector((-0.22, 0.3, 0.93)).normalized()
 
 
 def dark_side(p) -> float:
@@ -512,19 +515,19 @@ def dark_side(p) -> float:
 def build_head():
     c = HC
     els = [
-        E(c + Vector((0, 0.1, 0.12)), (0.72, 0.56, 0.52)),            # cranium, wider than tall
-        E(c + Vector((0, -0.08, -0.06)), (0.75, 0.52, 0.46)),           # broad lower face carrying the grin
-        E(c + Vector((0.02, -0.1, -0.3)), (0.56, 0.38, 0.22)),        # underslung jaw
+        E(c + Vector((0, 0.1, 0.12)), (0.63, 0.56, 0.55)),            # cranium, wider than tall
+        E(c + Vector((0, -0.08, -0.06)), (0.69, 0.52, 0.48)),           # broad lower face carrying the grin
+        E(c + Vector((0.02, -0.06, -0.4)), (0.6, 0.44, 0.32)),        # full round chin under the grin
         E(c + Vector((-0.5, -0.12, 0.02)), (0.28, 0.32, 0.3)),        # cheeks, uneven
         E(c + Vector((0.53, -0.1, -0.06)), (0.3, 0.34, 0.32)),
         E(c + Vector((-0.32, -0.3, 0.31)), (0.3, 0.26, 0.2)),         # heavy brows
         E(c + Vector((0.36, -0.26, 0.24)), (0.27, 0.25, 0.2)),
-        E(c + Vector((-0.16, 0.32, 0.3)), (0.5, 0.42, 0.38)),         # skull swells back into the lobe
+        E(c + Vector((-0.06, 0.32, 0.3)), (0.44, 0.42, 0.38)),         # skull swells back into the lobe
         E(c + Vector((-0.63, 0.02, 0.26)), (0.17, 0.22, 0.2)),        # temple lump
-        E(c + Vector((0.2, 0.12, 0.4)), (0.28, 0.28, 0.14)),             # crown bump
-        E(c + Vector((0.0, 0.12, -0.42)), (0.2, 0.2, 0.15)),          # chin socket over the neck
+        E(c + Vector((0.12, 0.08, 0.46)), (0.42, 0.4, 0.22)),             # crown bump
+        E(c + Vector((0.0, 0.14, -0.52)), (0.22, 0.22, 0.16)),          # chin socket over the neck
     ]
-    els += [E(c + Vector((-0.26, 0.44, 0.3)), (0.68, 0.54, 0.54)),          # big hooded sack bulge at the back of the head
+    els += [E(c + Vector((-0.1, 0.44, 0.3)), (0.56, 0.54, 0.54)),          # big hooded sack bulge at the back of the head
             E(c + Vector((-0.34, 0.4, 0.34)), (0.38, 0.34, 0.3)), CAP(c + Vector(LOBE[0]), c + Vector(LOBE[1]), 0.3)]  # rising into the lobe
     for x, dz, r, yaw in EYES:  # deep sockets
         a = math.radians(yaw)
@@ -535,12 +538,12 @@ def build_head():
         rad = 0.86 - 0.12 * s * s
         els.append(E(Vector((math.sin(phi) * rad, c.y - math.cos(phi) * rad, grin_z(s))), (0.09, 0.09, 0.045 * (1 - 0.5 * s * s)),
                      rot=(0, 0, math.degrees(phi)), negative=True, stiffness=1.4))
-    head = A.organic("Head", els, 13000, resolution=0.017, material="Fabric", smooth_iters=1)
+    head = A.organic("Head", els, 45000, resolution=0.013, material="Fabric", smooth_iters=1)
     # The lobe: the back of the head sweeps up and rolls over into a spiral (swept so the curl stays crisp; it
     # starts inside the skull's bulge, so it grows out of the head rather than sitting on it).
     lobe = shapes.tube("Lobe", [c + Vector(p) for p in LOBE], LOBE_R, 14, "Fabric", resample=5, flatten=0.78, cap_start=False)
     head = core.join([head, lobe], "Head")
-    displace(head, lambda p: 0.004 * fbm(p, 0.35, 2, 3.0))
+    displace(head, lambda p: 0.004 * fbm(p, 0.35, 2, 3.0) + 0.0035 * ridged(p, 0.11, 6.0) + 0.002 * fbm(p, 0.04, 2, 9.0))  # soft creases in the cloth
     core.smooth(head, 180)
     return head
 
@@ -626,7 +629,7 @@ def mouth_twine(tree, grin, rng):
         up = tang.cross(nrm).normalized()
         if up.z < 0:
             up = -up
-        L = (0.078 + 0.036 * (1 - abs(s))) * (0.9 + 0.2 * rng.random())
+        L = (0.066 + 0.03 * (1 - abs(s))) * (0.9 + 0.2 * rng.random())
         tilt = 0.32 + (rng.random() - 0.5) * 0.08
         ends = []
         for sgn in (1, -1):
@@ -826,9 +829,9 @@ def build_pole():
     bot = pole_at(BOT_Z)
     L = (top - bot).length
     r = POLE_R
-    prof = [(0.0, 0.0), (0.025, 0.04), (0.088, 0.24), (0.06, 0.265), (0.06, 0.29), (0.118, 0.305), (0.124, 0.345), (0.118, 0.37),
-            (0.07, 0.385), (0.07, 0.43), (0.1, 0.445), (0.1, 0.485), (0.072, 0.5), (r, 0.53)]
-    mid = [(r, 0.42 + (L - 0.84) * k / 6) for k in range(1, 6)]
+    prof = [(rr * 1.55, z * 1.35) for rr, z in [(0.0, 0.0), (0.025, 0.04), (0.088, 0.24), (0.06, 0.265), (0.06, 0.29), (0.118, 0.305),
+            (0.124, 0.345), (0.118, 0.37), (0.07, 0.385), (0.07, 0.43), (0.1, 0.445), (0.1, 0.485), (0.072, 0.5)]] + [(r, 0.53 * 1.35)]
+    mid = [(r, 0.72 + (L - 1.44) * k / 6) for k in range(1, 6)]
     full = prof + mid + [(rr, L - z) for rr, z in reversed(prof)]
     obj = shapes.lathe("Pole", full, 12, "Metal", cap_bottom=False, cap_top=False, wobble=0.015, seed=3)
     core.smooth(obj, 50)
@@ -857,7 +860,7 @@ def build_tray():
         for yy in (-LIP_Y - 0.01, LIP_Y + 0.01):
             sc = shapes.tube(f"TrayScroll{sgn}{yy}", [p + Vector((0, yy, 0)) for p in scroll], lambda t: 0.022 * (1 - 0.5 * t), 5, "Metal",
                              resample=0)
-            parts.append(sc)
+            pass  # no scroll ends: the concept tray is a plain shallow dish
     parts.append(shapes.box("TrayKeel", (0.36, 0.12, 0.05), (0, 0, TRAY_Z - 0.055), bevel=0.008, segments=1))
     ring = shapes.tube("TrayRing", [(0.045 * math.cos(a), 0, RING_Z + 0.045 * math.sin(a)) for a in [k / 10 * math.tau for k in range(11)]],
                        0.015, 6, "Metal", cap_start=False, cap_end=False)
@@ -874,20 +877,20 @@ def build_tray():
 
 # --- lantern -------------------------------------------------------------------------------------------------------
 LS = 1.55  # lantern scale about its top ring
-Z_TOP = -2.2
-Z_APEX = -2.3
-Z_EAVE = -2.69
-Z_BT = -2.77
-Z_BB = -3.65
-Z_BASE = -3.73
-Z_POINT = -3.89
+Z_TOP = -2.890
+Z_APEX = -2.830
+Z_EAVE = -3.380
+Z_BT = -3.460
+Z_BB = -4.340
+Z_BASE = -4.420
+Z_POINT = -4.580
 EAVE_H = 0.44
 
 
 def half_w(z: float) -> float:
     """Concave lantern body: wide under the eave, pinched at the waist, flaring at the foot."""
     t = (z - Z_BB) / (Z_BT - Z_BB)
-    return 0.31 + 0.055 * (2 * t - 1) ** 2 + 0.012 * t
+    return 0.265 + 0.1 * (2 * t - 1) ** 2 + 0.02 * t
 
 
 def square_ring(name, h, z0, z1, depth, material="Metal"):
@@ -920,7 +923,7 @@ def build_lantern():
 
         outer = [on_face(0.09, -1), on_face(0.09, 1), on_face(0.8, 0)]
         cen = (outer[0] + outer[1] + outer[2]) / 3
-        inner = [q.lerp(cen, 0.24) for q in outer]
+        inner = [q.lerp(cen, 0.13) for q in outer]
         bm = bmesh.new()  # copper-bound rim
         vs = [bm.verts.new(q + nrm * 0.045) for q in outer]
         vb = [bm.verts.new(q - nrm * 0.004) for q in outer]
@@ -956,7 +959,7 @@ def build_lantern():
         iron.append(horn)
         zs = [Z_EAVE, Z_BT, Z_BT - 0.15, (Z_BT + Z_BB) / 2, Z_BB + 0.15, Z_BB, Z_BASE - 0.02]
         post_pts = [rot @ Vector((half_w(min(Z_BT, max(Z_BB, z))) + 0.008, -(half_w(min(Z_BT, max(Z_BB, z))) + 0.008), z)) for z in zs]
-        post_pts += [rot @ Vector((0.42, -0.42, Z_BASE - 0.07)), rot @ Vector((0.47, -0.47, Z_BASE - 0.15))]
+        post_pts += [rot @ Vector((0.41, -0.41, Z_BASE - 0.05)), rot @ Vector((0.44, -0.44, Z_BASE - 0.09))]
         post = shapes.tube(f"Post{k}", post_pts, lambda t: 0.066 * (1 - 0.8 * max(0, t - 0.72) / 0.28), 4, "Metal", resample=0)
         core.smooth(post, 45)
         iron.append(post)
@@ -966,7 +969,7 @@ def build_lantern():
                 z = Z_BT - 0.03 - (Z_BT - Z_BB - 0.06) * i / 6
                 h = half_w(z)
                 bpts.append(rot @ Vector((f * (h - 0.06), -(h + 0.008), z)))
-            bar = shapes.tube(f"Bar{k}_{f}", bpts, 0.034, 5, "Metal", resample=0, flatten=0.6)
+            bar = shapes.tube(f"Bar{k}_{f}", bpts, 0.02, 5, "Metal", resample=0, flatten=0.6)
             core.smooth(bar, 60)
             iron.append(bar)
         # A flat iron frame round each pane (strips inside the posts, riveted), as on the concept.
@@ -1032,14 +1035,14 @@ def build_lantern():
     # Chain (not scaled with the lantern): alternating oval links from the tray ring down to the finial ring.
     links = []
     z0, z1 = RING_Z - 0.03, Z_TOP - 0.02
-    nlinks = 2
+    nlinks = 3
     for i in range(nlinks):
         zc = z0 - (z0 - z1) * (i + 0.5) / nlinks
         lh = (z0 - z1) / nlinks * 0.62 + 0.025
         yaw = 0 if i % 2 else math.pi / 2
-        pts = [Vector((0, 0, zc)) + Matrix.Rotation(yaw, 3, "Z") @ Vector((0.04 * math.cos(a), 0, lh * math.sin(a)))
+        pts = [Vector((0, 0, zc)) + Matrix.Rotation(yaw, 3, "Z") @ Vector((0.07 * math.cos(a), 0, lh * math.sin(a)))
                for a in [k / 12 * math.tau for k in range(13)]]
-        links.append(shapes.tube(f"Link{i}", pts, 0.016, 6, "Metal", cap_start=False, cap_end=False))
+        links.append(shapes.tube(f"Link{i}", pts, 0.03, 6, "Metal", cap_start=False, cap_end=False))
     # Scale the lantern about its hanging ring and turn it corner-on, as in the concept.
     pivot = Vector((0, 0, Z_TOP))
     m = Matrix.Translation(pivot) @ Matrix.Rotation(math.radians(45), 4, "Z") @ Matrix.Scale(LS, 4) @ Matrix.Translation(-pivot)
@@ -1144,7 +1147,7 @@ def lantern_wisp():
 
     # Paint. Sack panels each have their own dye; seams and stitch holes are sunk and dark.
     limb_segs = [(SH_R, EL_R, PATCH_DK), (SH_L, EL_L, SKIN), (EL_R, wristR, SKIN), (EL_L, wristL, SKIN_MID),
-                 (HIP_R, KN_R, PATCH_DK), (HIP_L, KN_L, PATCH), (KN_R, AN_R, SKIN), (KN_L, AN_L, SKIN_MID)]
+                 (HIP_R, KN_R, SKIN), (HIP_L, KN_L, SKIN_MID), (KN_R, AN_R, SKIN), (KN_L, AN_L, SKIN)]
 
     def body_col(p, n, o, cv, op):
         name = o.name
@@ -1181,6 +1184,8 @@ def lantern_wisp():
     def head_col(p, n, o, cv, op):
         # The pale face shades gradually through grey-teal into the near-black back and lobe (no hard colour edge;
         # the seam and its stitches cross the gradient).
+        if o.name.startswith("Rim"):
+            return paint.mix(paint.mix(SHADOW, CREVICE, 0.55), PATCH_DK, 0.25 * max(0.0, fbm(p, 0.03, 2, 2.0)))
         base = SKIN
         if p.x < -0.5 + 0.12 * (p.y - HC.y):
             base = SKIN_MID
@@ -1213,7 +1218,7 @@ def lantern_wisp():
         m = 0.5 + 0.5 * fbm(p, 0.2, 3, 7.0)
         edge = max(0.0, cv - 0.6) * 2.5 + (0.5 if noise.noise(p / 0.05) > 0.4 else 0.0)  # sharp edges and worn spots
         if name == "Pole":
-            base = paint.mix(H("4a4139"), H("85796c"), m)  # worn bronze-steel
+            base = paint.mix(H("3f3e3b"), H("7d7a72"), m)  # worn grey steel with bronze wear
             base = paint.mix(base, H("b3a796"), min(0.5, edge))
         elif name.startswith("RoofPlateRim"):
             base = paint.mix(COPPER, H("5b3a24"), 0.3 + 0.5 * m)  # copper-bound plate rims
