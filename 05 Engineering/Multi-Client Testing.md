@@ -4,7 +4,7 @@ title: Multi-Client Testing
 type: index
 status: approved
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-15
 tags:
   - engineering/testing
 related:
@@ -56,6 +56,22 @@ end)
 ## Running Luau specs
 Run them in a **fresh Play session (Server data model)**, not Edit mode. Edit mode caches modules ([[LES-0005-Edit-Mode-Require-Cache]]).
 
+## GAME-002 (Haunted Collector) runs through Studio MCP
+The sections above describe the GAME-001 hook. GAME-002 scenarios live in `games/haunted/tests/scenarios/`. What works on this Mac (TASK-0025 to TASK-0041):
+- Start runs in the Edit data model inside `task.spawn`, store a compact summary in `_G.scn[key]`, wait with a background sleep (60–240 s), then read it. Calling `ExecutePlayModeAsync` directly from `execute_luau` times out and drops the connection. Edit-mode `_G` persists across MCP calls; LogService in Edit keeps no Play logs.
+- `_G.scnChain({{key, name, players, args}, ...})` runs scenarios back to back. It lives only in that Studio's Edit `_G`, so re-define it after every relaunch: loop over the entries, `pcall` `ExecutePlayModeAsync(args)` or `ExecuteMultiplayerTestAsync(players, args)`, summarise `res.checks` into `_G.scn[key]`, then wait for `RunService:IsRunning()` to go false plus 4 s.
+- Args: `habitat = "<id>"` starts in a module; `rotation = {slotSeconds=30, warningSeconds=12, closingSeconds=6, startNow=true}` unpins the rotation (test runs are pinned to the Cemetery otherwise).
+- Wait until Studio is back in Edit mode (and `list_roblox_studios` shows only the main window) before the next run; a run started while it's stopping returns nil.
+- CrossPlot (`ExecuteMultiplayerTestAsync(2, …)`) needs `timeout = 240`. If only 1 client joined (`infra = true`), rerun once; that doesn't count as a revision. Run it once per task, at the end. It uses `CaptureService.carryForTest` instead of the timed minigame.
+- `execute_luau` in the Server data model has its own module cache: requiring a service there gives a fresh, unstarted copy. Drive running services through scenario args; pure builders (e.g. `PlotBuilder.buildHouse`) work from MCP.
+- `Player:LoadCharacter()` already yields until the character exists, so a following `CharacterAdded:Wait()` hangs. Poll for `Character.Head`.
+- Screen captures in Play often drop the MCP connection: one capture per call, in normal Play, with `camera_position`; Studio reconnects after about a minute. To frame a shot, teleport the character from the Server data model, then set `workspace.CurrentCamera.CFrame` in the Client data model with CameraType Custom (Scriptable gets reset).
+- If the Rojo plugin isn't connected, sync by writing each changed script's `Source` through `execute_luau` (a `[=====[ ]=====]` long string), check every file against disk with a length plus hash, and record in the TEST note that sync wasn't via Rojo.
+- A local place rebuilt with `rojo build` runs memory-only, so the Persistence scenario can't pass there.
+- Engine fact: a server `Seat:Sit()` seats a humanoid even when `Seat.Disabled` is true, and won't re-seat a just-ejected humanoid on the same seat for a while.
+- Before any of this, run `scripts/studio-preflight.sh`.
+
 ## Limits
+- **GAME-002: at most 2 clients in Studio** (jg, 2026-10-12: a 6-client run never started in 15 minutes). The game is still built for a full 6-player server; full-server profiling waits until jg can join from several devices.
 - **On this 8 GB Mac, 3 clients is the practical maximum.** 4 clients didn't all join within 30 s (about 77 MB free). Give `timeout` ≥ 50 for 3 clients (they joined in about 22 s).
 Everything runs on one machine, so there's no real network latency. Mobile still needs a real device. The DevForum reports `EndTest` bugs in some Studio versions. Here the sessions closed by themselves.
