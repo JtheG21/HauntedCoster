@@ -613,12 +613,12 @@ def head_seams(tree):
     return [(s, closed, key) for s, closed, key in out if len(s) > 3]
 
 
-def mouth_twine(tree, grin, rng):
+def mouth_twine(tree, grin, rng, thick=1.0, count=23):
     """The grin is laced across with thick twisted twine, each loop bridging the open gap from lip to lip. `grin` is
     the seam on the uncarved face (it gives each loop its frame); `tree` is the carved surface the ends sink into.
     Returns rope objects, the punch-hole points and the dark mouth interior."""
     ropes, holes = [], []
-    M = 23
+    M = count
     for k in range(M):
         s = -0.84 + 1.72 * k / (M - 1) + (rng.random() - 0.5) * 0.02
         f = (s + 1) / 2 * (len(grin) - 1)
@@ -642,7 +642,7 @@ def mouth_twine(tree, grin, rng):
         holes += [top, bot]
         mid = p + nrm * (0.034 + 0.01 * rng.random()) - tang * 0.022  # out over the gap
         pts = [top, top.lerp(mid, 0.55) + nrm * 0.014, mid, bot.lerp(mid, 0.55) + nrm * 0.014, bot]  # a C-shaped loop
-        ropes.append(rope(f"Twine{k}", pts, 0.03 + 0.005 * rng.random(), segs=7, per=2))  # game-weight, not decimated
+        ropes.append(rope(f"Twine{k}", pts, (0.03 + 0.005 * rng.random()) * thick, segs=7, per=2))  # game-weight, not decimated
     slot = shapes.tube("GrinSlot", [p - n * 0.05 for p, n in grin], lambda t: 0.07 * math.sin(math.pi * min(1, max(0, t))) ** 0.5 + 0.008,
                        6, "SmoothPlastic", resample=0, flatten=0.55, cap_start=False, cap_end=False)  # the dark inside of the mouth
     core.smooth(slot, 180)
@@ -1365,10 +1365,10 @@ def _report_clearance(body, lamp, panes):
     print("CLEARANCE lantern bottom above ground (hover 4, after lift and scale)", round((lo + LIFT) * ASSET_SCALE + 4.0, 3))
 
 
-ASSETS = {"creature_wisp": lantern_wisp}
+ASSETS = {"creature_wisp_procedural": lantern_wisp}  # fallback; creature_wisp is assets/wisp_hybrid.py
 
 # Production bake (hcart/bake.py): game parts and the full-detail sources baked onto them.
-BAKE = {"creature_wisp": {
+BAKE = {"creature_wisp_procedural": {
     "Creature": {"size": 2048, "metal": 0.0, "parts": {
         "Body": {"src": ["Body", "BodyStitches"], "tris": 5000},
         "Head": {"src": ["Head", "HeadStitches"], "tris": 5000},
