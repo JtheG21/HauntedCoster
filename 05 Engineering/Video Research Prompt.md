@@ -20,6 +20,8 @@ Repeatable way to turn a video into one `RSH-` note. Draft process, not yet appr
 - One video, one note in `02 Research/`. No raw transcript in the vault.
 - Use `/watch` for anything visual. NotebookLM is optional for long or multi-source material; paste its brief in with the URL.
 - Claude drafts. jg reviews. Nothing becomes a lesson or a gate without evidence and approval.
+- **Batches:** jg may send several videos at once. Each gets its own note; one PR carries the batch. Check [[Video Research Index]] and `grep -rl "<video id>" "02 Research"` first, and add a row to the index in the same PR.
+- **Concurrent sessions:** before any write, run `git worktree list` and confirm the branch; never reuse another session's worktree or branch, and check preflight's exit code explicitly (never pipe it).
 
 ## Prompt (paste into Claude Code)
 
