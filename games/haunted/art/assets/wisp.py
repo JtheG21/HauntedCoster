@@ -531,7 +531,7 @@ def build_head():
         els.append(B(c + Vector((x, -0.48 + 0.12 * abs(math.sin(a)), dz)), r * 1.12, negative=True, stiffness=1.6))
     for i in range(15):  # the seam line the twine laces shut
         s = -0.92 + 1.84 * i / 14
-        phi = math.radians(80 * s)
+        phi = math.radians(88 * s)
         rad = 0.86 - 0.12 * s * s
         els.append(E(Vector((math.sin(phi) * rad, c.y - math.cos(phi) * rad, grin_z(s))), (0.09, 0.09, 0.045 * (1 - 0.5 * s * s)),
                      rot=(0, 0, math.degrees(phi)), negative=True, stiffness=1.4))
@@ -549,7 +549,7 @@ def crumple_dark_panel(head):
     """The dark sacking is coarser and crumpled: ridged creases and lumps, fading in at its seam."""
     def fn(p):
         m = max(0.0, min(1.0, (dark_side(p) + 0.12) / 0.4))
-        return m * (0.011 * ridged(p, 0.1, 5.0) + 0.006 * ridged(p, 0.045, 8.0) + 0.006 * fbm(p, 0.2, 2, 4.0))
+        return m * (0.016 * ridged(p, 0.1, 5.0) + 0.009 * ridged(p, 0.045, 8.0) + 0.01 * fbm(p, 0.2, 2, 4.0))
 
     displace(head, fn)
 
@@ -574,7 +574,7 @@ def cast_grin(tree):
     N = 44
     for i in range(N + 1):
         s = -1 + 2 * i / N
-        phi = math.radians(86 * s)
+        phi = math.radians(92 * s)
         dirn = Vector((math.sin(phi), -math.cos(phi), 0))
         h = A.project(tree, Vector((0, HC.y, grin_z(s))) + dirn * 2.0, -dirn)
         if h:
@@ -615,9 +615,9 @@ def mouth_twine(tree, grin, rng):
     the seam on the uncarved face (it gives each loop its frame); `tree` is the carved surface the ends sink into.
     Returns rope objects, the punch-hole points and the dark mouth interior."""
     ropes, holes = [], []
-    M = 20
+    M = 22
     for k in range(M):
-        s = -0.8 + 1.66 * k / (M - 1) + (rng.random() - 0.5) * 0.02
+        s = -0.84 + 1.72 * k / (M - 1) + (rng.random() - 0.5) * 0.02
         f = (s + 1) / 2 * (len(grin) - 1)
         i = min(len(grin) - 2, int(f))
         p = grin[i][0].lerp(grin[i + 1][0], f - i)
@@ -626,7 +626,7 @@ def mouth_twine(tree, grin, rng):
         up = tang.cross(nrm).normalized()
         if up.z < 0:
             up = -up
-        L = (0.045 + 0.025 * (1 - abs(s))) * (0.9 + 0.2 * rng.random())
+        L = (0.062 + 0.032 * (1 - abs(s))) * (0.9 + 0.2 * rng.random())
         tilt = (0.16 if k % 2 else -0.1) + (rng.random() - 0.5) * 0.1
         ends = []
         for sgn in (1, -1):
@@ -639,7 +639,7 @@ def mouth_twine(tree, grin, rng):
         holes += [top, bot]
         mid = p + nrm * (0.018 + 0.01 * rng.random()) + tang * (0.01 if k % 2 else -0.01)  # out over the gap
         pts = [top, top.lerp(mid, 0.55) + nrm * 0.014, mid, bot.lerp(mid, 0.55) + nrm * 0.014, bot]  # a C-shaped loop
-        ropes.append(rope(f"Twine{k}", pts, 0.025 + 0.005 * rng.random(), segs=8, per=3))
+        ropes.append(rope(f"Twine{k}", pts, 0.031 + 0.006 * rng.random(), segs=7, per=2))  # game-weight, not decimated
     slot = shapes.tube("GrinSlot", [p - n * 0.05 for p, n in grin], lambda t: 0.045 * math.sin(math.pi * min(1, max(0, t))) ** 0.5 + 0.006,
                        6, "SmoothPlastic", resample=0, flatten=0.55, cap_start=False, cap_end=False)  # the dark inside of the mouth
     core.smooth(slot, 180)
@@ -686,7 +686,7 @@ def eye_parts(tree, rng):
             for e_ in (-1, 0, 1):
                 d_ = (bd + up * (0.3 * e_ - 0.05) + right * tilt * e_).normalized()
                 pts.append(c + d_ * (r + (0.016 if e_ == 0 else -0.002)))
-            ropes.append(rope(f"EyeTwine{len(eyes)}_{j}", pts, 0.0095, segs=6, per=2))
+            ropes.append(rope(f"EyeTwine{len(eyes)}_{j}", pts, 0.0095, segs=5, per=2))
     return eyes, lids, slits, ropes
 
 
@@ -703,6 +703,7 @@ STYLES = {
     "chest": ("x", "black", 0.055, 0.095, 0.02),
     "belly": ("ladder", "brown", 0.05, 0.09, 0.02),
     "back": ("x", "brown", 0.055, 0.095, 0.02),
+    "patch": ("x", "black", 0.05, 0.07, 0.016),
     "seat": ("ladder", "black", 0.05, 0.085, 0.02),
     "scalp": ("whip", "brown", 0.045, 0.06, 0.009),
     "temple": ("whip", "brown", 0.045, 0.08, 0.0142),
@@ -1088,6 +1089,18 @@ def lantern_wisp():
     seat_c = Vector((0, 0.2, -0.22))
     bseams.append((project_path(btree, resample(ring_path(seat_c, Vector((0, -0.4, 1)), 0.75, 40, (15, 165)), 0.02), lambda p: seat_c),
                    False, "seat"))
+    # Patches sewn onto the limbs: an oval on the right upper arm, a strip down the left thigh, one on the left forearm.
+    for key, a_, b_, side in (("patch", SH_R.lerp(EL_R, 0.25), SH_R.lerp(EL_R, 0.75), Vector((0, -1, 0.3))),
+                              ("patch", HIP_L.lerp(KN_L, 0.2), HIP_L.lerp(KN_L, 0.85), Vector((0.3, -1, 0))),
+                              ("patch", EL_L.lerp(wristL, 0.25), EL_L.lerp(wristL, 0.7), Vector((0.2, -1, 0.4)))):
+        ax = (b_ - a_).normalized()
+        nrm = (side - ax * side.dot(ax)).normalized()
+        e2 = ax.cross(nrm).normalized()
+        L2 = (b_ - a_).length / 2
+        mid = (a_ + b_) / 2
+        ring = [mid + ax * math.cos(t) * L2 * 0.9 + e2 * math.sin(t) * 0.09 + nrm * 0.5 for t in [k / 24 * math.tau for k in range(25)]]
+        bseams.append((project_path(btree, resample(ring, 0.02), lambda p, mid=mid: mid + (p - mid - nrm * (p - mid).dot(nrm)) * 0.2),
+                       True, key))
     bseams = [s for s in bseams if len(s[0]) > 3]
     pucker(torso, SeamIndex([s for s, _, _ in bseams]))
     btree = A.surface_bvh(body_parts)
@@ -1357,7 +1370,7 @@ BAKE = {"creature_wisp": {
     }},
     "Face": {"size": 1024, "metal": 0.0, "parts": {
         "Face": {"src": ["Face"], "tris": 1600},
-        "FaceTwine": {"src": ["FaceTwine"], "tris": 2000},
+        "FaceTwine": {"src": ["FaceTwine"]},  # built at game weight; decimating thin loops breaks them
     }},
     "Metal": {"size": 1024, "metal": 0.75, "parts": {
         "Perch": {"src": ["Perch"]},

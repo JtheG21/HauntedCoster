@@ -57,6 +57,24 @@ def _grain(nt, kind: str):
         mix.inputs["Factor"].default_value = 0.35
         nt.links.new(mul.outputs[0], mix.inputs["A"])
         nt.links.new(fib.outputs["Fac"], mix.inputs["B"])
+        # Creases: worn folds in the sacking (ridged noise), layered over the weave.
+        crease = _node(nt, "ShaderNodeTexNoise", Scale=9.0, Detail=4.0, Roughness=0.6)
+        nt.links.new(tc.outputs["Object"], crease.inputs["Vector"])
+        cr = _node(nt, "ShaderNodeMapRange")
+        cr.inputs["From Min"].default_value = 0.42
+        cr.inputs["From Max"].default_value = 0.58
+        cr.clamp = True
+        nt.links.new(crease.outputs["Fac"], cr.inputs["Value"])
+        ridge = _node(nt, "ShaderNodeMath")
+        ridge.operation = "PINGPONG"
+        ridge.inputs[1].default_value = 0.5
+        nt.links.new(cr.outputs["Result"], ridge.inputs[0])
+        both = _node(nt, "ShaderNodeMix")
+        both.data_type = "FLOAT"
+        both.inputs["Factor"].default_value = 0.45
+        nt.links.new(mix.outputs["Result"], both.inputs["A"])
+        nt.links.new(ridge.outputs[0], both.inputs["B"])
+        mix = both
         ramp = _node(nt, "ShaderNodeMapRange")
         ramp.inputs["From Min"].default_value = 0.0
         ramp.inputs["From Max"].default_value = 0.6
@@ -184,7 +202,7 @@ def _source_material(obj, mode: str) -> bpy.types.Material:
     else:
         bsdf = nt.nodes.new("ShaderNodeBsdfPrincipled")
         if height is not None:
-            bump = _node(nt, "ShaderNodeBump", Strength=0.55 if kind == "Fabric" else 0.35, Distance=0.004)
+            bump = _node(nt, "ShaderNodeBump", Strength=0.85 if kind == "Fabric" else 0.45, Distance=0.006)
             nt.links.new(height, bump.inputs["Height"])
             nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
         nt.links.new(bsdf.outputs["BSDF"], out.inputs["Surface"])
