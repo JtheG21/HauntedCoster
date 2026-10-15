@@ -64,7 +64,7 @@ Workflow audits and proposals drawn from the video notes (not video notes themse
 
 Wisp pilot: start at [[Wisp Pilot Start Here]], then [[RSH-20261014-Wisp-Revision-Readiness]], [[RSH-20261014-Wisp-Four-Note-Prebuild-Review]] and [[RSH-20261014-Wisp-Approved-Modeling-Handoff]].
 
-In flight on other branches (add here once merged): the Universal Modder evaluation (`chore/universal-modder-evaluation`).
+Tool evaluation: [[RSH-20261013-Universal-Modder-Evaluation]] (its TASK-0042 trial is still on `chore/universal-modder-evaluation`).
 
 ## Gaps (what we still don't know)
 These are the subjects the next videos should cover. Updated 2026-10-14 after the MrWonderHow batch (24 notes); remove a line when a note covers it at `medium` confidence.
