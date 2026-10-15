@@ -5,7 +5,7 @@ type: system
 project: GAME-002
 status: proposed
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-15
 tags:
   - game/art
   - engineering/pipeline
@@ -88,6 +88,9 @@ Every current asset was built from primitive parts (ADR-0007 "simple parts") and
 | Lighting, sky, atmosphere | `Atmosphere` | **Refine** | twilight direction was reviewed in TASK-0028; tune for new materials | 0044 |
 | Flashlight | client SpotLight | **Retain** | a light, no geometry to judge | — |
 | Skins, auras, capture effects, mansion themes, exterior decorations | none | **New** | approved scope ([[ADR-0011-Monetization-UI-Scope]]) | 0050 |
+
+## Third-party sources and credits
+- **Lantern Wisp base mesh (2026-10-15, TASK-0043 rev 1):** body and head generated with Meshy 6 Lite image-to-3D from the approved concept, on Meshy's free plan. Free-plan output is licensed **CC BY 4.0**: commercial use is allowed, and the game must credit Meshy (for example "Wisp base model generated with Meshy" in the experience description or credits). Approved by jg in chat on 2026-10-15; no money was spent. The source GLB stays outside the repo (`~/Roblox-Work/haunted/art/meshy/wisp_meshy_v1.glb`); `art/assets/wisp_hybrid.py` builds on it, and `creature_wisp_procedural` is the fully procedural fallback.
 
 ## Trust boundary
 Art is client-side presentation. The server never reads it; colliders, prompts and lights stay server-built. Cosmetic appearance comes from replicated attributes the server sets after validation ([[TASK-0047-Cosmetics-Backend-And-Persistence]]).

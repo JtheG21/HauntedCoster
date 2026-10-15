@@ -42,7 +42,8 @@ NECK_M = Vector((-0.05, -0.02, 0.55))
 REF = (860, 1287)
 # Meshy put its own eye lumps and tooth row where its head needs them; ours go exactly there (front ortho, x/z).
 EYES_M = [((0.11, 0.817), 0.046), ((0.229, 0.752), 0.038)]
-GRIN_M = [(-0.105, 0.84), (-0.047, 0.77), (0.023, 0.712), (0.093, 0.677), (0.163, 0.677), (0.21, 0.70)]
+GRIN_M = [(-0.135, 0.8), (-0.08, 0.745), (-0.02, 0.703), (0.05, 0.676), (0.12, 0.665), (0.185, 0.678), (0.235, 0.712)]  # a rounder smile than Meshy's
+GRIN_OLD = [(-0.105, 0.84), (-0.047, 0.77), (0.023, 0.712), (0.093, 0.677), (0.163, 0.677), (0.21, 0.70)]  # Meshy's tooth row
 VIEW = {"yaw": -8.0, "el": 16.0, "lens": 50.0, "fill": 0.94}  # the compare.py front view
 
 POLE_R = 0.17
@@ -149,8 +150,9 @@ def _neck_collar(body):
     up = Vector((0, 0, 1))
     pts.sort(key=lambda p: math.atan2((p - c).cross(ref).dot(up), (p - c).dot(ref)))
     ring = W.resample(pts[::3] + [pts[0]], 0.006)
-    col = shapes.tube("Collar", ring, 0.012, 8, "Fabric", resample=0, cap_start=False, cap_end=False)
+    col = shapes.tube("Collar", ring, 0.02, 8, "Fabric", resample=0, cap_start=False, cap_end=False)
     core.smooth(col, 180)
+    col["ring"] = [tuple(q) for q in ring]
     return col
 
 
@@ -182,8 +184,8 @@ def eye_parts(hits, rng):
         right = Vector((0, 0, 1)).cross(fwd).normalized()
         up = fwd.cross(right).normalized()
         pts = [c + fwd * r * 0.3 + (right * math.cos(t) + up * math.sin(t)) * r * 0.99 for t in [i / 24 * math.tau for i in range(25)]]
-        rim = shapes.tube(f"Rim{len(rims)}", pts, lambda t, r=r: r * 0.075, 8, "Fabric", resample=0, cap_start=False, cap_end=False,
-                          flatten=0.75)
+        rim = shapes.tube(f"Rim{len(rims)}", pts, lambda t, r=r: r * (0.1 + 0.12 * max(0.0, math.sin(math.tau * t))), 8, "Fabric",
+                          resample=0, cap_start=False, cap_end=False, flatten=0.75)  # puffy lid, heavier along the top
         core.smooth(rim, 180)
         rims.append(rim)
         arc = []
@@ -222,18 +224,19 @@ def metal_col(p, n, o, cv, op):
         base = paint.mix(W.IRON, W.IRON_MID, m * 0.6)
     else:
         base = paint.mix(W.IRON, W.IRON_MID, m)
-        base = paint.mix(base, W.BRONZE, 0.25 * max(0.0, W.fbm(p, 0.12, 2, 9.0)))
+        base = paint.mix(base, W.BRONZE, 0.7 + 0.3 * max(0.0, W.fbm(p, 0.12, 2, 9.0)))  # weathered bronze-iron
+        base = paint.mix(base, W.COPPER, 0.18)
         worn = noise.noise(p / 0.04 + Vector((3.3, 0, 0)))
-        if worn > 0.35:
-            base = paint.mix(base, W.COPPER, min(0.6, (worn - 0.35) * 2.5))
-    if W.fbm(p, 0.05, 2, 11.0) > 0.42:
-        base = paint.mix(base, W.RUST, 0.35)
+        if worn > 0.2:
+            base = paint.mix(base, W.COPPER, min(0.65, (worn - 0.2) * 2.2))
+    if W.fbm(p, 0.05, 2, 11.0) > 0.3:
+        base = paint.mix(base, W.RUST, 0.45)
     streak = noise.noise(Vector((p.x * 38, p.y * 38, p.z * 3.0)))
     if streak > 0.45 and abs(n.z) < 0.6:
         base = paint.mix(base, H("3a2418"), min(0.35, (streak - 0.45) * 2.0))
     if op < 0.6:
         base = paint.mix(base, W.VERDIGRIS, (0.6 - op) * 0.6)
-    base = paint.mix(base, H("0b0a09"), (1 - op) * 0.7)
+    base = paint.mix(base, H("0b0a09"), (1 - op) * 0.45)
     if noise.noise(p / 0.012) > 0.5:
         base = paint.mul(base, 0.7)
     return base
@@ -314,6 +317,11 @@ def lantern_wisp_hybrid():
         loc, nrm, _, _ = tree.ray_cast(Vector((x, -2.0, z)), Vector((0, 1, 0)))
         if loc is not None:
             grin_m.append(loc)
+    grin_old = []
+    for x, z in GRIN_OLD:
+        loc, _, _, _ = tree.ray_cast(Vector((x, -2.0, z)), Vector((0, 1, 0)))
+        if loc is not None:
+            grin_old.append(loc)
     print("HYBRID eyes", [(tuple(round(c, 3) for c in h[0]), round(h[2], 3)) for h in eye_hits], "grin pts", len(grin_m))
 
     # Iron out Meshy's lumpy eyes and bump-teeth before the real ones go in.
@@ -322,17 +330,20 @@ def lantern_wisp_hybrid():
         for p, _, r in eye_hits:
             d = (co - p).length
             w = max(w, max(0.0, 1 - d / (r * 2.4)))
-        d = _seg_dist(co, grin_m)
-        w = max(w, max(0.0, 1 - d / 0.075))
+        d = min(_seg_dist(co, grin_m), _seg_dist(co, grin_old))
+        w = max(w, max(0.0, 1 - d / 0.1))
         return min(1.0, w * 1.6)
 
     _smooth_region(creature, face_w, iters=80)
-    _smooth_region(creature, lambda co: 0.35, iters=4)  # tidy Meshy's ragged seam frills
+    _smooth_region(creature, lambda co: 0.4, iters=9)  # tidy Meshy's ragged seam frills
+    _smooth_region(creature, lambda co: max(0.0, 1 - (co - NECK_M).length / 0.16), iters=30)  # the jumbled stitching round the neck
 
     head = _split_head(creature)
     collar = _neck_collar(creature)
     # Meshy turned the face too far to its left; the concept faces the viewer more.
-    turn = Matrix.Translation(NECK_M) @ Matrix.Rotation(math.radians(HEAD_YAW), 4, "Z") @ Matrix.Translation(-NECK_M)
+    hcm = sum((Vector(c) for c in head.bound_box), Vector()) / 8
+    squash = Matrix.Translation(hcm) @ Matrix.Diagonal((0.9, 0.88, 1.0, 1.0)) @ Matrix.Translation(-hcm)  # shorter at the back
+    turn = Matrix.Translation(NECK_M) @ Matrix.Rotation(math.radians(HEAD_YAW), 4, "Z") @ Matrix.Translation(-NECK_M) @ squash
     head.matrix_world = turn @ head.matrix_world
     core.apply_transform(head)
     eye_hits = [(turn @ p, (turn.to_3x3() @ n).normalized(), r) for p, n, r in eye_hits]
@@ -352,10 +363,26 @@ def lantern_wisp_hybrid():
         loc, nrm, _, _ = htree.find_nearest(q)
         if loc is not None:
             grin.append((loc, nrm))
+    # Lumpy, crumpled sacking over the crown and back (the face stays smooth enough to read).
+    hc0 = sum((Vector(c) for c in head.bound_box), Vector()) / 8
+    ub = Vector((-0.15, 0.5, 0.85)).normalized()
+    W.displace(head, lambda p: max(0.0, min(1.0, (p - hc0).dot(ub) / 0.6 + 0.4)) * (0.03 * W.fbm(p, 0.3, 2, 8.0) + 0.012 * W.ridged(p, 0.12, 5.0)))
     W.carve_mouth(head, grin, depth=0.11, half_gap=0.055)
     htree = A.surface_bvh([head])
     twine, mouth_holes, slot = W.mouth_twine(htree, grin, rng, thick=0.9, count=24)
     eyes, rims, slits, eye_twine = eye_parts(eye_hits, rng)
+    # The neck seam is laced with the same heavy twine loops as the grin (the concept's collar).
+    if collar:
+        btree = A.surface_bvh([creature, head])
+        ring = []
+        for q in collar["ring"]:
+            loc, nrm, _, _ = btree.find_nearest(m @ Vector(q))
+            if loc is not None:
+                ring.append((loc, nrm))
+        ring = ring[:: max(1, len(ring) // 60)]
+        neck_twine, _, neck_slot = W.mouth_twine(btree, ring, rng, thick=1.1, count=18)
+        bpy.data.objects.remove(neck_slot)
+        eye_twine += neck_twine
 
     # Perch: the concept's thick pole on Meshy's pole axis, the procedural tray, chain and lantern.
     pole = build_pole(to_design(pole_tips[0]), to_design(pole_tips[1]))
@@ -375,8 +402,8 @@ def lantern_wisp_hybrid():
             return paint.mix(paint.mix(W.SKIN_MID, W.PATCH, 0.4), W.SHADOW, 0.35 + 0.3 * max(0.0, W.fbm(p, 0.03, 2, 2.0)))  # puffy cloth lid
         patch = W.fbm(p, 0.55, 2, 41.0)
         base = paint.mix(W.SKIN, W.PATCH, max(0.0, min(1.0, (patch - 0.15) * 2.5)) * 0.55)  # sewn panels of different sacking
-        base = paint.mix(base, W.SHADOW, 0.12 if o.name != "Head" else 0.0)
-        pale = W.burlap(p, n, min(1.0, cv * 3.0), op, base, None, 5.0 if o.name == "Head" else 1.0)  # Meshy's seams read dark
+        base = paint.mix(base, W.SHADOW, 0.18 if o.name != "Head" else 0.06)
+        pale = W.burlap(p, n, max(-1.0, min(1.0, cv * 4.5)), op, base, None, 5.0 if o.name == "Head" else 1.0)  # Meshy's seams read dark
         if o.name != "Head":
             dirt = max(0.0, min(1.0, (W.TRAY_Z + 0.9 - p.z) / 1.4)) * (0.75 + 0.25 * W.fbm(p, 0.1, 2, 31.0))
             return paint.mix(pale, paint.mix(W.STAIN, W.CREVICE, 0.45), dirt * 0.5)
