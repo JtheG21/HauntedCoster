@@ -25,8 +25,32 @@ One row per video note. This is a lookup table, not a synthesis: each note stand
 |---|---|---|---|---|
 | 3D: rigging / import | [[RSH-20261014-Mixamo-Custom-Rig-And-Camera-Video]] | medium | Order of import, root part, animation scale and HipHeight checks | Model quality, texturing |
 | 3D: rigging / import | [[RSH-20261014-Mixamo-Skinned-Mesh-Character-Video]] | medium | Skinned-mesh character import checks | Form or finish quality |
+| 3D: rigging / import | [[RSH-20261014-Dynamic-Head-Neck-Joint-Fix-Video]] | medium | Missing "Neck" constraint, accessory re-attachment, ragdoll joints | Anything beyond R15 heads |
 | 3D: creature pipeline | [[RSH-20261014-Monster-NPC-Sculpt-And-Rig-Video]] | medium | Creature stage order (sculpt, budget, auto-rig, animation) as a review checklist | Texturing, non-humanoid rigs |
+| 3D: part-based creature | [[RSH-20261014-Hand-Built-ASYM-Monster-Video]] | medium | Motor6D part rigs, held-pose attack timing, effect templates | Meeting the model-quality baseline |
+| 3D + AI pipeline | [[RSH-20261014-Procedural-Spider-Animation-MCP-Video]] | medium | Image-to-3D, remesh budget, Blender rig via MCP, procedural leg stepping | Finish quality, licences |
+| 3D + AI pipeline | [[RSH-20261014-Pet-RPG-Claude-MCP-Full-Tutorial-Video]] | medium | Rig-aware creature design, export settings, spec-driven MCP building | Finish quality, licences |
+| 3D + AI pipeline | [[RSH-20261014-Pet-Shop-Summon-Prototype-Video]] | medium | Shape of a summon/shop prototype and its UI patterns | Balance or monetization data |
+| Blender to Roblox | [[RSH-20261014-Blender-R6-Animation-To-Roblox-Video]] | medium | Rig prep and animation import checks (R6) | Non-R6 rigs |
+| Blender to Roblox | [[RSH-20261014-Blender-Remove-Animation-Actions-Video]] | medium | Removing stale actions, resetting a posed rig | Anything beyond file cleanup |
+| Systems: movement | [[RSH-20261014-Advanced-Movement-System-Video]] | medium | Config-driven single-state traversal, collision-group trick, mobile parity | Server validation of movement |
+| Systems: movement | [[RSH-20261014-Parkour-Vault-System-Video]] | medium | Tag-gated, measure-then-arc interaction | Server-trusted movement |
+| Systems: movement | [[RSH-20261014-Wall-Climbing-System-Video]] | medium | Raycast surface detection and state handling | Our current scope |
+| Systems: combat | [[RSH-20261014-Hitscan-Gun-System-Video]] | medium | Input validation shape: client sends intent, server validates | Distance and line-of-sight checks |
+| Systems: combat | [[RSH-20261014-Grab-And-Throw-Skill-Video]] | medium | Client picks, server decides; reversible ragdoll toggle | Combat as a feature |
+| Systems: combat | [[RSH-20261014-Animation-Event-Ability-System-Video]] | medium | Animation-marker timing for sound, VFX and hitbox | Server validation of the release signal |
+| Systems: combat | [[RSH-20261014-Fighter-Juggle-And-Air-Combo-Video]] | medium | Data-defined move tables and server state machines | PvP netcode |
+| Systems: tools | [[RSH-20261014-Back-Sword-Equip-System-Video]] | medium | Holster/equip pattern, asset preloading | Weapon scope |
+| VFX | [[RSH-20261014-Anime-Flight-System-Video]] | medium | Effect templates cloned and toggled by the server, layered beams | VFX budgets |
+| VFX | [[RSH-20261014-Glowing-Sword-Aura-No-Script-Video]] | medium | Layering, flipbooks, beam vs particle rule | Cost at scale |
+| VFX / camera | [[RSH-20261014-Impact-Frames-Video]] | medium | A rare emphasis pop; instant-in, eased-out | Photosensitivity concerns |
+| VFX / cutscene | [[RSH-20261014-Claude-MCP-Skill-Cutscene-Video]] | medium | A cutscene spec idea; what AI-assisted prototyping looks like | Code quality |
 | UI | [[RSH-20261014-Good-UI-Principles-Video]] | medium | HUD, Journal and shop readability principles | Final layouts |
+| UI | [[RSH-20261014-Emote-Wheel-Video]] | medium | Hold-to-open radial menu, config-driven list | Touch behaviour |
+| UI | [[RSH-20261014-Animated-Shine-Button-Video]] | medium | A highlight sweep for new/unlocked shop items | Constant-motion use |
+| Audio | [[RSH-20261014-Material-Footsteps-Video]] | medium | Swapping the built-in Running sound by material | Mixing or ambience |
+| Environment | [[RSH-20261014-Custom-Skybox-GIMP-Video]] | medium | Six-face skybox from one panorama | Seam quality, licences |
+| Systems: building | [[RSH-20261014-Procedural-Building-System-MCP-Video]] | medium | Module structure of a draw-to-build tool | Persistence and validation |
 | Monetization / live-ops | [[RSH-20261014-Roblox-Game-95k-Monthly-Revenue-Video]] | medium | Live-ops cadence, regional pricing and ads as questions | Revenue figures, a collector-horror audience |
 | Monetization / onboarding | [[RSH-20261014-Roblox-Viral-Game-Lessons-Video]] | low | Onboarding funnel and contextual tutorial ideas | Any figures (German auto-captions) |
 | Workflow (AI-built games) | [[RSH-20261014-AI-Incremental-Game-Pipeline-Video]] | low | Staged skills and handoff ideas | Incremental-genre specifics |
@@ -37,15 +61,18 @@ Earlier non-video research: [[RSH-20261013-Haunted-Monetization-Discovery]], [[R
 In flight on other branches (add here once merged): a Blender import-for-Roblox video note.
 
 ## Gaps (what we still don't know)
-These are the subjects the next videos should cover. Remove a line when a note covers it at `medium` confidence.
-- **Modeling form:** how professionals build organic creature silhouettes, anatomy and secondary forms (the main gap against the [[3D Model Quality Baseline]]).
-- **Topology:** edge flow, deformation-friendly topology, and sensible triangle budgets for Roblox.
-- **Texturing:** UV layout, PBR maps, and how finish is produced; the first 3D videos skipped this entirely.
-- **Rig and skinning quality:** weight painting and deformation checks; non-humanoid rigs (quadrupeds, wings, many limbs).
-- **Animation quality:** timing, foot sync and loops for creatures.
-- **Environment art and maps:** composition and readability for horror spaces.
-- **Audio:** only the audio pass notes exist; no video on mixing or ambience yet.
-- **VFX:** no video notes yet.
+These are the subjects the next videos should cover. Updated 2026-10-14 after the MrWonderHow batch (24 notes); remove a line when a note covers it at `medium` confidence.
+- **Modeling form:** how professionals build organic creature silhouettes, anatomy and secondary forms. Still the main gap against the [[3D Model Quality Baseline]]; the part-based and generator workflows show process, not finish.
+- **Topology:** edge flow and deformation-friendly topology. Triangle budgets are partly covered (generator remesh, the 20,000-per-mesh figure in the local docs) but not how to retopologise well.
+- **Texturing:** UV layout, PBR maps and how finish is produced. Only texture stamping, neon duplicates and a texture-heal tool appear; no UV or PBR workflow yet.
+- **Skinning quality:** weight painting and deformation checks; non-humanoid rigs with wings or many limbs (one video reports wing deformation problems but does not solve them well). Joint setup, auto-rigging and IK are covered at a basic level.
+- **Animation quality:** timing, weight, foot sync and loop principles. Event markers, held poses and procedural stepping are covered; animation craft is not.
+- **Environment art and maps:** composition, readability and lighting for horror spaces. Only a skybox workflow so far.
+- **Audio:** footsteps by material is covered; mixing, ambience layering and loudness are not.
+- **VFX performance:** effect techniques are well covered; budgets (counts, lifetimes, cost per player) and horror-appropriate VFX are not.
+- **Security and validation depth:** gun and grab notes cover the intent/validate shape, but not line-of-sight, range inflation or rate limiting in depth.
+- **Mobile and touch UI:** radial and button patterns were shown on PC only; touch behaviour is untested.
+- **Licensing:** third-party assets, services and packs appear throughout; terms are unverified everywhere.
 
 ## Rules for adding a note
 1. One video, one `RSH-` note, created from the matching prompt variant.
