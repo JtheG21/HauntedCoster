@@ -70,6 +70,34 @@ class TestGuardBash(unittest.TestCase):
         self.assertIn("scripts/preflight.sh", r.stderr)
 
 
+class TestGuardMainCheckout(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.main = Path(self.tmp.name) / "main"
+        self.main.mkdir()
+        for args in (["init", "-q", "-b", "main"], ["config", "user.email", "t@example.com"], ["config", "user.name", "t"],
+                     ["commit", "-q", "--allow-empty", "-m", "init"], ["branch", "task/x"]):
+            subprocess.run(["git", "-C", str(self.main), *args], check=True, capture_output=True)
+        self.wt = Path(self.tmp.name) / "wt"
+        subprocess.run(["git", "-C", str(self.main), "worktree", "add", "-q", str(self.wt), "task/x"], check=True,
+                       capture_output=True)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def guard(self, command):
+        pf = "scripts/preflight.sh --root x --branch y && "
+        return decision(run_hook(GUARD, "Bash", command=pf + command))
+
+    def test_main_checkout_stays_on_main(self):
+        self.assertEqual(self.guard(f"git -C {self.main} switch task/x"), "block")
+        self.assertEqual(self.guard(f"git -C {self.main} switch -c chore/new"), "block")
+        self.assertEqual(self.guard(f"git -C {self.main} switch main"), "allow")
+
+    def test_worktrees_may_switch(self):
+        self.assertEqual(self.guard(f"git -C {self.wt} switch -c chore/other"), "allow")
+
+
 class TestGuardPaths(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

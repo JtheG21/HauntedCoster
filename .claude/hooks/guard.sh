@@ -29,6 +29,19 @@ if [ "$tool" = "Bash" ] && [ -n "$cmd" ]; then
 		&& ! grep -q 'scripts/preflight.sh' <<<"$cmd"; then
 		block "state-changing Git needs the checkout guard first, in the same command: scripts/preflight.sh --root <checkout> --branch <name> && git -C <checkout> ... (AGENTS.md \"Git safety\", LES-0006)"
 	fi
+	# The main checkout stays on main; work branches live in worktrees (AGENTS.md "Git safety").
+	if grep -Eq "${git_cmd}(switch|checkout)( |$)" <<<"$cmd" && ! grep -q ' -- ' <<<"$cmd"; then
+		dir="$(sed -nE 's/.*git +-C +("([^"]*)"|([^ ]+)).*/\2\3/p' <<<"$cmd" | head -1)"
+		[ -n "$dir" ] || dir="$(jq -r '.cwd // empty' <<<"$input")"
+		target="$(sed -nE 's/.*git( +-[Cc] +("[^"]*"|[^ ]+))* +(switch|checkout)( +-[^ ]+)* +([^ ;&|]+).*/\5/p' <<<"$cmd" | head -1)"
+		if [ -n "$dir" ] && [ -d "$dir" ] && [ -n "$target" ] && [ "$target" != "main" ]; then
+			git_dir="$(cd "$dir" && cd "$(git rev-parse --git-dir 2>/dev/null)" 2>/dev/null && pwd -P)"
+			common="$(cd "$dir" && cd "$(git rev-parse --git-common-dir 2>/dev/null)" 2>/dev/null && pwd -P)"
+			if [ -n "$git_dir" ] && [ "$git_dir" = "$common" ]; then
+				block "the main checkout stays on main. Work on '$target' in a worktree: git -C <main checkout> worktree add <path> $target (AGENTS.md \"Git safety\")"
+			fi
+		fi
+	fi
 	if grep -Eq "${start}rojo +serve( |$)" <<<"$cmd" && ! grep -q '\.project\.json' <<<"$cmd"; then
 		block "a bare 'rojo serve' serves GAME-001 (default.project.json). Use: rojo serve haunted.project.json (AGENTS.md \"One Rojo server\")"
 	fi

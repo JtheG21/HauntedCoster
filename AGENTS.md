@@ -25,6 +25,8 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 
 ## Git safety (2026-10-11, after a merge ran in the wrong checkout: LES-0006)
 - Before any local switch, merge, rebase, cherry-pick, reset, clean, commit, push or branch deletion, run `scripts/preflight.sh --root <checkout> --branch <expected>` and chain the operation with `&&`. Address the checkout explicitly (`git -C <checkout>`); never rely on the current directory.
+- The main checkout (`/Users/jg/Desktop/Rg1`) stays on `main`. Every task and chore branch gets its own worktree, so parallel sessions never share a working tree.
+- Push a work branch as soon as it has a commit (a draft PR is fine), so no work exists only on this Mac.
 - If the intended checkout or worktree is missing or stale, **stop** and re-discover it. Never fall back to whatever directory is current.
 - Never discard unrelated or user edits, force-push, or delete untracked files without explicit authorization.
 
