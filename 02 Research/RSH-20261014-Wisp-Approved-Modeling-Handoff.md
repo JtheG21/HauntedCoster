@@ -6,7 +6,7 @@ project: GAME-002
 status: research
 confidence: medium
 created: 2026-10-14
-updated: 2026-10-14
+updated: 2026-10-15
 sources:
   - User-provided visual references and design approval in Codex, 2026-10-14
 tags:
@@ -17,7 +17,7 @@ related:
 ---
 # Wisp Approved Modeling Handoff
 
-Reusable fidelity/performance guidance and the limits of current verification: [[LES-0008-Model-Fidelity-And-Performance]] (proposed; runtime validation pending).
+Reusable fidelity/performance guidance and the limits of current verification: [[LES-0008-Model-Fidelity-And-Performance]] (approved by jg 2026-10-15; runtime validation pending).
 
 Current task authority, explicit correction checklist and per-part budget investigation: [[RSH-20261014-Wisp-Revision-Readiness]]. The overhaul queue already records revision 1/2 in progress; the Wisp implementation checkout's queue is stale.
 
