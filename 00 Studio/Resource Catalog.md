@@ -4,7 +4,7 @@ title: Resource Catalog
 type: index
 status: approved
 created: 2026-10-12
-updated: 2026-10-13
+updated: 2026-10-14
 tags:
   - studio/catalog
 related:
@@ -54,6 +54,10 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Headless Luau specs | `scripts/lune/specs.luau`, `games/haunted/tests/TestRunner.luau` | verified | [[ADR-0008-Headless-Specs-With-Lune]]; 125 specs pass | Pure modules only; instance requires are shimmed |
 | Studio play scenarios | `games/haunted/tests/scenarios/` | verified | [[TEST-20261012-17]] and earlier TEST notes | GAME-002 specific; Studio, at most 2 players ([[Multi-Client Testing]]) |
 | Note templates | `99 Templates/` | approved | [[Obsidian Conventions]] | Core Templates syntax only |
+| Claude Code guard and format hooks | `.claude/settings.json`, `.claude/hooks/` | verified | `tests/test_claude_hooks.py` | Claude Code only; Codex relies on the git pre-commit hook. Matches the common command forms, not every spelling |
+| Studio environment check | `scripts/studio-preflight.sh`, skill `studio-preflight` | implemented | Run on 2026-10-14 against live state: it caught Rojo serving another worktree | macOS process checks; the Studio-side checks go through Studio MCP |
+| Task close-out | skill `task-close` (`.claude/skills/`, copy in `.agents/skills/`) | implemented | Not yet used on a task | Packages AGENTS.md protocol #9 and #17 and [[Task Intake]] step 10; those notes win |
+| Audit subagent | `.claude/agents/auditor.md` | implemented | Not yet used on a task | Wraps [[Auditor]]; read-only; once per task |
 
 ### Production skills
 | Resource | Location | State | Evidence | Limits / notes |
