@@ -4,7 +4,7 @@ title: Task Intake
 type: agent
 status: approved
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-15
 tags:
   - workflow/process
 related:
@@ -28,7 +28,7 @@ The entry point for every task, in any game. [[AGENTS]] holds the rules, [[Workf
 2. **Instructions.** `AGENTS.md`, then only the project notes the task touches. Don't reread what is already in context.
 3. **Decisions already made.** The queue entry, the TASK note, ADRs, the Game Design, and memory. Never ask for something already documented.
 4. **Classify** (table below) and open only the matching workflow(s).
-5. **Reuse search.** Check the [[Resource Catalog]], then the [[Reference_Code_Index]], then `10 References/<area>/`, then the existing code (grep). Write reuse, adapt or replace, and why, in the task note.
+5. **Reuse search.** Check the [[Resource Catalog]], the lessons in `09 Knowledge/` and the [[Video Research Index]] for the task's area, then the [[Reference_Code_Index]], then `10 References/<area>/`, then the existing code (grep). Write reuse, adapt or replace, and why, in the task note.
 6. **Inspect the real implementation** before changing it: the files, not their summaries.
 7. **Plan** to the depth tier below.
 8. **Execute** in small, reviewable stages on the task branch.
