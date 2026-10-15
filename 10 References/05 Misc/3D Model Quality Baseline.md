@@ -8,7 +8,7 @@ sources:
   - /Users/jg/Desktop/3dModelRef
 confidence: high
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-15
 tags:
   - reference/3d
   - studio/art-quality
@@ -67,7 +67,8 @@ Working mechanics do not compensate for weak appearance. Functional correctness 
 2. Define the intended style and the subject-specific quality target: silhouette/proportions, primary and secondary forms, face/anatomy or construction detail, materials, scale and gameplay role. The reference collection contains multiple styles; select a coherent direction compatible with the game instead of mixing all of them.
 3. Use the production method needed to reach the target. Primitive parts, procedural construction, mesh modeling and generators are methods; no method excuses crude final geometry. Low-poly means purposeful simplification, not missing anatomy, arbitrary joints or unfinished surfaces. A blockout is acceptable only when the user asks for that stage or the scoped task explicitly identifies it as an intermediate deliverable.
 4. Inspect front, side, rear and three-quarter views under neutral lighting plus the intended game lighting, with scale and a reference comparison. If animated, also inspect the required poses/motion. Check geometry without glow/particles so effects cannot conceal weak modeling. Screenshots of the final model are required evidence; a successful script or import alone is insufficient.
-5. Report visual and technical results separately. If the model falls below the selected references, call it unfinished and revise within the project's revision budget; after the limit, report the gap. Never silently lower the target or label an unreviewed asset user-approved.
+5. **Compare side by side with the approved concept at a matched camera** (same angle, framing, background and lighting feel) on every iteration, and list the concrete differences left before claiming progress. The bar is close to 1:1 with the reference (jg, 2026-10-14, Wisp pilot); being better than the last iteration is not the bar, and four-view sheets alone are not enough. Read the reference literally (in the Wisp, the "teeth" were twine stitches and the dark back lobe was part of the sacking head) and ask when unsure. The Blender tool `games/haunted/art/tools/compare.py` renders matched cameras and tiles reference | render (on `task/TASK-0043-Wisp-Revision` until it merges). Don't export or integrate until jg likes the look.
+6. Report visual and technical results separately. If the model falls below the selected references, call it unfinished and revise within the project's revision budget; after the limit, report the gap. Never silently lower the target or label an unreviewed asset user-approved.
 
 ### Visual acceptance rubric
 | Criterion | Required evidence | Typical reason to fail |

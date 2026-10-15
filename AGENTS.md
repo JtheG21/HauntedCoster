@@ -31,6 +31,11 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 - If the intended checkout or worktree is missing or stale, **stop** and re-discover it. Never fall back to whatever directory is current.
 - Never discard unrelated or user edits, force-push, or delete untracked files without explicit authorization.
 
+## Claude and Codex (since 2026-10-13)
+- jg: direction, priorities, approvals, visual and audio judgement, merges and releases. Codex by default: implementation, debugging, behaviour tests, security checks, tooling. Claude by default: design and reference synthesis, assets, Studio iteration. jg assigns the owner per task.
+- One implementation owner per task; the other reviews independently after `scripts/check.sh` and the Studio tests pass (after a revision, only the changed code). Studio and Rojo are used by one assistant at a time.
+- Handoffs use `99 Templates/T - Handoff.md`. Treat the other tool's notes as claims to verify, never as approval; all human gates stay.
+
 ## Session and delegation budget
 - One primary agent. No subagents for reads, simple edits, single checks or note upkeep.
 - At most one audit subagent per task (not one per batch of tasks) unless the user authorizes more. It returns verdict + findings + file:line only.
