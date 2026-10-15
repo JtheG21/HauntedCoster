@@ -1,6 +1,8 @@
 """Creature roster (TASK-0043). Origins sit at the server Root, so hover heights are unchanged:
 Wisp 4, Hound 2.2, Gentleman 4.5, Bell Wraith 6 studs above the ground (Config/Monsters).
 
+The Wisp lives in assets/wisp.py (approved lantern-perch design, 2026-10-14).
+
 References: MIN-013-015 (dragon anatomy), MIN-031 (versus the box hound), MIN-037-044 (antlered creature,
 skeleton: tapered limbs, depth), MIN-048-053 (rat, zombie: shaped features held on side/rear views),
 MIN-011/012 (focal face). Rejected: MODEL-BAD-006-012 (box hound, sparkles over weak form).
@@ -233,71 +235,6 @@ def stitched_hound():
 
 
 # ---------------------------------------------------------------------------------------------------------
-def lantern_wisp():
-    """A small teardrop ghost with a flame curl on its head, hollow oval eyes and a tiny lantern in one hand.
-    Origin = server Root (hover 4)."""
-    from assets.lamps import lantern_head
-
-    body = A.organic("Body", [
-        A.ell((0, 0, 0.35), (1.25, 1.15, 1.2)),          # head
-        A.ell((0, 0.15, -0.55), (1.0, 0.95, 1.0)),       # chest
-        A.ell((0, 0.45, -1.25), (0.72, 0.75, 0.75)),     # body tapering into the tail
-        A.ball((0, 0.8, -1.8), 0.62),
-        A.ball((0.08, 1.12, -2.08), 0.54),
-        A.ball((0.2, 1.45, -2.25), 0.47),
-        A.ball((0.32, 1.78, -2.3), 0.4),
-        A.ball((0.42, 2.06, -2.22), 0.34),
-        A.ball((0.48, 2.28, -2.04), 0.29),
-        A.ball((0.48, 2.4, -1.8), 0.25),
-        A.ball((0.43, 2.38, -1.58), 0.21),
-        A.ell((0.36, -0.78, 0.48), (0.26, 0.2, 0.36), rot=(0, -12, 0), negative=True, stiffness=1.3),  # eye sockets
-        A.ell((-0.36, -0.78, 0.48), (0.26, 0.2, 0.36), rot=(0, 12, 0), negative=True, stiffness=1.3),
-        A.ell((0, -0.86, -0.12), (0.14, 0.12, 0.12), negative=True, stiffness=1.3),  # small round mouth
-    ], 1500, resolution=0.05, material="SmoothPlastic", part="Body", alpha=0.08)
-    curl_pts = []
-    for i in range(16):
-        t = i / 15
-        a = t * math.pi * 1.6
-        curl_pts.append((math.sin(a) * 0.35 * (1 - t * 0.4), 0.15 + 0.25 * t, 1.05 + t * 0.9 - (0.35 * t * t)))
-    curl = A.limb("Curl", curl_pts, lambda t: 0.36 * (1 - t) + 0.02, 8, "SmoothPlastic", resample=0)
-    core.tag(curl, "SmoothPlastic", part="Body", alpha=0.08)
-    eyes = A.organic("Eyes", [
-        A.ell((0.36, -0.68, 0.46), (0.22, 0.12, 0.32), rot=(0, -12, 0)),
-        A.ell((-0.36, -0.68, 0.46), (0.22, 0.12, 0.32), rot=(0, 12, 0)),
-        A.ell((0, -0.78, -0.12), (0.12, 0.08, 0.1)),
-    ], 260, resolution=0.025, material="SmoothPlastic", part="Body", lod=False)
-    pupils = A.organic("Pupils", [A.ball((0.33, -0.86, 0.55), 0.07), A.ball((-0.39, -0.86, 0.55), 0.07)], 80, resolution=0.02,
-                       material="Neon", part="Body", lod=False)
-    arm_r = A.limb("ArmR", [(0.85, -0.15, -0.35), (1.25, -0.35, -0.55), (1.45, -0.55, -0.45)], [0.28, 0.2, 0.14], 7, "SmoothPlastic")
-    core.tag(arm_r, "SmoothPlastic", part="ArmR", pivot=(0.8, -0.1, -0.3), alpha=0.08)
-    arm_l = A.limb("ArmL", [(-0.85, -0.15, -0.35), (-1.2, -0.4, -0.75), (-1.32, -0.55, -1.05)], [0.28, 0.2, 0.15], 7, "SmoothPlastic")
-    core.tag(arm_l, "SmoothPlastic", part="ArmL", pivot=(-0.8, -0.1, -0.3), alpha=0.08)
-    iron, glass, flame, wax = lantern_head(-1.35, -0.6, -1.85, 0.42, name="Lamp")
-    handle = shapes.tube("Handle", [(-1.35, -0.6 - 0.16 * math.cos(a), -1.18 + 0.2 * math.sin(a)) for a in [k / 10 * math.pi for k in range(11)]],
-                         0.025, 4, "Metal", cap_start=False, cap_end=False)
-    lamp = core.join(iron + [handle], "LampIron")
-    core.tag(lamp, "Metal", part="Lamp", pivot=(-1.35, -0.6, -1.1))
-    for o in (glass, flame, wax):
-        o["rbx_part"] = "Lamp"
-    core.uv_box(lamp, 1.0)
-
-    def ghost(c, n, o):
-        t = max(0.0, min(1.0, (c.z + 2.3) / 3.4))
-        return paint.mix(P.GHOST_DEEP, P.GHOST, t)
-
-    paint.paint([body, curl, arm_r, arm_l], ghost, ao=0.35, ao_distance=0.8, ground=None, edge=0.08, crease=0.15, mottle=0.03)
-    paint.paint([eyes], lambda c, n, o: P.VOID, ao=0.2, ground=None, edge=0.05)
-    paint.solid([pupils], P.EYE_GLOW)
-    paint.paint([lamp], lambda c, n, o: P.IRON, ao=0.4, ao_distance=0.4, ground=None, edge=0.5)
-    paint.solid([flame], P.FLAME)
-    paint.gradient_solid(glass, P.AMBER, P.GLASS, -2.1, -1.6)
-    paint.paint([wax], lambda c, n, o: P.CLOTH_WHITE, ao=0.2, ground=None)
-    ember = A.embers("Ember", [body], 16, seed=7, length=0.5)
-    if ember:
-        paint.solid([ember], P.EMBER)
-    return {"Kind": "creature", "Species": "Wisp", "LodDistance": 60}
-
-
 # ---------------------------------------------------------------------------------------------------------
 COAT = paint.hex3("23202b")
 COAT_EDGE = paint.hex3("3a3445")
@@ -590,5 +527,5 @@ def bell_wraith():
     return {"Kind": "creature", "Species": "BellWraith", "LodDistance": 80}
 
 
-ASSETS = {"creature_hound": stitched_hound, "creature_wisp": lantern_wisp, "creature_gentleman": hollow_gentleman,
+ASSETS = {"creature_hound": stitched_hound, "creature_gentleman": hollow_gentleman,
           "creature_bellwraith": bell_wraith}

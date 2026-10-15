@@ -58,8 +58,7 @@ local items: { Item } = {
 		look = {
 			tint = {
 				Body = c3(255, 226, 170),
-				ArmL = c3(255, 226, 170),
-				ArmR = c3(255, 226, 170),
+				Head = c3(255, 226, 170), -- the rebuilt Wisp (TASK-0043 rev 1) has Body/Head/Lamp, no separate arms
 				Lamp = c3(255, 170, 70),
 			},
 		},
@@ -75,8 +74,7 @@ local items: { Item } = {
 		look = {
 			tint = {
 				Body = c3(190, 214, 255),
-				ArmL = c3(190, 214, 255),
-				ArmR = c3(190, 214, 255),
+				Head = c3(190, 214, 255), -- the rebuilt Wisp (TASK-0043 rev 1) has Body/Head/Lamp, no separate arms
 				Lamp = c3(150, 200, 255),
 			},
 		},

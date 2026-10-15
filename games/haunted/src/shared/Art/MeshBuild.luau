@@ -3,6 +3,8 @@
 --   MeshBuild.bake(value)  -- server: EditableMesh -> DataModel-scoped content -> MeshPart that replicates to
 --                             every client like a normal mesh, so clients never spend their EditableMesh budget.
 --   MeshBuild.local_(value) -- fallback on either side: a MeshPart linked to a live EditableMesh.
+--   MeshBuild.imported(value) -- server: jg's Studio import of the same part (ServerStorage.ImportedArt/<asset>/<part>,
+--                             a MeshPart with its SurfaceAppearance PBR maps), preferred over the HCM1 build when present.
 -- Vertices are recentred on the bounding box (CreateMeshPartAsync keeps raw coordinates), so the part's
 -- Position is the box centre (attribute CX/CY/CZ in asset space).
 
@@ -91,6 +93,24 @@ function MeshBuild.bake(value: StringValue): (MeshPart?, string?)
 		return nil, tostring(result)
 	end
 	return finish(part, value), nil
+end
+
+-- The imported production mesh for this part, if the place has one. LOD1 twins ("@lod1") always come from HCM1.
+-- An "ImportYaw" attribute on the asset folder (degrees) corrects an import that came in turned about Y.
+function MeshBuild.imported(value: StringValue): MeshPart?
+	local root = game:GetService("ServerStorage"):FindFirstChild("ImportedArt")
+	local asset = root and value.Parent and root:FindFirstChild(value.Parent.Name)
+	local src = asset and asset:FindFirstChild(value.Name)
+	if not (src and src:IsA("MeshPart")) then
+		return nil
+	end
+	local part = finish(src:Clone(), value)
+	local yaw = asset and asset:GetAttribute("ImportYaw")
+	if type(yaw) == "number" and yaw ~= 0 then
+		part:SetAttribute("ImportYaw", yaw)
+	end
+	part:SetAttribute("Imported", true)
+	return part
 end
 
 -- The returned part stays linked to its EditableMesh, which is kept alive by that link.

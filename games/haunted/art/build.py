@@ -43,6 +43,15 @@ def registry() -> dict:
     return reg
 
 
+def bake_asset(name: str, reg: dict) -> dict:
+    from hcart import bake
+
+    spec = getattr(sys.modules[reg[name].__module__], "BAKE", {}).get(name)
+    if not spec:
+        raise SystemExit(f"{name} has no BAKE spec")
+    return bake.production(name, spec, WORK / "textures" / name)
+
+
 def main() -> None:
     argv = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
     p = argparse.ArgumentParser()
@@ -54,6 +63,8 @@ def main() -> None:
     p.add_argument("--noglow", action="store_true")
     p.add_argument("--export", action="store_true")
     p.add_argument("--fbx", action="store_true")
+    p.add_argument("--glb", action="store_true", help="write a glTF binary with baked PBR maps (needs --bake)")
+    p.add_argument("--bake", action="store_true", help="production bake: game mesh + PBR maps (assets with a BAKE spec)")
     p.add_argument("--tile", type=int, default=400)
     p.add_argument("--views", default="0,40,90,180")
     p.add_argument("--focus", default=None, help="x,y,z,size (Blender space) for a close-up sheet")
@@ -69,10 +80,14 @@ def main() -> None:
         core.reset_scene()
         meta = reg[name]() or {}
         info = {"asset": name}
+        if a.bake:
+            info["bake"] = bake_asset(name, reg)
         if a.export:
             info.update(export.export_asset(name, DATA, meta=meta))
         if a.fbx:
             export.export_fbx(name, WORK / "fbx")
+        if a.glb:
+            info["glb"] = str(export.export_glb(name, WORK / "fbx"))
         views = tuple(int(v) for v in a.views.split(","))
         if a.render:
             (WORK / "previews").mkdir(parents=True, exist_ok=True)

@@ -1,10 +1,11 @@
 --!strict
 -- Bakes every client art part once per server (TASK-0042). Each HCM1 part in ServerStorage.ArtData (raw data
--- never replicates)
--- becomes a template MeshPart in ReplicatedStorage.ArtTemplates/<asset>/<part> backed by DataModel-scoped
--- content, which replicates like a normal mesh; clients clone templates (client/Art/ArtLoader) instead of
--- building EditableMeshes against their small per-device budget. Presentation only: a failed bake leaves the
--- asset to the client's local fallback, and gameplay never waits on art.
+-- never replicates) becomes a template MeshPart in ReplicatedStorage.ArtTemplates/<asset>/<part> backed by
+-- DataModel-scoped content, which replicates like a normal mesh; clients clone templates (client/Art/ArtLoader)
+-- instead of building EditableMeshes against their small per-device budget. Presentation only: a failed bake
+-- leaves the asset to the client's local fallback, and gameplay never waits on art. A part jg has imported in
+-- Studio (ServerStorage.ImportedArt/<asset>/<part>, with its SurfaceAppearance PBR maps) is used as the template
+-- instead of the HCM1 bake.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
@@ -83,7 +84,11 @@ function ArtBakeService._run()
 			end
 			active += 1
 			task.spawn(function()
-				local ok, part, err = pcall(MeshBuild.bake, job.value)
+				local imported = MeshBuild.imported(job.value)
+				local ok, part, err = true, imported, nil
+				if not imported then
+					ok, part, err = pcall(MeshBuild.bake, job.value)
+				end
 				if ok and part then
 					part.Parent = job.folder
 					stats.parts += 1

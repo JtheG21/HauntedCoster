@@ -224,7 +224,10 @@ function ArtLoader.build(key: string, opts: Options?): Built?
 		end
 		local mp = template:Clone()
 		mp.Name = p.name
-		mp.CFrame = CFrame.new(p.centre)
+		local yaw = mp:GetAttribute("ImportYaw")
+		mp.CFrame = if type(yaw) == "number"
+			then CFrame.new(p.centre) * CFrame.Angles(0, math.rad(yaw), 0)
+			else CFrame.new(p.centre)
 		mp.Material = if o.material and o.material[p.part] then o.material[p.part] else p.material
 		mp.Transparency = if o.alpha and o.alpha[p.part] then o.alpha[p.part] else p.alpha
 		if o.tint and o.tint[p.part] then

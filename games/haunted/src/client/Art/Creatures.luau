@@ -53,18 +53,18 @@ local KEYS = {
 
 -- Where the art sits inside the capture jar (centres each species' body on the jar).
 local JAR_OFFSET = {
-	Wisp = Vector3.new(0, 0.15, -0.15),
+	Wisp = Vector3.new(0.08, 0.03, 0.03), -- the whole perch (pole and lantern too) centred in the jar
 	Hound = Vector3.new(0, 0.05, 0),
 	Gentleman = Vector3.new(0, 0.05, 0),
 	BellWraith = Vector3.new(0, 0.3, 0),
 }
 
 -- Carried copies are shrunk to fit the jar.
-local CARRY_SCALE = { Wisp = 0.42, Hound = 0.3, Gentleman = 0.22, BellWraith = 0.24 }
+local CARRY_SCALE = { Wisp = 0.3, Hound = 0.3, Gentleman = 0.22, BellWraith = 0.24 }
 
 -- Joints that ride on another joint (the child's motion is applied inside its parent's).
 local PARENT: { [string]: { [string]: string } } = {
-	Wisp = { Lamp = "ArmL" },
+	Wisp = {}, -- rigid perch: body, pole and tray move as one, so the grips never drift (TASK-0043 rev 1)
 	Hound = { Jaw = "Head", EarL = "Head", EarR = "Head" },
 	Gentleman = {},
 	BellWraith = {},
@@ -368,16 +368,30 @@ local function pose(rig: Rig, t: number): (CFrame, (string) -> CFrame)
 				return CFrame.identity
 			end
 	elseif rig.species == "Wisp" then
-		local body = CFrame.new(0, math.sin(idle * 2.1) * 0.28 * s, 0)
-			* CFrame.Angles(math.sin(idle * 1.3) * 0.06 + 0.12 * move, 0, math.sin(idle * 1.7) * 0.08)
+		-- The perch floats as one rigid piece (hands on the pole, toes on the tray). The head looks about and
+		-- flinches back at speed; the lantern swings from its ring, lags behind motion and counters the lean. Swing
+		-- stays inside +-0.33 rad, the range the art build proves clear of the pole (art/assets/wisp.py).
+		local lean = 0.1 * move
+		local body = CFrame.new(0, math.sin(idle * 1.6) * 0.12 * s, 0)
+			* CFrame.Angles(
+				lean + math.sin(idle * 1.1) * 0.035,
+				math.sin(idle * 0.45) * 0.08,
+				math.sin(idle * 0.9) * 0.045
+			)
+		local flinch = math.clamp((rig.speed - 9) / 10, 0, 1)
 		return body,
 			function(name: string): CFrame
-				if name == "ArmR" then
-					return CFrame.Angles(0, 0, math.sin(idle * 3) * 0.3 - 0.1)
-				elseif name == "ArmL" then
-					return CFrame.Angles(0, 0, -math.sin(idle * 3 + 0.6) * 0.15)
-				elseif name == "Lamp" then
-					return CFrame.Angles(math.sin(idle * 2.6) * 0.22 - 0.2 * move, 0, math.sin(idle * 2.1) * 0.15)
+				if name == "Head" or name == "Face" or name == "Twine" then
+					local look = (math.sin(idle * 0.37) * 0.22 + math.sin(idle * 0.11) * 0.1) * (1 - move * 0.6)
+					return CFrame.Angles(
+						math.sin(idle * 0.8) * 0.05 - 0.14 * flinch,
+						look,
+						math.sin(idle * 0.53) * 0.07
+					)
+				elseif name == "Lamp" or name == "LampGlow" then
+					local swingX = math.sin(idle * 1.9) * 0.07 - lean * 1.6 - 0.1 * move
+					local swingZ = math.sin(idle * 1.4 + 1.2) * 0.06 - math.sin(idle * 0.9) * 0.045
+					return CFrame.Angles(math.clamp(swingX, -0.33, 0.33), 0, math.clamp(swingZ, -0.33, 0.33))
 				end
 				return CFrame.identity
 			end

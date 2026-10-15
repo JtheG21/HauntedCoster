@@ -40,7 +40,8 @@ def mesh_arrays(obj: bpy.types.Object, with_uv: bool) -> tuple[list, list, list,
     if obj.matrix_world.determinant() < 0:
         me.flip_normals()
     col = me.color_attributes.get("Col")
-    uvl = me.uv_layers.active if with_uv and me.uv_layers else None
+    # Baked parts carry an atlas UV for their texture maps plus a world-scale "Tile" UV for Roblox material textures.
+    uvl = (me.uv_layers.get("Tile") or me.uv_layers.active) if with_uv and me.uv_layers else None
     normals = me.corner_normals
     keymap: dict = {}
     pos, nrm, cols, uvs, faces = [], [], [], [], []
@@ -134,6 +135,17 @@ def export_asset(asset: str, out_dir: Path, lod_ratio: float = 0.3, lod_min_tris
     path = out_dir / f"{asset}.model.json"
     path.write_text(json.dumps(doc, separators=(",", ":")))
     return {"asset": asset, "tris": total, "tris_lod1": total_lod, "parts": len(objs), "bytes": path.stat().st_size}
+
+
+def export_glb(asset: str, out_dir: Path) -> Path:
+    """glTF binary with PBR materials (baked maps), for Studio's 3D Importer (jg's step: an upload)."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / f"{asset}.glb"
+    for o in bpy.context.scene.objects:
+        o.select_set(o.type == "MESH" and "rbx_material" in o.keys())
+    bpy.ops.export_scene.gltf(filepath=str(path), use_selection=True, export_format="GLB", export_yup=True, export_texcoords=True,
+                              export_normals=True, export_materials="EXPORT", export_vertex_color="ACTIVE", export_apply=True)
+    return path
 
 
 def export_fbx(asset: str, out_dir: Path) -> Path:

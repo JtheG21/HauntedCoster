@@ -15,14 +15,14 @@ local MonsterModels = {}
 
 -- Hitbox size and centre offset from the Root, matched to the art bounds (games/haunted/art/assets/creatures.py).
 local HITBOX: { [string]: { size: Vector3, offset: Vector3 } } = {
-	Wisp = { size = Vector3.new(3, 4.4, 3.4), offset = Vector3.new(0, -0.5, 0.6) },
+	Wisp = { size = Vector3.new(2.4, 6.1, 1.85), offset = Vector3.new(0.3, -0.11, -0.1) }, -- perch and lantern, not the pole
 	Hound = { size = Vector3.new(2.6, 4.4, 6.6), offset = Vector3.new(0, -0.1, 0.1) },
 	Gentleman = { size = Vector3.new(3, 8.6, 2.2), offset = Vector3.new(0, -0.3, 0) },
 	BellWraith = { size = Vector3.new(4.6, 8.4, 4.6), offset = Vector3.new(0, -1.3, 0) },
 }
 
-local GLOW: { [string]: { color: Color3, range: number, brightness: number } } = {
-	Wisp = { color = Color3.fromRGB(255, 196, 120), range = 14, brightness = 1.3 }, -- its little lantern
+local GLOW: { [string]: { color: Color3, range: number, brightness: number, at: Vector3? } } = {
+	Wisp = { color = Color3.fromRGB(120, 225, 232), range = 14, brightness = 1.2, at = Vector3.new(0, -2.49, 0) }, -- cyan lantern
 	BellWraith = { color = Color3.fromRGB(255, 205, 110), range = 16, brightness = 1.4 }, -- the cracked bell's glow
 }
 
@@ -63,7 +63,15 @@ function MonsterModels.build(speciesId: string, variantId: string): Model
 		l.Color = glow.color
 		l.Range = glow.range
 		l.Brightness = glow.brightness
-		l.Parent = root
+		if glow.at then -- in the lantern, not the Root
+			local a = Instance.new("Attachment")
+			a.Name = "Glow"
+			a.Position = glow.at
+			a.Parent = root
+			l.Parent = a
+		else
+			l.Parent = root
+		end
 	end
 	if variant and variant.glow then
 		local l = Instance.new("PointLight")

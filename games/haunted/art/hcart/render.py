@@ -54,7 +54,7 @@ def contact_sheet(path: Path, tile: int = 400, night: bool = False, no_glow: boo
         if o.type == "MESH" and o.get("rbx_part") == "Ember":
             o.hide_render = "Ember" not in show_parts
     for o in list(sc.objects):
-        if o.type == "MESH" and "rbx_material" in o.keys():
+        if o.type == "MESH" and "rbx_material" in o.keys() and "rbx_baked" not in o.keys():  # baked parts keep their PBR maps
             o.data.materials.clear()
             o.data.materials.append(_material(o, no_glow))
     lo, hi = _bounds()
