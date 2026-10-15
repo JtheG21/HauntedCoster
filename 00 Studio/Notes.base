@@ -46,3 +46,28 @@ views:
       - file.name
       - category
       - updated
+  - type: table
+    name: Decisions to review
+    filters:
+      and:
+        - 'type == "adr"'
+        - 'status == "proposed"'
+    order:
+      - file.name
+      - project
+      - status
+      - updated
+  - type: table
+    name: Recent notes
+    filters:
+      and:
+        - 'status != "archived"'
+    limit: 8
+    sort:
+      - property: updated
+        direction: DESC
+    order:
+      - file.name
+      - type
+      - project
+      - updated

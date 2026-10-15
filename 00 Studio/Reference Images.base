@@ -1,0 +1,49 @@
+filters:
+  and:
+    - 'file.inFolder("10 References")'
+    - 'file.ext == "png" || file.ext == "jpg" || file.ext == "jpeg" || file.ext == "webp"'
+formulas:
+  preview: 'file.asLink()'
+views:
+  - type: cards
+    name: Map images
+    filters:
+      and:
+        - 'file.inFolder("10 References/02 Map")'
+    image: formula.preview
+    imageFit: contain
+    imageAspectRatio: 1.5
+    cardSize: 220
+    order:
+      - file.name
+    sort:
+      - property: file.name
+        direction: ASC
+  - type: cards
+    name: Quality floor
+    filters:
+      and:
+        - 'file.inFolder("10 References/05 Misc/3D Model Quality/Minimum Standard")'
+    image: formula.preview
+    imageFit: contain
+    imageAspectRatio: 1.5
+    cardSize: 220
+    order:
+      - file.name
+    sort:
+      - property: file.name
+        direction: ASC
+  - type: cards
+    name: Rejected examples
+    filters:
+      and:
+        - 'file.inFolder("10 References/05 Misc/3D Model Quality/Rejected")'
+    image: formula.preview
+    imageFit: contain
+    imageAspectRatio: 1.5
+    cardSize: 220
+    order:
+      - file.name
+    sort:
+      - property: file.name
+        direction: ASC

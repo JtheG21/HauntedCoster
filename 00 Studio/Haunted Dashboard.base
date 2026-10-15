@@ -1,0 +1,41 @@
+filters:
+  and:
+    - 'file.ext == "md"'
+    - 'project == "GAME-002"'
+views:
+  - type: table
+    name: Open tasks
+    filters:
+      and:
+        - 'type == "task"'
+        - 'status != "done"'
+        - 'status != "archived"'
+    order:
+      - file.name
+      - status
+      - priority
+  - type: table
+    name: Proposed decisions
+    filters:
+      and:
+        - 'type == "adr"'
+        - 'status == "proposed"'
+    order:
+      - file.name
+      - status
+      - updated
+  - type: table
+    name: Research
+    filters:
+      and:
+        - 'type == "research"'
+        - 'status != "archived"'
+    sort:
+      - property: updated
+        direction: DESC
+    limit: 8
+    order:
+      - file.name
+      - status
+      - confidence
+      - updated

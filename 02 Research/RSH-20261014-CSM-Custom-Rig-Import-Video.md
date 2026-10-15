@@ -18,7 +18,7 @@ tags:
 > Draft. One vendor tutorial (a 3D-generation company's own walkthrough). Medium confidence at most. Nothing here is approved, and it changes neither the baseline nor the gallery.
 
 ## Question
-Which parts of one creator's "generated character → Blender → Mixamo → Studio rig" walkthrough can feed a shared vocabulary and checklist for what a professional, game-ready 3D model is (modeling, topology, texturing/UVs, rigging), so jg and Claude can judge model quality and write precise asset requests for GAME-002? It informs how we apply [[3D Model Quality Baseline]] and the finished-assets requirement in [[ADR-0011-Monetization-UI-Scope]]. Not tied to any task.
+Which parts of one creator's "generated character → Blender → Mixamo → Studio rig" walkthrough can feed a shared vocabulary and checklist for what a professional, game-ready 3D model is (modeling, topology, texturing/UVs, rigging), so jg and Claude can judge model quality and write precise asset requests for GAME-002? It informs how we apply [[3D Model Quality Baseline]] and the finished-assets requirement in [[ADR-0009-Monetization-UI-Scope]]. Not tied to any task.
 
 **Scope warning.** The video is mostly a rigging and import procedure. It says almost nothing about topology quality, UV layout or texel density. Those rows of the checklist below come from the local Roblox docs, not from the video, and are labelled as such.
 
@@ -54,7 +54,7 @@ Tags: *(speaker claim)*, *(shown on screen)*, *(opinion)*. Pipeline order as the
 - **Tris/quads toggle at generation time reduces later cleanup.** Confidence: low. Test: generate one subject both ways and compare wireframes.
 
 ## Relevance to our game
-Informs the art side of [[ADR-0011-Monetization-UI-Scope]] ("finished assets") and the review gates of [[3D Model Quality Baseline]]. Existing pipeline notes remain authoritative for scale/orientation: [[LES-0007-Blender-Studio-Scale]], [[Blender Pipeline]]. Related research notes linked: [[RSH-20261013-Haunted-Monetization-Discovery]], [[RSH-20261014-Good-UI-Principles-Video]]. Compared against `10 References/05 Misc/` (`3D Model Quality Baseline.md`, gallery and contact sheets): the baseline rubric is visual-only and explicitly says topology, rigging and budgets were not verified, which is the gap this note's checklist addresses. Nothing there was edited. No matching `01 UI`/`02 Map`/`03 Sounds`/`04 Vfx` references apply.
+Informs the art side of [[ADR-0009-Monetization-UI-Scope]] ("finished assets") and the review gates of [[3D Model Quality Baseline]]. The original research cited these pipeline notes for scale/orientation; their contents cannot be verified here: `LES-0007-Blender-Studio-Scale` (cited note unavailable in this checkout), `Blender Pipeline` (cited note unavailable in this checkout). Related research notes linked: [[RSH-20261013-Haunted-Monetization-Discovery]], `RSH-20261014-Good-UI-Principles-Video` (cited note unavailable in this checkout). Compared against `10 References/05 Misc/` (`3D Model Quality Baseline.md`, gallery and contact sheets): the baseline rubric is visual-only and explicitly says topology, rigging and budgets were not verified, which is the gap this note's checklist addresses. Nothing there was edited. No matching `01 UI`/`02 Map`/`03 Sounds`/`04 Vfx` references apply.
 
 **Transferability.** Genre-neutral for modeling hygiene. Weak for our audience/platform: the video targets a humanoid-style character with a Mixamo skeleton, while Haunted Collector's creatures, props and cosmetics are mostly non-humanoid or rigid, so the humanoid steps (R15, HumanoidRootPart, Animate script) rarely apply. Server authority, approved ADRs and AGENTS.md win over anything shown.
 
@@ -66,7 +66,7 @@ Informs the art side of [[ADR-0011-Monetization-UI-Scope]] ("finished assets") a
 | Modeling | Watertight, no zero-thickness faces, no exposed holes/backfaces | (Roblox-specific) | creator-docs |
 | Topology | Triangle count stated against a budget; decimated meshes inspected in wireframe, not trusted | (general) | video 0:59, 1:12 |
 | Topology | Quads where possible, no n-gons, even density where the mesh will bend | (general / Roblox-specific doc wording) | creator-docs |
-| Topology | Flat origin, feet at the ground plane, facing forward, scale applied | (general) | video 1:19; [[LES-0007-Blender-Studio-Scale]] |
+| Topology | Flat origin, feet at the ground plane, facing forward, scale applied | (general) | video 1:19; `LES-0007-Blender-Studio-Scale` (cited note unavailable in this checkout) |
 | Texturing/UVs | Texture embedded or referenced and loads on import; no stray untextured parts | (general) | video 1:32 |
 | Texturing/UVs | Texel density matches object size; texture resolution sized to object (256 / 512 / 1024 px by stud size) | (Roblox-specific) | creator-docs |
 | Texturing/UVs | UV islands, seams and overlaps checked on a checker pattern | (general) | **not in video; not verified here** |

@@ -4,37 +4,38 @@ title: Studio Index
 type: index
 status: in_progress
 created: 2026-10-10
-updated: 2026-10-11
+updated: 2026-10-14
 tags:
   - studio/index
 ---
-# Roblox AI Studio: index
+# Studio home
 
-**Rules:** [[AGENTS]] · [[Obsidian Conventions]] · [[Workflow]] · budget `00 Studio/budget.json`
-**Machine state:** `tasks/queue.json` · `project-state.json` · `python3 scripts/orchestrator.py status`
+> [!tip] Start here
+> **[[GAME-002 Haunted Collector/00 Overview|Haunted Collector]]** — primary game · **[[Reference Library|Reference library]]** — browse art · **[[Vault Navigation|Using this dashboard]]**
 
-## Active games
-| ID | Game | Phase | Overview |
-|---|---|---|---|
-| GAME-001 | Rival Realms (working title) | Paused, source material (2026-10-11) | [[GAME-001 Rg1/00 Overview]] |
-| GAME-002 | Haunted Collector (working title) | **Primary.** M1: MVP loop, TASK-0011 ready | [[GAME-002 Haunted Collector/00 Overview]] |
+## Workbench
+- **Build:** [[GAME-002 Haunted Collector/03 Roadmap|Roadmap]] · [[Notes.base#Open tasks|Open tasks]] · [[Notes.base#Decisions to review|Proposed decisions]]
+- **Explore:** [[GAME-002 Haunted Collector/01 Game Design|Game design]] · [[Reference Library|Visual references]] · [[Notes.base#Lessons|Lessons learned]]
+- **Verify:** [[GAME-002 Haunted Collector/02 Technical Architecture|Architecture & evidence]] · [[Notes.base#Audits|Audits]] · [[Workflow|Development workflow]]
 
-## Folders
-- `01 Inbox/`: raw ideas, waiting to be triaged
-- `02 Research/`: `RSH-` notes
-- `03 Games/`: one folder per game
-- `04 Agents/`: [[Researcher]] · [[Planner]] · [[Executor]] · [[Auditor]] · [[Orchestrator]] · [[Knowledge Agent]]
-- `05 Engineering/`: [[Luau Standards]] · [[ADR-0001-Repo-Is-Vault]]
-- `06 QA/`: audits and bugs
-- `07 Metrics/`: [[Monetization Index]]
-- `08 Reviews/`: weekly (`REV-`) and health (`HLT-`) reports
-- `09 Knowledge/`: lessons (`LES-`)
-- `99 Templates/`: `T - *` templates
+## Open tasks
+![[Notes.base#Open tasks]]
 
-## Needs human attention
-- **Approve (GAME-002):** [[GAME-002 Haunted Collector/03 Roadmap]] · TASK-0012 to TASK-0018 plans
-- **Approve:** [[GAME-001 Rg1/03 Roadmap]] (M2–M8) · M2 tasks (start with [[TASK-0002-Ability-Framework]] and [[TASK-0009-Multi-Client-Test-Harness]]) · [[EXP-0001-M2-Validation-Experiments]]
-- The 2-player test for [[TASK-0001-Collectible-Pickup]] ([[TEST-20261010-01]])
+An empty view means no task notes match. Status is mirrored from `tasks/queue.json`; use `python3 scripts/orchestrator.py status` for the authoritative queue. Research proposals are not scheduled tasks.
 
-## All notes
-![[Notes.base]]
+## Proposed decisions
+![[Notes.base#Decisions to review]]
+
+## Recently updated
+![[Notes.base#Recent notes]]
+
+> [!info]- Studio map & rules
+> **Games:** [[GAME-002 Haunted Collector/00 Overview|Haunted Collector — primary]] · [[GAME-001 Rg1/00 Overview|Rival Realms — paused/source material]]
+>
+> **Folders:** Inbox → Research → Games · Engineering · QA · Metrics · Reviews · Knowledge · Templates.
+>
+> **Rules:** [[AGENTS]] · [[Obsidian Conventions]] · [[Workflow]] · [[Luau Standards]]
+>
+> **Machine state:** `tasks/queue.json` · `project-state.json` · `00 Studio/budget.json`
+
+Full catalog: [[Notes.base]]

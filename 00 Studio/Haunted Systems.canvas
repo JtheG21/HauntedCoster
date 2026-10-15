@@ -1,0 +1,79 @@
+{
+  "nodes": [
+    {
+      "id": "intro",
+      "type": "text",
+      "text": "# Haunted Collector systems\nNavigation map \u2014 open a card for the maintained system note. Lines group documents; they do not specify runtime dependencies.",
+      "x": 0,
+      "y": 0,
+      "width": 980,
+      "height": 130
+    },
+    {
+      "id": "n0",
+      "type": "file",
+      "file": "03 Games/GAME-002 Haunted Collector/00 Overview.md",
+      "x": 0,
+      "y": 190,
+      "width": 980,
+      "height": 300,
+      "color": "1"
+    },
+    {
+      "id": "n1",
+      "type": "file",
+      "file": "03 Games/GAME-002 Haunted Collector/05 Systems/SYS-Haunted-Player-Data.md",
+      "x": 0,
+      "y": 590,
+      "width": 300,
+      "height": 300,
+      "color": "2"
+    },
+    {
+      "id": "n2",
+      "type": "file",
+      "file": "03 Games/GAME-002 Haunted Collector/05 Systems/SYS-Haunted-Capture-Loop.md",
+      "x": 340,
+      "y": 590,
+      "width": 300,
+      "height": 300,
+      "color": "3"
+    },
+    {
+      "id": "n3",
+      "type": "file",
+      "file": "03 Games/GAME-002 Haunted Collector/05 Systems/SYS-Haunted-Ghost-Train.md",
+      "x": 680,
+      "y": 590,
+      "width": 300,
+      "height": 300,
+      "color": "4"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "fromNode": "n0",
+      "fromSide": "bottom",
+      "toNode": "n1",
+      "toSide": "top",
+      "toEnd": "none"
+    },
+    {
+      "id": "e2",
+      "fromNode": "n0",
+      "fromSide": "bottom",
+      "toNode": "n2",
+      "toSide": "top",
+      "toEnd": "none"
+    },
+    {
+      "id": "e3",
+      "fromNode": "n0",
+      "fromSide": "bottom",
+      "toNode": "n3",
+      "toSide": "top",
+      "toEnd": "none"
+    }
+  ]
+}
