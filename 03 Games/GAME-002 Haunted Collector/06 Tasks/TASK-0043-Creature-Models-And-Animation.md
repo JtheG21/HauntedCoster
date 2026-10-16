@@ -75,6 +75,19 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 **Not verified:** animation was checked for errors and poses in stills only, not judged in motion by a person; triangle budgets were raised to ≤ 8.5k (Hound 8.3k) and recorded in [[SYS-Haunted-Art-Direction]].
 - 2026-10-16 rev 1 (Claude): Lantern Wisp rebuilt from a Meshy 6 Lite base (CC BY 4.0), repainted and baked to PBR maps; 8,415 tris LOD0 / 3,165 LOD1; head split for the neck turn; textured parts imported and kept in `games/haunted/assets/ImportedArt.rbxm`. Details and asset IDs: [[SYS-Haunted-Art-Direction]]. Audit pass with minor findings (blank-mesh fallback guard, Meshy credit before publish, note updates), addressed. Awaiting Codex review and jg's acceptance.
 
+## Handoff (Codex review, rev 1, 2026-10-16)
+**Task:** TASK-0043 rev 1. Independent code review of the Lantern Wisp revision before jg accepts it.
+**Receiver:** Codex (reviewer; Claude owned the implementation). **Workspace:** `/Users/jg/Desktop/Rg1-worktrees/wisp`, branch `task/TASK-0043-Wisp-Revision`, review commits from `aad6906` through `21e9db1`. Run `scripts/preflight.sh` before any Git state change; review only, no edits unless jg asks.
+**Inputs:** [[SYS-Haunted-Art-Direction]] (budget table, the "Lantern Wisp performance pass" entry and asset IDs), this note's rev 1 implementation line, the audit hand-back (verdict pass, minor findings addressed in `21e9db1`).
+**Review focus:**
+- `games/haunted/src/shared/Art/MeshBuild.luau` `imported()`: server-only clone, `@lod1` guard, empty-MeshId fallback. Is the fallback to the HCM1 bake still safe, and is a mesh that is linked but fails to load (moderated or private) worth guarding with `ContentProvider:PreloadAsync`?
+- `haunted.project.json` mapping of `games/haunted/assets/ImportedArt.rbxm` into `ServerStorage.ImportedArt`: confirm `rojo build` includes it. Live `rojo serve` sync of MeshParts from an `.rbxm` is unverified.
+- `games/haunted/art/hcart/core.py` `decimate_to(keep=...)` and `hcart/bake.py`: the weight group is inverted (weight = keep, capped at 0.8 because 1.0 locks a vertex), and behaviour without `keep` is unchanged.
+- `creature_wisp.model.json`: 8,415 tris LOD0 / 3,165 LOD1 against the budget of 8,500 / 6,000.
+**Constraints:** no uploads, no publishing, no Studio writes. Studio and Rojo are used by one assistant at a time; the Rojo server on port 34872 belongs to TASK-0046 (`overhaul` worktree).
+**Known, not this task:** `validate_vault` fails on the TASK-0044 and TASK-0046 status mismatches.
+**Report back with:** verdict, findings with file:line, the checks you ran and their output, and what is unverified.
+
 ## Audits
 - [[AUD-20261013-TASK-0043-01]]: pass. Fixed on the TASK-0044 branch: finding 1 (Spectral shells were drawn at all distances, near-range cost up to 14.3k on the Hound) — shells are now near-only; 2 (step guarded); 3 (re-check after build); 4 (Root timeout warns); 5 (LOD hysteresis, staggered throttle); 7 (Lamp rides ArmL, Jaw/ears ride Head); 8 (separate start guards); 9 (ArtShowcase refuses non-memory profiles); 10 (Hitbox comment). Open: 6 (gait speed from a tweened Root, judge in motion), 11 (nits).
 
