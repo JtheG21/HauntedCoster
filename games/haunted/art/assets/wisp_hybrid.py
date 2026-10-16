@@ -452,9 +452,9 @@ def lantern_wisp_hybrid():
     return {"Kind": "creature", "Species": "Wisp", "LodDistance": 60, "Credit": "Base model generated with Meshy (CC BY 4.0)"}
 
 
-ASSETS = {"creature_wisp": lantern_wisp_hybrid}
+ASSETS = {"creature_wisp_hybrid": lantern_wisp_hybrid}
 
-BAKE = {"creature_wisp": {
+BAKE = {"creature_wisp_hybrid": {
     "Creature": {"size": 2048, "metal": 0.0, "parts": {
         "Body": {"src": ["Body"], "tris": 6000},
         "Head": {"src": ["Head"], "tris": 6000},
