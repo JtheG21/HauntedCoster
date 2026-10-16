@@ -25,6 +25,7 @@ from mathutils.bvhtree import BVHTree
 
 from assets import wisp as W
 from hcart import anatomy as A
+from hcart.sourced import bounds as _bounds, seg_dist as _seg_dist  # noqa: F401
 from hcart import core, paint, shapes
 
 MESHY = Path(os.environ.get("WISP_MESHY", "~/Roblox-Work/haunted/art/meshy/wisp_meshy_v1.glb")).expanduser()
@@ -52,13 +53,6 @@ HEAD_YAW = -22.0
 
 def to_design(p: Vector) -> Vector:
     return (p - TRAY_C) * S + Vector((0, 0, W.TRAY_Z))
-
-
-def _bounds(objs):
-    pts = [o.matrix_world @ Vector(c) for o in objs for c in o.bound_box]
-    lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
-    hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
-    return lo, hi
 
 
 def _concept_rays(objs):
@@ -100,13 +94,6 @@ def _smooth_region(obj, weight_fn, iters=30):
     bm.to_mesh(obj.data)
     bm.free()
     obj.data.update()
-
-
-def _seg_dist(p, pts):
-    best = 9.0
-    for a, b in zip(pts, pts[1:]):
-        best = min(best, W._seg_d(p, a, b))
-    return best
 
 
 def _split_head(obj):
