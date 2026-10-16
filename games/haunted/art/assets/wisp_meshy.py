@@ -19,7 +19,7 @@ from mathutils import Matrix, Vector, noise
 
 from assets import wisp as W
 from assets import wisp_hybrid as Hy
-from hcart import core, paint
+from hcart import core, paint, shapes
 
 H = paint.hex3
 
@@ -102,6 +102,95 @@ def _lamp_r(p):
     return max(abs(c * dx - s * dy), abs(s * dx + c * dy))
 
 
+def lamp_details(lamp):
+    """The concept's lamp detail on Meshy's lantern (Meshy units): rivets along the bands and corner posts,
+    copper-bound triangular plates on the roof, and an even glowing pane surface just behind the bars."""
+    import numpy as np
+    from mathutils.bvhtree import BVHTree
+
+    tree = BVHTree.FromObject(lamp, bpy.context.evaluated_depsgraph_get())
+    vs = np.array([tuple(lamp.matrix_world @ v.co) for v in lamp.data.vertices])
+    c, s_ = math.cos(LAMP_ANGLE), math.sin(LAMP_ANGLE)
+    dx, dy = vs[:, 0] - LAMP_C[0], vs[:, 1] - LAMP_C[1]
+    rr = np.maximum(np.abs(c * dx - s_ * dy), np.abs(s_ * dx + c * dy))
+
+    def rmax(z, band=0.012, pct=97, face=None):
+        m = np.abs(vs[:, 2] - z) < band
+        if face is not None:  # only vertices on that face's side (where its axis gives the square distance)
+            nrm, _ = frame(face)
+            d = (vs[:, 0] - LAMP_C[0]) * nrm.x + (vs[:, 1] - LAMP_C[1]) * nrm.y
+            m &= d > rr * 0.97
+        return float(np.percentile(rr[m], pct)) if m.sum() > 20 else 0.16
+
+    def frame(k):
+        """Outward normal and along-face tangent of face k, in world (Meshy) axes."""
+        a = LAMP_ANGLE + math.pi / 2 * k
+        # face normals of the turned square: local +x rotated back by the lantern angle
+        nrm = Vector((math.cos(-a), math.sin(-a), 0))
+        tan = Vector((-nrm.y, nrm.x, 0))
+        return nrm, tan
+
+    centre = Vector((LAMP_C[0], LAMP_C[1], 0))
+
+    def on_surface(k, u, z):
+        """Point on face k at along-face offset u and height z, found by casting in from outside."""
+        nrm, tan = frame(k)
+        start = centre + nrm * 0.5 + tan * u + Vector((0, 0, z))
+        loc, n, _, _ = tree.ray_cast(start, -nrm, 1.0)
+        return (loc, n) if loc is not None else (None, None)
+
+    rivets, rims, glass = [], [], []
+    for k in range(4):
+        for z in (-0.605, -0.865):  # top and bottom bands
+            w = rmax(z) * 0.82
+            for i in range(6):
+                u = -w + 2 * w * i / 5
+                loc, n = on_surface(k, u, z)
+                if loc is not None:
+                    rivets.append(W.ellipsoid("Rivet", loc + n * 0.001, (0.0045, 0.0045, 0.0045), seg=8, rings=5,
+                                              material="Metal"))
+        for i in range(5):  # down the corner post
+            z = -0.64 - 0.2 * i / 4
+            nrm, tan = frame(k)
+            r = rmax(z)
+            p = centre + (nrm + tan) * r * 0.985 + Vector((0, 0, z))
+            loc, n, _, _ = tree.ray_cast(p + (nrm + tan).normalized() * 0.2, -(nrm + tan).normalized(), 0.5)
+            if loc is not None:
+                rivets.append(W.ellipsoid("Rivet", loc + n * 0.001, (0.004, 0.004, 0.004), seg=8, rings=5, material="Metal"))
+        # Copper-bound triangle on the roof face: cast down onto the roof.
+        nrm, tan = frame(k)
+        tri = [(-0.13, 0.205), (0.13, 0.205), (0.0, 0.07), (-0.13, 0.205)]
+        pts = []
+        for (u0, r0), (u1, r1) in zip(tri, tri[1:]):
+            for t in [j / 8 for j in range(8)]:
+                u, r = u0 + (u1 - u0) * t, r0 + (r1 - r0) * t
+                q = centre + nrm * r + tan * u + Vector((0, 0, -0.3))
+                loc, n, _, _ = tree.ray_cast(q, Vector((0, 0, -1)), 0.5)
+                if loc is not None:
+                    pts.append(loc + n * 0.004)
+        if len(pts) > 6:
+            pts.append(pts[0])
+            rim = shapes.tube(f"RoofPlateRim{k}", pts, 0.0055, 5, "Metal", resample=0, flatten=0.6)
+            core.smooth(rim, 50)
+            rims.append(rim)
+        # Even glowing glass behind the bars, following the lantern's pinched profile.
+        zs = [-0.855 + 0.23 * j / 14 for j in range(15)]
+        bm = bmesh.new()
+        grid = []
+        for z in zs:
+            r = 0.5 * (rmax(z, pct=30, face=k) + rmax(z, pct=85, face=k))  # in front of Meshy's recessed panes, behind its bars
+            row = []
+            for i in range(9):
+                u = (-0.92 + 1.84 * i / 8) * r
+                row.append(bm.verts.new(centre + nrm * r + tan * u + Vector((0, 0, z))))
+            grid.append(row)
+        for a, b in zip(grid, grid[1:]):
+            for i in range(8):
+                bm.faces.new((a[i], a[i + 1], b[i + 1], b[i]))
+        glass.append(core.obj_from_bmesh(f"Glass{k}", bm, "Neon"))
+    return rivets, rims, glass
+
+
 def lantern_wisp_meshy():
     bpy.ops.import_scene.gltf(filepath=str(Hy.MESHY))
     src = [o for o in bpy.context.scene.objects if o.type == "MESH"]
@@ -149,11 +238,14 @@ def lantern_wisp_meshy():
         r = _lamp_r(c)
         return 0.11 < r < 0.16  # recessed between the frame bars (bars and posts stand out to ~0.167)
 
-    panes = _split(lamp, is_pane, "LampGlow", "Neon")
+    rivets, rims, glass = lamp_details(lamp)  # Meshy's own pane faces stay as dark metal behind the new glass
+    if rivets:
+        rivets = [core.join(rivets, "Rivets")]
+    panes = core.join(glass, "LampGlow") if glass else None
 
     # Into design units, standing on the procedural tray height.
     m = Matrix.Translation(Vector((0, 0, W.TRAY_Z))) @ Matrix.Scale(Hy.S, 4) @ Matrix.Translation(-Hy.TRAY_C)
-    parts = [o for o in (creature, lamp, pole, eyes, tray, panes) if o]
+    parts = [o for o in (creature, lamp, pole, eyes, tray, panes) if o] + rivets + rims
     for o in parts:
         o.matrix_world = m @ o.matrix_world
         core.apply_transform(o)
@@ -232,7 +324,7 @@ def lantern_wisp_meshy():
         return paint.mix(c, W.SHADOW, min(1.0, (1 - op) * 1.3))
 
     def lamp_col(p, n, o, cv, op):
-        if o.name == "Pole":
+        if o.name == "Pole" or o.name.startswith(("Rivet", "RoofPlateRim")):
             return Hy.metal_col(p, n, o, cv, op)
         base = paint.mix(Hy.metal_col(p, n, o, cv, op), W.IRON, 0.35)  # darker iron than the procedural lamp
         if cv > 0.45:  # worn copper on the raised edges, rivets and frame lips
@@ -245,7 +337,8 @@ def lantern_wisp_meshy():
     if eyes:
         core.subdivide(eyes, 2)  # fine enough to carry the painted slit and its stitches
         W.custom_paint([eyes], eye_col, ao_samples=10, ao_distance=0.2)
-    W.custom_paint([o for o in (lamp, pole, tray) if o], lamp_col, ao_samples=16, ao_distance=0.35)
+    W.custom_paint([o for o in (lamp, pole, tray) if o] + rivets + rims, lamp_col, ao_samples=16, ao_distance=0.35)
+    lamp = core.join([lamp] + rivets + rims, "LampIron")
     if panes:
         pz = [(o_.matrix_world @ v.co).z for o_ in (panes,) for v in o_.data.vertices]
         z0, z1 = min(pz), max(pz)
