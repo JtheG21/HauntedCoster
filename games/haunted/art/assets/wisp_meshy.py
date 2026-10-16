@@ -336,6 +336,8 @@ def lantern_wisp_meshy():
     if rivets:
         rivets = [core.join(rivets, "Rivets")]
     panes = core.join(glass, "LampGlow") if glass else None
+    if panes:
+        core.decimate_to(panes, 320)  # flat Neon glass: shape only, keeps the asset inside the 8.5k creature budget
 
     # Into design units, standing on the procedural tray height.
     m = Matrix.Translation(Vector((0, 0, W.TRAY_Z))) @ Matrix.Scale(Hy.S, 4) @ Matrix.Translation(-Hy.TRAY_C)
@@ -500,14 +502,29 @@ def lantern_wisp_meshy():
 
 ASSETS = {"creature_wisp": lantern_wisp_meshy}
 
+_face = {}
+
+
+def keep_face(p):
+    """Decimation weight: 1 on the eyes and grin, fading out over the head, so the face keeps its triangles."""
+    if not _face:
+        head, eyes = bpy.data.objects["Head"], bpy.data.objects.get("Eyes")
+        hlo, hhi = Hy._bounds([head])
+        c = Hy._bounds([eyes]) if eyes else (hlo, hhi)
+        _face["c"] = (c[0] + c[1]) / 2
+        _face["r"] = 0.6 * (hhi.x - hlo.x)
+    d = (p - _face["c"]).length / _face["r"]
+    return 1.0 if d < 0.5 else max(0.0, 1.0 - (d - 0.5) * 2.0)
+
+
 BAKE = {"creature_wisp": {
     "Creature": {"size": 1024, "metal": 0.0, "parts": {
-        "Body": {"src": ["Body"], "tris": 6000},
-        "Head": {"src": ["Head"], "tris": 5000},
+        "Body": {"src": ["Body"], "tris": 2300},
+        "Head": {"src": ["Head"], "tris": 3000, "keep": keep_face},
         "Eyes": {"src": ["Eyes"], "tris": 600},
     }},
     "Metal": {"size": 1024, "metal": 0.75, "parts": {
-        "Perch": {"src": ["Perch"], "tris": 1500},
-        "LampIron": {"src": ["LampIron"], "tris": 4000},
+        "Perch": {"src": ["Perch"], "tris": 500},
+        "LampIron": {"src": ["LampIron"], "tris": 1700},
     }},
 }}

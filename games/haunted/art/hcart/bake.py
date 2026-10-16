@@ -269,7 +269,7 @@ def production(asset: str, spec: dict, tex_dir: Path, samples: int = 4) -> dict:
             for k in list(low.keys()):
                 del low[k]
             if p.get("tris"):
-                core.decimate_to(low, p["tris"])
+                core.decimate_to(low, p["tris"], keep=p.get("keep"))
             core.smooth(low, p.get("smooth", 180))
             mat = bpy.data.materials.new(f"{set_name}:{part}")
             mat.use_nodes = True

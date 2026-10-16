@@ -10,6 +10,9 @@
     "ServerStorage": {
       "ArtData": {
         "$path": "games/haunted/assets/ArtData"
+      },
+      "ImportedArt": {
+        "$path": "games/haunted/assets/ImportedArt.rbxm"
       }
     },
     "ServerScriptService": {

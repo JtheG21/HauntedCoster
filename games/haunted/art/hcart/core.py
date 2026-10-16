@@ -127,11 +127,22 @@ def tri_count(obj: bpy.types.Object) -> int:
     return n
 
 
-def decimate_to(obj: bpy.types.Object, max_tris: int) -> bpy.types.Object:
+def decimate_to(obj: bpy.types.Object, max_tris: int, keep=None, keep_factor: float = 1.0) -> bpy.types.Object:
+    """keep: optional fn(world position) -> 0..1; weighted vertices cost more to collapse, so detail stays there."""
     n = tri_count(obj)
     if n > max_tris:
-        add_modifier(obj, "DECIMATE", ratio=max(0.02, max_tris / n), use_collapse_triangulate=True)
+        m = add_modifier(obj, "DECIMATE", ratio=max(0.02, max_tris / n), use_collapse_triangulate=True)
+        if keep:
+            vg = obj.vertex_groups.new(name="DecimateKeep")
+            mw = obj.matrix_world
+            for v in obj.data.vertices:
+                vg.add([v.index], 0.8 * max(0.0, min(1.0, keep(mw @ v.co))), "REPLACE")  # 1.0 locks a vertex
+            m.vertex_group = vg.name
+            m.vertex_group_factor = keep_factor
+            m.invert_vertex_group = True  # Blender decimates where the group is weighted; invert so weight = keep
         apply_modifiers(obj)
+        if keep:
+            obj.vertex_groups.remove(obj.vertex_groups["DecimateKeep"])
     return obj
 
 

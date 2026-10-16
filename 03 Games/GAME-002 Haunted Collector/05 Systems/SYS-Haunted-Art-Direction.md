@@ -59,7 +59,7 @@ EditableMesh fails by default in published games. Either:
 ## Budgets (proposed; measured in TASK-0042 and TASK-0052)
 | Asset class | LOD0 triangles | LOD1 | Notes |
 |---|---|---|---|
-| Creature | ≤ 8,500 | ≤ 6,000 incl. detail parts dropped at distance | 8 wild + pen/exhibit displays (measured: Wisp 3.4k, Gentleman 5.6k, Bell Wraith 5.3k, Hound 8.3k) |
+| Creature | ≤ 8,500 | ≤ 6,000 incl. detail parts dropped at distance | 8 wild + pen/exhibit displays (measured: Wisp 8.4k / LOD1 3.2k (Meshy rev, 2026-10-16), Gentleman 5.6k, Bell Wraith 5.3k, Hound 8.3k) |
 | Repeated prop (lamp, grave, fence, tree) | ≤ 3,200 | ≤ 1,100 | LOD1 beyond 70 studs |
 | Landmark | ≤ 12,000 | ≤ 4,000 | one or two per habitat |
 | Mansion tier | ≤ 16,000 | ≤ 5,000 | six plots |
@@ -100,3 +100,4 @@ Art is client-side presentation. The server never reads it; colliders, prompts a
 ## Needs human review
 - The direction, palette and every "meets the floor" verdict are Claude's; jg owns visual acceptance.
 - Choose live path A or B before publishing.
+- **Lantern Wisp performance pass (2026-10-16, superseded the 18k import above):** re-baked at 8,415 tris (LOD0) / 3,165 (LOD1), down from 17,990, inside the ≤ 8,500 creature budget. Normal maps are baked from the full-detail source onto the cut mesh; the face (eyes, grin) is protected during decimation (`keep_face` weight in `wisp_meshy.py`, `decimate_to(keep=...)` in `hcart/core.py`); close-ups compared against the source show the same shapes. Re-imported (same approved flow) and saved in the repo as `games/haunted/assets/ImportedArt.rbxm`, mapped to `ServerStorage.ImportedArt` in `haunted.project.json`, so any `rojo build` place carries the textured Wisp (round-trip checked: mesh, maps, sizes identical). Parts use RenderFidelity Automatic and box collision. Current asset IDs: Body 75612386658950, Head 99243944145033, Eyes 132509968012500, LampIron 137713377547378, Perch 80079725003486; Creature colour 74516942057421, normal 97386526582948; Metal colour 121499623802643, normal 135044514471578. Live `rojo serve` sync of MeshParts from an .rbxm is not verified.
