@@ -4,7 +4,7 @@ title: Resource Catalog
 type: index
 status: approved
 created: 2026-10-12
-updated: 2026-10-14
+updated: 2026-10-16
 tags:
   - studio/catalog
 related:
@@ -66,6 +66,7 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Map plan and prover (`roblox-map`) | `.claude/skills/roblox-map/` | verified | [[TASK-0012-Graveyard-And-Landmarks]], [[AUD-20261011-TASK-0012-01]] | Never run its Studio bootstrap on the Rg1 or Haunted places |
 | Video watching (`watch`) | user skill | implemented | Dependencies installed 2026-10-12 | Not yet run on a real video |
 | Blender pipeline | [[Blender Pipeline]], `scripts/blender/export_for_roblox.py`, Blender 5.1.0 | verified | Headless export tests; Studio import exact in FBX and glb ([[LES-0007-Blender-Studio-Scale]]) | Static meshes only; rigs and animation are untested (animation plugin not installed yet) |
+| Mixamo → Roblox animations (`mixamo-roblox`) | Separate repo `~/Code/mixamo-roblox-pipeline` (private, JtheG21); vault `~/Documents/RobloxAnimVault`; skill `skills/mixamo-roblox/SKILL.md` there | verified | 25 animations published 2026-10-16 (15 R15, 10 R6: idle, walk, run, jump, fall, combat idle, punch, dance, wave, pose and more); retarget-check clean on R15, R6 and a scaled R15; Lune and Python tests in that repo | IDs: `python3 scripts/pipeline.py lookup "<term>" --rig R15` there, or its `manifest.json`. Owned by jg's personal account, so they play only in jg-owned games, not group games. Run it from a session in that repo (Rg1's guard blocks its key file). Personal use; never commit Mixamo FBX to Rg1 |
 
 ### Code patterns
 | Resource | Location | State | Evidence | Limits / notes |
