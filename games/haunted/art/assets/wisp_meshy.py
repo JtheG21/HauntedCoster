@@ -157,6 +157,14 @@ def lamp_details(lamp):
             loc, n, _, _ = tree.ray_cast(p + (nrm + tan).normalized() * 0.2, -(nrm + tan).normalized(), 0.5)
             if loc is not None:
                 rivets.append(W.ellipsoid("Rivet", loc + n * 0.001, (0.004, 0.004, 0.004), seg=8, rings=5, material="Metal"))
+        # A row of rivets down the roof edge, from the eave corner up to the peak.
+        hip = (nrm + tan).normalized()
+        for i in range(6):
+            r = 0.215 - 0.15 * i / 5
+            q = centre + hip * r * math.sqrt(2) * 0.97 + Vector((0, 0, -0.3))
+            loc, n, _, _ = tree.ray_cast(q, Vector((0, 0, -1)), 0.5)
+            if loc is not None:
+                rivets.append(W.ellipsoid("Rivet", loc + n * 0.001, (0.0042, 0.0042, 0.0042), seg=8, rings=5, material="Metal"))
         # Copper-bound triangle on the roof face: cast down onto the roof.
         nrm, tan = frame(k)
         tri = [(-0.13, 0.205), (0.13, 0.205), (0.0, 0.07), (-0.13, 0.205)]
@@ -327,8 +335,24 @@ def lantern_wisp_meshy():
         if o.name == "Pole" or o.name.startswith(("Rivet", "RoofPlateRim")):
             return Hy.metal_col(p, n, o, cv, op)
         base = paint.mix(Hy.metal_col(p, n, o, cv, op), W.IRON, 0.35)  # darker iron than the procedural lamp
-        if cv > 0.45:  # worn copper on the raised edges, rivets and frame lips
-            base = paint.mix(base, W.COPPER, min(0.7, (cv - 0.25) * 2.0))
+        if o.name == "Tray":
+            return base
+        # Weathering: blotchy dark iron, rust patches and runs, teal patina in the recesses, bright worn copper edges.
+        blot = W.fbm(p, 0.35, 3, 51.0)
+        base = paint.mix(base, H("23272a"), 0.45)  # blue-grey iron under the bronze
+        base = paint.mix(base, H("111416"), max(0.0, min(0.8, (blot + 0.05) * 2.2)))
+        rust = W.fbm(p, 0.13, 3, 57.0) + 0.3 * noise.noise(p / 0.025)
+        if rust > 0.18:
+            base = paint.mix(base, paint.mix(H("6e3318"), H("9a5228"), 0.5 + 0.5 * noise.noise(p / 0.015)), min(0.65, (rust - 0.18) * 2.6))
+        run = noise.noise(Vector((p.x * 30, p.y * 30, p.z * 2.5)))
+        if run > 0.35 and abs(n.z) < 0.5:
+            base = paint.mix(base, H("4a2614"), min(0.5, (run - 0.35) * 2.0))
+        if op < 0.75:
+            base = paint.mix(base, paint.mix(W.VERDIGRIS, H("3f7a70"), 0.5), min(0.8, (0.8 - op) * 2.2))
+        if cv > 0.35:
+            base = paint.mix(base, paint.mix(W.COPPER, H("c58a5a"), 0.4), min(0.8, (cv - 0.35) * 2.5))
+        if noise.noise(p / 0.004) > 0.4:
+            base = paint.mul(base, 0.6)  # pitting
         return base
 
     for o in parts:
