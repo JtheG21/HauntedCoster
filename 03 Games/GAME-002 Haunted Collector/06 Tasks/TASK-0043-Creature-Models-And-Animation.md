@@ -3,7 +3,7 @@ id: TASK-0043
 title: "Creature Models and Animation"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -93,3 +93,7 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 - [[AUD-20261013-TASK-0043-01]]: pass. Fixed on the TASK-0044 branch: finding 1 (Spectral shells were drawn at all distances, near-range cost up to 14.3k on the Hound) — shells are now near-only; 2 (step guarded); 3 (re-check after build); 4 (Root timeout warns); 5 (LOD hysteresis, staggered throttle); 7 (Lamp rides ArmL, Jaw/ears ride Head); 8 (separate start guards); 9 (ArtShowcase refuses non-memory profiles); 10 (Hitbox comment). Open: 6 (gait speed from a tweened Root, judge in motion), 11 (nits).
 
 ## Outcome
+- **Accepted by jg, 2026-10-16** (chat: "the wisp looks good go ahead and close it out"). The merge was approved through `orchestrator.py approve-merge`.
+- Four creatures rebuilt (original pass, AUD-20261013-TASK-0043-01). The Lantern Wisp was then revised to match the approved concept (rev 1): a Meshy base (CC BY 4.0), repainted, PBR-baked, the head split for the neck turn, 8,415 / 3,165 tris, imported textures kept in `games/haunted/assets/ImportedArt.rbxm`. Independent audit and Codex review both passed.
+- **Delivery:** the revision lives on `task/TASK-0043-Wisp-Revision`, stacked on the overhaul integration line (TASK-0042…0051). It reaches `main` with that line through [[TASK-0052-Overhaul-Verification]], not on its own, because a direct merge would ship unapproved overhaul work.
+- **Follow-ups:** the player-facing Meshy credit before publish; a PreloadAsync status guard for imported meshes (do it together with the other creatures' imports); the known budget overages listed in `tests/test_art_budgets.py`; the other three creatures can follow the Wisp's steps (`review.sh`, `art-import`).

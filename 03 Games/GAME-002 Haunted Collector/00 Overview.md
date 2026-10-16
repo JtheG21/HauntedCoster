@@ -5,7 +5,7 @@ type: overview
 project: GAME-002
 status: in_progress
 created: 2026-10-11
-updated: 2026-10-13
+updated: 2026-10-16
 tags:
   - game/overview
 ---
@@ -82,3 +82,5 @@ Statuses are copied from `tasks/queue.json` (authoritative); `validate_vault.py`
 - ADR-0005 open question 4 (migrating the old links): done 2026-10-12, the 45 ambiguous links are qualified (GAME-001 notes link to `GAME-001 Rg1/…`).
 - The habitat, house and train looks (TASK-0027, 0028, 0030) await jg's review.
 - The haunted-tree look ([[TASK-0041-Interactive-Haunted-Trees]], [[TEST-20261013-01]] screenshots) and [[ADR-0010-Client-Reported-Gaze]] await jg's review.
+
+- 2026-10-16: TASK-0043 accepted by jg. The Lantern Wisp revision (textured, 8.4k tris, imported art kept in the repo) is on the overhaul line and ships with TASK-0052.
