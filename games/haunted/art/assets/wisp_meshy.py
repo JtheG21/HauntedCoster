@@ -501,12 +501,12 @@ def lantern_wisp_meshy():
 ASSETS = {"creature_wisp": lantern_wisp_meshy}
 
 BAKE = {"creature_wisp": {
-    "Creature": {"size": 2048, "metal": 0.0, "parts": {
+    "Creature": {"size": 1024, "metal": 0.0, "parts": {
         "Body": {"src": ["Body"], "tris": 6000},
         "Head": {"src": ["Head"], "tris": 5000},
         "Eyes": {"src": ["Eyes"], "tris": 600},
     }},
-    "Metal": {"size": 2048, "metal": 0.75, "parts": {
+    "Metal": {"size": 1024, "metal": 0.75, "parts": {
         "Perch": {"src": ["Perch"], "tris": 1500},
         "LampIron": {"src": ["LampIron"], "tris": 4000},
     }},

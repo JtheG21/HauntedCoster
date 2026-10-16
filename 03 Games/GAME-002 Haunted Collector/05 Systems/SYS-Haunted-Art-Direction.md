@@ -5,7 +5,7 @@ type: system
 project: GAME-002
 status: proposed
 created: 2026-10-13
-updated: 2026-10-15
+updated: 2026-10-16
 tags:
   - game/art
   - engineering/pipeline
@@ -91,6 +91,8 @@ Every current asset was built from primitive parts (ADR-0007 "simple parts") and
 
 ## Third-party sources and credits
 - **Lantern Wisp base mesh (2026-10-15, TASK-0043 rev 1):** body and head generated with Meshy 6 Lite image-to-3D from the approved concept, on Meshy's free plan. Free-plan output is licensed **CC BY 4.0**: commercial use is allowed, and the game must credit Meshy (for example "Wisp base model generated with Meshy" in the experience description or credits). Approved by jg in chat on 2026-10-15; no money was spent. The source GLB stays outside the repo (`~/Roblox-Work/haunted/art/meshy/wisp_meshy_v1.glb`); `art/assets/wisp_hybrid.py` builds on it, and `creature_wisp_procedural` is the fully procedural fallback.
+
+- **Lantern Wisp imported textures (2026-10-16, approved by jg in chat):** the baked game parts (1024 maps) were imported through Studio's 3D Importer, uploading to jg's account, and filed under `ServerStorage.ImportedArt/creature_wisp` in the local test place `~/Roblox-Work/haunted/WispRev3.rbxl`, where `MeshBuild.imported` prefers them over the vertex-coloured build. Asset IDs (to rebuild without re-uploading): Body mesh 132058751370899, Head mesh 139559420312900, Eyes mesh 138061365221442, LampIron mesh 138538525494294, Perch mesh 75068377089870; Creature colour 136853848737865, Creature normal 72429941937717; Metal colour 90669118569125, Metal normal 114393961588486. `ImportedArt` lives in the place file, not in Rojo source: any place rebuilt from the repo needs these parts re-inserted (an `ImportedArt` model file in the repo is the open follow-up). LampGlow stays the in-game neon build.
 
 ## Trust boundary
 Art is client-side presentation. The server never reads it; colliders, prompts and lights stay server-built. Cosmetic appearance comes from replicated attributes the server sets after validation ([[TASK-0047-Cosmetics-Backend-And-Persistence]]).
