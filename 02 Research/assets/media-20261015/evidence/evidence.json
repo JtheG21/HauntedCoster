@@ -1,0 +1,396 @@
+{
+  "method": "Local Watch; direct review of scene and 3-second cue contact sheets. Times rounded by Watch; not frame-accurate. No raw transcript retained.",
+  "videos": [
+    {
+      "file": "1-v12044gd0000db6mtjfog65l7rpta4ug.mp4",
+      "scenes": [
+        {
+          "time": "00:00",
+          "reason": "first-frame",
+          "frame": "frame_0001.jpg"
+        },
+        {
+          "time": "00:07",
+          "reason": "scene-change",
+          "frame": "frame_0003.jpg"
+        },
+        {
+          "time": "00:09",
+          "reason": "scene-change",
+          "frame": "frame_0004.jpg"
+        },
+        {
+          "time": "00:11",
+          "reason": "scene-change",
+          "frame": "frame_0006.jpg"
+        },
+        {
+          "time": "00:11",
+          "reason": "scene-change",
+          "frame": "frame_0008.jpg"
+        },
+        {
+          "time": "00:11",
+          "reason": "scene-change",
+          "frame": "frame_0009.jpg"
+        },
+        {
+          "time": "00:11",
+          "reason": "scene-change",
+          "frame": "frame_0011.jpg"
+        },
+        {
+          "time": "00:12",
+          "reason": "scene-change",
+          "frame": "frame_0013.jpg"
+        },
+        {
+          "time": "00:12",
+          "reason": "scene-change",
+          "frame": "frame_0014.jpg"
+        },
+        {
+          "time": "00:20",
+          "reason": "scene-change",
+          "frame": "frame_0016.jpg"
+        }
+      ],
+      "sweep": [
+        {
+          "time": "00:00",
+          "reason": "transcript-cue",
+          "frame": "cue_0000.jpg"
+        },
+        {
+          "time": "00:03",
+          "reason": "transcript-cue",
+          "frame": "cue_0001.jpg"
+        },
+        {
+          "time": "00:06",
+          "reason": "transcript-cue",
+          "frame": "cue_0002.jpg"
+        },
+        {
+          "time": "00:09",
+          "reason": "transcript-cue",
+          "frame": "cue_0003.jpg"
+        },
+        {
+          "time": "00:12",
+          "reason": "transcript-cue",
+          "frame": "cue_0004.jpg"
+        },
+        {
+          "time": "00:15",
+          "reason": "transcript-cue",
+          "frame": "cue_0005.jpg"
+        },
+        {
+          "time": "00:18",
+          "reason": "transcript-cue",
+          "frame": "cue_0006.jpg"
+        },
+        {
+          "time": "00:21",
+          "reason": "transcript-cue",
+          "frame": "cue_0007.jpg"
+        }
+      ],
+      "scenes_sheet": "01-scenes.jpg",
+      "sweep_sheet": "01-sweep.jpg"
+    },
+    {
+      "file": "3-v15025gf0000db243rvog65i0oih547g.mp4",
+      "scenes": [
+        {
+          "time": "00:00",
+          "reason": "first-frame",
+          "frame": "frame_0001.jpg"
+        },
+        {
+          "time": "00:04",
+          "reason": "scene-change",
+          "frame": "frame_0003.jpg"
+        },
+        {
+          "time": "00:08",
+          "reason": "scene-change",
+          "frame": "frame_0006.jpg"
+        },
+        {
+          "time": "00:09",
+          "reason": "scene-change",
+          "frame": "frame_0008.jpg"
+        },
+        {
+          "time": "00:09",
+          "reason": "scene-change",
+          "frame": "frame_0010.jpg"
+        },
+        {
+          "time": "00:11",
+          "reason": "scene-change",
+          "frame": "frame_0013.jpg"
+        },
+        {
+          "time": "00:14",
+          "reason": "scene-change",
+          "frame": "frame_0015.jpg"
+        },
+        {
+          "time": "00:14",
+          "reason": "scene-change",
+          "frame": "frame_0017.jpg"
+        },
+        {
+          "time": "00:14",
+          "reason": "scene-change",
+          "frame": "frame_0020.jpg"
+        },
+        {
+          "time": "00:14",
+          "reason": "scene-change",
+          "frame": "frame_0022.jpg"
+        }
+      ],
+      "sweep": [
+        {
+          "time": "00:00",
+          "reason": "transcript-cue",
+          "frame": "cue_0000.jpg"
+        },
+        {
+          "time": "00:03",
+          "reason": "transcript-cue",
+          "frame": "cue_0001.jpg"
+        },
+        {
+          "time": "00:06",
+          "reason": "transcript-cue",
+          "frame": "cue_0002.jpg"
+        },
+        {
+          "time": "00:09",
+          "reason": "transcript-cue",
+          "frame": "cue_0003.jpg"
+        },
+        {
+          "time": "00:12",
+          "reason": "transcript-cue",
+          "frame": "cue_0004.jpg"
+        },
+        {
+          "time": "00:15",
+          "reason": "transcript-cue",
+          "frame": "cue_0005.jpg"
+        },
+        {
+          "time": "00:18",
+          "reason": "transcript-cue",
+          "frame": "cue_0006.jpg"
+        },
+        {
+          "time": "00:21",
+          "reason": "transcript-cue",
+          "frame": "cue_0007.jpg"
+        }
+      ],
+      "scenes_sheet": "03-scenes.jpg",
+      "sweep_sheet": "03-sweep.jpg"
+    },
+    {
+      "file": "4-v12044gd0000db8250vog65rdnfli080.mp4",
+      "scenes": [
+        {
+          "time": "00:00",
+          "reason": "first-frame",
+          "frame": "frame_0001.jpg"
+        },
+        {
+          "time": "00:00",
+          "reason": "scene-change",
+          "frame": "frame_0004.jpg"
+        },
+        {
+          "time": "00:01",
+          "reason": "scene-change",
+          "frame": "frame_0007.jpg"
+        },
+        {
+          "time": "00:03",
+          "reason": "scene-change",
+          "frame": "frame_0009.jpg"
+        },
+        {
+          "time": "00:07",
+          "reason": "scene-change",
+          "frame": "frame_0012.jpg"
+        },
+        {
+          "time": "00:09",
+          "reason": "scene-change",
+          "frame": "frame_0015.jpg"
+        },
+        {
+          "time": "00:12",
+          "reason": "scene-change",
+          "frame": "frame_0018.jpg"
+        },
+        {
+          "time": "00:14",
+          "reason": "scene-change",
+          "frame": "frame_0020.jpg"
+        },
+        {
+          "time": "00:21",
+          "reason": "scene-change",
+          "frame": "frame_0023.jpg"
+        },
+        {
+          "time": "00:24",
+          "reason": "scene-change",
+          "frame": "frame_0026.jpg"
+        }
+      ],
+      "sweep": [
+        {
+          "time": "00:00",
+          "reason": "transcript-cue",
+          "frame": "cue_0000.jpg"
+        },
+        {
+          "time": "00:03",
+          "reason": "transcript-cue",
+          "frame": "cue_0001.jpg"
+        },
+        {
+          "time": "00:06",
+          "reason": "transcript-cue",
+          "frame": "cue_0002.jpg"
+        },
+        {
+          "time": "00:09",
+          "reason": "transcript-cue",
+          "frame": "cue_0003.jpg"
+        },
+        {
+          "time": "00:12",
+          "reason": "transcript-cue",
+          "frame": "cue_0004.jpg"
+        },
+        {
+          "time": "00:15",
+          "reason": "transcript-cue",
+          "frame": "cue_0005.jpg"
+        },
+        {
+          "time": "00:18",
+          "reason": "transcript-cue",
+          "frame": "cue_0006.jpg"
+        },
+        {
+          "time": "00:21",
+          "reason": "transcript-cue",
+          "frame": "cue_0007.jpg"
+        }
+      ],
+      "scenes_sheet": "04-scenes.jpg",
+      "sweep_sheet": "04-sweep.jpg"
+    },
+    {
+      "file": "5-v15044gf0000db6mtpfog65l4b12hv60.mp4",
+      "scenes": [
+        {
+          "time": "00:00",
+          "reason": "uniform",
+          "frame": "frame_0001.jpg"
+        },
+        {
+          "time": "00:03",
+          "reason": "uniform",
+          "frame": "frame_0002.jpg"
+        },
+        {
+          "time": "00:06",
+          "reason": "uniform",
+          "frame": "frame_0003.jpg"
+        },
+        {
+          "time": "00:09",
+          "reason": "uniform",
+          "frame": "frame_0004.jpg"
+        },
+        {
+          "time": "00:11",
+          "reason": "uniform",
+          "frame": "frame_0005.jpg"
+        },
+        {
+          "time": "00:14",
+          "reason": "uniform",
+          "frame": "frame_0006.jpg"
+        },
+        {
+          "time": "00:17",
+          "reason": "uniform",
+          "frame": "frame_0007.jpg"
+        },
+        {
+          "time": "00:20",
+          "reason": "uniform",
+          "frame": "frame_0008.jpg"
+        },
+        {
+          "time": "00:23",
+          "reason": "uniform",
+          "frame": "frame_0009.jpg"
+        }
+      ],
+      "sweep": [
+        {
+          "time": "00:00",
+          "reason": "transcript-cue",
+          "frame": "cue_0000.jpg"
+        },
+        {
+          "time": "00:03",
+          "reason": "transcript-cue",
+          "frame": "cue_0001.jpg"
+        },
+        {
+          "time": "00:06",
+          "reason": "transcript-cue",
+          "frame": "cue_0002.jpg"
+        },
+        {
+          "time": "00:09",
+          "reason": "transcript-cue",
+          "frame": "cue_0003.jpg"
+        },
+        {
+          "time": "00:12",
+          "reason": "transcript-cue",
+          "frame": "cue_0004.jpg"
+        },
+        {
+          "time": "00:15",
+          "reason": "transcript-cue",
+          "frame": "cue_0005.jpg"
+        },
+        {
+          "time": "00:18",
+          "reason": "transcript-cue",
+          "frame": "cue_0006.jpg"
+        },
+        {
+          "time": "00:21",
+          "reason": "transcript-cue",
+          "frame": "cue_0007.jpg"
+        }
+      ],
+      "scenes_sheet": "05-scenes.jpg",
+      "sweep_sheet": "05-sweep.jpg"
+    }
+  ]
+}

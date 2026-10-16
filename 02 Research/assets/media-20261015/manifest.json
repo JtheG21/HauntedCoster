@@ -1,0 +1,60 @@
+{
+  "accessed": "2026-10-15",
+  "source": "jg chat attachments; original platform URLs and licences not supplied",
+  "files": [
+    {
+      "received_filename": "1-v12044gd0000db6mtjfog65l7rpta4ug.mp4",
+      "vault_path": "02 Research/assets/media-20261015/1-v12044gd0000db6mtjfog65l7rpta4ug.mp4",
+      "bytes": 5355029,
+      "sha256": "07ddc4563d095077bdedf6df7f339c0df592c3fb50e98f8a9c8561f5af79527b"
+    },
+    {
+      "received_filename": "2-Photo-2.jpg",
+      "vault_path": "10 References/05 Misc/Media-20261015/2-Photo-2.jpg",
+      "bytes": 107026,
+      "sha256": "d125ee37d26b36a200c08bec0441d50f7b23f67e1822c4bd8118f42de41defa5"
+    },
+    {
+      "received_filename": "3-v15025gf0000db243rvog65i0oih547g.mp4",
+      "vault_path": "02 Research/assets/media-20261015/3-v15025gf0000db243rvog65i0oih547g.mp4",
+      "bytes": 4232550,
+      "sha256": "be56afdcbed3c8ab9130ca2fc61c737f331cb9393d741a493c9b3d8859062cea"
+    },
+    {
+      "received_filename": "4-v12044gd0000db8250vog65rdnfli080.mp4",
+      "vault_path": "02 Research/assets/media-20261015/4-v12044gd0000db8250vog65rdnfli080.mp4",
+      "bytes": 8048684,
+      "sha256": "f6c4c9c91175da8992ddab08e39a9faccb2232df0935386f486d975b0780e633"
+    },
+    {
+      "received_filename": "5-v15044gf0000db6mtpfog65l4b12hv60.mp4",
+      "vault_path": "02 Research/assets/media-20261015/5-v15044gf0000db6mtpfog65l4b12hv60.mp4",
+      "bytes": 3194300,
+      "sha256": "a53114f8e01e3bc106983d239310479a743f1b9de7c58247a90eb2014cd1573d"
+    },
+    {
+      "received_filename": "6-Photo-6.jpg",
+      "vault_path": "10 References/05 Misc/Media-20261015/6-Photo-6.jpg",
+      "bytes": 127410,
+      "sha256": "29c6c1592e782fbc2ad54a56e3e61bf2956d8860db77c2e236eef14575c79804"
+    },
+    {
+      "received_filename": "7-Photo-7.jpg",
+      "vault_path": "10 References/05 Misc/Media-20261015/7-Photo-7.jpg",
+      "bytes": 130231,
+      "sha256": "5f63e294010d225d26f568018cfa2a817e0e485716380c48f34cfd9e4cf5708f"
+    },
+    {
+      "received_filename": "8-Photo-8.jpg",
+      "vault_path": "10 References/05 Misc/Media-20261015/8-Photo-8.jpg",
+      "bytes": 125179,
+      "sha256": "fca281688faf07759acc778707de71ad2ef94dd11f49abd26ef39e4830da229b"
+    },
+    {
+      "received_filename": "9-Photo-9.jpg",
+      "vault_path": "10 References/05 Misc/Media-20261015/9-Photo-9.jpg",
+      "bytes": 112757,
+      "sha256": "4adee84798a13db987c77da8ee19a6cac176b17bc8c13cf36af02fcea84b2d0d"
+    }
+  ]
+}

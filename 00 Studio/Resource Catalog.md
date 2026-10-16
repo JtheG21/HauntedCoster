@@ -4,7 +4,7 @@ title: Resource Catalog
 type: index
 status: approved
 created: 2026-10-12
-updated: 2026-10-14
+updated: 2026-10-15
 tags:
   - studio/catalog
 related:
@@ -64,7 +64,7 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 |---|---|---|---|---|
 | Sound sourcing (`roblox-sfx`) | `.claude/skills/roblox-sfx/` | verified (sourcing and probing) | TASK-0040 shortlist: 90 candidates probed in Studio | Can't hear; human picks. Wiring output not yet merged |
 | Map plan and prover (`roblox-map`) | `.claude/skills/roblox-map/` | verified | [[TASK-0012-Graveyard-And-Landmarks]], [[AUD-20261011-TASK-0012-01]] | Never run its Studio bootstrap on the Rg1 or Haunted places |
-| Video watching (`watch`) | user skill | implemented | Dependencies installed 2026-10-12 | Not yet run on a real video |
+| Video watching (`watch`) | user skill | verified (four local clips) | [[RSH-20261015-Individual-Media-Intake]]: local frames plus WhisperX; timestamped sheets | Short local MP4s only in this check; visual sampling is not continuous playback; hosted non-YouTube download support untested |
 | Blender pipeline | [[Blender Pipeline]], `scripts/blender/export_for_roblox.py`, Blender 5.1.0 | verified | Headless export tests; Studio import exact in FBX and glb ([[LES-0007-Blender-Studio-Scale]]) | Static meshes only; rigs and animation are untested (animation plugin not installed yet) |
 
 ### Code patterns
@@ -86,3 +86,5 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | GAME-002 art direction | GAME-002 world code | implemented | Accepted for now; a full revamp is expected (jg, 2026-10-12). Not a reusable standard |
 | Map screenshots (7) | `10 References/02 Map/` ([[Map References]]) | captured | On hold; context not written |
 | GAME-002 sound bank | TASK-0040 (in progress) | proposed | Add here once merged |
+
+User-supplied local media intake (nine separate assessments, captured references only): [[RSH-20261015-Individual-Media-Intake]].

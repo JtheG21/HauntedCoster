@@ -20,9 +20,15 @@ One row per video note. This is a lookup table, not a synthesis: each note stand
 - **Promotion:** several notes agreeing on something concrete can become a `LES-` or `ADR-` candidate, but only with evidence and jg's approval. Nothing is promoted automatically.
 - **Batching:** send several links at once; each gets its own note, and one PR carries the batch.
 
+Local attachment intake (four individually assessed videos and five individually assessed images): [[RSH-20261015-Individual-Media-Intake]].
+
 ## Notes by topic
 | Topic | Note | Confidence | Good for | Not good for |
 |---|---|---|---|---|
+| VFX: showcase | [[RSH-20261015-Blender-Elemental-VFX-Showcase]] | medium (visuals; no speech detected) | Local effect footprints and layered silhouettes | Blender export method, performance |
+| VFX: transformation | [[RSH-20261015-Transformation-Impact-VFX]] | medium (visuals; no speech detected) | Buildup, peak and recovery contrast | Frame-accurate timing, flash accessibility |
+| Environment / game showcase | [[RSH-20261015-Dark-Fantasy-RNG-Exploration]] | medium | Lighting contrast, paths and landmarks | Economy, RNG balance, present release status |
+| Cutscene / AI claim | [[RSH-20261015-Kraken-Reveal-AI-Claim]] | medium | Partial reveal, face and player-relative scale | AI attribution, build speed, playable encounter |
 | 3D: rigging / import | [[RSH-20261014-Mixamo-Custom-Rig-And-Camera-Video]] | medium | Order of import, root part, animation scale and HipHeight checks | Model quality, texturing |
 | 3D: rigging / import | [[RSH-20261014-Mixamo-Skinned-Mesh-Character-Video]] | medium | Skinned-mesh character import checks | Form or finish quality |
 | 3D: rigging / import | [[RSH-20261014-Dynamic-Head-Neck-Joint-Fix-Video]] | medium | Missing "Neck" constraint, accessory re-attachment, ragdoll joints | Anything beyond R15 heads |
