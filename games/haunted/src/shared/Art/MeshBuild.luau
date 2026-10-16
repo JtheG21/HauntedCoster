@@ -100,8 +100,11 @@ end
 function MeshBuild.imported(value: StringValue): MeshPart?
 	local root = game:GetService("ServerStorage"):FindFirstChild("ImportedArt")
 	local asset = root and value.Parent and root:FindFirstChild(value.Parent.Name)
+	if string.sub(value.Name, -5) == "@lod1" then
+		return nil -- LOD1 twins always come from HCM1
+	end
 	local src = asset and asset:FindFirstChild(value.Name)
-	if not (src and src:IsA("MeshPart")) then
+	if not (src and src:IsA("MeshPart")) or src.MeshId == "" then
 		return nil
 	end
 	local part = finish(src:Clone(), value)

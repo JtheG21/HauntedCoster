@@ -15,7 +15,7 @@ related:
   - "[[SYS-Haunted-Monetization-UI]]"
   - "[[3D Model Quality Baseline]]"
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-16
 tags:
   - workflow/task
 ---
@@ -73,6 +73,7 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 **Checks:** pre-commit `check.sh` steps pass (143 specs). Studio, stacked head: FullLoop 85/85 (twice, after the bake gating), CarryGuard 21/21, Retaliation 36/36. Client mesh memory with lamps + creatures 2.0–2.5 MB.
 
 **Not verified:** animation was checked for errors and poses in stills only, not judged in motion by a person; triangle budgets were raised to ≤ 8.5k (Hound 8.3k) and recorded in [[SYS-Haunted-Art-Direction]].
+- 2026-10-16 rev 1 (Claude): Lantern Wisp rebuilt from a Meshy 6 Lite base (CC BY 4.0), repainted and baked to PBR maps; 8,415 tris LOD0 / 3,165 LOD1; head split for the neck turn; textured parts imported and kept in `games/haunted/assets/ImportedArt.rbxm`. Details and asset IDs: [[SYS-Haunted-Art-Direction]]. Audit pass with minor findings (blank-mesh fallback guard, Meshy credit before publish, note updates), addressed. Awaiting Codex review and jg's acceptance.
 
 ## Audits
 - [[AUD-20261013-TASK-0043-01]]: pass. Fixed on the TASK-0044 branch: finding 1 (Spectral shells were drawn at all distances, near-range cost up to 14.3k on the Hound) — shells are now near-only; 2 (step guarded); 3 (re-check after build); 4 (Root timeout warns); 5 (LOD hysteresis, staggered throttle); 7 (Lamp rides ArmL, Jaw/ears ride Head); 8 (separate start guards); 9 (ArtShowcase refuses non-memory profiles); 10 (Hitbox comment). Open: 6 (gait speed from a tweened Root, judge in motion), 11 (nits).
