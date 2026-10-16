@@ -199,6 +199,74 @@ def lamp_details(lamp):
     return rivets, rims, glass
 
 
+def separate_head(body, neck_z, x_arm, z_arm, band=0.12):
+    """Splits the painted head off the body for the neck animation, keeping its vertex colours (Blender's own
+    separate). A thin band of neck faces below the cut is copied into the head as well, so the overlap hides the
+    seam while the head turns. The raised right arm stays with the body."""
+    def meshy(c):  # back to Meshy units, where the head was measured
+        return Vector(((c.x) / Hy.S + Hy.TRAY_C.x, c.y / Hy.S + Hy.TRAY_C.y, (c.z - W.TRAY_Z) / Hy.S + Hy.TRAY_C.z))
+
+    def in_neck(m, r=0.055):
+        return math.hypot(m.x - Hy.NECK_M.x, m.y - Hy.NECK_M.y) < r
+
+    def is_cand(c):
+        m = meshy(c)
+        chin = m.y < Hy.NECK_M.y - 0.03 and abs(m.x - 0.05) < 0.26
+        return m.z > Hy.NECK_M.z + 0.02 or (m.z > Hy.NECK_M.z - 0.02 and (in_neck(m) or chin))
+
+    def head_island():
+        """Candidate faces connected to the top of the head (the raised shoulder is its own island)."""
+        core.activate(body)
+        bpy.ops.object.mode_set(mode="EDIT")
+        bm = bmesh.from_edit_mesh(body.data)
+        bm.faces.ensure_lookup_table()
+        cand = {f.index for f in bm.faces if is_cand(f.calc_center_median())}
+        seed = max(cand, key=lambda k: bm.faces[k].calc_center_median().z)
+        keep, todo = {seed}, [seed]
+        while todo:
+            f = bm.faces[todo.pop()]
+            for e in f.edges:
+                for g in e.link_faces:
+                    if g.index in cand and g.index not in keep:
+                        keep.add(g.index)
+                        todo.append(g.index)
+        bpy.ops.object.mode_set(mode="OBJECT")
+        return keep
+
+    island = head_island()
+
+    def is_head(c):
+        return False  # replaced by the island selection below
+
+    def is_band(c):
+        m = meshy(c)
+        return Hy.NECK_M.z - band / Hy.S < m.z <= Hy.NECK_M.z and in_neck(m, 0.06)
+
+    def select(fn, ids=None):
+        core.activate(body)
+        bpy.ops.object.mode_set(mode="EDIT")
+        bm = bmesh.from_edit_mesh(body.data)
+        for f in bm.faces:
+            f.select = (f.index in ids) if ids is not None else fn(f.calc_center_median())
+        bmesh.update_edit_mesh(body.data)
+
+    before = set(bpy.data.objects)
+    select(is_band)
+    bpy.ops.mesh.duplicate()
+    bpy.ops.mesh.separate(type="SELECTED")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    band_obj = next(iter(set(bpy.data.objects) - before), None)
+    before = set(bpy.data.objects)
+    select(None, island)
+    bpy.ops.mesh.separate(type="SELECTED")
+    bpy.ops.object.mode_set(mode="OBJECT")
+    head = next(iter(set(bpy.data.objects) - before))
+    if band_obj:
+        head = core.join([head, band_obj], "Head")
+    head.name = "Head"
+    return head
+
+
 def lantern_wisp_meshy():
     bpy.ops.import_scene.gltf(filepath=str(Hy.MESHY))
     src = [o for o in bpy.context.scene.objects if o.type == "MESH"]
@@ -383,8 +451,7 @@ def lantern_wisp_meshy():
         core.uv_box(o, 1.2)
     W.custom_paint([creature] + lids, lambda p, n, o, cv, op: lid_col(p, n, o, cv, op) if o.name.startswith("Lid")
                    else cloth_col(p, n, o, cv, op), ao_samples=20, ao_distance=0.45)
-    if lids:
-        creature = core.join([creature] + lids, "Body")
+    # (the lids join the head once it is split off, so they turn with it)
     if eyes:
         core.subdivide(eyes, 2)  # fine enough to carry the painted slit and its stitches
         W.custom_paint([eyes], eye_col, ao_samples=10, ao_distance=0.2)
@@ -404,9 +471,17 @@ def lantern_wisp_meshy():
 
     if eyes:
         core.smooth(eyes, 180)
+    # The head: split off (after painting) so the client can turn it about the neck; eyes and lids ride with it.
+    x_arm = (-0.15 - Hy.TRAY_C.x) * Hy.S
+    z_arm = (0.68 - Hy.TRAY_C.z) * Hy.S + W.TRAY_Z
+    head = separate_head(creature, neck.z, x_arm, z_arm)
+    if lids:
+        head = core.join([head] + lids, "Head")
     core.tag(creature, "Fabric", part="Body")
+    core.tag(head, "Fabric", part="Head", pivot=tuple(neck))
+    core.smooth(head, 180)
     if eyes:
-        core.tag(eyes, "SmoothPlastic", part="Eyes", lod=False)  # rides with the body (the head is not split)
+        core.tag(eyes, "SmoothPlastic", part="Face", pivot=tuple(neck), lod=False)
     core.tag(lamp, "Metal", part="Lamp", pivot=tuple(chain_top))
     if panes:
         core.tag(panes, "Neon", part="LampGlow", pivot=tuple(chain_top), lod=False)
@@ -427,7 +502,8 @@ ASSETS = {"creature_wisp": lantern_wisp_meshy}
 
 BAKE = {"creature_wisp": {
     "Creature": {"size": 2048, "metal": 0.0, "parts": {
-        "Body": {"src": ["Body"], "tris": 9000},
+        "Body": {"src": ["Body"], "tris": 6000},
+        "Head": {"src": ["Head"], "tris": 5000},
         "Eyes": {"src": ["Eyes"], "tris": 600},
     }},
     "Metal": {"size": 2048, "metal": 0.75, "parts": {
