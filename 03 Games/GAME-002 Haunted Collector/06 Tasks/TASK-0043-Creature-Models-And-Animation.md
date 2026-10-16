@@ -89,6 +89,7 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 **Report back with:** verdict, findings with file:line, the checks you ran and their output, and what is unverified.
 
 ## Audits
+- 2026-10-16 rev 1 Codex review (aad6906..21e9db1): **pass**, one minor non-blocking finding. `MeshBuild.imported` accepts any non-empty MeshId, so a private or moderated mesh would render blank instead of falling back to HCM1. Fix later by checking the PreloadAsync callback status (failed downloads don't throw). Codex verified the missing, wrong-class and empty-ID fallbacks, the `@lod1` guard, that the Rojo build includes the five meshes and their SurfaceAppearances, the budget (8,415 / 3,165, with LOD1 including 919 tris from Eyes and LampGlow kept at distance), and the decimate paths. Unverified: a fresh Blender bake, live Rojo `.rbxm` sync, loading under another owner, animation in motion.
 - [[AUD-20261013-TASK-0043-01]]: pass. Fixed on the TASK-0044 branch: finding 1 (Spectral shells were drawn at all distances, near-range cost up to 14.3k on the Hound) — shells are now near-only; 2 (step guarded); 3 (re-check after build); 4 (Root timeout warns); 5 (LOD hysteresis, staggered throttle); 7 (Lamp rides ArmL, Jaw/ears ride Head); 8 (separate start guards); 9 (ArtShowcase refuses non-memory profiles); 10 (Hitbox comment). Open: 6 (gait speed from a tweened Root, judge in motion), 11 (nits).
 
 ## Outcome
