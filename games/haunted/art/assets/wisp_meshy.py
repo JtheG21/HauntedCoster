@@ -19,7 +19,7 @@ from mathutils import Matrix, Vector, noise
 
 from assets import wisp as W
 from assets import wisp_hybrid as Hy
-from hcart import core, paint, shapes
+from hcart import core, paint, shapes, sourced, surface
 
 H = paint.hex3
 
@@ -29,70 +29,6 @@ CHAIN_TOP = Vector((-0.27, 0.03, -0.33))  # the lantern swings from here
 LAMP_C = (-0.24, 0.018)  # lantern axis
 LAMP_ANGLE = math.radians(46)  # its square body is turned corner-on
 POLE_FACE_R = 0.036  # faces this close to the pole axis are the pole
-
-
-def _split(obj, keep_face, name, material):
-    """Moves the faces where keep_face(centre, normal) into a new object; returns it (or None)."""
-    bm = bmesh.new()
-    bm.from_mesh(obj.data)
-    faces = [f for f in bm.faces if keep_face(f.calc_center_median(), f.normal)]
-    if not faces:
-        bm.free()
-        return None
-    nb = bmesh.new()
-    vmap = {}
-    for f in faces:
-        vs = []
-        for v in f.verts:
-            if v not in vmap:
-                vmap[v] = nb.verts.new(v.co)
-            vs.append(vmap[v])
-        nb.faces.new(vs)
-    bmesh.ops.delete(bm, geom=faces, context="FACES_ONLY")
-    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
-    bm.to_mesh(obj.data)
-    bm.free()
-    obj.data.update()
-    return core.obj_from_bmesh(name, nb, material)
-
-
-def relief_map(obj, iters=30):
-    """Per-vertex relief: how far each vertex stands out of (+) or sinks into (-) a smoothed copy of the surface.
-    Meshy's stitches and tooth loops stand out; the gaps between them sink. More reliable than curvature here."""
-    import numpy as np
-    me = obj.data
-    n = len(me.vertices)
-    co = np.empty(n * 3)
-    me.vertices.foreach_get("co", co)
-    co = co.reshape(n, 3)
-    ev = np.empty(len(me.edges) * 2, dtype=np.int64)
-    me.edges.foreach_get("vertices", ev)
-    ev = ev.reshape(-1, 2)
-    deg = np.bincount(ev.ravel(), minlength=n).astype(float)
-    sm = co.copy()
-    for _ in range(iters):
-        acc = np.zeros_like(sm)
-        np.add.at(acc, ev[:, 0], sm[ev[:, 1]])
-        np.add.at(acc, ev[:, 1], sm[ev[:, 0]])
-        sm = 0.5 * sm + 0.5 * acc / np.maximum(deg, 1)[:, None]
-    nrm = np.empty(n * 3)
-    me.vertices.foreach_get("normal", nrm)
-    nrm = nrm.reshape(n, 3)
-    rel = ((co - sm) * nrm).sum(1)
-    base = rel.copy()  # subtract the slow, curvature-driven part so only local bumps and dips remain
-    for _ in range(iters):
-        acc = np.zeros(n)
-        np.add.at(acc, ev[:, 0], base[ev[:, 1]])
-        np.add.at(acc, ev[:, 1], base[ev[:, 0]])
-        base = 0.5 * base + 0.5 * acc / np.maximum(deg, 1)
-    rel = rel - base
-    mw = obj.matrix_world
-    from mathutils.kdtree import KDTree
-    kd = KDTree(n)
-    for i in range(n):
-        kd.insert(mw @ Vector(co[i]), i)
-    kd.balance()
-    return kd, rel
 
 
 def _lamp_r(p):
@@ -200,9 +136,8 @@ def lamp_details(lamp):
 
 
 def separate_head(body, neck_z, x_arm, z_arm, band=0.12):
-    """Splits the painted head off the body for the neck animation, keeping its vertex colours (Blender's own
-    separate). A thin band of neck faces below the cut is copied into the head as well, so the overlap hides the
-    seam while the head turns. The raised right arm stays with the body."""
+    """The Wisp's head and neck-band tests for sourced.split_head (measured in Meshy units). The raised right arm
+    crosses the cut height but isn't connected to the head island, so it stays with the body."""
     def meshy(c):  # back to Meshy units, where the head was measured
         return Vector(((c.x) / Hy.S + Hy.TRAY_C.x, c.y / Hy.S + Hy.TRAY_C.y, (c.z - W.TRAY_Z) / Hy.S + Hy.TRAY_C.z))
 
@@ -214,95 +149,24 @@ def separate_head(body, neck_z, x_arm, z_arm, band=0.12):
         chin = m.y < Hy.NECK_M.y - 0.03 and abs(m.x - 0.05) < 0.26
         return m.z > Hy.NECK_M.z + 0.02 or (m.z > Hy.NECK_M.z - 0.02 and (in_neck(m) or chin))
 
-    def head_island():
-        """Candidate faces connected to the top of the head (the raised shoulder is its own island)."""
-        core.activate(body)
-        bpy.ops.object.mode_set(mode="EDIT")
-        bm = bmesh.from_edit_mesh(body.data)
-        bm.faces.ensure_lookup_table()
-        cand = {f.index for f in bm.faces if is_cand(f.calc_center_median())}
-        seed = max(cand, key=lambda k: bm.faces[k].calc_center_median().z)
-        keep, todo = {seed}, [seed]
-        while todo:
-            f = bm.faces[todo.pop()]
-            for e in f.edges:
-                for g in e.link_faces:
-                    if g.index in cand and g.index not in keep:
-                        keep.add(g.index)
-                        todo.append(g.index)
-        bpy.ops.object.mode_set(mode="OBJECT")
-        return keep
-
-    island = head_island()
-
-    def is_head(c):
-        return False  # replaced by the island selection below
-
     def is_band(c):
         m = meshy(c)
         return Hy.NECK_M.z - band / Hy.S < m.z <= Hy.NECK_M.z and in_neck(m, 0.06)
 
-    def select(fn, ids=None):
-        core.activate(body)
-        bpy.ops.object.mode_set(mode="EDIT")
-        bm = bmesh.from_edit_mesh(body.data)
-        for f in bm.faces:
-            f.select = (f.index in ids) if ids is not None else fn(f.calc_center_median())
-        bmesh.update_edit_mesh(body.data)
-
-    before = set(bpy.data.objects)
-    select(is_band)
-    bpy.ops.mesh.duplicate()
-    bpy.ops.mesh.separate(type="SELECTED")
-    bpy.ops.object.mode_set(mode="OBJECT")
-    band_obj = next(iter(set(bpy.data.objects) - before), None)
-    before = set(bpy.data.objects)
-    select(None, island)
-    bpy.ops.mesh.separate(type="SELECTED")
-    bpy.ops.object.mode_set(mode="OBJECT")
-    head = next(iter(set(bpy.data.objects) - before))
-    if band_obj:
-        head = core.join([head, band_obj], "Head")
-    head.name = "Head"
-    return head
+    return sourced.split_head(body, is_cand, is_band)
 
 
 def lantern_wisp_meshy():
-    bpy.ops.import_scene.gltf(filepath=str(Hy.MESHY))
-    src = [o for o in bpy.context.scene.objects if o.type == "MESH"]
-    mesh = core.join(src, "Meshy")
-    core.apply_transform(mesh)
-    mesh.data.materials.clear()
-    core.activate(mesh)
-    bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.mesh.select_all(action="SELECT")
-    bpy.ops.mesh.separate(type="LOOSE")
-    bpy.ops.object.mode_set(mode="OBJECT")
-    creature, lamp = sorted([o for o in bpy.context.scene.objects if o.type == "MESH"], key=lambda o: -len(o.data.vertices))[:2]
+    creature, lamp = sourced.separate_loose(sourced.load_glb(Hy.MESHY, "Meshy", weld=None))[:2]
     creature.name, lamp.name = "Body", "LampIron"
 
     # Pole axis, fitted to the pole's own vertices.
-    import numpy as np
-    vs = [creature.matrix_world @ v.co for v in creature.data.vertices]
-    a0, b0 = Hy.POLE_TIPS
-    ax0 = (b0 - a0).normalized()
-    near = [p for p in vs if (p - (a0 + ax0 * (p - a0).dot(ax0))).length < 0.035]
-    pc = sum(near, Vector()) / len(near)
-    ax = Vector(np.linalg.svd(np.array([tuple(p - pc) for p in near]), full_matrices=False)[2][0])
+    pc, ax = sourced.fit_axis(creature, *Hy.POLE_TIPS, 0.035)
+    pole_d = sourced.axis_distance(pc, ax)
 
-    def pole_d(p):
-        return (p - (pc + ax * (p - pc).dot(ax))).length
-
-    eyes_m = []
-    tree = __import__("mathutils").bvhtree.BVHTree.FromObject(creature, bpy.context.evaluated_depsgraph_get())
-    for (x, z), r in Hy.EYES_M:
-        loc, _, _, _ = tree.ray_cast(Vector((x, -2.0, z)), Vector((0, 1, 0)))
-        eyes_m.append((loc, r))
-    grin_m = []
-    for x, z in Hy.GRIN_OLD:
-        loc, _, _, _ = tree.ray_cast(Vector((x, -2.0, z)), Vector((0, 1, 0)))
-        if loc is not None:
-            grin_m.append(loc)
+    tree = sourced.bvh(creature)
+    eyes_m = list(zip(sourced.hits_from_front(tree, [xz for xz, _ in Hy.EYES_M]), [r for _, r in Hy.EYES_M]))
+    grin_m = sourced.hits_from_front(tree, Hy.GRIN_OLD)
 
     # Puffy cloth lids round Meshy's eye lumps (a light touch: a ring on the surface, heavier along the top).
     lids = []
@@ -322,9 +186,9 @@ def lantern_wisp_meshy():
         core.smooth(lid, 180)
         lids.append(lid)
 
-    pole = _split(creature, lambda c, n: pole_d(c) < POLE_FACE_R, "Pole", "Metal")
-    eyes = _split(creature, lambda c, n: any((c - p).length < r * 0.95 for p, r in eyes_m), "Eyes", "SmoothPlastic")
-    tray = _split(lamp, lambda c, n: c.z > TRAY_SPLIT_Z, "Tray", "Metal")
+    pole = sourced.split_faces(creature, lambda c, n: pole_d(c) < POLE_FACE_R, "Pole", "Metal")
+    eyes = sourced.split_faces(creature, lambda c, n: any((c - p).length < r * 0.95 for p, r in eyes_m), "Eyes", "SmoothPlastic")
+    tray = sourced.split_faces(lamp, lambda c, n: c.z > TRAY_SPLIT_Z, "Tray", "Metal")
 
     def is_pane(c, n):
         if not (-0.86 < c.z < -0.62) or abs(n.z) > 0.7:
@@ -350,7 +214,7 @@ def lantern_wisp_meshy():
     chain_top = m @ CHAIN_TOP
     neck = m @ Hy.NECK_M
 
-    lo, hi = Hy._bounds([creature])
+    lo, hi = sourced.bounds([creature])
     head_c = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, (m @ Hy.NECK_M).z + 0.85))
     up_back = Vector((-0.15, 0.5, 0.85)).normalized()
 
@@ -360,13 +224,9 @@ def lantern_wisp_meshy():
         return (p - (pcd + axd * (p - pcd).dot(axd))).length
 
     def grin_dist(p):
-        return Hy._seg_dist(p, grin_d)
+        return sourced.seg_dist(p, grin_d)
 
-    rel_kd, rel = relief_map(creature)
-    rel_scale = 0.012  # relief that counts as a full stitch or loop (design units)
-
-    def relief(p):
-        return rel[rel_kd.find(p)[1]] / rel_scale
+    relief = sourced.Relief(creature, scale=0.012)  # 1.0 = a full stitch or loop (design units)
 
     def cloth_col(p, n, o, cv, op):
         patch = W.fbm(p, 0.55, 2, 41.0)
@@ -398,11 +258,8 @@ def lantern_wisp_meshy():
                 if r * 0.9 < e < r * 1.35:
                     c = paint.mix(c, W.CREVICE, 0.55 * (1 - abs(e - r * 1.1) / (r * 0.25)))
         elif pole_dd(p) > 0.2:  # (not the hands round the pole: their knuckles are not stitches)
-            rl = relief(p)
-            if rl > 0.35:  # Meshy's stitch ridges, as dark thread
-                c = paint.mix(c, paint.mix(W.THREADS["brown"], W.THREADS["black"], 0.35), min(0.85, (rl - 0.35) * 1.5))
-            elif rl < -0.4:  # the sunk seam beside them
-                c = paint.mix(c, W.CREVICE, min(0.6, (-rl - 0.4)))
+            # Meshy's stitch ridges as dark thread, and the sunk seam beside them
+            c = surface.relief_stitches(c, relief(p), paint.mix(W.THREADS["brown"], W.THREADS["black"], 0.35), W.CREVICE)
         dirt = max(0.0, min(1.0, (W.TRAY_Z + 0.9 - p.z) / 1.4)) * (0.75 + 0.25 * W.fbm(p, 0.1, 2, 31.0))
         return paint.mix(c, paint.mix(W.STAIN, W.CREVICE, 0.45), dirt * 0.45)
 
@@ -431,22 +288,7 @@ def lantern_wisp_meshy():
         base = paint.mix(Hy.metal_col(p, n, o, cv, op), W.IRON, 0.35)  # darker iron than the procedural lamp
         if o.name == "Tray":
             return base
-        # Weathering: blotchy dark iron, rust patches and runs, teal patina in the recesses, bright worn copper edges.
-        blot = W.fbm(p, 0.35, 3, 51.0)
-        base = paint.mix(base, H("23272a"), 0.45)  # blue-grey iron under the bronze
-        base = paint.mix(base, H("111416"), max(0.0, min(0.8, (blot + 0.05) * 2.2)))
-        rust = W.fbm(p, 0.13, 3, 57.0) + 0.3 * noise.noise(p / 0.025)
-        if rust > 0.18:
-            base = paint.mix(base, paint.mix(H("6e3318"), H("9a5228"), 0.5 + 0.5 * noise.noise(p / 0.015)), min(0.65, (rust - 0.18) * 2.6))
-        run = noise.noise(Vector((p.x * 30, p.y * 30, p.z * 2.5)))
-        if run > 0.35 and abs(n.z) < 0.5:
-            base = paint.mix(base, H("4a2614"), min(0.5, (run - 0.35) * 2.0))
-        if op < 0.75:
-            base = paint.mix(base, paint.mix(W.VERDIGRIS, H("3f7a70"), 0.5), min(0.8, (0.8 - op) * 2.2))
-        if cv > 0.35:
-            base = paint.mix(base, paint.mix(W.COPPER, H("c58a5a"), 0.4), min(0.8, (cv - 0.35) * 2.5))
-        if noise.noise(p / 0.004) > 0.4:
-            base = paint.mul(base, 0.6)  # pitting
+        base = surface.weathered_iron(base, p, n, cv, op)
         return base
 
     for o in parts:
@@ -493,34 +335,17 @@ def lantern_wisp_meshy():
         core.smooth(o, 180)
 
     objs = [o for o in bpy.context.scene.objects if o.type == "MESH" and "rbx_material" in o.keys()]
-    lo, hi = Hy._bounds(objs)
-    W.ASSET_SCALE = 6.1 / (hi.z - lo.z)
-    W._lift_all((0.85 - 4.0) / W.ASSET_SCALE - lo.z)
+    sourced.fit_to_height(6.1, 0.85)  # 6.1 studs tall, lantern 0.85 off the ground
     print("MESHY parts", {o.name: len(o.data.polygons) for o in objs}, "panes", bool(panes), "eyes", bool(eyes))
     return {"Kind": "creature", "Species": "Wisp", "LodDistance": 60, "Credit": "Base model generated with Meshy (CC BY 4.0)"}
 
 
 ASSETS = {"creature_wisp": lantern_wisp_meshy}
 
-_face = {}
-
-
-def keep_face(p):
-    """Decimation weight: 1 on the eyes and grin, fading out over the head, so the face keeps its triangles."""
-    if not _face:
-        head, eyes = bpy.data.objects["Head"], bpy.data.objects.get("Eyes")
-        hlo, hhi = Hy._bounds([head])
-        c = Hy._bounds([eyes]) if eyes else (hlo, hhi)
-        _face["c"] = (c[0] + c[1]) / 2
-        _face["r"] = 0.6 * (hhi.x - hlo.x)
-    d = (p - _face["c"]).length / _face["r"]
-    return 1.0 if d < 0.5 else max(0.0, 1.0 - (d - 0.5) * 2.0)
-
-
 BAKE = {"creature_wisp": {
     "Creature": {"size": 1024, "metal": 0.0, "parts": {
         "Body": {"src": ["Body"], "tris": 2300},
-        "Head": {"src": ["Head"], "tris": 3000, "keep": keep_face},
+        "Head": {"src": ["Head"], "tris": 3000, "keep": sourced.keep_near(["Eyes"], "Head")},
         "Eyes": {"src": ["Eyes"], "tris": 600},
     }},
     "Metal": {"size": 1024, "metal": 0.75, "parts": {

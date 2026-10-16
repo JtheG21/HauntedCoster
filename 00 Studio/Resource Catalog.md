@@ -4,7 +4,7 @@ title: Resource Catalog
 type: index
 status: approved
 created: 2026-10-12
-updated: 2026-10-13
+updated: 2026-10-16
 tags:
   - studio/catalog
 related:
@@ -62,6 +62,7 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Map plan and prover (`roblox-map`) | `.claude/skills/roblox-map/` | verified | [[TASK-0012-Graveyard-And-Landmarks]], [[AUD-20261011-TASK-0012-01]] | Never run its Studio bootstrap on the Rg1 or Haunted places |
 | Video watching (`watch`) | user skill | implemented | Dependencies installed 2026-10-12 | Not yet run on a real video |
 | Blender pipeline | [[Blender Pipeline]], `scripts/blender/export_for_roblox.py`, Blender 5.1.0 | verified | Headless export tests; Studio import exact in FBX and glb ([[LES-0007-Blender-Studio-Scale]]) | Static meshes only; rigs and animation are untested (animation plugin not installed yet) |
+| Creature art pipeline (sourced base mesh → game) | [[Creature Art Pipeline]], `games/haunted/art/hcart/{sourced,surface,bake}.py`, `art/templates/sourced_creature.py`, `art/tools/review.sh` | verified (one asset) | Lantern Wisp, [[TASK-0043-Creature-Models-And-Animation]] (audit and Codex review passed); refactor checked against the old code: geometry identical, the same bake (8,415 / 3,165), colours within the old code's own run-to-run variation; the template builds and bakes a stand-in mesh | Meshy base meshes stay out of the repo, and CC BY needs a credit. Animation is the client's procedural rig, not skinned |
 
 ### Code patterns
 | Resource | Location | State | Evidence | Limits / notes |

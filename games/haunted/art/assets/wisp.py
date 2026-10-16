@@ -30,6 +30,8 @@ from mathutils.kdtree import KDTree
 
 from hcart import anatomy as A
 from hcart import core, paint, shapes
+from hcart.surface import SeamIndex, burlap, fbm, ridged  # noqa: F401  (shared painters; assets import them from here too)
+from hcart.surface import vertex_paint as custom_paint  # noqa: F401
 
 H = paint.hex3
 # Palette read from the concept: cold grey-green sacking, slate panels, blue-black crevices.
@@ -269,49 +271,6 @@ def displace(obj, fn):
     bm.free()
 
 
-def fbm(p, scale, octaves=3, off=0.0):
-    acc, amp, tot = 0.0, 1.0, 0.0
-    for i in range(octaves):
-        acc += noise.noise(p / (scale * 0.5 ** i) + Vector((off + i * 7.1, off * 0.7 + i * 3.3, off * 1.3 + i * 5.9))) * amp
-        tot += amp
-        amp *= 0.5
-    return acc / tot
-
-
-def ridged(p, scale, off=0.0):
-    """Crumpled-cloth creases: sharp valleys along the zero set of noise."""
-    return 1.0 - abs(noise.noise(p / scale + Vector((off, off * 0.3, off * 0.7)))) * 2.0
-
-
-class SeamIndex:
-    """Nearest-seam lookup (distance and arc position) over sampled seam polylines."""
-
-    def __init__(self, surfs, extra=()):
-        pts, arcs = [], []
-        for surf in surfs:
-            acc = 0.0
-            for i, (p, _) in enumerate(surf):
-                if i:
-                    acc += (p - surf[i - 1][0]).length
-                pts.append(p.copy())
-                arcs.append(acc)
-        for p in extra:
-            pts.append(Vector(p))
-            arcs.append(0.0)
-        self.arcs = arcs
-        self.kd = KDTree(max(1, len(pts)))
-        for i, p in enumerate(pts):
-            self.kd.insert(p, i)
-        self.kd.balance()
-        self.empty = not pts
-
-    def find(self, p):
-        if self.empty:
-            return 9.0, 0.0
-        _, i, d = self.kd.find(p)
-        return d, self.arcs[i]
-
-
 def pucker(obj, seams: SeamIndex, depth=0.011, ridge=0.006, fold=0.0045):
     """Sewn cloth: the seam line sinks, a folded hem ridge runs beside it and pinch folds radiate from the stitches."""
     def fn(p):
@@ -325,68 +284,6 @@ def pucker(obj, seams: SeamIndex, depth=0.011, ridge=0.006, fold=0.0045):
         return off
 
     displace(obj, fn)
-
-
-def custom_paint(objs, fn, ao_samples=16, ao_distance=0.6):
-    """Face-corner colours from fn(p, n, obj, cavity, openness) (sRGB 0..1), with shared ambient occlusion."""
-    occ = paint.occlusion(objs, ao_samples, ao_distance, None)
-    for o in objs:
-        me = o.data
-        if "Col" in me.color_attributes:
-            me.color_attributes.remove(me.color_attributes["Col"])
-        attr = me.color_attributes.new("Col", "BYTE_COLOR", "CORNER")
-        cav = paint.cavity(o)
-        mw = o.matrix_world
-        nm = mw.to_3x3().inverted().transposed()
-        openness = occ[o.name]
-        cache = {}
-        for poly in me.polygons:
-            fnrm = (nm @ poly.normal).normalized()
-            for li in poly.loop_indices:
-                vi = me.loops[li].vertex_index
-                c = cache.get(vi)
-                if c is None:
-                    p = mw @ me.vertices[vi].co
-                    c = fn(p, fnrm, o, cav[vi], openness[vi])
-                    cache[vi] = c
-                attr.data[li].color_srgb = (max(0, min(1, c[0])), max(0, min(1, c[1])), max(0, min(1, c[2])), 1.0)
-
-
-def burlap(p, n, cv, op, base, seams: SeamIndex | None, seed):
-    """Coarse sacking: blotchy dye and stains, fibre speckle and a weave hint, cold shadows, dark sunk seams."""
-    g = fbm(p, 0.22, 3, seed)
-    c = paint.mul(base, 1.0 + 0.32 * g)  # blotchy dye within the panel
-    c = paint.mix(c, paint.mul(base, 1.3), max(0.0, -g - 0.25) * 0.8)
-    st = fbm(p, 0.14, 2, seed + 9.0)
-    if st > 0.12:
-        c = paint.mix(c, STAIN, min(0.6, (st - 0.12) * 1.8))
-    tb = fbm(p, 0.18, 2, seed + 17.0)
-    if tb > 0.08:
-        c = paint.mix(c, DARK_TEAL, min(0.3, (tb - 0.08) * 1.0))  # teal-black blotches soaked into the sacking
-    smudge = fbm(p, 0.07, 2, seed + 4.0)
-    if smudge > 0.1:
-        c = paint.mix(c, paint.mul(base, 0.5), min(0.6, (smudge - 0.1) * 1.8))  # grimy smudges
-    if noise.noise(p / 0.05 + Vector((seed, 0, 5.0))) > 0.5:
-        c = paint.mul(c, 0.9)  # coarse dark speckle
-    fib = noise.noise(p / 0.011 + Vector((seed, 1.7, 0)))
-    weave = math.sin((p.x + p.y * 0.6) * math.tau / 0.045) * math.sin((p.z - p.y * 0.4) * math.tau / 0.045)
-    k = 1.0 + 0.035 * fib + 0.015 * weave
-    if noise.noise(p / 0.04 + Vector((0, seed, 3.1))) > 0.62:
-        c = paint.mix(c, PATCH_DK, 0.2)  # dark fibre flecks
-    occl = 1 - op
-    c = paint.mix(c, SHADOW, min(1.0, occl * 1.1))
-    c = paint.mix(c, CREVICE, max(0.0, occl - 0.25) * 1.5)
-    if cv < 0:
-        c = paint.mix(c, CREVICE, min(0.75, -cv * 1.0))
-    else:
-        c = paint.mix(c, paint.mul(base, 1.35), min(0.35, cv * 0.5))
-    if seams is not None:
-        d, _ = seams.find(p)
-        if d < 0.045:
-            c = paint.mix(c, CREVICE, 0.55 * (1 - d / 0.045) ** 2)
-        if d < 0.012:
-            c = paint.mix(c, H("0d1112"), 0.75 * (1 - d / 0.012))  # the seam line itself
-    return paint.mul(c, k)
 
 
 # --- body ----------------------------------------------------------------------------------------------------------
