@@ -236,6 +236,24 @@ def lantern_wisp_meshy():
         if loc is not None:
             grin_m.append(loc)
 
+    # Puffy cloth lids round Meshy's eye lumps (a light touch: a ring on the surface, heavier along the top).
+    lids = []
+    for p_, r in eyes_m:
+        loc, nrm, _, _ = tree.find_nearest(p_)
+        fwd = nrm.normalized()
+        right = Vector((0, 0, 1)).cross(fwd).normalized()
+        up = fwd.cross(right).normalized()
+        ring = []
+        for i in range(33):
+            t = math.tau * i / 32
+            q = p_ + (right * math.cos(t) + up * math.sin(t)) * r * 1.02
+            hit, hn, _, _ = tree.find_nearest(q)
+            ring.append(hit + hn * r * 0.04)
+        lid = shapes.tube(f"Lid{len(lids)}", ring, lambda t, r=r: r * (0.1 + 0.14 * max(0.0, math.sin(math.tau * t))), 8, "Fabric",
+                          resample=0, cap_start=False, cap_end=False, flatten=0.7)
+        core.smooth(lid, 180)
+        lids.append(lid)
+
     pole = _split(creature, lambda c, n: pole_d(c) < POLE_FACE_R, "Pole", "Metal")
     eyes = _split(creature, lambda c, n: any((c - p).length < r * 0.95 for p, r in eyes_m), "Eyes", "SmoothPlastic")
     tray = _split(lamp, lambda c, n: c.z > TRAY_SPLIT_Z, "Tray", "Metal")
@@ -253,7 +271,7 @@ def lantern_wisp_meshy():
 
     # Into design units, standing on the procedural tray height.
     m = Matrix.Translation(Vector((0, 0, W.TRAY_Z))) @ Matrix.Scale(Hy.S, 4) @ Matrix.Translation(-Hy.TRAY_C)
-    parts = [o for o in (creature, lamp, pole, eyes, tray, panes) if o] + rivets + rims
+    parts = [o for o in (creature, lamp, pole, eyes, tray, panes) if o] + rivets + rims + lids
     for o in parts:
         o.matrix_world = m @ o.matrix_world
         core.apply_transform(o)
@@ -287,6 +305,7 @@ def lantern_wisp_meshy():
         c = W.burlap(p, n, max(-1.0, min(1.0, cv * 4.0)), op, base, None, 3.0)
         head = p.z > neck.z - 0.05
         if head:  # the dark sacking over the crown, back and curl
+            c = paint.mix(c, paint.mix(base, W.SKIN_HI, 0.15), 0.4)  # the face is cleaner than the body: no brown stains
             d = (p - head_c).dot(up_back) + 0.1 * W.fbm(p, 0.25, 2, 21.0)
             t = max(0.0, min(1.0, (d + 0.25) / 0.35))
             t = t * t * (3 - 2 * t)
@@ -294,10 +313,11 @@ def lantern_wisp_meshy():
             dark = paint.mix(dark, H("0b0e0f"), min(0.85, max(0.0, -cv) * 1.4 + (1 - op) * 0.9))
             c = paint.mix(c, dark, t)
             g = grin_dist(p)
-            if g < 0.22:  # the grin: twine on the raised loops, black in the gaps between them
+            ends = min((p - grin_d[0]).length, (p - grin_d[-1]).length) if grin_d else 9.0
+            if g < 0.22 and not (ends < 0.12 and g > 0.06):  # nothing past the corners of the mouth  # the grin: twine on the raised loops, black in the gaps between them
                 rl = relief(p)
                 k = 1.0 if g < 0.14 else max(0.0, (0.22 - g) / 0.08)
-                if rl > 0.28:
+                if rl > 0.38:
                     tw = paint.mix(W.TWINE, W.TWINE_DK, max(0.0, W.fbm(p, 0.04, 2, 13.0)) * 0.6)
                     tw = paint.mix(tw, H("2a241b"), min(0.6, (1 - op) * 0.9))
                     c = paint.mix(c, tw, min(1.0, rl * 2.5) * k)
@@ -315,6 +335,10 @@ def lantern_wisp_meshy():
                 c = paint.mix(c, W.CREVICE, min(0.6, (-rl - 0.4)))
         dirt = max(0.0, min(1.0, (W.TRAY_Z + 0.9 - p.z) / 1.4)) * (0.75 + 0.25 * W.fbm(p, 0.1, 2, 31.0))
         return paint.mix(c, paint.mix(W.STAIN, W.CREVICE, 0.45), dirt * 0.45)
+
+    def lid_col(p, n, o, cv, op):
+        c = W.burlap(p, n, cv, op, paint.mix(W.SKIN, W.SKIN_MID, 0.35), None, 7.0)
+        return paint.mix(c, W.CREVICE, min(0.7, (1 - op) * 1.4))  # dark crease where the lid meets the eye
 
     def eye_col(p, n, o, cv, op):
         c = paint.mix(W.EYE, H("c9d6d1"), 0.4 + 0.3 * max(0.0, W.fbm(p, 0.05, 2, 12.0)))
@@ -357,7 +381,10 @@ def lantern_wisp_meshy():
 
     for o in parts:
         core.uv_box(o, 1.2)
-    W.custom_paint([creature], cloth_col, ao_samples=20, ao_distance=0.45)
+    W.custom_paint([creature] + lids, lambda p, n, o, cv, op: lid_col(p, n, o, cv, op) if o.name.startswith("Lid")
+                   else cloth_col(p, n, o, cv, op), ao_samples=20, ao_distance=0.45)
+    if lids:
+        creature = core.join([creature] + lids, "Body")
     if eyes:
         core.subdivide(eyes, 2)  # fine enough to carry the painted slit and its stitches
         W.custom_paint([eyes], eye_col, ao_samples=10, ao_distance=0.2)
