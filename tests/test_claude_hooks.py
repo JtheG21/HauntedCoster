@@ -170,7 +170,7 @@ class TestLuauFormat(unittest.TestCase):
 class TestCodexSkillCopies(unittest.TestCase):
     def test_copies_match(self):
         # Codex reads .agents/skills/; Claude reads .claude/skills/. Edit one, copy it to the other.
-        for name in ("task-close", "studio-preflight"):
+        for name in ("task-close", "studio-preflight", "art-import", "codex-handoff"):
             with self.subTest(skill=name):
                 claude = (ROOT / ".claude" / "skills" / name / "SKILL.md").read_text()
                 codex = (ROOT / ".agents" / "skills" / name / "SKILL.md").read_text()
