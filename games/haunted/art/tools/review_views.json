@@ -1,0 +1,10 @@
+{
+  "_doc": "Per-asset review cameras for review.sh: a concept image (repo path) plus named compare.py views. Add an asset here before its first revision so every revision is judged from the same angles.",
+  "creature_wisp": {
+    "ref": "02 Research/assets/wisp-pilot/wisp-approved-concept.png",
+    "sheets": {
+      "full": ["0,0,860,1287:yaw=-8,el=16,lens=50", "730,250,1222,1287:yaw=150,el=14,lens=50"],
+      "face": ["120,0,700,520:yaw=-8,el=12,lens=50,fill=3.0,dz=2.0"]
+    }
+  }
+}
