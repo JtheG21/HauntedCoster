@@ -18,5 +18,6 @@
 
 ## Claude Code automations (`.claude/`)
 - **Hooks** (`settings.json`, scripts in `hooks/`, tests in `tests/test_claude_hooks.py`). `guard.sh` blocks state-changing Git without a chained `scripts/preflight.sh`, a bare `rojo serve`, `.env`, and edits in `Agents/`, `Chats/` and `.obsidian/`. It asks jg before `gh pr merge`, `rojo upload` and edits in `10 References/`. `luau-format.sh` runs StyLua and Selene on each edited `.luau` file under `src/`, `tests/luau/` or `games/`. If a block is wrong, fix the hook rather than working around it.
-- **Skills:** `/task-close TASK-####` (close-out; only jg starts it) and `studio-preflight` (before any Studio run).
+- **Skills:** `/task-close TASK-####` (close-out; only jg starts it), `studio-preflight` (before any Studio run), `art-import <asset>` (3D Importer upload with jg's approval, ImportedArt.rbxm into the repo, round-trip check) and `codex-handoff TASK-####` (review handoff into the task note).
+- **Art tools:** `games/haunted/art/tools/review.sh <asset>` (bake, comparison sheets, budget) and `tests/test_art_budgets.py` (triangle budgets from SYS-Haunted-Art-Direction), arriving with the TASK-0042/0043 art pipeline. `scripts/studio_transfer.py` moves an .rbxm between Studio and disk.
 - **Agent:** `auditor`, the one audit per task. Call it with `model: sonnet` for delta re-audits.
