@@ -111,3 +111,26 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Expert-informed briefs and verification | [[REF-CODE-007-Expert-Informed-Briefs]] | captured | jg supports stronger interviews and useful opportunities; needs experimentation; scope expansion requires agreement; workflow changes deferred. Review 2026-10-17: propose a scoped experiment. |
 | ActorCore free motions | [[REF-MISC-006-ActorCore-Free-Motions]] | captured | Needs experimentation; free only (jg, 2026-10-16); compare existing animation library and retargeting effort; rights/Roblox compatibility unverified. Review 2026-10-17: investigate a specific gap. |
 | Awesome Learn Gamedev research directory | [[REF-CODE-008-Awesome-Learn-Gamedev]] | captured | Free only (jg, 2026-10-16); discovery across production disciplines; linked resources unreviewed and require individual evaluation; later review. Review 2026-10-17: keep as reference. |
+| Check-UI Clean Roblox | [[REF-UI-003-Check-UI-Clean-Roblox]] | captured | Needs experimentation; selected Luau source inspected, no runtime/visual validation; style only where game-appropriate |
+
+### Prompts folder source references (2026-10-17)
+| Resource | Location | State | Limits / evidence |
+|---|---|---|---|
+| Leonida Browser Slice | [[REF-CODE-009-Leonida-Browser-Slice]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Nightfall Tactical FPS | [[REF-CODE-010-Nightfall-Tactical-FPS]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Pinehollow Funland Night Watch | [[REF-CODE-011-Pinehollow-Night-Watch]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Rocket Arena 3v3 | [[REF-CODE-012-Rocket-Arena-3v3]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| VoxelCraft | [[REF-CODE-013-VoxelCraft]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Cataclysm Natural Disaster Demo | [[REF-CODE-014-Cataclysm-Disaster-Demo]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Kart Party Deluxe | [[REF-CODE-015-Kart-Party-Deluxe]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Neon Rain Fighter | [[REF-CODE-016-Neon-Rain-Fighter]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Elden Ring Browser Interpretation | [[REF-CODE-017-Elden-Ring-Browser-Interpretation]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Chapter One Browser Interpretation | [[REF-CODE-018-Chapter-One-Browser-Interpretation]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Subnautica Crater Browser Adaptation | [[REF-CODE-019-Subnautica-Crater-Adaptation]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Steal An Egg — Fandom Wiki Research | [[REF-CODE-020-Fandom-Wiki-Research]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Steal An Egg — Guide-Site Research | [[REF-CODE-021-Guide-Site-Research]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Steal An Egg — Video Research Findings | [[REF-CODE-022-YouTube-Research]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Steal An Egg — Official and Community Research | [[REF-CODE-023-Official-Community-Research]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Steal An Egg — Prompt Fix Review | [[REF-CODE-024-Prompt-Fix-Review]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Steal An Egg — Fix Application Record | [[REF-CODE-025-Fix-Application-Record]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Steal An Egg — Visual Evidence Pack | [[REF-MISC-007-Steal-An-Egg-Visual-Evidence]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |

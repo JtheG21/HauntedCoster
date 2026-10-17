@@ -16,6 +16,10 @@ tags:
 
 Start here for jg's 2026-10-16 reference collection: **19 interviewed notes, 8 archived videos and 25 saved images**. Notes stay in their subject folders; this index groups the review without merging their evidence. Dark Fantasy world and boss presentation deliberately remain separate companion notes.
 
+## New capture batches
+- [[Reference Review 2026-10-17]] — new references captured separately from the original collection.
+- [[REF-UI-003-Check-UI-Clean-Roblox]] — first entry in that batch; needs experimentation.
+
 ## Review queue
 All items await the later, deeper note-by-note review with jg. Capture/interview is complete; an unchecked item does not mean its source or tool has been tested. Check an item only after that review, and record the decision in its own note.
 
@@ -68,3 +72,25 @@ All items await the later, deeper note-by-note review with jg. Capture/interview
 - Vault validator: 0 errors, 0 warnings. Diff whitespace check passed.
 - `scripts/check.sh`: formatting, lint, type checks, 140 Luau specs, both Rojo builds, JSON, queue and vault checks passed. The sandbox blocked a Python localhost-server test; rerunning the full Python suite with localhost permission passed all 69 tests. No game code changed and no Studio test was needed for note organization.
 - Published to the main vault by PR #67 (approved by jg). Reference tooling: `python3 scripts/refs.py lint|list|brief|trace` ([[RSH-20261017-Reference-Automation-Spec]]).
+
+## Prompts folder references — 2026-10-17
+Archive grouping and complete new queue: [[Reference Review 2026-10-17]]. All entries below await deeper review.
+
+- [ ] [[REF-CODE-009-Leonida-Browser-Slice]] — Leonida Browser Slice
+- [ ] [[REF-CODE-010-Nightfall-Tactical-FPS]] — Nightfall Tactical FPS
+- [ ] [[REF-CODE-011-Pinehollow-Night-Watch]] — Pinehollow Funland Night Watch
+- [ ] [[REF-CODE-012-Rocket-Arena-3v3]] — Rocket Arena 3v3
+- [ ] [[REF-CODE-013-VoxelCraft]] — VoxelCraft
+- [ ] [[REF-CODE-014-Cataclysm-Disaster-Demo]] — Cataclysm Natural Disaster Demo
+- [ ] [[REF-CODE-015-Kart-Party-Deluxe]] — Kart Party Deluxe
+- [ ] [[REF-CODE-016-Neon-Rain-Fighter]] — Neon Rain Fighter
+- [ ] [[REF-CODE-017-Elden-Ring-Browser-Interpretation]] — Elden Ring Browser Interpretation
+- [ ] [[REF-CODE-018-Chapter-One-Browser-Interpretation]] — Chapter One Browser Interpretation
+- [ ] [[REF-CODE-019-Subnautica-Crater-Adaptation]] — Subnautica Crater Browser Adaptation
+- [ ] [[REF-CODE-020-Fandom-Wiki-Research]] — Steal An Egg — Fandom Wiki Research
+- [ ] [[REF-CODE-021-Guide-Site-Research]] — Steal An Egg — Guide-Site Research
+- [ ] [[REF-CODE-022-YouTube-Research]] — Steal An Egg — Video Research Findings
+- [ ] [[REF-CODE-023-Official-Community-Research]] — Steal An Egg — Official and Community Research
+- [ ] [[REF-CODE-024-Prompt-Fix-Review]] — Steal An Egg — Prompt Fix Review
+- [ ] [[REF-CODE-025-Fix-Application-Record]] — Steal An Egg — Fix Application Record
+- [ ] [[REF-MISC-007-Steal-An-Egg-Visual-Evidence]] — Steal An Egg — Visual Evidence Pack

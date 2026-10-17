@@ -1,25 +1,158 @@
 {
-	"version": 1,
-	"note": "Licence class per REF note, from what each note records (2026-10-17). A class is a claim about the note's evidence, not legal advice; 'permissive-verified' needs the actual licence text read and recorded. Edit with jg.",
-	"notes": {
-		"REF-UI-001": {"class": "permissive-claimed", "basis": "About page (2026-10-17): free for personal and commercial use, credit optional; no licence text; says nothing on input art or fonts"},
-		"REF-UI-002": {"class": "per-item", "basis": "Licence page read 2026-10-17: Exclusive-badge products designed by Resource Boy are royalty-free for personal and commercial use, editable, no attribution, final output may be sold; no standalone redistribution, no upload to public or accessible private repositories (GitHub, Google Drive), and no making files available for download outside a final project; third-party items (for example Spicy Sauce Font) follow their own product-page licence. The in-zip License.txt is shorter than the web page; treat the stricter web terms as governing. Keep pack files out of this repo"},
-		"REF-MAP-001": {"class": "reference-only", "basis": "User video (@eazycreates); author and asset licences unverified"},
-		"REF-MAP-002": {"class": "reference-only", "basis": "User video (@bellydog_); author, game and asset rights unverified"},
-		"REF-VFX-001": {"class": "reference-only", "basis": "User clip (TikTok @ludc45); author and asset rights unverified"},
-		"REF-MISC-001": {"class": "permissive-verified", "basis": "MIT licence text read in full at commit e9488296a4 on 2026-10-17 (Copyright (c) 2026 Ryan); copy the copyright and licence notice if any code is ever copied"},
-		"REF-MISC-002": {"class": "reference-only", "basis": "User screenshot; original video, author and licence unverified"},
-		"REF-MISC-003": {"class": "reference-only", "basis": "User video (@guineainteractive); rights unverified"},
-		"REF-MISC-004": {"class": "reference-only", "basis": "User video (@handa.65); author, game and asset rights unverified"},
-		"REF-MISC-005": {"class": "reference-only", "basis": "User video and images (@eazycreates, Dark Fantasy RNG); licences unverified"},
-		"REF-MISC-006": {"class": "per-item", "basis": "Reallusion Content EULA (updated 2025-08-01) read 2026-10-17: the Standard License allows games, AR/VR and interactive services but forbids importing, uploading, making available or sublicensing Content to any third party and using it as embedded content in applications or online services; free items show a Standard License at 0 USD and downloading needs a member account (accepting the EULA); the licence page lists embedding in any application or service as Enterprise only. Whether publishing a retargeted motion as a Roblox animation asset is permitted is unconfirmed: no download, retarget or upload until Reallusion confirms in writing"},
-		"REF-CODE-001": {"class": "copyleft", "basis": "AGPL-3.0-or-later confirmed in LICENSE, README, package.json and NOTICE.md at commit 4e29b9b90a on 2026-10-17 (copyright S4US and the Roqer contributors; additional permission for Roblox LibMP); releases 0.1.6 and earlier were MIT, main is not. Methods and ideas only, restated in our own words: no code (including templates/vfx/emit.lua) and no copied documentation text"},
-		"REF-CODE-002": {"class": "platform-terms", "basis": "Commercial service by ROSUITE, LLC (ropilot.ai), terms last updated 2026-03-14, read 2026-10-17: users get a non-exclusive licence to use, reproduce, modify and distribute outputs; nothing transfers ownership of outputs; the service may store prompts, outputs and game structure for account functionality, security, operation and product improvement. No source code found. Demo videos are vendor marketing; do not reuse"},
-		"REF-CODE-003": {"class": "platform-terms", "basis": "Package and repository MIT, text read at commit 81fd4ece5d on 2026-10-17 (Copyright (c) 2026 Shader Effects Inc.). Platform License Agreement v2.0 (2026-10-06) read: anything designed from scratch in the platform and exported is the user's; Free Content is usable commercially, Pro Content needs a paid plan (Pro 10 USD a month or 299 USD Lifetime; HD renders without watermark are Pro); no redistribution of preset content or offering it through a marketplace or competing tool; the software may send anonymous usage telemetry from web deployments"},
-		"REF-CODE-004": {"class": "per-item", "basis": "Checked 2026-10-17 by GitHub licence label only, texts not read: Crawlee and crawlee-python Apache-2.0, apify-mcp-server MIT, agent-skills no licence (all rights reserved). Repositories fingerprint-suite, impit and camoufox-js exist to evade bot detection and are off limits. Platform needs an account (Free 0 USD with 5 USD usage a month; Starter 19 USD); Apify platform terms not read; Store Actors are third-party under their own terms and pricing"},
-		"REF-CODE-005": {"class": "permissive-verified", "basis": "MIT licence text read in full at commit 927dd7cc20 on 2026-10-17 (Copyright (c) 2025-present 650 Industries, Inc.); keep the notice if any file text is copied. The expo-skill-feedback skill (runs npx --yes submit-expo-feedback@latest, bundled opt-in telemetry), unpinned npx helpers and broad tool preauthorization stay off limits regardless of licence"},
-		"REF-CODE-006": {"class": "reference-only", "basis": "User video (@snackoverflowgeorge); authorship and rights unverified"},
-		"REF-CODE-007": {"class": "reference-only", "basis": "User video (@chase_ai_); credited article not retrieved"},
-		"REF-CODE-008": {"class": "per-item", "basis": "CC0 1.0 legal code read at commit 28e61535a7 on 2026-10-17; it covers the list itself only. Linked resources carry their own terms and prices; free and paid marking is prose, and free does not mean free for commercial use (for example a rig free for non-commercial use only). Read each entry's terms before relying on it"}
-	}
+  "version": 1,
+  "note": "Licence class per REF note, from what each note records (2026-10-17). A class is a claim about the note's evidence, not legal advice; 'permissive-verified' needs the actual licence text read and recorded. Edit with jg.",
+  "notes": {
+    "REF-UI-001": {
+      "class": "permissive-claimed",
+      "basis": "About page (2026-10-17): free for personal and commercial use, credit optional; no licence text; says nothing on input art or fonts"
+    },
+    "REF-UI-002": {
+      "class": "per-item",
+      "basis": "Licence page read 2026-10-17: Exclusive-badge products designed by Resource Boy are royalty-free for personal and commercial use, editable, no attribution, final output may be sold; no standalone redistribution, no upload to public or accessible private repositories (GitHub, Google Drive), and no making files available for download outside a final project; third-party items (for example Spicy Sauce Font) follow their own product-page licence. The in-zip License.txt is shorter than the web page; treat the stricter web terms as governing. Keep pack files out of this repo"
+    },
+    "REF-MAP-001": {
+      "class": "reference-only",
+      "basis": "User video (@eazycreates); author and asset licences unverified"
+    },
+    "REF-MAP-002": {
+      "class": "reference-only",
+      "basis": "User video (@bellydog_); author, game and asset rights unverified"
+    },
+    "REF-VFX-001": {
+      "class": "reference-only",
+      "basis": "User clip (TikTok @ludc45); author and asset rights unverified"
+    },
+    "REF-MISC-001": {
+      "class": "permissive-verified",
+      "basis": "MIT licence text read in full at commit e9488296a4 on 2026-10-17 (Copyright (c) 2026 Ryan); copy the copyright and licence notice if any code is ever copied"
+    },
+    "REF-MISC-002": {
+      "class": "reference-only",
+      "basis": "User screenshot; original video, author and licence unverified"
+    },
+    "REF-MISC-003": {
+      "class": "reference-only",
+      "basis": "User video (@guineainteractive); rights unverified"
+    },
+    "REF-MISC-004": {
+      "class": "reference-only",
+      "basis": "User video (@handa.65); author, game and asset rights unverified"
+    },
+    "REF-MISC-005": {
+      "class": "reference-only",
+      "basis": "User video and images (@eazycreates, Dark Fantasy RNG); licences unverified"
+    },
+    "REF-MISC-006": {
+      "class": "per-item",
+      "basis": "Reallusion Content EULA (updated 2025-08-01) read 2026-10-17: the Standard License allows games, AR/VR and interactive services but forbids importing, uploading, making available or sublicensing Content to any third party and using it as embedded content in applications or online services; free items show a Standard License at 0 USD and downloading needs a member account (accepting the EULA); the licence page lists embedding in any application or service as Enterprise only. Whether publishing a retargeted motion as a Roblox animation asset is permitted is unconfirmed: no download, retarget or upload until Reallusion confirms in writing"
+    },
+    "REF-CODE-001": {
+      "class": "copyleft",
+      "basis": "AGPL-3.0-or-later confirmed in LICENSE, README, package.json and NOTICE.md at commit 4e29b9b90a on 2026-10-17 (copyright S4US and the Roqer contributors; additional permission for Roblox LibMP); releases 0.1.6 and earlier were MIT, main is not. Methods and ideas only, restated in our own words: no code (including templates/vfx/emit.lua) and no copied documentation text"
+    },
+    "REF-CODE-002": {
+      "class": "platform-terms",
+      "basis": "Commercial service by ROSUITE, LLC (ropilot.ai), terms last updated 2026-03-14, read 2026-10-17: users get a non-exclusive licence to use, reproduce, modify and distribute outputs; nothing transfers ownership of outputs; the service may store prompts, outputs and game structure for account functionality, security, operation and product improvement. No source code found. Demo videos are vendor marketing; do not reuse"
+    },
+    "REF-CODE-003": {
+      "class": "platform-terms",
+      "basis": "Package and repository MIT, text read at commit 81fd4ece5d on 2026-10-17 (Copyright (c) 2026 Shader Effects Inc.). Platform License Agreement v2.0 (2026-10-06) read: anything designed from scratch in the platform and exported is the user's; Free Content is usable commercially, Pro Content needs a paid plan (Pro 10 USD a month or 299 USD Lifetime; HD renders without watermark are Pro); no redistribution of preset content or offering it through a marketplace or competing tool; the software may send anonymous usage telemetry from web deployments"
+    },
+    "REF-CODE-004": {
+      "class": "per-item",
+      "basis": "Checked 2026-10-17 by GitHub licence label only, texts not read: Crawlee and crawlee-python Apache-2.0, apify-mcp-server MIT, agent-skills no licence (all rights reserved). Repositories fingerprint-suite, impit and camoufox-js exist to evade bot detection and are off limits. Platform needs an account (Free 0 USD with 5 USD usage a month; Starter 19 USD); Apify platform terms not read; Store Actors are third-party under their own terms and pricing"
+    },
+    "REF-CODE-005": {
+      "class": "permissive-verified",
+      "basis": "MIT licence text read in full at commit 927dd7cc20 on 2026-10-17 (Copyright (c) 2025-present 650 Industries, Inc.); keep the notice if any file text is copied. The expo-skill-feedback skill (runs npx --yes submit-expo-feedback@latest, bundled opt-in telemetry), unpinned npx helpers and broad tool preauthorization stay off limits regardless of licence"
+    },
+    "REF-CODE-006": {
+      "class": "reference-only",
+      "basis": "User video (@snackoverflowgeorge); authorship and rights unverified"
+    },
+    "REF-CODE-007": {
+      "class": "reference-only",
+      "basis": "User video (@chase_ai_); credited article not retrieved"
+    },
+    "REF-CODE-008": {
+      "class": "per-item",
+      "basis": "CC0 1.0 legal code read at commit 28e61535a7 on 2026-10-17; it covers the list itself only. Linked resources carry their own terms and prices; free and paid marking is prose, and free does not mean free for commercial use (for example a rig free for non-commercial use only). Read each entry's terms before relying on it"
+    },
+    "REF-UI-003": {
+      "class": "permissive-claimed",
+      "basis": "README claims MIT; actual licence text and icon ownership/usage rights not verified"
+    },
+    "REF-CODE-009": {
+      "class": "unknown",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-010": {
+      "class": "unknown",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-011": {
+      "class": "unknown",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-012": {
+      "class": "unknown",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-013": {
+      "class": "unknown",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-014": {
+      "class": "unknown",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-015": {
+      "class": "unknown",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-016": {
+      "class": "unknown",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-017": {
+      "class": "unknown",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-018": {
+      "class": "unknown",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-019": {
+      "class": "unknown",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-020": {
+      "class": "reference-only",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-021": {
+      "class": "reference-only",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-022": {
+      "class": "reference-only",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-023": {
+      "class": "reference-only",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-024": {
+      "class": "reference-only",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-CODE-025": {
+      "class": "reference-only",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-MISC-007": {
+      "class": "reference-only",
+      "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    }
+  }
 }
