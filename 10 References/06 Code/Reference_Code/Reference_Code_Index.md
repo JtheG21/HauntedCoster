@@ -4,7 +4,7 @@ title: Code Reference Index
 type: index
 status: proposed
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-16
 tags:
   - reference/code
 ---
@@ -13,6 +13,24 @@ tags:
 > Purpose: reusable engineering knowledge for future Roblox systems. References are source material to inspect and adapt, not plug-and-play guarantees.
 
 Per-repo guides, with verified paths, compatibility notes and known pitfalls: [[SODT-RC-1]] · [[Npc_template]] · [[vfx_template]]. The rule that makes this mandatory is in `AGENTS.md` ("Reference-first development").
+
+## Additional references awaiting experimentation
+
+- [[REF-CODE-001-Roqer]] — full Roblox Studio agent repository; animation/VFX guidance is the first inspected area. Needs experimentation per technique. Roqer-specific tools, current AGPL licensing and untested macOS support require checking before adoption. The access table below covers the original three repositories only.
+
+- [[REF-CODE-002-RoPilot]] — website/product reference for workflow automation, not inspected implementation code. Needs experimentation; showcase examples are not jg’s visual baseline.
+
+- [[REF-CODE-003-Shaders]] — browser WebGPU effects reference; explore appearance, layering, animation and possible Roblox recreation or baked assets. Needs experimentation per effect; direct compatibility unverified.
+
+- [[REF-CODE-004-Apify]] — research/reference collection and web automation exploration. Organization overview inspected only; compare tools and alternatives for a concrete job. Needs experimentation.
+
+- [[REF-CODE-005-Expo-Skills]] — Expo/React Native agent knowledge and workflow reference; explore Roblox adaptations and supporting tools. PRs are research leads only; individual files/diffs unreviewed. Needs experimentation.
+
+- [[REF-CODE-006-Orchestrated-Agent-Workflows]] — video reference for scoped instructions, handoffs, task gates and agent coordination. jg supports investigation; methods remain experimental and delegation policy is unchanged.
+
+- [[REF-CODE-007-Expert-Informed-Briefs]] — expert methods, original sources and independent evidence to strengthen interviews/briefs. Supported direction, needs experimentation; scope expansion requires agreement; later review.
+
+- [[REF-CODE-008-Awesome-Learn-Gamedev]] — cross-discipline research directory for Claude and the broader workflow. Free resources only; evaluate actual linked sources individually; later review.
 
 ## How to access the source
 All three repos are **public**. Reading them needs no credentials and no clone in the vault. Access was confirmed from this shell on 2026-10-11 with `git ls-remote` and `gh api`.
