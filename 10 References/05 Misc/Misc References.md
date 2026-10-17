@@ -4,7 +4,7 @@ title: Misc References
 type: index
 status: proposed
 created: 2026-10-11
-updated: 2026-10-13
+updated: 2026-10-16
 tags:
   - reference/misc
 ---
@@ -24,5 +24,6 @@ Anything that doesn't fit the other folders: pacing or economy examples from oth
 | Reference | Source / licence | Borrow | Avoid |
 |---|---|---|---|
 | [[3D Model Quality Baseline]] — 17 rejected and 70 minimum-standard screenshots | jg's Desktop screenshots, copied 2026-10-13; underlying model licences unverified | Deliberate silhouette, anatomy/construction, expression, layered forms, materials and all-view finish | Crude primitive assemblies, effects disguising weak geometry; copying reference identities/assets |
+| [[REF-MISC-001-Anatomy]] | https://github.com/wheresryan22/anatomy; declares MIT, full terms not inspected | Experiment with parts breakdowns, structural planning and inspection when modeling is confusing | Assuming diagrams are Roblox meshes or geometric checks prove real-world correctness |
 
 Related: [[Reference_Code_Index]]

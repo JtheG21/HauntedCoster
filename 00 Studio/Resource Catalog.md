@@ -90,3 +90,4 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 
 | Throwie image-effects exploration | [[REF-UI-001-Throwie]] | captured | Needs experimentation; jg likes distressed, eerie, hand-drawn possibilities. Exports, rights and Roblox use unverified |
 | Resource Boy Exclusives | [[REF-UI-002-Resource-Boy]] | captured | Needs experimentation per pack; VFX, textures, text effects and gradients are initial interests; rights, formats and Roblox suitability unverified |
+| Anatomy structural modeling exploration | [[REF-MISC-001-Anatomy]] | captured | Needs experimentation on one confusing object; SVG/WebGL skill, not a verified Roblox model pipeline |
