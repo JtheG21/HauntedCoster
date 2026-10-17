@@ -33,6 +33,8 @@ Images or layouts of graveyards, paths and landmarks: composition, sightlines, l
 
 | [[REF-MAP-001-Dark-Fantasy-World]] | User video, @eazycreates watermark; rights unverified; six frames saved | jg’s world look/feel quality floor: texture richness, atmosphere, lighting, scenery and architecture | Assuming gameplay/UI adoption or one-prompt feasibility is proven |
 
+| [[REF-MAP-002-Stylized-Swamp-Encounter]] | User clip, @bellydog_ watermark; rights/game unknown; five frames saved | Whole-scene quality across visuals, gameplay and animation: silhouettes, deliberate forms, palette, depth and glow | Assuming sampled frames prove encounter logic or one-prompt feasibility |
+
 ## Asset references: Interactive Haunted Trees (added 2026-10-13, TASK-0041)
 jg's reference pack for the haunted-tree prop. These IDs are jg's and stay stable. Pack notes: [[Interactive Haunted Trees - READ ME]], [[Haunted Trees -- Reference Pack]] (hierarchy and brief), [[Haunted Trees -- Visual Reference]] (embeds). Used by [[TASK-0041-Interactive-Haunted-Trees]].
 
