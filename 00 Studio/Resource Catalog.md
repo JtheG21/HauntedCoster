@@ -87,3 +87,5 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | GAME-002 art direction | GAME-002 world code | implemented | Accepted for now; a full revamp is expected (jg, 2026-10-12). Not a reusable standard |
 | Map screenshots (7) | `10 References/02 Map/` ([[Map References]]) | captured | On hold; context not written |
 | GAME-002 sound bank | TASK-0040 (in progress) | proposed | Add here once merged |
+
+| Throwie image-effects exploration | [[REF-UI-001-Throwie]] | captured | Needs experimentation; jg likes distressed, eerie, hand-drawn possibilities. Exports, rights and Roblox use unverified |
