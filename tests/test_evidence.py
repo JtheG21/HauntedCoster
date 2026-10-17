@@ -128,6 +128,53 @@ class EvidenceTest(unittest.TestCase):
         subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(self.video), "-an", str(no_audio)], check=True)
         self.assertEqual(self.run_cmd("audio", str(no_audio))[0], 1)
 
+    def make_png(self, name, color, size="120x60", alpha_box=False):
+        path = self.dir / name
+        vf = "format=rgba" if not alpha_box else "format=rgba,geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='if(between(X,30,90)*between(Y,15,45),255,0)'"
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", f"color=c={color}:s={size}:d=1",
+                        "-vf", vf, "-frames:v", "1", str(path)], check=True)
+        return path
+
+    def test_matrix_builds_dark_and_light_sheets(self):
+        a, b = self.make_png("a.png", "red"), self.make_png("b.png", "blue", "100x100")
+        code, out = self.run_cmd("matrix", str(a), str(b), "--widths", "40,80", "--out", str(self.out / "m"))
+        self.assertEqual(code, 0, out)
+        self.assertIn("columns left to right: a.png, b.png", out)
+        for name in ("matrix_dark.png", "matrix_light.png"):
+            self.assertTrue((self.out / "m" / name).exists())
+        self.assertEqual(list((self.out / "m").glob("cell_*")), [])  # temporary cells are removed
+        self.assertEqual(self.run_cmd("matrix", "/no/such.png")[0], 1)
+
+    def test_silhouette_luma_and_alpha_modes(self):
+        bright = self.make_png("bright.png", "white")
+        dark = self.make_png("dark.png", "black")
+        code, out = self.run_cmd("silhouette", str(bright), str(dark), "--height", "60", "--out", str(self.out / "s.png"))
+        self.assertEqual(code, 0, out)
+        self.assertTrue((self.out / "s.png").exists())
+        boxed = self.make_png("boxed.png", "black", alpha_box=True)
+        code, out = self.run_cmd("silhouette", str(boxed), "--mode", "alpha", "--height", "60", "--out", str(self.out / "alpha.png"))
+        self.assertEqual(code, 0, out)
+        px = evidence.pixels(self.out / "alpha.png", None)
+        white = sum(1 for p in px if p[0] > 200)
+        self.assertGreater(white, 200)
+        self.assertLess(white, len(px) - 200)  # a white shape on black, not all white or all black
+        code, out = self.run_cmd("silhouette", str(self.video), "--at", "0.5", "--height", "40", "--out", str(self.out / "v.png"))
+        self.assertEqual(code, 0, out)
+        self.assertEqual(self.run_cmd("silhouette", str(self.out / "gone.png"))[0], 1)
+        inside = self.root / "inside.png"
+        self.assertEqual(self.run_cmd("silhouette", str(bright), "--out", str(inside))[0], 1)
+
+    def test_series_gate_passes_calm_and_fails_strobe(self):
+        calm = self.run_cmd("series", str(self.video), "--fps", "10", "--max-transitions", "6")
+        self.assertEqual(calm[0], 0, calm[1])
+        self.assertIn("PASS", calm[1])
+        strobe = self.dir / "strobe2.mp4"
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
+                        "nullsrc=s=64x64:d=2:r=10,format=gray,geq=lum='if(lt(mod(N,2),1),255,0)',format=rgb24", str(strobe)], check=True)
+        code, out = self.run_cmd("series", str(strobe), "--fps", "10", "--max-transitions", "6")
+        self.assertEqual(code, 1, out)
+        self.assertIn("FAIL", out)
+
     def test_bad_inputs(self):
         self.assertEqual(self.run_cmd("stats", "/no/such.png")[0], 1)
         self.assertEqual(self.run_cmd("strip", str(self.out))[0], 1)

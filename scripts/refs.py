@@ -9,7 +9,9 @@ Reads the REF-* notes on demand; there is no stored registry, so nothing can dri
   refs.py brief --ids REF-VFX-001       explicit notes
   refs.py trace                         which tasks cite which REF, and REF notes nothing cites
   refs.py lint [--file PATH]            frontmatter, ids, embeds, Index and Catalog rows
-  refs.py guard [--staged | --base REF] flag edits to jg's Intent sections and moves to `approved`
+  refs.py guard [--staged | --base REF] flag edits to jg's Intent sections and moves to `approved`, and refuse staged
+                                        files that are byte-identical to files in ~/Roblox-Work/resource-packs (licences forbid repo storage)
+  refs.py actions [--by-blocker|--id ID] every reviewed note's outcome, next action and what it waits on
   refs.py new --area map --title "X"    scaffold the next REF-<AREA>-NNN from T - Reference
   refs.py review-next [--id REF-ID]     review packet for the next unchecked item (or a named one)
   refs.py decide REF-ID --outcome ...   record jg's decision: append a dated section, tick the Index, note the Catalog (dry run unless --apply)
@@ -27,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import hashlib
 import json
 import os
 import re
@@ -374,6 +377,64 @@ def git(root: Path, *args: str) -> str | None:
     return r.stdout if r.returncode == 0 else None
 
 
+PACKS_DIR_DEFAULT = Path.home() / "Roblox-Work" / "resource-packs"
+MIN_PACK_FILE = 4096  # smaller files (README, licence text) are never flagged
+
+
+def packs_dir() -> Path:
+    return Path(os.environ.get("REFS_PACKS_DIR", str(PACKS_DIR_DEFAULT)))
+
+
+def pack_index(d: Path) -> dict[int, list[Path]]:
+    """Size -> pack files of that size (stat only, so the common case costs no hashing)."""
+    idx: dict[int, list[Path]] = {}
+    for p in d.rglob("*"):
+        try:
+            if p.is_file() and not p.name.startswith("."):
+                size = p.stat().st_size
+                if size >= MIN_PACK_FILE:
+                    idx.setdefault(size, []).append(p)
+        except OSError:
+            continue
+    return idx
+
+
+def sha256_of(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def blob_bytes(root: Path, spec: str) -> bytes | None:
+    r = subprocess.run(["git", "-C", str(root), "show", spec], capture_output=True)
+    return r.stdout if r.returncode == 0 else None
+
+
+def pack_leaks(root: Path, changed: list[str], spec_of) -> list[str]:
+    """Changed files byte-identical to a file in the resource-packs folder. Not overridable."""
+    d = packs_dir()
+    if not d.is_dir():
+        return []
+    idx = pack_index(d)
+    if not idx:
+        return []
+    cache: dict[Path, str] = {}
+    issues = []
+    for f in changed:
+        data = blob_bytes(root, spec_of(f))
+        if data is None or len(data) < MIN_PACK_FILE or len(data) not in idx:
+            continue
+        digest = hashlib.sha256(data).hexdigest()
+        for cand in idx[len(data)]:
+            if cache.setdefault(cand, sha256_of(cand)) == digest:
+                issues.append(f"{f} is byte-identical to {cand}; the Resource Boy and ActorCore licences forbid "
+                              "storing pack files in a repository (REF-UI-002, REF-MISC-006). Remove it from the commit.")
+                break
+    return issues
+
+
 def cmd_guard(root: Path, staged: bool, base: str | None) -> int:
     if staged:
         changed = (git(root, "diff", "--cached", "--name-only", "--diff-filter=AM") or "").splitlines()
@@ -390,15 +451,18 @@ def cmd_guard(root: Path, staged: bool, base: str | None) -> int:
             new = new_of(f)
             if new is not None:
                 issues += guard_issues(f, old_of(f), new)
+    leaks = pack_leaks(root, changed, (lambda f: f":{f}") if staged else (lambda f: f"HEAD:{f}"))
+    for lk in leaks:
+        print("GUARD pack-leak", lk)  # no override: this is a licence rule, not jg's preference
     if issues and os.environ.get("REFS_JG_APPROVED") == "1":
         print("refs guard: jg-approved override set; allowing:\n  " + "\n  ".join(issues))
-        return 0
+        return 1 if leaks else 0
     for i in issues:
         print("GUARD", i)
     if issues:
         print("These are jg's preferences/approvals. If jg asked for exactly this edit, rerun the commit with "
               "REFS_JG_APPROVED=1 and say so in the commit message.")
-    return 1 if issues else 0
+    return 1 if (issues or leaks) else 0
 
 
 # --------------------------------------------------------------------------- new
@@ -768,6 +832,73 @@ def cmd_decide(root: Path, rid: str, outcome: str, summary: str, inspected: str,
     return cmd_lint(root, None)
 
 
+# --------------------------------------------------------------------------- actions
+
+OUTCOME_SHORT = {"keep as reference": "keep", "investigate a specific gap": "investigate",
+                 "propose a scoped experiment": "experiment", "mark unsuitable for a stated use": "unsuitable"}
+BLOCKERS = [
+    (r"when a game is chosen|a game choice|game and ability|game choice|which game", "a game choice"),
+    (r"free studio", "a free Studio session"),
+    (r"pads exist|studio vfx and surface pads|test pads", "the Studio test pads"),
+    (r"uploading resource boy|before any upload|upload question|open question on uploading", "the Roblox-upload question"),
+    (r"until reallusion|reallusion answers|reallusion confirms", "Reallusion's written answer"),
+    (r"jg approves|jg's approval|jg approval|approved on its own|separate policy", "jg approval"),
+]
+
+
+def decision_blocks(text: str) -> list[dict]:
+    """Every '## Review decision (date)' section as {date, outcome, next, summary}; latest last."""
+    out = []
+    for name, body in sections(text).items():
+        m = re.match(r"Review decision \((\d{4}-\d{2}-\d{2})\)", name)
+        if not m:
+            continue
+        fields = {k.lower(): v.strip() for k, v in re.findall(r"(?m)^- \*\*([^:*]+):\*\*\s*(.+)$", body)}
+        out.append({"date": m.group(1), "outcome": fields.get("outcome", ""), "next": fields.get("next action", ""),
+                    "decided_by": fields.get("decided by", "")})
+    return sorted(out, key=lambda d: d["date"])
+
+
+def blockers_of(next_action: str) -> list[str]:
+    low = next_action.lower()
+    return [label for pat, label in BLOCKERS if re.search(pat, low)]
+
+
+def cmd_actions(root: Path, by_blocker: bool, only: str | None) -> int:
+    rows = []
+    for p in ref_notes(root):
+        rid = ref_id(p)
+        if only and rid != only:
+            continue
+        fm, text = load(p)
+        blocks = decision_blocks(text)
+        last = blocks[-1] if blocks else None
+        outcome = OUTCOME_SHORT.get(last["outcome"], last["outcome"] or "?") if last else "no decision"
+        nxt = last["next"] if last else ""
+        rows.append({"id": rid, "status": str(fm.get("status", "?")), "outcome": outcome, "next": nxt,
+                     "blockers": blockers_of(nxt) if last else [], "has_next": bool(nxt) and "none selected" not in nxt.lower()})
+    if only and not rows:
+        print(f"refs: {only} is not a REF note", file=sys.stderr)
+        return 2
+    if by_blocker:
+        groups: dict[str, list[str]] = {}
+        for r in rows:
+            for b in r["blockers"]:
+                groups.setdefault(b, []).append(r["id"])
+        for b, ids in sorted(groups.items(), key=lambda kv: -len(kv[1])):
+            print(f"{b} ({len(ids)}): {', '.join(ids)}")
+        free = [r["id"] for r in rows if r["has_next"] and not r["blockers"]]
+        print(f"next action recorded, no blocker named ({len(free)}): {', '.join(free) or '-'}")
+        undecided = [r["id"] for r in rows if r["outcome"] == "no decision"]
+        print(f"no decision yet ({len(undecided)}): {', '.join(undecided) or '-'}")
+        return 0
+    print(f"{'ID':13} {'status':9} {'outcome':12} waits on  |  next action")
+    for r in rows:
+        wait = "; ".join(r["blockers"]) or "-"
+        print(f"{r['id']:13} {r['status']:9} {r['outcome']:12} {wait}  |  {r['next'][:110]}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
@@ -796,6 +927,9 @@ def main(argv: list[str] | None = None) -> int:
     rt = sub.add_parser("rights")
     rt.add_argument("--check")
     rt.add_argument("--use", choices=["code", "asset", "method"], default="code")
+    ac = sub.add_parser("actions")
+    ac.add_argument("--by-blocker", action="store_true")
+    ac.add_argument("--id")
     rn = sub.add_parser("review-next")
     rn.add_argument("--id")
     dc = sub.add_parser("decide")
@@ -829,6 +963,8 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_rights(root, a.check, a.use)
     if a.cmd == "ledger":
         return cmd_ledger(root, a.refs)
+    if a.cmd == "actions":
+        return cmd_actions(root, a.by_blocker, a.id)
     if a.cmd == "review-next":
         return cmd_review_next(root, a.id)
     if a.cmd == "decide":

@@ -285,6 +285,116 @@ class ReviewDriverTest(RefsTest):
         self.assertEqual(refs.guard_issues("f", old, new), [])
 
 
+DECISION = """
+## Review decision (2026-10-17)
+- **Outcome:** propose a scoped experiment
+- **Decided by:** jg
+- **Summary:** s
+- **Evidence inspected:** e
+- **Still unverified:** u
+- **Next action:** {nxt}
+
+"""
+
+
+class ActionsTest(RefsTest):
+    def add_decision(self, rel, nxt, outcome="propose a scoped experiment"):
+        p = self.root / rel
+        p.write_text(p.read_text() + DECISION.replace("propose a scoped experiment", outcome).format(nxt=nxt))
+
+    def test_decision_blocks_and_blockers(self):
+        text = note() + DECISION.format(nxt="x")
+        blocks = refs.decision_blocks(text)
+        self.assertEqual(len(blocks), 1)
+        self.assertEqual(blocks[0]["date"], "2026-10-17")
+        self.assertEqual(blocks[0]["decided_by"], "jg")
+        got = refs.blockers_of("When a game is chosen, run it. Waits on a free Studio session and jg's approval. "
+                               "Before any upload to Roblox. Until Reallusion answers in writing. Needs the Studio VFX and surface pads.")
+        self.assertEqual(set(got), {"a game choice", "a free Studio session", "jg approval", "the Roblox-upload question",
+                                    "Reallusion's written answer", "the Studio test pads"})
+        self.assertEqual(refs.blockers_of("Write a card."), [])
+
+    def test_actions_table_and_by_blocker(self):
+        self.add_decision("10 References/02 Map/REF-MAP-001-One.md", "When a game is chosen, build it. Needs a free Studio session.")
+        self.add_decision("10 References/02 Map/REF-MAP-002-Other.md", "Write a technique card.", outcome="keep as reference")
+        code, out = self.run_cmd("actions")
+        self.assertEqual(code, 0, out)
+        self.assertRegex(out, r"REF-MAP-001\s+proposed\s+experiment\s+a game choice; a free Studio session")
+        self.assertRegex(out, r"REF-MAP-002\s+approved\s+keep")
+        code, out = self.run_cmd("actions", "--by-blocker")
+        self.assertIn("a game choice (1): REF-MAP-001", out)
+        self.assertIn("next action recorded, no blocker named (1): REF-MAP-002", out)
+        self.assertIn("no decision yet (0)", out)
+        self.assertEqual(self.run_cmd("actions", "--id", "REF-NOPE-001")[0], 2)
+
+    def test_undecided_note_is_listed(self):
+        _, out = self.run_cmd("actions")
+        self.assertIn("no decision", out)
+        _, out = self.run_cmd("actions", "--by-blocker")
+        self.assertIn("no decision yet (2): REF-MAP-001, REF-MAP-002", out)
+
+
+class PackLeakTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        base = Path(self.tmp.name)
+        self.repo = base / "repo"
+        self.packs = base / "packs"
+        (self.packs / "pack-a").mkdir(parents=True)
+        self.repo.mkdir()
+        for args in (["init", "-q", "-b", "main"], ["config", "user.email", "t@e.com"], ["config", "user.name", "t"]):
+            subprocess.run(["git", "-C", str(self.repo), *args], check=True, capture_output=True)
+        (self.repo / "keep.txt").write_text("x")
+        subprocess.run(["git", "-C", str(self.repo), "add", "-A"], check=True, capture_output=True)
+        subprocess.run(["git", "-C", str(self.repo), "commit", "-q", "-m", "init"], check=True, capture_output=True)
+        self.old = os.environ.get("REFS_PACKS_DIR")
+        os.environ["REFS_PACKS_DIR"] = str(self.packs)
+
+    def tearDown(self):
+        if self.old is None:
+            os.environ.pop("REFS_PACKS_DIR", None)
+        else:
+            os.environ["REFS_PACKS_DIR"] = self.old
+        self.tmp.cleanup()
+
+    def guard(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = refs.main(["--root", str(self.repo), "guard", "--staged"])
+        return code, out.getvalue()
+
+    def stage(self, name, data):
+        (self.repo / name).parent.mkdir(parents=True, exist_ok=True)
+        (self.repo / name).write_bytes(data)
+        subprocess.run(["git", "-C", str(self.repo), "add", "-A"], check=True, capture_output=True)
+
+    def test_identical_pack_file_is_refused_even_with_jg_override(self):
+        data = os.urandom(8000)
+        (self.packs / "pack-a" / "tex.png").write_bytes(data)
+        self.stage("assets/renamed.png", data)
+        code, out = self.guard()
+        self.assertEqual(code, 1)
+        self.assertIn("pack-leak", out)
+        self.assertIn("tex.png", out)
+        os.environ["REFS_JG_APPROVED"] = "1"
+        try:
+            self.assertEqual(self.guard()[0], 1)
+        finally:
+            del os.environ["REFS_JG_APPROVED"]
+
+    def test_same_size_different_bytes_and_small_files_pass(self):
+        (self.packs / "pack-a" / "tex.png").write_bytes(b"a" * 8000)
+        self.stage("assets/other.png", b"b" * 8000)
+        self.stage("License.txt", b"short licence text")
+        (self.packs / "pack-a" / "License.txt").write_bytes(b"short licence text")
+        self.assertEqual(self.guard()[0], 0)
+
+    def test_no_packs_folder_is_a_no_op(self):
+        os.environ["REFS_PACKS_DIR"] = str(self.packs / "missing")
+        self.stage("assets/x.png", os.urandom(6000))
+        self.assertEqual(self.guard()[0], 0)
+
+
 class GuardGitTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
