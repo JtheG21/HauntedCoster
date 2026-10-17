@@ -23,16 +23,16 @@ All items await the later, deeper note-by-note review with jg. Capture/interview
 |---|---|---|
 | [x] | [[REF-UI-001-Throwie]] — Throwie | Tool capabilities, text-art experiments; exports unverified |
 | [x] | [[REF-UI-002-Resource-Boy]] — Resource Boy | Evaluate packs individually; formats/rights unverified |
-| [ ] | [[REF-MISC-001-Anatomy]] — Anatomy | Structural planning; not a proven Roblox mesh pipeline |
-| [ ] | [[REF-CODE-001-Roqer]] — Roqer | Animation/VFX first inspected; full implementation unreviewed |
-| [ ] | [[REF-CODE-002-RoPilot]] — RoPilot | Automation claims; product untested |
-| [ ] | [[REF-CODE-003-Shaders]] — Shaders | WebGPU looks/techniques; Roblox portability untested |
-| [ ] | [[REF-CODE-004-Apify]] — Apify and alternatives | Bounded research collection; comparison article inaccessible |
-| [ ] | [[REF-CODE-005-Expo-Skills]] — Expo Skills and PRs | Transferable methods; individual skills/PR diffs unreviewed |
+| [x] | [[REF-MISC-001-Anatomy]] — Anatomy | Structural planning; not a proven Roblox mesh pipeline |
+| [x] | [[REF-CODE-001-Roqer]] — Roqer | Animation/VFX first inspected; full implementation unreviewed |
+| [x] | [[REF-CODE-002-RoPilot]] — RoPilot | Automation claims; product untested |
+| [x] | [[REF-CODE-003-Shaders]] — Shaders | WebGPU looks/techniques; Roblox portability untested |
+| [x] | [[REF-CODE-004-Apify]] — Apify and alternatives | Bounded research collection; comparison article inaccessible |
+| [x] | [[REF-CODE-005-Expo-Skills]] — Expo Skills and PRs | Transferable methods; individual skills/PR diffs unreviewed |
 | [x] | [[REF-MISC-002-Reference-Library-Approach]] — Reference library approach | Accepted organizational direction; no new RAG service |
-| [ ] | [[REF-VFX-001-Cinematic-Energy-Sequence]] — Cinematic energy sequence | Quality preference; motion fidelity needs denser review |
-| [ ] | [[REF-MAP-001-Dark-Fantasy-World]] — Dark Fantasy world | World look/feel quality floor; gameplay not requested |
-| [ ] | [[REF-CODE-006-Orchestrated-Agent-Workflows]] — Orchestrated agent workflows | Investigate tools/parallelism; delegation rules unchanged |
+| [x] | [[REF-VFX-001-Cinematic-Energy-Sequence]] — Cinematic energy sequence | Quality preference; motion fidelity needs denser review |
+| [x] | [[REF-MAP-001-Dark-Fantasy-World]] — Dark Fantasy world | World look/feel quality floor; gameplay not requested |
+| [x] | [[REF-CODE-006-Orchestrated-Agent-Workflows]] — Orchestrated agent workflows | Investigate tools/parallelism; delegation rules unchanged |
 | [ ] | [[REF-MAP-002-Stylized-Swamp-Encounter]] — Stylized swamp encounter | Whole-scene visual/gameplay/animation quality |
 | [ ] | [[REF-MISC-003-Character-Sheet-Workflow]] — Character sheet to playable model | Consolidated sheet; mouse is process example, not baseline |
 | [ ] | [[REF-MISC-004-Illustrated-Surreal-World]] — Illustrated surreal world | Style quality floor; explore 2D and 3D |

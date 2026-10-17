@@ -7,7 +7,7 @@ area: code
 source: https://github.com/apify
 accessed: 2026-10-16
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 related:
   - "[[Reference_Code_Index]]"
 tags:
@@ -55,3 +55,11 @@ For one bounded collection job record: question, selected sources and limits, ca
 ## Traceability
 - No implementation tasks or collected datasets yet.
 - Next stage: identify a bounded research job, compare suitable options then, and record the experiment findings here.
+
+## Review decision (2026-10-17)
+- **Outcome:** keep as reference
+- **Decided by:** jg
+- **Summary:** Source inspected 2026-10-17: the Apify GitHub organization (270 public repos), the pricing page, the Store (search for Roblox), two repository READMEs and the ScraperAPI comparison article; nothing was signed up for, installed or run. Apify is open-source libraries plus a paid cloud platform. Crawlee (Node, 26k stars) and crawlee-python (Python 3.10+, 9.6k stars) are Apache-2.0 by GitHub's label (texts not read); the Apify MCP server is MIT with a hosted endpoint at mcp.apify.com; agent-skills has no licence. Three repositories (fingerprint-suite, impit, camoufox-js) exist to evade bot detection and are off limits under the rule against bypassing bot detection. The platform needs an account: Free is 0 USD with 5 USD of usage a month and no card, Starter 19 USD a month, Scale 199, Business 999; Actors bill per event or per usage; overage rates were not on the page read. The Store lists 22 Roblox-related Actors, mostly small (2 to 52 users) and pay-per-event, including one Roblox Email Scraper that should not be used. The ScraperAPI article is dated 2026-01-30, published by a competitor, readable only to the first of 11 alternatives, and its claim that Apify also starts at 49 USD contradicts Apify's pricing page (Free 0, Starter 19). A baseline probe with the built-in browser read ActorCore's free motion listing (first 16 items, category tree with counts such as 5,237 total motions, infinite scroll) without Apify; that listing says up to 10 free daily downloads after sign-up, relevant to REF-MISC-006. This session's other reviews paginated a 176-product listing and read minified page code with web fetch, gh api, the built-in browser and curl, so no collection job beyond existing tools has been identified. Kept as a reference. Revisit only for a job beyond those tools, using local Crawlee before any hosted Actor, never the evasion libraries, and no account or spend without jg. Rights ledger basis updated; class stays per-item.
+- **Evidence inspected:** Review packet; org metadata and the 16 largest non-fork repositories with licence labels; pricing page; Store search for Roblox (22 results, pricing models); README excerpts for apify-mcp-server and crawlee-python; the ScraperAPI article (partial); ActorCore free listing in the built-in browser as a baseline probe; no sign-in, install, purchase or Actor run
+- **Still unverified:** Licence texts (labels only); Apify platform terms and the Store Actors' terms; overage rates; whether any Roblox Actor's data collection is allowed by Roblox's terms (not checked); the rest of the ScraperAPI article and the other alternatives; Crawlee's robots.txt handling and behaviour when run; a full clean item list of the ActorCore free catalog
+- **Next action:** none selected

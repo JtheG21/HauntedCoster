@@ -7,7 +7,7 @@ area: map
 source: User-supplied Dark Fantasy RNG video; original post URL unknown
 accessed: 2026-10-16
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 related:
   - "[[Map References]]"
   - "[[REF-MISC-005-Dark-Fantasy-Boss-Presentation]]"
@@ -41,7 +41,7 @@ The narration names Dark Fantasy RNG and describes bosses, weapon rolls, armor c
 ![[Dark-Fantasy-00-11.jpg]]
 ### 00:14 — misty woodland and oversized mushrooms
 ![[Dark-Fantasy-00-14.jpg]]
-### 00:16 — blue-lit grove
+### 00:16 — blue colour wash over a stone floor, with an inset AI-style image (heading corrected 2026-10-17; see Review decision)
 ![[Dark-Fantasy-00-16.jpg]]
 
 ## Intent — interview with jg, 2026-10-16
@@ -69,6 +69,14 @@ Record the interview/brief and prompt, selected frame qualities, chosen original
 ## Traceability
 - No implementation task or recreated world yet.
 - Next stage: a scoped environment experiment informed by an interview, followed by visual comparison and findings.
+
+## Review decision (2026-10-17)
+- **Outcome:** propose a scoped experiment
+- **Decided by:** jg
+- **Summary:** Review 2026-10-17 of an approved world look-and-feel floor. The archived clip (27.8 s, narrated promo edit with captions, game HUD and a TikTok end card from about 24.9 s) was reopened as contact sheets with scene-change times, audio level and the six preserved frames. Correction: the 00:16 frame is not a blue-lit grove; it is a heavy blue colour wash over a stone floor with an inset image of cloaked figures around a campfire, shown while the narrator says 'AI dark fantasy videos' as a comparison with AI-made dark-fantasy clips; its heading in the note was corrected at jg's request. The other headings (00:00, 00:03, 00:09, 00:11, 00:14) match their frames. What the clip shows: zones with distinct colour identities (warm orange-red village street, cool blue crystal garden, green-yellow boss arena with a horned skeleton, purple throne room with chest, green and teal mushroom forest), grainy high-contrast cobblestone ground, dense props (lanterns, banners, glowing mushrooms), fog in the forest scenes, and loot-bag UI screens near the end. Measured on the six preserved frames as aids (promo grading shifts them): mean luminance about 38 to 73 of 255, almost no clipped highlights, 10 to 37 percent crushed shadows, and each zone leaning one colour direction (village 64 percent warm, blue garden 39 percent cool, mushroom forest 68 percent cool). The audio is continuous narration with no information about the world's look. jg selected an experiment, with all four qualities (zone colour identity, rich surface textures, dense layered props, fog and focal architecture) to carry, and left the target game undecided. The one-prompt expectation stays a target.
+- **Evidence inspected:** Review packet; the archived clip as two contact sheets (about 0.75 fps) with scene-change beats and the audio envelope; the six preserved frames viewed (00:09, 00:11, 00:14 and 00:16 individually) with evidence.py stats on all six; the note's Observations and Intent
+- **Still unverified:** Lighting, fog and material settings behind the look (the promotional grading shifts it); layout, distances and unseen geometry; whether this look can be built in Roblox from one prompt and at what performance cost; the clip's authorship and asset rights; whether dark fantasy fits any chosen game
+- **Next action:** When a game is chosen (undecided for now), build one 200 by 200-stud vignette (gateway, path, forest) after a reference-brief interview and one implementation prompt, carrying four selected qualities: per-zone colour identity, rich surface textures, dense layered props, and fog with focal architecture. Judge with matched-view captures from named camera anchors, the atmosphere numbers from evidence.py stats (aids only), and the one-prompt ledger. Adapt, do not copy layouts, characters or textures. Waits on the game choice and a free Studio session.
 
 ## Companion reference
 [[REF-MISC-005-Dark-Fantasy-Boss-Presentation]] retains a later video and six supplied images with their own interview. jg requested separate notes grouped by links; the companion adds boss/effect presentation and case-by-case texture preference.
