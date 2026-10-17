@@ -12,7 +12,9 @@ tags:
 
 > Reference-first rule: `AGENTS.md` ("Reference-first development"). References are material to inspect and adapt, not instructions or assets to copy.
 
-**Status: 7 screenshots added by jg (2026-10-11), context not yet written.** Each `referenceN` note embeds one image; its `referenceNContext` note is empty, as is `reference8`. jg fills in what to borrow; until then, say so in the task note and follow the existing conventions and [[GAME-002 Haunted Collector/01 Game Design]]. The images moved here from the repo root on 2026-10-12 (names unchanged, so the embeds still resolve).
+**New references:** [[Reference Review Index]] links the interviewed 2026-10-16 collection.
+
+**Earlier pack: 7 screenshots added by jg (2026-10-11), context not yet written.** Each `referenceN` note embeds one image; its `referenceNContext` note is empty, as is `reference8`. jg fills in what to borrow; until then, say so in the task note and follow the existing conventions and [[GAME-002 Haunted Collector/01 Game Design]]. The images moved here from the repo root on 2026-10-12 (names unchanged, so the embeds still resolve).
 
 ## What goes here
 Images or layouts of graveyards, paths and landmarks: composition, sightlines, lighting in dark areas, how the player is guided.
@@ -30,9 +32,7 @@ Images or layouts of graveyards, paths and landmarks: composition, sightlines, l
 | [[reference5]] (`Screenshot 2026-10-11 at 11.31.44 PM.png`) | jg screenshot; source not recorded | not yet written | not yet written |
 | [[reference6]] (`Screenshot 2026-10-11 at 11.30.50 PM.png`) | jg screenshot; source not recorded | not yet written | not yet written |
 | [[reference7]] (`Screenshot 2026-10-11 at 11.34.41 PM.png`) | jg screenshot; source not recorded | not yet written | not yet written |
-
 | [[REF-MAP-001-Dark-Fantasy-World]] | User video, @eazycreates watermark; rights unverified; six frames saved | jg’s world look/feel quality floor: texture richness, atmosphere, lighting, scenery and architecture | Assuming gameplay/UI adoption or one-prompt feasibility is proven |
-
 | [[REF-MAP-002-Stylized-Swamp-Encounter]] | User clip, @bellydog_ watermark; rights/game unknown; five frames saved | Whole-scene quality across visuals, gameplay and animation: silhouettes, deliberate forms, palette, depth and glow | Assuming sampled frames prove encounter logic or one-prompt feasibility |
 
 ## Asset references: Interactive Haunted Trees (added 2026-10-13, TASK-0041)

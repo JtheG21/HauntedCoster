@@ -4,7 +4,7 @@ title: Studio Index
 type: index
 status: in_progress
 created: 2026-10-10
-updated: 2026-10-12
+updated: 2026-10-16
 tags:
   - studio/index
 ---
@@ -12,6 +12,8 @@ tags:
 
 **Rules:** [[AGENTS]] · [[Obsidian Conventions]] · [[Workflow]] · budget `00 Studio/budget.json`
 **Machine state:** `tasks/queue.json` · `project-state.json` · `python3 scripts/orchestrator.py status`
+
+**Review the new reference collection:** [[Reference Review Index]] (19 notes, original media and review checklist).
 
 ## Active games
 | ID | Game | Phase | Overview |

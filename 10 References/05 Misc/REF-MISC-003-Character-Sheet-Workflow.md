@@ -22,7 +22,7 @@ tags:
 
 ## Identity
 - **Original filename:** `v12044gd0000db8n18fog65nsq10p4mg.mp4`; attachment filename `1-v12044gd0000db8n18fog65nsq10p4mg.mp4`.
-- **Local source:** `/tmp/codex-remote-attachments/01a147e8-0f4c-70f3-8203-a85e6ba89679/38F3DF7B-113C-44C0-85FF-737ACE3AD970/1-v12044gd0000db8n18fog65nsq10p4mg.mp4`. Temporary attachment, not archived in Git.
+- **Local source:** `10 References/05 Misc/Media/REF-MISC-003-Character-Sheet-Workflow/1-v12044gd0000db8n18fog65nsq10p4mg.mp4`. Original video archived with this note; see the source-video embed below.
 - **Source / rights:** Watermark @guineainteractive; original author, post and asset rights unverified. Reference material only.
 - **Purpose:** Capture a modeling process to consider later, not a model request or workflow implementation.
 - **Evaluation:** Direction supported by jg; needs experimentation. Keep as a proposed reference pending the later note-by-note review. No policy or production process changed.
@@ -57,3 +57,6 @@ During the planned note-by-note review, decide whether to experiment. If selecte
 ## Traceability
 - Capture only: no model built, skills modified, agents spawned, assets published or workflow changes made.
 - Next action: later review this note alongside the other newly captured references, one by one with jg.
+
+## Archived source video
+![[1-v12044gd0000db8n18fog65nsq10p4mg.mp4]]

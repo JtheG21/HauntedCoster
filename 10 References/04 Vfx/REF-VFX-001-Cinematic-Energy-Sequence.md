@@ -21,7 +21,7 @@ tags:
 
 ## Identity
 - **Original filename:** `v15025gf0000db243rvog65i0oih547g.mp4`; attachment filename `1-v15025gf0000db243rvog65i0oih547g.mp4`.
-- **Local source:** `/tmp/codex-remote-attachments/01a147e8-0f4c-70f3-8203-a85e6ba89679/6DDF6528-F456-4F74-9CE6-47167939310A/1-v15025gf0000db243rvog65i0oih547g.mp4`. Temporary attachment; not stored in Git. Archive location remains pending if durable video evidence is needed.
+- **Local source:** `10 References/04 Vfx/Media/REF-VFX-001-Cinematic-Energy-Sequence/1-v15025gf0000db243rvog65i0oih547g.mp4`. Original video archived with this note; see the source-video embed below.
 - **Source / rights:** User-supplied clip with visible TikTok watermark `@ludc45`. Original author, post and asset rights unverified. Watermark does not establish authorship. Reference only.
 - **Purpose:** Shared quality reference for animation, cutscenes and VFX across Roblox games.
 - **Status distinction:** jg accepted this as inspiration and a minimum quality standard on 2026-10-16. Production techniques and ability to achieve it remain **needs experimentation**; no recreation has been implemented or tested.
@@ -58,8 +58,11 @@ Record the interview/brief and prompt, selected beats with finer source timestam
 ## Open questions
 - Which details must carry into a particular game, and what can be adapted?
 - What exact timing, camera path and sound treatment should a task use?
-- Where should the original video be archived for durable reference access?
+- Original video is now archived alongside this note for later review.
 
 ## Traceability
 - No implementation tasks or recreated assets yet.
-- Approved quality preference; implementation experiment and durable video archive remain pending.
+- Approved quality preference; implementation experiment remains pending; original video is now archived.
+
+## Archived source video
+![[1-v15025gf0000db243rvog65i0oih547g.mp4]]

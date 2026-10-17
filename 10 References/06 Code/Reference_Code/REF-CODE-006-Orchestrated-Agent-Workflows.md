@@ -20,7 +20,7 @@ tags:
 
 ## Identity
 - **Original filename:** `v1c025g50000db876afog65u6j3jm8r0.mp4`; attachment filename `1-v1c025g50000db876afog65u6j3jm8r0.mp4`.
-- **Local source:** `/tmp/codex-remote-attachments/01a147e8-0f4c-70f3-8203-a85e6ba89679/C63BA418-80E9-4387-88D7-18EFBD225BF0/1-v1c025g50000db876afog65u6j3jm8r0.mp4`. Temporary attachment, not archived in Git.
+- **Local source:** `10 References/06 Code/Reference_Code/Media/REF-CODE-006-Orchestrated-Agent-Workflows/1-v1c025g50000db876afog65u6j3jm8r0.mp4`. Original video archived with this note; see the source-video embed below.
 - **Source / rights:** User-supplied video with watermark @snackoverflowgeorge; original post, authorship and rights not independently verified.
 - **Purpose:** Shared research direction for more reliable, less repetitive Roblox production workflows.
 - **Status distinction:** jg supports investigating the organizational direction (2026-10-16); methods and tools remain **needs experimentation**. This is not approval to change existing workflow policy.
@@ -63,3 +63,6 @@ Define a scoped bottleneck and baseline; inspect selected source/version and dep
 ## Traceability
 - No agents spawned, tools installed, scheduled jobs created or policy changes made.
 - Next stage: investigate a concrete workflow gap and test a scoped improvement under existing rules.
+
+## Archived source video
+![[1-v1c025g50000db876afog65u6j3jm8r0.mp4]]

@@ -21,7 +21,7 @@ tags:
 
 ## Identity
 - **Original filename:** `v12300gd0001db9cohnog65pc3ngsi4g.mp4`; attachment filename `1-v12300gd0001db9cohnog65pc3ngsi4g.mp4`.
-- **Local source:** `/tmp/codex-remote-attachments/01a147e8-0f4c-70f3-8203-a85e6ba89679/F1DDF381-E89B-4418-BF94-444CB1497330/1-v12300gd0001db9cohnog65pc3ngsi4g.mp4`. Temporary attachment, not archived in Git.
+- **Local source:** `10 References/06 Code/Reference_Code/Media/REF-CODE-007-Expert-Informed-Briefs/1-v12300gd0001db9cohnog65pc3ngsi4g.mp4`. Original video archived with this note; see the source-video embed below.
 - **Source / rights:** Video watermark @chase_ai_; original post and rights unverified. Visible material attributes an article titled “How to be more ambitious: A tutorial for humans with models” to Felix Rieseberg. Full article and original post not independently retrieved or verified.
 - **Purpose:** Capture principles for stronger interviews, briefs and evidence-based Roblox production across projects.
 - **Evaluation:** Direction supported by jg; needs experimentation. Keep as a proposed reference for later note-by-note review, not a new mandatory workflow.
@@ -56,3 +56,6 @@ During the later review, decide whether to test on a real brief. Record the init
 ## Traceability
 - Capture only: no workflow, skill or task scope changed.
 - Next action: later review this note with the other new references, one by one with jg.
+
+## Archived source video
+![[1-v12300gd0001db9cohnog65pc3ngsi4g.mp4]]

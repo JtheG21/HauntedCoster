@@ -23,7 +23,7 @@ tags:
 
 ## Identity
 - **Original filename:** `v1c044g50000db6c88fog65gda9du000.mp4`; attachment filename `1-v1c044g50000db6c88fog65gda9du000.mp4`.
-- **Local source:** `/tmp/codex-remote-attachments/01a147e8-0f4c-70f3-8203-a85e6ba89679/BB9C2A09-7292-4700-8F11-3FCC5E064FDC/1-v1c044g50000db6c88fog65gda9du000.mp4`. Temporary video attachment; four useful screenshots preserved below.
+- **Local source:** `10 References/05 Misc/Media/REF-MISC-004-Illustrated-Surreal-World/1-v1c044g50000db6c88fog65gda9du000.mp4`. Original video archived with this note; see the source-video embed below.
 - **Source / rights:** Watermark @handa.65; original author, game, post and asset rights unverified. Reference evidence only, not production art.
 - **Purpose:** Shared art-direction reference spanning environments, characters, interface and overall atmosphere; future game tasks choose relevant uses.
 - **Status distinction:** jg accepted inspiration and a minimum quality standard for this style on 2026-10-16. Reproduction/adaptation remains **needs experimentation**. No implementation or workflow change requested during capture; review later with the other new notes.
@@ -63,8 +63,11 @@ When selected during the later note-by-note review, record the interview/brief, 
 ## Open questions
 - Which qualities matter most for a specific game or deliverable?
 - Which 2D or 3D technique preserves them at acceptable cost and performance?
-- Should the source video be archived beyond the temporary attachment? Four representative frames are preserved here.
+- Original video is now archived alongside this note for later review.
 
 ## Traceability
 - Capture only: no game, artwork, renderer or workflow modification implemented.
 - Next action: later review the new reference notes one by one with jg before choosing experiments or changes.
+
+## Archived source video
+![[1-v1c044g50000db6c88fog65gda9du000.mp4]]

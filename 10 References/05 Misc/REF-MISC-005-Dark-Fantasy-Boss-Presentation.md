@@ -24,7 +24,7 @@ tags:
 ## Identity
 - **Original video:** `v12044gd0000db98quvog65v0dt42oq0.mp4`; attachment filename `1-v12044gd0000db98quvog65v0dt42oq0.mp4`.
 - **Original images:** Photo 2.jpg through Photo 7.jpg; preserved with attachment filenames `2-Photo-2.jpg` through `7-Photo-7.jpg` in `10 References/05 Misc/Dark Fantasy Boss Presentation/`.
-- **Local video:** `/tmp/codex-remote-attachments/01a147e8-0f4c-70f3-8203-a85e6ba89679/C5E723A6-B1DA-43EE-AA3F-87893B7136F3/1-v12044gd0000db98quvog65v0dt42oq0.mp4`. Temporary attachment; video not archived in Git. Six supplied images and three relevant extracted frames preserved.
+- **Local video:** `10 References/05 Misc/Media/REF-MISC-005-Dark-Fantasy-Boss-Presentation/1-v12044gd0000db98quvog65v0dt42oq0.mp4`. Original video archived with this note; see the source-video embed below.
 - **Source / rights:** @eazycreates watermark, Dark Fantasy RNG named in supplied material. Original posts, authorship, asset licences and current game state unverified. Reference evidence only.
 - **Purpose:** Capture whole-presentation qualities spanning bosses, world, materials and VFX.
 - **Grouping:** Companion to [[REF-MAP-001-Dark-Fantasy-World]], kept as a separate note with its own evidence, as requested by jg.
@@ -78,3 +78,6 @@ When a scoped experiment is selected, record chosen qualities, original assets/r
 ## Traceability
 - Capture only: no encounter, model, VFX or workflow changes implemented.
 - Next action: later review this note alongside its companion and other new references, one by one with jg.
+
+## Archived source video
+![[1-v12044gd0000db98quvog65v0dt42oq0.mp4]]

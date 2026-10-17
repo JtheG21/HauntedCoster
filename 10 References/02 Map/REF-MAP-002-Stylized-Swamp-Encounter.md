@@ -21,7 +21,7 @@ tags:
 
 ## Identity
 - **Original filename:** `v12044gd0000db791hvog65mbspvirfg.mp4`; attachment filename `1-v12044gd0000db791hvog65mbspvirfg.mp4`.
-- **Local source:** `/tmp/codex-remote-attachments/01a147e8-0f4c-70f3-8203-a85e6ba89679/A199B6D7-F60C-4423-A40B-6AE639BA7F80/1-v12044gd0000db791hvog65mbspvirfg.mp4`. Temporary video attachment; not archived in Git. Five useful sampled screenshots are preserved below.
+- **Local source:** `10 References/02 Map/Media/REF-MAP-002-Stylized-Swamp-Encounter/1-v12044gd0000db791hvog65mbspvirfg.mp4`. Original video archived with this note; see the source-video embed below.
 - **Source / rights:** Watermark @bellydog_; original author, game, post and asset rights unverified. Retained as reference evidence, not production assets.
 - **Purpose:** Shared reference for coherent environment, creature, gameplay and animation presentation in Roblox game production.
 - **Status distinction:** jg accepted inspiration and minimum quality on 2026-10-16. Implementation remains **needs experimentation**; no recreation or gameplay test performed.
@@ -64,8 +64,11 @@ Record the interview/brief and prompt, finer motion evidence when relevant, orig
 ## Open questions
 - What are the exact encounter behaviors and animation beats in the clip?
 - Which adaptations fit a particular game's camera, style and gameplay?
-- Should the original video be archived beyond its temporary attachment? Five representative frames are preserved here.
+- Original video is now archived alongside this note for later review.
 
 ## Traceability
 - No implementation task or recreated assets yet.
 - Approved quality preference; scoped implementation experiment remains pending.
+
+## Archived source video
+![[1-v12044gd0000db791hvog65mbspvirfg.mp4]]

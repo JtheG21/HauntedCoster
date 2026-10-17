@@ -20,7 +20,7 @@ tags:
 
 ## Identity
 - **Original filename:** `v12044gd0000db8250vog65rdnfli080.mp4`; attachment filename `1-v12044gd0000db8250vog65rdnfli080.mp4`.
-- **Local video:** `/tmp/codex-remote-attachments/01a147e8-0f4c-70f3-8203-a85e6ba89679/FB2ABAB8-7155-4D45-B273-2D8E382E98FF/1-v12044gd0000db8250vog65rdnfli080.mp4`. Temporary attachment, not archived in Git.
+- **Local video:** `10 References/02 Map/Media/REF-MAP-001-Dark-Fantasy-World/1-v12044gd0000db8250vog65rdnfli080.mp4`. Original video archived with this note; see the source-video embed below.
 - **Source / rights:** User video with watermark @eazycreates. Original author/post and asset licences unverified. Frames retained as reference evidence, not production assets.
 - **Purpose:** Shared reference for how a Roblox world looks and feels, not a request to adopt the featured game's gameplay systems.
 - **Status distinction:** jg accepted inspiration and minimum world-presentation quality on 2026-10-16. Implementation remains **needs experimentation**; no world has been recreated or tested.
@@ -64,7 +64,7 @@ Record the interview/brief and prompt, selected frame qualities, chosen original
 ## Open questions
 - What should be changed or excluded for a particular game?
 - Which visual qualities matter most in that game's camera and lighting?
-- Should the source video be archived beyond the temporary attachment? Representative frames are preserved here.
+- Original video is now archived alongside this note for later review.
 
 ## Traceability
 - No implementation task or recreated world yet.
@@ -72,3 +72,6 @@ Record the interview/brief and prompt, selected frame qualities, chosen original
 
 ## Companion reference
 [[REF-MISC-005-Dark-Fantasy-Boss-Presentation]] retains a later video and six supplied images with their own interview. jg requested separate notes grouped by links; the companion adds boss/effect presentation and case-by-case texture preference.
+
+## Archived source video
+![[1-v12044gd0000db8250vog65rdnfli080.mp4]]

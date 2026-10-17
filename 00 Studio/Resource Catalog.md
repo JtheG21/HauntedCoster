@@ -18,6 +18,8 @@ The one place to look before building something that might already exist. Each r
 
 Identity is the resource's path or existing ID. This catalog adds no new ID scheme.
 
+**Review the new reference collection:** [[Reference Review Index]] (19 notes, original media and review checklist).
+
 ## Lifecycle
 These are catalog states, not note statuses. A resource may skip states, and "verified" does not mean "works everywhere": the Limits column says where it was proven.
 
@@ -87,7 +89,6 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | GAME-002 art direction | GAME-002 world code | implemented | Accepted for now; a full revamp is expected (jg, 2026-10-12). Not a reusable standard |
 | Map screenshots (7) | `10 References/02 Map/` ([[Map References]]) | captured | On hold; context not written |
 | GAME-002 sound bank | TASK-0040 (in progress) | proposed | Add here once merged |
-
 | Throwie image-effects exploration | [[REF-UI-001-Throwie]] | captured | Needs experimentation; jg likes distressed, eerie, hand-drawn possibilities. Exports, rights and Roblox use unverified |
 | Resource Boy Exclusives | [[REF-UI-002-Resource-Boy]] | captured | Needs experimentation per pack; VFX, textures, text effects and gradients are initial interests; rights, formats and Roblox suitability unverified |
 | Anatomy structural modeling exploration | [[REF-MISC-001-Anatomy]] | captured | Needs experimentation on one confusing object; SVG/WebGL skill, not a verified Roblox model pipeline |
@@ -97,7 +98,7 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Apify research and reference gathering | [[REF-CODE-004-Apify]] | captured | Needs experimentation on a bounded collection job; compare alternatives when needed; individual tools and linked comparison article unreviewed |
 | Expo Skills agent knowledge and workflows | [[REF-CODE-005-Expo-Skills]] | captured | Needs experimentation per method; Expo/React Native assumptions require adaptation; PRs are research leads, not approved changes |
 | Reference library organizational direction | [[REF-MISC-002-Reference-Library-Approach]] | approved | jg, 2026-10-16: evidence-backed summaries and links, possible uses and contradiction flags; direction only, no automated service implemented |
-| Cinematic energy sequence quality reference | [[REF-VFX-001-Cinematic-Energy-Sequence]] | approved | jg, 2026-10-16: inspiration and minimum animation/cutscene/VFX quality; implementation needs experimentation; original video remains a temporary attachment |
+| Cinematic energy sequence quality reference | [[REF-VFX-001-Cinematic-Energy-Sequence]] | approved | jg, 2026-10-16: inspiration and minimum animation/cutscene/VFX quality; implementation needs experimentation; original video archived with the note |
 | Dark fantasy world quality reference | [[REF-MAP-001-Dark-Fantasy-World]] | approved | jg, 2026-10-16: inspiration and minimum world look/feel quality; implementation needs experimentation; six reference frames preserved |
 | Orchestrated agent workflow research direction | [[REF-CODE-006-Orchestrated-Agent-Workflows]] | approved | jg, 2026-10-16: investigate principles, named tools and useful parallelism; needs experimentation; no delegation-policy change |
 | Stylized swamp encounter quality reference | [[REF-MAP-002-Stylized-Swamp-Encounter]] | approved | jg, 2026-10-16: whole scene, visuals/gameplay/animation quality; needs experimentation; five frames preserved; one-prompt goal unproven |
