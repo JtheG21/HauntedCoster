@@ -8,6 +8,9 @@
   evidence.py stats   <image|video> [<image|video> ...] [--at SECONDS]
   evidence.py series  <video|REF-ID> [--fps 30] [--start S] [--end S] [--csv FILE]   per-frame luminance/saturation, mono runs, flash risk
   evidence.py audio   <video|REF-ID> [--window 0.1]   loudness envelope, silence and onset times
+  evidence.py matrix  <img> [<img> ...] [--widths 90,180,340] [--out DIR]   same inputs at real display widths on dark and light
+  evidence.py silhouette <img|video> [...] [--at S] [--mode luma|alpha] [--threshold 128] [--out FILE]   black/white shape sheet
+  (series also takes --max-transitions N: exit 1 if the worst second has more, so a task can gate on it)
 
 `<video|REF-ID>` is a file path or a REF note id; an id resolves to the first archived .mp4 the note embeds.
 Outputs go to a fresh temp directory (printed), never into the vault. Frames are named f_0001.jpg ...
@@ -268,7 +271,8 @@ def worst_window(times: list[float], width: float = 1.0) -> tuple[int, float]:
     return best, at
 
 
-def cmd_series(root: Path, src: str, fps: float, start: float, end: float | None, csv: str | None) -> int:
+def cmd_series(root: Path, src: str, fps: float, start: float, end: float | None, csv: str | None,
+               max_transitions: int | None = None) -> int:
     video = resolve_video(root, src)
     rows = frame_series(video, fps, start, end)
     if csv:
@@ -290,6 +294,10 @@ def cmd_series(root: Path, src: str, fps: float, start: float, end: float | None
     print(f"luminance transitions >= 10% of full scale: {len(trans)} total; worst 1 s window starts {fmt_t(at)} with {n}")
     print("heuristic only: whole-frame mean at 32x32, not the area-based WCAG flash test and not a conformance "
           "result; more than 6 transitions in one second (about 3 flashes) means look at it with a proper tool.")
+    if max_transitions is not None:
+        ok = n <= max_transitions
+        print(f"{'PASS' if ok else 'FAIL'}: worst second has {n} large luminance transitions (limit {max_transitions})")
+        return 0 if ok else 1
     return 0
 
 
@@ -328,6 +336,99 @@ def cmd_audio(root: Path, src: str, window: float) -> int:
     return 0
 
 
+def media_size(path: Path) -> tuple[int, int]:
+    r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height",
+                        "-of", "csv=p=0", str(path)], capture_output=True, text=True)
+    try:
+        w, h = r.stdout.strip().split(",")[:2]
+        return int(w), int(h)
+    except ValueError:
+        raise EvidenceError(f"cannot read size of {path}")
+
+
+def cmd_matrix(root: Path, inputs: list[str], widths: list[int], out: str | None) -> int:
+    paths = [Path(i) for i in inputs]
+    for p in paths:
+        if not p.exists():
+            raise EvidenceError(f"no such image: {p}")
+    d = out_dir(root, out, "matrix")
+    aspect = max(media_size(p)[1] / media_size(p)[0] for p in paths)
+    cell_w = max(widths) + 20
+    for name, bg in (("dark", "0x1b1b24"), ("light", "0xd9d2c3")):
+        rows = []
+        for w in widths:
+            h = max(40, int(round(w * aspect)) + 20)
+            cells = []
+            for i, p in enumerate(paths):
+                cell = d / f"cell_{name}_{w}_{i}.png"
+                fc = (f"color=c={bg}:s={cell_w}x{h}[bg];[0:v]scale={w}:-2:flags=lanczos[img];"
+                      "[bg][img]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2")
+                r = ffmpeg("-i", str(p), "-filter_complex", fc, "-frames:v", "1", str(cell))
+                if r.returncode != 0:
+                    raise EvidenceError(f"ffmpeg cell failed for {p.name}: {r.stderr.strip()[:200]}")
+                cells.append(cell)
+            row = d / f"row_{name}_{w}.png"
+            args = []
+            for c in cells:
+                args += ["-i", str(c)]
+            r = ffmpeg(*args, "-filter_complex", f"hstack=inputs={len(cells)}" if len(cells) > 1 else "null",
+                       "-frames:v", "1", str(row))
+            if r.returncode != 0:
+                raise EvidenceError(f"ffmpeg row failed: {r.stderr.strip()[:200]}")
+            rows.append(row)
+        args = []
+        for r_ in rows:
+            args += ["-i", str(r_)]
+        r = ffmpeg(*args, "-filter_complex", f"vstack=inputs={len(rows)}" if len(rows) > 1 else "null",
+                   "-frames:v", "1", str(d / f"matrix_{name}.png"))
+        if r.returncode != 0:
+            raise EvidenceError(f"ffmpeg stack failed: {r.stderr.strip()[:200]}")
+        for tmp in list(d.glob(f"cell_{name}_*.png")) + list(d.glob(f"row_{name}_*.png")):
+            tmp.unlink()
+    print("columns left to right: " + ", ".join(p.name for p in paths))
+    print(f"rows top to bottom: display widths {', '.join(str(w) for w in widths)} px")
+    print(f"matrix_dark.png and matrix_light.png -> {d}")
+    return 0
+
+
+def cmd_silhouette(root: Path, inputs: list[str], at: float | None, mode: str, threshold: int,
+                   height: int, out: str | None) -> int:
+    for f in inputs:
+        if not Path(f).exists():
+            raise EvidenceError(f"no such file: {f}")
+    dest = Path(out).resolve() if out else out_dir(root, None, "silhouette") / "silhouette.png"
+    try:
+        dest.relative_to(root.resolve())
+        raise EvidenceError(f"refusing to write evidence output inside the vault: {dest}")
+    except ValueError:
+        pass
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = Path(tempfile.mkdtemp(prefix="sil-"))
+    pieces = []
+    for i, f in enumerate(inputs):
+        piece = tmp / f"s{i}.png"
+        if mode == "alpha":
+            vf = f"scale=-2:{height},format=rgba,alphaextract,format=gray,lutyuv=y='if(gt(val,{threshold}),255,0)'"
+        else:
+            vf = f"scale=-2:{height},format=gray,lutyuv=y='if(gt(val,{threshold}),255,0)'"
+        args = (["-ss", str(at)] if at is not None else []) + ["-i", f, "-vf", vf, "-frames:v", "1", str(piece)]
+        r = ffmpeg(*args)
+        if r.returncode != 0 or not piece.exists():
+            raise EvidenceError(f"silhouette failed for {f}: {r.stderr.strip()[:200]}")
+        pieces.append(piece)
+    args = []
+    for pc in pieces:
+        args += ["-i", str(pc)]
+    r = ffmpeg(*args, "-filter_complex", f"hstack=inputs={len(pieces)}" if len(pieces) > 1 else "null",
+               "-frames:v", "1", str(dest))
+    shutil.rmtree(tmp, ignore_errors=True)
+    if r.returncode != 0:
+        raise EvidenceError(f"ffmpeg stack failed: {r.stderr.strip()[:200]}")
+    print("left to right: " + ", ".join(Path(f).name for f in inputs) + f"; mode={mode}, threshold={threshold} -> {dest}")
+    print("a shape aid for jg's judgement of readability, not a pass/fail")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path, default=ROOT)
@@ -346,14 +447,23 @@ def main(argv: list[str] | None = None) -> int:
     st.add_argument("inputs", nargs="+"); st.add_argument("--at", type=float)
     se = sub.add_parser("series")
     se.add_argument("src"); se.add_argument("--fps", type=float, default=30.0); se.add_argument("--start", type=float, default=0.0)
-    se.add_argument("--end", type=float); se.add_argument("--csv")
+    se.add_argument("--end", type=float); se.add_argument("--csv"); se.add_argument("--max-transitions", type=int)
     au = sub.add_parser("audio")
     au.add_argument("src"); au.add_argument("--window", type=float, default=0.1)
+    mx = sub.add_parser("matrix")
+    mx.add_argument("inputs", nargs="+"); mx.add_argument("--widths", default="90,180,340"); mx.add_argument("--out")
+    si = sub.add_parser("silhouette")
+    si.add_argument("inputs", nargs="+"); si.add_argument("--at", type=float); si.add_argument("--mode", choices=["luma", "alpha"], default="luma")
+    si.add_argument("--threshold", type=int, default=128); si.add_argument("--height", type=int, default=540); si.add_argument("--out")
     a = ap.parse_args(argv)
     root = a.root.resolve()
     try:
+        if a.cmd == "matrix":
+            return cmd_matrix(root, a.inputs, [int(w) for w in a.widths.split(",") if w.strip()], a.out)
+        if a.cmd == "silhouette":
+            return cmd_silhouette(root, a.inputs, a.at, a.mode, a.threshold, a.height, a.out)
         if a.cmd == "series":
-            return cmd_series(root, a.src, a.fps, a.start, a.end, a.csv)
+            return cmd_series(root, a.src, a.fps, a.start, a.end, a.csv, a.max_transitions)
         if a.cmd == "audio":
             return cmd_audio(root, a.src, a.window)
         if a.cmd == "frames":
