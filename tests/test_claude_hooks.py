@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 GUARD = ROOT / ".claude" / "hooks" / "guard.sh"
 FORMAT = ROOT / ".claude" / "hooks" / "luau-format.sh"
 STUDIO = ROOT / "scripts" / "studio-preflight.sh"
+REFLINT = ROOT / ".claude" / "hooks" / "ref-lint.sh"
 
 
 def run_hook(script, tool, **tool_input):
@@ -128,6 +129,33 @@ class TestGuardPaths(unittest.TestCase):
     def test_other_repos_are_left_alone(self):
         (self.repo / "haunted.project.json").unlink()
         self.check("allow", "Write", "Agents/x.md")
+
+
+@unittest.skipUnless(shutil.which("jq"), "needs jq")
+class TestRefLint(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.repo = make_checkout(self.tmp.name)
+        (self.repo / "scripts").mkdir()
+        shutil.copy(ROOT / "scripts" / "refs.py", self.repo / "scripts" / "refs.py")
+        shutil.copy(ROOT / "scripts" / "validate_vault.py", self.repo / "scripts" / "validate_vault.py")
+        self.note = self.repo / "10 References" / "01 UI" / "REF-UI-001-X.md"
+        self.note.parent.mkdir(parents=True)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_reports_a_bad_note(self):
+        self.note.write_text("---\nid: REF-UI-001\n---\n# x\n")
+        r = run_hook(REFLINT, "Edit", file_path=str(self.note))
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("missing 'title'", r.stderr)
+
+    def test_ignores_other_files(self):
+        other = self.repo / "notes.md"
+        other.write_text("x")
+        self.assertEqual(run_hook(REFLINT, "Edit", file_path=str(other)).returncode, 0)
+        self.assertEqual(run_hook(REFLINT, "Edit", file_path=str(self.repo / "10 References" / "01 UI" / "gone.md")).returncode, 0)
 
 
 @unittest.skipUnless(shutil.which("stylua") and shutil.which("selene") and shutil.which("jq"), "needs stylua, selene, jq")
