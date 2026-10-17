@@ -4,7 +4,7 @@ title: Code Reference Index
 type: index
 status: proposed
 created: 2026-10-11
-updated: 2026-10-11
+updated: 2026-10-16
 tags:
   - reference/code
 ---
@@ -13,6 +13,10 @@ tags:
 > Purpose: reusable engineering knowledge for future Roblox systems. References are source material to inspect and adapt, not plug-and-play guarantees.
 
 Per-repo guides, with verified paths, compatibility notes and known pitfalls: [[SODT-RC-1]] · [[Npc_template]] · [[vfx_template]]. The rule that makes this mandatory is in `AGENTS.md` ("Reference-first development").
+
+## Additional references awaiting experimentation
+
+- [[REF-CODE-001-Roqer]] — full Roblox Studio agent repository; animation/VFX guidance is the first inspected area. Needs experimentation per technique. Roqer-specific tools, current AGPL licensing and untested macOS support require checking before adoption. The access table below covers the original three repositories only.
 
 ## How to access the source
 All three repos are **public**. Reading them needs no credentials and no clone in the vault. Access was confirmed from this shell on 2026-10-11 with `git ls-remote` and `gh api`.
