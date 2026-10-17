@@ -30,7 +30,7 @@ The entry point for every task, in any game. [[AGENTS]] holds the rules, [[Workf
 4. **Classify** (table below) and open only the matching workflow(s).
 5. **Reuse search.** Check the [[Resource Catalog]], the lessons in `09 Knowledge/` and the [[Video Research Index]] for the task's area, then the [[Reference_Code_Index]], then `10 References/<area>/` (`python3 scripts/refs.py brief --task TASK-####` or `--category <name>` prints the matching notes' Intent and open questions; `orchestrator.py start` prints it too), then the existing code (grep). Write reuse, adapt or replace, and why, in the task note.
 6. **Inspect the real implementation** before changing it: the files, not their summaries.
-7. **Plan** to the depth tier below.
+7. **Plan** to the depth tier below. For Standard and Deep tasks with matching notes in `10 References/`, the `reference-brief` skill builds the interview, evidence plan and Intake block first.
 8. **Execute** in small, reviewable stages on the task branch.
 9. **Validate**, cheapest check first ([[Workflow]] "Check order").
 10. **Record and report.** Fill the task note's Implementation record and Outcome; add a catalog row if something reusable came out of it; write a LES only with evidence. Report using the states below.

@@ -7,7 +7,7 @@ area: misc
 source: User-supplied video; original game and post URL unknown
 accessed: 2026-10-16
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 related:
   - "[[Misc References]]"
   - "[[UI References]]"
@@ -68,6 +68,14 @@ When selected during the later note-by-note review, record the interview/brief, 
 ## Traceability
 - Capture only: no game, artwork, renderer or workflow modification implemented.
 - Next action: later review the new reference notes one by one with jg before choosing experiments or changes.
+
+## Review decision (2026-10-17)
+- **Outcome:** propose a scoped experiment
+- **Decided by:** jg
+- **Summary:** Review 2026-10-17 of an approved art-direction floor. The archived clip (21.3 s, 576 by 576) was reopened as 22 frames in one contact sheet plus the four preserved frames, with scene-change beats, palette numbers, a flash-risk check and the audio level. It is a montage of about a dozen scenes from one game with a cut roughly every 1.3 s under the caption 'A Roblox game btw', with a persistent torn-paper border, a bottom icon bar (including CJK characters), pointing-hand icons, a vignette, and a small character with one large eye and a cap or bob haircut; a side-moving adventure style is a guess from the framing. Scenes: a dark sepia spiral-mushroom grove, a pond under clouds, a stack of CRT televisions, a tangled rope-textured tree with lanterns, a dark furry creature beside a wooden shack, an interior with a mechanical figure having tea, a sunset over pylons, giant red shoes, and machinery rooms with dials and wheels. Look: heavy hand-drawn outlines and hatching, woven or rope-like texture on organic forms, paper-like surfaces, muted earth tones with selective accents, dense detail everywhere. Measured on the four preserved frames as aids: mean luminance 55 to 86 of 255, 17 to 28 percent crushed shadows, mostly warm (34 to 72 percent) with almost no cool; four large luminance transitions in the whole clip, all from cuts or the end-card transition, so no flash risk. The audio is a continuous track with a loud peak near 17 s and silence from 18.4 s, with no bearing on the look. The clip names the game only as a Roblox game and shows no construction, so whether the scenes are 2D layers or 3D is unknown. The four existing frame headings match their frames. jg selected an experiment, all three production methods for the eventual scene board, and the frame, icon bar and a menu as the first test target, recorded as jg's choices. The one-prompt expectation was not part of this note's interview and stays unclaimed; ease is to be judged from results.
+- **Evidence inspected:** Review packet; the archived clip as a 22-frame contact sheet with scene-change beats, the audio envelope, the per-frame series and palette numbers; the four preserved frames (00:05 viewed individually) and their headings; the related Throwie and Resource Boy decisions
+- **Still unverified:** Whether the scenes are 2D layers or 3D and how the look was produced; the game and author; the asset rights; whether any of the three methods can reproduce this density in Roblox and at what effort or performance cost; how Throwie and Resource Boy ingredients look in this style; the meaning of the CJK text on the icon bar
+- **Next action:** Step 1: write a one-page style bible from the clip (palette limits, line and hatch rules, texture set, shape vocabulary, frame and icon-bar treatment, and what is excluded). Step 2: test the persistent torn-paper frame, bottom icon bar and a menu or dialogue panel first, using ingredients such as Throwie effects and Resource Boy textures, judged by jg at the real UI size. Step 3: once the frame reads right, build a small scene comparison board of the three methods jg selected (3D with Highlight outlines and colour grading; 3D with inverted-hull outline meshes and hand-drawn textures; 2D layered cutouts with parallax), same scene and camera, judged by jg at matched views. Original assets only; no copying of characters, layouts or artwork. Waits on a game choice and a free Studio session; any upload needs jg's approval.
 
 ## Archived source video
 ![[1-v1c044g50000db6c88fog65gda9du000.mp4]]

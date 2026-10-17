@@ -7,7 +7,7 @@ area: misc
 source: https://github.com/wheresryan22/anatomy
 accessed: 2026-10-16
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 related:
   - "[[Misc References]]"
   - "[[3D Model Quality Baseline]]"
@@ -51,3 +51,11 @@ Choose one structurally confusing object when a real modeling task warrants it. 
 ## Traceability
 - No implementation tasks, installed skill or production assets yet.
 - Next stage: a scoped experiment on one troublesome object, then update the usefulness assessment with evidence.
+
+## Review decision (2026-10-17)
+- **Outcome:** propose a scoped experiment
+- **Decided by:** jg
+- **Summary:** Source inspected 2026-10-17 at commit e9488296a4 (MIT, read in full). Anatomy is an explainer-figure skill: it invents a physical machine whose working illustrates a technical idea and renders it as an interactive isometric SVG page, with optional WebGL shaders and a beta 3D mode. Its README limits it to machines, instruments, tools and furniture, not people or exact maps, and it has no mesh or Roblox export. Its geometry audit (nothing passes through anything, every end sits on a mount, overlaps drawn in depth order) runs only on its own SVG solids. The transferable part is the method: collect the real numbers first, write a parts list before any geometry with each part sitting on another part, and verify like a critic with close-ups of every junction; never copy a reference's object, only its finish. Its fixed part counts (40-80 for a Figure, 80-150 for a Hero), SVG kit, WebGL and React are not transferable. It needs Node 20.10+ and headless Chrome (Node is not installed on this Mac); a Figure is quoted as under an hour and a Hero as 2-4 hours. It ships 5 eval prompts with expected outputs, a pattern we could reuse for our own skills. The note's earlier claims (SVG, optional WebGL, beta 3D, parts list before geometry, geometry checks) are confirmed. Rights ledger class moves from permissive-claimed to permissive-verified.
+- **Evidence inspected:** Review packet; repo metadata and pinned tree at e9488296a4; LICENSE in full; README (what it makes, how it works, requirements, limits); SKILL.md (the idea, workflow, craft rules); CHANGELOG head; evals.json; two gallery images (raptor-engine-apart, dial-indicator) viewed
+- **Still unverified:** Whether the method improves model coherence beyond the existing reference-first process; the examples' behaviour when run (Node is not installed, nothing was executed); the 3D mode; the eval prompts' quality; the repository's stability (nine days old)
+- **Next action:** On the first structurally confusing object in a real model task (jg flags it), write a parts list with support relations and proportions before modeling and compare it against the baseline process, one revision each, recording the extra effort. Method only: do not install the skill (it needs Node 20.10+, which is not installed, and it makes illustrations, not meshes). Any structure check on Blender or Roblox output would be our own build, not part of this repository.

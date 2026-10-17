@@ -225,6 +225,66 @@ class PinRightsLedgerTest(RefsTest):
         self.assertRegex(out, r"TASK-0001\s+done\s+1\s+2\s+1\s+2\.5\s+1500\s+partly \(jg\)\s+REF-MAP-001")
 
 
+class ReviewDriverTest(RefsTest):
+    def test_review_next_packet(self):
+        code, out = self.run_cmd("review-next")
+        self.assertEqual(code, 0, out)
+        self.assertIn("Review packet: REF-MAP-001", out)
+        self.assertIn("1 unchecked", out)
+        self.assertIn("jg likes this", out)
+        self.assertIn("Which one?", out)
+        self.assertIn("refs.py decide", out)
+        self.assertEqual(self.run_cmd("review-next", "--id", "REF-NOPE-001")[0], 2)
+
+    def test_review_next_when_done_and_spec_section(self):
+        self.write("00 Studio/Reference Review Index.md",
+                   "| [x] | [[REF-MAP-001-One]] — One | q |\n| [x] | [[REF-MAP-002-Other]] — Other | q |\n")
+        self.assertIn("every item", self.run_cmd("review-next")[1])
+        self.write(refs.SPEC, "## Part C\n### 1. REF-MAP-001 One\n- **Automations:** do a thing\n### 2. REF-MAP-002 Other\n- x\n")
+        _, out = self.run_cmd("review-next", "--id", "REF-MAP-001")
+        self.assertIn("do a thing", out)
+        self.assertNotIn("REF-MAP-002 Other", out)
+
+    ARGS = ["decide", "REF-MAP-001", "--summary", "Useful | for fog", "--inspected", "README and one video",
+            "--unverified", "rights", "--by", "jg"]
+
+    def test_decide_dry_run_changes_nothing(self):
+        before = (self.root / "10 References/02 Map/REF-MAP-001-One.md").read_text()
+        code, out = self.run_cmd(*self.ARGS, "--outcome", "keep")
+        self.assertEqual(code, 0, out)
+        self.assertIn("DRY RUN", out)
+        self.assertEqual((self.root / "10 References/02 Map/REF-MAP-001-One.md").read_text(), before)
+
+    def test_decide_apply(self):
+        code, out = self.run_cmd(*self.ARGS, "--outcome", "experiment", "--next", "try one fog pack", "--apply")
+        self.assertEqual(code, 0, out)
+        note_path = self.root / "10 References/02 Map/REF-MAP-001-One.md"
+        text = note_path.read_text()
+        self.assertIn("## Review decision (", text)
+        self.assertIn("propose a scoped experiment", text)
+        self.assertIn("Useful / for fog", text)
+        self.assertIn("**Next action:** try one fog pack", text)
+        self.assertIn("| [x] | [[REF-MAP-001-One]]", (self.root / "00 Studio/Reference Review Index.md").read_text())
+        self.assertRegex((self.root / "00 Studio/Resource Catalog.md").read_text(), r"n\. Review \d{4}-\d{2}-\d{2}: propose a scoped experiment")
+        # Intent and status untouched
+        self.assertEqual(refs.section(text, "Intent"), refs.section(note(), "Intent"))
+        self.assertEqual(refs.parse_frontmatter(text)["status"], "proposed")
+
+    def test_decide_requires_next_and_by(self):
+        self.assertEqual(self.run_cmd(*self.ARGS, "--outcome", "investigate")[0], 2)
+        args = [a for a in self.ARGS]
+        args[args.index("--by") + 1] = " "
+        self.assertEqual(self.run_cmd(*args, "--outcome", "keep")[0], 2)
+        self.assertEqual(self.run_cmd("decide", "REF-NOPE-001", "--outcome", "keep", "--summary", "s", "--inspected", "i",
+                                      "--unverified", "u", "--by", "jg")[0], 2)
+
+    def test_decision_passes_the_guard(self):
+        self.run_cmd(*self.ARGS, "--outcome", "keep", "--apply")
+        old = note()
+        new = (self.root / "10 References/02 Map/REF-MAP-001-One.md").read_text()
+        self.assertEqual(refs.guard_issues("f", old, new), [])
+
+
 class GuardGitTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
