@@ -7,7 +7,7 @@ area: code
 source: User-supplied video; original post URL unknown
 accessed: 2026-10-16
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 related:
   - "[[Reference_Code_Index]]"
   - "[[REF-MISC-002-Reference-Library-Approach]]"
@@ -63,6 +63,14 @@ Define a scoped bottleneck and baseline; inspect selected source/version and dep
 ## Traceability
 - No agents spawned, tools installed, scheduled jobs created or policy changes made.
 - Next stage: investigate a concrete workflow gap and test a scoped improvement under existing rules.
+
+## Review decision (2026-10-17)
+- **Outcome:** keep as reference
+- **Decided by:** jg
+- **Summary:** Review 2026-10-17 of an approved research direction. The archived video (161.5 s, a creator's ladder from one agent to an orchestrated crew in about twelve slides: one agent one task, more tabs, tooling, persistent instructions (AGENTS.md), instructions by folder, templates with access limits, memory and cron and workflows, a task queue, a decision gate between automation and human review, orchestrator and workers, event-driven agent messages, project direction, and a personal FirstMate fork) was viewed as 48 frames over three contact sheets; the speaker's credentials and PR counts are on-screen assertions, unverified. The article its slide cites is real: 'How we built a software factory with Kiro Crew to merge 1,000 PRs in a week', published 2026-09-18 on kiro.dev, with five stages (one session by hand, many sessions by hand, memory plus dashboard plus cron and workflows, an agent pipeline of triage, implementation, review and merge stages, and Crew Mode with a coordinating agent). Its authors say every one of the 1,000 PRs went through CI and review, the figure came from the pipeline plus an early Crew Mode, a single coordinating agent can become a bottleneck, coordination has a cost, and humans still set the goals. FirstMate is verified: kunchenguid/firstmate, MIT, Shell, created 2026-06-12, about 8,000 stars, an agent distro of AGENTS.md, skills and scripts that runs a crew with one worktree and one visible tmux window per crewmate and event-driven supervision; it needs macOS or Linux, a supported harness, gh and tmux, offers a +yolo merge-autonomy flag and an optional relay that answers public mentions on X and Discord, which conflict with our human-merge and no-outward-posting rules. Herdr (Rust terminal multiplexer for agents, about 44,000 stars) has licence reports that disagree (Apache-2.0 per GitHub, AGPL per some third parties). Against our setup: sessions by hand, persistent instructions, memory and a gated queue exist; scheduled jobs, message-passing pipelines and autonomous orchestrator-and-worker crews are not authorized and would need separate delegation-policy approval. Current data: 40 tasks (37 done, 3 archived), nothing ready, mean revisions 0.45, so there is no backlog for parallel agents; the queue's start-to-review times mark orchestrator calls and are a weak baseline. Kept as a reference. Revisit when orchestrator.py next --parallel-safe repeatedly shows two or more independent ready tasks. FirstMate, Herdr and the Kiro article are named leads only: nothing installed, no policy change, no recurring jobs.
+- **Evidence inspected:** Review packet; the archived video as 48 frames over three contact sheets plus scene-change beats; web search results for FirstMate, Herdr and the Kiro article; gh api metadata for kunchenguid/firstmate and the Herdr repositories; the FirstMate README (first 70 lines); the Kiro article through the fetch tool (a summarizer, so secondary); orchestrator.py status, next --parallel-safe and cycles on the current queue
+- **Still unverified:** The speaker's claims, credentials and PR counts; the narration (no transcription tool is installed, so only on-screen text was read); FirstMate and Herdr behaviour when run (nothing installed); the Herdr licence; the full Kiro article text beyond the summarizer and whether its stages transfer to a solo Roblox studio; whether parallel agents would reduce completion time here
+- **Next action:** none selected
 
 ## Archived source video
 ![[1-v1c025g50000db876afog65u6j3jm8r0.mp4]]
