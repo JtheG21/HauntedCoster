@@ -11,6 +11,8 @@ Reads the REF-* notes on demand; there is no stored registry, so nothing can dri
   refs.py lint [--file PATH]            frontmatter, ids, embeds, Index and Catalog rows
   refs.py guard [--staged | --base REF] flag edits to jg's Intent sections and moves to `approved`
   refs.py new --area map --title "X"    scaffold the next REF-<AREA>-NNN from T - Reference
+  refs.py review-next [--id REF-ID]     review packet for the next unchecked item (or a named one)
+  refs.py decide REF-ID --outcome ...   record jg's decision: append a dated section, tick the Index, note the Catalog (dry run unless --apply)
   refs.py pin [--ids A,B]               record source commit + licence of GitHub-sourced notes (read-only gh api)
   refs.py drift [--links]               compare the latest pins with upstream HEAD; optionally HEAD-check source URLs
   refs.py rights [--check ID --use code|asset|method]   licence class per note and the adaptation gate
@@ -653,6 +655,117 @@ def cmd_ledger(root: Path, only: str | None) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- review driver
+
+SPEC = "02 Research/RSH-20261017-Reference-Automation-Spec.md"
+OUTCOMES = {"keep": "keep as reference", "investigate": "investigate a specific gap",
+            "experiment": "propose a scoped experiment", "unsuitable": "mark unsuitable for a stated use"}
+
+
+def spec_section(root: Path, rid: str) -> str | None:
+    f = root / SPEC
+    if not f.exists():
+        return None
+    m = re.search(rf"(?ms)^### \d+\. {re.escape(rid)}\b.*?(?=^### |^## |\Z)", f.read_text(encoding="utf-8"))
+    return m.group(0).strip() if m else None
+
+
+def unchecked(root: Path) -> list[str]:
+    return [rid for rid, done in review_checks(root).items() if not done]
+
+
+def cmd_review_next(root: Path, only: str | None) -> int:
+    notes = {ref_id(p): p for p in ref_notes(root)}
+    queue = unchecked(root)
+    rid = only or (queue[0] if queue else None)
+    if not rid:
+        print("every item in the Reference Review Index is checked")
+        return 0
+    if rid not in notes:
+        print(f"refs: {rid} is not a REF note", file=sys.stderr)
+        return 2
+    p = notes[rid]
+    fm, text = load(p)
+    print(f"# Review packet: {rid} {fm.get('title', '')}  [{fm.get('status')}]")
+    print(f"Note: {p.relative_to(root)}\nSource: {fm.get('source')}  (accessed {fm.get('accessed')})")
+    print(f"Queue: {len(queue)} unchecked; this is {'the one you named' if only else 'next in Index order'}"
+          + (f"; after it: {', '.join(queue[1:3])}" if not only and len(queue) > 1 else ""))
+    r = read_rights(root).get(rid)
+    if r:
+        print(f"Rights class: {r['class']}: {r['basis']}")
+    pin = read_pins(root).get(rid)
+    if pin:
+        print(f"Pinned: {pin['repo']}@{pin['sha'][:10]} on {pin['time'][:10]}, licence {pin['license']}")
+    media = sorted(set(re.findall(r"!\[\[([^\]]+\.(?:mp4|jpg|jpeg|png))\]\]", text)))
+    print(f"Media to open ({len(media)}): " + (", ".join(media[:12]) or "none (live source link only)"))
+    for label, prefixes, limit in (("Identity", ("Identity",), 8), ("What was inspected", ("Observations", "Inspection"), 12),
+                                   ("Intent (jg's words, do not edit)", ("Intent",), 14),
+                                   ("Interpretation", ("Interpretation",), 10),
+                                   ("Evidence to add", ("Experiment and evidence", "Future review", "Future evidence"), 6),
+                                   ("Open questions", ("Open questions",), 8)):
+        body = next((b for n, b in sections(text).items() if n.startswith(prefixes)), None)
+        if body:
+            print(f"\n## {label}\n{clip(body.strip(), limit)}")
+    if any(n.startswith("Dense review") for n in sections(text)):
+        print("\n(A 'Dense review' section already exists in the note.)")
+    spec = spec_section(root, rid)
+    if spec:
+        print("\n## Proposed automations for this note (from the spec, unapproved)\n" + clip(spec, 30))
+    print("\n## Decide with jg (Index, 'How to review one item')\n"
+          "1. Open the real source (media above or the live link) before concluding anything.\n"
+          "2. Name one concrete use, and what existing resources already cover it.\n"
+          "3. jg picks: " + "; ".join(f"`{k}` = {v}" for k, v in OUTCOMES.items()) + ".\n"
+          "4. Record with `refs.py decide` (needs: --outcome, --inspected, --unverified, --by jg; --next for investigate/experiment).")
+    return 0
+
+
+def cmd_decide(root: Path, rid: str, outcome: str, summary: str, inspected: str, unverified: str,
+               nxt: str | None, by: str, apply: bool) -> int:
+    notes = {ref_id(p): p for p in ref_notes(root)}
+    if rid not in notes:
+        print(f"refs: {rid} is not a REF note", file=sys.stderr)
+        return 2
+    if outcome in ("investigate", "experiment", "unsuitable") and not nxt:
+        print(f"refs: --next is required for '{outcome}' (the next action, or the stated use it is unsuitable for)", file=sys.stderr)
+        return 2
+    if not by.strip():
+        print("refs: --by is required: the decision is jg's", file=sys.stderr)
+        return 2
+    clean = lambda s: " ".join((s or "").replace("|", "/").split())  # noqa: E731
+    today = datetime.date.today().isoformat()
+    block = (f"## Review decision ({today})\n- **Outcome:** {OUTCOMES[outcome]}\n- **Decided by:** {clean(by)}\n"
+             f"- **Summary:** {clean(summary)}\n- **Evidence inspected:** {clean(inspected)}\n"
+             f"- **Still unverified:** {clean(unverified)}\n"
+             + (f"- **Next action:** {clean(nxt)}\n" if nxt else "- **Next action:** none selected\n") + "\n")
+    p = notes[rid]
+    text = p.read_text(encoding="utf-8")
+    anchor = next((m.start() for m in re.finditer(r"(?m)^## (Archived source video|Companion reference)\b", text)), None)
+    new_text = (text[:anchor] + block + text[anchor:]) if anchor is not None else text.rstrip() + "\n\n" + block.rstrip() + "\n"
+    new_text = re.sub(r"(?m)^updated: .*$", f"updated: {today}", new_text, count=1)
+    idx, cat = root / INDEX, root / CATALOG
+    idx_text = idx.read_text(encoding="utf-8") if idx.exists() else ""
+    new_idx = re.sub(rf"(?m)^(\|\s*)\[ \](\s*\|\s*\[\[{re.escape(rid)})", r"\1[x]\2", idx_text, count=1)
+    cat_text = cat.read_text(encoding="utf-8") if cat.exists() else ""
+    tag = f" Review {today}: {OUTCOMES[outcome]}" + (f" ({clean(nxt)})" if outcome == "unsuitable" and nxt else "") + "."
+    lines, new_cat, hit = cat_text.split("\n"), [], False
+    for ln in lines:
+        if not hit and ln.startswith("|") and re.search(rf"\[\[{re.escape(rid)}[^\]]*\]\]", ln):
+            ln, hit = ln.rstrip().rstrip("|").rstrip() + tag + " |", True
+        new_cat.append(ln)
+    print(f"{'APPLY' if apply else 'DRY RUN'}: {rid} -> {OUTCOMES[outcome]}")
+    print(f"  note: append section, set updated {today}\n  index: {'tick' if new_idx != idx_text else 'no unchecked row found'}\n"
+          f"  catalog: {'append review tag' if hit else 'no row found'}\n---\n{block.rstrip()}")
+    if not apply:
+        print("---\nRe-run with --apply once jg has confirmed this wording.")
+        return 0
+    p.write_text(new_text, encoding="utf-8")
+    if new_idx != idx_text:
+        idx.write_text(new_idx, encoding="utf-8")
+    if hit:
+        cat.write_text("\n".join(new_cat), encoding="utf-8")
+    return cmd_lint(root, None)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
@@ -681,6 +794,17 @@ def main(argv: list[str] | None = None) -> int:
     rt = sub.add_parser("rights")
     rt.add_argument("--check")
     rt.add_argument("--use", choices=["code", "asset", "method"], default="code")
+    rn = sub.add_parser("review-next")
+    rn.add_argument("--id")
+    dc = sub.add_parser("decide")
+    dc.add_argument("id")
+    dc.add_argument("--outcome", choices=sorted(OUTCOMES), required=True)
+    dc.add_argument("--summary", required=True)
+    dc.add_argument("--inspected", required=True)
+    dc.add_argument("--unverified", required=True)
+    dc.add_argument("--next")
+    dc.add_argument("--by", required=True)
+    dc.add_argument("--apply", action="store_true")
     lg = sub.add_parser("ledger")
     lg.add_argument("--refs")
     a = ap.parse_args(argv)
@@ -703,6 +827,10 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_rights(root, a.check, a.use)
     if a.cmd == "ledger":
         return cmd_ledger(root, a.refs)
+    if a.cmd == "review-next":
+        return cmd_review_next(root, a.id)
+    if a.cmd == "decide":
+        return cmd_decide(root, a.id, a.outcome, a.summary, a.inspected, a.unverified, a.next, a.by, a.apply)
     return cmd_new(root, a.area, a.title, a.dry_run)
 
 

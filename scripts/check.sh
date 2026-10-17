@@ -15,6 +15,7 @@ step "JSON files";           for f in default.project.json haunted.project.json 
 step "Task queue";           run python3 scripts/orchestrator.py validate
 step "Vault conventions";    run python3 scripts/validate_vault.py
 step "Reference notes";      run python3 scripts/refs.py lint
+step "Project skills";        run python3 scripts/skill_lint.py
 step "Python tests";         run python3 -m unittest discover -s tests -q
 
 echo
