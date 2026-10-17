@@ -33,13 +33,13 @@ All items await the later, deeper note-by-note review with jg. Capture/interview
 | [x] | [[REF-VFX-001-Cinematic-Energy-Sequence]] — Cinematic energy sequence | Quality preference; motion fidelity needs denser review |
 | [x] | [[REF-MAP-001-Dark-Fantasy-World]] — Dark Fantasy world | World look/feel quality floor; gameplay not requested |
 | [x] | [[REF-CODE-006-Orchestrated-Agent-Workflows]] — Orchestrated agent workflows | Investigate tools/parallelism; delegation rules unchanged |
-| [ ] | [[REF-MAP-002-Stylized-Swamp-Encounter]] — Stylized swamp encounter | Whole-scene visual/gameplay/animation quality |
-| [ ] | [[REF-MISC-003-Character-Sheet-Workflow]] — Character sheet to playable model | Consolidated sheet; mouse is process example, not baseline |
-| [ ] | [[REF-MISC-004-Illustrated-Surreal-World]] — Illustrated surreal world | Style quality floor; explore 2D and 3D |
-| [ ] | [[REF-MISC-005-Dark-Fantasy-Boss-Presentation]] — Dark Fantasy bosses and effects | Separate companion note; textures chosen case by case |
+| [x] | [[REF-MAP-002-Stylized-Swamp-Encounter]] — Stylized swamp encounter | Whole-scene visual/gameplay/animation quality |
+| [x] | [[REF-MISC-003-Character-Sheet-Workflow]] — Character sheet to playable model | Consolidated sheet; mouse is process example, not baseline |
+| [x] | [[REF-MISC-004-Illustrated-Surreal-World]] — Illustrated surreal world | Style quality floor; explore 2D and 3D |
+| [x] | [[REF-MISC-005-Dark-Fantasy-Boss-Presentation]] — Dark Fantasy bosses and effects | Separate companion note; textures chosen case by case |
 | [x] | [[REF-CODE-007-Expert-Informed-Briefs]] — Expert-informed briefs | Original sources/expert methods/independent evidence |
-| [ ] | [[REF-MISC-006-ActorCore-Free-Motions]] — ActorCore | Free only; retargeting and terms unverified |
-| [ ] | [[REF-CODE-008-Awesome-Learn-Gamedev]] — Awesome Learn Gamedev | Free only; discovery directory, evaluate each resource |
+| [x] | [[REF-MISC-006-ActorCore-Free-Motions]] — ActorCore | Free only; retargeting and terms unverified |
+| [x] | [[REF-CODE-008-Awesome-Learn-Gamedev]] — Awesome Learn Gamedev | Free only; discovery directory, evaluate each resource |
 
 ## How to review one item
 1. Open its actual source: archived video/images or the live source link. Read its evidence limits and jg's interview answers.
