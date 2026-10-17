@@ -4,7 +4,7 @@ title: Code Reference Index
 type: index
 status: proposed
 created: 2026-10-11
-updated: 2026-10-16
+updated: 2026-10-17
 tags:
   - reference/code
 ---
@@ -137,3 +137,23 @@ Add a new entry only when a real implementation teaches a reusable lesson. Inclu
 - **Known limitations / pitfalls:**
 - **Validation evidence:**
 - **Related current-project note or ADR:**
+
+## Local game and research source captures — 2026-10-17
+See [[Reference Review 2026-10-17]] for archive indexes and later review queue.
+- [[REF-CODE-009-Leonida-Browser-Slice]] — Leonida Browser Slice; source scan, needs experimentation.
+- [[REF-CODE-010-Nightfall-Tactical-FPS]] — Nightfall Tactical FPS; source scan, needs experimentation.
+- [[REF-CODE-011-Pinehollow-Night-Watch]] — Pinehollow Funland Night Watch; source scan, needs experimentation.
+- [[REF-CODE-012-Rocket-Arena-3v3]] — Rocket Arena 3v3; source scan, needs experimentation.
+- [[REF-CODE-013-VoxelCraft]] — VoxelCraft; source scan, needs experimentation.
+- [[REF-CODE-014-Cataclysm-Disaster-Demo]] — Cataclysm Natural Disaster Demo; source scan, needs experimentation.
+- [[REF-CODE-015-Kart-Party-Deluxe]] — Kart Party Deluxe; source scan, needs experimentation.
+- [[REF-CODE-016-Neon-Rain-Fighter]] — Neon Rain Fighter; source scan, needs experimentation.
+- [[REF-CODE-017-Elden-Ring-Browser-Interpretation]] — Elden Ring Browser Interpretation; source scan, needs experimentation.
+- [[REF-CODE-018-Chapter-One-Browser-Interpretation]] — Chapter One Browser Interpretation; source scan, needs experimentation.
+- [[REF-CODE-019-Subnautica-Crater-Adaptation]] — Subnautica Crater Browser Adaptation; source scan, needs experimentation.
+- [[REF-CODE-020-Fandom-Wiki-Research]] — Steal An Egg — Fandom Wiki Research; source scan, needs experimentation.
+- [[REF-CODE-021-Guide-Site-Research]] — Steal An Egg — Guide-Site Research; source scan, needs experimentation.
+- [[REF-CODE-022-YouTube-Research]] — Steal An Egg — Video Research Findings; source scan, needs experimentation.
+- [[REF-CODE-023-Official-Community-Research]] — Steal An Egg — Official and Community Research; source scan, needs experimentation.
+- [[REF-CODE-024-Prompt-Fix-Review]] — Steal An Egg — Prompt Fix Review; source scan, needs experimentation.
+- [[REF-CODE-025-Fix-Application-Record]] — Steal An Egg — Fix Application Record; source scan, needs experimentation.

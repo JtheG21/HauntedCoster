@@ -1,0 +1,198 @@
+{
+  "date": "2026-10-17",
+  "archives": [
+    {
+      "slug": "Fable-Game-Archive",
+      "title": "Fable 5.1 game archive",
+      "sha": "98e5b729961b4966846a69d406ff8b0ad70a2a0561c15934596b1029e7ec6e8b",
+      "children": [
+        [
+          "REF-CODE-009-Leonida-Browser-Slice",
+          "Leonida Browser Slice"
+        ],
+        [
+          "REF-CODE-010-Nightfall-Tactical-FPS",
+          "Nightfall Tactical FPS"
+        ],
+        [
+          "REF-CODE-011-Pinehollow-Night-Watch",
+          "Pinehollow Funland Night Watch"
+        ],
+        [
+          "REF-CODE-012-Rocket-Arena-3v3",
+          "Rocket Arena 3v3"
+        ],
+        [
+          "REF-CODE-013-VoxelCraft",
+          "VoxelCraft"
+        ]
+      ],
+      "archive": "FABLE 5.1 Games.zip",
+      "members": 5
+    },
+    {
+      "slug": "Astra-Game-Archive",
+      "title": "GPT-6 Astra game archive",
+      "sha": "3799f87a6ba17617aad60d5bb6f2690b3e416c0708be204ff46928567dfc780f",
+      "children": [
+        [
+          "REF-CODE-017-Elden-Ring-Browser-Interpretation",
+          "Elden Ring Browser Interpretation"
+        ],
+        [
+          "REF-CODE-018-Chapter-One-Browser-Interpretation",
+          "Chapter One Browser Interpretation"
+        ],
+        [
+          "REF-CODE-019-Subnautica-Crater-Adaptation",
+          "Subnautica Crater Browser Adaptation"
+        ]
+      ],
+      "archive": "GPT-6-Astra-Games-macOS.zip",
+      "members": 89
+    },
+    {
+      "slug": "Opus-Game-Archive",
+      "title": "Opus 5.5 game archive",
+      "sha": "07ab422749e0ed6d7080acd019871d35cf6f533994f22667488e6b6cc75e62e3",
+      "children": [
+        [
+          "REF-CODE-014-Cataclysm-Disaster-Demo",
+          "Cataclysm Natural Disaster Demo"
+        ],
+        [
+          "REF-CODE-015-Kart-Party-Deluxe",
+          "Kart Party Deluxe"
+        ],
+        [
+          "REF-CODE-016-Neon-Rain-Fighter",
+          "Neon Rain Fighter"
+        ]
+      ],
+      "archive": "Opus-5.5-Games-All-3.zip",
+      "members": 6
+    },
+    {
+      "slug": "Steal-An-Egg-Research-Archive",
+      "title": "Steal An Egg research archive",
+      "sha": "32c2412a7a3c5e2084d15c94422a3dc4e23668ee80f0a2b15bbee680325c320d",
+      "children": [
+        [
+          "REF-CODE-020-Fandom-Wiki-Research",
+          "Steal An Egg \u2014 Fandom Wiki Research"
+        ],
+        [
+          "REF-CODE-021-Guide-Site-Research",
+          "Steal An Egg \u2014 Guide-Site Research"
+        ],
+        [
+          "REF-CODE-022-YouTube-Research",
+          "Steal An Egg \u2014 Video Research Findings"
+        ],
+        [
+          "REF-CODE-023-Official-Community-Research",
+          "Steal An Egg \u2014 Official and Community Research"
+        ],
+        [
+          "REF-CODE-024-Prompt-Fix-Review",
+          "Steal An Egg \u2014 Prompt Fix Review"
+        ],
+        [
+          "REF-CODE-025-Fix-Application-Record",
+          "Steal An Egg \u2014 Fix Application Record"
+        ]
+      ],
+      "archive": "research.zip",
+      "members": 1776
+    },
+    {
+      "slug": "Steal-An-Egg-Visual-Archive",
+      "title": "Steal An Egg visual archive",
+      "sha": "63b1950b799d240b42209cdcc68e7724d9feb55fd34cf9a87ee1dc5b79485ece",
+      "children": [
+        [
+          "REF-MISC-007-Steal-An-Egg-Visual-Evidence",
+          "Steal An Egg \u2014 Visual Evidence Pack"
+        ]
+      ],
+      "archive": "reference.zip",
+      "members": 255
+    }
+  ],
+  "notes": [
+    {
+      "id": "REF-CODE-009",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-009-Leonida-Browser-Slice.md"
+    },
+    {
+      "id": "REF-CODE-010",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-010-Nightfall-Tactical-FPS.md"
+    },
+    {
+      "id": "REF-CODE-011",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-011-Pinehollow-Night-Watch.md"
+    },
+    {
+      "id": "REF-CODE-012",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-012-Rocket-Arena-3v3.md"
+    },
+    {
+      "id": "REF-CODE-013",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-013-VoxelCraft.md"
+    },
+    {
+      "id": "REF-CODE-014",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-014-Cataclysm-Disaster-Demo.md"
+    },
+    {
+      "id": "REF-CODE-015",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-015-Kart-Party-Deluxe.md"
+    },
+    {
+      "id": "REF-CODE-016",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-016-Neon-Rain-Fighter.md"
+    },
+    {
+      "id": "REF-CODE-017",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-017-Elden-Ring-Browser-Interpretation.md"
+    },
+    {
+      "id": "REF-CODE-018",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-018-Chapter-One-Browser-Interpretation.md"
+    },
+    {
+      "id": "REF-CODE-019",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-019-Subnautica-Crater-Adaptation.md"
+    },
+    {
+      "id": "REF-CODE-020",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-020-Fandom-Wiki-Research.md"
+    },
+    {
+      "id": "REF-CODE-021",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-021-Guide-Site-Research.md"
+    },
+    {
+      "id": "REF-CODE-022",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-022-YouTube-Research.md"
+    },
+    {
+      "id": "REF-CODE-023",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-023-Official-Community-Research.md"
+    },
+    {
+      "id": "REF-CODE-024",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-024-Prompt-Fix-Review.md"
+    },
+    {
+      "id": "REF-CODE-025",
+      "file": "10 References/06 Code/Reference_Code/REF-CODE-025-Fix-Application-Record.md"
+    },
+    {
+      "id": "REF-MISC-007",
+      "file": "10 References/05 Misc/REF-MISC-007-Steal-An-Egg-Visual-Evidence.md"
+    }
+  ],
+  "json_parse_failures": [],
+  "scope": "Source/text scans and per-note evidence; no full gameplay certification; bundled runtimes not read/executed"
+}

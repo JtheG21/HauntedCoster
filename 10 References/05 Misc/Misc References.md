@@ -4,7 +4,7 @@ title: Misc References
 type: index
 status: proposed
 created: 2026-10-11
-updated: 2026-10-16
+updated: 2026-10-17
 tags:
   - reference/misc
 ---
@@ -32,3 +32,6 @@ Anything that doesn't fit the other folders: pacing or economy examples from oth
 | [[REF-MISC-006-ActorCore-Free-Motions]] | ActorCore/Reallusion free catalog; per-item terms unverified | Free animation sourcing, adaptation and movement study; compare existing pipeline | Paid selections; assuming free means unrestricted or directly Roblox-compatible |
 
 Related: [[Reference_Code_Index]]
+
+## Local visual evidence packs
+- [[REF-MISC-007-Steal-An-Egg-Visual-Evidence]] — still-image sample review and complete 255-member inventory; four clips not watched; reference rights unverified.

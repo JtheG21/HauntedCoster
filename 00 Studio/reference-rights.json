@@ -81,6 +81,78 @@
 		"REF-UI-003": {
 			"class": "permissive-claimed",
 			"basis": "README claims MIT; actual licence text and icon ownership/usage rights not verified"
+		},
+		"REF-CODE-009": {
+			"class": "unknown",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-010": {
+			"class": "unknown",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-011": {
+			"class": "unknown",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-012": {
+			"class": "unknown",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-013": {
+			"class": "unknown",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-014": {
+			"class": "unknown",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-015": {
+			"class": "unknown",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-016": {
+			"class": "unknown",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-017": {
+			"class": "unknown",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-018": {
+			"class": "unknown",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-019": {
+			"class": "unknown",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-020": {
+			"class": "reference-only",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-021": {
+			"class": "reference-only",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-022": {
+			"class": "reference-only",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-023": {
+			"class": "reference-only",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-024": {
+			"class": "reference-only",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-CODE-025": {
+			"class": "reference-only",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+		},
+		"REF-MISC-007": {
+			"class": "reference-only",
+			"basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
 		}
 	}
 }
