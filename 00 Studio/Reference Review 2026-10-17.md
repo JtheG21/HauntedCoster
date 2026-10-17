@@ -36,7 +36,7 @@ Five archives scanned separately; one note per game or substantial document, sup
 |---|---|---|
 | [ ] | [[REF-CODE-009-Leonida-Browser-Slice]] — Leonida Browser Slice | Needs experimentation; carried-forward interview; scan scope in note |
 | [ ] | [[REF-CODE-010-Nightfall-Tactical-FPS]] — Nightfall Tactical FPS | Needs experimentation; carried-forward interview; scan scope in note |
-| [ ] | [[REF-CODE-011-Pinehollow-Night-Watch]] — Pinehollow Funland Night Watch | Needs experimentation; carried-forward interview; scan scope in note |
+| [x] | [[REF-CODE-011-Pinehollow-Night-Watch]] — Pinehollow Funland Night Watch | Needs experimentation; carried-forward interview; scan scope in note |
 | [ ] | [[REF-CODE-012-Rocket-Arena-3v3]] — Rocket Arena 3v3 | Needs experimentation; carried-forward interview; scan scope in note |
 | [ ] | [[REF-CODE-013-VoxelCraft]] — VoxelCraft | Needs experimentation; carried-forward interview; scan scope in note |
 | [ ] | [[REF-CODE-014-Cataclysm-Disaster-Demo]] — Cataclysm Natural Disaster Demo | Needs experimentation; carried-forward interview; scan scope in note |
@@ -59,3 +59,6 @@ Created 18 individual reference notes (11 games, six research documents and one 
 Runtime inspection reached initial gameplay in Leonida and Nightfall and the Pinehollow menu; browser control then failed. Other game findings are source inspection or supplied-preview observations. Four supporting clips remain unwatched. Research findings are historical supplied claims; the assembled prompt and some cited validators are absent, so claimed fix closure cannot be reproduced. No game implementation or deeper review was completed. Originals remain unchanged in Desktop/Prompts.
 
 jg authorized GitHub backup of this note batch and selected evidence on 2026-10-17. Documentation is retained on chore/references-20261017; merge remains pending human approval. Continue later through the unchecked reference queue.
+
+## Follow-through — 2026-10-17
+Merged capture notes into the local main vault at ffd92ed, preserving earlier review decisions. jg selected Pinehollow for an isolated feedback experiment and confirmed the wording; the review decision is recorded. [[RSH-20261017-Reference-Feedback-Experiment]] tracks implementation, tests, remaining runtime/visual checks and candidate recipe. Ten other games remain in the individual queue; no further decisions inferred. The original capture merge completed on GitHub in PR #76 at 525b378. The new experiment batch is local pending backup approval.
