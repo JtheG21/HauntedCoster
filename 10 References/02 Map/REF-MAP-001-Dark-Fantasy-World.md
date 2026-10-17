@@ -10,6 +10,7 @@ created: 2026-10-16
 updated: 2026-10-16
 related:
   - "[[Map References]]"
+  - "[[REF-MISC-005-Dark-Fantasy-Boss-Presentation]]"
 tags:
   - reference/map
   - reference/atmosphere
@@ -68,3 +69,6 @@ Record the interview/brief and prompt, selected frame qualities, chosen original
 ## Traceability
 - No implementation task or recreated world yet.
 - Next stage: a scoped environment experiment informed by an interview, followed by visual comparison and findings.
+
+## Companion reference
+[[REF-MISC-005-Dark-Fantasy-Boss-Presentation]] retains a later video and six supplied images with their own interview. jg requested separate notes grouped by links; the companion adds boss/effect presentation and case-by-case texture preference.

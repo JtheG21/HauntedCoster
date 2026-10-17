@@ -28,5 +28,6 @@ Anything that doesn't fit the other folders: pacing or economy examples from oth
 | [[REF-MISC-002-Reference-Library-Approach]] | jg-supplied screenshot; original video unknown | Source-backed summaries, related-note links, possible uses and contradiction flags; jg accepted direction 2026-10-16 | Treating diagram labels as a verified system or silently changing approved decisions |
 | [[REF-MISC-003-Character-Sheet-Workflow]] | User video, @guineainteractive watermark; underlying implementation unverified | Consolidated multi-view sheets and specific model comparison; review later with jg | Treating the mouse as a new quality baseline or starting workflow changes during capture |
 | [[REF-MISC-004-Illustrated-Surreal-World]] | User clip, @handa.65 watermark; game/rights unknown; four frames saved | Whole art-direction quality: eerie illustration, dense detail, palette and UI/world consistency; both 2D and 3D exploration | Assuming underlying rendering technique or implementation ease is proven |
+| [[REF-MISC-005-Dark-Fantasy-Boss-Presentation]] | @eazycreates video and six supplied images; rights unverified | Whole presentation, boss silhouettes, scale, palettes, VFX and staging; separate companion to Dark Fantasy World | Turning the speaker’s stud criticism into a texture ban; inferring gameplay from stills |
 
 Related: [[Reference_Code_Index]]
