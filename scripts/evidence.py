@@ -6,6 +6,8 @@
   evidence.py beats   <video|REF-ID> [--threshold 0.3]
   evidence.py sheet   <left.png> <right.png> [--height 540] [--out FILE]
   evidence.py stats   <image|video> [<image|video> ...] [--at SECONDS]
+  evidence.py series  <video|REF-ID> [--fps 30] [--start S] [--end S] [--csv FILE]   per-frame luminance/saturation, mono runs, flash risk
+  evidence.py audio   <video|REF-ID> [--window 0.1]   loudness envelope, silence and onset times
 
 `<video|REF-ID>` is a file path or a REF note id; an id resolves to the first archived .mp4 the note embeds.
 Outputs go to a fresh temp directory (printed), never into the vault. Frames are named f_0001.jpg ...
@@ -18,6 +20,8 @@ Exit codes: 0 ok, 1 ffmpeg failed or nothing found, 2 usage error.
 from __future__ import annotations
 
 import argparse
+import array
+import math
 import re
 import shutil
 import subprocess
@@ -200,6 +204,130 @@ def cmd_stats(root: Path, inputs: list[str], at: float | None) -> int:
     return 0
 
 
+def rel_luminance(r: int, g: int, b: int) -> float:
+    lin = [((c / 255) ** 2.2) for c in (r, g, b)]
+    return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2]
+
+
+def saturation(r: int, g: int, b: int) -> float:
+    mx, mn = max(r, g, b), min(r, g, b)
+    return 0.0 if mx == 0 else (mx - mn) / mx
+
+
+def frame_series(video: Path, fps: float, start: float, end: float | None) -> list[dict]:
+    args = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", str(start)]
+    if end is not None:
+        args += ["-to", str(end)]
+    args += ["-i", str(video), "-vf", f"fps={fps},scale=32:32", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
+    r = subprocess.run(args, capture_output=True)
+    size = 32 * 32 * 3
+    if r.returncode != 0 or len(r.stdout) < size:
+        raise EvidenceError(f"could not read frames: {r.stderr.decode()[:200]}")
+    rows = []
+    for i in range(len(r.stdout) // size):
+        d = r.stdout[i * size:(i + 1) * size]
+        px = [(d[j], d[j + 1], d[j + 2]) for j in range(0, size, 3)]
+        n = len(px)
+        rows.append({"t": start + i / fps,
+                     "rel_lum": sum(rel_luminance(*p) for p in px) / n,
+                     "sat": sum(saturation(*p) for p in px) / n,
+                     "luma": sum(0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2] for p in px) / n})
+    return rows
+
+
+def mono_runs(rows: list[dict], sat_max: float = 0.06) -> list[tuple[float, int]]:
+    """Runs of near-grayscale frames: (start time, length in frames)."""
+    runs, cur = [], None
+    for i, r in enumerate(rows):
+        if r["sat"] <= sat_max:
+            cur = cur or [r["t"], 0]
+            cur[1] += 1
+        elif cur:
+            runs.append((cur[0], cur[1]))
+            cur = None
+    if cur:
+        runs.append((cur[0], cur[1]))
+    return runs
+
+
+def luminance_transitions(rows: list[dict], delta: float = 0.10, dark_max: float = 0.80) -> list[float]:
+    """Times where whole-frame relative luminance changes by >= delta between frames (darker side < dark_max)."""
+    out = []
+    for a, b in zip(rows, rows[1:]):
+        if abs(b["rel_lum"] - a["rel_lum"]) >= delta and min(a["rel_lum"], b["rel_lum"]) < dark_max:
+            out.append(b["t"])
+    return out
+
+
+def worst_window(times: list[float], width: float = 1.0) -> tuple[int, float]:
+    best, at = 0, 0.0
+    for t0 in times:
+        n = sum(1 for t in times if t0 <= t < t0 + width)
+        if n > best:
+            best, at = n, t0
+    return best, at
+
+
+def cmd_series(root: Path, src: str, fps: float, start: float, end: float | None, csv: str | None) -> int:
+    video = resolve_video(root, src)
+    rows = frame_series(video, fps, start, end)
+    if csv:
+        dest = Path(csv).resolve()
+        try:
+            dest.relative_to(root.resolve())
+            raise EvidenceError(f"refusing to write evidence output inside the vault: {dest}")
+        except ValueError:
+            pass
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text("t,rel_lum,sat,luma\n" + "".join(
+            f"{r['t']:.3f},{r['rel_lum']:.4f},{r['sat']:.4f},{r['luma']:.1f}\n" for r in rows))
+    print(f"{video.name}: {len(rows)} frames at {fps} fps from {fmt_t(start)}")
+    runs = mono_runs(rows)
+    print("near-grayscale runs (start, frames, ms): " + (
+        ", ".join(f"{fmt_t(s)} x{n} ({round(1000 * n / fps)} ms)" for s, n in runs) or "none"))
+    trans = luminance_transitions(rows)
+    n, at = worst_window(trans)
+    print(f"luminance transitions >= 10% of full scale: {len(trans)} total; worst 1 s window starts {fmt_t(at)} with {n}")
+    print("heuristic only: whole-frame mean at 32x32, not the area-based WCAG flash test and not a conformance "
+          "result; more than 6 transitions in one second (about 3 flashes) means look at it with a proper tool.")
+    return 0
+
+
+def cmd_audio(root: Path, src: str, window: float) -> int:
+    video = resolve_video(root, src)
+    r = subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-i", str(video), "-vn", "-ac", "1",
+                        "-ar", "8000", "-f", "s16le", "-"], capture_output=True)
+    if r.returncode != 0 or not r.stdout:
+        raise EvidenceError(f"no readable audio track: {r.stderr.decode()[:200]}")
+    samples = array.array("h")
+    samples.frombytes(r.stdout[: len(r.stdout) // 2 * 2])
+    step = int(8000 * window)
+    db = []
+    for i in range(0, len(samples) - step + 1, step):
+        chunk = samples[i:i + step]
+        rms = math.sqrt(sum(x * x for x in chunk) / len(chunk)) / 32768
+        db.append(20 * math.log10(rms) if rms > 0 else -120.0)
+    per_sec = int(round(1 / window))
+    print(f"{video.name}: {len(db)} windows of {window}s; peak {max(db):.1f} dBFS (RMS per window), "
+          f"median {sorted(db)[len(db) // 2]:.1f} dBFS")
+    print("RMS dBFS per second (max of each second): " + ", ".join(
+        f"{i // per_sec}s={max(db[i:i + per_sec]):.0f}" for i in range(0, len(db), per_sec)))
+    quiet, cur = [], None
+    for i, v in enumerate(db):
+        if v < -50:
+            cur = cur if cur is not None else i
+        elif cur is not None:
+            quiet.append((cur * window, i * window))
+            cur = None
+    if cur is not None:
+        quiet.append((cur * window, len(db) * window))
+    print("windows below -50 dBFS: " + (", ".join(f"{fmt_t(a)}-{fmt_t(b)}" for a, b in quiet) or "none"))
+    onsets = [round(i * window, 2) for i in range(1, len(db)) if db[i] > -35 and db[i] - db[i - 1] >= 6]
+    print("onsets (rise of 6 dB or more into a window above -35 dBFS): " + (", ".join(fmt_t(t) for t in onsets) or "none"))
+    print("These describe level over time only; they do not say what the sound is or how good it is.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path, default=ROOT)
@@ -216,9 +344,18 @@ def main(argv: list[str] | None = None) -> int:
     sh.add_argument("left"); sh.add_argument("right"); sh.add_argument("--height", type=int, default=540); sh.add_argument("--out")
     st = sub.add_parser("stats")
     st.add_argument("inputs", nargs="+"); st.add_argument("--at", type=float)
+    se = sub.add_parser("series")
+    se.add_argument("src"); se.add_argument("--fps", type=float, default=30.0); se.add_argument("--start", type=float, default=0.0)
+    se.add_argument("--end", type=float); se.add_argument("--csv")
+    au = sub.add_parser("audio")
+    au.add_argument("src"); au.add_argument("--window", type=float, default=0.1)
     a = ap.parse_args(argv)
     root = a.root.resolve()
     try:
+        if a.cmd == "series":
+            return cmd_series(root, a.src, a.fps, a.start, a.end, a.csv)
+        if a.cmd == "audio":
+            return cmd_audio(root, a.src, a.window)
         if a.cmd == "frames":
             return cmd_frames(root, a.src, a.start, a.end, a.fps, a.out)
         if a.cmd == "strip":

@@ -93,6 +93,41 @@ class EvidenceTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("inside the vault", out)
 
+    def test_series_finds_mono_runs_and_flash_risk(self):
+        video = self.dir / "strobe.mp4"
+        # red 1 s, then 1 s alternating white/black every frame (a strobe), then red
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "color=c=red:s=64x64:d=1:r=10",
+                        "-f", "lavfi", "-i", "nullsrc=s=64x64:d=1:r=10,format=gray,geq=lum='if(lt(mod(N,2),1),255,0)',format=rgb24",
+                        "-f", "lavfi", "-i", "color=c=red:s=64x64:d=1:r=10",
+                        "-filter_complex", "[0][1][2]concat=n=3:v=1:a=0", str(video)], check=True)
+        code, out = self.run_cmd("series", str(video), "--fps", "10")
+        self.assertEqual(code, 0, out)
+        self.assertIn("near-grayscale runs", out)
+        self.assertIn("00:01.00", out)
+        n = int(out.split("worst 1 s window starts")[1].split("with")[1].split()[0])
+        self.assertGreaterEqual(n, 6)
+        self.assertIn("not a conformance", out)
+
+    def test_series_helpers(self):
+        rows = [{"t": i / 10, "rel_lum": v, "sat": s, "luma": 0} for i, (v, s) in enumerate(
+            [(0.2, 0.9), (0.9, 0.0), (0.9, 0.0), (0.2, 0.9)])]
+        self.assertEqual(evidence.mono_runs(rows), [(0.1, 2)])
+        self.assertEqual(evidence.luminance_transitions(rows), [0.1, 0.3])
+        self.assertEqual(evidence.worst_window([0.1, 0.3, 2.0]), (2, 0.1))
+
+    def test_audio_envelope(self):
+        clip = self.dir / "tone.mp4"
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "color=c=gray:s=64x64:d=2:r=10",
+                        "-f", "lavfi", "-i", "aevalsrc='if(gt(t,1),0.5*sin(2*PI*440*t),0)':d=2:s=8000",
+                        "-shortest", "-c:a", "aac", str(clip)], check=True)
+        code, out = self.run_cmd("audio", str(clip))
+        self.assertEqual(code, 0, out)
+        self.assertIn("windows below -50 dBFS: 00:00.00", out)
+        self.assertRegex(out, r"onsets .*: 00:0[01]\.[0-9]+|onsets .*: 00:01")
+        no_audio = self.dir / "mute.mp4"
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(self.video), "-an", str(no_audio)], check=True)
+        self.assertEqual(self.run_cmd("audio", str(no_audio))[0], 1)
+
     def test_bad_inputs(self):
         self.assertEqual(self.run_cmd("stats", "/no/such.png")[0], 1)
         self.assertEqual(self.run_cmd("strip", str(self.out))[0], 1)
