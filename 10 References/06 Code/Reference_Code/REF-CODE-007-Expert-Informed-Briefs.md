@@ -7,7 +7,7 @@ area: code
 source: User-supplied commentary video; original article not fully inspected
 accessed: 2026-10-16
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 related:
   - "[[Reference_Code_Index]]"
   - "[[REF-MISC-002-Reference-Library-Approach]]"
@@ -56,6 +56,14 @@ During the later review, decide whether to test on a real brief. Record the init
 ## Traceability
 - Capture only: no workflow, skill or task scope changed.
 - Next action: later review this note with the other new references, one by one with jg.
+
+## Review decision (2026-10-17)
+- **Outcome:** propose a scoped experiment
+- **Decided by:** jg
+- **Summary:** Experiment selected; status stays proposed. The source article was retrieved and matches the note: Speed, Altitude, Depth, Range, plus an 'outside judge' section whose four-part prompt asks what a top professional would do, the rawest material, the specific methods and tools, and what other than the model or user would show the result is right. Article caveats to carry into briefs: Altitude works less well for creative work; ask the model to perform what a professional does, not imitate how they write; specific hard goals beat do-your-best. The reference-brief skill already implements the four-part lens; a follow-up PR will add the two cautions.
+- **Evidence inspected:** Review packet; the archived video (38 frames at 0.5 fps as two contact sheets, with the article text visible on screen; audio level only); the original article at felixrieseberg.com/how-to-be-more-ambitious-a-tutorial-for-humans-with-models/ read through the fetch tool (a summarizer, so secondary; the prompt and four types confirmed by video frames)
+- **Still unverified:** Whether the method improves our briefs; the article's own claims and examples; the video commentary's accuracy; the full article text beyond the summarizer
+- **Next action:** Run the reference-brief skill on the next Standard or Deep task; record additions proposed vs accepted and interview length in the task note; revisit with 'refs.py ledger' after about five tasks and keep the step only if jg accepts a meaningful share of what it adds.
 
 ## Archived source video
 ![[1-v12300gd0001db9cohnog65pc3ngsi4g.mp4]]

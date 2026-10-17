@@ -37,7 +37,7 @@ All items await the later, deeper note-by-note review with jg. Capture/interview
 | [ ] | [[REF-MISC-003-Character-Sheet-Workflow]] — Character sheet to playable model | Consolidated sheet; mouse is process example, not baseline |
 | [ ] | [[REF-MISC-004-Illustrated-Surreal-World]] — Illustrated surreal world | Style quality floor; explore 2D and 3D |
 | [ ] | [[REF-MISC-005-Dark-Fantasy-Boss-Presentation]] — Dark Fantasy bosses and effects | Separate companion note; textures chosen case by case |
-| [ ] | [[REF-CODE-007-Expert-Informed-Briefs]] — Expert-informed briefs | Original sources/expert methods/independent evidence |
+| [x] | [[REF-CODE-007-Expert-Informed-Briefs]] — Expert-informed briefs | Original sources/expert methods/independent evidence |
 | [ ] | [[REF-MISC-006-ActorCore-Free-Motions]] — ActorCore | Free only; retargeting and terms unverified |
 | [ ] | [[REF-CODE-008-Awesome-Learn-Gamedev]] — Awesome Learn Gamedev | Free only; discovery directory, evaluate each resource |
 
