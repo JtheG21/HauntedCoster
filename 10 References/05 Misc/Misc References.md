@@ -27,5 +27,6 @@ Anything that doesn't fit the other folders: pacing or economy examples from oth
 | [[REF-MISC-001-Anatomy]] | https://github.com/wheresryan22/anatomy; declares MIT, full terms not inspected | Experiment with parts breakdowns, structural planning and inspection when modeling is confusing | Assuming diagrams are Roblox meshes or geometric checks prove real-world correctness |
 | [[REF-MISC-002-Reference-Library-Approach]] | jg-supplied screenshot; original video unknown | Source-backed summaries, related-note links, possible uses and contradiction flags; jg accepted direction 2026-10-16 | Treating diagram labels as a verified system or silently changing approved decisions |
 | [[REF-MISC-003-Character-Sheet-Workflow]] | User video, @guineainteractive watermark; underlying implementation unverified | Consolidated multi-view sheets and specific model comparison; review later with jg | Treating the mouse as a new quality baseline or starting workflow changes during capture |
+| [[REF-MISC-004-Illustrated-Surreal-World]] | User clip, @handa.65 watermark; game/rights unknown; four frames saved | Whole art-direction quality: eerie illustration, dense detail, palette and UI/world consistency; both 2D and 3D exploration | Assuming underlying rendering technique or implementation ease is proven |
 
 Related: [[Reference_Code_Index]]
