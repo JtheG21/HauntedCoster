@@ -118,7 +118,7 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 |---|---|---|---|
 | Leonida Browser Slice | [[REF-CODE-009-Leonida-Browser-Slice]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
 | Nightfall Tactical FPS | [[REF-CODE-010-Nightfall-Tactical-FPS]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
-| Pinehollow Funland Night Watch | [[REF-CODE-011-Pinehollow-Night-Watch]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+| Pinehollow Funland Night Watch | [[REF-CODE-011-Pinehollow-Night-Watch]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification. Review 2026-10-17: propose a scoped experiment. |
 | Rocket Arena 3v3 | [[REF-CODE-012-Rocket-Arena-3v3]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
 | VoxelCraft | [[REF-CODE-013-VoxelCraft]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
 | Cataclysm Natural Disaster Demo | [[REF-CODE-014-Cataclysm-Disaster-Demo]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
@@ -134,3 +134,8 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Steal An Egg — Prompt Fix Review | [[REF-CODE-024-Prompt-Fix-Review]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
 | Steal An Egg — Fix Application Record | [[REF-CODE-025-Fix-Application-Record]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
 | Steal An Egg — Visual Evidence Pack | [[REF-MISC-007-Steal-An-Egg-Visual-Evidence]] | captured | Local archive scan; scope and limits in note; inherited interview, no runtime certification |
+
+### Reference experiment tooling
+| Resource | Location | State | Limits / evidence |
+|---|---|---|---|
+| Meter-and-light feedback candidate | [[RSH-20261017-Reference-Feedback-Experiment]]; `experiments/reference-feedback/` | implemented | Original isolated demo; headless logic/type/lint/build verified; Studio interaction and jg visual judgment pending; not adopted game balance |

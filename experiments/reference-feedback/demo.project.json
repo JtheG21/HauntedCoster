@@ -1,0 +1,24 @@
+{
+  "name": "ReferenceFeedbackDemo",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "FeedbackDemo": {
+        "State": {
+          "$path": "State.luau"
+        },
+        "Theme": {
+          "$path": "../../games/haunted/src/client/UI/Theme.luau"
+        },
+        "$className": "Folder"
+      }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Demo": {
+          "$path": "Demo.client.luau"
+        }
+      }
+    }
+  }
+}

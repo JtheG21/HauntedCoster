@@ -57,3 +57,14 @@ Select a specific useful pattern, inspect its actual code/evidence, compare the 
 
 ## Traceability
 - Capture only; no game implementation task or adopted asset yet.
+
+## Review decision (2026-10-17)
+- **Outcome:** propose a scoped experiment
+- **Decided by:** jg
+- **Summary:** jg selected an isolated Roblox feedback demo: a meter and light with normal, low and depleted states; no Haunted Collector gameplay change.
+- **Evidence inspected:** Original Pinehollow HTML source: update, updateHUD, interference and updateBeds; browser menu observed in initial capture.
+- **Still unverified:** In-game visuals, audio, balance and end-to-end play remain unverified; browser attempts timed out.
+- **Next action:** Build an original isolated feedback demo, validate its state transitions and request Studio visual judgment before promotion.
+
+## Experiment findings — 2026-10-17
+[[RSH-20261017-Reference-Feedback-Experiment]] records the isolated meter-and-light demo, headless verification and remaining Studio/visual checks. Sources: `experiments/reference-feedback/`; built place: `/private/tmp/ReferenceFeedbackDemo.rbxl`. Original presentation code, existing Theme reused unchanged. Runtime quality and usefulness remain unverified; candidate recipe only.

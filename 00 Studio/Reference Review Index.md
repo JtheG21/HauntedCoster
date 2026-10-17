@@ -74,23 +74,26 @@ All items await the later, deeper note-by-note review with jg. Capture/interview
 - Published to the main vault by PR #67 (approved by jg). Reference tooling: `python3 scripts/refs.py lint|list|brief|trace` ([[RSH-20261017-Reference-Automation-Spec]]).
 
 ## Prompts folder references — 2026-10-17
-Archive grouping and complete new queue: [[Reference Review 2026-10-17]]. All entries below await deeper review.
+Archive grouping and complete new queue: [[Reference Review 2026-10-17]]. Entries below track the individual review decisions.
 
-- [ ] [[REF-CODE-009-Leonida-Browser-Slice]] — Leonida Browser Slice
-- [ ] [[REF-CODE-010-Nightfall-Tactical-FPS]] — Nightfall Tactical FPS
-- [ ] [[REF-CODE-011-Pinehollow-Night-Watch]] — Pinehollow Funland Night Watch
-- [ ] [[REF-CODE-012-Rocket-Arena-3v3]] — Rocket Arena 3v3
-- [ ] [[REF-CODE-013-VoxelCraft]] — VoxelCraft
-- [ ] [[REF-CODE-014-Cataclysm-Disaster-Demo]] — Cataclysm Natural Disaster Demo
-- [ ] [[REF-CODE-015-Kart-Party-Deluxe]] — Kart Party Deluxe
-- [ ] [[REF-CODE-016-Neon-Rain-Fighter]] — Neon Rain Fighter
-- [ ] [[REF-CODE-017-Elden-Ring-Browser-Interpretation]] — Elden Ring Browser Interpretation
-- [ ] [[REF-CODE-018-Chapter-One-Browser-Interpretation]] — Chapter One Browser Interpretation
-- [ ] [[REF-CODE-019-Subnautica-Crater-Adaptation]] — Subnautica Crater Browser Adaptation
-- [ ] [[REF-CODE-020-Fandom-Wiki-Research]] — Steal An Egg — Fandom Wiki Research
-- [ ] [[REF-CODE-021-Guide-Site-Research]] — Steal An Egg — Guide-Site Research
-- [ ] [[REF-CODE-022-YouTube-Research]] — Steal An Egg — Video Research Findings
-- [ ] [[REF-CODE-023-Official-Community-Research]] — Steal An Egg — Official and Community Research
-- [ ] [[REF-CODE-024-Prompt-Fix-Review]] — Steal An Egg — Prompt Fix Review
-- [ ] [[REF-CODE-025-Fix-Application-Record]] — Steal An Egg — Fix Application Record
-- [ ] [[REF-MISC-007-Steal-An-Egg-Visual-Evidence]] — Steal An Egg — Visual Evidence Pack
+| Reviewed with jg | Reference | Evaluation |
+|---|---|---|
+
+| [ ] | [[REF-CODE-009-Leonida-Browser-Slice]] — Leonida Browser Slice | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-010-Nightfall-Tactical-FPS]] — Nightfall Tactical FPS | Needs experimentation; see individual note |
+| [x] | [[REF-CODE-011-Pinehollow-Night-Watch]] — Pinehollow Funland Night Watch | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-012-Rocket-Arena-3v3]] — Rocket Arena 3v3 | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-013-VoxelCraft]] — VoxelCraft | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-014-Cataclysm-Disaster-Demo]] — Cataclysm Natural Disaster Demo | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-015-Kart-Party-Deluxe]] — Kart Party Deluxe | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-016-Neon-Rain-Fighter]] — Neon Rain Fighter | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-017-Elden-Ring-Browser-Interpretation]] — Elden Ring Browser Interpretation | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-018-Chapter-One-Browser-Interpretation]] — Chapter One Browser Interpretation | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-019-Subnautica-Crater-Adaptation]] — Subnautica Crater Browser Adaptation | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-020-Fandom-Wiki-Research]] — Steal An Egg — Fandom Wiki Research | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-021-Guide-Site-Research]] — Steal An Egg — Guide-Site Research | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-022-YouTube-Research]] — Steal An Egg — Video Research Findings | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-023-Official-Community-Research]] — Steal An Egg — Official and Community Research | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-024-Prompt-Fix-Review]] — Steal An Egg — Prompt Fix Review | Needs experimentation; see individual note |
+| [ ] | [[REF-CODE-025-Fix-Application-Record]] — Steal An Egg — Fix Application Record | Needs experimentation; see individual note |
+| [ ] | [[REF-MISC-007-Steal-An-Egg-Visual-Evidence]] — Steal An Egg — Visual Evidence Pack | Needs experimentation; see individual note |
