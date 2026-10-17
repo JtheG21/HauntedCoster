@@ -2,7 +2,7 @@
 	"version": 1,
 	"note": "Licence class per REF note, from what each note records (2026-10-17). A class is a claim about the note's evidence, not legal advice; 'permissive-verified' needs the actual licence text read and recorded. Edit with jg.",
 	"notes": {
-		"REF-UI-001": {"class": "unknown", "basis": "Output usage rights and input-font licences not verified (note Identity)"},
+		"REF-UI-001": {"class": "permissive-claimed", "basis": "About page (2026-10-17): free for personal and commercial use, credit optional; no licence text; says nothing on input art or fonts"},
 		"REF-UI-002": {"class": "per-item", "basis": "Each pack has its own terms, formats and permitted uses; none inspected"},
 		"REF-MAP-001": {"class": "reference-only", "basis": "User video (@eazycreates); author and asset licences unverified"},
 		"REF-MAP-002": {"class": "reference-only", "basis": "User video (@bellydog_); author, game and asset rights unverified"},

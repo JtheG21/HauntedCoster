@@ -21,7 +21,7 @@ All items await the later, deeper note-by-note review with jg. Capture/interview
 
 | Reviewed with jg | Reference | Main question / limit |
 |---|---|---|
-| [ ] | [[REF-UI-001-Throwie]] — Throwie | Tool capabilities, text-art experiments; exports unverified |
+| [x] | [[REF-UI-001-Throwie]] — Throwie | Tool capabilities, text-art experiments; exports unverified |
 | [ ] | [[REF-UI-002-Resource-Boy]] — Resource Boy | Evaluate packs individually; formats/rights unverified |
 | [ ] | [[REF-MISC-001-Anatomy]] — Anatomy | Structural planning; not a proven Roblox mesh pipeline |
 | [ ] | [[REF-CODE-001-Roqer]] — Roqer | Animation/VFX first inspected; full implementation unreviewed |
