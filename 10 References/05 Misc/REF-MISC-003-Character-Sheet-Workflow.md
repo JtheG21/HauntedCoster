@@ -7,7 +7,7 @@ area: misc
 source: User-supplied video; original post URL unknown
 accessed: 2026-10-16
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 related:
   - "[[Misc References]]"
   - "[[3D Model Quality Baseline]]"
@@ -57,6 +57,14 @@ During the planned note-by-note review, decide whether to experiment. If selecte
 ## Traceability
 - Capture only: no model built, skills modified, agents spawned, assets published or workflow changes made.
 - Next action: later review this note alongside the other newly captured references, one by one with jg.
+
+## Review decision (2026-10-17)
+- **Outcome:** propose a scoped experiment
+- **Decided by:** jg
+- **Summary:** Review 2026-10-17 of a process reference. The archived clip (55.7 s: a 42 s five-step demo and an end card) was reopened as 40 frames over two contact sheets and its on-screen text read; no transcription tool is installed, so the narration was not heard. Steps shown: (1) collect screenshots from other Roblox games and send them to ChatGPT; (2) ChatGPT turns them into one character sheet, tweaked to a v1, with the tip 'one sheet, everything on it' and labelled panels for every angle, props and a colour palette; (3) Claude builds the model from the sheet and a prompt.txt; (4) a review agent compares the render with the reference sheet over rounds counted 1/5 to 5/5, flagging differences such as body shape, stud rows and tail thickness; (5) Claude rigs and animates it, shown as a Roblox game screenshot. The demo is a stylized grey rat with stud rows and a thick pink tail, a process demonstration and not a quality baseline; nothing about its geometry, rig quality or performance is shown. Overlap with our setup: the 3D Model Quality Baseline step 5 already requires a side-by-side comparison with the approved concept at a matched camera and a list of concrete differences on every iteration, implemented by compare.py and review.sh on the unmerged chore/art-automation branch, and the Wisp pilot used an approved concept, an explicit discrepancy list, a revision budget and jg's final review. New elements: the consolidated multi-view sheet (the Wisp concept supplied two views and its handoff calls it not a complete orthographic specification), the review agent's up-to-5-round loop (our budget is 2), and rigging a custom character (our Mixamo pipeline covers humanoids; non-humanoid rigging is untested). jg selected an experiment limited to the sheet contract and asked for a separate proposal on more review rounds, which changes nothing now.
+- **Evidence inspected:** Review packet; the archived clip as two contact sheets (0.4 fps) with scene-change beats and its on-screen text; the 3D Model Quality Baseline structure; the unmerged art-automation review.sh and compare.py headers; the Wisp approved-modeling handoff note
+- **Still unverified:** The narration; the author's claims of matching and game-ready output; the sheet-generation and review-agent behaviour (no prompts, scripts or mesh shown); rig quality and Roblox import; whether a consolidated sheet or more rounds improves our results; non-humanoid rigging and animation
+- **Next action:** On the next character model task, refine one consolidated sheet with jg before modeling (every angle, colours, props, a scale marker, construction callouts) as the model contract, then use the existing matched-camera comparison and written difference list within the current 2-revision budget, with mesh, rig, animation and in-game checks reported separately; record the extra effort. Separately, jg asked to propose a trial with more review rounds than the 2-revision budget; that is a policy-change proposal to be approved on its own, and nothing in the budget changes now. Not started: no model built, no skill or workflow changed, no extra agents, no upload or publishing.
 
 ## Archived source video
 ![[1-v12044gd0000db8n18fog65nsq10p4mg.mp4]]
