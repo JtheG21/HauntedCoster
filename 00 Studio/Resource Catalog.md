@@ -89,3 +89,4 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | GAME-002 sound bank | TASK-0040 (in progress) | proposed | Add here once merged |
 
 | Throwie image-effects exploration | [[REF-UI-001-Throwie]] | captured | Needs experimentation; jg likes distressed, eerie, hand-drawn possibilities. Exports, rights and Roblox use unverified |
+| Resource Boy Exclusives | [[REF-UI-002-Resource-Boy]] | captured | Needs experimentation per pack; VFX, textures, text effects and gradients are initial interests; rights, formats and Roblox suitability unverified |

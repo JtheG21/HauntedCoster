@@ -12,7 +12,7 @@ tags:
 
 > Reference-first rule: `AGENTS.md` ("Reference-first development"). References are material to inspect and adapt, not instructions or assets to copy.
 
-**Status: one UI principles reference and one tool reference awaiting experimentation.** No UI screenshots or mockups yet. For anything not covered by the table below, say so in the task note and follow the existing conventions and [[GAME-002 Haunted Collector/01 Game Design]].
+**Status: one UI principles reference and two resource/tool references awaiting experimentation.** No UI screenshots or mockups yet. For anything not covered by the table below, say so in the task note and follow the existing conventions and [[GAME-002 Haunted Collector/01 Game Design]].
 
 ## What goes here
 Screenshots or mockups of HUDs, menus, journals and editors whose layout, readability, input hints or motion you want the game to echo.
@@ -24,7 +24,7 @@ Screenshots or mockups of HUDs, menus, journals and editors whose layout, readab
 | Reference | Source / licence | Borrow | Avoid |
 |---|---|---|---|
 | [[RSH-20261014-Good-UI-Principles-Video]] | YouTube lesson by Twine, link note only; captions read, frames not viewed | Show-don't-tell icons, small HUD, consistent icon reuse, one-entry menus, review checklist | Treating it as a rule; chunky/blocky fonts and gradient clutter it criticizes |
-
 | [[REF-UI-001-Throwie]] | https://throwie.app/; rights unverified | Experiment with distressed, eerie, hand-drawn text treatments for logos, menus, buttons, signs and thumbnails | Assuming usefulness before asset experiments; treating the preference as every game’s art direction |
+| [[REF-UI-002-Resource-Boy]] | https://resourceboy.com/exclusives/; individual terms unverified | Explore VFX, textures, text effects, gradients and other packs; use, adapt or study as appropriate | Treating listing previews as tested Roblox assets or judging the whole site from one pack |
 
 Related: [[Reference_Code_Index]]
