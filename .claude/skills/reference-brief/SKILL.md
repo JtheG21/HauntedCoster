@@ -20,7 +20,7 @@ Ask only what changes the result, each with a recommended default:
 Model-generated expert advice is a proposal to verify, not authority.
 
 ## 4. Evidence plan
-Behavior: Lune spec or Studio scenario. Visuals: matched-view sheet (`evidence.py sheet`). Motion: paired frame strips at the same beats; on-screen flashing: `evidence.py series`. Preference: jg. Tests do not establish taste; a good render does not establish runtime correctness.
+Behavior: Lune spec or Studio scenario. Visuals: matched-view sheet (`evidence.py sheet`). Motion: paired frame strips at the same beats; on-screen flashing: `evidence.py series --max-transitions 6` (exit 1 above the limit); shapes: `evidence.py silhouette`; UI treatments at real sizes: `evidence.py matrix`. Preference: jg. Tests do not establish taste; a good render does not establish runtime correctness.
 
 ## 5. Write the Intake block (25 lines or fewer)
 In the task note: **References** (IDs), **Qualities taken** (quoted from Intent), **Not taken** (exclusions, rights limits), **Evidence plan**, **Open questions** (the batch), **Ambition proposals** (listed separately; each needs jg's yes or no before it enters scope), **Rights**.

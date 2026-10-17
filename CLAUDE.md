@@ -14,11 +14,13 @@
 - `scripts/preflight.sh --root <checkout> --branch <name> [--clean]`: run before any state-changing Git operation (AGENTS.md "Git safety")
 - `python3 scripts/orchestrator.py status|next|approve|start|record-exec|record-audit|approve-merge|report ...` (`--help`)
 - `python3 scripts/validate_vault.py`: note conventions, links, and queue/note sync
+- `python3 scripts/evidence.py matrix|silhouette`: the same images at real display widths on dark and light, and black/white shape sheets (`--mode alpha` for transparent PNGs); `series --max-transitions N` fails a clip with too many large luminance changes per second
+- `python3 scripts/refs.py actions [--by-blocker]`: every reviewed note's outcome, next action and what it waits on (game choice, free Studio, upload question, Reallusion, jg approval)
 - `python3 scripts/evidence.py frames|strip|beats|sheet|stats`: dense frames, contact sheets, scene-change beats, side-by-side, luminance/palette numbers, per-frame `series` (mono runs, flash-risk heuristic) and `audio` level envelope for reference videos and renders (ffmpeg; output outside the vault)
 - `python3 scripts/skill_lint.py`: lints the project's own skills (frontmatter, trigger wording, dead paths, `.agents` copies)
 - `python3 scripts/refs.py review-next|decide`: review packet for the next Index item, and `decide ... --apply` to record jg's decision (dry run by default)
 - `python3 scripts/refs.py pin|drift|rights|ledger`: source commit pins, upstream drift, the licence adaptation gate (`rights --check ID --use code|asset|method`) and what tasks citing a REF cost
-- `python3 scripts/refs.py list|brief|trace|lint|guard|new`: the `10 References/` library (briefs per task or category, lint, jg-approval guard, scaffold). `REFS_JG_APPROVED=1` lets a commit that jg asked for change an Intent section or approve a note
+- `python3 scripts/refs.py list|brief|trace|lint|guard|new`: the `10 References/` library (briefs per task or category, lint, jg-approval guard, scaffold). `REFS_JG_APPROVED=1` lets a commit that jg asked for change an Intent section or approve a note. The same guard refuses (no override) any staged file byte-identical to a file in `~/Roblox-Work/resource-packs/`: the Resource Boy and ActorCore licences forbid storing pack files in a repository
 - `scripts/studio-preflight.sh [--root <checkout>]`: Rojo, Studio windows, memory and build stamp before a Studio run
 
 ## Claude Code automations (`.claude/`)
