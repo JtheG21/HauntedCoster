@@ -7,7 +7,7 @@
 		"REF-MAP-001": {"class": "reference-only", "basis": "User video (@eazycreates); author and asset licences unverified"},
 		"REF-MAP-002": {"class": "reference-only", "basis": "User video (@bellydog_); author, game and asset rights unverified"},
 		"REF-VFX-001": {"class": "reference-only", "basis": "User clip (TikTok @ludc45); author and asset rights unverified"},
-		"REF-MISC-001": {"class": "permissive-claimed", "basis": "Repository declares MIT; full licence text not inspected"},
+		"REF-MISC-001": {"class": "permissive-verified", "basis": "MIT licence text read in full at commit e9488296a4 on 2026-10-17 (Copyright (c) 2026 Ryan); copy the copyright and licence notice if any code is ever copied"},
 		"REF-MISC-002": {"class": "reference-only", "basis": "User screenshot; original video, author and licence unverified"},
 		"REF-MISC-003": {"class": "reference-only", "basis": "User video (@guineainteractive); rights unverified"},
 		"REF-MISC-004": {"class": "reference-only", "basis": "User video (@handa.65); author, game and asset rights unverified"},
