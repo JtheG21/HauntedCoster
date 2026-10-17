@@ -26,7 +26,7 @@ All items await the later, deeper note-by-note review with jg. Capture/interview
 | [x] | [[REF-MISC-001-Anatomy]] — Anatomy | Structural planning; not a proven Roblox mesh pipeline |
 | [x] | [[REF-CODE-001-Roqer]] — Roqer | Animation/VFX first inspected; full implementation unreviewed |
 | [x] | [[REF-CODE-002-RoPilot]] — RoPilot | Automation claims; product untested |
-| [ ] | [[REF-CODE-003-Shaders]] — Shaders | WebGPU looks/techniques; Roblox portability untested |
+| [x] | [[REF-CODE-003-Shaders]] — Shaders | WebGPU looks/techniques; Roblox portability untested |
 | [ ] | [[REF-CODE-004-Apify]] — Apify and alternatives | Bounded research collection; comparison article inaccessible |
 | [ ] | [[REF-CODE-005-Expo-Skills]] — Expo Skills and PRs | Transferable methods; individual skills/PR diffs unreviewed |
 | [x] | [[REF-MISC-002-Reference-Library-Approach]] — Reference library approach | Accepted organizational direction; no new RAG service |
