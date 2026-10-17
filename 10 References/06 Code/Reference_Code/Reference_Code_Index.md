@@ -26,6 +26,8 @@ Per-repo guides, with verified paths, compatibility notes and known pitfalls: [[
 
 - [[REF-CODE-005-Expo-Skills]] — Expo/React Native agent knowledge and workflow reference; explore Roblox adaptations and supporting tools. PRs are research leads only; individual files/diffs unreviewed. Needs experimentation.
 
+- [[REF-CODE-006-Orchestrated-Agent-Workflows]] — video reference for scoped instructions, handoffs, task gates and agent coordination. jg supports investigation; methods remain experimental and delegation policy is unchanged.
+
 ## How to access the source
 All three repos are **public**. Reading them needs no credentials and no clone in the vault. Access was confirmed from this shell on 2026-10-11 with `git ls-remote` and `gh api`.
 
