@@ -24,6 +24,8 @@ Per-repo guides, with verified paths, compatibility notes and known pitfalls: [[
 
 - [[REF-CODE-004-Apify]] — research/reference collection and web automation exploration. Organization overview inspected only; compare tools and alternatives for a concrete job. Needs experimentation.
 
+- [[REF-CODE-005-Expo-Skills]] — Expo/React Native agent knowledge and workflow reference; explore Roblox adaptations and supporting tools. PRs are research leads only; individual files/diffs unreviewed. Needs experimentation.
+
 ## How to access the source
 All three repos are **public**. Reading them needs no credentials and no clone in the vault. Access was confirmed from this shell on 2026-10-11 with `git ls-remote` and `gh api`.
 
