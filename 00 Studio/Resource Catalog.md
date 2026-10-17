@@ -93,7 +93,7 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Map screenshots (7) | `10 References/02 Map/` ([[Map References]]) | captured | On hold; context not written |
 | GAME-002 sound bank | TASK-0040 (in progress) | proposed | Add here once merged |
 | Throwie image-effects exploration | [[REF-UI-001-Throwie]] | captured | Needs experimentation; jg likes distressed, eerie, hand-drawn possibilities. Exports, rights and Roblox use unverified. Review 2026-10-17: propose a scoped experiment. |
-| Resource Boy Exclusives | [[REF-UI-002-Resource-Boy]] | captured | Needs experimentation per pack; VFX, textures, text effects and gradients are initial interests; rights, formats and Roblox suitability unverified |
+| Resource Boy Exclusives | [[REF-UI-002-Resource-Boy]] | captured | Needs experimentation per pack; VFX, textures, text effects and gradients are initial interests; rights, formats and Roblox suitability unverified. Review 2026-10-17: propose a scoped experiment. |
 | Anatomy structural modeling exploration | [[REF-MISC-001-Anatomy]] | captured | Needs experimentation on one confusing object; SVG/WebGL skill, not a verified Roblox model pipeline |
 | Roqer production reference | [[REF-CODE-001-Roqer]] | captured | Needs experimentation per technique; animation/VFX first inspected; full repo available for exploration; Roqer tool dependencies and macOS compatibility unverified |
 | RoPilot workflow automation reference | [[REF-CODE-002-RoPilot]] | captured | Needs experimentation; study automation and consider a trial when relevant; homepage claims only, no product testing |
