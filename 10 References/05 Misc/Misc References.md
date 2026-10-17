@@ -25,5 +25,6 @@ Anything that doesn't fit the other folders: pacing or economy examples from oth
 |---|---|---|---|
 | [[3D Model Quality Baseline]] — 17 rejected and 70 minimum-standard screenshots | jg's Desktop screenshots, copied 2026-10-13; underlying model licences unverified | Deliberate silhouette, anatomy/construction, expression, layered forms, materials and all-view finish | Crude primitive assemblies, effects disguising weak geometry; copying reference identities/assets |
 | [[REF-MISC-001-Anatomy]] | https://github.com/wheresryan22/anatomy; declares MIT, full terms not inspected | Experiment with parts breakdowns, structural planning and inspection when modeling is confusing | Assuming diagrams are Roblox meshes or geometric checks prove real-world correctness |
+| [[REF-MISC-002-Reference-Library-Approach]] | jg-supplied screenshot; original video unknown | Source-backed summaries, related-note links, possible uses and contradiction flags; jg accepted direction 2026-10-16 | Treating diagram labels as a verified system or silently changing approved decisions |
 
 Related: [[Reference_Code_Index]]
