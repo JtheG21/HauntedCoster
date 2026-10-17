@@ -13,7 +13,7 @@
 		"REF-MISC-004": {"class": "reference-only", "basis": "User video (@handa.65); author, game and asset rights unverified"},
 		"REF-MISC-005": {"class": "reference-only", "basis": "User video and images (@eazycreates, Dark Fantasy RNG); licences unverified"},
 		"REF-MISC-006": {"class": "per-item", "basis": "Free price does not establish redistribution rights; terms per motion item"},
-		"REF-CODE-001": {"class": "copyleft", "basis": "Root LICENSE is AGPL-3.0-or-later (note Inspection); older MIT releases do not describe main"},
+		"REF-CODE-001": {"class": "copyleft", "basis": "AGPL-3.0-or-later confirmed in LICENSE, README, package.json and NOTICE.md at commit 4e29b9b90a on 2026-10-17 (copyright S4US and the Roqer contributors; additional permission for Roblox LibMP); releases 0.1.6 and earlier were MIT, main is not. Methods and ideas only, restated in our own words: no code (including templates/vfx/emit.lua) and no copied documentation text"},
 		"REF-CODE-002": {"class": "unknown", "basis": "Website only; product terms and any source not inspected"},
 		"REF-CODE-003": {"class": "platform-terms", "basis": "README: repository/package MIT, platform editor and presets under separate terms"},
 		"REF-CODE-004": {"class": "per-item", "basis": "Organization with many repositories; licences and service terms not assessed"},
