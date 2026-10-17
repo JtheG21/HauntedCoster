@@ -22,6 +22,8 @@ Per-repo guides, with verified paths, compatibility notes and known pitfalls: [[
 
 - [[REF-CODE-003-Shaders]] — browser WebGPU effects reference; explore appearance, layering, animation and possible Roblox recreation or baked assets. Needs experimentation per effect; direct compatibility unverified.
 
+- [[REF-CODE-004-Apify]] — research/reference collection and web automation exploration. Organization overview inspected only; compare tools and alternatives for a concrete job. Needs experimentation.
+
 ## How to access the source
 All three repos are **public**. Reading them needs no credentials and no clone in the vault. Access was confirmed from this shell on 2026-10-11 with `git ls-remote` and `gh api`.
 

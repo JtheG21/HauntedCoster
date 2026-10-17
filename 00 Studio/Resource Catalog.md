@@ -94,3 +94,4 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Roqer production reference | [[REF-CODE-001-Roqer]] | captured | Needs experimentation per technique; animation/VFX first inspected; full repo available for exploration; Roqer tool dependencies and macOS compatibility unverified |
 | RoPilot workflow automation reference | [[REF-CODE-002-RoPilot]] | captured | Needs experimentation; study automation and consider a trial when relevant; homepage claims only, no product testing |
 | Shaders visual effects exploration | [[REF-CODE-003-Shaders]] | captured | Needs experimentation per effect; web WebGPU library; Roblox recreation, baking, output rights and performance unverified |
+| Apify research and reference gathering | [[REF-CODE-004-Apify]] | captured | Needs experimentation on a bounded collection job; compare alternatives when needed; individual tools and linked comparison article unreviewed |
