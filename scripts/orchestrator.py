@@ -387,6 +387,71 @@ class Project:
         return out
 
 
+def cycle_report(proj: "Project") -> str:
+    """Per-task cycle data from the queue and usage ledger: the baseline for any claim that a workflow change is faster."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import refs
+    tokens = refs.usage_tokens(proj.root)
+    rows, hours, revs = [], [], []
+    for t in proj.tasks:
+        c = refs.task_cycle(t)
+        if c["hours"] is not None:
+            hours.append(c["hours"])
+        revs.append(c["revisions"])
+        tok = tokens.get(t["id"])
+        rows.append(f"{t['id']:9} {t['status']:15} rev={c['revisions']} exec={c['executions']} audits={c['audits']} "
+                    f"hours={c['hours'] if c['hours'] is not None else 'n/a':>5} tokens={tok if tok else 'n/a'}")
+    summary = (f"{len(proj.tasks)} tasks; mean revisions {sum(revs) / max(len(revs), 1):.2f}; "
+               + (f"median start-to-review {sorted(hours)[len(hours) // 2]} h over {len(hours)} tasks" if hours else "no timed tasks")
+               + ". Tokens are only what record-usage logged. "
+               "Queue times mark when the orchestrator was called, which can differ from real working time.")
+    return "\n".join(rows + [summary])
+
+
+def files_expected(proj: "Project", t: dict) -> tuple[set[str], bool]:
+    """Paths listed under '## Files expected to change' in the task note, and whether its Tests mention Studio."""
+    note = proj.root / t.get("note", "")
+    if not note.is_file():
+        return set(), False
+    text = note.read_text(encoding="utf-8")
+    m = re.search(r"(?ms)^## Files expected to change\s*\n(.*?)(?=^## |\Z)", text)
+    paths = set()
+    for line in (m.group(1) if m else "").splitlines():
+        line = line.strip()
+        if line.startswith("-") and len(line) > 1:
+            found = re.findall(r"`([^`]+)`", line)
+            paths |= set(found) if found else {line.lstrip("- ").strip()}
+    tests = re.search(r"(?ms)^## Tests\s*\n(.*?)(?=^## |\Z)", text)
+    return {p for p in paths if p}, bool(tests and re.search(r"Studio", tests.group(1)))
+
+
+def overlap(a: str, b: str) -> bool:
+    a, b = a.rstrip("/"), b.rstrip("/")
+    return a == b or a.startswith(b + "/") or b.startswith(a + "/")
+
+
+def parallel_report(proj: "Project") -> str:
+    """Which ready tasks could run side by side. Reports only: starting parallel work needs jg (delegation budget)."""
+    ready = proj.ready()
+    if len(ready) < 2:
+        return f"{len(ready)} ready task(s); nothing to compare."
+    info = {t["id"]: files_expected(proj, t) for t in ready}
+    lines = []
+    for i, a in enumerate(ready):
+        for b in ready[i + 1:]:
+            (fa, sa), (fb, sb) = info[a["id"]], info[b["id"]]
+            reasons = []
+            if not fa or not fb:
+                reasons.append("a task lists no expected files, so overlap is unknown")
+            elif any(overlap(x, y) for x in fa for y in fb):
+                reasons.append("expected files overlap")
+            if sa and sb:
+                reasons.append("both need Studio (one assistant at a time)")
+            lines.append(f"{a['id']} + {b['id']}: " + ("NOT SAFE: " + "; ".join(reasons) if reasons else "no overlap found"))
+    lines.append("A report, not approval: a second parallel agent still needs jg's explicit authorization (AGENTS.md).")
+    return "\n".join(lines)
+
+
 def reference_brief(root: Path, task_id: str) -> None:
     """Print the task's reference brief (Task Intake step 5). Best effort: never blocks a start."""
     try:
@@ -404,7 +469,9 @@ def main(argv: list[str] | None = None) -> int:
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("validate", help="validate queue.json and budget.json")
     sub.add_parser("status", help="list tasks")
-    sub.add_parser("next", help="show tasks ready to start")
+    s = sub.add_parser("next", help="show tasks ready to start")
+    s.add_argument("--parallel-safe", action="store_true", help="also report which ready tasks could run side by side")
+    sub.add_parser("cycles", help="per-task revisions, start-to-review hours and tokens (baseline data)")
     sub.add_parser("report", help="write 08 Reviews/HLT-<date>.md and update project-state.json")
     for name in ("approve", "approve-merge", "archive"):
         s = sub.add_parser(name)
@@ -446,6 +513,11 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"{t['id']} ({t['status']}): {t['title']}" + (f"  [BLOCKED: {block}]" if block else ""))
             if not ready:
                 print("nothing ready (approve a proposed task, or finish dependencies)")
+            if a.parallel_safe:
+                print(parallel_report(proj))
+            return 0
+        if a.cmd == "cycles":
+            print(cycle_report(proj))
             return 0
         if a.cmd == "report":
             print(f"wrote {proj.report().relative_to(proj.root)}")

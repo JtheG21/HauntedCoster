@@ -360,6 +360,8 @@ Each section: **Offers** (what the note actually supports), **Enters the workflo
 | 2 Skills | X3 and X3s (`reference-review`), X4 (`reference-brief`), EX-1, plus `.agents` copies | G0 | Each skill used once on a real item and noted in the Catalog as `implemented` |
 | 3 Experiments | One per note jg selects, each a TASK on its own branch | Per task; G2 for installs, accounts, downloads | Result appended to the REF note and Catalog, including failures |
 
+**Status 2026-10-17:** Phase 0 is in PR #68. Phase 1 is built except X11 (Studio test pads, which need Studio runs) on `chore/reference-evidence`: X5 (`pin`, `drift`), X6 (`evidence.py`), X7 (`ledger`), X8 (`rights`), OR-1 (`cycles`) and OR-3 (`next --parallel-safe`).
+
 Phase 0 and 1 introduce no dependencies and no spend. A task slot is proposed per phase; no TASK IDs are reserved here.
 
 ## Part E: Deliberately not proposed

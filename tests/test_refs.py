@@ -2,6 +2,7 @@
 
 import contextlib
 import io
+import json
 import os
 import subprocess
 import sys
@@ -146,6 +147,82 @@ class RefsTest(unittest.TestCase):
         self.assertEqual(len(issues), 2)
         self.assertEqual(refs.guard_issues("f", old, old.replace("test purpose", "other")), [])
         self.assertEqual(refs.guard_issues("f", None, new), [])  # a new capture
+
+
+class PinRightsLedgerTest(RefsTest):
+    def setUp(self):
+        super().setUp()
+        self.write("10 References/02 Map/REF-MAP-001-One.md",
+                   note().replace("source: https://example.com", "source: https://github.com/own/repo/tree/main"))
+        self.calls = []
+        self._gh = refs.gh
+
+        def fake(*args):
+            self.calls.append(args)
+            joined = " ".join(args)
+            if "commits/HEAD" in joined:
+                return self.sha
+            if joined.endswith(".default_branch"):
+                return "main"
+            if "/license" in joined:
+                return self.lic
+            return None
+        self.sha, self.lic = "a" * 40, "MIT"
+        refs.gh = fake
+        self.addCleanup(setattr, refs, "gh", self._gh)
+
+    def test_pin_and_drift(self):
+        code, out = self.run_cmd("pin")
+        self.assertEqual(code, 0, out)
+        self.assertIn("own/repo main@aaaaaaaaaa licence MIT", out)
+        self.assertIn("skip", self.run_cmd("pin", "--ids", "REF-MAP-002")[1])
+        self.assertIn("unchanged", self.run_cmd("drift")[1])
+        self.sha = "b" * 40
+        code, out = self.run_cmd("drift")
+        self.assertEqual(code, 0)
+        self.assertIn("upstream moved aaaaaaaaaa -> bbbbbbbbbb", out)
+        self.lic = "AGPL-3.0"
+        code, out = self.run_cmd("drift")
+        self.assertEqual(code, 1)
+        self.assertIn("LICENCE CHANGED MIT -> AGPL-3.0", out)
+
+    def test_drift_before_pin_and_unreachable(self):
+        code, out = self.run_cmd("drift")
+        self.assertEqual(code, 1)
+        self.assertIn("never pinned", out)
+        refs.gh = lambda *a: None
+        self.assertEqual(self.run_cmd("pin")[0], 1)
+
+    def test_rights_gate_and_lint(self):
+        self.write("00 Studio/reference-rights.json", json.dumps({"notes": {
+            "REF-MAP-001": {"class": "copyleft", "basis": "AGPL"},
+            "REF-MAP-002": {"class": "permissive-verified", "basis": "read LICENSE"}}}))
+        self.assertEqual(self.run_cmd("lint")[0], 0)
+        code, out = self.run_cmd("rights", "--check", "REF-MAP-001", "--use", "code")
+        self.assertEqual(code, 1)
+        self.assertIn("BLOCKED", out)
+        self.assertEqual(self.run_cmd("rights", "--check", "REF-MAP-001", "--use", "method")[0], 0)
+        self.assertEqual(self.run_cmd("rights", "--check", "REF-MAP-002", "--use", "asset")[0], 0)
+        self.assertEqual(self.run_cmd("rights", "--check", "REF-NOPE-001")[0], 2)
+        self.write("00 Studio/reference-rights.json", json.dumps({"notes": {
+            "REF-MAP-001": {"class": "bogus", "basis": "x"}, "REF-GONE-001": {"class": "unknown", "basis": "x"}}}))
+        _, out = self.run_cmd("lint")
+        self.assertIn("needs a class", out)
+        self.assertIn("no entry for REF-MAP-002", out)
+        self.assertIn("unknown note REF-GONE-001", out)
+
+    def test_ledger(self):
+        self.assertIn("no task cites", self.run_cmd("ledger", "--refs", "REF-MAP-002")[1])
+        self.write("tasks/queue.json", json.dumps({"tasks": [{"id": "TASK-0001", "status": "done", "revisions": 1,
+            "executions": [{}, {}], "audits": [{}],
+            "history": [{"time": "2026-10-10T10:00:00", "to": "in_progress"}, {"time": "2026-10-10T12:30:00", "to": "in_review"}]}]}))
+        self.write("tasks/usage-ledger.jsonl",
+                   '{"task": "TASK-0001", "tokens": 1000}\n{"task": "TASK-0001", "tokens": 500}\n')
+        p = self.root / "03 Games/GAME-001 T/06 Tasks/TASK-0001-A.md"
+        p.write_text(p.read_text() + "Reference floor met: partly (jg)\n")
+        code, out = self.run_cmd("ledger")
+        self.assertEqual(code, 0)
+        self.assertRegex(out, r"TASK-0001\s+done\s+1\s+2\s+1\s+2\.5\s+1500\s+partly \(jg\)\s+REF-MAP-001")
 
 
 class GuardGitTest(unittest.TestCase):
