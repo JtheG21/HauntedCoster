@@ -92,3 +92,4 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Resource Boy Exclusives | [[REF-UI-002-Resource-Boy]] | captured | Needs experimentation per pack; VFX, textures, text effects and gradients are initial interests; rights, formats and Roblox suitability unverified |
 | Anatomy structural modeling exploration | [[REF-MISC-001-Anatomy]] | captured | Needs experimentation on one confusing object; SVG/WebGL skill, not a verified Roblox model pipeline |
 | Roqer production reference | [[REF-CODE-001-Roqer]] | captured | Needs experimentation per technique; animation/VFX first inspected; full repo available for exploration; Roqer tool dependencies and macOS compatibility unverified |
+| RoPilot workflow automation reference | [[REF-CODE-002-RoPilot]] | captured | Needs experimentation; study automation and consider a trial when relevant; homepage claims only, no product testing |

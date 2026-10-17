@@ -18,6 +18,8 @@ Per-repo guides, with verified paths, compatibility notes and known pitfalls: [[
 
 - [[REF-CODE-001-Roqer]] — full Roblox Studio agent repository; animation/VFX guidance is the first inspected area. Needs experimentation per technique. Roqer-specific tools, current AGPL licensing and untested macOS support require checking before adoption. The access table below covers the original three repositories only.
 
+- [[REF-CODE-002-RoPilot]] — website/product reference for workflow automation, not inspected implementation code. Needs experimentation; showcase examples are not jg’s visual baseline.
+
 ## How to access the source
 All three repos are **public**. Reading them needs no credentials and no clone in the vault. Access was confirmed from this shell on 2026-10-11 with `git ls-remote` and `gh api`.
 
