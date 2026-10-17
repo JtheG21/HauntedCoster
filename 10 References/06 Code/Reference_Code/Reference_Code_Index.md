@@ -20,6 +20,8 @@ Per-repo guides, with verified paths, compatibility notes and known pitfalls: [[
 
 - [[REF-CODE-002-RoPilot]] — website/product reference for workflow automation, not inspected implementation code. Needs experimentation; showcase examples are not jg’s visual baseline.
 
+- [[REF-CODE-003-Shaders]] — browser WebGPU effects reference; explore appearance, layering, animation and possible Roblox recreation or baked assets. Needs experimentation per effect; direct compatibility unverified.
+
 ## How to access the source
 All three repos are **public**. Reading them needs no credentials and no clone in the vault. Access was confirmed from this shell on 2026-10-11 with `git ls-remote` and `gh api`.
 
