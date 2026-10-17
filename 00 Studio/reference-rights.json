@@ -2,24 +2,85 @@
 	"version": 1,
 	"note": "Licence class per REF note, from what each note records (2026-10-17). A class is a claim about the note's evidence, not legal advice; 'permissive-verified' needs the actual licence text read and recorded. Edit with jg.",
 	"notes": {
-		"REF-UI-001": {"class": "unknown", "basis": "Output usage rights and input-font licences not verified (note Identity)"},
-		"REF-UI-002": {"class": "per-item", "basis": "Each pack has its own terms, formats and permitted uses; none inspected"},
-		"REF-MAP-001": {"class": "reference-only", "basis": "User video (@eazycreates); author and asset licences unverified"},
-		"REF-MAP-002": {"class": "reference-only", "basis": "User video (@bellydog_); author, game and asset rights unverified"},
-		"REF-VFX-001": {"class": "reference-only", "basis": "User clip (TikTok @ludc45); author and asset rights unverified"},
-		"REF-MISC-001": {"class": "permissive-claimed", "basis": "Repository declares MIT; full licence text not inspected"},
-		"REF-MISC-002": {"class": "reference-only", "basis": "User screenshot; original video, author and licence unverified"},
-		"REF-MISC-003": {"class": "reference-only", "basis": "User video (@guineainteractive); rights unverified"},
-		"REF-MISC-004": {"class": "reference-only", "basis": "User video (@handa.65); author, game and asset rights unverified"},
-		"REF-MISC-005": {"class": "reference-only", "basis": "User video and images (@eazycreates, Dark Fantasy RNG); licences unverified"},
-		"REF-MISC-006": {"class": "per-item", "basis": "Free price does not establish redistribution rights; terms per motion item"},
-		"REF-CODE-001": {"class": "copyleft", "basis": "Root LICENSE is AGPL-3.0-or-later (note Inspection); older MIT releases do not describe main"},
-		"REF-CODE-002": {"class": "unknown", "basis": "Website only; product terms and any source not inspected"},
-		"REF-CODE-003": {"class": "platform-terms", "basis": "README: repository/package MIT, platform editor and presets under separate terms"},
-		"REF-CODE-004": {"class": "per-item", "basis": "Organization with many repositories; licences and service terms not assessed"},
-		"REF-CODE-005": {"class": "permissive-claimed", "basis": "README identifies MIT; full terms and file notices not checked"},
-		"REF-CODE-006": {"class": "reference-only", "basis": "User video (@snackoverflowgeorge); authorship and rights unverified"},
-		"REF-CODE-007": {"class": "reference-only", "basis": "User video (@chase_ai_); credited article not retrieved"},
-		"REF-CODE-008": {"class": "per-item", "basis": "Repository CC0-1.0, but linked resources carry their own terms and prices"}
+		"REF-UI-001": {
+			"class": "unknown",
+			"basis": "Output usage rights and input-font licences not verified (note Identity)"
+		},
+		"REF-UI-002": {
+			"class": "per-item",
+			"basis": "Each pack has its own terms, formats and permitted uses; none inspected"
+		},
+		"REF-MAP-001": {
+			"class": "reference-only",
+			"basis": "User video (@eazycreates); author and asset licences unverified"
+		},
+		"REF-MAP-002": {
+			"class": "reference-only",
+			"basis": "User video (@bellydog_); author, game and asset rights unverified"
+		},
+		"REF-VFX-001": {
+			"class": "reference-only",
+			"basis": "User clip (TikTok @ludc45); author and asset rights unverified"
+		},
+		"REF-MISC-001": {
+			"class": "permissive-claimed",
+			"basis": "Repository declares MIT; full licence text not inspected"
+		},
+		"REF-MISC-002": {
+			"class": "reference-only",
+			"basis": "User screenshot; original video, author and licence unverified"
+		},
+		"REF-MISC-003": {
+			"class": "reference-only",
+			"basis": "User video (@guineainteractive); rights unverified"
+		},
+		"REF-MISC-004": {
+			"class": "reference-only",
+			"basis": "User video (@handa.65); author, game and asset rights unverified"
+		},
+		"REF-MISC-005": {
+			"class": "reference-only",
+			"basis": "User video and images (@eazycreates, Dark Fantasy RNG); licences unverified"
+		},
+		"REF-MISC-006": {
+			"class": "per-item",
+			"basis": "Free price does not establish redistribution rights; terms per motion item"
+		},
+		"REF-CODE-001": {
+			"class": "copyleft",
+			"basis": "Root LICENSE is AGPL-3.0-or-later (note Inspection); older MIT releases do not describe main"
+		},
+		"REF-CODE-002": {
+			"class": "unknown",
+			"basis": "Website only; product terms and any source not inspected"
+		},
+		"REF-CODE-003": {
+			"class": "platform-terms",
+			"basis": "README: repository/package MIT, platform editor and presets under separate terms"
+		},
+		"REF-CODE-004": {
+			"class": "per-item",
+			"basis": "Organization with many repositories; licences and service terms not assessed"
+		},
+		"REF-CODE-005": {
+			"class": "permissive-claimed",
+			"basis": "README identifies MIT; full terms and file notices not checked"
+		},
+		"REF-CODE-006": {
+			"class": "reference-only",
+			"basis": "User video (@snackoverflowgeorge); authorship and rights unverified"
+		},
+		"REF-CODE-007": {
+			"class": "reference-only",
+			"basis": "User video (@chase_ai_); credited article not retrieved"
+		},
+		"REF-CODE-008": {
+			"class": "per-item",
+			"basis": "Repository CC0-1.0, but linked resources carry their own terms and prices"
+		},
+		"REF-UI-003": {
+			"class": "permissive-claimed",
+			"basis": "README claims MIT; actual licence text and icon ownership/usage rights not verified"
+		}
 	}
 }

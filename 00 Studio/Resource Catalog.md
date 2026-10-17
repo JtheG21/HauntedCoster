@@ -110,3 +110,5 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Expert-informed briefs and verification | [[REF-CODE-007-Expert-Informed-Briefs]] | captured | jg supports stronger interviews and useful opportunities; needs experimentation; scope expansion requires agreement; workflow changes deferred |
 | ActorCore free motions | [[REF-MISC-006-ActorCore-Free-Motions]] | captured | Needs experimentation; free only (jg, 2026-10-16); compare existing animation library and retargeting effort; rights/Roblox compatibility unverified |
 | Awesome Learn Gamedev research directory | [[REF-CODE-008-Awesome-Learn-Gamedev]] | captured | Free only (jg, 2026-10-16); discovery across production disciplines; linked resources unreviewed and require individual evaluation; later review |
+
+| Check-UI Clean Roblox | [[REF-UI-003-Check-UI-Clean-Roblox]] | captured | Needs experimentation; selected Luau source inspected, no runtime/visual validation; style only where game-appropriate |

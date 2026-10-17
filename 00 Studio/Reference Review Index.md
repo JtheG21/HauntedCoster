@@ -16,6 +16,10 @@ tags:
 
 Start here for jg's 2026-10-16 reference collection: **19 interviewed notes, 8 archived videos and 25 saved images**. Notes stay in their subject folders; this index groups the review without merging their evidence. Dark Fantasy world and boss presentation deliberately remain separate companion notes.
 
+## New capture batches
+- [[Reference Review 2026-10-17]] — new references captured separately from the original collection.
+- [[REF-UI-003-Check-UI-Clean-Roblox]] — first entry in that batch; needs experimentation.
+
 ## Review queue
 All items await the later, deeper note-by-note review with jg. Capture/interview is complete; an unchecked item does not mean its source or tool has been tested. Check an item only after that review, and record the decision in its own note.
 
