@@ -7,7 +7,7 @@ area: map
 source: User-supplied video; original game and post URL unknown
 accessed: 2026-10-16
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 related:
   - "[[Map References]]"
   - "[[REF-MAP-001-Dark-Fantasy-World]]"
@@ -69,6 +69,14 @@ Record the interview/brief and prompt, finer motion evidence when relevant, orig
 ## Traceability
 - No implementation task or recreated assets yet.
 - Approved quality preference; scoped implementation experiment remains pending.
+
+## Review decision (2026-10-17)
+- **Outcome:** propose a scoped experiment
+- **Decided by:** jg
+- **Summary:** Review 2026-10-17 of an approved whole-scene floor. The archived clip (38.7 s) was reopened as 39 frames over two contact sheets, with a 5 fps window of the creature's emergence, scene-change times, per-frame luminance and the audio level. It is one continuous landscape gameplay capture letterboxed into a portrait frame under the caption 'Bro RUN', a fixed elevated 3/4 camera with a slow pull-back, no cuts until the end card at 34.7 s, and 0 large luminance transitions (calm, no flash risk). Observed sequence: a fight in a swamp arena (0 to 2 s); an empty arena where a glowing gem appears in the reeds, then orange eyes, then a toothy mouth, revealed slowly (3.0 to 4.4 s); a closer framing of a blocky green creature with outstretched arms and a burst of pale crystal shards as it rises (5.0 to 5.4 s); the creature fighting a group of players on a wooden boardwalk with logs, campfires, hit flashes and green energy (about 10 to 25 s); and a stone gateway framed by dark thorny bushes becoming the focus from about 23 s while the creature recedes. Look: muted teal and green with turquoise accents (crystals, fireflies, gem eyes), a warm sand ground with soft blobs, flat layered canopies and hanging reeds for depth, and a clear angular creature silhouette. Capture-rate changes, distances, hitboxes, attack timing and any AI are unknown and none is inferred. The audio is a continuous track around minus 28 dBFS peaking near 18 s, with no bearing on the look. jg selected an experiment, all four qualities (clear simple silhouettes, teal palette with luminous accents, layered depth, elevated calm camera), and all three behaviours (emergence reveal, melee swipe on a platform, ranged green energy attack) for the first slice, over my suggestion to define behaviours later in the interview; recorded as jg's choice. The one-prompt expectation stays a target.
+- **Evidence inspected:** Review packet; the archived clip as two contact sheets (1 fps), a 5 fps window over 3.0 to 6.2 s, scene-change beats, per-frame luminance series and the audio envelope; the note's Observations and Intent
+- **Still unverified:** Exact choreography, attack timing, hit detection, encounter rules and camera behaviour (sampled motion only); the clip's authorship, game and asset rights; whether this look and behaviour set can be built in Roblox from one prompt and at what cost; the capture-rate changes' effect on apparent speed
+- **Next action:** When a game is chosen, build a small arena slice (elevated 3/4 camera, platform plus gateway) with one creature and three behaviours jg selected: a slow emergence reveal (glow, eyes, teeth, rise), a melee swipe against a group on a platform, and a ranged green energy attack. The behaviours are jg's design choices, not rules inferred from the clip. After a reference-brief interview and one implementation prompt; encounter logic is server-authoritative with a pure state machine tested headlessly in Lune (start from the Npc_template guide), effects client-side. Carry four qualities: clear simple silhouettes, teal palette with luminous accents, layered depth, and an elevated calm camera. Judge with matched-view captures, a silhouette sheet, performance and cleanup checks and the one-prompt ledger. Adapt, do not copy the creature, layouts or assets. Waits on a game choice and a free Studio session.
 
 ## Archived source video
 ![[1-v12044gd0000db791hvog65mbspvirfg.mp4]]
