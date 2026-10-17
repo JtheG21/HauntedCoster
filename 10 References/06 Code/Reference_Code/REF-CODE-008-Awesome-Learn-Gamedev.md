@@ -7,7 +7,7 @@ area: code
 source: https://github.com/dawdle-deer/awesome-learn-gamedev
 accessed: 2026-10-16
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 related:
   - "[[Reference_Code_Index]]"
   - "[[REF-CODE-007-Expert-Informed-Briefs]]"
@@ -53,3 +53,11 @@ During the later review or a relevant task, record the question, selected resour
 ## Traceability
 - Capture only: no curriculum, course purchase, dependency or workflow change created.
 - Next action: later review with jg; investigate individual free resources as concrete needs arise.
+
+## Review decision (2026-10-17)
+- **Outcome:** keep as reference
+- **Decided by:** jg
+- **Summary:** Review 2026-10-17 of a research directory, including an end-to-end run of the question-to-resource-to-card method. Source: dawdle-deer/awesome-learn-gamedev at commit 28e61535a7, created 2022-08-14, about 3.6k stars, last pushed 2026-06-01; the CC0 1.0 legal code was read and covers the list itself only. The README is 51 KB with 274 unique links across Programming (78 links), Art (39), Design (33), Technical Art (24), General (19), Job Hunting (17), Other (15), Audio (9), Marketing (7), Writing (6) and Production (5); it never mentions Roblox, so everything is general or tied to other engines. The README says nearly all resources are free and paid ones are clearly marked, but the marking is prose (44 lines mention free, 10 carry a price warning, one is free for non-commercial use only, one is a free trial), so a free-only filter must read each entry and free does not mean free for commercial use. Link health, checked once with read-only requests: 252 of 274 respond normally; 17 return a 4xx (many are bot-blocking on Udemy, ArtStation, Shadertoy, MIT Press and ACM, so unknown); two are confirmed 404 (a Flipped Normals hair tutorial and a personal site); 4 had network errors and 1 returned 503; about 92 percent reachable. End-to-end test on the question 'where can we learn VFX timing and layering for free to complement the Roqer methods': resource card 1, the realtimevfx.com Start Here thread, is public and free to read but dated 2018, points to Unreal 4 and Unity-era tools (Cascade, Shader Forge), does not cover timing in any depth, does not mention Roblox and states no reuse terms, so a weak fit; resource card 2, the BiteyCastle Academy 2dFX Animation Course on Gumroad, shows a price of 0 USD or more (pay what you like, zero allowed), software-agnostic, over 21 hours of video, 2.27 GB, hundreds of examples, 11,661 downloads and a 99 percent five-star rating from 302 ratings, covering the physics, timing and design of elemental effects (electricity, fire, smoke, water); the author's credentials are self-stated, the page states no reuse terms so it is personal study only, whether checkout needs an email or account is unverified, and it is 2D hand animation rather than Roblox implementation, so a strong conceptual fit but not an implementation guide. The directory's animation section offers nothing on sourcing mocap, so it did not help with the ActorCore question. Kept as a reference for on-demand use for one concrete question at a time; nothing downloaded or signed up for. Rights ledger basis updated; class stays per-item.
+- **Evidence inspected:** Review packet; repository metadata, pinned tree and the CC0 licence text; the README structure, About, Key and the rigging, VFX and animation sections; counts of Roblox mentions, free and paid markers and links per section; a one-time read-only liveness check of all 274 unique links; the realtimevfx.com thread through the fetch tool; the BiteyCastle Gumroad page in the built-in browser; no download, sign-in or purchase
+- **Still unverified:** The content and quality of every linked resource beyond the two cards; whether the BiteyCastle checkout requires an email or account; the 17 4xx links that may only be bot-blocking; how current the list stays (last pushed 2026-06-01); the author's credentials; whether the course content transfers to Roblox effects
+- **Next action:** none selected

@@ -20,6 +20,6 @@
 		"REF-CODE-005": {"class": "permissive-verified", "basis": "MIT licence text read in full at commit 927dd7cc20 on 2026-10-17 (Copyright (c) 2025-present 650 Industries, Inc.); keep the notice if any file text is copied. The expo-skill-feedback skill (runs npx --yes submit-expo-feedback@latest, bundled opt-in telemetry), unpinned npx helpers and broad tool preauthorization stay off limits regardless of licence"},
 		"REF-CODE-006": {"class": "reference-only", "basis": "User video (@snackoverflowgeorge); authorship and rights unverified"},
 		"REF-CODE-007": {"class": "reference-only", "basis": "User video (@chase_ai_); credited article not retrieved"},
-		"REF-CODE-008": {"class": "per-item", "basis": "Repository CC0-1.0, but linked resources carry their own terms and prices"}
+		"REF-CODE-008": {"class": "per-item", "basis": "CC0 1.0 legal code read at commit 28e61535a7 on 2026-10-17; it covers the list itself only. Linked resources carry their own terms and prices; free and paid marking is prose, and free does not mean free for commercial use (for example a rig free for non-commercial use only). Read each entry's terms before relying on it"}
 	}
 }

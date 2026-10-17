@@ -39,7 +39,7 @@ All items await the later, deeper note-by-note review with jg. Capture/interview
 | [x] | [[REF-MISC-005-Dark-Fantasy-Boss-Presentation]] — Dark Fantasy bosses and effects | Separate companion note; textures chosen case by case |
 | [x] | [[REF-CODE-007-Expert-Informed-Briefs]] — Expert-informed briefs | Original sources/expert methods/independent evidence |
 | [x] | [[REF-MISC-006-ActorCore-Free-Motions]] — ActorCore | Free only; retargeting and terms unverified |
-| [ ] | [[REF-CODE-008-Awesome-Learn-Gamedev]] — Awesome Learn Gamedev | Free only; discovery directory, evaluate each resource |
+| [x] | [[REF-CODE-008-Awesome-Learn-Gamedev]] — Awesome Learn Gamedev | Free only; discovery directory, evaluate each resource |
 
 ## How to review one item
 1. Open its actual source: archived video/images or the live source link. Read its evidence limits and jg's interview answers.
