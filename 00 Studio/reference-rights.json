@@ -2,8 +2,8 @@
 	"version": 1,
 	"note": "Licence class per REF note, from what each note records (2026-10-17). A class is a claim about the note's evidence, not legal advice; 'permissive-verified' needs the actual licence text read and recorded. Edit with jg.",
 	"notes": {
-		"REF-UI-001": {"class": "unknown", "basis": "Output usage rights and input-font licences not verified (note Identity)"},
-		"REF-UI-002": {"class": "per-item", "basis": "Each pack has its own terms, formats and permitted uses; none inspected"},
+		"REF-UI-001": {"class": "permissive-claimed", "basis": "About page (2026-10-17): free for personal and commercial use, credit optional; no licence text; says nothing on input art or fonts"},
+		"REF-UI-002": {"class": "per-item", "basis": "Licence page read 2026-10-17: Exclusive-badge products designed by Resource Boy are royalty-free for personal and commercial use, editable, no attribution, final output may be sold; no standalone redistribution, no upload to public or accessible private repositories (GitHub, Google Drive), and no making files available for download outside a final project; third-party items (for example Spicy Sauce Font) follow their own product-page licence. The in-zip License.txt is shorter than the web page; treat the stricter web terms as governing. Keep pack files out of this repo"},
 		"REF-MAP-001": {"class": "reference-only", "basis": "User video (@eazycreates); author and asset licences unverified"},
 		"REF-MAP-002": {"class": "reference-only", "basis": "User video (@bellydog_); author, game and asset rights unverified"},
 		"REF-VFX-001": {"class": "reference-only", "basis": "User clip (TikTok @ludc45); author and asset rights unverified"},

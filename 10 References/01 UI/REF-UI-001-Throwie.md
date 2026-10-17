@@ -9,7 +9,7 @@ accessed: 2026-10-16
 related:
   - "[[UI References]]"
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 tags:
   - reference/ui
   - reference/typography
@@ -50,3 +50,11 @@ For each of a few assets, record: intended use, source artwork and font rights, 
 ## Traceability
 - No implementation tasks or production assets yet.
 - Next stage: asset experiments, followed by an evidence-based usefulness assessment with jg.
+
+## Review decision (2026-10-17)
+- **Outcome:** propose a scoped experiment
+- **Decided by:** jg
+- **Summary:** First experiment run 2026-10-17: one generated neutral test image (white text on black, 1200x500), four tools at default settings (Erosion, Root Rot, Hyphae, Scribble), exported as PNG and compared at three display widths (90, 180, 340 px) on dark and light backgrounds. Exports are PNG with an alpha channel; Erosion, Hyphae and Scribble keep transparency, Root Rot exports an opaque white background. Tools differ in which luminance counts as ink: Erosion, Root Rot and Hyphae shape the white text, Scribble fills the dark areas, so on this input it covered the background and the text was unreadable. Black ink is invisible on a dark background without recoloring. Output size grows with bleed (Root Rot 1200x526, Scribble 1223x568). Hyphae took about 8 s to render. Root Rot and Erosion stayed readable at every size tested at defaults. The About page states 'Free for personal and commercial use'; credit optional. No uploaded image appeared in network requests (blob fetches, analytics beacons including an export_image event, Cloudflare RUM); POST bodies not inspected. Rights ledger class moves from unknown to permissive-claimed.
+- **Evidence inspected:** Review packet; the live app (41 tools in 5 groups, About text, page code strings, network log); four PNG exports from throwie.app; two comparison matrices built with ffmpeg; alpha measured per export. Evidence archived under Media/REF-UI-001-Throwie/: Throwie-test-erosion-default.png, Throwie-test-rootrot-default.png, Throwie-test-hyphae-default.png, Throwie-test-scribble-default.png, Throwie-matrix-dark-90-180-340px.png, Throwie-matrix-light-90-180-340px.png (the input image was generated in the page and not saved)
+- **Still unverified:** The other 37 tools; tuned settings (defaults only); the transparent-background parameter; the text config export; behaviour with real logo art and real fonts; Roblox import and in-game readability; licence beyond the one-line About statement; whether any image ever leaves the browser (POST bodies not read)
+- **Next action:** Second round on one real logo or sign task: choose the input polarity per tool, try the recolor and transparent-background options, keep each tool's config export, and check the chosen output at real UI sizes in Studio (any upload needs jg's approval).

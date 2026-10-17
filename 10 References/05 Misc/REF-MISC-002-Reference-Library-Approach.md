@@ -8,7 +8,7 @@ source_file: Reference Library Approach/1-Photo-1.jpg
 source: User-supplied screenshot; original video URL unknown
 accessed: 2026-10-16
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 related:
   - "[[Misc References]]"
   - "[[Resource Catalog]]"
@@ -46,3 +46,11 @@ A diagram shows `vault/`, a `raw/` source area, a `wiki/` area described as LLM-
 ## Traceability
 - This note records an accepted organizational direction. No new RAG service, automated maintainer, plugin or recurring job was implemented.
 - Future implementation work, if needed, follows normal scoped task intake; the reference itself requires no further investigation.
+
+## Review decision (2026-10-17)
+- **Outcome:** keep as reference
+- **Decided by:** jg
+- **Summary:** Kept as the approved organizing direction; no further investigation. Retrieval stays grep plus scripts/refs.py brief (no vector or RAG service), to be revisited at about 100 REF notes or sooner if a brief misses a relevant note. The model may add a labelled '### Maintained summary (DATE)' block listing what was inspected and what is unverified; it never edits Intent, Identity or approval lines (refs.py guard enforces this).
+- **Evidence inspected:** Review packet; the source screenshot 1-Photo-1.jpg (vault, raw, wiki, _master-index, topic folders, output diagram and the overlay caption)
+- **Still unverified:** The source video, its author and any working implementation; the screenshot's technical claims; whether briefs miss relevant notes at scale
+- **Next action:** none selected
