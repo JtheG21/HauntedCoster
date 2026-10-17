@@ -30,6 +30,8 @@ Per-repo guides, with verified paths, compatibility notes and known pitfalls: [[
 
 - [[REF-CODE-007-Expert-Informed-Briefs]] — expert methods, original sources and independent evidence to strengthen interviews/briefs. Supported direction, needs experimentation; scope expansion requires agreement; later review.
 
+- [[REF-CODE-008-Awesome-Learn-Gamedev]] — cross-discipline research directory for Claude and the broader workflow. Free resources only; evaluate actual linked sources individually; later review.
+
 ## How to access the source
 All three repos are **public**. Reading them needs no credentials and no clone in the vault. Access was confirmed from this shell on 2026-10-11 with `git ls-remote` and `gh api`.
 
