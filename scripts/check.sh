@@ -14,6 +14,7 @@ step "Rojo build";           tmp="$(mktemp -d)"; run rojo build default.project.
 step "JSON files";           for f in default.project.json haunted.project.json project-state.json tasks/queue.json "00 Studio/budget.json"; do run python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"; done
 step "Task queue";           run python3 scripts/orchestrator.py validate
 step "Vault conventions";    run python3 scripts/validate_vault.py
+step "Reference notes";      run python3 scripts/refs.py lint
 step "Python tests";         run python3 -m unittest discover -s tests -q
 
 echo

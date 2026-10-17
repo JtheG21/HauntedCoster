@@ -4,7 +4,7 @@ title: Resource Catalog
 type: index
 status: approved
 created: 2026-10-12
-updated: 2026-10-16
+updated: 2026-10-17
 tags:
   - studio/catalog
 related:
@@ -50,6 +50,7 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Resource | Location | State | Evidence | Limits / notes |
 |---|---|---|---|---|
 | Cheap check suite | `scripts/check.sh` (CI: `.github/workflows/check.yml`) | verified | CI on every PR | Paths are per game; a new game must be added |
+| Reference tooling | `scripts/refs.py` (`list`, `brief`, `trace`, `lint`, `guard`, `new`), hook `.claude/hooks/ref-lint.sh`, check.sh step and pre-commit guard | implemented | `tests/test_refs.py`; spec [[RSH-20261017-Reference-Automation-Spec]] | Reads `REF-*` notes on demand (no registry). `guard` blocks edits to `## Intent` sections and moves to `approved` unless `REFS_JG_APPROVED=1`. Evidence tools, rights ledger and review driver are later phases |
 | Task gates | `scripts/orchestrator.py` | verified | `tests/test_orchestrator.py` | `tasks/queue.json` format |
 | Vault validator | `scripts/validate_vault.py` | verified | `tests/test_validate_vault.py` | Doesn't check frontmatter under `10 References/` |
 | Git checkout guard | `scripts/preflight.sh` | verified | `tests/test_preflight.py`, [[LES-0006-Guard-Git-Checkout]] | Read-only guard |
@@ -66,7 +67,7 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 |---|---|---|---|---|
 | Sound sourcing (`roblox-sfx`) | `.claude/skills/roblox-sfx/` | verified (sourcing and probing) | TASK-0040 shortlist: 90 candidates probed in Studio | Can't hear; human picks. Wiring output not yet merged |
 | Map plan and prover (`roblox-map`) | `.claude/skills/roblox-map/` | verified | [[TASK-0012-Graveyard-And-Landmarks]], [[AUD-20261011-TASK-0012-01]] | Never run its Studio bootstrap on the Rg1 or Haunted places |
-| Video watching (`watch`) | user skill | implemented | Dependencies installed 2026-10-12 | Not yet run on a real video |
+| Video watching (`watch`) | user skill | verified (local engine) | Used for the 8 reference videos captured 2026-10-16, e.g. [[REF-VFX-001-Cinematic-Energy-Sequence]] | Sparse frame sampling; it does not establish exact motion or timing (see each note's evidence limits) |
 | Blender pipeline | [[Blender Pipeline]], `scripts/blender/export_for_roblox.py`, Blender 5.1.0 | verified | Headless export tests; Studio import exact in FBX and glb ([[LES-0007-Blender-Studio-Scale]]) | Static meshes only; rigs and animation are untested (animation plugin not installed yet) |
 | Mixamo → Roblox animations (`mixamo-roblox`) | Separate repo `~/Code/mixamo-roblox-pipeline` (private, JtheG21); vault `~/Documents/RobloxAnimVault`; skill `skills/mixamo-roblox/SKILL.md` there | verified | 25 animations published 2026-10-16 (15 R15, 10 R6: idle, walk, run, jump, fall, combat idle, punch, dance, wave, pose and more); retarget-check clean on R15, R6 and a scaled R15; Lune and Python tests in that repo | IDs: `python3 scripts/pipeline.py lookup "<term>" --rig R15` there, or its `manifest.json`. Owned by jg's personal account, so they play only in jg-owned games, not group games. Run it from a session in that repo (Rg1's guard blocks its key file). Personal use; never commit Mixamo FBX to Rg1 |
 

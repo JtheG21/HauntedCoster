@@ -4,7 +4,7 @@ title: Reference Review Index
 type: index
 status: ready
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 related:
   - "[[Resource Catalog]]"
   - "[[Studio Index]]"
@@ -67,4 +67,4 @@ All items await the later, deeper note-by-note review with jg. Capture/interview
 - Inventory: all 19 references from this conversation have individual notes; all 33 media embeds resolve (25 images, 8 videos).
 - Vault validator: 0 errors, 0 warnings. Diff whitespace check passed.
 - `scripts/check.sh`: formatting, lint, type checks, 140 Luau specs, both Rojo builds, JSON, queue and vault checks passed. The sandbox blocked a Python localhost-server test; rerunning the full Python suite with localhost permission passed all 69 tests. No game code changed and no Studio test was needed for note organization.
-- Publication into the main Obsidian vault remains pending human-approved merge and main-checkout synchronization. Existing main-checkout user edits must be preserved.
+- Published to the main vault by PR #67 (approved by jg). Reference tooling: `python3 scripts/refs.py lint|list|brief|trace` ([[RSH-20261017-Reference-Automation-Spec]]).

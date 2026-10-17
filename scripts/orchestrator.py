@@ -387,6 +387,17 @@ class Project:
         return out
 
 
+def reference_brief(root: Path, task_id: str) -> None:
+    """Print the task's reference brief (Task Intake step 5). Best effort: never blocks a start."""
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import refs
+        print()
+        refs.cmd_brief(root, None, task_id, None, "standard", 6)
+    except (SystemExit, Exception) as e:  # noqa: BLE001
+        print(f"(no reference brief: {e})")
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
@@ -459,6 +470,8 @@ def main(argv: list[str] | None = None) -> int:
         actions[a.cmd]()
         proj.save()
         print(f"{a.id} -> {proj.task(a.id)['status']}")
+        if a.cmd == "start":
+            reference_brief(proj.root, a.id)
         return 0
     except OrchestratorError as e:
         print(f"error: {e}", file=sys.stderr)
