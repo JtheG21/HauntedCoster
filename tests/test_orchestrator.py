@@ -222,5 +222,41 @@ class TestBudgetAndDispatch(Base):
         self.assertTrue(list((self.root / "08 Reviews").glob("HLT-*.md")))
 
 
+class TestReports(Base):
+    def note(self, name, files, tests="- Studio playtest: join"):
+        p = self.root / "03 Games" / f"{name}.md"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(f"## Files expected to change\n{files}\n\n## Tests\n{tests}\n\n## Risks\n")
+        return f"03 Games/{name}.md"
+
+    def test_cycles_summarises(self):
+        t = task("TASK-0001", "done")
+        t["history"] = [{"time": "2026-10-10T10:00:00", "to": "in_progress"}, {"time": "2026-10-10T11:30:00", "to": "in_review"}]
+        t["revisions"] = 1
+        self.write_queue([t, task("TASK-0002")])
+        code, out = self.cli("cycles")
+        self.assertEqual(code, 0)
+        self.assertIn("rev=1", out)
+        self.assertIn("1.5", out)
+        self.assertIn("2 tasks", out)
+
+    def test_parallel_safe(self):
+        a = task("TASK-0001", "ready", note=self.note("a", "- `src/a.luau`"))
+        b = task("TASK-0002", "ready", note=self.note("b", "- `src/b.luau`", tests="- headless only"))
+        c = task("TASK-0003", "ready", note=self.note("c", "- `src/a.luau`"))
+        d = task("TASK-0004", "ready", note=self.note("d", "- `src/d.luau`"))
+        self.write_queue([a, b, c, d])
+        code, out = self.cli("next", "--parallel-safe")
+        self.assertEqual(code, 0)
+        self.assertIn("TASK-0001 + TASK-0002: no overlap found", out)
+        self.assertIn("TASK-0001 + TASK-0003: NOT SAFE: expected files overlap; both need Studio", out)
+        self.assertIn("TASK-0001 + TASK-0004: NOT SAFE: both need Studio", out)
+        self.assertIn("still needs jg's explicit authorization", out)
+
+    def test_parallel_unknown_files(self):
+        self.write_queue([task("TASK-0001", "ready"), task("TASK-0002", "ready")])
+        self.assertIn("overlap is unknown", self.cli("next", "--parallel-safe")[1])
+
+
 if __name__ == "__main__":
     unittest.main()

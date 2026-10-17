@@ -11,9 +11,13 @@ Reads the REF-* notes on demand; there is no stored registry, so nothing can dri
   refs.py lint [--file PATH]            frontmatter, ids, embeds, Index and Catalog rows
   refs.py guard [--staged | --base REF] flag edits to jg's Intent sections and moves to `approved`
   refs.py new --area map --title "X"    scaffold the next REF-<AREA>-NNN from T - Reference
+  refs.py pin [--ids A,B]               record source commit + licence of GitHub-sourced notes (read-only gh api)
+  refs.py drift [--links]               compare the latest pins with upstream HEAD; optionally HEAD-check source URLs
+  refs.py rights [--check ID --use code|asset|method]   licence class per note and the adaptation gate
+  refs.py ledger [--refs A,B]           what tasks citing a REF cost: revisions, elapsed, tokens, jg's floor verdict
 
 Spec: 02 Research/RSH-20261017-Reference-Automation-Spec.md. It never writes inside an existing
-note, never touches Intent sections, and `new` only creates a file.
+note or touches Intent sections; `new` only creates a file, `pin` only appends to tasks/reference-pins.jsonl.
 Exit codes: 0 ok, 1 problems found, 2 usage error.
 """
 
@@ -24,8 +28,11 @@ import datetime
 import json
 import os
 import re
+import statistics
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -35,6 +42,12 @@ REF_DIR = "10 References"
 INDEX = "00 Studio/Reference Review Index.md"
 CATALOG = "00 Studio/Resource Catalog.md"
 TEMPLATE = "99 Templates/T - Reference.md"
+PINS = "tasks/reference-pins.jsonl"
+RIGHTS = "00 Studio/reference-rights.json"
+USAGE = "tasks/usage-ledger.jsonl"
+QUEUE = "tasks/queue.json"
+RIGHTS_CLASSES = ("permissive-verified", "permissive-claimed", "copyleft", "platform-terms", "per-item",
+                  "unknown", "reference-only")
 ID_RE = re.compile(r"^REF-([A-Z]+)-(\d{3})$")
 REF_IN_TEXT = re.compile(r"REF-[A-Z]+-\d{3}")
 FOLDER_AREA = {"01 UI": "ui", "02 Map": "map", "03 Sounds": "sfx", "04 Vfx": "vfx", "05 Misc": "misc", "06 Code": "code"}
@@ -322,6 +335,15 @@ def cmd_lint(root: Path, file: str | None) -> int:
     for p in paths:
         errs += lint_note(root, p, names, states, index_text)
     ids = [ref_id(p) for p in ref_notes(root)]
+    if (root / RIGHTS).exists():
+        rights = read_rights(root)
+        for rid in ids:
+            if rid not in rights:
+                errs.append(f"{RIGHTS}: no entry for {rid}")
+            elif rights[rid].get("class") not in RIGHTS_CLASSES or not rights[rid].get("basis"):
+                errs.append(f"{RIGHTS}: {rid} needs a class from {RIGHTS_CLASSES} and a basis")
+        for rid in set(rights) - set(ids):
+            errs.append(f"{RIGHTS}: entry for unknown note {rid}")
     for dup in {i for i in ids if ids.count(i) > 1}:
         errs.append(f"duplicate reference id {dup}")
     for e in errs:
@@ -411,6 +433,226 @@ def cmd_new(root: Path, area: str, title: str, dry: bool) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- pin / drift
+
+def gh(*args: str) -> str | None:
+    """Read-only GitHub API call through `gh`; None on any failure. Tests replace this."""
+    try:
+        r = subprocess.run(["gh", "api", *args], capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return r.stdout.strip() if r.returncode == 0 else None
+
+
+def github_repo(source: str) -> tuple[str, str] | None:
+    m = re.match(r"^https?://github\.com/([^/\s]+)/([^/\s#?]+)", source or "")
+    return (m.group(1), m.group(2)) if m else None
+
+
+def upstream(owner: str, repo: str) -> dict | None:
+    sha = gh(f"repos/{owner}/{repo}/commits/HEAD", "--jq", ".sha")
+    if not sha:
+        return None
+    branch = gh(f"repos/{owner}/{repo}", "--jq", ".default_branch") or "?"
+    lic = gh(f"repos/{owner}/{repo}/license", "--jq", ".license.spdx_id") or "none"
+    return {"sha": sha, "branch": branch, "license": lic}
+
+
+def read_pins(root: Path) -> dict[str, dict]:
+    """Latest pin per REF id."""
+    out: dict[str, dict] = {}
+    f = root / PINS
+    if f.exists():
+        for line in f.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                rec = json.loads(line)
+                out[rec["ref"]] = rec
+    return out
+
+
+def github_notes(root: Path) -> dict[str, tuple[str, str, str]]:
+    out = {}
+    for p in ref_notes(root):
+        fm, _ = load(p)
+        repo = github_repo(str(fm.get("source", "")))
+        if repo:
+            out[ref_id(p)] = (repo[0], repo[1], str(fm.get("source")))
+    return out
+
+
+def cmd_pin(root: Path, ids: str | None) -> int:
+    notes = github_notes(root)
+    wanted = [i.strip() for i in (ids or "").split(",") if i.strip()] or sorted(notes)
+    recs = []
+    for rid in wanted:
+        if rid not in notes:
+            print(f"skip {rid}: source is not a GitHub repository (organization pages and websites are not pinned)")
+            continue
+        owner, repo, _ = notes[rid]
+        info = upstream(owner, repo)
+        if not info:
+            print(f"FAIL {rid}: could not read {owner}/{repo} through gh")
+            continue
+        rec = {"time": datetime.datetime.now().isoformat(timespec="seconds"), "ref": rid,
+               "repo": f"{owner}/{repo}", **info}
+        recs.append(rec)
+        print(f"{rid}: {owner}/{repo} {info['branch']}@{info['sha'][:10]} licence {info['license']}")
+    if recs:
+        f = root / PINS
+        f.parent.mkdir(parents=True, exist_ok=True)
+        with f.open("a", encoding="utf-8") as fh:
+            for rec in recs:
+                fh.write(json.dumps(rec) + "\n")
+    return 0 if recs else 1
+
+
+def url_status(url: str) -> str:
+    for method in ("HEAD", "GET"):
+        req = urllib.request.Request(url, method=method, headers={"User-Agent": "rg1-refs-drift"})
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return str(r.status)
+        except urllib.error.HTTPError as e:
+            if method == "GET":
+                return str(e.code)
+        except (urllib.error.URLError, OSError, ValueError) as e:
+            if method == "GET":
+                return f"unreachable ({type(e).__name__})"
+    return "unknown"
+
+
+def cmd_drift(root: Path, links: bool) -> int:
+    pins, notes = read_pins(root), github_notes(root)
+    problems = 0
+    for rid in sorted(notes):
+        if rid not in pins:
+            print(f"{rid}: never pinned (run `refs.py pin`)")
+            problems += 1
+            continue
+        pin, owner_repo = pins[rid], pins[rid]["repo"].split("/")
+        now = upstream(*owner_repo)
+        if not now:
+            print(f"{rid}: upstream unreachable through gh")
+            problems += 1
+        elif now["license"] != pin["license"]:
+            print(f"{rid}: LICENCE CHANGED {pin['license']} -> {now['license']} (re-check rights before any adaptation)")
+            problems += 1
+        elif now["sha"] != pin["sha"]:
+            print(f"{rid}: upstream moved {pin['sha'][:10]} -> {now['sha'][:10]} (pinned {pin['time'][:10]}); "
+                  "the note's findings describe the pinned commit")
+        else:
+            print(f"{rid}: unchanged at {pin['sha'][:10]}")
+    if links:
+        for p in ref_notes(root):
+            fm, _ = load(p)
+            src = str(fm.get("source", ""))
+            if src.startswith("http"):
+                st = url_status(src)
+                print(f"{ref_id(p)}: {st} {src}")
+                problems += 0 if st.startswith(("2", "3")) else 1
+    return 1 if problems else 0
+
+
+# --------------------------------------------------------------------------- rights
+
+def read_rights(root: Path) -> dict[str, dict]:
+    f = root / RIGHTS
+    return json.loads(f.read_text(encoding="utf-8")).get("notes", {}) if f.exists() else {}
+
+
+def rights_gate(cls: str, use: str) -> tuple[bool, str]:
+    if use == "method":
+        return True, "methods and ideas may be restated in our own words; cite the note"
+    if cls == "permissive-verified":
+        return True, "licence verified; keep notices and record the file and commit in the task"
+    why = {"permissive-claimed": "licence only claimed in the note; read the actual licence text, record it, and have jg confirm",
+           "copyleft": "copyleft licence; no code or asset adaptation without jg's recorded decision",
+           "platform-terms": "package and platform have separate terms; check the exact terms for this use",
+           "per-item": "terms differ per resource or pack; verify the specific item",
+           "unknown": "rights unverified",
+           "reference-only": "retained as reference evidence; do not reuse its assets"}
+    return False, why.get(cls, "unclassified")
+
+
+def cmd_rights(root: Path, check: str | None, use: str) -> int:
+    rights = read_rights(root)
+    if check:
+        if check not in rights:
+            print(f"refs: no rights entry for {check}", file=sys.stderr)
+            return 2
+        ok, why = rights_gate(rights[check]["class"], use)
+        print(f"{check} [{rights[check]['class']}] use={use}: {'ALLOWED' if ok else 'BLOCKED'}: {why}\nbasis: {rights[check]['basis']}")
+        return 0 if ok else 1
+    for p in ref_notes(root):
+        rid = ref_id(p)
+        e = rights.get(rid, {"class": "MISSING", "basis": ""})
+        print(f"{rid:13} {e['class']:19} {e['basis']}")
+    return 0
+
+
+# --------------------------------------------------------------------------- ledger
+
+def iso(ts: str) -> datetime.datetime:
+    return datetime.datetime.fromisoformat(ts)
+
+
+def task_cycle(t: dict) -> dict:
+    hist = t.get("history", [])
+    start = next((iso(h["time"]) for h in hist if h.get("to") == "in_progress"), None)
+    review = next((iso(h["time"]) for h in hist if h.get("to") == "in_review"), None)
+    return {"revisions": t.get("revisions", 0), "executions": len(t.get("executions", [])),
+            "audits": len(t.get("audits", [])),
+            "hours": round((review - start).total_seconds() / 3600, 1) if start and review else None}
+
+
+def usage_tokens(root: Path) -> dict[str, int | None]:
+    out: dict[str, int | None] = {}
+    f = root / USAGE
+    if f.exists():
+        for line in f.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                r = json.loads(line)
+                if r.get("tokens") is not None:
+                    out[r["task"]] = (out.get(r["task"]) or 0) + r["tokens"]
+                else:
+                    out.setdefault(r["task"], None)
+    return out
+
+
+def cmd_ledger(root: Path, only: str | None) -> int:
+    cites = cited_by(root)
+    wanted = {i.strip() for i in (only or "").split(",") if i.strip()}
+    task_refs: dict[str, set[str]] = {}
+    for rid, tids in cites.items():
+        if wanted and rid not in wanted:
+            continue
+        for tid in tids:
+            task_refs.setdefault(tid, set()).add(rid)
+    if not task_refs:
+        print("no task cites a REF note yet (add `REF-…` IDs to the task note's **References:** line)")
+        return 0
+    queue = {t["id"]: t for t in json.loads((root / QUEUE).read_text(encoding="utf-8"))["tasks"]}
+    tokens, notes = usage_tokens(root), task_notes(root)
+    print(f"{'task':10} {'status':12} {'rev':3} {'exec':4} {'aud':3} {'hours':6} {'tokens':8} floor-met (jg)   references")
+    for tid in sorted(task_refs):
+        t = queue.get(tid)
+        if not t:
+            print(f"{tid:10} not in queue.json")
+            continue
+        c = task_cycle(t)
+        floor = "-"
+        if tid in notes:
+            m = re.search(r"(?im)reference floor met:\s*(.+)$", notes[tid].read_text(encoding="utf-8"))
+            floor = m.group(1).strip()[:16] if m else "-"
+        tok = tokens.get(tid)
+        print(f"{tid:10} {t['status']:12} {c['revisions']:3} {c['executions']:4} {c['audits']:3} "
+              f"{str(c['hours']) if c['hours'] is not None else 'n/a':6} {str(tok) if tok else 'n/a':8} {floor:17} "
+              f"{', '.join(sorted(task_refs[tid]))}")
+    print("Hours run from first start to first in_review; tokens are only what record-usage logged. Interview length and "
+          "prompt count are not recorded by the queue: note them in the task. This is evidence for jg, not a verdict.")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
@@ -432,6 +674,15 @@ def main(argv: list[str] | None = None) -> int:
     n.add_argument("--area", required=True)
     n.add_argument("--title", required=True)
     n.add_argument("--dry-run", action="store_true")
+    pn = sub.add_parser("pin")
+    pn.add_argument("--ids")
+    dr = sub.add_parser("drift")
+    dr.add_argument("--links", action="store_true")
+    rt = sub.add_parser("rights")
+    rt.add_argument("--check")
+    rt.add_argument("--use", choices=["code", "asset", "method"], default="code")
+    lg = sub.add_parser("ledger")
+    lg.add_argument("--refs")
     a = ap.parse_args(argv)
     root = a.root.resolve()
     if a.cmd == "list":
@@ -444,6 +695,14 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_lint(root, a.file)
     if a.cmd == "guard":
         return cmd_guard(root, a.staged, a.base)
+    if a.cmd == "pin":
+        return cmd_pin(root, a.ids)
+    if a.cmd == "drift":
+        return cmd_drift(root, a.links)
+    if a.cmd == "rights":
+        return cmd_rights(root, a.check, a.use)
+    if a.cmd == "ledger":
+        return cmd_ledger(root, a.refs)
     return cmd_new(root, a.area, a.title, a.dry_run)
 
 
