@@ -265,7 +265,7 @@ class ReviewDriverTest(RefsTest):
         self.assertIn("Useful / for fog", text)
         self.assertIn("**Next action:** try one fog pack", text)
         self.assertIn("| [x] | [[REF-MAP-001-One]]", (self.root / "00 Studio/Reference Review Index.md").read_text())
-        self.assertRegex((self.root / "00 Studio/Resource Catalog.md").read_text(), r"Review \d{4}-\d{2}-\d{2}: propose a scoped experiment")
+        self.assertRegex((self.root / "00 Studio/Resource Catalog.md").read_text(), r"n\. Review \d{4}-\d{2}-\d{2}: propose a scoped experiment")
         # Intent and status untouched
         self.assertEqual(refs.section(text, "Intent"), refs.section(note(), "Intent"))
         self.assertEqual(refs.parse_frontmatter(text)["status"], "proposed")

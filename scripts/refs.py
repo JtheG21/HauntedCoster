@@ -750,7 +750,8 @@ def cmd_decide(root: Path, rid: str, outcome: str, summary: str, inspected: str,
     lines, new_cat, hit = cat_text.split("\n"), [], False
     for ln in lines:
         if not hit and ln.startswith("|") and re.search(rf"\[\[{re.escape(rid)}[^\]]*\]\]", ln):
-            ln, hit = ln.rstrip().rstrip("|").rstrip() + tag + " |", True
+            body = ln.rstrip().rstrip("|").rstrip()
+            ln, hit = body + ("" if body.endswith((".", ";", ":")) else ".") + tag + " |", True
         new_cat.append(ln)
     print(f"{'APPLY' if apply else 'DRY RUN'}: {rid} -> {OUTCOMES[outcome]}")
     print(f"  note: append section, set updated {today}\n  index: {'tick' if new_idx != idx_text else 'no unchecked row found'}\n"
@@ -759,10 +760,11 @@ def cmd_decide(root: Path, rid: str, outcome: str, summary: str, inspected: str,
         print("---\nRe-run with --apply once jg has confirmed this wording.")
         return 0
     p.write_text(new_text, encoding="utf-8")
+    bump = lambda s: re.sub(r"(?m)^updated: .*$", f"updated: {today}", s, count=1)  # noqa: E731
     if new_idx != idx_text:
-        idx.write_text(new_idx, encoding="utf-8")
+        idx.write_text(bump(new_idx), encoding="utf-8")
     if hit:
-        cat.write_text("\n".join(new_cat), encoding="utf-8")
+        cat.write_text(bump("\n".join(new_cat)), encoding="utf-8")
     return cmd_lint(root, None)
 
 
