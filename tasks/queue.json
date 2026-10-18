@@ -3294,6 +3294,73 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0054",
+      "title": "Rare Capture Finisher",
+      "project": "GAME-002",
+      "status": "done",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0053"
+      ],
+      "branch": "task/TASK-0054-Rare-Capture-Finisher",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0054-Rare-Capture-Finisher.md",
+      "acceptance_criteria": [
+        "Lune spec: finisher validates, 10-15 s, at most 2 large-flash cues at least 2 s apart, reduced mode weaker.",
+        "Play scenario: effect folder and Lighting return to baseline after finish and cancel; no emitters left; within budget.",
+        "jg judges one client run against REF-VFX-001 beats and gives a floor verdict; ledger recorded.",
+        "scripts/check.sh green; one audit; no server file changed."
+      ],
+      "history": [
+        {
+          "time": "2026-10-17T19:02:29",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-17T19:02:29",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-17T20:20:30",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-17T20:20:30",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-17T20:23:08",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-17T20:20:30",
+          "result": "pass",
+          "notes": "check.sh green; Studio scenario 35/35 and client restore checks; AC3 is jg's verdict"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-17T20:20:30",
+          "result": "pass",
+          "report": "06 QA/AUD-20261017-TASK-0054-01.md"
+        }
+      ],
+      "revisions": 0,
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }
