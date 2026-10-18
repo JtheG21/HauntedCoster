@@ -4269,7 +4269,7 @@
       "id": "TASK-0064",
       "title": "Mansion Themes",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4289,6 +4289,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T13:30:14",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [],

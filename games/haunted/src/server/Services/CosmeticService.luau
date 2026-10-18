@@ -9,11 +9,13 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Catalog = require(Shared.Config.Catalog)
 local CaptureFxRules = require(Shared.Rules.CaptureFxRules)
 local CosmeticRules = require(Shared.Rules.CosmeticRules)
+local ThemeRules = require(Shared.Rules.ThemeRules)
 local LookRules = require(Shared.Rules.LookRules)
 local ProfileRules = require(Shared.Rules.ProfileRules)
 local Remotes = require(script.Parent.Parent.Remotes)
 local ContainmentService = require(script.Parent.ContainmentService)
 local PlayerDataService = require(script.Parent.PlayerDataService)
+local PlotService = require(script.Parent.PlotService)
 local StateService = require(script.Parent.StateService)
 
 local CosmeticService = {}
@@ -100,6 +102,35 @@ function CosmeticService.equipCaptureEffect(player: Player, id: any): (boolean, 
 	return true, nil
 end
 
+-- Equip or remove the mansion theme (id = nil removes). setTheme refuses a theme that doesn't cover the
+-- current house tier; the plot house is rebuilt with the new tint, which replicates to every player.
+function CosmeticService.equipTheme(player: Player, id: any): (boolean, string?)
+	local valid, bad = ThemeRules.parse(id)
+	if not valid then
+		return false, bad
+	end
+	local profile = PlayerDataService.get(player)
+	if not profile then
+		return false, "Your data is still loading."
+	end
+	local failure: string? = nil
+	local applied = PlayerDataService.update(player, function(p)
+		local ok, reason = CosmeticRules.setTheme(p.cosmetics, catalog(), id :: string?, p.houseTier)
+		if not ok then
+			failure = ThemeRules.message(reason)
+		end
+	end)
+	if failure then
+		return false, failure
+	end
+	if not applied then
+		return false, "Your data is still loading."
+	end
+	PlotService.rebuildHouse(player)
+	StateService.markDirty(player)
+	return true, nil
+end
+
 function CosmeticService.start()
 	if started then
 		return
@@ -110,6 +141,12 @@ function CosmeticService.start()
 			return false, "Slow down."
 		end
 		return CosmeticService.equip(player, uid, slot, id)
+	end
+	Remotes.func("EquipTheme").OnServerInvoke = function(player, id)
+		if not Remotes.allow(player, "EquipTheme", 4, 8) then
+			return false, "Slow down."
+		end
+		return CosmeticService.equipTheme(player, id)
 	end
 	Remotes.func("EquipCaptureEffect").OnServerInvoke = function(player, id)
 		if not Remotes.allow(player, "EquipCaptureEffect", 6, 8) then

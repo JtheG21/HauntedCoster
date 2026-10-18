@@ -19,12 +19,13 @@ export type Reward = {
 
 local Catalog = {}
 
--- Sample looks (TASK-0062, TASK-0063): data-only recolour and particle looks over the existing creature art, listed so the
+-- Sample looks (TASK-0062 to TASK-0064): data-only recolour and particle looks over the existing creature art, listed so the
 -- equip path can be exercised. No grant path exists yet, so nobody owns them; real items need jg's decisions.
 Catalog.Items = {
 	SkinMoss = { name = "Mossy Skin", category = "Skin" },
 	AuraEmbers = { name = "Ember Aura", category = "Aura" },
 	FxSparks = { name = "Golden Sparks", category = "CaptureEffect" },
+	ThemeMoonlit = { name = "Moonlit Theme", category = "Theme", tiers = { 1, 2 } }, -- not the Shack: tests the fallback
 } :: { [string]: Item }
 Catalog.Rewards = {} :: { [string]: Reward }
 

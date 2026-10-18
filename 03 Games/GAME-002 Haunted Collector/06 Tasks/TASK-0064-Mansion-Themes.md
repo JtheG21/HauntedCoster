@@ -3,7 +3,7 @@ id: TASK-0064
 title: "Mansion Themes"
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: medium
 risk: medium
 owner: executor
@@ -52,6 +52,21 @@ Persistence, trust boundary and product details are governed by the baseline not
 
 ---
 ## Implementation record
+Executor: Claude (Sonnet 5.5). Context tokens at start 219,091, at close 238,975 (growth 19,884, shared with earlier session work). Weekly plan 95% at start and close.
+
+**Files:** new `Rules/ThemeRules.luau` (parse, messages, tier coverage text, which theme shows at a tier, the fallback notice after an upgrade) and `tests/ThemeRules.spec.luau`; `CosmeticService.equipTheme` plus the `EquipTheme` remote (rate limited 4 per 8 s, `CosmeticRules.setTheme` checks ownership and tier inside the update, then the house is rebuilt); `PlotBuilder.buildHouse` takes a tint and sets `Tint_Walls/Trim/Roof` on the house art (the client `Dressing` already applies `Tint_` attributes, so every player sees it); `PlotService` passes the resolved tint on every house build; `EconomyService` clears an equipped theme the new tier does not cover and toasts the reason; `ShopUI` details view shows coverage, colour swatches and Equip/Remove (Equip only at a covered tier); `Config/CosmeticLooks` and `Catalog` gain one sample, `ThemeMoonlit` (tiers 1 and 2, not the Shack, so the fallback is real); `Net` registers `EquipTheme`.
+
+**Checks:** `scripts/check.sh` ALL CHECKS PASSED; Lune specs 230 passed.
+
+**Decisions:** the tint applies only while the house is at a covered tier (resolved when the house is built). An upgrade that leaves the theme uncovered clears the selection with a notice; the theme stays owned. A removed or unowned or unlisted theme resolves to the default look.
+
+**Limits (honest):** the sample is a recolour of the existing house art (Walls, Trim, Roof), not a new model, so the baseline asset condition is not met; real themes need jg's art decisions. There is no full-exterior preview: the details view shows coverage and colour swatches only, so AC2's "complete exterior preview before purchase" is not met. Nobody can own `ThemeMoonlit` yet (no grant path until TASK-0066/0067). The rebuild on equip and on rejoin uses the same path as a tier upgrade, but no Studio run checked it across tiers or plot orientations.
+
+| AC | State |
+|---|---|
+| AC1 tier list, refusal with reason, fallback with notice | implemented and spec-tested |
+| AC2 complete exterior preview, consistent for all players, survives rejoin | NOT met: preview is swatches only; the tint replicates through house attributes and persists in `cosmetics`, untested in Studio |
+| AC3 specs, Studio across tiers and orientations, check.sh, Sonnet audit | specs and check.sh done; Studio not run; audit pending |
 
 ## Audits
 
