@@ -3557,6 +3557,25 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0058",
+      "title": "SetExhibit Input Rules",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0058-SetExhibit-Input-Rules",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0058-SetExhibit-Input-Rules.md",
+      "acceptance_criteria": [
+        "ExhibitRules.setRefusal(profile, slot, uid) holds the SetExhibit validation (loading, non-integer or NaN slot, locked slot, unowned or non-string uid) with the same order and player-facing text; the rate limit stays in the service.",
+        "A Lune spec covers the all-clear case, each refusal, the order, NaN, slot 0 and a slot above the tier; a negative control (one guard removed) fails it.",
+        "FullLoop and ExploitProbe still pass in Studio; scripts/check.sh green; one Sonnet first audit (Opus if the diff goes beyond the extraction); tokens recorded."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
     }
   ]
 }
