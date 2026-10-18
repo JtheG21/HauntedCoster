@@ -328,6 +328,27 @@ return function(t: TestRunner.T)
 		end
 	end)
 
+	t.test("sanitize is idempotent with an unknown ID spread across slot kinds", function()
+		local raw = {
+			owned = owned,
+			cosmetics = {
+				entitlements = { Mystery = true, Lantern = true },
+				ghostLooks = { m2 = { aura = "Mystery" }, m1 = { skin = "Mystery" } },
+				captureEffect = "Mystery",
+				mansionTheme = "Mystery",
+				placements = { { id = "Mystery", x = 0, z = 0, r = 0 }, { id = "Lantern", x = 1, z = 1, r = 0 } },
+			},
+		}
+		local once = ProfileRules.sanitize(raw, now, cat)
+		local twice, repaired = ProfileRules.sanitize(once, now, cat)
+		t.eq(cosmeticRepairs(repaired), 0)
+		t.eq(twice.cosmetics.ghostLooks.m1.skin, "Mystery")
+		t.eq(twice.cosmetics.ghostLooks.m2, nil)
+		t.eq(#twice.cosmetics.placements, 1)
+		t.eq(twice.cosmetics.placements[1].id, "Lantern")
+		t.eq(twice.cosmetics.captureEffect, nil)
+	end)
+
 	t.test("a lowered placement limit drops extra placements but keeps the item", function()
 		local raw = {
 			cosmetics = {

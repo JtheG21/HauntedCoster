@@ -3685,7 +3685,7 @@
       "id": "TASK-0060",
       "title": "Monetization Persistence Schema",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0060-Monetization-Persistence-Schema",
@@ -3731,6 +3731,18 @@
           "from": "changes_requested",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-18T11:48:49",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T11:48:49",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -3738,6 +3750,11 @@
           "time": "2026-10-18T02:23:00",
           "result": "pass",
           "notes": "check.sh green; Lune 188/188; Persistence write 9/9 read 4/4 on published place (hand-synced modules)"
+        },
+        {
+          "time": "2026-10-18T11:48:49",
+          "result": "pass",
+          "notes": "revision 1: all audit findings fixed; check.sh green; Lune 194/194"
         }
       ],
       "audits": [
@@ -3745,6 +3762,11 @@
           "time": "2026-10-18T02:23:07",
           "result": "pass",
           "report": "/Users/jg/Desktop/Rg1-worktrees/task-0060/06 QA/AUD-20261018-TASK-0060-01.md"
+        },
+        {
+          "time": "2026-10-18T11:48:49",
+          "result": "pass",
+          "report": "06 QA/AUD-20261018-TASK-0060-02.md"
         }
       ],
       "revisions": 1,

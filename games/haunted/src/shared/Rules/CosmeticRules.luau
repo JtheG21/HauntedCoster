@@ -6,7 +6,8 @@
 -- doesn't list it (a config gap must not destroy something a player earned or bought). Selections and
 -- placements must reference an owned entitlement and, when the catalog knows the item, fit its category and
 -- compatibility. An ID the catalog doesn't list may fill only one kind of slot (skin, aura, capture effect,
--- theme or decoration), so stored data can't spread it across categories. Placements are not protected like
+-- theme or decoration), so stored data can't spread it across categories. Precedence is code order: ghost
+-- looks (by sorted UID, skin before aura), then capture effect, then theme, then placements. Placements are not protected like
 -- entitlements: if a later catalog lowers an item's placementLimit or changes its category, the extra or
 -- mismatched placements are dropped on load (and reported as repaired) while the item stays owned.
 -- Cosmetics never touch income, capacity, rarity, variants or capture rules.
@@ -144,6 +145,14 @@ local function limitOf(catalog: Catalog, id: string): number
 	return if item and item.placementLimit then item.placementLimit else 1
 end
 
+local function count(set: { [string]: boolean }): number
+	local n = 0
+	for _ in set do
+		n += 1
+	end
+	return n
+end
+
 local function placedCount(s: State, id: string): number
 	local n = 0
 	for _, pl in s.placements do
@@ -256,11 +265,7 @@ function CosmeticRules.grant(s: State, catalog: Catalog, id: string): (boolean, 
 	if s.entitlements[id] then
 		return true, "alreadyOwned"
 	end
-	local n = 0
-	for _ in s.entitlements do
-		n += 1
-	end
-	if n >= CatalogConfig.MaxEntitlements then
+	if count(s.entitlements) >= CatalogConfig.MaxEntitlements then
 		return false, "full"
 	end
 	s.entitlements[id] = true
@@ -400,11 +405,7 @@ function CosmeticRules.claimReward(s: State, catalog: Catalog, rewardId: string)
 			newCount += 1
 		end
 	end
-	local owned = 0
-	for _ in s.entitlements do
-		owned += 1
-	end
-	if owned + newCount > CatalogConfig.MaxEntitlements then
+	if count(s.entitlements) + newCount > CatalogConfig.MaxEntitlements then
 		return false, "full"
 	end
 	for id in new do
