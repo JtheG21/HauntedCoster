@@ -194,8 +194,6 @@ local function renderCaptureEffect(c: ShopRules.Card)
 	end, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.fromScale(1, 0.5), Size = UDim2.fromOffset(90, 34) })
 end
 
--- Owned skins and auras: one row per owned ghost with Equip or Remove. The server decides; the row only
--- shows what LookRules says is possible and the server's answer.
 -- Owned mansion themes: the tiers it covers, its colours, and Equip or Remove. Equip is offered only when the
 -- house is at a covered tier; the server checks it again.
 local function renderTheme(c: ShopRules.Card)
@@ -249,6 +247,8 @@ local function renderTheme(c: ShopRules.Card)
 	end
 end
 
+-- Owned skins and auras: one row per owned ghost with Equip or Remove. The server decides; the row only
+-- shows what LookRules says is possible and the server's answer.
 function renderEquip(c: ShopRules.Card)
 	if c.owned and c.category == "Theme" then
 		renderTheme(c)

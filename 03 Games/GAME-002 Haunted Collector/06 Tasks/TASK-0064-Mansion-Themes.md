@@ -3,7 +3,7 @@ id: TASK-0064
 title: "Mansion Themes"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: medium
 risk: medium
 owner: executor
@@ -71,5 +71,6 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 219,091, at close 238,975
 **Studio skipped by jg, 2026-10-18.** No Play session, no check across tiers or plot orientations, no screenshots. The tint, the upgrade fallback and the theme UI are unverified at runtime.
 
 ## Audits
+[[AUD-20261018-TASK-0064-01]]: pass (Sonnet). No blocker; Studio and a full exterior preview still owed.
 
 ## Outcome
