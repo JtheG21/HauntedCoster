@@ -12,16 +12,19 @@ local MeshCodec = require(script.Parent.MeshCodec)
 
 local MeshBuild = {}
 
-local function fill(em: EditableMesh, mesh: MeshCodec.Mesh)
+-- The EditableMesh batch API and its enums are newer than the pinned CI type definitions, so they go through `any`.
+local function fill(typed: EditableMesh, mesh: MeshCodec.Mesh)
+	local em = typed :: any
+	local MeshAttribute = (Enum :: any).MeshAttribute
 	local centre = mesh.centre
 	local positions = table.create(#mesh.positions) :: { Vector3 }
 	for i, p in mesh.positions do
 		positions[i] = p - centre
 	end
-	local vIds = em:BatchAdd(Enum.MeshAttribute.Vertex, positions)
-	local nIds = em:BatchAdd(Enum.MeshAttribute.Normal, mesh.normals)
-	local cIds = (em :: any):BatchAdd(Enum.MeshAttribute.Color, mesh.colors, table.create(#mesh.colors, 1))
-	local uIds = if mesh.uvs then em:BatchAdd(Enum.MeshAttribute.UV, mesh.uvs) else nil
+	local vIds = em:BatchAdd(MeshAttribute.Vertex, positions)
+	local nIds = em:BatchAdd(MeshAttribute.Normal, mesh.normals)
+	local cIds = em:BatchAdd(MeshAttribute.Color, mesh.colors, table.create(#mesh.colors, 1))
+	local uIds = if mesh.uvs then em:BatchAdd(MeshAttribute.UV, mesh.uvs) else nil
 	local nf = #mesh.faces
 	local fv, fn, fc = table.create(nf), table.create(nf), table.create(nf)
 	local fu = if uIds then table.create(nf) else nil
@@ -34,7 +37,7 @@ local function fill(em: EditableMesh, mesh: MeshCodec.Mesh)
 			fu[i] = { uIds[a], uIds[b], uIds[c] }
 		end
 	end
-	local faceIds = em:BatchAdd(Enum.MeshAttribute.Face, fv)
+	local faceIds = em:BatchAdd(MeshAttribute.Face, fv)
 	em:BatchSetFaceAttributes(faceIds, fn)
 	em:BatchSetFaceAttributes(faceIds, fc)
 	if fu then
@@ -79,7 +82,7 @@ function MeshBuild.bake(value: StringValue): (MeshPart?, string?)
 	local em, _ = editable(value)
 	local ok, result, part = pcall(function()
 		local r, content = AssetService:CreateDataModelContentAsync(Content.fromObject(em))
-		if r ~= Enum.CreateContentResult.Success then
+		if r ~= (Enum :: any).CreateContentResult.Success then
 			return r, nil
 		end
 		return r, AssetService:CreateMeshPartAsync(content, OPTIONS)

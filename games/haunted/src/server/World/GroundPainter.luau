@@ -79,7 +79,7 @@ local function fillDisc(terrain: Terrain, centre: Vector3, radius: number, surfa
 		Vector3.new(centre.X - radius, -8, centre.Z - radius),
 		Vector3.new(centre.X + radius, 0, centre.Z + radius)
 	):ExpandToGrid(4)
-	local mats, occs = terrain:ReadVoxels(region, 4)
+	local mats, occs = (terrain :: any):ReadVoxels(region, 4)
 	local size = mats.Size
 	local origin = region.CFrame.Position - region.Size / 2
 	local topOcc = math.clamp((surface + 2) / 4, 0.05, 1)
