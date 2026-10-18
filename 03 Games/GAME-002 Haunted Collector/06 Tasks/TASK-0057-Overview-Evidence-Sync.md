@@ -3,7 +3,7 @@ id: TASK-0057
 title: "Overview Evidence Sync"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: low
 risk: low
 owner: executor
@@ -60,3 +60,4 @@ Never invent evidence: any claim must link a task note, TEST note or command out
 [[AUD-20261018-TASK-0057-01]]: pass (Sonnet, requested by jg; 27,723 tokens)
 
 ## Outcome
+Merged with jg's approval (2026-10-18). Measurement: Light path used a Sonnet audit at jg's request (27,723 tokens, 6 tool calls); executor tokens unavailable. Follow-up: TASK-0058 as the Standard data point.
