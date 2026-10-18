@@ -3493,6 +3493,25 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0057",
+      "title": "Overview Evidence Sync",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0057-Overview-Evidence-Sync",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0057-Overview-Evidence-Sync.md",
+      "acceptance_criteria": [
+        "00 Overview's Latest evidence and Next lines match the current spec count and the queue.",
+        "The Overview task table lists TASK-0053 to TASK-0056 with their outcomes, linked to their notes.",
+        "scripts/check.sh and validate_vault.py pass; executor tokens recorded with record-usage if a figure exists; no audit (Light tier)."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
     }
   ]
 }
