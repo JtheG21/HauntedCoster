@@ -38,6 +38,7 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 
 ## Session and delegation budget
 - One primary agent. No subagents for reads, simple edits, single checks or note upkeep.
+- **Model and effort by tier:** Light tasks (docs, notes, formatting, small tooling) run on Sonnet at low effort, or Haiku at medium effort. Standard tasks use Sonnet; switch to Opus for Deep tasks and for security, networking or DataStore code. Start the session on that model (`/model`) instead of defaulting to Opus. jg can override per task.
 - At most one audit subagent per task (not one per batch of tasks) unless the user authorizes more. It returns verdict + findings + file:line only.
 - Audit by depth tier ([[Task Intake]]): **Light** tasks rely on a green `scripts/check.sh` and skip the audit subagent. **Standard** tasks get one first audit with `model: sonnet`. **Deep** tasks and any security, networking or DataStore code get an Opus first audit. Delta re-audits after a revision may use `model: sonnet`, except for security, networking or DataStore code. jg can always ask for a stronger audit.
 - Don't poll with `sleep`. Use background runs and wait for the notification.
