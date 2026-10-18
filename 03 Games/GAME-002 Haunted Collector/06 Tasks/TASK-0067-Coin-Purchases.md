@@ -3,7 +3,7 @@ id: TASK-0067
 title: "Coin Purchases"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: high
 owner: executor
@@ -76,3 +76,4 @@ Executor: Claude. jg said the session was switched to Opus, but the session stil
 [[AUD-20261018-TASK-0067-01]]: pass (Opus). Fixed after the audit: only final refusals are remembered, receipts are per item, the probe check compares against a snapshot. Studio and the ExploitProbe run still owed.
 
 ## Outcome
+Sample cosmetics can be bought with Coins: the server reads the price from the catalog, debits and grants in one step, and a retry or double submit never charges twice (merge approved by jg, 2026-10-18). Opus audit passed. Needs jg: tune the placeholder prices (SkinMoss 300, AuraEmbers 250, DecoLantern 150) from measured income, and decide whether a purchase should force a save. Not verified: Studio (the Buy and Confirm round trip, the pending state) and a run of the extended ExploitProbe. Coins only; a Robux path waits on TASK-0068 and jg's approval.
