@@ -16,6 +16,7 @@ local JournalUI = require(script.UI.JournalUI)
 local ShopUI = require(script.UI.ShopUI)
 local TrackEditor = require(script.UI.TrackEditor)
 local CaptureFinisher = require(script.CaptureFinisher)
+local CaptureFx = require(script.CaptureFx)
 
 local BuildInfo = require(ReplicatedStorage.Shared.BuildInfo)
 
@@ -104,7 +105,8 @@ ShopUI.mount(gui)
 MansionUI.openShop = ShopUI.open
 JournalUI.mount(gui)
 TrackEditor.mount(gui, Hud.toast)
-CaptureFinisher.mount();
+CaptureFinisher.mount()
+CaptureFx.mount();
 
 (State.remote("Toast") :: RemoteEvent).OnClientEvent:Connect(function(t)
 	if type(t) == "table" and type(t.text) == "string" then

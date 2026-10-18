@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Rules = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Rules")
 local ShopRules = require(Rules:WaitForChild("ShopRules"))
 local LookRules = require(Rules:WaitForChild("LookRules"))
+local CaptureFx = require(script.Parent.Parent.CaptureFx)
 local Theme = require(script.Parent.Theme)
 local State = require(script.Parent.Parent.State)
 
@@ -159,7 +160,44 @@ end
 
 -- Owned skins and auras: one row per owned ghost with Equip or Remove. The server decides; the row only
 -- shows what LookRules says is possible and the server's answer.
+local function renderCaptureEffect(c: ShopRules.Card)
+	local snap = State.snap
+	local equipped = snap and snap.cosmetics and snap.cosmetics.captureEffect == c.id
+	if equipMessage then
+		local m = card()
+		Theme.label(
+			m,
+			equipMessage,
+			{ TextColor3 = Theme.Colors.gold, AutomaticSize = Enum.AutomaticSize.Y, Size = UDim2.fromScale(1, 0) }
+		)
+	end
+	local row = card(48)
+	Theme.label(row, if equipped then "Equipped" else "Not equipped", {
+		Size = UDim2.new(1, -200, 0, 22),
+		TextColor3 = if equipped then Theme.Colors.good else Theme.Colors.dim,
+	})
+	Theme.button(row, "Preview", function()
+		CaptureFx.preview(c.id)
+	end, {
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -100, 0.5, 0),
+		Size = UDim2.fromOffset(90, 34),
+		BackgroundColor3 = Theme.Colors.buttonOff,
+	})
+	Theme.button(row, if equipped then "Remove" else "Equip", function()
+		local ok, msg = State.invoke("EquipCaptureEffect", if equipped then nil else c.id)
+		equipMessage = if ok ~= true
+			then (if type(msg) == "string" then msg else "Something went wrong. Try again.")
+			else nil
+		render(false)
+	end, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.fromScale(1, 0.5), Size = UDim2.fromOffset(90, 34) })
+end
+
 function renderEquip(c: ShopRules.Card)
+	if c.owned and c.category == "CaptureEffect" then
+		renderCaptureEffect(c)
+		return
+	end
 	if not (c.owned and (c.category == "Skin" or c.category == "Aura") and catalog) then
 		return
 	end

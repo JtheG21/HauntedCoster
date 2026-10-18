@@ -3,7 +3,7 @@ id: TASK-0063
 title: "Capture Effects Equipment"
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: medium
 risk: medium
 owner: executor
@@ -52,6 +52,21 @@ Persistence, trust boundary and product details are governed by the baseline not
 
 ---
 ## Implementation record
+Executor: Claude (Sonnet 5.5). Context tokens at start 193,292, at close 208,028 (growth 14,736, shared with earlier session work). Weekly plan 95% at start and close.
+
+**Files:** new `Rules/CaptureFxRules.luau` (request parsing, which effect plays now, payload re-check, preview cooldown) and `tests/CaptureFxRules.spec.luau`; `CosmeticService.equipCaptureEffect` plus the `EquipCaptureEffect` remote (rate limited 6 per 8 s, uses `CosmeticRules.setCaptureEffect`); `CaptureService` fires `CaptureFx` to the capturing player only, after `startCarry`, when an owned, listed effect is equipped; new `client/CaptureFx.luau` (burst on a hidden marker, ReduceEffects thins it, local preview with a 1.5 s cooldown); `ShopUI` details view gets Equip/Remove and Preview for owned effects; `Net` registers both names; `Config/CosmeticLooks` and `Config/Catalog` gain one sample, `FxSparks`.
+
+**Checks:** `scripts/check.sh` ALL CHECKS PASSED; Lune specs 223 passed. The earlier CosmeticRules catalog spec now allows capture-effect samples.
+
+**Decisions:** the effect plays after every capture rule has run (judge, apply, endSession, startCarry), so it cannot change timing, success, the meter, retaliation or income; a spec shows equipping changes only `captureEffect`. A stale, unowned or unlisted choice resolves to no effect, not an error. The preview is local and only emits on a hidden marker, so no live model changes. It plays for the capturer only (not other players).
+
+**Limits:** the sample is a particle burst, not an asset, so no plugin VFX rights apply (TASK-0054 check not needed). Nobody can own `FxSparks` yet (no grant path until TASK-0066/0067). The vfx_template reference was not opened. No Studio run yet: AC1 visuals and AC2's Studio check are unverified.
+
+| AC | State |
+|---|---|
+| AC1 equip/remove, replayable preview | implemented and spec-tested (rules); UI and preview not run in Studio |
+| AC2 no change to capture rules | spec asserts equip touches only `captureEffect`; Studio check not run |
+| AC3 check.sh, Sonnet audit, VFX rights | check.sh green; audit pending; no plugin asset used |
 
 ## Audits
 

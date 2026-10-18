@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Catalog = require(Shared.Config.Catalog)
+local CaptureFxRules = require(Shared.Rules.CaptureFxRules)
 local CosmeticRules = require(Shared.Rules.CosmeticRules)
 local LookRules = require(Shared.Rules.LookRules)
 local ProfileRules = require(Shared.Rules.ProfileRules)
@@ -72,6 +73,33 @@ function CosmeticService.equip(player: Player, uid: any, slot: any, id: any): (b
 	return true, nil
 end
 
+-- Equip or remove the capture effect (id = nil removes). Nothing else about the player changes.
+function CosmeticService.equipCaptureEffect(player: Player, id: any): (boolean, string?)
+	local req, bad = CaptureFxRules.parse(id)
+	if not req then
+		return false, bad
+	end
+	local profile = PlayerDataService.get(player)
+	if not profile then
+		return false, "Your data is still loading."
+	end
+	local failure: string? = nil
+	local applied = PlayerDataService.update(player, function(p)
+		local ok, reason = CosmeticRules.setCaptureEffect(p.cosmetics, catalog(), req.id)
+		if not ok then
+			failure = CaptureFxRules.message(reason)
+		end
+	end)
+	if failure then
+		return false, failure
+	end
+	if not applied then
+		return false, "Your data is still loading."
+	end
+	StateService.markDirty(player)
+	return true, nil
+end
+
 function CosmeticService.start()
 	if started then
 		return
@@ -82,6 +110,12 @@ function CosmeticService.start()
 			return false, "Slow down."
 		end
 		return CosmeticService.equip(player, uid, slot, id)
+	end
+	Remotes.func("EquipCaptureEffect").OnServerInvoke = function(player, id)
+		if not Remotes.allow(player, "EquipCaptureEffect", 6, 8) then
+			return false, "Slow down."
+		end
+		return CosmeticService.equipCaptureEffect(player, id)
 	end
 end
 

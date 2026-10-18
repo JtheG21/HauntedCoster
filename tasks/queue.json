@@ -4201,7 +4201,7 @@
       "id": "TASK-0063",
       "title": "Capture Effects Equipment",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4221,6 +4221,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T13:25:08",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [],
