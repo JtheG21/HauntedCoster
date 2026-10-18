@@ -2,7 +2,9 @@
 id: LES-0009
 title: Rojo Partial Sync
 type: lesson
-status: proposed
+status: approved
+approved_by: jg
+approved_on: 2026-10-18
 category: bug-pattern
 evidence:
   - "2026-10-18 (TASK-0060): after Rojo logged a WebSocket reset and 'Cannot rename instances yet', the published Haunted place showed the current BuildStamp (159a373) while ProfileRules still held Schema = 1, the Persistence scenario was the old version, and the two new ModuleScripts (CosmeticRules, Catalog) existed with empty Source. A plugin reconnect did not repair it. The first write run saved without cosmetics; after a hand sync (lengths checked against disk) write 9/9 and read 4/4 passed."
@@ -29,7 +31,7 @@ Hypothesis, not verified: after the plugin's WebSocket dropped, Rojo applied som
 - Treat `WebSocket error` or `Cannot rename instances yet` in the Rojo log as a reason to re-check before any Play run.
 
 ## Validation
-[[TASK-0060-Monetization-Persistence-Schema]] (implementation record, AC3). Proposed: jg approves before this becomes a rule. A possible tooling follow-up is a per-changed-file length check in `studio-preflight`.
+[[TASK-0060-Monetization-Persistence-Schema]] (implementation record, AC3). Approved by jg on 2026-10-18. A possible tooling follow-up is a per-changed-file length check in `studio-preflight`.
 
 ## Where this applies
 Any Studio Play test or scenario run through Studio MCP, especially right after new files are added or when the Rojo log shows connection errors. See also [[LES-0005-Edit-Mode-Require-Cache]].

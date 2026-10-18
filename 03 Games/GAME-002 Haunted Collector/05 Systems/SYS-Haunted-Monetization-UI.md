@@ -140,8 +140,8 @@ No new API or remote names are approved here. Screen-to-service interfaces must 
 
 ## Data & state
 See Included categories and ownership, Interaction/state baseline, and Delivery dependencies above. Entitlements, equipped selections, placements and rewards must have an approved persistent schema before release.
-- **Implemented (TASK-0060, pending merge):** profile schema 2 stores `cosmetics` (entitlements, per-UID skin/aura, capture effect, mansion theme, reusable capped placements, reward claims) with sanitize, migration and pure rules in `CosmeticRules`; the catalog ships empty. See [[TASK-0060-Monetization-Persistence-Schema]].
-- **Proposed, needs jg approval:** an owned entitlement the current catalog doesn't list is kept, never dropped, so a catalog config gap can't destroy a bought or earned item. Such an ID may fill only one kind of slot, and placements beyond a lowered limit are stored back (the item stays owned). Until jg approves, treat this as draft behaviour, not policy.
+- **Implemented (TASK-0060, merged in #98):** profile schema 2 stores `cosmetics` (entitlements, per-UID skin/aura, capture effect, mansion theme, reusable capped placements, reward claims) with sanitize, migration and pure rules in `CosmeticRules`; the catalog ships empty. See [[TASK-0060-Monetization-Persistence-Schema]].
+- **Approved by jg (2026-10-18):** an owned entitlement the current catalog doesn't list is kept, never dropped, so a catalog config gap can't destroy a bought or earned item. Such an ID may fill only one kind of slot, and placements beyond a lowered limit are stored back (the item stays owned).
 
 ## Trust boundary / security
 The client previews and requests actions; the server validates ownership, compatibility, pricing, placement and grants, with input validation and rate limits. Client prompt completion never establishes entitlement.
@@ -154,3 +154,4 @@ The client previews and requests actions; the server validates ownership, compat
 - 2026-10-13: baseline drafted from discovery and explicit choices in [[ADR-0011-Monetization-UI-Scope]].
 - 2026-10-13: jg approved the presented baseline and its local vault merge in chat. Pricing, product configuration, schema changes, implementation and publishing remain separately gated.
 - 2026-10-18: Data & state records the TASK-0060 schema and one proposed retention policy for jg review. No approved scope changed.
+- 2026-10-18: jg approved the TASK-0060 retention policy (owned IDs the catalog doesn't list are kept; one slot kind each; placements over a lowered limit are stored back).
