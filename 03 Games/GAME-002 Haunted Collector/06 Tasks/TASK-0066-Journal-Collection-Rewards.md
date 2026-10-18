@@ -3,7 +3,7 @@ id: TASK-0066
 title: "Journal Collection Rewards"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -87,3 +87,4 @@ SpiderWoodland and Settlement have no habitat milestone yet. The sample rewards 
 [[AUD-20261018-TASK-0066-01]]: pass (Sonnet). No blocker; the reward mapping needs jg's review and Studio is still owed.
 
 ## Outcome
+The Journal shows six draft collection milestones with progress, Claim and Claimed, and the server grants each reward once (merge approved by jg, 2026-10-18). Sonnet audit passed. Milestones come from the real species, habitat and variant tables; no cosmetic can complete a discovery. Needs jg: review of the milestone list and the reward mapping (two rewards currently grant the same sample). Not verified: Studio (the Journal section, Claim round trip and toast). SpiderWoodland and Settlement have no habitat milestone yet.
