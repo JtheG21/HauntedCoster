@@ -44,6 +44,29 @@ class TestContextBudget(unittest.TestCase):
         self.assertIn("repeated sentences: 1", out)
         self.assertIn("no task with a note found", out)
 
+    def test_sample_prompt_uses_the_checkout_given_as_root(self):
+        # Regression: the orchestrator must come from --root, not from the script's own checkout.
+        root = self.root / "other"
+        (root / "scripts").mkdir(parents=True)
+        (root / "tasks").mkdir()
+        (root / "tasks" / "queue.json").write_text("{}")
+        (root / "scripts" / "orchestrator.py").write_text(
+            "class Project:\n"
+            "    def __init__(self, root):\n"
+            "        self.tasks = [{'id': 'TASK-0001', 'note': 'n.md'}]\n"
+            "    def task(self, tid):\n"
+            "        return self.tasks[0]\n"
+            "    def build_prompt(self, t, role):\n"
+            "        return 'STUB-FROM-ROOT ' + role\n")
+        self.assertEqual(cb.sample_prompt(root, "executor", None), "STUB-FROM-ROOT executor")
+
+    def test_root_without_orchestrator_is_an_error(self):
+        root = self.root / "bare"
+        (root / "tasks").mkdir(parents=True)
+        (root / "tasks" / "queue.json").write_text("{}")
+        with self.assertRaises(FileNotFoundError):
+            cb.sample_prompt(root, "executor", None)
+
     def test_frontmatter_description(self):
         text = "---\nname: x\ndescription: Does a thing when asked.\n---\nBody"
         self.assertEqual(cb.frontmatter_description(text), "Does a thing when asked.")

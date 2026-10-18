@@ -19,6 +19,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import re
 import sys
 from pathlib import Path
@@ -73,10 +74,19 @@ def duplicate_sentences(texts: dict[str, str]) -> tuple[int, int, list[str]]:
     return len(repeated), extra, [s[:90] for s in sample]
 
 
-def sample_prompt(root: Path, role: str, task_id: str | None) -> str | None:
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    import orchestrator  # local import: keeps the measurement independent of queue health
+def load_orchestrator(root: Path):
+    """Load the orchestrator that belongs to the checkout being measured, not the one running this script."""
+    path = root / "scripts" / "orchestrator.py"
+    if not path.is_file():
+        raise FileNotFoundError(f"{path} not found; --root must be a checkout with scripts/orchestrator.py")
+    spec = importlib.util.spec_from_file_location("rg1_root_orchestrator", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
+
+def sample_prompt(root: Path, role: str, task_id: str | None) -> str | None:
+    orchestrator = load_orchestrator(root)
     proj = orchestrator.Project(root)
     tasks = proj.tasks
     if task_id:
@@ -159,7 +169,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--sample", default=None, help="task id for the dispatch prompt sample")
     a = ap.parse_args(argv)
     root = Path(a.root).resolve()
-    sample = sample_prompt(root, a.role, a.sample) if (root / "tasks" / "queue.json").is_file() else None
+    try:
+        sample = sample_prompt(root, a.role, a.sample) if (root / "tasks" / "queue.json").is_file() else None
+    except Exception as e:  # bad --root, unknown --sample or invalid queue: report it, don't guess a prompt
+        print(f"error: {e}", file=sys.stderr)
+        return 2
     print(report(root, a.role, sample))
     return 0
 
