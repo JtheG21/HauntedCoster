@@ -41,8 +41,8 @@ Pure sequence core, client player and one demo sequence per [[ADR-0012-Sequence-
 - `games/haunted/src/shared/Sequence.luau`, `games/haunted/src/client/SequencePlayer.luau`, `games/haunted/tests/Sequence.spec.luau`, `games/haunted/tests/scenarios/SequenceRunner.luau`, a demo sequence data file
 
 ## Acceptance criteria
-- [ ] AC1 Lune spec: cues sort by time; invalid tables rejected with a named reason; cancel at any time yields a complete cleanup plan; same input gives same plan.
-- [ ] AC2 Play scenario (fresh Play session): after the demo finishes or is cancelled, instance and connection counts equal the pre-run baseline and peak particles stay within the stated budget.
+- [x] AC1 Lune spec: cues sort by time; invalid tables rejected with a named reason; cancel at any time yields a complete cleanup plan; same input gives same plan. Evidence: `Sequence.spec.luau`, 7 tests, 147 Lune specs pass.
+- [x] AC2 Play scenario (fresh Play session): after the demo finishes or is cancelled, instance and connection counts equal the pre-run baseline and peak particles stay within the stated budget. Evidence: 2026-10-17 fresh Play session (server data model) in Place1, 16 of 16 checks, peak 1 emitter vs budget 3.
 - [ ] AC3 `evidence.py series --max-transitions 6` passes on a screen take of the demo.
 - [ ] AC4 `scripts/check.sh` green; one audit; no server file changed.
 
@@ -55,6 +55,9 @@ New client module only. Needs a free Studio session (one assistant at a time).
 
 ---
 ## Implementation record
+- Core `shared/Sequence.luau`, `shared/Config/SequenceDemo.luau`, `client/SequencePlayer.luau`, `client/SequenceDemoHandlers.luau`, spec and scenario. `scripts/check.sh` passes.
+- Studio run (2026-10-17): the five modules were loaded into the scratch Place1 from the worktree (not through Rojo; the Haunted place was untouched), then the scenario ran in a fresh Play session. First run failed one check of my own (the aura ends exactly when the burst starts, so they never overlap); the check now counts emitters created. Camera cues are not exercised on the server data model.
+- Open: AC3 needs jg to record a screen take of the demo on a client (camera push and burst), then `evidence.py series --max-transitions 6`. AC4 audit not run yet.
 
 ## Audits
 

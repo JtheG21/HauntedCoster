@@ -41,6 +41,12 @@ return function(_args: any): { [string]: any }
 		local baseDesc = counts()
 		local peak = 0
 		local doneCalls = 0
+		local created: { [string]: boolean } = {}
+		local added = anchor.DescendantAdded:Connect(function(d)
+			if d:IsA("ParticleEmitter") then
+				created[d.Name] = true
+			end
+		end)
 		local player = SequencePlayer.new(Demo, Handlers.make(anchor), function()
 			doneCalls += 1
 		end)
@@ -55,17 +61,21 @@ return function(_args: any): { [string]: any }
 			end
 		end
 		task.wait() -- let the spawned onDone run
+		added:Disconnect()
 		local desc, emitters = counts()
 		check(`{label}: descendants back to baseline`, desc == baseDesc, `{desc} vs {baseDesc}`)
 		check(`{label}: no emitters left`, emitters == 0, emitters)
 		check(`{label}: peak emitters within budget`, peak <= EMITTER_BUDGET, `peak {peak}, budget {EMITTER_BUDGET}`)
 		check(`{label}: clock disconnected`, player.conn == nil)
 		check(`{label}: onDone called once`, doneCalls == 1, doneCalls)
-		return peak
+		return created
 	end
 
-	local fullPeak = run("full run", nil)
-	check("full run reached the burst", fullPeak >= 2, fullPeak)
+	local created = run("full run", nil)
+	check(
+		"full run created aura and burst emitters",
+		created.SeqEmitter_aura == true and created.SeqEmitter_burst == true
+	)
 	run("cancel mid-aura", 1.5)
 	run("cancel during burst", 3.4)
 	anchor:Destroy()
