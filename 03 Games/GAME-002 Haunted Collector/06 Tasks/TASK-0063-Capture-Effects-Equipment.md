@@ -3,7 +3,7 @@ id: TASK-0063
 title: "Capture Effects Equipment"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -74,3 +74,4 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 193,292, at close 208,028
 [[AUD-20261018-TASK-0063-01]]: pass (Sonnet). Nits only; Studio still owed.
 
 ## Outcome
+One capture effect can be equipped and removed, with a local preview, and plays for the capturing player after every capture rule has run (merge approved by jg, 2026-10-18). Sonnet audit passed. Not verified: Studio (the burst, the Equip/Preview UI, a real capture with the effect equipped). The sample `FxSparks` is a particle burst and cannot be owned until a grant path exists (TASK-0066/0067).
