@@ -103,6 +103,25 @@ class TestWorkflow(Base):
         self.assertEqual(self.proj().task("TASK-0001")["status"], "done")
         self.assertEqual([t["id"] for t in self.proj().ready()], [])
 
+    def test_light_tier_skips_audit(self):
+        t = task("TASK-0001")
+        t["tier"] = "light"
+        self.write_queue([t])
+        p = self.proj()
+        p.approve("TASK-0001", "jg")
+        p.start("TASK-0001")
+        p.record_exec("TASK-0001", "pass", "checks ok")
+        self.assertEqual(p.task("TASK-0001")["status"], "approved")
+        p.approve_merge("TASK-0001", "jg")
+        self.assertEqual(p.task("TASK-0001")["status"], "done")
+
+    def test_non_light_still_needs_audit(self):
+        p = self.proj()
+        p.approve("TASK-0001", "jg")
+        p.start("TASK-0001")
+        p.record_exec("TASK-0001", "pass", "checks ok")
+        self.assertEqual(p.task("TASK-0001")["status"], "in_review")
+
     def test_revision_limit_blocks(self):
         p = self.proj()
         p.approve("TASK-0001", "jg")

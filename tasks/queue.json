@@ -3626,7 +3626,7 @@
       "id": "TASK-0059",
       "title": "ExhibitRules Corrupt Tier Guard",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "done",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0059-ExhibitRules-Corrupt-Tier-Guard",
@@ -3654,6 +3654,18 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T02:10:00",
+          "from": "in_review",
+          "to": "approved",
+          "note": "Light tier: no audit; one-off migration by jg's decision (orchestrator light path)"
+        },
+        {
+          "time": "2026-10-18T01:51:58",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -3665,7 +3677,9 @@
       ],
       "audits": [],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "tier": "light",
+      "merge_approved_by": "jg"
     }
   ]
 }

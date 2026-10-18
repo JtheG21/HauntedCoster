@@ -3,7 +3,7 @@ id: TASK-0059
 title: "ExhibitRules Corrupt Tier Guard"
 type: task
 project: GAME-002
-status: in_review
+status: done
 priority: low
 risk: low
 owner: executor
