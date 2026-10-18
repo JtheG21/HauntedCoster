@@ -22,76 +22,47 @@ local C = {
 	eye = Color3.fromRGB(255, 40, 40),
 }
 
-local function webSheet(parent: Instance, a: Vector3, b: Vector3, height: number)
+local function webSheet(parent: Instance, a: Vector3, b: Vector3, height: number, bottom: number?)
 	local mid = (a + b) / 2
-	local len = Vector3.new(b.X - a.X, 0, b.Z - a.Z).Magnitude
+	local d = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+	local len = d.Magnitude
 	if len < 1 then
 		return
 	end
-	Build.part({
-		name = "Web",
-		size = Vector3.new(len, height, 0.1),
-		cframe = CFrame.lookAt(Vector3.new(mid.X, height / 2 + 3, mid.Z), Vector3.new(b.X, height / 2 + 3, b.Z))
-			* CFrame.Angles(0, math.rad(90), 0),
-		color = C.web,
-		material = Enum.Material.Fabric,
-		transparency = 0.55,
-		collide = false,
-		parent = parent,
-	})
+	-- Art (TASK-0044): a torn radial web stretched across the gap; non-colliding as before.
+	Build.artSlot(
+		parent,
+		"web_sheet",
+		CFrame.fromMatrix(Vector3.new(mid.X, height / 2 + (bottom or 3), mid.Z), d.Unit, Vector3.yAxis),
+		{ ArtStretchX = len / 8, ArtStretchY = height / 6 }
+	)
 end
 
 local function cocoon(parent: Instance, x: number, z: number, size: number, hang: number?)
-	-- Cylinder parts extend along X: stand it upright.
-	Build.part({
-		name = "Cocoon",
-		size = Vector3.new(size * 1.8, size, size),
-		cframe = CFrame.new(x, (hang or 0) + size * 0.9, z) * CFrame.Angles(0, 0, math.rad(90)),
-		color = C.cocoon,
-		material = Enum.Material.Fabric,
-		shape = Enum.PartType.Cylinder,
-		collide = false,
-		parent = parent,
-	})
+	Build.artSlot(parent, "cocoon", CFrame.new(x, hang or 0, z), { ArtScale = size })
 end
 
--- A giant dead tree: thick trunk, four splayed limbs with webs strung between them, red eyes in the hollow.
+-- A giant dead tree (art TASK-0045, `landmark_broodtree`): a pale silk-whitened trunk with four limbs drooping
+-- along the diagonals, torn webs strung between the limb tips, red eyes in the hollow and cocoons hanging below.
 local function broodTree(parent: Instance, pos: Vector3): BasePart
-	local trunk = Build.block(parent, "Trunk", Vector3.new(7, 30, 7), pos.X, 0, pos.Z, C.bark, Enum.Material.Wood)
+	local trunk = Build.collider(parent, "Trunk", Vector3.new(7, 30, 7), CFrame.new(pos.X, 15, pos.Z))
+	Build.artSlot(parent, "landmark_broodtree", CFrame.new(pos.X, 0, pos.Z) * CFrame.Angles(0, math.pi, 0))
+	trunk:SetAttribute("LabelHeight", 21) -- the anchor sits at 15; the art tops out at 33
 	local tips: { Vector3 } = {}
 	for i = 0, 3 do
 		local a = math.rad(i * 90 + 45)
 		local cf = CFrame.new(pos.X, 24, pos.Z) * CFrame.Angles(0, a, 0) * CFrame.Angles(math.rad(-30), 0, 0)
-		Build.part({
-			name = "Limb",
-			size = Vector3.new(2, 2, 18),
-			cframe = cf * CFrame.new(0, 0, -9),
-			color = C.bark,
-			material = Enum.Material.Wood,
-			collide = false,
-			parent = parent,
-		})
 		table.insert(tips, (cf * CFrame.new(0, 0, -17)).Position)
 	end
 	for i = 1, 4 do
 		local a, b = tips[i], tips[i % 4 + 1]
-		Build.part({
-			name = "CanopyWeb",
-			size = Vector3.new((b - a).Magnitude, 10, 0.1),
-			cframe = CFrame.lookAt((a + b) / 2 - Vector3.new(0, 4, 0), b - Vector3.new(0, 4, 0))
-				* CFrame.Angles(0, math.rad(90), 0),
-			color = C.web,
-			material = Enum.Material.Fabric,
-			transparency = 0.5,
-			collide = false,
-			parent = parent,
-		})
+		webSheet(parent, a, b, 10, a.Y - 9) -- hung from the drooping tips
 	end
 	for _, dx in { -1.2, 1.2 } do
 		Build.part({
 			name = "Eye",
 			size = Vector3.new(0.6, 0.6, 0.2),
-			cframe = CFrame.new(pos.X + dx, 6, pos.Z + 3.6),
+			cframe = CFrame.new(pos.X + dx * 0.8, 6, pos.Z + 2.9),
 			color = C.eye,
 			material = Enum.Material.Neon,
 			collide = false,
@@ -105,9 +76,10 @@ local function broodTree(parent: Instance, pos: Vector3): BasePart
 	return trunk
 end
 
--- A gnarled stump with a heap of cocoons round it (the anchor is the stump).
+-- A broken stump with a heap of cocoons round it (the anchor is the stump).
 local function cocoonCluster(parent: Instance, pos: Vector3): BasePart
-	local stump = Build.block(parent, "Stump", Vector3.new(4, 6, 4), pos.X, 0, pos.Z, C.bark, Enum.Material.Wood)
+	local stump = Build.collider(parent, "Stump", Vector3.new(4, 6, 4), CFrame.new(pos.X, 3, pos.Z))
+	Build.artSlot(parent, "stump_broken", CFrame.new(pos.X, 0, pos.Z))
 	local spots = { { 4, 1, 2.2 }, { -3.5, 2.5, 2.6 }, { 1, -4, 1.8 }, { -2, -3.5, 2.4 }, { 3.5, -2, 1.6 } }
 	for _, s in spots do
 		cocoon(parent, pos.X + s[1], pos.Z + s[2], s[3])

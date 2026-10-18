@@ -143,17 +143,23 @@ function Cemetery.build(def: Habitats.Habitat): Result
 		local cryptFolder = Build.folder(model, "Crypt")
 		cryptGate = Props.crypt(cryptFolder, crypt.rect, crypt.gateSide, crypt.gateAt, crypt.gateWidth)
 		local gate = cryptGate :: BasePart
-		local sign = Build.block(
-			cryptFolder,
-			"CryptSign",
-			Vector3.new(0.4, 3, 6),
-			gate.Position.X + 2,
-			0,
-			gate.Position.Z + crypt.gateWidth / 2 + 4,
-			C.wood,
-			Enum.Material.Wood
-		)
-		Build.billboard(sign, "Restored Manor owners only", Color3.fromRGB(255, 220, 160), 3, 60, 1.1)
+		-- A hanging wooden sign by the gate (art TASK-0045, `sign_hanging`) lettered on both faces.
+		local at = CFrame.new(gate.Position.X + 2.5, 0, gate.Position.Z + crypt.gateWidth / 2 + 4)
+			* CFrame.Angles(0, math.rad(-90), 0)
+		Build.collider(cryptFolder, "CryptSignPost", Vector3.new(0.4, 5.4, 0.4), at * CFrame.new(0, 2.7, 0))
+		Build.artSlot(cryptFolder, "sign_hanging", at)
+		local board = Build.part({
+			name = "CryptSign",
+			size = Vector3.new(3.4, 1.4, 0.26), -- clear of the warped art board
+			cframe = at * CFrame.new(-2.1, 3.4, 0),
+			transparency = 1,
+			collide = false,
+			parent = cryptFolder,
+		})
+		board.CanQuery = false
+		for _, face in { Enum.NormalId.Front, Enum.NormalId.Back } do
+			Build.lettering(board, face, "Restored Manor owners only")
+		end
 	end
 
 	-- Decorative mausoleums in Old Rows and the Hollow

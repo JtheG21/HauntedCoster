@@ -5,8 +5,8 @@
 
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
@@ -102,13 +102,26 @@ end
 local homeLabel: TextLabel? = nil
 local homeIndex: number? = nil
 
--- Opens or closes a named gate anywhere in the active habitat, for this client only.
+-- Opens or closes a named gate anywhere in the active habitat, for this client only: the invisible collider
+-- stops colliding and its art leaves (anchors with GateRest and Swing, Props.crypt) swing about their hinges.
 local function setGate(name: string, open: boolean)
 	local habitat = Workspace:FindFirstChild("Habitat")
 	local gate = habitat and habitat:FindFirstChild(name, true)
-	if gate and gate:IsA("BasePart") then
-		gate.CanCollide = not open
-		gate.Transparency = if open then 0.85 else 0.25
+	if not (gate and gate:IsA("BasePart")) or gate:GetAttribute("LocalOpen") == open then
+		return
+	end
+	gate:SetAttribute("LocalOpen", open)
+	gate.CanCollide = not open
+	local label = gate:FindFirstChild("Label")
+	if label and label:IsA("BillboardGui") then
+		label.Enabled = not open
+	end
+	for _, leaf in gate:GetChildren() do
+		local rest, swing = leaf:GetAttribute("GateRest"), leaf:GetAttribute("Swing")
+		if leaf:IsA("BasePart") and typeof(rest) == "CFrame" and type(swing) == "number" then
+			local goal = if open then rest * CFrame.Angles(0, math.rad(swing), 0) else rest
+			TweenService:Create(leaf, TweenInfo.new(1.4, Enum.EasingStyle.Sine), { CFrame = goal }):Play()
+		end
 	end
 end
 
@@ -242,6 +255,10 @@ function LocalWorld.start()
 		local folder = Workspace:WaitForChild("Habitat")
 		folder.DescendantAdded:Connect(function(d)
 			if d.Name == "CryptGate" then
+				updateMarkers()
+			elseif d.Name == "GateLeaf" and d.Parent and d.Parent.Name == "CryptGate" then
+				-- A leaf that streams in after its gate: re-apply the gate's state to every leaf.
+				(d.Parent :: Instance):SetAttribute("LocalOpen", nil)
 				updateMarkers()
 			end
 		end)
