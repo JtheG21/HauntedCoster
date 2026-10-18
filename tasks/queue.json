@@ -3366,7 +3366,7 @@
       "id": "TASK-0056",
       "title": "Studio Test Pads",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0056-Studio-Test-Pads",
@@ -3401,6 +3401,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-17T21:06:56",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -3419,13 +3425,13 @@
       ],
       "revisions": 0,
       "approved_by": "jg",
-      "merge_approved_by": null
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0055",
       "title": "Rare Capture Hookup",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0054"
@@ -3462,6 +3468,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-17T21:07:06",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -3480,7 +3492,7 @@
       ],
       "revisions": 0,
       "approved_by": "jg",
-      "merge_approved_by": null
+      "merge_approved_by": "jg"
     }
   ]
 }

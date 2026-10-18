@@ -3,7 +3,7 @@ id: TASK-0055
 title: "Rare Capture Hookup"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: low
 risk: medium
 owner: executor
