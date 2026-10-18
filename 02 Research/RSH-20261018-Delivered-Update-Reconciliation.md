@@ -33,7 +33,7 @@ jg reports old wisps, tree issues and z-fighting in a playtest on 2026-10-18. Wh
 | Old overhaul UI/cosmetics | `a5f0aaa`, `199a82b`, `197c153`, `1e9ee4f` excluded deliberately by TASK-0069. Main uses replacement TASK-0060–0067 code. | Not accidental omissions. Wholesale restoration would overwrite newer state/UI and variant rules. |
 | New verification fixes | TASK-0070–0085 on the Codex review branch are proposed only. | These are findings/plans, not already-implemented fixes. |
 
-Studio read-only verification in Edit: **151/151 script lengths/hashes match main**; stamp `494be30 2026-10-18T21:25:38Z`. This rules out those script sources being stale at inspection time, not stale mesh content or problems in another saved place. No Play session or source change performed in this investigation.
+Studio read-only verification in Edit: **151/151 script lengths/hashes match main**; stamp `494be30 2026-10-18T21:25:38Z`. This rules out those script sources being stale at inspection time, not stale mesh content or problems in another saved place. This initial read-only check was followed by the isolated Play diagnostic in [[TEST-20261018-02]]; original source was restored afterward.
 
 ## Corrections to earlier records
 The initial handoff/source review repeated the historical statement that TASK-0044's revision was not completed. Commit `3ddc2e6` proves several code corrections did land. Historical audit records are preserved; this note supersedes that interpretation. TASK-0076 remains useful for current reproduction and missing evidence, not blanket reapplication of all old findings.
@@ -41,7 +41,7 @@ The initial handoff/source review repeated the historical statement that TASK-00
 ## Recommendation
 Recover the final accepted Wisp asset and its minimal runtime dependencies selectively. Preserve main's CosmeticLooks, SkinId/AuraId protocol, rare-variant restrictions and pinned-type casts; the old Creatures module is not a drop-in replacement. Do not merge the full Wisp branch, because its ancestry includes the deliberately excluded backend/UI overhaul. Proposed scope: [[TASK-0086-Accepted-Wisp-Revision-Recovery]].
 
-Reproduce z-fighting/tree issues at jg's reported locations before deciding on geometry edits. jg was asked which area/place was tested; response pending at recording time. Use [[TASK-0076-Environment-Revision-Remediation]] for confirmed current defects, keeping proposed status until approved.
+Reproduce z-fighting/tree issues at jg's reported locations before deciding on geometry edits. jg confirmed the connected Studio place and ground beside the plots. Follow-up runtime evidence: [[TEST-20261018-02]]. Eight faced Woodland trees rendered; a pupil tracked a moved player and gaze freeze responded. Visible terrain beside every plot is only 0.093748 studs above the still-visible World.Ground plane; this is a plausible flicker source, not a proven visual root cause. Use [[TASK-0076-Environment-Revision-Remediation]] for confirmed current defects, keeping proposed status until approved.
 
 ## Limits
 This is a targeted inventory of the preserved game/art branches, not proof that every historical chat request was delivered. Branch notes and prior approvals are evidence to verify, not a substitute for current human gates. No production code, model, saved place or task approval changed.

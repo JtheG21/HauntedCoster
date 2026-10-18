@@ -52,6 +52,9 @@ Resolve the uncompleted TASK-0044 revision against current merged code. **Propos
 ## Source reconciliation (2026-10-18)
 Commit `3ddc2e6` is already in main and contains several historical code corrections. The earlier handoff interpretation was inaccurate; reproduce current issues, do not blindly reapply that commit. Tree source/config/data match the preserved Wisp branch. See [[RSH-20261018-Delivered-Update-Reconciliation]].
 
+## Runtime diagnostic (2026-10-18)
+[[TEST-20261018-02]] confirms faced trees render and sampled eye tracking/gaze freeze work in Woodland. Beside all six plots, terrain raycasts hit y=0.093748 above visible World.Ground top y=0. Investigate this near-overlap with a controlled rendering A/B test before changing geometry; preserve walk/collision heights. No fix implemented.
+
 ## Risks / notes
 Networking/persistence/economy requires the project-mandated strong independent audit after automated and Studio checks; no schema migration is approved here.
 

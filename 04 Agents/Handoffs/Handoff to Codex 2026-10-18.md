@@ -121,3 +121,5 @@ Files changed, checks run and their output, the evidence for each acceptance cri
 
 ## Reported stale updates: source reconciliation (2026-10-18)
 [[RSH-20261018-Delivered-Update-Reconciliation]] identifies the accepted Wisp revision and imported-mesh dependency chain as missing from main; [[TASK-0086-Accepted-Wisp-Revision-Recovery]] is proposed, not started. The original z-fighting commit and environment revision `3ddc2e6` are already ancestors of main; the earlier claim that no environment revision was done was inaccurate about the code. Current tree source/data match the preserved revision branch; z-fighting/tree symptoms still need location-specific reproduction. Art tooling and unfinished placeholder audio also remain on side branches. Old overhaul UI/backend exclusions were deliberate. No production fixes or branch merges performed.
+
+Follow-up location supplied by jg: connected Studio, ground beside plots and the player-facing haunted tree. [[TEST-20261018-02]]: sampled tree behavior is present/working in Woodland; competing near-height terrain/ground layers identified, flicker root cause still unproven. Memory-only diagnostic restored/cleaned up.
