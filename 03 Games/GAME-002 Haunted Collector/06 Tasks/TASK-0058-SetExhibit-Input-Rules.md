@@ -3,7 +3,7 @@ id: TASK-0058
 title: "SetExhibit Input Rules"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: low
 risk: low
 owner: executor
@@ -62,3 +62,4 @@ Behaviour must not change: compare refusal text and order against the current fu
 [[AUD-20261018-TASK-0058-01]]: pass (Sonnet, Standard tier; classification confirmed by jg 2026-10-18).
 
 ## Outcome
+Merged with jg's approval (2026-10-18). Behaviour-preserving extraction; refusal text and order unchanged, covered by 6 headless tests (172 specs) and FullLoop 85/85, ExploitProbe 13/13. Follow-up (optional, nit): `HouseTiers[houseTier + 1]` still errors on a corrupt tier. Measurement: Standard audit on Sonnet 22,821 tokens; executor tokens unavailable.
