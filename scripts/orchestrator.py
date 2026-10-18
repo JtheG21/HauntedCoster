@@ -302,6 +302,17 @@ class Project:
             f"Follow '04 Agents/{role.capitalize()}.md' exactly. Read CLAUDE.md and '{note}'.",
             "Read only the files listed in the spec unless blocked; do not scan the whole repo.",
         ]
+        # Scope comes from fields the queue and note already hold; nothing new is stored.
+        criteria = t.get("acceptance_criteria") or []
+        if isinstance(criteria, str):
+            criteria = [criteria]
+        if criteria:
+            lines.append("Acceptance criteria (done means all hold):")
+            lines += [f"- {c}" for c in criteria]
+        files, _studio = files_expected(self, t)
+        if files:
+            lines.append("Files expected to change (touch others only if a finding requires it, and say so):")
+            lines += [f"- {f}" for f in sorted(files)]
         if role == "executor":
             lines.append(f"Work on branch {t.get('branch', 'task/' + t['id'])}. Run scripts/check.sh before finishing.")
         if role == "auditor":

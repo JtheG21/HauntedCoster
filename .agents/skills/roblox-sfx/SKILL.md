@@ -128,7 +128,7 @@ An example spec is in `examples/spec.example.json`; copy it and edit the roles.
 ## Run it
 
 ```bash
-cd .Codex/skills/roblox-sfx   # project-local install (Rg1); upstream path was ~/.Codex/skills/roblox-sfx
+cd .claude/skills/roblox-sfx   # project-local install (Rg1); upstream path was ~/.claude/skills/roblox-sfx
 python scripts/find_sfx.py spec examples/spec.example.json --out work/candidates.json --per-role 5
 python scripts/emit_probe.py work/candidates.json --out work
 # execute_luau work/probe.lua      -> "created N sounds across M roles"
