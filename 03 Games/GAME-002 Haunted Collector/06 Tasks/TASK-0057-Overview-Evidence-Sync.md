@@ -3,7 +3,7 @@ id: TASK-0057
 title: "Overview Evidence Sync"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: low
 risk: low
 owner: executor
@@ -57,6 +57,6 @@ Never invent evidence: any claim must link a task note, TEST note or command out
 - **Measurement (first Light task under the new tiering), honest limits:** done in the long session that drafted the tiering, on Sonnet 5.5, not in a fresh low-effort session; effort level not recorded. No token figure was available to this session, so none was logged (never estimated). No audit subagent ran (Light tier). One avoided misstep: a first edit script failed on a wrong `updated:` value before writing, so nothing was half-applied; the earlier worktree add also collided on a case-insensitive path. Not enough to claim any saving.
 
 ## Audits
-*(none: Light tier)*
+[[AUD-20261018-TASK-0057-01]]: pass (Sonnet, requested by jg; 27,723 tokens)
 
 ## Outcome
