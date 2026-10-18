@@ -3,7 +3,7 @@ id: TASK-0069
 title: "Art Salvage From Overhaul Branch"
 type: task
 project: GAME-002
-status: proposed
+status: in_progress
 priority: high
 risk: high
 owner: executor

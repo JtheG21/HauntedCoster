@@ -4052,7 +4052,7 @@
       "id": "TASK-0069",
       "title": "Art Salvage From Overhaul Branch",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "in_progress",
       "risk": "high",
       "depends_on": [],
       "branch": "task/TASK-0069-Art-Salvage-From-Overhaul-Branch",
@@ -4065,10 +4065,24 @@
         "3D Model Quality Baseline compared and reference IDs recorded in the task note; jg reviews the visuals before merge.",
         "One Opus audit (large port, server-baked art data, load-time cost)."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-18T12:57:16",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T12:57:16",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     }
   ]
 }
