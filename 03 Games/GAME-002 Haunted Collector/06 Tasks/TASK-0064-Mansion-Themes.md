@@ -7,7 +7,7 @@ status: ready
 priority: medium
 risk: medium
 owner: executor
-depends_on: [TASK-0060, TASK-0061]
+depends_on: [TASK-0060, TASK-0061, TASK-0069]
 branch: task/TASK-0064-Mansion-Themes
 related:
   - "[[Task Intake]]"
