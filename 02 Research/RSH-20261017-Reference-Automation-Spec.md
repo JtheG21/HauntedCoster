@@ -360,6 +360,8 @@ Each section: **Offers** (what the note actually supports), **Enters the workflo
 | 2 Skills | X3 and X3s (`reference-review`), X4 (`reference-brief`), EX-1, plus `.agents` copies | G0 | Each skill used once on a real item and noted in the Catalog as `implemented` |
 | 3 Experiments | One per note jg selects, each a TASK on its own branch | Per task; G2 for installs, accounts, downloads | Result appended to the REF note and Catalog, including failures |
 
+**Status 2026-10-17 (latest):** sequence runner done (TASK-0053, ADR-0012, merged). Still open: Studio test pads (X11), TEST-note drafter, skill-lint description budget, Roqer technique card.
+
 **Status 2026-10-17 (later):** all 19 reviews are done and merged. Built after them from the decisions: the pack-leak guard, `refs.py actions`, `evidence.py matrix` and `silhouette`, and the `series --max-transitions` gate. Still open: Studio test pads (X11), TEST-note drafter, sequence runner (needs a TASK and ADR), skill-lint description budget.
 
 **Status 2026-10-17:** Phase 0 (#68) and Phase 1 (#69) are merged, apart from X11. Phase 2 is built on `chore/reference-skills`: X3 (`review-next`, `decide`), X3s (`reference-review`), X4 (`reference-brief`) and EX-1 (`skill_lint.py`). (Original note: Phase 0 was in PR #68.) Phase 1 is built except X11 (Studio test pads, which need Studio runs) on `chore/reference-evidence`: X5 (`pin`, `drift`), X6 (`evidence.py`), X7 (`ledger`), X8 (`rights`), OR-1 (`cycles`) and OR-3 (`next --parallel-safe`).
