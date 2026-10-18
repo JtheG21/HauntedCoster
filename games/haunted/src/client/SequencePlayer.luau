@@ -47,7 +47,10 @@ local function apply(self: Player, actions: { Sequence.Action })
 			local undo = self.undo[a.cue.id]
 			self.undo[a.cue.id] = nil
 			if undo then
-				pcall(undo)
+				local ok, err = pcall(undo :: any)
+				if not ok then
+					warn(`SequencePlayer: cleanup of cue {a.cue.id} failed: {err}`)
+				end
 			end
 		end
 	end

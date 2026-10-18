@@ -9,7 +9,7 @@ local SequencePlayer = require(script.Parent.SequencePlayer)
 
 local SequenceDemoHandlers = {}
 
--- anchor: the part effects attach to. Returns handlers plus the emitter count seen at peak.
+-- anchor: the part effects attach to.
 function SequenceDemoHandlers.make(anchor: BasePart): SequencePlayer.Handlers
 	return {
 		camera = function(cue)
