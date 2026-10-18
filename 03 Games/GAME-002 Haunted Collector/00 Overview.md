@@ -5,13 +5,13 @@ type: overview
 project: GAME-002
 status: in_progress
 created: 2026-10-11
-updated: 2026-10-13
+updated: 2026-10-18
 tags:
   - game/overview
 ---
 # GAME-002: Haunted Collector (working title)
 
-**Phase:** M1 (playable MVP loop) and M3 (world retrofit) are complete ([[RETRO-M1-Playable-MVP-Loop]], [[RETRO-M3-World-Retrofit]]). M2 is complete except the physical controller and touch checks: [[TASK-0020-Physical-Device-Checks]] is archived (deferred by jg) and returns as a new task. **This is the studio's primary game** (user, 2026-10-11); GAME-001 is source material. **Audit remediation (2026-10-12):** T1–T5 are done ([[TASK-0034-Post-Merge-Verification]] to [[TASK-0038-Encounter-Review-Capture-Guards]]). **Latest evidence:** specs 125/0 (`scripts/check.sh`, 2026-10-12); on the merged code FullLoop 85/85, ExploitProbe 13/13, CarryGuard 21/21, Retaliation 36/36, HabitatRotation 28/28, HabitatSwap 35/35, Reachability 28/23/23/23 ([[TEST-20261012-12]], [[TEST-20261012-16]]); CrossPlot (2 players) 22/22 in 3 of 3 valid runs ([[TEST-20261012-13]]). Real saving is proven in jg's private place ([[TEST-20261012-10]]); live load failures go readonly, never memory ([[TEST-20261012-14]]). Max Players is 6, one per plot ([[TEST-20261012-15]]). **Not yet verified:** physical devices (deferred to near the end), a 6-player session (Studio tests use at most 2 players for now; 2-player baseline in [[TEST-20261012-17]]), audio and VFX (none yet). Art is accepted for now; a full revamp is expected later. **Next:** the remaining audit items ([[GAME-002 Haunted Collector/03 Roadmap]]). **Code:** `games/haunted/` with `haunted.project.json`, synced to a separate place ([[ADR-0005-Haunted-Collector-Direction]]). **Task status:** `tasks/queue.json`
+**Phase:** M1 (playable MVP loop) and M3 (world retrofit) are complete ([[RETRO-M1-Playable-MVP-Loop]], [[RETRO-M3-World-Retrofit]]). M2 is complete except the physical controller and touch checks: [[TASK-0020-Physical-Device-Checks]] is archived (deferred by jg) and returns as a new task. **This is the studio's primary game** (user, 2026-10-11); GAME-001 is source material. **Audit remediation (2026-10-12):** T1–T5 are done ([[TASK-0034-Post-Merge-Verification]] to [[TASK-0038-Encounter-Review-Capture-Guards]]). **Latest evidence:** specs 166/0 (`scripts/check.sh`, 2026-10-18); the scenario results below are from 2026-10-12; on the merged code FullLoop 85/85, ExploitProbe 13/13, CarryGuard 21/21, Retaliation 36/36, HabitatRotation 28/28, HabitatSwap 35/35, Reachability 28/23/23/23 ([[TEST-20261012-12]], [[TEST-20261012-16]]); CrossPlot (2 players) 22/22 in 3 of 3 valid runs ([[TEST-20261012-13]]). Real saving is proven in jg's private place ([[TEST-20261012-10]]); live load failures go readonly, never memory ([[TEST-20261012-14]]). Max Players is 6, one per plot ([[TEST-20261012-15]]). **Not yet verified:** physical devices (deferred to near the end), a 6-player session (Studio tests use at most 2 players for now; 2-player baseline in [[TEST-20261012-17]]), audio and VFX (none yet). Art is accepted for now; a full revamp is expected later. **Next:** the Monetization UI baseline (implementation tasks not yet queued; see Documents) and the remaining audit items ([[GAME-002 Haunted Collector/03 Roadmap]]). Before the Rare capture finisher ships, the rights of the VFX Studio plugin assets need checking ([[TASK-0054-Rare-Capture-Finisher]]). **Code:** `games/haunted/` with `haunted.project.json`, synced to a separate place ([[ADR-0005-Haunted-Collector-Direction]]). **Task status:** `tasks/queue.json`
 
 Hook (Round 20): **"Build your haunted train."** Pitch: hunt strange creatures in a dark graveyard, risk the trip home, and turn your collection into a rideable haunted train attraction you design yourself.
 
@@ -57,6 +57,10 @@ Statuses are copied from `tasks/queue.json` (authoritative); `validate_vault.py`
 | [[TASK-0038-Encounter-Review-Capture-Guards]] | done (EncounterService review; capture-start guards as a pure rule) | [[AUD-20261012-TASK-0038-01]] pass |
 | [[TASK-0039-Drop-Parked-Seat-Check]] | done (forced-parked-seat check dropped; decisions recorded) | [[AUD-20261012-TASK-0039-01]] pass |
 | [[TASK-0041-Interactive-Haunted-Trees]] | done (Woodland haunted trees: global gaze freeze; [[TEST-20261013-01]] 28/28 two-player) | [[AUD-20261013-TASK-0041-01]] pass with notes; [[AUD-20261013-TASK-0041-02]] delta pass |
+| [[TASK-0053-Sequence-Runner]] | done (pure sequence core, client player and demo; AC3 waived by jg) | [[AUD-20261017-TASK-0053-01]] pass |
+| [[TASK-0054-Rare-Capture-Finisher]] | done (Rare finisher sequence with orbiting orb; plugin asset rights unverified) | [[AUD-20261017-TASK-0054-01]] pass |
+| [[TASK-0055-Rare-Capture-Hookup]] | done (a Rare capture fires the finisher to that player and extends the carry timer; checked in the real place) | [[AUD-20261017-TASK-0055-01]] pass |
+| [[TASK-0056-Studio-Test-Pads]] | done (UI, VFX and surface test pads with a Play scenario; [[Studio Test Pads]]) | [[AUD-20261017-TASK-0056-01]] pass |
 
 ## How to playtest (Studio)
 1. `rojo build haunted.project.json -o HauntedCollector.rbxl`, then open it in Studio (or `rojo serve haunted.project.json` into a new empty place). **Never sync it into the Rg1/place1 place.**
