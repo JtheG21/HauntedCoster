@@ -3,7 +3,7 @@ id: TASK-0053
 title: "Sequence Runner"
 type: task
 project: GAME-002
-status: proposed
+status: done
 priority: low
 risk: medium
 owner: executor
@@ -41,9 +41,9 @@ Pure sequence core, client player and one demo sequence per [[ADR-0012-Sequence-
 - `games/haunted/src/shared/Sequence.luau`, `games/haunted/src/client/SequencePlayer.luau`, `games/haunted/tests/Sequence.spec.luau`, `games/haunted/tests/scenarios/SequenceRunner.luau`, a demo sequence data file
 
 ## Acceptance criteria
-- [ ] AC1 Lune spec: cues sort by time; invalid tables rejected with a named reason; cancel at any time yields a complete cleanup plan; same input gives same plan.
-- [ ] AC2 Play scenario (fresh Play session): after the demo finishes or is cancelled, instance and connection counts equal the pre-run baseline and peak particles stay within the stated budget.
-- [ ] AC3 `evidence.py series --max-transitions 6` passes on a screen take of the demo.
+- [x] AC1 Lune spec: cues sort by time; invalid tables rejected with a named reason; cancel at any time yields a complete cleanup plan; same input gives same plan. Evidence: `Sequence.spec.luau`, 7 tests, 147 Lune specs pass.
+- [x] AC2 Play scenario (fresh Play session): after the demo finishes or is cancelled, instance counts equal the pre-run baseline, the clock connection is released (step path) and peak particles stay within the stated budget. Evidence: 2026-10-17 fresh Play session (server data model) in Place1, 16 of 16 checks, peak 1 emitter vs budget 3.
+- [ ] AC3 `evidence.py series --max-transitions 6` passes on a screen take of the demo. **Waived by jg, 2026-10-17, not proven:** the demo's only fast moment is a 0.4 s FOV pulse (no luminance flash), which a 30 fps whole-frame check cannot judge. Two takes were recorded and neither showed the demo (static scene; wrong window), so their PASS results are not evidence. A client Play session printed `DEMO: start` and `DEMO: done` with no errors.
 - [ ] AC4 `scripts/check.sh` green; one audit; no server file changed.
 
 ## Tests
@@ -55,7 +55,11 @@ New client module only. Needs a free Studio session (one assistant at a time).
 
 ---
 ## Implementation record
+- Core `shared/Sequence.luau`, `shared/Config/SequenceDemo.luau`, `client/SequencePlayer.luau`, `client/SequenceDemoHandlers.luau`, spec and scenario. `scripts/check.sh` passes.
+- Studio run (2026-10-17): the five modules were loaded into the scratch Place1 from the worktree (not through Rojo; the Haunted place was untouched), then the scenario ran in a fresh Play session. First run failed one check of my own (the aura ends exactly when the burst starts, so they never overlap); the check now counts emitters created. Camera cues are not exercised on the server data model.
+- AC3 waived by jg (see above). AC4: audit next.
 
 ## Audits
+- Audit 2026-10-17 (auditor, Opus): **pass**. Fixed: undo errors now warn, stale comment, AC2 wording (the scenario drives `step()`, so the Heartbeat `play()` path is untested). Deferred (nothing uses them yet): `knownMarkers` not passed on the runtime path; burst emitter destroyed at stop can clip particles in flight; `duration` re-validates; `def.id`/`params` type checks.
 
 ## Outcome

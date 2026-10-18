@@ -3234,7 +3234,7 @@
       "id": "TASK-0053",
       "title": "Sequence Runner",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "done",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0053-Sequence-Runner",
@@ -3245,12 +3245,55 @@
         "evidence.py series --max-transitions 6 passes on a screen take of the demo.",
         "scripts/check.sh green; one audit; no server file changed."
       ],
-      "history": [],
-      "executions": [],
-      "audits": [],
+      "history": [
+        {
+          "time": "2026-10-17T18:00:08",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-17T18:00:08",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-17T18:43:20",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-17T18:43:25",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-17T18:43:29",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-17T18:43:20",
+          "result": "pass",
+          "notes": "check.sh green; Studio scenario 16/16; AC3 waived by jg"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-17T18:43:25",
+          "result": "pass",
+          "report": "06 QA/AUD-20261017-TASK-0053-01.md"
+        }
+      ],
       "revisions": 0,
-      "approved_by": null,
-      "merge_approved_by": null
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }
