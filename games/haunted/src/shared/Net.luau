@@ -23,6 +23,7 @@ Net.Functions = {
 	"SubmitRoute", -- C->S (points, pieces) -> ok, reason
 	"SetExhibit", -- C->S (slot: number, uid: string?) -> ok, reason
 	"GetCatalog", -- C->S () -> { items, rewards } read-only cosmetic catalog (TASK-0061)
+	"ClaimReward", -- C->S (milestoneId: string) -> ok, message (TASK-0066)
 	"EquipTheme", -- C->S (id: string?) -> ok, message (TASK-0064)
 	"EquipCaptureEffect", -- C->S (id: string?) -> ok, message (TASK-0063)
 	"EquipLook", -- C->S (uid: string, slot: "skin"|"aura", id: string?) -> ok, message (TASK-0062)

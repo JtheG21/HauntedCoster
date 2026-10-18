@@ -7,10 +7,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Catalog = require(Shared.Config.Catalog)
+local Habitats = require(Shared.Config.Habitats)
+local Monsters = require(Shared.Config.Monsters)
 local CaptureFxRules = require(Shared.Rules.CaptureFxRules)
 local CosmeticRules = require(Shared.Rules.CosmeticRules)
 local ThemeRules = require(Shared.Rules.ThemeRules)
 local LookRules = require(Shared.Rules.LookRules)
+local MilestoneRules = require(Shared.Rules.MilestoneRules)
 local ProfileRules = require(Shared.Rules.ProfileRules)
 local Remotes = require(script.Parent.Parent.Remotes)
 local ContainmentService = require(script.Parent.ContainmentService)
@@ -21,6 +24,8 @@ local StateService = require(script.Parent.StateService)
 local CosmeticService = {}
 
 local started = false
+
+local roster = MilestoneRules.rosterFrom(Monsters.Order, Habitats.List)
 
 local function catalog(): CosmeticRules.Catalog
 	return { Items = Catalog.Items, Rewards = Catalog.Rewards }
@@ -131,6 +136,40 @@ function CosmeticService.equipTheme(player: Player, id: any): (boolean, string?)
 	return true, nil
 end
 
+-- Claim a Journal milestone reward (TASK-0066). The server re-checks eligibility from the saved journal and
+-- grants exactly once: claimReward is all-or-nothing and a second claim is refused, so a retry never repeats.
+function CosmeticService.claimReward(player: Player, milestoneId: any): (boolean, string?)
+	local milestone, bad = MilestoneRules.parse(milestoneId)
+	if not milestone then
+		return false, bad
+	end
+	local profile = PlayerDataService.get(player)
+	if not profile then
+		return false, "Your data is still loading."
+	end
+	if profile.cosmetics.rewardsClaimed[milestone.id] then
+		return false, MilestoneRules.message("claimed")
+	end
+	if not MilestoneRules.eligible(profile.journal, milestone, roster) then
+		return false, MilestoneRules.message("notEligible")
+	end
+	local failure: string? = nil
+	local applied = PlayerDataService.update(player, function(p)
+		local ok, reason = CosmeticRules.claimReward(p.cosmetics, catalog(), milestone.id)
+		if not ok then
+			failure = MilestoneRules.message(reason)
+		end
+	end)
+	if failure then
+		return false, failure
+	end
+	if not applied then
+		return false, "Your data is still loading."
+	end
+	StateService.toast(player, `Reward claimed: {milestone.title}. Find it in Shop > Owned.`, "success")
+	return true, nil
+end
+
 function CosmeticService.start()
 	if started then
 		return
@@ -141,6 +180,12 @@ function CosmeticService.start()
 			return false, "Slow down."
 		end
 		return CosmeticService.equip(player, uid, slot, id)
+	end
+	Remotes.func("ClaimReward").OnServerInvoke = function(player, id)
+		if not Remotes.allow(player, "ClaimReward", 4, 8) then
+			return false, "Slow down."
+		end
+		return CosmeticService.claimReward(player, id)
 	end
 	Remotes.func("EquipTheme").OnServerInvoke = function(player, id)
 		if not Remotes.allow(player, "EquipTheme", 4, 8) then
