@@ -38,6 +38,30 @@ local function sortedKeys(t: any): { string }
 	return out
 end
 
+-- TASK-0060 cosmetic state, as stable strings.
+local function cosmeticsPrint(c: any): { string }
+	if type(c) ~= "table" then
+		return { "none" }
+	end
+	local looks = {}
+	for uid, look in c.ghostLooks do
+		table.insert(looks, `{uid}={look.skin or "-"}/{look.aura or "-"}`)
+	end
+	table.sort(looks)
+	local placed = {}
+	for _, pl in c.placements do
+		table.insert(placed, `{pl.id}@{pl.x},{pl.z},{pl.r}`)
+	end
+	return {
+		table.concat(sortedKeys(c.entitlements), ";"),
+		table.concat(looks, ";"),
+		tostring(c.captureEffect),
+		tostring(c.mansionTheme),
+		table.concat(placed, ";"),
+		table.concat(sortedKeys(c.rewardsClaimed), ";"),
+	}
+end
+
 -- The saved progress AC1 covers, as a stable JSON string.
 local function fingerprint(p: any): string
 	local owned = {}
@@ -68,6 +92,7 @@ local function fingerprint(p: any): string
 		nextUid = p.nextUid,
 		exhibits = exhibits,
 		route = route,
+		cosmetics = cosmeticsPrint(p.cosmetics),
 		caught = sortedKeys(p.journal.caught),
 		variants = sortedKeys(p.journal.variants),
 		clues = sortedKeys(p.journal.clues),
@@ -152,6 +177,16 @@ return function(args: any): { [string]: any }
 			p.flags.onboarded = true
 			p.flags.routeCustom = true
 			p.tutorialStep = 7
+			-- TASK-0060: IDs the shipped (empty) catalog doesn't list, so this also proves unknown entitlements
+			-- and their selections survive a real save and rejoin.
+			p.cosmetics = {
+				entitlements = { T60Skin = true, T60Aura = true, T60Fx = true, T60Theme = true, T60Lamp = true },
+				ghostLooks = { m1 = { skin = "T60Skin", aura = "T60Aura" }, m2 = { aura = "T60Aura" } },
+				captureEffect = "T60Fx",
+				mansionTheme = "T60Theme",
+				placements = { { id = "T60Lamp", x = 4, z = -6, r = 90 } },
+				rewardsClaimed = { T60Reward = true },
+			}
 		end)
 		check("the test values differ from what loaded", fingerprint(profile) ~= loaded)
 		PlayerDataService.saveNow(player)
