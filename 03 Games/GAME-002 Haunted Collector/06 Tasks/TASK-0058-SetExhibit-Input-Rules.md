@@ -3,7 +3,7 @@ id: TASK-0058
 title: "SetExhibit Input Rules"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: low
 risk: low
 owner: executor
@@ -56,8 +56,9 @@ Behaviour must not change: compare refusal text and order against the current fu
 - Added `shared/Rules/ExhibitRules.luau` (`setRefusal`, same order and text as before), `ContainmentService.onSetExhibit` now calls it (rate limit and update unchanged), and `tests/ExhibitRules.spec.luau` (6 tests; 172 specs total).
 - Negative control: with the slot-range guard replaced by `if false`, 2 new tests failed (170 passed, 2 failed); restored, 172/0. `scripts/check.sh` ALL CHECKS PASSED (a first typecheck failure on mixed-type lists was fixed with `{ any }` annotations).
 - AC3 (Studio, 2026-10-18): the real `HauntedCollector.rbxl` place (the only Studio instance; the stale ones were killed with jg's approval), synced by `rojo serve haunted.project.json` from this worktree; build stamp `770e359 2026-10-18T08:21:57Z` confirmed in Edit before the runs. `FullLoop` 85/85 (its SetExhibit checks cover a locked slot, an unowned monster and a valid set) and `ExploitProbe` 13/13, both equal to the 2026-10-12 baselines. Run in the background from Edit with the result read from `_G.scn`; a first direct call timed out and its result was lost, then both were rerun. DataStores were in memory mode (unpublished place). Reporting state: implemented and tested.
-- Usage: no token figure available for the executor; the audit has not run.
+- Usage: no token figure available for the executor. Audit: Sonnet, 22,821 tokens, 5 tool calls ([[AUD-20261018-TASK-0058-01]], pass, 2 nits).
 
 ## Audits
+[[AUD-20261018-TASK-0058-01]]: pass (Sonnet, Standard tier; classification confirmed by jg 2026-10-18).
 
 ## Outcome
