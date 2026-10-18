@@ -12,7 +12,7 @@ local Sequence = require(ReplicatedStorage.Shared.Sequence)
 
 local CameraRig = {}
 
-local BASE_FOV = 70
+local BASE_FOV = 70 -- only a fallback; the swing is based on the player's own field of view once a run starts
 local ORBIT_SPEED = 0.5 -- rad/s the camera circles the monster
 
 type Active = { id: string, startedAt: number, p: { [string]: any } }

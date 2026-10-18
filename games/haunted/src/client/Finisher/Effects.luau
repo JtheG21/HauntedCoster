@@ -85,11 +85,11 @@ local function lock(ctx: Ctx): Undo
 end
 
 local function tint(cue: Sequence.Cue, p: { [string]: any }): Undo
+	local colour = Util.color(p.color) -- first, so a bad cue errors before anything is added to Lighting
 	local cc = Instance.new("ColorCorrectionEffect")
 	cc.Name = "FinisherTint_" .. cue.id
 	cc.Parent = Lighting
-	TweenService:Create(cc, TweenInfo.new(0.6), { TintColor = Util.color(p.color), Brightness = p.brightness or 0 })
-		:Play()
+	TweenService:Create(cc, TweenInfo.new(0.6), { TintColor = colour, Brightness = p.brightness or 0 }):Play()
 	return function()
 		cc:Destroy()
 	end

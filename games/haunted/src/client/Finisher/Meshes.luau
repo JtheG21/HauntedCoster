@@ -25,20 +25,26 @@ function Meshes.preload()
 		return
 	end
 	state = "loading"
-	local ids: { [string]: number } = Assets.Meshes
-	for name, id in ids do
-		local ok, mesh = pcall(function()
-			return InsertService:CreateMeshPartAsync(
-				"rbxassetid://" .. id,
-				Enum.CollisionFidelity.Box,
-				Enum.RenderFidelity.Automatic
-			)
-		end)
-		if ok and mesh then
-			templates[name] = mesh
-		else
-			warn(`Finisher: mesh {name} ({id}) did not load, skipping it`)
+	-- whatever happens below, the state must end up "done" or later callers would wait forever
+	local ok, err = pcall(function()
+		local ids: { [string]: number } = Assets.Meshes
+		for name, id in ids do
+			local loaded, mesh = pcall(function()
+				return InsertService:CreateMeshPartAsync(
+					"rbxassetid://" .. id,
+					Enum.CollisionFidelity.Box,
+					Enum.RenderFidelity.Automatic
+				)
+			end)
+			if loaded and mesh then
+				templates[name] = mesh
+			else
+				warn(`Finisher: mesh {name} ({id}) did not load, skipping it`)
+			end
 		end
+	end)
+	if not ok then
+		warn(`Finisher: mesh preload failed: {err}`)
 	end
 	state = "done"
 end

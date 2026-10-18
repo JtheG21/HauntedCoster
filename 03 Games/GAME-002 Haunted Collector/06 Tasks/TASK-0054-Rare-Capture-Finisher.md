@@ -3,7 +3,7 @@ id: TASK-0054
 title: "Rare Capture Finisher"
 type: task
 project: GAME-002
-status: in_progress
+status: approved
 priority: low
 risk: low
 owner: executor
@@ -62,8 +62,9 @@ Client-only. Input lock must always be released, including on cancel and errors 
 - Practice parts `PracticeAura` remain in the scratch place Place1 only.
 
 ## Audits
-- Audit 1 (2026-10-17, auditor, Opus, commit 905e7df): **changes requested**, 2 major, 11 minor, 5 nit. Revision 1 fixed: second `play()` while one runs (one active run, per-run lock name, `PlayerModule` controls disabled and re-enabled); reduce-effects now reaches the rune, shockwave, pillar light and bolts; camera cuts no longer reset the camera for a frame; parent-last for Lighting effects; `Meshes.preload` waits instead of returning early; orb smaller than its tightest orbit, core capped, NaN-safe exit velocity, impact no longer cut short (orb cue 4.4 s, sequence 12.8 s); camera follows the anchor; dead code, unused params and the unused `snap` rule removed; shared `Ctx` type and named constants. Not fixed: effects run on `os.clock`, so `step()`-driven scenario runs do not exercise the orb motion (documented; the real-clock run does).
+- Audit 1 (2026-10-17, auditor, Opus, commit 905e7df): **changes requested**, 2 major, 11 minor, 5 nit. Revision 1 fixed: second `play()` while one runs (one active run, per-run lock name, `PlayerModule` controls disabled and re-enabled); reduce-effects now reaches the rune, shockwave, pillar light and bolts; camera cuts no longer reset the camera for a frame; parent-last for Lighting effects; `Meshes.preload` waits instead of returning early; orb smaller than its tightest orbit, core capped, NaN-safe exit velocity, impact no longer cut short (orb cue 4.4 s, sequence 12.8 s); camera follows the anchor; dead code, unused params and the unused `snap` rule removed; shared `Ctx` type and named constants. Revision 2 (after the delta audit): tint colour is now validated before Lighting is touched (revision 1's claim of that fix had silently not applied; found by the delta audit), and `Meshes.preload` can no longer leave waiting callers stuck. Not fixed: effects run on `os.clock`, so `step()`-driven scenario runs do not exercise the orb motion (documented; the real-clock run does).
 - Client check on a real client (Place1, 2026-10-17): overlapping runs leave one lock; cancel and a natural reduced run both restore camera type, field of view and the lock; 35/35 cleanup scenario.
+- Delta re-audit (2026-10-17, auditor, Sonnet, 905e7df..28ef5aa): **pass with notes**; every first-audit finding fixed except the tint ordering and a preload hang risk, both fixed after in revision 2.
 - Visual defect found and fixed in review: the core glow used a texture with an opaque dark background, which showed as a black box on a billboard; now an alpha-correct texture (`glow` is for additive particles only).
 
 ## Outcome
