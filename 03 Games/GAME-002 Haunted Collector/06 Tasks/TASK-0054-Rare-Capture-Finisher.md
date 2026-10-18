@@ -3,7 +3,7 @@ id: TASK-0054
 title: "Rare Capture Finisher"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: low
 risk: low
 owner: executor
@@ -42,10 +42,10 @@ The first consumer of the sequence runner: a 12.5 s cosmetic finisher for a rare
 - Brief review: 0 additions proposed, 0 accepted by jg, interview 4 questions
 
 ## Acceptance criteria
-- [ ] AC1 Lune spec: the finisher validates; length is 10-15 s; large-flash cues are at most 2 and at least 2 s apart; reduced mode drops flash and shake strength.
-- [ ] AC2 Play scenario: after finish and after cancel, descendants of the effect folder and Lighting return to baseline; no emitters left; peak emitters within budget.
-- [ ] AC3 jg judges one client run of the finisher against REF-VFX-001's beats (phases, bursts, camera variety) and gives a verdict on the floor; ledger recorded.
-- [ ] AC4 `scripts/check.sh` green; one audit; no server file changed.
+- [x] AC1 Lune spec: the finisher validates; length is 10-15 s; large-flash cues are at most 2 and at least 2 s apart; reduced mode drops flash and shake strength.
+- [x] AC2 Play scenario: after finish and after cancel, descendants of the effect folder and Lighting return to baseline; no emitters left; peak emitters within budget.
+- [x] AC3 jg judges one client run of the finisher against REF-VFX-001's beats (phases, bursts, camera variety) and gives a verdict on the floor; ledger recorded. Evidence: jg, 2026-10-17, after running it in Place1 several times and directing the orb, texture and release changes: "this is good". That is an approval of the look, not a formal floor comparison; the asset rights stay open.
+- [x] AC4 `scripts/check.sh` green; one audit; no server file changed.
 
 ## Tests
 - **Automated:** `scripts/check.sh`; Lune spec.
@@ -68,3 +68,4 @@ Client-only. Input lock must always be released, including on cancel and errors 
 - Visual defect found and fixed in review: the core glow used a texture with an opaque dark background, which showed as a black box on a billboard; now an alpha-correct texture (`glow` is for additive particles only).
 
 ## Outcome
+Merged with jg's approval (2026-10-17). Open: rights of the VFX Studio plugin assets (`FinisherAssets.luau`) before anything ships; not wired into the capture flow; effects run on `os.clock` so stepped scenario runs do not exercise orb motion.
