@@ -83,6 +83,39 @@ return function(t: TestRunner.T)
 		end
 	end)
 
+	t.test("a priced, unowned item is buyable and shows its cost", function()
+		local priced: CosmeticRules.Catalog = {
+			Items = {
+				Lamp = { name = "Lamp", category = "Decoration", coinPrice = 50 },
+				Both = { name = "Both", category = "Skin", coinPrice = 80 },
+				Plain = { name = "Plain", category = "Aura" },
+			},
+			Rewards = { R = { grants = { "Both" } } },
+		}
+		local inp = { catalog = priced, cosmetics = CosmeticRules.default(), persistence = "saved" }
+		local by = {}
+		for _, c in ShopRules.view(inp, "Shop").cards do
+			by[c.id] = c
+		end
+		t.eq(by.Lamp.canBuy, true)
+		t.eq(by.Lamp.price, 50)
+		t.eq(by.Lamp.acquisition, "buyable")
+		t.eq(ShopRules.acquisitionLabel(by.Lamp), "Costs 50 Coins")
+		t.eq(ShopRules.acquisitionLabel(by.Both), "Costs 80 Coins, or earn it")
+		t.eq(by.Plain.canBuy, false)
+		t.eq(by.Plain.acquisition, "notYet")
+		t.eq(ids(ShopRules.view(inp, "Shop", { acquisition = "buyable" }))[1], "Both")
+		t.eq(ids(ShopRules.view(inp, "Shop", { acquisition = "earnable" }))[1], "Both") -- also earnable
+		local owned = CosmeticRules.default()
+		owned.entitlements.Lamp = true
+		local v = ShopRules.view({ catalog = priced, cosmetics = owned, persistence = "saved" }, "Shop")
+		for _, c in v.cards do
+			if c.id == "Lamp" then
+				t.eq(c.canBuy, false) -- owned: nothing to buy
+			end
+		end
+	end)
+
 	t.test("filters narrow by category, ownership and acquisition", function()
 		local inp = { catalog = cat, cosmetics = state(), persistence = "saved" }
 		t.eq(#ShopRules.view(inp, "Shop", { category = "Skin" }).cards, 1)

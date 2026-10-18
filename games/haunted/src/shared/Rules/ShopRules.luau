@@ -4,6 +4,7 @@
 -- price and no Buy action anywhere: a card is only ever "earnable" through a reward, or "not available yet".
 
 local CosmeticRules = require(script.Parent.CosmeticRules)
+local PurchaseRules = require(script.Parent.PurchaseRules)
 
 local ShopRules = {}
 
@@ -12,7 +13,7 @@ ShopRules.Categories = { "Skin", "Aura", "CaptureEffect", "Theme", "Decoration" 
 export type Filter = {
 	category: string?, -- nil: all categories
 	ownership: string?, -- "all" (default) | "owned" | "unowned"
-	acquisition: string?, -- "all" (default) | "earnable" | "notYet"
+	acquisition: string?, -- "all" (default) | "buyable" | "earnable" | "notYet"
 }
 export type Card = {
 	id: string,
@@ -22,9 +23,10 @@ export type Card = {
 	owned: boolean,
 	equipped: boolean,
 	equippedOn: { string }, -- "ghost:<uid>", "captureEffect", "theme", "placed"
-	acquisition: string, -- "owned" | "earnable" | "notYet"
+	acquisition: string, -- "owned" | "buyable" | "earnable" | "notYet"
 	rewardId: string?,
-	canBuy: boolean, -- always false until a supported grant path exists
+	price: number?, -- Coins, from the catalog (PurchaseRules.price); nil if not for sale
+	canBuy: boolean, -- true only for an unowned item with a Coin price
 }
 export type View = {
 	status: string, -- "loading" | "unavailable" | "empty" | "noMatch" | "ready"
@@ -84,6 +86,8 @@ local function card(catalog: CosmeticRules.Catalog, s: CosmeticRules.State, id: 
 	local owned = s.entitlements[id] == true
 	local rewardId = rewardFor(catalog, id)
 	local where = equippedOn(s, id)
+	local price = if item then PurchaseRules.price(catalog, id) else nil
+	local buyable = price ~= nil and not owned
 	return {
 		id = id,
 		name = if item and item.name then item.name else id,
@@ -92,9 +96,12 @@ local function card(catalog: CosmeticRules.Catalog, s: CosmeticRules.State, id: 
 		owned = owned,
 		equipped = #where > 0,
 		equippedOn = where,
-		acquisition = (if owned then "owned" elseif rewardId then "earnable" else "notYet") :: string,
+		acquisition = (
+				if owned then "owned" elseif buyable then "buyable" elseif rewardId then "earnable" else "notYet"
+			) :: string,
 		rewardId = rewardId,
-		canBuy = false,
+		price = price,
+		canBuy = buyable,
 	}
 end
 
@@ -111,7 +118,13 @@ local function passes(c: Card, f: Filter): boolean
 	elseif f.ownership == "unowned" and c.owned then
 		return false
 	end
-	return acquisitionMatches(f.acquisition or "all", c.acquisition)
+	-- An unowned item that can be bought and earned also shows under "earnable".
+	local have = if c.acquisition == "buyable"
+			and c.rewardId ~= nil
+			and f.acquisition == "earnable"
+		then "earnable"
+		else c.acquisition
+	return acquisitionMatches(f.acquisition or "all", have)
 end
 
 local function sorted(a: Card, b: Card): boolean
@@ -217,6 +230,8 @@ end
 function ShopRules.acquisitionLabel(c: Card): string
 	if c.acquisition == "owned" then
 		return if c.equipped then "Owned, in use" else "Owned"
+	elseif c.acquisition == "buyable" then
+		return if c.rewardId then `Costs {c.price} Coins, or earn it` else `Costs {c.price} Coins`
 	elseif c.acquisition == "earnable" then
 		return "Earned through a reward"
 	end

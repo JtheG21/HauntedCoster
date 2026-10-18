@@ -53,6 +53,23 @@ local function run(): { [string]: any }
 	local p1 = { call(remotes, "Purchase", "house", 0) }
 	local p2 = { call(remotes, "Purchase", {}, nil) }
 	local p3 = { call(remotes, "Purchase", "speed", "0") }
+	-- Forged BuyItem (TASK-0067): bad types, an unknown item, an unpriced item and an over-long ID must all be
+	-- refused with no state change (the scenario checks coins and entitlements against a snapshot).
+	local b1 = { call(remotes, "BuyItem", {}, "r1") }
+	local b2 = { call(remotes, "BuyItem", "NoSuchItem", "rb2") }
+	local b3 = { call(remotes, "BuyItem", "FxSparks", "rb3") }
+	local b4 = { call(remotes, "BuyItem", "SkinMoss", 5) }
+	local b5 = { call(remotes, "BuyItem", string.rep("x", 200), "rb5") }
+	report.forgedBuysRejected = b1[1]
+		and b1[2] == false
+		and b2[1]
+		and b2[2] == false
+		and b3[1]
+		and b3[2] == false
+		and b4[1]
+		and b4[2] == false
+		and b5[1]
+		and b5[2] == false
 	report.forgedPurchasesRejected = p1[1] and p1[2] == false and p2[1] and p2[2] == false and p3[1] and p3[2] == false
 
 	local huge = {}
