@@ -3,7 +3,7 @@ id: TASK-0064
 title: "Mansion Themes"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -74,3 +74,4 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 219,091, at close 238,975
 [[AUD-20261018-TASK-0064-01]]: pass (Sonnet). No blocker; Studio and a full exterior preview still owed.
 
 ## Outcome
+A mansion theme can be equipped only at a house tier it covers, tints the house for every player, and falls back to the default look with a notice when an upgrade leaves it uncovered (merge approved by jg, 2026-10-18). Sonnet audit passed. Not met: AC2's complete exterior preview (swatches and coverage text only). Not verified: Studio across tiers and plot orientations. The sample `ThemeMoonlit` is a recolour, not a baseline-quality asset, and cannot be owned until a grant path exists (TASK-0066/0067).
