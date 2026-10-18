@@ -3685,7 +3685,7 @@
       "id": "TASK-0060",
       "title": "Monetization Persistence Schema",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "done",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0060-Monetization-Persistence-Schema",
@@ -3695,10 +3695,89 @@
         "Lune specs cover defaults, sanitization of corrupt values, migration from the current schema, and the grant/equip/remove rules as pure functions; a negative control fails them.",
         "Rejoin persistence is proven in Studio (save, leave, rejoin, state intact); scripts/check.sh green; one Opus first audit (DataStore code)."
       ],
-      "history": [],
-      "executions": [],
-      "audits": [],
-      "revisions": 0
+      "history": [
+        {
+          "time": "2026-10-18T01:58:08",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T01:59:18",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T02:23:00",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T02:23:07",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T11:45:52",
+          "from": "approved",
+          "to": "changes_requested",
+          "note": "changes requested by jg: jg 2026-10-18: fix all AUD-20261018-TASK-0060-01 findings; revision 1/2"
+        },
+        {
+          "time": "2026-10-18T11:45:52",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T11:48:49",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T11:48:49",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T12:04:54",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-18T02:23:00",
+          "result": "pass",
+          "notes": "check.sh green; Lune 188/188; Persistence write 9/9 read 4/4 on published place (hand-synced modules)"
+        },
+        {
+          "time": "2026-10-18T11:48:49",
+          "result": "pass",
+          "notes": "revision 1: all audit findings fixed; check.sh green; Lune 194/194"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-18T02:23:07",
+          "result": "pass",
+          "report": "/Users/jg/Desktop/Rg1-worktrees/task-0060/06 QA/AUD-20261018-TASK-0060-01.md"
+        },
+        {
+          "time": "2026-10-18T11:48:49",
+          "result": "pass",
+          "report": "06 QA/AUD-20261018-TASK-0060-02.md"
+        }
+      ],
+      "revisions": 1,
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0061",

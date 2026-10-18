@@ -3,7 +3,7 @@ id: TASK-0060
 title: "Monetization Persistence Schema"
 type: task
 project: GAME-002
-status: proposed
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -50,7 +50,16 @@ Persistence, trust boundary and product details are governed by the baseline not
 
 ---
 ## Implementation record
+- 2026-10-18: started (orchestrator `start`). Context at start: 86,536 tokens (`get_usage`); weekly plan 89% used, 5-hour 19%.
+- Schema 2 adds `profile.cosmetics` (entitlements, `ghostLooks[uid] = {skin, aura}`, `captureEffect`, `mansionTheme`, `placements {id,x,z,r}`, `rewardsClaimed`). New `Config/Catalog.luau` (shape only, empty Items/Rewards, size bounds) and `Rules/CosmeticRules.luau` (sanitize, grant, equipLook/removeLook, setCaptureEffect, setTheme with tier check, place/removePlacement with plot bounds, right-angle rotation and per-item cap, claimReward once). Schema-1 profiles migrate by gaining empty cosmetics.
+- Design choice (draft, for jg review): entitlements and selections whose ID the current catalog doesn't list are **kept**, not dropped, so a catalog config gap can't destroy owned items. Looks for a released ghost UID are dropped. Theme tier coverage is checked at equip, not at sanitize (an upgrade doesn't silently unequip).
+- AC2: `tests/CosmeticRules.spec.luau` (15 tests); `lune run scripts/lune/specs` 188/188. Negative control: removing the species-compatibility check and reverting Schema to 1 failed 2 specs; restored, all pass.
+- AC3: published private place (placeId 108419797534540), Studio API access on, build 159a373. Rojo plugin left ProfileRules stale and the two new modules empty; **synced by hand** (source lengths verified equal to disk: 9752/10846/1159 bytes). `Persistence` scenario (now with cosmetics in its fingerprint): write 9/9, read 4/4 ("every saved value survived leave and rejoin"); lock released after shutdown. `scripts/check.sh` green.
+- Revision 1 (jg, 2026-10-18: "fix all audit findings"): every AUD-01 finding fixed (all-or-nothing `claimReward`, deterministic entitlement cap with catalog IDs first, an unknown ID fills one slot kind, placement-drop policy and precedence documented, `fits` reuses `equipCheck`, `removeLook` checks the slot first), plus AUD-02's minors (idempotence spec, `count()` helper). Lune 194/194; negative control (unknown-kind rule and cap order weakened) failed 2 specs. Studio not re-run: pure rules change on an unchanged persistence path.
 
 ## Audits
+- [[AUD-20261018-TASK-0060-01]]: pass (Opus), 4 minor + 2 nit findings, optional; all fixed in revision 1.
+- [[AUD-20261018-TASK-0060-02]]: delta pass (Opus), 2 minor + 2 nit; three fixed after the audit, one kept on purpose.
 
 ## Outcome
+Schema 2 cosmetic persistence ships with an empty catalog; AC1-AC3 met (evidence above). Usage: context 86,536 → 182,987 tokens (+96,451), weekly plan 89% → 91%, logged with `record-usage`. Revision 1: context 182,987 → 206,557 (+23,570), weekly 91% → 92%. Pending jg: merge; approve or reject the proposed keep-unknown retention policy (now in [[SYS-Haunted-Monetization-UI]] Data & state) and the proposed [[LES-0009-Rojo-Partial-Sync]].
