@@ -18,7 +18,11 @@ function ExhibitRules.setRefusal(profile: Profile?, slot: any, uid: any): string
 	if type(slot) ~= "number" or slot % 1 ~= 0 then
 		return "Bad slot"
 	end
-	local slots = Economy.HouseTiers[profile.houseTier + 1].exhibitSlots
+	local tier = Economy.HouseTiers[profile.houseTier + 1]
+	if type(profile.houseTier) ~= "number" or profile.houseTier % 1 ~= 0 or not tier then
+		return "Something went wrong. Try again after rejoining."
+	end
+	local slots = tier.exhibitSlots
 	if slot < 1 or slot > slots then
 		return "That exhibit slot is locked"
 	end
