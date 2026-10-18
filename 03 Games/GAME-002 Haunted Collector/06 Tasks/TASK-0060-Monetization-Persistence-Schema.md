@@ -57,5 +57,7 @@ Persistence, trust boundary and product details are governed by the baseline not
 - AC3: published private place (placeId 108419797534540), Studio API access on, build 159a373. Rojo plugin left ProfileRules stale and the two new modules empty; **synced by hand** (source lengths verified equal to disk: 9752/10846/1159 bytes). `Persistence` scenario (now with cosmetics in its fingerprint): write 9/9, read 4/4 ("every saved value survived leave and rejoin"); lock released after shutdown. `scripts/check.sh` green.
 
 ## Audits
+- [[AUD-20261018-TASK-0060-01]]: pass (Opus), 4 minor + 2 nit findings, optional; none fixed in this task.
 
 ## Outcome
+Schema 2 cosmetic persistence ships with an empty catalog; AC1-AC3 met (evidence above). Usage: context 86,536 → 182,987 tokens (+96,451), weekly plan 89% → 91%, logged with `record-usage`. Pending jg: merge, and whether to schedule the audit minors (all-or-nothing `claimReward` first).
