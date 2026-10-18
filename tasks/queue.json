@@ -4336,7 +4336,7 @@
       "id": "TASK-0069",
       "title": "Art Salvage From Overhaul Branch",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "high",
       "depends_on": [],
       "branch": "task/TASK-0069-Art-Salvage-From-Overhaul-Branch",
@@ -4373,6 +4373,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T13:04:15",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -4390,7 +4396,8 @@
         }
       ],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }

@@ -3,7 +3,7 @@ id: TASK-0069
 title: "Art Salvage From Overhaul Branch"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: high
 owner: executor
@@ -75,3 +75,4 @@ Executor: Claude (Sonnet 5.5, at jg's choice; the plan called for Opus). Branch 
 [[AUD-20261018-TASK-0069-01]]: pass (Opus). Minor findings kept in the audit note; Studio and visual review still owed by jg.
 
 ## Outcome
+Art for TASK-0042 to 0046 landed on main through this task (merge approved by jg, 2026-10-18). Opus audit passed. Not verified: Studio rendering, art bake time (~11 MB), baseline comparison and jg's visual review. TASK-0044 (`changes_requested`) and TASK-0046 (`in_progress`) keep those statuses in the queue and still need closing or follow-up. Cosmetic decorations and theme tint (`a5f0aaa`) are left for TASK-0064/0065.
