@@ -1,7 +1,8 @@
 --!strict
 -- Line of sight to a haunted-tree face (TASK-0041), shared so the client's gaze test and the server's
 -- plausibility check agree. See-through parts (Transparency >= 0.5) and characters don't block; the tree
--- itself and the viewer's own character are excluded up front.
+-- itself and the viewer's own character are excluded up front. Invisible colliders that stand in for client
+-- art (Build.collider, attribute Solid) do block: the mesh the player sees is there.
 
 local Workspace = game:GetService("Workspace")
 
@@ -25,7 +26,7 @@ function TreeSight.clear(from: Vector3, to: Vector3, exclude: { Instance }): boo
 			return true
 		end
 		local part = hit.Instance
-		if part.Transparency >= 0.5 or isCharacterPart(part) then
+		if (part.Transparency >= 0.5 and part:GetAttribute("Solid") ~= true) or isCharacterPart(part) then
 			table.insert(list, part)
 			params.FilterDescendantsInstances = list
 		else

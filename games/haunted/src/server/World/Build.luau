@@ -1,5 +1,10 @@
 --!strict
--- Small helpers for building anchored placeholder geometry from code.
+-- Small helpers for building anchored geometry from code. Visible art is client-side (client/Art): the
+-- server builds invisible colliders, lights and prompts, plus `artSlot` anchors the client dresses.
+
+local CollectionService = game:GetService("CollectionService")
+
+local GroundPainter = require(script.Parent.GroundPainter)
 
 local Build = {}
 
@@ -91,8 +96,9 @@ function Build.billboard(
 	label.BackgroundTransparency = 1
 	label.Text = text
 	label.TextColor3 = color
-	label.TextStrokeTransparency = 0.3
-	label.Font = Enum.Font.Creepster
+	label.TextStrokeTransparency = 0.25
+	label.TextStrokeColor3 = Color3.fromRGB(12, 8, 18)
+	label.FontFace = Font.fromEnum(Enum.Font.GrenzeGotisch) -- the art direction's display face (TASK-0045)
 	label.TextScaled = true
 	label.Parent = gui
 	gui.Parent = parent
@@ -113,7 +119,7 @@ function Build.strip(
 	local mid = (a + b) / 2
 	local len = (Vector3.new(b.X, 0, b.Z) - Vector3.new(a.X, 0, a.Z)).Magnitude
 	local cf = CFrame.lookAt(Vector3.new(mid.X, y or 0.06, mid.Z), Vector3.new(b.X, y or 0.06, b.Z))
-	return Build.part({
+	local strip = Build.part({
 		name = name,
 		size = Vector3.new(width, 0.12, len),
 		cframe = cf,
@@ -121,6 +127,8 @@ function Build.strip(
 		material = material,
 		parent = parent,
 	})
+	GroundPainter.mark(strip) -- shown as terrain once painted (TASK-0044)
+	return strip
 end
 
 -- Moves every part under `container` from local space into `frame`. Plot geometry is built at plot-local
@@ -131,6 +139,64 @@ function Build.toFrame(container: Instance, frame: CFrame)
 			d.CFrame = frame * d.CFrame
 		end
 	end
+end
+
+-- Lettering painted on one face of a (usually invisible) board part: signs whose wood is client art.
+function Build.lettering(board: BasePart, face: Enum.NormalId, text: string, color: Color3?): TextLabel
+	local sg = Instance.new("SurfaceGui")
+	sg.Name = "Lettering" .. face.Name
+	sg.Face = face
+	sg.LightInfluence = 0.6
+	sg.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	sg.PixelsPerStud = 40
+	sg.MaxDistance = 260
+	local label = Instance.new("TextLabel")
+	label.Name = "Text"
+	label.BackgroundTransparency = 1
+	label.Size = UDim2.fromScale(0.92, 0.8)
+	label.Position = UDim2.fromScale(0.04, 0.1)
+	label.FontFace = Font.fromEnum(Enum.Font.GrenzeGotisch)
+	label.TextScaled = true
+	label.TextColor3 = color or Color3.fromRGB(255, 214, 150)
+	label.TextStrokeColor3 = Color3.fromRGB(40, 20, 10)
+	label.TextStrokeTransparency = 0.35
+	label.Text = text
+	label.Parent = sg
+	sg.Parent = board
+	return label
+end
+
+-- An invisible anchor at an asset's origin (base centre, front = LookVector) tagged for client art.
+-- `attrs` may set ArtScale, ArtFollow, ArtLod, ArtCull, Tint_<Part>, Mat_<Part> (client/Art/Dressing).
+function Build.artSlot(parent: Instance, key: string, cframe: CFrame, attrs: { [string]: any }?): Part
+	local p = Instance.new("Part")
+	p.Name = "Art_" .. key
+	p.Anchored = true
+	p.Size = Vector3.new(0.2, 0.2, 0.2)
+	p.CFrame = cframe
+	p.Transparency = 1
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
+	p.CastShadow = false
+	p:SetAttribute("ArtKey", key)
+	if attrs then
+		for k, v in attrs do
+			p:SetAttribute(k, v)
+		end
+	end
+	CollectionService:AddTag(p, "ArtSlot")
+	p.Parent = parent
+	return p
+end
+
+-- An invisible collider (the art supplies the look). Keeps gameplay collision independent of meshes.
+function Build.collider(parent: Instance, name: string, size: Vector3, cframe: CFrame, shape: Enum.PartType?): Part
+	local p =
+		Build.part({ name = name, size = size, cframe = cframe, shape = shape, transparency = 1, parent = parent })
+	p.CanTouch = false
+	p:SetAttribute("Solid", true) -- blocks sight checks (shared/TreeSight) like the mesh it stands for
+	return p
 end
 
 function Build.folder(parent: Instance, name: string): Folder

@@ -45,7 +45,9 @@ local function placeModel(
 	local species = Monsters.Species[speciesId]
 	if scale ~= 1 then
 		model:ScaleTo(scale)
+		model:SetAttribute("ArtScale", scale) -- client art (client/Art/Creatures) scales to match
 	end
+	model:SetAttribute("Display", true) -- pen or exhibit: idle display animation, no roaming
 	local at = pos + Vector3.new(0, species.hover * scale, 0)
 	model:PivotTo(CFrame.lookAt(at, at + facing))
 	model.Parent = parent
@@ -86,7 +88,7 @@ function ContainmentService.refreshVisuals(player: Player)
 					old:Destroy()
 				end
 				local active = slot <= slots
-				ped.Transparency = if active then 0 else 0.7
+				ped.Transparency = 1 -- the plinth is art (TASK-0046); locked slots say so on the label
 				ped:SetAttribute("Active", active)
 				local label = ped:FindFirstChild("Label")
 				local text = label and label:FindFirstChild("Text")

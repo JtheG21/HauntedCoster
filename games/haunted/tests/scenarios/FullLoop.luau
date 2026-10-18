@@ -59,7 +59,8 @@ return function(_args: any): { [string]: any }
 	check("starter train exists", Workspace.Plots[`Plot{plotIndex}`].Track:FindFirstChild("GhostCart") ~= nil)
 	check(
 		"starter ride has its Scare Arch (Round 20 Q4)",
-		Workspace.Plots[`Plot{plotIndex}`].Track:FindFirstChild("ArchPost") ~= nil
+		Workspace.Plots[`Plot{plotIndex}`].Track:FindFirstChild("ArchSkull") ~= nil -- its light; the arch is art (TASK-0046)
+			and Workspace.Plots[`Plot{plotIndex}`].Track:FindFirstChild("Art_scare_arch") ~= nil
 	)
 	local preview = TrainService.payoutPreview(player)
 	check("starter ride payout preview", preview ~= nil and preview.total > 0, preview and preview.total)

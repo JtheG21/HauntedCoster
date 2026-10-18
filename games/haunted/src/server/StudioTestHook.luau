@@ -40,6 +40,13 @@ function StudioTestHook.start()
 		return
 	end
 	task.spawn(function()
+		-- Start from a loaded game: wait for the art bake (server/Services/ArtBakeService), as the loading
+		-- screen does for players, so start-up work can't race a scenario's first teleports.
+		local art = game:GetService("ReplicatedStorage"):WaitForChild("ArtTemplates", 20)
+		local t0 = os.clock()
+		while art and not art:GetAttribute("Ready") and os.clock() - t0 < 60 do
+			task.wait(0.25)
+		end
 		local tests = TestService:WaitForChild("Tests", 10)
 		local scenarios = tests and tests:FindFirstChild("scenarios")
 		local module = scenarios and scenarios:FindFirstChild(args.scenario)
