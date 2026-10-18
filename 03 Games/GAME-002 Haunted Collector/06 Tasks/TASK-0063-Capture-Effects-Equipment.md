@@ -3,7 +3,7 @@ id: TASK-0063
 title: "Capture Effects Equipment"
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: medium
 risk: medium
 owner: executor
@@ -66,7 +66,9 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 193,292, at close 208,028
 |---|---|
 | AC1 equip/remove, replayable preview | implemented and spec-tested (rules); UI and preview not run in Studio |
 | AC2 no change to capture rules | spec asserts equip touches only `captureEffect`; Studio check not run |
-| AC3 check.sh, Sonnet audit, VFX rights | check.sh green; audit pending; no plugin asset used |
+| AC3 check.sh, Sonnet audit, VFX rights | check.sh green; audit see Audits; no plugin asset used |
+
+**Studio skipped by jg, 2026-10-18.** No Play session, no capture with the effect equipped, no preview run, no screenshots. The burst's look, the Equip/Preview buttons and AC2's Studio check are unverified at runtime.
 
 ## Audits
 

@@ -4201,7 +4201,7 @@
       "id": "TASK-0063",
       "title": "Capture Effects Equipment",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4227,9 +4227,21 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-18T13:27:29",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
-      "executions": [],
+      "executions": [
+        {
+          "time": "2026-10-18T13:27:29",
+          "result": "pass",
+          "notes": "capture effect equip/preview implemented; check.sh green, 223 specs; Studio skipped by jg"
+        }
+      ],
       "audits": [],
       "revisions": 0,
       "approved_by": "jg"
