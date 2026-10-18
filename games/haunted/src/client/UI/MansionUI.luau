@@ -14,6 +14,9 @@ local State = require(script.Parent.Parent.State)
 
 local MansionUI = {}
 
+-- Set by the client entry point so the Mansion can open the Shop without requiring it.
+MansionUI.openShop = function() end
+
 local panel: Frame
 local content: ScrollingFrame
 local tab = "Upgrades"
@@ -364,8 +367,16 @@ function MansionUI.mount(gui: ScreenGui, toastFn: (string, string?) -> ())
 	Theme.label(
 		panel,
 		"Your Mansion",
-		{ Font = Theme.Title, TextSize = 30, Size = UDim2.new(1, -60, 0, 34), TextColor3 = Theme.Colors.gold }
+		{ Font = Theme.Title, TextSize = 30, Size = UDim2.new(1, -130, 0, 34), TextColor3 = Theme.Colors.gold }
 	)
+	Theme.button(panel, "Shop", function()
+		MansionUI.close()
+		MansionUI.openShop()
+	end, {
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -48, 0, 0),
+		Size = UDim2.fromOffset(72, 34),
+	})
 	Theme.button(panel, "X", MansionUI.close, {
 		AnchorPoint = Vector2.new(1, 0),
 		Position = UDim2.fromScale(1, 0),

@@ -49,6 +49,7 @@ local function build(player: Player): { [string]: any }?
 		stats = profile.stats,
 		route = profile.route,
 		exhibits = profile.exhibits,
+		cosmetics = profile.cosmetics, -- read-only ownership for the Shop (TASK-0061)
 	}
 	for _, fn in providers do
 		local ok, err = pcall(function()

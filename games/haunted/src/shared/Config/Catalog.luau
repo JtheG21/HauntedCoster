@@ -6,6 +6,7 @@
 export type Category = "Skin" | "Aura" | "CaptureEffect" | "Theme" | "Decoration"
 
 export type Item = {
+	name: string?, -- display name; the UI falls back to the ID
 	category: Category,
 	species: { string }?, -- Skin/Aura: compatible species; nil means every species
 	tiers: { number }?, -- Theme: house tiers (0-based) the theme covers; nil means none yet
