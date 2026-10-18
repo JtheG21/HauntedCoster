@@ -3,7 +3,7 @@ id: TASK-0044
 title: "Environment Kit and Ground"
 type: task
 project: GAME-002
-status: changes_requested
+status: archived
 priority: high
 risk: medium
 owner: executor
@@ -15,7 +15,7 @@ related:
   - "[[SYS-Haunted-Monetization-UI]]"
   - "[[3D Model Quality Baseline]]"
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-18
 tags:
   - workflow/task
 ---
@@ -70,3 +70,6 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 ## Audits
 
 ## Outcome
+
+## Closure (2026-10-18)
+Archived by jg, superseded by [[TASK-0069-Art-Salvage-From-Overhaul-Branch]]. Its code and art were carried to main by [[TASK-0069-Art-Salvage-From-Overhaul-Branch]] as they stood on the overhaul branch, including the unresolved revision request, so the environment kit and ground were never re-reviewed after the changes were requested. The Opus audit of TASK-0069 covered the port, not a fresh review of this task. Studio was never run for the ported art.

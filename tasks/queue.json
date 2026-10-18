@@ -3809,7 +3809,7 @@
       "id": "TASK-0044",
       "title": "Environment Kit and Ground",
       "project": "GAME-002",
-      "status": "changes_requested",
+      "status": "archived",
       "risk": "medium",
       "depends_on": [
         "TASK-0041"
@@ -3848,6 +3848,12 @@
           "from": "in_review",
           "to": "changes_requested",
           "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-18T14:07:12",
+          "from": "changes_requested",
+          "to": "archived",
+          "note": "archived by jg"
         }
       ],
       "executions": [
@@ -3932,7 +3938,7 @@
       "id": "TASK-0046",
       "title": "Mansion, Plot and Ghost Train Art",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "archived",
       "risk": "medium",
       "depends_on": [
         "TASK-0041"
@@ -3958,6 +3964,12 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-18T14:07:12",
+          "from": "in_progress",
+          "to": "archived",
+          "note": "archived by jg"
         }
       ],
       "executions": [],
