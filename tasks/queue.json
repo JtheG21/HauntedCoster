@@ -3621,6 +3621,25 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0059",
+      "title": "ExhibitRules Corrupt Tier Guard",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0059-ExhibitRules-Corrupt-Tier-Guard",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0059-ExhibitRules-Corrupt-Tier-Guard.md",
+      "acceptance_criteria": [
+        "ExhibitRules.setRefusal returns a refusal instead of erroring when profile.houseTier is outside the HouseTiers table (negative, fractional, NaN, too large); valid tiers behave as before.",
+        "Lune spec covers those cases plus a regression check on valid tiers; a negative control (guard removed) fails it.",
+        "scripts/check.sh green; no audit (Light tier); executor context growth logged with record-usage from get_usage readings at start and close."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
     }
   ]
 }
