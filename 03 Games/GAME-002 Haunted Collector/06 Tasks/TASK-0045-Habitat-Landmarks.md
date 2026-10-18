@@ -3,7 +3,7 @@ id: TASK-0045
 title: "Habitat Landmarks"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: high
 risk: medium
 owner: executor
@@ -15,7 +15,7 @@ related:
   - "[[SYS-Haunted-Monetization-UI]]"
   - "[[3D Model Quality Baseline]]"
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-18
 tags:
   - workflow/task
 ---
@@ -73,3 +73,6 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 - [[AUD-20261013-TASK-0045-01]]: pass (12 minor/nit, fixed or recorded above).
 
 ## Outcome
+
+## Closure (2026-10-18)
+Marked done by jg. This task was approved on the overhaul branch, and The finished landmark meshes for all four habitats are on main through [[TASK-0069-Art-Salvage-From-Overhaul-Branch]]. The Opus audit of TASK-0069 covered the port, and this task's own audit stayed on the old branch. Not verified: Studio was never run for the ported art on main, so rendering, load time and the ~11 MB art bake are unchecked.

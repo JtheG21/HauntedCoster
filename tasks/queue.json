@@ -3685,7 +3685,7 @@
       "id": "TASK-0042",
       "title": "Art Pipeline and Direction",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0041"
@@ -3724,6 +3724,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T14:07:52",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -3741,13 +3747,14 @@
         }
       ],
       "revisions": 0,
-      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0043",
       "title": "Creature Models and Animation",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0041"
@@ -3786,6 +3793,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T14:07:52",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -3803,7 +3816,8 @@
         }
       ],
       "revisions": 0,
-      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0044",
@@ -3877,7 +3891,7 @@
       "id": "TASK-0045",
       "title": "Habitat Landmarks",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0041"
@@ -3915,6 +3929,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T14:07:52",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -3932,7 +3952,8 @@
         }
       ],
       "revisions": 0,
-      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0046",
