@@ -4,7 +4,7 @@ title: Task Intake
 type: agent
 status: approved
 created: 2026-10-12
-updated: 2026-10-17
+updated: 2026-10-18
 tags:
   - workflow/process
 related:
@@ -24,7 +24,7 @@ The entry point for every task, in any game. [[AGENTS]] holds the rules, [[Workf
 | **Task** | The TASK note and its `tasks/queue.json` entry, an optional handoff ([[T - Handoff]]), TEST and AUD notes | Copies of shared or project docs (link them) |
 
 ## Start procedure
-1. **Project and task.** `python3 scripts/orchestrator.py status`, the game's `00 Overview`, `git status` and the branch. Run `scripts/preflight.sh` before any state-changing Git operation.
+1. **Project and task.** `python3 scripts/orchestrator.py status`, the game's `00 Overview`, `git status` and the branch. Run `scripts/preflight.sh` before any state-changing Git operation. Note `get_usage` context tokens in the task note, so `task-close` can log the growth.
 2. **Instructions.** `AGENTS.md`, then only the project notes the task touches. Don't reread what is already in context.
 3. **Decisions already made.** The queue entry, the TASK note, ADRs, the Game Design, and memory. Never ask for something already documented.
 4. **Classify** (table below) and open only the matching workflow(s).

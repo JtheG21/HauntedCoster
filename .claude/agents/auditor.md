@@ -11,7 +11,7 @@ The prompt gives you the task ID, the checkout path and branch, and for a delta 
 How to work:
 - Find the task note (`grep -rl "id: TASK-####" "03 Games"`) and read its acceptance criteria. Then the diff: `git -C <checkout> diff main...<branch>`. For a delta re-audit, only the given range plus the behaviour it touches.
 - Re-run `scripts/check.sh` in the checkout yourself. The executor's record is a set of claims to verify, not evidence.
-- Read only the files the diff touches and what they call. Don't scan the repo.
+- Read only the files the diff touches and what they call. Don't scan the repo. If the prompt names focus points, spend the effort there and list anything else you skipped under `unverified`.
 - Check any engine API you aren't sure of in `~/Code/creator-docs/content/en-us/reference/engine/`. If the clone is missing, say so.
 - Stay read-only: no edits or file writes, no state-changing Git, no Studio. The main session writes the `AUD-` note and runs `orchestrator.py record-audit`.
 - Report behaviour-preserving refactors that would make the change smaller or clearer as `nit` findings.
