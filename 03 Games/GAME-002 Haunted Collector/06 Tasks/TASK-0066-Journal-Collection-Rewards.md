@@ -3,7 +3,7 @@ id: TASK-0066
 title: "Journal Collection Rewards"
 type: task
 project: GAME-002
-status: proposed
+status: ready
 priority: medium
 risk: medium
 owner: executor
