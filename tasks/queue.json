@@ -4201,7 +4201,7 @@
       "id": "TASK-0063",
       "title": "Capture Effects Equipment",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4221,12 +4221,49 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T13:25:08",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T13:27:29",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T13:28:21",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T13:28:59",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
-      "executions": [],
-      "audits": [],
+      "executions": [
+        {
+          "time": "2026-10-18T13:27:29",
+          "result": "pass",
+          "notes": "capture effect equip/preview implemented; check.sh green, 223 specs; Studio skipped by jg"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-18T13:28:21",
+          "result": "pass",
+          "report": "06 QA/AUD-20261018-TASK-0063-01.md"
+        }
+      ],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0064",

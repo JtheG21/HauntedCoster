@@ -21,6 +21,8 @@ local Variants = require(Config:WaitForChild("Variants"))
 local World = require(Config:WaitForChild("World"))
 local Economy = require(Config:WaitForChild("Economy"))
 local CaptureRules = require(Rules:WaitForChild("CaptureRules"))
+local CaptureFxRules = require(Rules:WaitForChild("CaptureFxRules"))
+local CatalogConfig = require(Config:WaitForChild("Catalog"))
 local ProfileRules = require(Rules:WaitForChild("ProfileRules"))
 local EconomyRules = require(Rules:WaitForChild("EconomyRules"))
 local HabitatRules = require(Rules:WaitForChild("HabitatRules"))
@@ -581,6 +583,17 @@ local function onCaptureRelease(player: Player): { [string]: any }
 		endSession(player, "success")
 		EncounterService.remove(e)
 		startCarry(player, e.species, e.variant, nil, finisherSeconds)
+		-- Equipped capture effect (TASK-0063): cosmetic, for the capturing player only, after every capture
+		-- rule has run, so it can't change timing, success, the meter or retaliation.
+		local profile = PlayerDataService.get(player)
+		local fx = profile
+			and CaptureFxRules.resolve(
+				profile.cosmetics,
+				{ Items = CatalogConfig.Items, Rewards = CatalogConfig.Rewards }
+			)
+		if fx then
+			Remotes.event("CaptureFx"):FireClient(player, { id = fx, position = where })
+		end
 		if finisherSeconds > 0 then
 			-- cosmetic, for the capturing player only; the client checks it again before playing
 			Remotes.event("CaptureFinisher")

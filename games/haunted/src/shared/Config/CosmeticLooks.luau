@@ -6,6 +6,7 @@
 
 export type Skin = { tint: Color3, material: Enum.Material? }
 export type Aura = { color: Color3, rate: number }
+export type CaptureEffect = { color: Color3, count: number, seconds: number }
 
 local CosmeticLooks = {}
 
@@ -16,5 +17,9 @@ CosmeticLooks.Skins = {
 CosmeticLooks.Auras = {
 	AuraEmbers = { color = Color3.fromRGB(255, 150, 70), rate = 8 },
 } :: { [string]: Aura }
+
+CosmeticLooks.CaptureEffects = {
+	FxSparks = { color = Color3.fromRGB(255, 225, 120), count = 36, seconds = 1.4 },
+} :: { [string]: CaptureEffect }
 
 return CosmeticLooks
