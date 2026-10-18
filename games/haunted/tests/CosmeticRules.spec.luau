@@ -39,8 +39,12 @@ end
 return function(t: TestRunner.T)
 	local now = 1_800_000_000
 
-	t.test("shipped catalog is empty (no invented products)", function()
-		t.eq(next(Catalog.Items), nil)
+	t.test("shipped catalog has only sample looks and no products", function()
+		for id, item in Catalog.Items do
+			t.truthy(item.category == "Skin" or item.category == "Aura", `{id} is not a sample look`)
+			t.eq((item :: any).price, nil)
+			t.eq((item :: any).product, nil)
+		end
 		t.eq(next(Catalog.Rewards), nil)
 	end)
 

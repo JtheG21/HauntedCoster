@@ -12,7 +12,11 @@ local CollectionService = game:GetService("CollectionService")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local ArtLoader = require(script.Parent.ArtLoader)
+local CosmeticLooks =
+	require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("CosmeticLooks"))
 
 local Creatures = {}
 
@@ -102,6 +106,53 @@ local function variantPart(p: BasePart, variant: string, shells: { BasePart })
 		p.Color = ASHEN_TINT
 		p.Material = Enum.Material.Slate -- burnt, ashy surface under the glowing cracks
 		p.Transparency = 0 -- ash is solid, even on ghosts
+	end
+end
+
+-- Equipped cosmetics (TASK-0062): the server sets SkinId/AuraId only for looks the owner really has and that
+-- fit the ghost, so unknown IDs here just mean "natural". A skin recolours; the glowing and Ember parts keep
+-- their own colour so the creature stays readable.
+local function applyLook(built: ArtLoader.Built, host: Instance)
+	local skin = CosmeticLooks.Skins[host:GetAttribute("SkinId") :: any]
+	if skin then
+		local function paint(p: BasePart)
+			if p.Material ~= Enum.Material.Neon then
+				p.Color = skin.tint
+				if skin.material then
+					p.Material = skin.material
+				end
+			end
+		end
+		for logical, parts in built.parts do
+			if logical ~= "Ember" then
+				for _, p in parts do
+					paint(p)
+				end
+			end
+		end
+		for _, p in built.lod1 do
+			paint(p)
+		end
+	end
+	local aura = CosmeticLooks.Auras[host:GetAttribute("AuraId") :: any]
+	local main = built.parts.Body and built.parts.Body[1]
+	if aura and main then
+		local pe = Instance.new("ParticleEmitter")
+		pe.Name = "EquippedAura"
+		pe.Color = ColorSequence.new(aura.color)
+		pe.LightEmission = 0.8
+		pe.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 1),
+			NumberSequenceKeypoint.new(0.3, 0.4),
+			NumberSequenceKeypoint.new(1, 1),
+		})
+		pe.Size = NumberSequence.new(0.25, 0.05)
+		pe.Lifetime = NumberRange.new(1, 1.8)
+		pe.Rate = aura.rate
+		pe.Speed = NumberRange.new(0.4, 1)
+		pe.SpreadAngle = Vector2.new(180, 180)
+		pe.Acceleration = Vector3.new(0, 0.8, 0)
+		pe.Parent = main
 	end
 end
 
@@ -225,6 +276,7 @@ local function attach(host: Instance)
 		return
 	end
 	applyVariant(built, if type(variant) == "string" then variant else "Normal")
+	applyLook(built, host)
 	local scale = if carried
 		then (CARRY_SCALE[species :: string] or 0.3)
 		else ((host:GetAttribute("ArtScale") :: number?) or 1)
