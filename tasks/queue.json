@@ -3626,7 +3626,7 @@
       "id": "TASK-0059",
       "title": "ExhibitRules Corrupt Tier Guard",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "in_review",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0059-ExhibitRules-Corrupt-Tier-Guard",
@@ -3636,10 +3636,36 @@
         "Lune spec covers those cases plus a regression check on valid tiers; a negative control (guard removed) fails it.",
         "scripts/check.sh green; no audit (Light tier); executor context growth logged with record-usage from get_usage readings at start and close."
       ],
-      "history": [],
-      "executions": [],
+      "history": [
+        {
+          "time": "2026-10-18T01:44:52",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T01:44:52",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T01:47:02",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-18T01:47:02",
+          "result": "pass",
+          "notes": "check.sh green, negative control fails, Light tier no audit"
+        }
+      ],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     }
   ]
 }
