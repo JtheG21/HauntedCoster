@@ -5052,6 +5052,29 @@
       "executions": [],
       "audits": [],
       "revisions": 0
+    },
+    {
+      "id": "TASK-0086",
+      "title": "Accepted Wisp Revision Recovery",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "tier": "deep",
+      "depends_on": [
+        "TASK-0069"
+      ],
+      "branch": "task/TASK-0086-Accepted-Wisp-Revision-Recovery",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0086-Accepted-Wisp-Revision-Recovery.md",
+      "acceptance_criteria": [
+        "Recover the accepted final Wisp data and existing imported PBR asset plus minimal MeshBuild, ArtBake, ImportYaw and animation/scale dependencies from the preserved revision branch; no uploads or paid generation.",
+        "Preserve main cosmetics, SkinId/AuraId, rare-variant restrictions, persistence, UI and CI-pinned type compatibility; do not merge excluded overhaul ancestry.",
+        "Verify normal/Spectral/Ashen wild, carried, pen and exhibit appearances in fresh Studio; capture matched views against the accepted Wisp and baseline originals, measure budgets, test two-client visibility and imported fallback; check.sh green.",
+        "Record every selected commit/file and any omitted dependency; jg reviews visual equivalence and explicitly approves the integration merge."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
     }
   ]
 }
