@@ -3,7 +3,7 @@ id: TASK-0059
 title: "ExhibitRules Corrupt Tier Guard"
 type: task
 project: GAME-002
-status: proposed
+status: in_review
 priority: low
 risk: low
 owner: executor
@@ -53,6 +53,9 @@ Studio is skipped on the same grounds as other pure-rule changes only if the dif
 
 ---
 ## Implementation record
+- Branch `task/TASK-0059-ExhibitRules-Corrupt-Tier-Guard`, worktree `~/Desktop/Rg1-wt/TASK-0059`, pushed (no PR yet). Guard in `ExhibitRules.setRefusal` returns "Something went wrong. Try again after rejoining." for non-number, fractional, NaN, negative or too-large `houseTier`; checked after the slot-shape check, before the lookup. Spec case added.
+- AC2 negative control: with the guard disabled the new spec failed (index nil with 'exhibitSlots'); restored. AC3: `scripts/check.sh` green (173 specs, 0 failed). No Studio run, diff stays inside the rule and its spec.
+- Usage: context `tokensUsed` 84,872 at start, 91,660 at close (+6,788); weekly plan 89% at start and at close. Logged with `record-usage`.
 
 ## Audits
 *(none: Light tier)*
