@@ -8,7 +8,7 @@ approved_by: jg
 approved_on: 2026-10-13
 version: 1.0
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-18
 tags:
   - game/design
   - game/monetization
@@ -140,6 +140,8 @@ No new API or remote names are approved here. Screen-to-service interfaces must 
 
 ## Data & state
 See Included categories and ownership, Interaction/state baseline, and Delivery dependencies above. Entitlements, equipped selections, placements and rewards must have an approved persistent schema before release.
+- **Implemented (TASK-0060, pending merge):** profile schema 2 stores `cosmetics` (entitlements, per-UID skin/aura, capture effect, mansion theme, reusable capped placements, reward claims) with sanitize, migration and pure rules in `CosmeticRules`; the catalog ships empty. See [[TASK-0060-Monetization-Persistence-Schema]].
+- **Proposed, needs jg approval:** an owned entitlement the current catalog doesn't list is kept, never dropped, so a catalog config gap can't destroy a bought or earned item. Such an ID may fill only one kind of slot, and placements beyond a lowered limit are stored back (the item stays owned). Until jg approves, treat this as draft behaviour, not policy.
 
 ## Trust boundary / security
 The client previews and requests actions; the server validates ownership, compatibility, pricing, placement and grants, with input validation and rate limits. Client prompt completion never establishes entitlement.
@@ -151,3 +153,4 @@ The client previews and requests actions; the server validates ownership, compat
 ## History
 - 2026-10-13: baseline drafted from discovery and explicit choices in [[ADR-0011-Monetization-UI-Scope]].
 - 2026-10-13: jg approved the presented baseline and its local vault merge in chat. Pricing, product configuration, schema changes, implementation and publishing remain separately gated.
+- 2026-10-18: Data & state records the TASK-0060 schema and one proposed retention policy for jg review. No approved scope changed.

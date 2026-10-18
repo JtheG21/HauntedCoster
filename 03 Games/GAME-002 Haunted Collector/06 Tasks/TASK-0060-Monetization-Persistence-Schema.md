@@ -62,4 +62,4 @@ Persistence, trust boundary and product details are governed by the baseline not
 - [[AUD-20261018-TASK-0060-02]]: delta pass (Opus), 2 minor + 2 nit; three fixed after the audit, one kept on purpose.
 
 ## Outcome
-Schema 2 cosmetic persistence ships with an empty catalog; AC1-AC3 met (evidence above). Usage: context 86,536 → 182,987 tokens (+96,451), weekly plan 89% → 91%, logged with `record-usage`. Revision 1: context 182,987 → 206,557 (+23,570), weekly 91% → 92%. Pending jg: merge.
+Schema 2 cosmetic persistence ships with an empty catalog; AC1-AC3 met (evidence above). Usage: context 86,536 → 182,987 tokens (+96,451), weekly plan 89% → 91%, logged with `record-usage`. Revision 1: context 182,987 → 206,557 (+23,570), weekly 91% → 92%. Pending jg: merge; approve or reject the proposed keep-unknown retention policy (now in [[SYS-Haunted-Monetization-UI]] Data & state) and the proposed [[LES-0009-Rojo-Partial-Sync]].
