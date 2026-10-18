@@ -3,7 +3,7 @@ id: TASK-0069
 title: "Art Salvage From Overhaul Branch"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: high
 risk: high
 owner: executor
@@ -72,5 +72,6 @@ Executor: Claude (Sonnet 5.5, at jg's choice; the plan called for Opus). Branch 
 | AC6 Opus audit | see Audits |
 
 ## Audits
+[[AUD-20261018-TASK-0069-01]]: pass (Opus). Minor findings kept in the audit note; Studio and visual review still owed by jg.
 
 ## Outcome
