@@ -3,7 +3,7 @@ id: TASK-0068
 title: "Robux Purchase Research And ADR"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -68,3 +68,4 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 369,782, at close 391,494
 [[AUD-20261018-TASK-0068-01]]: pass (Opus). Five findings, all fixed in the notes after the audit.
 
 ## Outcome
+The research note [[RSH-20261018-Robux-Purchase-Mechanisms]] and the draft [[ADR-0013-Robux-Purchase-Mechanism]] are on main (merge approved by jg, 2026-10-18). Opus audit passed and its five findings were fixed. The ADR stays `proposed`: it needs jg's answers to seven open questions before any implementation task, and no product IDs, prices, publishing or Robux spend are authorised. Sources were the local creator-docs clone only; the live docs, Studio test purchases and pass or product limits are unverified.

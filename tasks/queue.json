@@ -4539,7 +4539,7 @@
       "id": "TASK-0068",
       "title": "Robux Purchase Research And ADR",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0068-Robux-Purchase-Research-And-ADR",
@@ -4573,6 +4573,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T14:05:31",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -4590,7 +4596,8 @@
         }
       ],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0069",
