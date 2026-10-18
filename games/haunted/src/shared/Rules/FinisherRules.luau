@@ -19,4 +19,62 @@ function FinisherRules.fov(base: number, target: number, reduced: boolean): numb
 	return base + (target - base) * FinisherRules.scale("fovSwing", 1, reduced)
 end
 
+-- The orb's orbit around the captured monster: it starts slow and wide, and both its spin and its
+-- tightening grow exponentially until the orbit is too small and fast to hold. The orbit plane also
+-- tumbles about the X, Y and Z axes (rates tied to the spin), so the orb sweeps all the way around the
+-- monster. The combined angular rate is capped near 0.4 rad per frame at 60 fps so it stays smooth.
+FinisherRules.ORBIT =
+	{ w0 = 1.2, w1 = 18, r0 = 7, r1 = 1.6, size0 = 2.2, size1 = 4.4, tumbleX = 0.2, tumbleY = 0.14, tumbleZ = 0.1 }
+
+export type OrbitState = {
+	x: number,
+	y: number,
+	z: number,
+	ax: number,
+	ay: number,
+	az: number,
+	angle: number,
+	radius: number,
+	size: number,
+	speed: number,
+	u: number,
+}
+
+-- t seconds into an orbit of total length `total`; x, y, z is the offset from the monster's centre.
+function FinisherRules.orbit(t: number, total: number): OrbitState
+	local o = FinisherRules.ORBIT
+	local u = math.clamp(t / total, 0, 1)
+	local k = math.log(o.w1 / o.w0)
+	local angle = o.w0 * total / k * (math.exp(k * u) - 1)
+	local radius = o.r0 * (o.r1 / o.r0) ^ u
+	-- circle in the XY plane, then tumble about X, Y and Z
+	local x, y, z = math.cos(angle) * radius, math.sin(angle) * radius, 0
+	local ax, ay, az = angle * o.tumbleX + 0.6, angle * o.tumbleY + 0.9, angle * o.tumbleZ
+	local y1 = y * math.cos(ax) - z * math.sin(ax)
+	local z1 = y * math.sin(ax) + z * math.cos(ax)
+	local x2 = x * math.cos(ay) + z1 * math.sin(ay)
+	local z2 = -x * math.sin(ay) + z1 * math.cos(ay)
+	local x3 = x2 * math.cos(az) - y1 * math.sin(az)
+	local y3 = x2 * math.sin(az) + y1 * math.cos(az)
+	return {
+		x = x3,
+		y = y3,
+		z = z2,
+		ax = ax,
+		ay = ay,
+		az = az,
+		angle = angle,
+		radius = radius,
+		size = o.size0 + (o.size1 - o.size0) * u * u,
+		speed = o.w0 * math.exp(k * u),
+		u = u,
+	}
+end
+
+-- Break-off easing: leaves fast and keeps going (ease-out), k from 0 to 1.
+function FinisherRules.snap(k: number): number
+	local r = 1 - math.clamp(k, 0, 1)
+	return 1 - r * r * r * r
+end
+
 return FinisherRules

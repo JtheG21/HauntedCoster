@@ -56,6 +56,10 @@ Client-only. Input lock must always be released, including on cancel and errors 
 
 ---
 ## Implementation record
+- Built 2026-10-17: sequence data, `SequencePlayer` handlers, pure orbit rules (exponential spin and tightening, tumbling on all three axes, tested in Lune), reduce-effects mode, Play scenario (35 checks, real Heartbeat clock included, cancel at three points).
+- Orb: orbits the monster, speeding up and tightening exponentially (spin 1.2 to 18 rad/s), then breaks off at the player. jg judged the normal version good (2026-10-17).
+- Plugin assets (jg, 2026-10-17: use the VFX Studio plugin's meshes and textures): ids read from the plugin in Place1 into `shared/Config/FinisherAssets.luau` (5 meshes, 7 textures: rune circle, flare, lightning, swirl). **Rights unverified**: third-party uploads reached through a plugin, no licence checked. Anything that fails to load is skipped. Visual check in Place1 by Claude (screenshots at charge, peak, release) shows the rune disc, pillar, shockwave rings, lightning, orb glow and wind ring working.
+- Practice parts `PracticeAura` remain in the scratch place Place1 only.
 
 ## Audits
 

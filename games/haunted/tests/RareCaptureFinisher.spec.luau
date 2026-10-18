@@ -61,4 +61,63 @@ return function(t: TestRunner.T)
 		t.eq(Rules.fov(70, 82, false), 82)
 		t.truthy(Rules.fov(70, 82, true) < 82 and Rules.fov(70, 82, true) > 70)
 	end)
+
+	t.test("orb orbit starts slow and wide, speeds up and tightens exponentially, stays smooth", function()
+		local total = 3.4
+		local prev = Rules.orbit(0, total)
+		t.eq(prev.angle, 0)
+		t.truthy(math.abs(prev.speed - Rules.ORBIT.w0) < 1e-6)
+		t.truthy(math.abs(prev.radius - Rules.ORBIT.r0) < 1e-6)
+		local lastRatio = nil
+		for i = 1, 100 do
+			local cur = Rules.orbit(total * i / 100, total)
+			t.truthy(cur.angle > prev.angle, "angle must increase")
+			t.truthy(cur.speed > prev.speed, "speed must increase")
+			t.truthy(cur.radius < prev.radius, "radius must shrink")
+			t.truthy(cur.size >= prev.size, "energy (size) must build")
+			-- exponential: the speed ratio between equal steps is constant
+			local ratio = cur.speed / prev.speed
+			if lastRatio then
+				t.truthy(math.abs(ratio - lastRatio) < 1e-6, "speed growth must be exponential")
+			end
+			lastRatio = ratio
+			prev = cur
+		end
+		t.truthy(math.abs(prev.speed - Rules.ORBIT.w1) < 1e-6)
+		t.truthy(math.abs(prev.radius - Rules.ORBIT.r1) < 1e-6)
+		-- no frame step is big enough to strobe at 60 fps: spin plus the three tumble rates under 0.45 rad
+		local o = Rules.ORBIT
+		t.truthy(o.w1 * (1 + o.tumbleX + o.tumbleY + o.tumbleZ) / 60 < 0.45)
+		-- several laps before it lets go
+		t.truthy(prev.angle / (2 * math.pi) >= 3)
+	end)
+
+	t.test("break-off leaves fast and eases out", function()
+		t.eq(Rules.snap(0), 0)
+		t.eq(Rules.snap(1), 1)
+		t.truthy(Rules.snap(0.25) > 0.6, "most of the distance in the first quarter")
+		t.truthy(Rules.snap(0.5) > Rules.snap(0.25))
+	end)
+
+	t.test("orbit sweeps all three axes and keeps its radius", function()
+		local total = 3.4
+		local reach = { x = 0, y = 0, z = 0 }
+		for i = 0, 100 do
+			local o = Rules.orbit(total * i / 100, total)
+			local len = math.sqrt(o.x * o.x + o.y * o.y + o.z * o.z)
+			t.truthy(math.abs(len - o.radius) < 1e-6, "rotations must preserve the radius")
+			if o.u <= 0.6 then
+				reach.x = math.max(reach.x, math.abs(o.x) / o.radius)
+				reach.y = math.max(reach.y, math.abs(o.y) / o.radius)
+				reach.z = math.max(reach.z, math.abs(o.z) / o.radius)
+			end
+		end
+		t.truthy(reach.x > 0.7 and reach.y > 0.7 and reach.z > 0.7, `axis reach {reach.x} {reach.y} {reach.z}`)
+		-- the start must not dip under the ground the centre sits 7 studs above
+		local worst = 0
+		for i = 0, 100 do
+			worst = math.min(worst, Rules.orbit(total * i / 100, total).y)
+		end
+		t.truthy(worst >= -7, "stays above the ground")
+	end)
 end

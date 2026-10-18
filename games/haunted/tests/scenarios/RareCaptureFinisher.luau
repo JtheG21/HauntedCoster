@@ -10,7 +10,7 @@ local Lighting = game:GetService("Lighting")
 local StarterPlayer = game:GetService("StarterPlayer")
 local Workspace = game:GetService("Workspace")
 
-local EMITTER_BUDGET = 3
+local EMITTER_BUDGET = 8 -- peak phase runs the lightning pair; the aura pair and the burst pair never overlap it
 
 return function(_args: any): { [string]: any }
 	local checks: { { name: string, ok: boolean, detail: string? } } = {}
@@ -20,6 +20,7 @@ return function(_args: any): { [string]: any }
 
 	local Finisher =
 		require(StarterPlayer.StarterPlayerScripts:WaitForChild("Client"):WaitForChild("RareCaptureFinisher")) :: any
+	Finisher.preload() -- meshes are created once up front; creating one yields
 	local target = Instance.new("Part")
 	target.Name = "FinisherScenarioTarget"
 	target.Anchored = true
@@ -39,6 +40,7 @@ return function(_args: any): { [string]: any }
 	local function run(label: string, opts: { reduced: boolean?, stopAt: number?, real: boolean? })
 		local lightingBase = #Lighting:GetChildren()
 		local workspaceBase = #Workspace:GetDescendants()
+		local emittersBase = emitters()
 		local doneCalls = 0
 		local player = Finisher.new(target, {
 			reduced = opts.reduced,
@@ -76,8 +78,12 @@ return function(_args: any): { [string]: any }
 			#Workspace:GetDescendants() == workspaceBase,
 			`{#Workspace:GetDescendants()} vs {workspaceBase}`
 		)
-		check(`{label}: no emitters left`, emitters() == 0, emitters())
-		check(`{label}: peak emitters within budget`, peak <= EMITTER_BUDGET, `peak {peak}, budget {EMITTER_BUDGET}`)
+		check(`{label}: no emitters left`, emitters() == emittersBase, `{emitters()} vs {emittersBase}`)
+		check(
+			`{label}: peak emitters within budget`,
+			peak - emittersBase <= EMITTER_BUDGET,
+			`peak {peak}, budget {EMITTER_BUDGET}`
+		)
 		check(`{label}: clock disconnected`, player.conn == nil)
 		check(`{label}: onDone called once`, doneCalls == 1, doneCalls)
 	end
