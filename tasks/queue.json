@@ -3562,7 +3562,7 @@
       "id": "TASK-0058",
       "title": "SetExhibit Input Rules",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "done",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0058-SetExhibit-Input-Rules",
@@ -3572,10 +3572,55 @@
         "A Lune spec covers the all-clear case, each refusal, the order, NaN, slot 0 and a slot above the tier; a negative control (one guard removed) fails it.",
         "FullLoop and ExploitProbe still pass in Studio; scripts/check.sh green; one Sonnet first audit (Opus if the diff goes beyond the extraction); tokens recorded."
       ],
-      "history": [],
-      "executions": [],
-      "audits": [],
-      "revisions": 0
+      "history": [
+        {
+          "time": "2026-10-18T01:14:29",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T01:14:29",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T01:29:06",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T01:29:56",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T01:31:04",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-18T01:29:06",
+          "result": "pass",
+          "notes": "ExhibitRules extracted; specs 172/0, negative control, check.sh green; Studio FullLoop 85/85 and ExploitProbe 13/13"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-18T01:29:56",
+          "result": "pass",
+          "report": "06 QA/AUD-20261018-TASK-0058-01.md"
+        }
+      ],
+      "revisions": 0,
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }
