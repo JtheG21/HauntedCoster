@@ -4368,7 +4368,7 @@
       "id": "TASK-0066",
       "title": "Journal Collection Rewards",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4387,12 +4387,49 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T13:36:26",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T13:39:07",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T13:39:56",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T13:40:29",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
-      "executions": [],
-      "audits": [],
+      "executions": [
+        {
+          "time": "2026-10-18T13:39:07",
+          "result": "pass",
+          "notes": "journal milestones + claim implemented; check.sh green, 240 specs; Studio skipped by jg"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-18T13:39:56",
+          "result": "pass",
+          "report": "06 QA/AUD-20261018-TASK-0066-01.md"
+        }
+      ],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0067",

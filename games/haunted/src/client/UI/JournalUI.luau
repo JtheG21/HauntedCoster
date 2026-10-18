@@ -8,6 +8,7 @@ local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
 local Monsters = require(Config:WaitForChild("Monsters"))
 local Variants = require(Config:WaitForChild("Variants"))
 local Habitats = require(Config:WaitForChild("Habitats"))
+local MilestoneRules = require(ReplicatedStorage.Shared.Rules.MilestoneRules)
 local Theme = require(script.Parent.Theme)
 local State = require(script.Parent.Parent.State)
 
@@ -16,6 +17,9 @@ local JournalUI = {}
 local panel: Frame
 local content: ScrollingFrame
 local lastSig = ""
+local roster = MilestoneRules.rosterFrom(Monsters.Order, Habitats.List)
+local claimMessage: string? = nil -- the server's last answer to a Claim, shown with the milestones
+local render
 
 local function clear()
 	for _, c in content:GetChildren() do
@@ -75,7 +79,7 @@ local function spawnsIn(species: string, zoneIds: { string }): boolean
 	return false
 end
 
-local function render(force: boolean?)
+function render(force: boolean?)
 	if not panel.Visible then
 		return
 	end
@@ -94,6 +98,14 @@ local function render(force: boolean?)
 	for k in j.variants do
 		sig ..= k
 	end
+	for k in j.caught do
+		sig ..= "c" .. k
+	end
+	local claimed = if snap.cosmetics then snap.cosmetics.rewardsClaimed else {}
+	for k in claimed do
+		sig ..= "r" .. k
+	end
+	sig ..= tostring(claimMessage)
 	if sig == lastSig and not force then
 		return
 	end
@@ -112,6 +124,30 @@ local function render(force: boolean?)
 	local summary = card()
 	text(summary, `Caught {caught}/{#Monsters.Order} species  ·  Seen {seen}`, { Font = Theme.Bold, TextSize = 16 })
 	text(summary, "Trophies for milestones appear on your plot (cosmetic only).", { TextColor3 = Theme.Colors.dim })
+
+	-- Collection milestones: Claim grants the reward once (the server decides); Claimed rewards sit in Owned.
+	local mh = card()
+	text(mh, "Collection rewards", { Font = Theme.Bold, TextSize = 18 })
+	if claimMessage then
+		text(mh, claimMessage, { TextColor3 = Theme.Colors.gold })
+	end
+	for _, st in MilestoneRules.statuses(j, snap.cosmetics, roster) do
+		local row = card()
+		text(row, st.title, { Font = Theme.Bold })
+		if st.state == "claimed" then
+			text(row, "Claimed", { TextColor3 = Theme.Colors.good })
+		elseif st.state == "eligible" then
+			Theme.button(row, "Claim", function()
+				local ok, msg = State.invoke("ClaimReward", st.id)
+				claimMessage = if ok == true
+					then nil
+					else (if type(msg) == "string" then msg else "Something went wrong. Try again.")
+				render(true)
+			end, { Size = UDim2.fromOffset(90, 34) })
+		else
+			text(row, `{st.have}/{st.need}`, { TextColor3 = Theme.Colors.dim })
+		end
+	end
 
 	for _, id in Monsters.Order do
 		local s = Monsters.Species[id]

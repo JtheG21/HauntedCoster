@@ -27,7 +27,16 @@ Catalog.Items = {
 	FxSparks = { name = "Golden Sparks", category = "CaptureEffect" },
 	ThemeMoonlit = { name = "Moonlit Theme", category = "Theme", tiers = { 1, 2 } }, -- not the Shack: tests the fallback
 } :: { [string]: Item }
-Catalog.Rewards = {} :: { [string]: Reward }
+-- Milestone rewards (TASK-0066, Config/Milestones): the reward ID equals the milestone ID. DRAFT: which sample
+-- each milestone grants needs jg's review.
+Catalog.Rewards = {
+	bestiary_half = { grants = { "FxSparks" } },
+	bestiary_all = { grants = { "ThemeMoonlit" } },
+	hab_Cemetery = { grants = { "SkinMoss" } },
+	hab_Woodland = { grants = { "AuraEmbers" } },
+	var_Spectral = { grants = { "AuraEmbers" } },
+	var_Ashen = { grants = { "SkinMoss" } },
+} :: { [string]: Reward }
 
 -- Bounds that hold whatever the catalog contains, so a stored profile can't grow without limit.
 Catalog.MaxIdLength = 64

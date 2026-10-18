@@ -51,7 +51,10 @@ return function(t: TestRunner.T)
 			t.eq((item :: any).price, nil)
 			t.eq((item :: any).product, nil)
 		end
-		t.eq(next(Catalog.Rewards), nil)
+		for id, reward in Catalog.Rewards do
+			t.truthy(#reward.grants > 0, `{id} grants nothing`)
+			t.eq((reward :: any).price, nil)
+		end
 	end)
 
 	t.test("defaults are empty and unequipped", function()
