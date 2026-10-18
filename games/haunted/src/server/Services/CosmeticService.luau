@@ -14,6 +14,7 @@ local CosmeticRules = require(Shared.Rules.CosmeticRules)
 local ThemeRules = require(Shared.Rules.ThemeRules)
 local LookRules = require(Shared.Rules.LookRules)
 local MilestoneRules = require(Shared.Rules.MilestoneRules)
+local PlacementRules = require(Shared.Rules.PlacementRules)
 local ProfileRules = require(Shared.Rules.ProfileRules)
 local Remotes = require(script.Parent.Parent.Remotes)
 local ContainmentService = require(script.Parent.ContainmentService)
@@ -170,6 +171,79 @@ function CosmeticService.claimReward(player: Player, milestoneId: any): (boolean
 	return true, nil
 end
 
+local function footprintOf(id: string): PlacementRules.Footprint
+	local item = Catalog.Items[id]
+	return (item and item.footprint) or PlacementRules.DefaultFootprint
+end
+
+-- Place, move or store an exterior decoration (TASK-0065). Every number is untrusted: parseEdit cleans it, then
+-- PlacementRules (bounds and gameplay areas at the current house tier) and CosmeticRules (ownership, per-item
+-- limit, plot cap) decide inside one update, so a refusal changes nothing.
+function CosmeticService.editDecoration(player: Player, action: any, a: any, b: any, c: any, d: any): (boolean, string?)
+	local edit, bad = PlacementRules.parseEdit(action, a, b, c, d)
+	if not edit then
+		return false, bad
+	end
+	local profile = PlayerDataService.get(player)
+	if not profile then
+		return false, "Your data is still loading."
+	end
+	local failure: string? = nil
+	local applied = PlayerDataService.update(player, function(p)
+		local s = p.cosmetics
+		if edit.action == "store" then
+			local ok, reason = CosmeticRules.removePlacement(s, edit.index :: number)
+			if not ok then
+				failure = PlacementRules.message(reason)
+			end
+		elseif edit.action == "place" then
+			local id = edit.id :: string
+			local reason = PlacementRules.refusal(
+				edit.x :: number,
+				edit.z :: number,
+				footprintOf(id),
+				edit.r :: number,
+				p.houseTier
+			)
+			if reason then
+				failure = PlacementRules.message(reason)
+				return
+			end
+			local ok, why = CosmeticRules.place(s, catalog(), id, edit.x :: number, edit.z :: number, edit.r :: number)
+			if not ok then
+				failure = PlacementRules.message(why)
+			end
+		else
+			local placed = s.placements[edit.index :: number]
+			if not placed then
+				failure = PlacementRules.message("noPlacement")
+				return
+			end
+			local reason = PlacementRules.refusal(
+				edit.x :: number,
+				edit.z :: number,
+				footprintOf(placed.id),
+				edit.r :: number,
+				p.houseTier
+			)
+			if reason then
+				failure = PlacementRules.message(reason)
+				return
+			end
+			placed.x, placed.z, placed.r = edit.x :: number, edit.z :: number, edit.r :: number
+		end
+	end)
+	if failure then
+		return false, failure
+	end
+	if not applied then
+		return false, "Your data is still loading."
+	end
+	PlotService.rebuildDecorations(player)
+	StateService.markDirty(player)
+	return true, nil
+end
+
 function CosmeticService.start()
 	if started then
 		return
@@ -180,6 +254,12 @@ function CosmeticService.start()
 			return false, "Slow down."
 		end
 		return CosmeticService.equip(player, uid, slot, id)
+	end
+	Remotes.func("EditDecoration").OnServerInvoke = function(player, action, a, b, c, d)
+		if not Remotes.allow(player, "EditDecoration", 10, 8) then
+			return false, "Slow down."
+		end
+		return CosmeticService.editDecoration(player, action, a, b, c, d)
 	end
 	Remotes.func("ClaimReward").OnServerInvoke = function(player, id)
 		if not Remotes.allow(player, "ClaimReward", 4, 8) then
