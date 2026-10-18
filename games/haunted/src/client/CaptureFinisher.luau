@@ -45,13 +45,34 @@ function CaptureFinisher.mount()
 		marker.Size = Vector3.one
 		marker.Position = payload.position - Vector3.new(0, hover, 0)
 		marker.Parent = Workspace
-		RareCaptureFinisher.play(marker, {
+		-- A dead or removed character ends the carry; the finisher must not keep the camera and movement
+		-- locked over the respawn, so it stops with the character.
+		local guards: { RBXScriptConnection } = {}
+		local run = RareCaptureFinisher.play(marker, {
 			reduced = reduceEffects(),
 			destination = root.Position + DESTINATION_LIFT,
 			onDone = function()
+				for _, c in guards do
+					c:Disconnect()
+				end
 				marker:Destroy()
 			end,
 		})
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			table.insert(
+				guards,
+				humanoid.Died:Connect(function()
+					run:stop()
+				end)
+			)
+		end
+		table.insert(
+			guards,
+			Players.LocalPlayer.CharacterRemoving:Connect(function()
+				run:stop()
+			end)
+		)
 	end)
 end
 

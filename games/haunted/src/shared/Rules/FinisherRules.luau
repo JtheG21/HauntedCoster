@@ -92,6 +92,10 @@ function FinisherRules.hermite(p0: number, m0: number, p1: number, m1: number, k
 	return (2 * k3 - 3 * k2 + 1) * p0 + (k3 - 2 * k2 + k) * m0 + (-2 * k3 + 3 * k2) * p1 + (k3 - k2) * m1
 end
 
+local function isFinite(n: number): boolean
+	return n == n and math.abs(n) ~= math.huge
+end
+
 export type Payload = { species: string, position: Vector3 }
 
 -- Checks a CaptureFinisher event from the server before anything is built from it. The server is trusted
@@ -110,14 +114,7 @@ function FinisherRules.parsePayload(info: any, species: { [string]: any }, from:
 		return nil
 	end
 	local v = pos :: Vector3
-	if
-		v.X ~= v.X
-		or v.Y ~= v.Y
-		or v.Z ~= v.Z
-		or math.abs(v.X) == math.huge
-		or math.abs(v.Y) == math.huge
-		or math.abs(v.Z) == math.huge
-	then
+	if not (isFinite(v.X) and isFinite(v.Y) and isFinite(v.Z)) then
 		return nil
 	end
 	if (v - from).Magnitude > maxDistance then

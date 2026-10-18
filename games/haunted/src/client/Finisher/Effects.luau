@@ -41,6 +41,7 @@ local ESSENCE_SIZE = 4 -- studs across
 local ESSENCE_FADE_IN = 0.6
 local ESSENCE_FADE_OUT = 1.0
 local ESSENCE_ALPHA = 0.35
+local ESSENCE_FALLBACK_SECONDS = 12 -- only if a cue has no duration (the config spec requires one)
 local PILLAR_ALPHA_REDUCED = 0.75
 
 -- Height of the ground under the monster, or a sensible guess when nothing is hit.
@@ -222,7 +223,7 @@ end
 -- colours, and fades out before the sequence ends. The monster itself is already gone when this plays.
 local function essence(ctx: Ctx, cue: Sequence.Cue, p: { [string]: any }): Undo
 	local keys: { { at: number, c: { number } } } = p.colors
-	local duration: number = cue.duration or 12
+	local duration: number = cue.duration or ESSENCE_FALLBACK_SECONDS
 	local ball = Instance.new("Part")
 	ball.Name = "FinisherEssence"
 	ball.Shape = Enum.PartType.Ball
