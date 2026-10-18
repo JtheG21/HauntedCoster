@@ -3229,6 +3229,28 @@
       "revisions": 1,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0053",
+      "title": "Sequence Runner",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [],
+      "branch": "task/TASK-0053-Sequence-Runner",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0053-Sequence-Runner.md",
+      "acceptance_criteria": [
+        "Lune spec: cues sort by time; invalid tables rejected with a named reason; cancel yields a complete cleanup plan; deterministic.",
+        "Play scenario: instance and connection counts return to baseline and peak particles stay in budget after finish or cancel.",
+        "evidence.py series --max-transitions 6 passes on a screen take of the demo.",
+        "scripts/check.sh green; one audit; no server file changed."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": null,
+      "merge_approved_by": null
     }
   ]
 }

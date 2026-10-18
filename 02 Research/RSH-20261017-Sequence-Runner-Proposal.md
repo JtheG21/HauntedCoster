@@ -18,7 +18,7 @@ tags:
 ---
 # Sequence runner: proposed TASK and ADR
 
-> **Draft for jg.** Nothing here is approved. No TASK or ADR ID is reserved: other branches already use TASK-0042 to TASK-0046, so jg or the orchestrator assigns IDs when this is accepted.
+> **Update 2026-10-17:** jg approved the ADR direction, chose GAME-002 and delegated the task ID, owner and Studio window. Recorded as [[ADR-0012-Sequence-Runner]] (approved) and [[TASK-0053-Sequence-Runner]] (proposed; plan approval still pending). The text below is the original proposal.
 
 ## Why
 jg chose "build it first" for VF-5 in the REF-VFX-001 review: a data-driven runner for timed sequences (camera keys, effect cues, cleanup), so the experiment on a 10-15 s ability sequence has something to run on. The two 2026-10-14 video notes (read 2026-10-17) show the pattern is common but give no code, no server validation and no cleanup story: markers drive cosmetics, the server hitbox check is not shown, and marker-name mismatches fail silently. Those three gaps are what the runner must cover.
