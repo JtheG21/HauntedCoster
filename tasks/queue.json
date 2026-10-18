@@ -3680,6 +3680,198 @@
       "approved_by": "jg",
       "tier": "light",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0060",
+      "title": "Monetization Persistence Schema",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [],
+      "branch": "task/TASK-0060-Monetization-Persistence-Schema",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0060-Monetization-Persistence-Schema.md",
+      "acceptance_criteria": [
+        "Profile schema gains independent entitlement inventory, per-ghost skin and aura selections (keyed by monster UID), a per-player capture effect, the mansion theme, decoration inventory and placements, and reward claim state; ProfileRules sanitizes and migrates every field, and the newer-schema read-only guard still holds.",
+        "Lune specs cover defaults, sanitization of corrupt values, migration from the current schema, and the grant/equip/remove rules as pure functions; a negative control fails them.",
+        "Rejoin persistence is proven in Studio (save, leave, rejoin, state intact); scripts/check.sh green; one Opus first audit (DataStore code)."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0061",
+      "title": "Shop And Owned Inventory UI",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0060"
+      ],
+      "branch": "task/TASK-0061-Shop-And-Owned-Inventory-UI",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0061-Shop-And-Owned-Inventory-UI.md",
+      "acceptance_criteria": [
+        "A Shop screen (five categories, ownership and acquisition filters, cards, item details) and an Owned view with equipped markers, reachable from the HUD and Mansion, with one consistent back behaviour and kept filter and scroll position.",
+        "Loading, empty-catalog, unavailable-data and owned states are honest: no fake prices, no Buy button without a supported grant path, unknown ownership never shown as unowned.",
+        "Server exposes read-only catalog and ownership remotes (validated, rate-limited); UI specs for state logic; Studio screenshots at desktop and phone widths; check.sh green; one Sonnet audit."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0062",
+      "title": "Ghost Skins And Auras Equipment",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0060",
+        "TASK-0061"
+      ],
+      "branch": "task/TASK-0062-Ghost-Skins-And-Auras-Equipment",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0062-Ghost-Skins-And-Auras-Equipment.md",
+      "acceptance_criteria": [
+        "Owned skins and auras equip and remove per ghost (by UID) through a server-validated remote; compatibility is checked and explained; natural Spectral and Ashen identity is preserved.",
+        "The appearance shows on the owner's and other players' clients, previews never alter live models, and state survives rejoin.",
+        "Specs for equip, remove, incompatible target and invalid input; check.sh green; one Sonnet audit; Studio FullLoop still passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0063",
+      "title": "Capture Effects Equipment",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0060",
+        "TASK-0061"
+      ],
+      "branch": "task/TASK-0063-Capture-Effects-Equipment",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0063-Capture-Effects-Equipment.md",
+      "acceptance_criteria": [
+        "A per-player capture effect can be equipped and removed, with a replayable preview in the item details.",
+        "Cosmetics change nothing about timing, success, the meter or retaliation; asserted by a spec and a Studio check.",
+        "check.sh green; one Sonnet audit; VFX rights for any plugin asset checked first (see TASK-0054)."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0064",
+      "title": "Mansion Themes",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0060",
+        "TASK-0061"
+      ],
+      "branch": "task/TASK-0064-Mansion-Themes",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0064-Mansion-Themes.md",
+      "acceptance_criteria": [
+        "A theme declares its supported house tiers; equipping an unsupported tier is refused with a reason, and a tier upgrade that invalidates the equipped theme falls back to the default look with a notice.",
+        "Complete exterior preview before purchase; the theme shows consistently to all players; state survives rejoin.",
+        "Specs for compatibility and fallback; Studio check across tiers and plot orientations; check.sh green; one Sonnet audit."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0065",
+      "title": "Exterior Decoration Editor",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0060",
+        "TASK-0061",
+        "TASK-0064"
+      ],
+      "branch": "task/TASK-0065-Exterior-Decoration-Editor",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0065-Exterior-Decoration-Editor.md",
+      "acceptance_criteria": [
+        "Owned decorations are placed in plot-local coordinates with grid snap, rotation, bounded fine placement, live valid or invalid feedback, Confirm, Cancel, Move, Rotate, Store and Exit; the server validates every placement against bounds, caps and essential gameplay areas.",
+        "Reusable ownership with a per-plot cap (jg, this batch); a house upgrade stores incompatible placements with a notice and nothing is lost; state survives rejoin.",
+        "Specs for placement validation, cap and storage; Studio check on all plot orientations; check.sh green; one Opus audit (server-validated persistent state)."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0066",
+      "title": "Journal Collection Rewards",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0060",
+        "TASK-0061"
+      ],
+      "branch": "task/TASK-0066-Journal-Collection-Rewards",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0066-Journal-Collection-Rewards.md",
+      "acceptance_criteria": [
+        "The Journal shows habitat completion, rare natural-variant discoveries and Bestiary milestones with Eligible and Claimed states; a Claim action grants once on the server and cannot repeat.",
+        "Milestone definitions come from the real species and habitat roster, written into the note; a paid skin never completes a discovery.",
+        "Specs for eligibility, single grant and replay; check.sh green; one Sonnet audit."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0067",
+      "title": "Coin Purchases",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "depends_on": [
+        "TASK-0060",
+        "TASK-0061"
+      ],
+      "branch": "task/TASK-0067-Coin-Purchases",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0067-Coin-Purchases.md",
+      "acceptance_criteria": [
+        "Coin purchases of catalog items debit and grant authoritatively on the server, idempotent under retry and double submit; insufficient funds shows the exact requirement and never opens a Robux prompt.",
+        "Pending, failure and rejoin states are covered; prices come from configured data, never UI constants.",
+        "Specs for debit, grant, retry, insufficient funds and rapid repeats; ExploitProbe extended; check.sh green; one Opus audit (economy and persistence)."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0068",
+      "title": "Robux Purchase Research And ADR",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0068-Robux-Purchase-Research-And-ADR",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0068-Robux-Purchase-Research-And-ADR.md",
+      "acceptance_criteria": [
+        "A research note and a draft ADR compare entitlement mechanisms (developer product vs game pass), receipt handling and grant recovery, with sources and access dates.",
+        "The ADR stays draft; no product IDs, prices, publishing or Robux spend without jg's explicit approval.",
+        "Open questions listed for jg; no code changes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
     }
   ]
 }
