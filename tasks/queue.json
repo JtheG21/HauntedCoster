@@ -3498,7 +3498,7 @@
       "id": "TASK-0057",
       "title": "Overview Evidence Sync",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "done",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0057-Overview-Evidence-Sync",
@@ -3508,10 +3508,55 @@
         "The Overview task table lists TASK-0053 to TASK-0056 with their outcomes, linked to their notes.",
         "scripts/check.sh and validate_vault.py pass; executor tokens recorded with record-usage if a figure exists; no audit (Light tier)."
       ],
-      "history": [],
-      "executions": [],
-      "audits": [],
-      "revisions": 0
+      "history": [
+        {
+          "time": "2026-10-18T01:05:55",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T01:05:55",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T01:06:55",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T01:08:37",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T01:11:56",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-18T01:06:55",
+          "result": "pass",
+          "notes": "Overview synced; check.sh green; Light tier, no audit; tokens not available"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-18T01:08:37",
+          "result": "pass",
+          "report": "06 QA/AUD-20261018-TASK-0057-01.md"
+        }
+      ],
+      "revisions": 0,
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }
