@@ -51,6 +51,24 @@ function Util.emitter(
 	return p
 end
 
+-- A camera-facing image sprite sized in studs (billboard scale is studs). Returns the gui and its image.
+function Util.billboard(parent: Instance, texture: string, color: Color3): (BillboardGui, ImageLabel)
+	local gui = Instance.new("BillboardGui")
+	gui.AlwaysOnTop = false
+	gui.LightInfluence = 0
+	gui.Size = UDim2.fromScale(1, 1)
+	gui.Parent = parent
+	local img = Instance.new("ImageLabel")
+	img.BackgroundTransparency = 1
+	img.AnchorPoint = Vector2.new(0.5, 0.5)
+	img.Position = UDim2.fromScale(0.5, 0.5)
+	img.Size = UDim2.fromScale(1, 1)
+	img.Image = texture
+	img.ImageColor3 = color
+	img.Parent = gui
+	return gui, img
+end
+
 -- Runs fn(secondsSinceStart, dt) every frame until the returned stop function is called.
 function Util.every(fn: (t: number, dt: number) -> ()): () -> ()
 	local started = os.clock()

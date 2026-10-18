@@ -5,6 +5,13 @@
 
 local Sequence = require(script.Parent.Parent.Sequence)
 
+-- Colour by phase (seconds from the start): cold blue-green charge, white peak, purple release.
+local phaseColors = {
+	{ at = 0, c = { 0.55, 1, 0.9 } },
+	{ at = 4, c = { 1, 1, 1 } },
+	{ at = 8, c = { 0.85, 0.6, 1 } },
+}
+
 local finisher: Sequence.Def = {
 	id = "rare_capture_finisher",
 	length = 12.8,
@@ -18,15 +25,16 @@ local finisher: Sequence.Def = {
 			at = 0,
 			kind = "effect",
 			duration = 12.2,
-			params = {
-				effect = "rune",
-				size = 26,
-				colors = {
-					{ at = 0, c = { 0.55, 1, 0.9 } },
-					{ at = 4, c = { 1, 1, 1 } },
-					{ at = 8, c = { 0.85, 0.6, 1 } },
-				},
-			},
+			params = { effect = "rune", size = 26, colors = phaseColors },
+		},
+		-- the captured spirit: the monster is removed the instant a capture succeeds, so the finisher brings
+		-- its own subject for the rune to sit under and the orb to orbit
+		{
+			id = "essence",
+			at = 0,
+			kind = "effect",
+			duration = 12.2,
+			params = { effect = "essence", colors = phaseColors },
 		},
 
 		-- phase 1: charge (cold blue-green), slow push-in and orbit

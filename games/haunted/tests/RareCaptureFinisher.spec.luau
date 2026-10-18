@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Sequence = require(ReplicatedStorage.Shared.Sequence)
 local Finisher = require(ReplicatedStorage.Shared.Config.RareCaptureFinisher)
 local Rules = require(ReplicatedStorage.Shared.Rules.FinisherRules)
+local Monsters = require(ReplicatedStorage.Shared.Config.Monsters)
 
 return function(t: TestRunner.T)
 	t.test("finisher validates and is 10-15 s", function()
@@ -144,6 +145,70 @@ return function(t: TestRunner.T)
 		t.truthy(
 			math.abs(first - v.x * dt) < 0.05 * math.max(1, math.abs(v.x * dt)) + 0.02,
 			`first step {first} vs {v.x * dt}`
+		)
+	end)
+
+	t.test("essence cue is present and its colour keys match the rune's", function()
+		local rune, essence
+		for _, cue in Finisher.cues do
+			if cue.id == "rune" then
+				rune = cue
+			elseif cue.id == "essence" then
+				essence = cue
+			end
+		end
+		t.truthy(rune and essence, "rune and essence cues")
+		t.eq((essence :: any).params.colors, (rune :: any).params.colors)
+	end)
+
+	t.test("payload check accepts a real Rare capture and rejects everything else", function()
+		local here = Vector3.new(10, 5, 10)
+		local good = { species = "BellWraith", variant = "Normal", position = Vector3.new(20, 6, 12) }
+		local ok = Rules.parsePayload(good, Monsters.Species, here, 120)
+		t.truthy(ok and ok.species == "BellWraith")
+		t.eq(Rules.parsePayload(nil, Monsters.Species, here, 120), nil)
+		t.eq(Rules.parsePayload("x", Monsters.Species, here, 120), nil)
+		t.eq(
+			Rules.parsePayload({ species = "Wisp", position = good.position }, Monsters.Species, here, 120),
+			nil,
+			"not Rare"
+		)
+		t.eq(
+			Rules.parsePayload({ species = "Nope", position = good.position }, Monsters.Species, here, 120),
+			nil,
+			"unknown"
+		)
+		t.eq(Rules.parsePayload({ species = 5, position = good.position }, Monsters.Species, here, 120), nil)
+		t.eq(Rules.parsePayload({ species = "BellWraith", position = "far" }, Monsters.Species, here, 120), nil)
+		t.eq(
+			Rules.parsePayload(
+				{ species = "BellWraith", position = Vector3.new(0 / 0, 0, 0) },
+				Monsters.Species,
+				here,
+				120
+			),
+			nil,
+			"NaN"
+		)
+		t.eq(
+			Rules.parsePayload(
+				{ species = "BellWraith", position = Vector3.new(math.huge, 0, 0) },
+				Monsters.Species,
+				here,
+				120
+			),
+			nil,
+			"inf"
+		)
+		t.eq(
+			Rules.parsePayload(
+				{ species = "BellWraith", position = Vector3.new(500, 5, 10) },
+				Monsters.Species,
+				here,
+				120
+			),
+			nil,
+			"too far"
 		)
 	end)
 end
