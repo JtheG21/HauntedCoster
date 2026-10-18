@@ -4269,7 +4269,7 @@
       "id": "TASK-0064",
       "title": "Mansion Themes",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4295,9 +4295,21 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-18T13:32:35",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
-      "executions": [],
+      "executions": [
+        {
+          "time": "2026-10-18T13:32:35",
+          "result": "pass",
+          "notes": "mansion themes implemented; check.sh green, 230 specs; Studio skipped by jg; AC2 full preview not built"
+        }
+      ],
       "audits": [],
       "revisions": 0,
       "approved_by": "jg"

@@ -3,7 +3,7 @@ id: TASK-0064
 title: "Mansion Themes"
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: medium
 risk: medium
 owner: executor
@@ -66,7 +66,9 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 219,091, at close 238,975
 |---|---|
 | AC1 tier list, refusal with reason, fallback with notice | implemented and spec-tested |
 | AC2 complete exterior preview, consistent for all players, survives rejoin | NOT met: preview is swatches only; the tint replicates through house attributes and persists in `cosmetics`, untested in Studio |
-| AC3 specs, Studio across tiers and orientations, check.sh, Sonnet audit | specs and check.sh done; Studio not run; audit pending |
+| AC3 specs, Studio across tiers and orientations, check.sh, Sonnet audit | specs and check.sh done; Studio not run; audit see Audits |
+
+**Studio skipped by jg, 2026-10-18.** No Play session, no check across tiers or plot orientations, no screenshots. The tint, the upgrade fallback and the theme UI are unverified at runtime.
 
 ## Audits
 
