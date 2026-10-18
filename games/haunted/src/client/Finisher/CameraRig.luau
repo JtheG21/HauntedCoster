@@ -17,7 +17,7 @@ local ORBIT_SPEED = 0.5 -- rad/s the camera circles the monster
 
 type Active = { id: string, startedAt: number, p: { [string]: any } }
 
-function CameraRig.new(target: BasePart, reduced: boolean): (cue: Sequence.Cue) -> (() -> ())?
+function CameraRig.new(anchor: BasePart, reduced: boolean): (cue: Sequence.Cue) -> (() -> ())?
 	local active: { Active } = {}
 	local conn: RBXScriptConnection? = nil
 	local saved: { type: Enum.CameraType, fov: number }? = nil
@@ -45,13 +45,13 @@ function CameraRig.new(target: BasePart, reduced: boolean): (cue: Sequence.Cue) 
 			local p = posCue.p
 			local angle = (now - posCue.startedAt) * ORBIT_SPEED
 			local height = if p.pos == "low" then 1.5 else p.height or 5
-			local pos = target.Position + Vector3.new(math.cos(angle) * p.radius, height, math.sin(angle) * p.radius)
+			local pos = anchor.Position + Vector3.new(math.cos(angle) * p.radius, height, math.sin(angle) * p.radius)
 			local offset = Vector3.new(math.noise(now * 20, 1), math.noise(now * 20, 2), math.noise(now * 20, 3))
 				* shake
-			cam.CFrame = CFrame.lookAt(pos + offset, target.Position + Vector3.new(0, 3, 0))
+			cam.CFrame = CFrame.lookAt(pos + offset, anchor.Position + Vector3.new(0, 3, 0))
 		end
 		if fovCue then
-			local goal = FinisherRules.fov(BASE_FOV, fovCue.p.fov, reduced)
+			local goal = FinisherRules.fov(if saved then saved.fov else BASE_FOV, fovCue.p.fov, reduced)
 			fov += (goal - fov) * math.min(1, dt * 3)
 			cam.FieldOfView = fov
 		end
@@ -75,15 +75,23 @@ function CameraRig.new(target: BasePart, reduced: boolean): (cue: Sequence.Cue) 
 			if i then
 				table.remove(active, i)
 			end
-			if #active == 0 and saved then
+			-- Cuts replace one camera cue with the next in the same frame (the runner stops the old cue
+			-- first). Restoring now would flash the player's camera for a frame, so check again after.
+			task.defer(function()
+				if #active > 0 or not saved then
+					return
+				end
 				if conn then
 					conn:Disconnect()
 					conn = nil
 				end
-				cam.CameraType = saved.type
-				cam.FieldOfView = saved.fov
+				local current = Workspace.CurrentCamera
+				if current then
+					current.CameraType = saved.type
+					current.FieldOfView = saved.fov
+				end
 				saved = nil
-			end
+			end)
 		end
 	end
 end

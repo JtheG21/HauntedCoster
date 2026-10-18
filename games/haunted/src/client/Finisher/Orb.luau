@@ -16,12 +16,14 @@ local Util = require(script.Parent.Util)
 
 local Orb = {}
 
-export type Ctx = { fx: Folder, anchor: BasePart, destination: Vector3, reduced: boolean }
+type Ctx = Util.Ctx
 
 local ORBIT_HEIGHT = 7 -- studs above the monster's anchor the orbit is centred
 local FADE_IN = 0.45 -- seconds the orb takes to appear
 local ARRIVE_SPEED = 2.2 -- exit speed into the target, as a multiple of the straight-line distance per curve
 local CORE_PULSE_HZ = 2.5
+local TRAIL_HALF_WIDTH = 0.28 -- of the orb's size: a slim ribbon, not a slab
+local SNAP_TRAIL_LIFETIME = 0.14 -- seconds; short, so the break-off streaks instead of smearing
 
 local function billboard(parent: Instance, texture: string, color: Color3): (BillboardGui, ImageLabel)
 	local gui = Instance.new("BillboardGui")
@@ -65,7 +67,7 @@ function Orb.start(ctx: Ctx, cue: Sequence.Cue): () -> ()
 	trail.FaceCamera = true
 	trail.Color = ColorSequence.new(tint)
 	trail.LightEmission = 1
-	trail.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.1), NumberSequenceKeypoint.new(1, 1) })
+	trail.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.25), NumberSequenceKeypoint.new(1, 1) })
 	trail.WidthScale = NumberSequence.new({ NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(1, 0) })
 	trail.Enabled = false -- on after the fade-in, so it never draws a streak from the spawn point
 	trail.Parent = orb
@@ -73,7 +75,9 @@ function Orb.start(ctx: Ctx, cue: Sequence.Cue): () -> ()
 	local _, orbGlow = billboard(orb, Assets.Textures.sparkle, tint)
 	local orbGui = orbGlow.Parent :: BillboardGui
 	orbGlow.ImageTransparency = 1
-	local coreGui, core = billboard(ctx.anchor, Assets.Textures.glow, tint)
+	-- sparkle has a real alpha channel; the glow texture has an opaque dark background that shows as a box
+	-- on a billboard (billboards cannot be additive like particles), so it is only used on emitters
+	local coreGui, core = billboard(ctx.anchor, Assets.Textures.sparkle, tint)
 	core.ImageTransparency = 1
 
 	local wind = Meshes.get("windRing", tint, 1)
@@ -98,14 +102,14 @@ function Orb.start(ctx: Ctx, cue: Sequence.Cue): () -> ()
 		orb.Position = center + Vector3.new(o.x, o.y, o.z)
 		local s = o.size
 		orb.Size = Vector3.new(s, s, s)
-		a0.Position = Vector3.new(0, s * 0.45, 0)
-		a1.Position = Vector3.new(0, -s * 0.45, 0)
-		trail.Lifetime = 0.2 + 0.5 * o.u
+		a0.Position = Vector3.new(0, s * TRAIL_HALF_WIDTH, 0)
+		a1.Position = Vector3.new(0, -s * TRAIL_HALF_WIDTH, 0)
+		trail.Lifetime = 0.2 + 0.4 * o.u
 		orbGui.Size = UDim2.fromScale(s * 2.6, s * 2.6)
 		orbGlow.Rotation = (t * 160) % 360
 		-- the core swells and quickens as the orbit tightens
 		local pulse = 1 + 0.12 * math.sin(t * math.pi * 2 * CORE_PULSE_HZ * (1 + 2 * o.u))
-		local coreSize = (6 + 10 * FinisherRules.smoothstep(o.u)) * pulse
+		local coreSize = (4 + 5 * FinisherRules.smoothstep(o.u)) * pulse
 		coreGui.Size = UDim2.fromScale(coreSize, coreSize)
 		if wind then
 			local d = o.radius * 2.2
@@ -132,13 +136,14 @@ function Orb.start(ctx: Ctx, cue: Sequence.Cue): () -> ()
 
 	local function startBreakOff()
 		local p0 = orb.Position
+		trail.Lifetime = SNAP_TRAIL_LIFETIME
 		-- velocity on the orbit at the last instant, so the exit keeps its speed and direction
 		local v0 = (orbitPos(orbitTime) - orbitPos(orbitTime - 1 / 60)) * 60
 		local toTarget = ctx.destination - p0
 		launch = {
 			p0 = p0,
 			m0 = v0 * snapTime,
-			m1 = toTarget.Unit * toTarget.Magnitude * ARRIVE_SPEED,
+			m1 = toTarget * ARRIVE_SPEED,
 			startSize = orb.Size.X,
 		}
 		emitAt(

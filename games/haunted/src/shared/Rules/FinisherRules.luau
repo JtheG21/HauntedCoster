@@ -4,10 +4,14 @@
 
 local FinisherRules = {}
 
-FinisherRules.REDUCED = { flash = 0.25, shake = 0.2, rate = 0.5, fovSwing = 0.5 }
+FinisherRules.REDUCED = { flash = 0.25, shake = 0.2, rate = 0.5, fovSwing = 0.5, brightness = 0.4, bolt = 0.5 }
 
 -- Returns the strength/amplitude/rate to use for a cue param, given the reduce-effects setting.
-function FinisherRules.scale(kind: "flash" | "shake" | "rate" | "fovSwing", value: number, reduced: boolean): number
+function FinisherRules.scale(
+	kind: "flash" | "shake" | "rate" | "fovSwing" | "brightness" | "bolt",
+	value: number,
+	reduced: boolean
+): number
 	if not reduced then
 		return value
 	end
@@ -24,7 +28,7 @@ end
 -- tumbles about the X, Y and Z axes (rates tied to the spin), so the orb sweeps all the way around the
 -- monster. The combined angular rate is capped near 0.4 rad per frame at 60 fps so it stays smooth.
 FinisherRules.ORBIT =
-	{ w0 = 1.2, w1 = 18, r0 = 7, r1 = 1.6, size0 = 2.2, size1 = 4.4, tumbleX = 0.2, tumbleY = 0.14, tumbleZ = 0.1 }
+	{ w0 = 1.2, w1 = 18, r0 = 7, r1 = 1.6, size0 = 2.2, size1 = 2.8, tumbleX = 0.2, tumbleY = 0.14, tumbleZ = 0.1 }
 
 export type OrbitState = {
 	x: number,
@@ -69,12 +73,6 @@ function FinisherRules.orbit(t: number, total: number): OrbitState
 		speed = o.w0 * math.exp(k * u),
 		u = u,
 	}
-end
-
--- Break-off easing: leaves fast and keeps going (ease-out), k from 0 to 1.
-function FinisherRules.snap(k: number): number
-	local r = 1 - math.clamp(k, 0, 1)
-	return 1 - r * r * r * r
 end
 
 -- Smooth 0..1 ease with zero slope at both ends.

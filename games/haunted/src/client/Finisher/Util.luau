@@ -5,6 +5,16 @@ local RunService = game:GetService("RunService")
 
 local Util = {}
 
+-- What every effect needs to know about the run it belongs to.
+export type Ctx = {
+	fx: Folder, -- everything an effect creates lives here; destroyed when the run ends
+	anchor: BasePart, -- fixed point on the monster the effects attach to
+	target: BasePart,
+	destination: Vector3, -- where the orb finally lands
+	reduced: boolean,
+	runId: string, -- unique per run, so two runs never share a binding name
+}
+
 function Util.color(c: { number }): Color3
 	return Color3.new(c[1], c[2], c[3])
 end

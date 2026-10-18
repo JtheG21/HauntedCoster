@@ -27,6 +27,11 @@ export type Options = {
 
 local DEFAULT_DESTINATION_OFFSET = Vector3.new(0, 1.5, 12)
 
+-- One finisher at a time: a new request cleanly replaces a running one, so two runs never fight over
+-- the camera, the movement lock or Lighting.
+local activeRun: SequencePlayer.Player? = nil
+local runCount = 0
+
 function RareCaptureFinisher.preload()
 	Meshes.preload()
 end
@@ -36,6 +41,10 @@ end
 function RareCaptureFinisher.new(target: BasePart, opts: Options?): SequencePlayer.Player
 	local o: Options = opts or {}
 	local reduced = o.reduced == true
+	if activeRun then
+		activeRun:stop()
+	end
+	runCount += 1
 
 	local fx = Instance.new("Folder")
 	fx.Name = "FinisherFx"
@@ -51,21 +60,28 @@ function RareCaptureFinisher.new(target: BasePart, opts: Options?): SequencePlay
 	anchor.Parent = fx
 
 	local handlers: SequencePlayer.Handlers = {
-		camera = CameraRig.new(target, reduced),
+		camera = CameraRig.new(anchor, reduced),
 		effect = Effects.new({
 			fx = fx,
 			anchor = anchor,
 			target = target,
 			destination = o.destination or (target.Position + DEFAULT_DESTINATION_OFFSET),
 			reduced = reduced,
+			runId = tostring(runCount),
 		}),
 	}
-	return SequencePlayer.new(Finisher, handlers, function()
+	local player: SequencePlayer.Player
+	player = SequencePlayer.new(Finisher, handlers, function()
+		if activeRun == player then
+			activeRun = nil
+		end
 		fx:Destroy()
 		if o.onDone then
 			o.onDone()
 		end
 	end)
+	activeRun = player
+	return player
 end
 
 function RareCaptureFinisher.play(target: BasePart, opts: Options?): SequencePlayer.Player

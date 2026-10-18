@@ -5,6 +5,7 @@
 
 local ContextActionService = game:GetService("ContextActionService")
 local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
@@ -19,7 +20,7 @@ local Util = require(script.Parent.Util)
 
 local Effects = {}
 
-export type Ctx = { fx: Folder, anchor: BasePart, target: BasePart, destination: Vector3, reduced: boolean }
+type Ctx = Util.Ctx
 type Undo = (() -> ())?
 
 local LOCKED_ACTIONS = {
@@ -32,6 +33,11 @@ local LOCKED_ACTIONS = {
 local LOCK_PRIORITY = 3000 -- above the default movement bindings
 local RUNE_FADE_IN = 0.8
 local PALE_BLUE = Color3.new(0.9, 0.95, 1)
+local SHOCK_START_SIZE = 4 -- studs across when a shockwave ring is born
+local SHOCK_THICKNESS = 0.3
+local SHOCK_LIFT = 0.6 -- above the ground, so it never z-fights
+local PILLAR_ALPHA = 0.55
+local PILLAR_ALPHA_REDUCED = 0.75
 
 -- Height of the ground under the monster, or a sensible guess when nothing is hit.
 local function groundY(ctx: Ctx): number
@@ -42,15 +48,39 @@ local function groundY(ctx: Ctx): number
 	return if hit then hit.Position.Y + 0.15 else ctx.target.Position.Y - 3
 end
 
-local function lock(): Undo
+-- The player's own movement controls, if their module is present (it is on any normal client).
+local function playerControls(): any?
+	local player = Players.LocalPlayer
+	local scripts = player and player:FindFirstChild("PlayerScripts")
+	local module = scripts and scripts:FindFirstChild("PlayerModule")
+	if not module or not module:IsA("ModuleScript") then
+		return nil
+	end
+	local ok, controls = pcall(function()
+		return (require(module) :: any):GetControls()
+	end)
+	return if ok then controls else nil
+end
+
+-- Blocks movement and jump for the whole run: the default controls are switched off and the character
+-- actions are sunk, under a name unique to this run so one run's undo never unbinds another's.
+local function lock(ctx: Ctx): Undo
 	if not RunService:IsClient() then
 		return nil
 	end
-	ContextActionService:BindActionAtPriority("FinisherLock", function()
+	local name = "FinisherLock_" .. ctx.runId
+	ContextActionService:BindActionAtPriority(name, function()
 		return Enum.ContextActionResult.Sink
 	end, false, LOCK_PRIORITY, table.unpack(LOCKED_ACTIONS))
+	local controls = playerControls()
+	if controls then
+		controls:Disable()
+	end
 	return function()
-		ContextActionService:UnbindAction("FinisherLock")
+		ContextActionService:UnbindAction(name)
+		if controls then
+			controls:Enable()
+		end
 	end
 end
 
@@ -95,7 +125,7 @@ local function rune(ctx: Ctx, p: { [string]: any }, floor: Vector3): Undo
 	local gui = Instance.new("SurfaceGui")
 	gui.Face = Enum.NormalId.Top
 	gui.LightInfluence = 0
-	gui.Brightness = 3
+	gui.Brightness = FinisherRules.scale("brightness", 3, ctx.reduced)
 	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
 	gui.PixelsPerStud = 24
 	gui.Parent = disc
@@ -149,14 +179,16 @@ local function shockwave(ctx: Ctx, cue: Sequence.Cue, p: { [string]: any }, floo
 	end
 	local reach: number = p.size or 40
 	local duration: number = cue.duration or 1
-	ring.Size = Vector3.new(4, 0.3, 4)
-	ring.CFrame = CFrame.new(floor + Vector3.new(0, 0.6, 0))
+	local startAlpha = if ctx.reduced then 0.5 else 0 -- reduced mode never shows a full-bright ring
+	ring.Size = Vector3.new(SHOCK_START_SIZE, SHOCK_THICKNESS, SHOCK_START_SIZE)
+	ring.CFrame = CFrame.new(floor + Vector3.new(0, SHOCK_LIFT, 0))
+	ring.Transparency = startAlpha
 	ring.Parent = ctx.fx
 	local stop = Util.every(function(t)
 		local k = math.clamp(t / duration, 0, 1)
-		local s = 4 + (reach - 4) * (1 - (1 - k) ^ 3)
-		ring.Size = Vector3.new(s, 0.3 + 1.2 * (1 - k), s)
-		ring.Transparency = k ^ 1.5
+		local s = SHOCK_START_SIZE + (reach - SHOCK_START_SIZE) * (1 - (1 - k) ^ 3)
+		ring.Size = Vector3.new(s, SHOCK_THICKNESS + 1.2 * (1 - k), s)
+		ring.Transparency = startAlpha + (1 - startAlpha) * k ^ 1.5
 	end)
 	return function()
 		stop()
@@ -213,8 +245,24 @@ local function sparks(ctx: Ctx, p: { [string]: any }): Undo
 	local rate: number = FinisherRules.scale("rate", p.rate or 30, ctx.reduced)
 	local range = NumberRange.new(12, 30)
 	local life = NumberRange.new(0.15, 0.35)
-	local a = Util.emitter(ctx.anchor, PALE_BLUE, Assets.Textures.lightningA, rate * 0.5, range, life, 14)
-	local b = Util.emitter(ctx.anchor, PALE_BLUE, Assets.Textures.lightningB, rate * 0.5, range, life, 16)
+	local a = Util.emitter(
+		ctx.anchor,
+		PALE_BLUE,
+		Assets.Textures.lightningA,
+		rate * 0.5,
+		range,
+		life,
+		FinisherRules.scale("bolt", 14, ctx.reduced)
+	)
+	local b = Util.emitter(
+		ctx.anchor,
+		PALE_BLUE,
+		Assets.Textures.lightningB,
+		rate * 0.5,
+		range,
+		life,
+		FinisherRules.scale("bolt", 16, ctx.reduced)
+	)
 	a.Rotation = NumberRange.new(0, 360)
 	b.Rotation = NumberRange.new(0, 360)
 	return function()
@@ -248,7 +296,8 @@ end
 local function pillar(ctx: Ctx, p: { [string]: any }): Undo
 	local height: number = p.height or 60
 	local column: BasePart
-	local tube = Meshes.get("tube", Color3.new(1, 1, 1), 0.55)
+	local alpha = if ctx.reduced then PILLAR_ALPHA_REDUCED else PILLAR_ALPHA
+	local tube = Meshes.get("tube", Color3.new(1, 1, 1), alpha)
 	if tube then
 		tube.Size = Vector3.new(4, height, 4)
 		column = tube
@@ -266,11 +315,11 @@ local function pillar(ctx: Ctx, p: { [string]: any }): Undo
 	column.Position = ctx.anchor.Position + Vector3.new(0, height / 2 - 4, 0)
 	local light = Instance.new("PointLight")
 	light.Range = 40
-	light.Brightness = 2
+	light.Brightness = FinisherRules.scale("brightness", 2, ctx.reduced)
 	light.Parent = column
 	column.Transparency = 1
 	column.Parent = ctx.fx
-	TweenService:Create(column, TweenInfo.new(0.5), { Transparency = 0.55 }):Play()
+	TweenService:Create(column, TweenInfo.new(0.5), { Transparency = alpha }):Play()
 	return function()
 		column:Destroy()
 	end
@@ -282,7 +331,7 @@ function Effects.new(ctx: Ctx): (cue: Sequence.Cue) -> (() -> ())?
 		local p: { [string]: any } = cue.params or {}
 		local kind = p.effect
 		if kind == "lock" then
-			return lock()
+			return lock(ctx)
 		elseif kind == "tint" then
 			return tint(cue, p)
 		elseif kind == "flash" then

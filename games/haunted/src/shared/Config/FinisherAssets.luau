@@ -21,8 +21,7 @@ FinisherAssets.Textures = {
 	mandala = "rbxassetid://12402928708",
 	sparkle = "rbxassetid://12386386944",
 	radialBurst = "rbxassetid://12386392796",
-	glow = "rbxassetid://11425477167",
-	glowRing = "rbxassetid://12386390257",
+	glow = "rbxassetid://11425477167", -- opaque dark background: additive particles only, never an ImageLabel
 }
 
 return FinisherAssets

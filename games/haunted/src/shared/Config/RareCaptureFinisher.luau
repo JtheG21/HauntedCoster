@@ -1,5 +1,5 @@
 --!strict
--- Rare capture finisher (TASK-0054): a 12.5 s cosmetic sequence for the sequence runner (ADR-0012).
+-- Rare capture finisher (TASK-0054): a 12.8 s cosmetic sequence for the sequence runner (ADR-0012).
 -- Phases after REF-VFX-001's methods, restated for this game: cold charge, white peak, purple release,
 -- joined by two short flash bursts, with a changing camera. Flash budget: two flashes, 4 s apart.
 
@@ -7,10 +7,10 @@ local Sequence = require(script.Parent.Parent.Sequence)
 
 local finisher: Sequence.Def = {
 	id = "rare_capture_finisher",
-	length = 12.5,
+	length = 12.8,
 	cues = {
 		-- input lock for the whole sequence; the runner always releases it
-		{ id = "lock", at = 0, kind = "effect", duration = 12.4, params = { effect = "lock" } },
+		{ id = "lock", at = 0, kind = "effect", duration = 12.6, params = { effect = "lock" } },
 
 		-- the rune disc under the monster lives through all three phases and changes colour with them
 		{
@@ -76,7 +76,7 @@ local finisher: Sequence.Def = {
 			at = 4.3,
 			kind = "effect",
 			duration = 3.7,
-			params = { effect = "sparks", count = 18, rate = 40 },
+			params = { effect = "sparks", rate = 40 },
 		},
 		{
 			id = "cam_wide",
@@ -122,8 +122,8 @@ local finisher: Sequence.Def = {
 			id = "orb",
 			at = 8.2,
 			kind = "effect",
-			duration = 4,
-			params = { effect = "orb", color = { 0.8, 0.5, 1 }, orbitTime = 3, radius = 6 },
+			duration = 4.4,
+			params = { effect = "orb", color = { 0.8, 0.5, 1 }, orbitTime = 3.3, snapTime = 0.55 },
 		},
 		{
 			id = "cam_back",
@@ -133,7 +133,7 @@ local finisher: Sequence.Def = {
 			params = { pos = "orbit", radius = 28, height = 10, fov = 60 },
 		},
 
-		{ id = "done", at = 12.4, kind = "callback", cleanup = false },
+		{ id = "done", at = 12.7, kind = "callback", cleanup = false },
 	},
 }
 

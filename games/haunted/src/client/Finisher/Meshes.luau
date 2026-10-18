@@ -10,13 +10,21 @@ local Assets = require(ReplicatedStorage.Shared.Config.FinisherAssets)
 local Meshes = {}
 
 local templates: { [string]: MeshPart } = {}
-local loaded = false
+local state: "idle" | "loading" | "done" = "idle"
 
+-- Yields until every mesh has loaded or failed; a failed mesh is skipped, not retried. A second caller
+-- waits for the first instead of returning early.
 function Meshes.preload()
-	if loaded then
+	if state == "done" then
 		return
 	end
-	loaded = true
+	if state == "loading" then
+		while state == "loading" do
+			task.wait()
+		end
+		return
+	end
+	state = "loading"
 	local ids: { [string]: number } = Assets.Meshes
 	for name, id in ids do
 		local ok, mesh = pcall(function()
@@ -32,6 +40,7 @@ function Meshes.preload()
 			warn(`Finisher: mesh {name} ({id}) did not load, skipping it`)
 		end
 	end
+	state = "done"
 end
 
 -- A neon, non-colliding copy of a preloaded mesh, or nil when it is not available.

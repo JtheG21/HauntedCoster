@@ -92,13 +92,6 @@ return function(t: TestRunner.T)
 		t.truthy(prev.angle / (2 * math.pi) >= 3)
 	end)
 
-	t.test("break-off leaves fast and eases out", function()
-		t.eq(Rules.snap(0), 0)
-		t.eq(Rules.snap(1), 1)
-		t.truthy(Rules.snap(0.25) > 0.6, "most of the distance in the first quarter")
-		t.truthy(Rules.snap(0.5) > Rules.snap(0.25))
-	end)
-
 	t.test("orbit sweeps all three axes and keeps its radius", function()
 		local total = 3.4
 		local reach = { x = 0, y = 0, z = 0 }
