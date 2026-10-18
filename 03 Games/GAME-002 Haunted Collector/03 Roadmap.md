@@ -5,7 +5,7 @@ type: roadmap
 project: GAME-002
 status: in_progress
 created: 2026-10-11
-updated: 2026-10-12
+updated: 2026-10-18
 tags:
   - game/roadmap
 related:
@@ -72,7 +72,24 @@ From the formal project audit (chat report, 2026-10-12). Each task was approved 
 Decisions (jg, 2026-10-12): the current art is accepted for now, with a full revamp expected later (AUDIT-010; audio/VFX not started); map references on hold until jg adds more; the device checks (TASK-0020's replacement) wait until the game is nearly finished; 6-player profiling (AUDIT-015) waits until several devices can join, and until then Studio tests use at most 2 players while the game is built for a full 6-player server. Accepted risks, documented, no change: AUDIT-004 (save-failure edge cases), AUDIT-011 (per-server limits, client-performed ragdoll).
 
 ## Next major UI update — monetization baseline
-Scope: [[SYS-Haunted-Monetization-UI|Monetization UI Baseline]], choices approved by jg on 2026-10-13 in [[ADR-0011-Monetization-UI-Scope]]. Include Shop/owned inventory/previews, all five cosmetic categories, equipment and exterior placement, and Journal collection reward states. Permanent catalog first; direct Robux plus earned Coins/rewards; premium currency and paid convenience deferred. Implementation tasks are not yet added to the queue. Baseline dependencies cover assets, prices, persistence, commerce, geometry and device verification.
+Scope: [[SYS-Haunted-Monetization-UI|Monetization UI Baseline]], choices approved by jg on 2026-10-13 in [[ADR-0011-Monetization-UI-Scope]]. Include Shop/owned inventory/previews, all five cosmetic categories, equipment and exterior placement, and Journal collection reward states. Permanent catalog first; direct Robux plus earned Coins/rewards; premium currency and paid convenience deferred. Implementation tasks were proposed on 2026-10-18 (all `proposed`, none approved):
+
+| Order | Task | Depends on | Result |
+|---|---|---|---|
+| 1 | [[TASK-0060-Monetization-Persistence-Schema]] | — | Entitlement, equipment and reward state in the profile (Opus audit) |
+| 2 | [[TASK-0061-Shop-And-Owned-Inventory-UI]] | 0060 | Shop and Owned screens with honest states |
+| 3 | [[TASK-0062-Ghost-Skins-And-Auras-Equipment]] | 0060, 0061 | Per-ghost skin and aura equip |
+| 4 | [[TASK-0063-Capture-Effects-Equipment]] | 0060, 0061 | Equippable capture effect, no rule change |
+| 5 | [[TASK-0064-Mansion-Themes]] | 0060, 0061 | Tier-truthful themes with fallback |
+| 6 | [[TASK-0065-Exterior-Decoration-Editor]] | 0060, 0061, 0064 | Server-validated placements, reusable with a cap (Opus audit) |
+| 7 | [[TASK-0066-Journal-Collection-Rewards]] | 0060, 0061 | Claim-once milestone rewards |
+| 8 | [[TASK-0067-Coin-Purchases]] | 0060, 0061 | Authoritative, idempotent Coin buys (Opus audit) |
+| R | [[TASK-0068-Robux-Purchase-Research-And-ADR]] | — | Evidence for jg's Robux mechanism choice; no code |
+
+Decisions (jg, 2026-10-18): decorations are reusable with a per-plot cap; themes declare a tier list with a truthful fallback; rewards use a Claim button; Coins first, Robux only after the research task. Baseline dependencies cover assets, prices, persistence, commerce, geometry and device verification.
+
+## Since the audit remediation (2026-10-13 to 2026-10-18)
+Done and not listed above: [[TASK-0041-Interactive-Haunted-Trees]], the Rare capture finisher ([[TASK-0054-Rare-Capture-Finisher]], [[TASK-0055-Rare-Capture-Hookup]]), [[TASK-0053-Sequence-Runner]], [[TASK-0056-Studio-Test-Pads]], [[TASK-0057-Overview-Evidence-Sync]], [[TASK-0058-SetExhibit-Input-Rules]] and [[TASK-0059-ExhibitRules-Corrupt-Tier-Guard]]. The queue is authoritative.
 
 ## Later (not planned in detail)
 - Haunted Forest and Mine region (brief §15). The woodland habitats in M3 may cover part of it.
