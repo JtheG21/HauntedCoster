@@ -3,7 +3,7 @@ id: TASK-0065
 title: "Exterior Decoration Editor"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -77,3 +77,4 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 283,615, at close 315,127
 [[AUD-20261018-TASK-0065-01]]: pass (Opus). Fixed after the audit: `markDirty` when an upgrade stores decorations. Open follow-ups: re-validate placements on load, stable placement IDs. Studio still owed.
 
 ## Outcome
+A sample decoration can be placed, moved, rotated and stored on the plot, validated on the server and persisted; a house upgrade stores decorations the bigger house touches, still owned, with a notice (merge approved by jg, 2026-10-18). Opus audit passed. Needs jg: review of the grid, fine-step, margin and cap numbers. Not built: drag placement (nudge buttons only). Not verified: Studio on any plot orientation. Follow-ups from the audit: re-validate saved placements against the keep-out areas on load, and give placements stable IDs instead of array indexes. The sample lantern is a few Parts, not a baseline-quality model, and cannot be owned until a grant path exists (TASK-0067).
