@@ -12,6 +12,7 @@ local Economy = require(Config:WaitForChild("Economy"))
 local World = require(Config:WaitForChild("World"))
 local Monsters = require(Config:WaitForChild("Monsters"))
 local EconomyRules = require(Rules:WaitForChild("EconomyRules"))
+local ExhibitRules = require(Rules:WaitForChild("ExhibitRules"))
 local ProfileRules = require(Rules:WaitForChild("ProfileRules"))
 local Remotes = require(script.Parent.Parent.Remotes)
 local MonsterModels = require(script.Parent.Parent.World.MonsterModels)
@@ -118,18 +119,9 @@ local function onSetExhibit(player: Player, slot: any, uid: any): (boolean, stri
 		return false, "Slow down"
 	end
 	local profile = PlayerDataService.get(player)
-	if not profile then
-		return false, "Still loading"
-	end
-	if type(slot) ~= "number" or slot % 1 ~= 0 then
-		return false, "Bad slot"
-	end
-	local slots = Economy.HouseTiers[profile.houseTier + 1].exhibitSlots
-	if slot < 1 or slot > slots then
-		return false, "That exhibit slot is locked"
-	end
-	if uid ~= nil and (type(uid) ~= "string" or not ProfileRules.findOwned(profile, uid)) then
-		return false, "You don't own that monster"
+	local refusal = ExhibitRules.setRefusal(profile, slot, uid)
+	if refusal then
+		return false, refusal
 	end
 	PlayerDataService.update(player, function(p)
 		local kept = {}

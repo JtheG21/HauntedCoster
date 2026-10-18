@@ -3562,7 +3562,7 @@
       "id": "TASK-0058",
       "title": "SetExhibit Input Rules",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "in_progress",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0058-SetExhibit-Input-Rules",
@@ -3572,10 +3572,24 @@
         "A Lune spec covers the all-clear case, each refusal, the order, NaN, slot 0 and a slot above the tier; a negative control (one guard removed) fails it.",
         "FullLoop and ExploitProbe still pass in Studio; scripts/check.sh green; one Sonnet first audit (Opus if the diff goes beyond the extraction); tokens recorded."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-18T01:14:29",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T01:14:29",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     }
   ]
 }
