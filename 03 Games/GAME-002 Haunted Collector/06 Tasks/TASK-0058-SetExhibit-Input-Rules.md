@@ -3,7 +3,7 @@ id: TASK-0058
 title: "SetExhibit Input Rules"
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: low
 risk: low
 owner: executor
@@ -42,7 +42,7 @@ Move the `SetExhibit` remote's input validation into a pure rule with a headless
 ## Acceptance criteria
 - [x] AC1 `ExhibitRules.setRefusal` holds the validation with the same order and text; the rate limit stays in the service.
 - [x] AC2 Lune spec covers the all-clear case, each refusal, the order, NaN, slot 0 and a slot above the tier; a negative control fails it.
-- [ ] AC3 FullLoop and ExploitProbe pass in Studio; `scripts/check.sh` green; one Sonnet first audit; tokens recorded.
+- [x] AC3 FullLoop and ExploitProbe pass in Studio; `scripts/check.sh` green; one Sonnet first audit; tokens recorded.
 
 ## Tests
 - **Automated:** `scripts/check.sh`.
@@ -55,7 +55,7 @@ Behaviour must not change: compare refusal text and order against the current fu
 ## Implementation record
 - Added `shared/Rules/ExhibitRules.luau` (`setRefusal`, same order and text as before), `ContainmentService.onSetExhibit` now calls it (rate limit and update unchanged), and `tests/ExhibitRules.spec.luau` (6 tests; 172 specs total).
 - Negative control: with the slot-range guard replaced by `if false`, 2 new tests failed (170 passed, 2 failed); restored, 172/0. `scripts/check.sh` ALL CHECKS PASSED (a first typecheck failure on mixed-type lists was fixed with `{ any }` annotations).
-- AC3 (Studio): **not run.** `studio-preflight` found no Rojo server for this checkout and three Studio windows with no place in their launch arguments. Starting a server and connecting a plugin could touch the wrong place, so I stopped for jg. Reporting state: implemented, not tested in Studio.
+- AC3 (Studio, 2026-10-18): the real `HauntedCollector.rbxl` place (the only Studio instance; the stale ones were killed with jg's approval), synced by `rojo serve haunted.project.json` from this worktree; build stamp `770e359 2026-10-18T08:21:57Z` confirmed in Edit before the runs. `FullLoop` 85/85 (its SetExhibit checks cover a locked slot, an unowned monster and a valid set) and `ExploitProbe` 13/13, both equal to the 2026-10-12 baselines. Run in the background from Edit with the result read from `_G.scn`; a first direct call timed out and its result was lost, then both were rerun. DataStores were in memory mode (unpublished place). Reporting state: implemented and tested.
 - Usage: no token figure available for the executor; the audit has not run.
 
 ## Audits

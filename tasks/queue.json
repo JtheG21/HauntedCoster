@@ -3562,7 +3562,7 @@
       "id": "TASK-0058",
       "title": "SetExhibit Input Rules",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0058-SetExhibit-Input-Rules",
@@ -3584,9 +3584,21 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-18T01:29:06",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
-      "executions": [],
+      "executions": [
+        {
+          "time": "2026-10-18T01:29:06",
+          "result": "pass",
+          "notes": "ExhibitRules extracted; specs 172/0, negative control, check.sh green; Studio FullLoop 85/85 and ExploitProbe 13/13"
+        }
+      ],
       "audits": [],
       "revisions": 0,
       "approved_by": "jg"
