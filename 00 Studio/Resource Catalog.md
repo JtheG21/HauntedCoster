@@ -152,3 +152,9 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Agent Reach | [[RSH-20261017-Agent-Reach-Integration]] | captured | jg accepted documented direction, 2026-10-17; upstream review only. Optional trial plan; not installed or runtime verified; savings unproven. |
 | EasySpider | [[RSH-20261017-EasySpider-Integration]] | captured | jg accepted documented direction, 2026-10-17; upstream review only. Optional trial plan; not installed or runtime verified; savings unproven. |
 | Public APIs | [[RSH-20261017-Public-APIs-Integration]] | captured | jg accepted documented direction, 2026-10-17; upstream review only. Discovery bookmark; each service requires independent evaluation. |
+
+### Repository adoption shortlist
+| Resource | Location | State | Limits / evidence |
+|---|---|---|---|
+| Optional document extraction, scoped model handoffs and repeatable capture research | [[RSH-20261017-Repo-Adoption-Plan]] | captured | jg accepted review recommendations, 2026-10-17; Anydoc, Claudex Route and Claude of Tanks are candidates, not runtime-verified integrations. No new required workflow stage. |
+| Mods efficiency direction | [[RSH-20261017-Mods-Workflow-Efficiency-Handoff]] | proposed | Minimal process proposal for Claude; policy changes and installed mods remain unverified. |
