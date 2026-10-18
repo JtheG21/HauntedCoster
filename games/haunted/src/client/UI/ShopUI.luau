@@ -99,12 +99,16 @@ end
 
 local render
 local renderEquip
+local buying: string? = nil -- the item whose Confirm is showing
+local pendingBuy = false
+local buySeq = 0
 local equipMessage: string? = nil -- the server's last refusal, shown in the details view
 
 local function showDetails(c: ShopRules.Card)
 	listScroll = content.CanvasPosition.Y
 	selected = c.id
 	equipMessage = nil
+	buying = nil
 	render(false)
 end
 
@@ -395,7 +399,66 @@ local function renderDecoration(c: ShopRules.Card)
 	end
 end
 
+-- Buying with Coins: the price comes from the catalog (via ShopRules), never from this file. One tap shows the
+-- cost, a second Confirm sends it with a fresh request ID; the button is off while the answer is pending.
+
+local function renderBuy(c: ShopRules.Card)
+	local snap = State.snap
+	local coins = if snap and type(snap.coins) == "number" then snap.coins else 0
+	local price = c.price :: number
+	local box = card()
+	Theme.label(box, `Price: {price} Coins  ·  You have {coins}`, { Font = Theme.Bold })
+	if coins < price then
+		Theme.label(box, `You need {price - coins} more Coins.`, { TextColor3 = Theme.Colors.gold })
+	end
+	local row = card(46)
+	Theme.list(row, 8, true)
+	if pendingBuy then
+		Theme.label(row, "Buying...", { TextColor3 = Theme.Colors.dim })
+	elseif buying == c.id then
+		Theme.button(row, `Confirm: {price} Coins`, function()
+			pendingBuy = true
+			buySeq += 1
+			local id = c.id
+			local requestId = `{game.Players.LocalPlayer.UserId}-{os.time()}-{buySeq}`
+			render(false)
+			task.spawn(function()
+				local ok, msg = State.invoke("BuyItem", id, requestId)
+				pendingBuy = false
+				buying = nil
+				equipMessage = if type(msg) == "string"
+					then msg
+					elseif ok == true then nil
+					else "Something went wrong. Try again."
+				render(false)
+			end)
+		end, { Size = UDim2.fromOffset(190, 34) })
+		Theme.button(row, "Cancel", function()
+			buying = nil
+			render(false)
+		end, { Size = UDim2.fromOffset(90, 34), BackgroundColor3 = Theme.Colors.buttonOff })
+	elseif coins >= price then
+		Theme.button(row, "Buy", function()
+			buying = c.id
+			equipMessage = nil
+			render(false)
+		end, { Size = UDim2.fromOffset(90, 34) })
+	end
+end
+
 function renderEquip(c: ShopRules.Card)
+	if c.canBuy then
+		if equipMessage then
+			local m = card()
+			Theme.label(
+				m,
+				equipMessage,
+				{ TextColor3 = Theme.Colors.gold, AutomaticSize = Enum.AutomaticSize.Y, Size = UDim2.fromScale(1, 0) }
+			)
+		end
+		renderBuy(c)
+		return
+	end
 	if c.owned and c.category == "Decoration" then
 		renderDecoration(c)
 		return

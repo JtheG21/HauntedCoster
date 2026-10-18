@@ -4472,7 +4472,7 @@
       "id": "TASK-0067",
       "title": "Coin Purchases",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "in_progress",
       "risk": "high",
       "depends_on": [
         "TASK-0060",
@@ -4491,6 +4491,12 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T13:52:39",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [],
