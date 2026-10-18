@@ -50,6 +50,11 @@ Persistence, trust boundary and product details are governed by the baseline not
 
 ---
 ## Implementation record
+- 2026-10-18: started (orchestrator `start`). Context at start: 86,536 tokens (`get_usage`); weekly plan 89% used, 5-hour 19%.
+- Schema 2 adds `profile.cosmetics` (entitlements, `ghostLooks[uid] = {skin, aura}`, `captureEffect`, `mansionTheme`, `placements {id,x,z,r}`, `rewardsClaimed`). New `Config/Catalog.luau` (shape only, empty Items/Rewards, size bounds) and `Rules/CosmeticRules.luau` (sanitize, grant, equipLook/removeLook, setCaptureEffect, setTheme with tier check, place/removePlacement with plot bounds, right-angle rotation and per-item cap, claimReward once). Schema-1 profiles migrate by gaining empty cosmetics.
+- Design choice (draft, for jg review): entitlements and selections whose ID the current catalog doesn't list are **kept**, not dropped, so a catalog config gap can't destroy owned items. Looks for a released ghost UID are dropped. Theme tier coverage is checked at equip, not at sanitize (an upgrade doesn't silently unequip).
+- AC2: `tests/CosmeticRules.spec.luau` (15 tests); `lune run scripts/lune/specs` 188/188. Negative control: removing the species-compatibility check and reverting Schema to 1 failed 2 specs; restored, all pass.
+- AC3: published private place (placeId 108419797534540), Studio API access on, build 159a373. Rojo plugin left ProfileRules stale and the two new modules empty; **synced by hand** (source lengths verified equal to disk: 9752/10846/1159 bytes). `Persistence` scenario (now with cosmetics in its fingerprint): write 9/9, read 4/4 ("every saved value survived leave and rejoin"); lock released after shutdown. `scripts/check.sh` green.
 
 ## Audits
 
