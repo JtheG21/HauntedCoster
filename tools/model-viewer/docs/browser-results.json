@@ -1,0 +1,23 @@
+{
+  "checks": [
+    "real Wisp loads with materials, correct no-animation controls",
+    "four inspection camera controls",
+    "lighting, effects, wireframe, turntable and saved scene restore",
+    "portable scene JSON export",
+    "scene JSON import restores actual file",
+    "clean viewport PNG capture",
+    "imported animation plays, pauses and scrubs",
+    "non-looping playback stops at clip duration at selected speed",
+    "replay after end moves actual geometry again",
+    "Still returns rest pose",
+    "corrupt model error preserves current asset",
+    "invalid scene fails clearly",
+    "missing package is visible and recoverable",
+    "glTF companion buffers load from local selection",
+    "missing glTF companion fails clearly",
+    "delayed automatic preset cannot overwrite a newer imported scene",
+    "a newer current-model scene import cancels an older pending model switch",
+    "no unhandled browser errors"
+  ],
+  "errors": []
+}

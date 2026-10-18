@@ -4,7 +4,7 @@ title: Resource Catalog
 type: index
 status: approved
 created: 2026-10-12
-updated: 2026-10-17
+updated: 2026-10-18
 tags:
   - studio/catalog
 related:
@@ -47,8 +47,10 @@ Don't reuse something only because its name fits. Don't rebuild something withou
 Checked on 2026-10-12 against the repo; the evidence is linked.
 
 ### Workflow and tooling
+
 | Resource | Location | State | Evidence | Limits / notes |
 |---|---|---|---|---|
+| Shared Atelier model viewer | Private `JtheG21/studio-model-viewer`; local Rg1 integration `tools/model-viewer/`; [[RSH-20261018-Shared-Model-Viewer]]; shared `model-viewer` skill | implemented | Real Wisp rendered; browser controls, imported animation fixture, presets and captures exercised | Local desktop browser; model library ignored and backed up separately; no Roblox import or visual approval implied |
 | Cheap check suite | `scripts/check.sh` (CI: `.github/workflows/check.yml`) | verified | CI on every PR | Paths are per game; a new game must be added |
 | Reference tooling | `scripts/refs.py` (`list`, `brief`, `trace`, `lint`, `guard` incl. the pack-leak check, `new`, `actions`), hook `.claude/hooks/ref-lint.sh`, check.sh step and pre-commit guard | implemented | `tests/test_refs.py`; spec [[RSH-20261017-Reference-Automation-Spec]] | Reads `REF-*` notes on demand (no registry). `guard` blocks edits to `## Intent` sections and moves to `approved` unless `REFS_JG_APPROVED=1`. Evidence tools, rights ledger and review driver are later phases |
 | Reference evidence tools | `scripts/evidence.py` (`frames`, `strip`, `beats`, `sheet`, `stats`, `series` with a `--max-transitions` gate, `audio`, `matrix`, `silhouette`); `scripts/refs.py pin`, `drift`, `rights`, `ledger`; `00 Studio/reference-rights.json`; `tasks/reference-pins.jsonl` | implemented | `tests/test_evidence.py`, `tests/test_refs.py`; run on REF-VFX-001's archived video and the 5 GitHub-sourced notes on 2026-10-17 | ffmpeg only (no `drawtext`, so `index.txt` maps frames to timestamps). Numbers are aids, not pass/fail. Rights classes are claims from each note, not legal advice. Studio test pads: see the next row |

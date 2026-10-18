@@ -43,3 +43,29 @@ jobs:
         env:
           TYPECHECK_REQUIRED: "1"
         run: scripts/check.sh
+
+  model-viewer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "11.25.0"
+      - name: Install pinned viewer dependencies
+        working-directory: tools/model-viewer
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Viewer checks
+        working-directory: tools/model-viewer
+        run: scripts/check.sh
+      - name: Install test browser
+        working-directory: tools/model-viewer
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Browser acceptance
+        working-directory: tools/model-viewer
+        run: node tests/ci-browser.mjs

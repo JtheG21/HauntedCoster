@@ -1,0 +1,6 @@
+node_modules/
+library/*
+!library/.gitkeep
+!library/README.md
+playwright-report/
+test-results/

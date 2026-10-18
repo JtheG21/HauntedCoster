@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Atelier · Model Viewer</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/node_modules/three/build/three.module.js",
+          "three/addons/": "/node_modules/three/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/"
+        >◈ <span>ATELIER<small>SHARED MODEL STUDIO</small></span></a
+      ><span class="local">● LOCAL / PRIVATE</span>
+      <div class="header-actions">
+        <button id="open">Open model</button
+        ><button id="import">Import scene</button
+        ><button id="save">Export scene</button
+        ><button id="capture" class="primary">Capture PNG ↗</button>
+      </div>
+    </header>
+    <main>
+      <aside class="left">
+        <div class="eyebrow">YOUR COLLECTION</div>
+        <h1>Model library</h1>
+        <p class="muted">One stage. Every creation.</p>
+        <div id="library"></div>
+        <button id="refresh" class="subtle">↻ Refresh library</button>
+        <div class="drop-note">
+          Drop a GLB here, or select a glTF with its textures and buffers.<br /><br />Files
+          stay on this computer.
+        </div>
+        <section>
+          <div class="eyebrow">CURRENT MODEL</div>
+          <h2 id="model-name">Nothing loaded</h2>
+          <p id="stats" class="muted">Open a model to begin.</p>
+          <p id="source-note" class="muted"></p>
+        </section>
+      </aside>
+      <div class="center">
+        <div class="stage-toolbar">
+          <div class="segmented" aria-label="Camera views">
+            <button data-view="front">Front</button
+            ><button data-view="side">Side</button
+            ><button data-view="back">Back</button
+            ><button data-view="three">¾</button>
+          </div>
+          <button id="fit">Fit model <kbd>F</kbd></button>
+        </div>
+        <div
+          id="viewport"
+          tabindex="0"
+          aria-label="3D model viewport. Drag to orbit, right drag to pan, scroll to zoom."
+        >
+          <div id="empty">
+            <div class="empty-glyph">◈</div>
+            <h2>A stage for your next creation.</h2>
+            <p>Choose a library model or open a local file.</p>
+          </div>
+          <div class="viewport-label">
+            PERSPECTIVE <span>•</span> REAL-TIME PREVIEW
+          </div>
+          <div id="busy" hidden>Loading model…</div>
+        </div>
+        <div id="message" role="status" aria-live="polite">
+          Ready. Models and scene files work with Claude and Codex.
+        </div>
+        <footer class="timeline">
+          <div class="mode-row">
+            <div class="segmented">
+              <button data-mode="Idle">Idle</button
+              ><button data-mode="Move">Move</button
+              ><button data-mode="Ability">Ability</button
+              ><button id="still">Still</button>
+            </div>
+            <label
+              >Clip
+              <select id="clip">
+                <option value="">Rest pose</option>
+              </select></label
+            >
+          </div>
+          <div class="transport">
+            <button id="play" aria-label="Play animation">▶</button
+            ><button id="replay" aria-label="Replay animation">↺</button
+            ><input
+              id="scrub"
+              aria-label="Animation timeline"
+              type="range"
+              min="0"
+              max="1"
+              step="0.001"
+              value="0"
+            /><output id="clock">0.00 / 0.00 s</output
+            ><label><input id="loop" type="checkbox" checked /> Loop</label
+            ><label
+              >Speed
+              <select id="speed">
+                <option value="0.25">¼×</option>
+                <option value="0.5">½×</option>
+                <option value="1" selected>1×</option>
+                <option value="1.5">1½×</option>
+                <option value="2">2×</option>
+              </select></label
+            >
+          </div>
+          <p id="animation-note" class="muted">
+            Animation controls become available when a model includes clips.
+          </p>
+        </footer>
+      </div>
+      <aside class="right">
+        <div class="eyebrow">PRESENTATION</div>
+        <h2>Set the scene</h2>
+        <label
+          >Lighting<select id="lighting">
+            <option value="studio">Neutral studio</option>
+            <option value="bright">Bright studio</option>
+            <option value="night">Cinematic night</option>
+          </select></label
+        ><label
+          >Background<input
+            id="background"
+            type="color"
+            value="#111923" /></label
+        ><label
+          >Exposure<input
+            id="exposure"
+            type="range"
+            min="0.1"
+            max="3"
+            step="0.05"
+            value="1"
+        /></label>
+        <div class="check-row">
+          <label><input id="grid" type="checkbox" checked /> Ground grid</label
+          ><label><input id="wireframe" type="checkbox" /> Wireframe</label
+          ><label><input id="turntable" type="checkbox" /> Turntable</label>
+        </div>
+        <section>
+          <div class="eyebrow">VIEWER EFFECTS</div>
+          <label
+            >Effect<select id="effect">
+              <option value="none">Off · inspect geometry</option>
+              <option value="aura">Aura</option>
+              <option value="sparks">Floating sparks</option>
+              <option value="rings">Orbit rings</option>
+            </select></label
+          ><label
+            >Color<input id="effectColor" type="color" value="#67e8ce" /></label
+          ><label
+            >Intensity<input
+              id="effectIntensity"
+              type="range"
+              min="0"
+              max="3"
+              step="0.1"
+              value="1"
+          /></label>
+          <p class="muted">
+            Presentation effects only. Exported scene presets preserve the
+            setup; Roblox effects require their own implementation.
+          </p>
+        </section>
+        <section>
+          <div class="eyebrow">ANIMATION MAPPING</div>
+          <div id="mappings"></div>
+        </section>
+        <section>
+          <button id="remember">Remember setup</button
+          ><button id="restore" class="subtle">Restore setup</button>
+          <p class="muted">
+            Browser saves are local. Export scene JSON to share with either
+            assistant.
+          </p>
+        </section>
+      </aside>
+    </main>
+    <input
+      type="file"
+      id="model-files"
+      multiple
+      accept=".glb,.gltf,.bin,.png,.jpg,.jpeg,.webp,.ktx2"
+      hidden
+    /><input type="file" id="scene-file" accept=".json" hidden />
+    <script type="module" src="/src/viewer.js"></script>
+  </body>
+</html>

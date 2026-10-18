@@ -3951,6 +3951,65 @@
       "executions": [],
       "audits": [],
       "revisions": 0
+    },
+    {
+      "id": "TASK-0069",
+      "title": "Shared Model Viewer",
+      "project": "GAME-002",
+      "status": "approved",
+      "risk": "medium",
+      "tier": "standard",
+      "depends_on": [],
+      "branch": "chore/shared-model-viewer",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0069-Shared-Model-Viewer.md",
+      "acceptance_criteria": [
+        "Real existing model renders with orbit, camera views, neutral lighting, effects-off inspection and statistics.",
+        "Imported clips play, pause, scrub, replay and stop correctly; missing animations and corrupt/missing assets have clear behavior.",
+        "Validated portable packages and scene JSON preserve model identity and review settings; screenshots export; originals remain unchanged.",
+        "Shared Claude/Codex instructions, conversion guidance, automated tests, full repository checks and independent audit are delivered."
+      ],
+      "history": [
+        {
+          "time": "2026-10-18T12:56:41",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T12:56:41",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T12:58:19",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T13:20:30",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-18T12:58:19",
+          "result": "pass",
+          "notes": "Root check.sh ALL CHECKS PASSED; viewer formatter, JS and Python tests pass; real Wisp browser run and isolated CI browser pass; Studio not applicable."
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-18T13:20:30",
+          "result": "pass",
+          "report": "06 QA/AUD-20261018-TASK-0069-03.md"
+        }
+      ],
+      "revisions": 2,
+      "approved_by": "jg"
     }
   ]
 }
