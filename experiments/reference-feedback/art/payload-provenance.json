@@ -1,0 +1,52 @@
+[
+  {
+    "folder": "ArtData",
+    "source": "halloween-fidelity-desktop.png",
+    "source_sha256": "821286ec4a5bd7cf0adb350872b0aa63fb84c9b9659d7b23526b333f02e8a77f",
+    "width": 768,
+    "height": 682,
+    "palette_entries": 128,
+    "indices_sha256": "5dd4741f7bb7b44a0d2442333a60747e42a9c9e543cb613342b0168b73983685",
+    "compressed_bytes": 66882
+  },
+  {
+    "folder": "PortraitArtData",
+    "source": "halloween-fidelity-portrait.png",
+    "source_sha256": "b6beeb46c553d2af6d02e27fa94f960528e924cc833414941389ec613d2c7715",
+    "width": 576,
+    "height": 768,
+    "palette_entries": 128,
+    "indices_sha256": "28cc395768aae142c143b2446d10237fcde69be049b5d64618fc03fc339d4aef",
+    "compressed_bytes": 57964
+  },
+  {
+    "folder": "SpriteArtData",
+    "source": "halloween-sprite-atlas.png",
+    "source_sha256": "c6d4f489bb5ad70a5ea4d23a76bca5ec4ae4f0662704414a3438271c61c50e07",
+    "width": 768,
+    "height": 768,
+    "palette_entries": 128,
+    "indices_sha256": "0e5c8c9010215874b4d427b5f346012b259925795b6744c867eaed5838f2d345",
+    "compressed_bytes": 64673
+  },
+  {
+    "folder": "RootArtData",
+    "source": "halloween-rooted-foliage-atlas.png",
+    "source_sha256": "c6e6c7a94d947027eb85abb7347b2750a08ed1c1b13628801198d1b0eb5ae076",
+    "width": 1024,
+    "height": 342,
+    "palette_entries": 128,
+    "indices_sha256": "45947c8019c4f7c56446ac203f942c021691f84a17c8b6139926e13e92416fc9",
+    "compressed_bytes": 36816
+  },
+  {
+    "folder": "TreeArtData",
+    "source": "halloween-tree-curled-tip.png",
+    "source_sha256": "225c71eee9a191a7966bc2b68a7abe8c64a26b60b5e392f1878ce9710aaad7a9",
+    "width": 1024,
+    "height": 342,
+    "palette_entries": 128,
+    "indices_sha256": "bec4ef3031cff601391a4e821a68dada6d4e7d6a716f63fec042d8eaf564fb53",
+    "compressed_bytes": 35408
+  }
+]

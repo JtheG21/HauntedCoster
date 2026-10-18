@@ -140,4 +140,8 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 ### Reference experiment tooling
 | Resource | Location | State | Limits / evidence |
 |---|---|---|---|
-| Meter-and-light feedback candidate | [[RSH-20261017-Reference-Feedback-Experiment]]; `experiments/reference-feedback/` | implemented | Original isolated demo; headless logic/type/lint/build verified; Studio interaction and jg visual judgment pending; not adopted game balance |
+| Meter-and-light feedback candidate | [[RSH-20261017-Reference-Feedback-Experiment]]; `experiments/reference-feedback/` | implemented | Accepted isolated experiment (jg, 2026-10-17); final illustrated UI approved after runtime/visual iteration; source, prompts and evidence preserved. No game integration or device/deployment certification. |
+
+| Illustrated Halloween UI direction | [[REF-UI-004-Illustrated-Halloween-Shop]] | captured | Source remains reference-only; generated-original demo adaptation visually accepted by jg on 2026-10-17. Approval applies to the final demo, not source ownership or all game uses. |
+
+| Layered illustrated UI production recipe | [[RSH-20261017-Layered-UI-Production-Recipe]] | implemented | Verified workflow from accepted feedback experiment: layered art, centered labels, attached motion, dim/lit closeups, input checks and explicit device limits. |

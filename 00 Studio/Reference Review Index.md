@@ -97,3 +97,8 @@ Archive grouping and complete new queue: [[Reference Review 2026-10-17]]. Entrie
 | [ ] | [[REF-CODE-024-Prompt-Fix-Review]] — Steal An Egg — Prompt Fix Review | Needs experimentation; see individual note |
 | [ ] | [[REF-CODE-025-Fix-Application-Record]] — Steal An Egg — Fix Application Record | Needs experimentation; see individual note |
 | [ ] | [[REF-MISC-007-Steal-An-Egg-Visual-Evidence]] — Steal An Egg — Visual Evidence Pack | Needs experimentation; see individual note |
+
+## Illustrated UI target — 2026-10-17
+| Reviewed with jg | Reference | Evaluation |
+|---|---|---|
+| [ ] | [[REF-UI-004-Illustrated-Halloween-Shop]] — Illustrated Halloween Shop | Selected as demo visual target; resulting UI awaits visual acceptance |

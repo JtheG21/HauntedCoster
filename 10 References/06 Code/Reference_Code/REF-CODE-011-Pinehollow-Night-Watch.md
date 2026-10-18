@@ -68,3 +68,9 @@ Select a specific useful pattern, inspect its actual code/evidence, compare the 
 
 ## Experiment findings — 2026-10-17
 [[RSH-20261017-Reference-Feedback-Experiment]] records the isolated meter-and-light demo, headless verification and remaining Studio/visual checks. Sources: `experiments/reference-feedback/`; built place: `/private/tmp/ReferenceFeedbackDemo.rbxl`. Original presentation code, existing Theme reused unchanged. Runtime quality and usefulness remain unverified; candidate recipe only.
+
+## Runtime follow-up — 2026-10-17
+The original isolated Roblox demo now has runtime evidence in [[RSH-20261017-Reference-Feedback-Experiment]]: depletion, disabled actions, recovery and phone layout checks. jg accepted functionality and spacing, rejected both visual treatments. A landscape clipping issue was fixed with scrolling. Original Pinehollow runtime remains unverified. No accepted visual style or production recipe follows from this result.
+
+## Illustrated adaptation — 2026-10-17
+After rejecting the earlier skins, jg supplied [[REF-UI-004-Illustrated-Halloween-Shop]] and requested applying that direction. The original generated-art adaptation, separate desktop/phone frames and fresh runtime checks are recorded in [[RSH-20261017-Reference-Feedback-Experiment]]. Human visual acceptance is pending. Original Pinehollow runtime remains unverified.

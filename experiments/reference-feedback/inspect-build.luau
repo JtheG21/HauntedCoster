@@ -5,6 +5,17 @@ local roots = roblox.deserializePlace(fs.readFile(process.args[1] or "/private/t
 local rs = roots:GetService("ReplicatedStorage")
 assert(rs.FeedbackDemo.State:IsA("ModuleScript"))
 assert(rs.FeedbackDemo.Theme:IsA("ModuleScript"))
+assert(rs.FeedbackDemo.DemoTheme:IsA("ModuleScript"))
+assert(rs.FeedbackDemo.DemoMotion:IsA("ModuleScript"))
+assert(rs.FeedbackDemo.DecorationMotion:IsA("ModuleScript"))
+assert(rs.FeedbackDemo.FrameArt:IsA("ModuleScript"))
+for _, name in { "ArtData", "PortraitArtData", "SpriteArtData", "RootArtData", "TreeArtData" } do
+	local data = rs.FeedbackDemo:FindFirstChild(name)
+	assert(data and data:FindFirstChild("Palette"), "local art payload")
+	assert(data.Width.Value > 0 and data.Width.Value <= 1024, "valid art width")
+	assert(data.Height.Value > 0 and data.Height.Value <= 1024, "valid art height")
+	assert(data:FindFirstChild("Chunk001"), "compressed pixels")
+end
 assert(roots:GetService("StarterPlayer").StarterPlayerScripts.Demo:IsA("LocalScript"))
 assert(not rs:FindFirstChild("Shared"), "no Haunted Collector shared code")
-print("Built-place inspection: isolated State + Theme + client demo verified")
+print("Built-place inspection: isolated state, skin, local art payloads and client verified")
