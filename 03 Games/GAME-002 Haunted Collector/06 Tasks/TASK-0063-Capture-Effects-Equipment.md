@@ -3,7 +3,7 @@ id: TASK-0063
 title: "Capture Effects Equipment"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: medium
 risk: medium
 owner: executor
@@ -71,5 +71,6 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 193,292, at close 208,028
 **Studio skipped by jg, 2026-10-18.** No Play session, no capture with the effect equipped, no preview run, no screenshots. The burst's look, the Equip/Preview buttons and AC2's Studio check are unverified at runtime.
 
 ## Audits
+[[AUD-20261018-TASK-0063-01]]: pass (Sonnet). Nits only; Studio still owed.
 
 ## Outcome

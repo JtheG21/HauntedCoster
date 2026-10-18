@@ -158,8 +158,7 @@ local function renderFilters()
 	end
 end
 
--- Owned skins and auras: one row per owned ghost with Equip or Remove. The server decides; the row only
--- shows what LookRules says is possible and the server's answer.
+-- Owned capture effects: Equip or Remove, plus a local Preview. The server decides.
 local function renderCaptureEffect(c: ShopRules.Card)
 	local snap = State.snap
 	local equipped = snap and snap.cosmetics and snap.cosmetics.captureEffect == c.id
@@ -193,6 +192,8 @@ local function renderCaptureEffect(c: ShopRules.Card)
 	end, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.fromScale(1, 0.5), Size = UDim2.fromOffset(90, 34) })
 end
 
+-- Owned skins and auras: one row per owned ghost with Equip or Remove. The server decides; the row only
+-- shows what LookRules says is possible and the server's answer.
 function renderEquip(c: ShopRules.Card)
 	if c.owned and c.category == "CaptureEffect" then
 		renderCaptureEffect(c)
