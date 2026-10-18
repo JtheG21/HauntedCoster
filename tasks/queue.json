@@ -4368,7 +4368,7 @@
       "id": "TASK-0066",
       "title": "Journal Collection Rewards",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4399,6 +4399,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T13:39:56",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -4408,7 +4414,13 @@
           "notes": "journal milestones + claim implemented; check.sh green, 240 specs; Studio skipped by jg"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-18T13:39:56",
+          "result": "pass",
+          "report": "06 QA/AUD-20261018-TASK-0066-01.md"
+        }
+      ],
       "revisions": 0,
       "approved_by": "jg"
     },

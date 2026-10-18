@@ -3,7 +3,7 @@ id: TASK-0066
 title: "Journal Collection Rewards"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: medium
 risk: medium
 owner: executor
@@ -84,5 +84,6 @@ SpiderWoodland and Settlement have no habitat milestone yet. The sample rewards 
 **Studio skipped by jg, 2026-10-18.** No Play session, no Claim round trip, no screenshots. The Journal section layout, the Claim button and the toast are unverified at runtime.
 
 ## Audits
+[[AUD-20261018-TASK-0066-01]]: pass (Sonnet). No blocker; the reward mapping needs jg's review and Studio is still owed.
 
 ## Outcome
