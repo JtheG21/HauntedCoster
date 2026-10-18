@@ -13,6 +13,7 @@ local Hud = require(script.UI.Hud)
 local CaptureUI = require(script.UI.CaptureUI)
 local MansionUI = require(script.UI.MansionUI)
 local JournalUI = require(script.UI.JournalUI)
+local ShopUI = require(script.UI.ShopUI)
 local TrackEditor = require(script.UI.TrackEditor)
 local CaptureFinisher = require(script.CaptureFinisher)
 
@@ -51,16 +52,24 @@ require(script.DevProbe).start() -- Studio-only; inert unless a test arms it
 local function closeMenus()
 	MansionUI.close()
 	JournalUI.close()
+	ShopUI.close()
 end
 
 Hud.mount(gui, {
 	openJournal = function()
 		MansionUI.close()
+		ShopUI.close()
 		JournalUI.toggle()
 	end,
 	openMansion = function()
 		JournalUI.close()
+		ShopUI.close()
 		MansionUI.toggle()
+	end,
+	openShop = function()
+		JournalUI.close()
+		MansionUI.close()
+		ShopUI.toggle()
 	end,
 	openEditor = function()
 		closeMenus()
@@ -74,6 +83,8 @@ Hud.mount(gui, {
 })
 CaptureUI.mount(gui, Hud.toast)
 MansionUI.mount(gui, Hud.toast)
+ShopUI.mount(gui)
+MansionUI.openShop = ShopUI.open
 JournalUI.mount(gui)
 TrackEditor.mount(gui, Hud.toast)
 CaptureFinisher.mount();

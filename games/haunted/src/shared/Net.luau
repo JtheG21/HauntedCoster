@@ -21,6 +21,7 @@ Net.Functions = {
 	"Purchase", -- C->S (item: string) -> ok, reason
 	"SubmitRoute", -- C->S (points, pieces) -> ok, reason
 	"SetExhibit", -- C->S (slot: number, uid: string?) -> ok, reason
+	"GetCatalog", -- C->S () -> { items, rewards } read-only cosmetic catalog (TASK-0061)
 	"Ack", -- C->S (what: string) -> () UI-only acknowledgements (journal opened)
 }
 

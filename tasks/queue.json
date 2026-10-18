@@ -3783,7 +3783,7 @@
       "id": "TASK-0061",
       "title": "Shop And Owned Inventory UI",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "in_progress",
       "risk": "low",
       "depends_on": [
         "TASK-0060"
@@ -3795,10 +3795,24 @@
         "Loading, empty-catalog, unavailable-data and owned states are honest: no fake prices, no Buy button without a supported grant path, unknown ownership never shown as unowned.",
         "Server exposes read-only catalog and ownership remotes (validated, rate-limited); UI specs for state logic; Studio screenshots at desktop and phone widths; check.sh green; one Sonnet audit."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-18T12:19:41",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T12:19:42",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0062",

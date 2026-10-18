@@ -22,6 +22,7 @@ local Hud = {}
 export type Callbacks = {
 	openJournal: () -> (),
 	openMansion: () -> (),
+	openShop: () -> (),
 	openEditor: () -> (),
 	toggleLight: () -> boolean,
 }
@@ -268,6 +269,7 @@ function Hud.mount(gui: ScreenGui, cb: Callbacks)
 	end, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 1 })
 	Theme.button(bar2, "Journal", cb.openJournal, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 2 })
 	Theme.button(bar2, "Mansion", cb.openMansion, { Size = UDim2.fromOffset(104, 48), LayoutOrder = 3 })
+	Theme.button(bar2, "Shop", cb.openShop, { Size = UDim2.fromOffset(88, 48), LayoutOrder = 5 })
 	editorButton = Theme.button(bar2, "Edit Track", cb.openEditor, {
 		Size = UDim2.fromOffset(110, 48),
 		LayoutOrder = 4,

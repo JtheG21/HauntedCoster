@@ -3,7 +3,7 @@ id: TASK-0061
 title: "Shop And Owned Inventory UI"
 type: task
 project: GAME-002
-status: proposed
+status: in_progress
 priority: medium
 risk: low
 owner: executor
