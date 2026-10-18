@@ -4368,7 +4368,7 @@
       "id": "TASK-0066",
       "title": "Journal Collection Rewards",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4393,9 +4393,21 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-18T13:39:07",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
-      "executions": [],
+      "executions": [
+        {
+          "time": "2026-10-18T13:39:07",
+          "result": "pass",
+          "notes": "journal milestones + claim implemented; check.sh green, 240 specs; Studio skipped by jg"
+        }
+      ],
       "audits": [],
       "revisions": 0,
       "approved_by": "jg"

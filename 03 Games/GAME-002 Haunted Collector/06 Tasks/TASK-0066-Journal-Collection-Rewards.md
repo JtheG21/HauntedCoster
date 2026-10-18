@@ -3,7 +3,7 @@ id: TASK-0066
 title: "Journal Collection Rewards"
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: medium
 risk: medium
 owner: executor
@@ -79,7 +79,9 @@ SpiderWoodland and Settlement have no habitat milestone yet. The sample rewards 
 |---|---|
 | AC1 states and a single server grant | implemented and spec-tested (Eligible, Claimed, replay refused); UI not run in Studio |
 | AC2 definitions from the real roster, written here; no paid skin completes a discovery | met (table above; specs) |
-| AC3 specs, check.sh, Sonnet audit | specs and check.sh done; audit pending |
+| AC3 specs, check.sh, Sonnet audit | specs and check.sh done; audit see Audits |
+
+**Studio skipped by jg, 2026-10-18.** No Play session, no Claim round trip, no screenshots. The Journal section layout, the Claim button and the toast are unverified at runtime.
 
 ## Audits
 
