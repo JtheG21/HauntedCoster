@@ -3361,6 +3361,43 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0055",
+      "title": "Rare Capture Hookup",
+      "project": "GAME-002",
+      "status": "in_progress",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0054"
+      ],
+      "branch": "task/TASK-0055-Rare-Capture-Hookup",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0055-Rare-Capture-Hookup.md",
+      "acceptance_criteria": [
+        "Lune: finisherSeconds is the finisher duration for Rare and 0 otherwise; payload check rejects bad events; essence cue valid.",
+        "A Rare success fires CaptureFinisher to that player only and extends deadline, deadlineServer and returnSeconds; Common and Uncommon unchanged.",
+        "The finisher plays from that event on the client, restores camera, FOV and movement lock, and the HUD carry bar reads correctly.",
+        "scripts/check.sh green; one audit."
+      ],
+      "history": [
+        {
+          "time": "2026-10-17T20:28:39",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-17T20:28:39",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg",
+      "merge_approved_by": null
     }
   ]
 }

@@ -18,36 +18,18 @@ local Orb = {}
 
 type Ctx = Util.Ctx
 
-local ORBIT_HEIGHT = 7 -- studs above the monster's anchor the orbit is centred
 local FADE_IN = 0.45 -- seconds the orb takes to appear
 local ARRIVE_SPEED = 2.2 -- exit speed into the target, as a multiple of the straight-line distance per curve
 local CORE_PULSE_HZ = 2.5
 local TRAIL_HALF_WIDTH = 0.28 -- of the orb's size: a slim ribbon, not a slab
 local SNAP_TRAIL_LIFETIME = 0.14 -- seconds; short, so the break-off streaks instead of smearing
 
-local function billboard(parent: Instance, texture: string, color: Color3): (BillboardGui, ImageLabel)
-	local gui = Instance.new("BillboardGui")
-	gui.AlwaysOnTop = false
-	gui.LightInfluence = 0
-	gui.Size = UDim2.fromScale(1, 1) -- scale is studs on a billboard
-	gui.Parent = parent
-	local img = Instance.new("ImageLabel")
-	img.BackgroundTransparency = 1
-	img.AnchorPoint = Vector2.new(0.5, 0.5)
-	img.Position = UDim2.fromScale(0.5, 0.5)
-	img.Size = UDim2.fromScale(1, 1)
-	img.Image = texture
-	img.ImageColor3 = color
-	img.Parent = gui
-	return gui, img
-end
-
 function Orb.start(ctx: Ctx, cue: Sequence.Cue): () -> ()
 	local p: { [string]: any } = cue.params or {}
 	local tint = Util.color(p.color)
 	local orbitTime: number = p.orbitTime or 3.3
 	local snapTime: number = p.snapTime or 0.55
-	local center = ctx.anchor.Position + Vector3.new(0, ORBIT_HEIGHT, 0)
+	local center = ctx.anchor.Position + Vector3.new(0, FinisherRules.CENTER_HEIGHT, 0)
 
 	local orb = Instance.new("Part")
 	orb.Name = "FinisherOrb"
@@ -72,12 +54,12 @@ function Orb.start(ctx: Ctx, cue: Sequence.Cue): () -> ()
 	trail.Enabled = false -- on after the fade-in, so it never draws a streak from the spawn point
 	trail.Parent = orb
 
-	local _, orbGlow = billboard(orb, Assets.Textures.sparkle, tint)
+	local _, orbGlow = Util.billboard(orb, Assets.Textures.sparkle, tint)
 	local orbGui = orbGlow.Parent :: BillboardGui
 	orbGlow.ImageTransparency = 1
 	-- sparkle has a real alpha channel; the glow texture has an opaque dark background that shows as a box
 	-- on a billboard (billboards cannot be additive like particles), so it is only used on emitters
-	local coreGui, core = billboard(ctx.anchor, Assets.Textures.sparkle, tint)
+	local coreGui, core = Util.billboard(ctx.anchor, Assets.Textures.sparkle, tint)
 	core.ImageTransparency = 1
 
 	local wind = Meshes.get("windRing", tint, 1)

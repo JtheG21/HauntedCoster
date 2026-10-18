@@ -27,6 +27,8 @@ end
 -- tightening grow exponentially until the orbit is too small and fast to hold. The orbit plane also
 -- tumbles about the X, Y and Z axes (rates tied to the spin), so the orb sweeps all the way around the
 -- monster. The combined angular rate is capped near 0.4 rad per frame at 60 fps so it stays smooth.
+FinisherRules.CENTER_HEIGHT = 7 -- studs above the monster's ground point: the captured spirit and the orb's orbit centre
+
 FinisherRules.ORBIT =
 	{ w0 = 1.2, w1 = 18, r0 = 7, r1 = 1.6, size0 = 2.2, size1 = 2.8, tumbleX = 0.2, tumbleY = 0.14, tumbleZ = 0.1 }
 
@@ -88,6 +90,40 @@ function FinisherRules.hermite(p0: number, m0: number, p1: number, m1: number, k
 	local k2 = k * k
 	local k3 = k2 * k
 	return (2 * k3 - 3 * k2 + 1) * p0 + (k3 - 2 * k2 + k) * m0 + (-2 * k3 + 3 * k2) * p1 + (k3 - k2) * m1
+end
+
+export type Payload = { species: string, position: Vector3 }
+
+-- Checks a CaptureFinisher event from the server before anything is built from it. The server is trusted
+-- to send it, but a malformed or misplaced payload must never reach the camera code: it must name a
+-- known Rare species, carry a finite Vector3 and be within `maxDistance` of where the player is.
+function FinisherRules.parsePayload(info: any, species: { [string]: any }, from: Vector3, maxDistance: number): Payload?
+	if type(info) ~= "table" or type(info.species) ~= "string" then
+		return nil
+	end
+	local def: { rarity: string }? = species[info.species]
+	if not def or def.rarity ~= "Rare" then
+		return nil
+	end
+	local pos = info.position
+	if typeof(pos) ~= "Vector3" then
+		return nil
+	end
+	local v = pos :: Vector3
+	if
+		v.X ~= v.X
+		or v.Y ~= v.Y
+		or v.Z ~= v.Z
+		or math.abs(v.X) == math.huge
+		or math.abs(v.Y) == math.huge
+		or math.abs(v.Z) == math.huge
+	then
+		return nil
+	end
+	if (v - from).Magnitude > maxDistance then
+		return nil
+	end
+	return { species = info.species, position = v }
 end
 
 return FinisherRules

@@ -2,11 +2,22 @@
 -- Capture meter maths. The server owns the clock: it starts the session, and judges each release
 -- from its own receive time minus measured latency. The client only draws the same needle.
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Finisher = require(ReplicatedStorage.Shared.Config.RareCaptureFinisher)
+local Sequence = require(ReplicatedStorage.Shared.Sequence)
+
 local CaptureRules = {}
 
 CaptureRules.LatencySlack = 0.04 -- seconds of extra forgiveness either side of the press (jitter only)
 CaptureRules.MinReleaseGap = 0.35 -- seconds between counted releases (anti-spam; mashing still burns misses)
 CaptureRules.SessionTimeout = 20
+
+-- Seconds of cosmetic finisher a successful capture of this rarity plays; that long is added to the carry
+-- timer so watching it never costs the player time (TASK-0055).
+function CaptureRules.finisherSeconds(rarity: string): number
+	return if rarity == "Rare" then Sequence.duration(Finisher) else 0
+end
 
 -- Needle position in [0, 1]: a triangle wave, 0 -> 1 -> 0 every `period` seconds.
 function CaptureRules.needle(t: number, period: number): number

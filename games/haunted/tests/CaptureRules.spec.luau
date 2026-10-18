@@ -310,4 +310,19 @@ return function(t: TestRunner.T)
 		f.distance, f.needsCrypt = 30, true
 		t.eq(CaptureRules.startRefusal(f), "Get closer")
 	end)
+
+	t.test("finisherSeconds: the finisher's length for Rare, nothing for the others", function()
+		local Sequence = require(ReplicatedStorage.Shared.Sequence)
+		local Finisher = require(ReplicatedStorage.Shared.Config.RareCaptureFinisher)
+		t.eq(CaptureRules.finisherSeconds("Rare"), Sequence.duration(Finisher))
+		t.truthy(CaptureRules.finisherSeconds("Rare") > 10)
+		t.eq(CaptureRules.finisherSeconds("Common"), 0)
+		t.eq(CaptureRules.finisherSeconds("Uncommon"), 0)
+		t.eq(CaptureRules.finisherSeconds("nonsense"), 0)
+		-- every Rare species gets a finisher, and the carry timer grows by exactly its length
+		for _, species in Monsters.Species do
+			local bonus = CaptureRules.finisherSeconds(species.rarity)
+			t.eq(bonus > 0, species.rarity == "Rare", species.id)
+		end
+	end)
 end

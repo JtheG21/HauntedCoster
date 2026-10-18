@@ -37,6 +37,10 @@ local SHOCK_START_SIZE = 4 -- studs across when a shockwave ring is born
 local SHOCK_THICKNESS = 0.3
 local SHOCK_LIFT = 0.6 -- above the ground, so it never z-fights
 local PILLAR_ALPHA = 0.55
+local ESSENCE_SIZE = 4 -- studs across
+local ESSENCE_FADE_IN = 0.6
+local ESSENCE_FADE_OUT = 1.0
+local ESSENCE_ALPHA = 0.35
 local PILLAR_ALPHA_REDUCED = 0.75
 
 -- Height of the ground under the monster, or a sensible guess when nothing is hit.
@@ -214,6 +218,47 @@ local function vortex(ctx: Ctx, p: { [string]: any }): Undo
 	end
 end
 
+-- The captured spirit: a soft glowing sphere with a halo that hovers where the monster was, takes the phase
+-- colours, and fades out before the sequence ends. The monster itself is already gone when this plays.
+local function essence(ctx: Ctx, cue: Sequence.Cue, p: { [string]: any }): Undo
+	local keys: { { at: number, c: { number } } } = p.colors
+	local duration: number = cue.duration or 12
+	local ball = Instance.new("Part")
+	ball.Name = "FinisherEssence"
+	ball.Shape = Enum.PartType.Ball
+	ball.Anchored = true
+	ball.CanCollide = false
+	ball.CanQuery = false
+	ball.CastShadow = false
+	ball.Material = Enum.Material.Neon
+	ball.Transparency = 1
+	ball.Size = Vector3.one * ESSENCE_SIZE
+	ball.Position = ctx.anchor.Position + Vector3.new(0, FinisherRules.CENTER_HEIGHT, 0)
+	ball.Parent = ctx.fx
+	local halo = Util.billboard(ball, Assets.Textures.sparkle, Util.color(keys[1].c))
+	local haloImage = halo:FindFirstChildOfClass("ImageLabel") :: ImageLabel
+	local stop = Util.every(function(t)
+		local c = Util.color(keys[1].c)
+		for _, key in keys do
+			if t >= key.at then
+				c = Util.color(key.c)
+			end
+		end
+		local fade = math.min(t / ESSENCE_FADE_IN, 1) * math.clamp((duration - t) / ESSENCE_FADE_OUT, 0, 1)
+		local pulse = 1 + 0.06 * math.sin(t * 3)
+		ball.Color = c
+		ball.Size = Vector3.one * ESSENCE_SIZE * pulse
+		ball.Transparency = 1 - fade * (1 - ESSENCE_ALPHA)
+		halo.Size = UDim2.fromScale(ESSENCE_SIZE * 2.6 * pulse, ESSENCE_SIZE * 2.6 * pulse)
+		haloImage.ImageColor3 = c
+		haloImage.ImageTransparency = 1 - fade * 0.7
+	end)
+	return function()
+		stop()
+		ball:Destroy()
+	end
+end
+
 local function aura(ctx: Ctx, p: { [string]: any }): Undo
 	local rate: number = FinisherRules.scale("rate", p.rate or 20, ctx.reduced)
 	local glow = Util.emitter(
@@ -336,6 +381,8 @@ function Effects.new(ctx: Ctx): (cue: Sequence.Cue) -> (() -> ())?
 			return tint(cue, p)
 		elseif kind == "flash" then
 			return flash(cue, p, ctx.reduced)
+		elseif kind == "essence" then
+			return essence(ctx, cue, p)
 		elseif kind == "rune" then
 			return rune(ctx, p, floor)
 		elseif kind == "shockwave" then
