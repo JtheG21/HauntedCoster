@@ -29,3 +29,6 @@ Screenshots or mockups of HUDs, menus, journals and editors whose layout, readab
 | [[REF-UI-003-Check-UI-Clean-Roblox]] | GitHub; MIT claimed, icon rights unverified | UI design, components, animation and guidance where useful; game-specific style | Treating source claims or rigid style rules as tested universal standards |
 
 Related: [[Reference_Code_Index]]
+
+## Illustrated UI target
+- [[REF-UI-004-Illustrated-Halloween-Shop]] — illustrated Halloween panel, textured wood, outlined typography and layered decorations; original source viewed; original adaptation in the feedback demo.

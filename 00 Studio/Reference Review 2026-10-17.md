@@ -62,3 +62,12 @@ jg authorized GitHub backup of this note batch and selected evidence on 2026-10-
 
 ## Follow-through — 2026-10-17
 Merged capture notes into the local main vault at ffd92ed, preserving earlier review decisions. jg selected Pinehollow for an isolated feedback experiment and confirmed the wording; the review decision is recorded. [[RSH-20261017-Reference-Feedback-Experiment]] tracks implementation, tests, remaining runtime/visual checks and candidate recipe. Ten other games remain in the individual queue; no further decisions inferred. The original capture merge completed on GitHub in PR #76 at 525b378. The new experiment batch is local pending backup approval.
+
+## Runtime review outcome — 2026-10-17
+[[RSH-20261017-Reference-Feedback-Experiment]] records successful demo behavior checks and a corrected phone-landscape clipping failure. jg accepts functionality and spacing, rejects the visual style. Revision limit reached; a concrete UI target is needed before another attempt. Candidate recipe remains unpromoted; this batch has not completed all eleven individual game reviews. Runtime work is saved in chore/reference-feedback-runtime and awaits final scope/backup decisions.
+
+## Concrete illustrated target — 2026-10-17
+jg supplied [[REF-UI-004-Illustrated-Halloween-Shop]] and asked to apply it to the feedback demo. The illustrated original adaptation is implemented and runtime-tested on desktop and simulated phone layouts; [[RSH-20261017-Reference-Feedback-Experiment]] records the evidence and remaining human visual acceptance. Earlier rejected styles remain rejected. New runtime/artwork changes remain local on chore/reference-feedback-runtime pending final backup/merge scope.
+
+## Accepted experiment and closeout — 2026-10-17
+jg said “all good now” after the second rightward branch increment, then approved next steps 1–4: record visual approval, back up/review the work, final input check and reusable recipe. Approval is for the final isolated demo, not a game adoption decision or blanket reference acceptance. [[RSH-20261017-Layered-UI-Production-Recipe]] captures the verified process and mistakes; [[RSH-20261017-Reference-Feedback-Experiment]] retains the full evidence and closeout limits. Ten other games remain in the individual review queue.

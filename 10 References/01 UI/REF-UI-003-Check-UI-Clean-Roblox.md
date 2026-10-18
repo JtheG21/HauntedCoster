@@ -59,3 +59,8 @@ For a selected UI task, record actual visual sources inspected, exact commit and
 ## Traceability
 - Capture only: no skill installed, UI built or runtime changes made.
 - Next stage: later review, then a scoped experiment only if selected.
+
+## Experiment inspection — 2026-10-17
+Opened the actual `assets/all_menus_harmonized.png` and `assets/standard_button_studio.png` images from main and the design manual. Observed slate menu canvases, contrasting headers, outlined typography, inset fields and raised gradient buttons. Files were inspected in scratch, not installed or imported; exact commit was not pinned.
+
+[[RSH-20261017-Reference-Feedback-Experiment]] records a demo-local original adaptation of header hierarchy, inset fields and button depth. jg rejected the result's style. This is evidence about that adaptation, not a verdict on the entire source or permission to reuse its assets. Original interview and status retained.

@@ -153,6 +153,10 @@
     "REF-MISC-007": {
       "class": "reference-only",
       "basis": "Local user-supplied archive; no overall reuse licence established. Third-party assets and copied research retain separate terms; source inspection is not permission."
+    },
+    "REF-UI-004": {
+      "class": "reference-only",
+      "basis": "User-supplied X video, visible frames/transition inspected in browser; original asset rights unverified. Style adaptation uses separately generated original artwork."
     }
   }
 }
