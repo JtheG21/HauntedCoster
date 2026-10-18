@@ -8,10 +8,14 @@ local Economy = require(Shared.Config.Economy)
 local Monsters = require(Shared.Config.Monsters)
 local Variants = require(Shared.Config.Variants)
 local Track = require(Shared.Config.Track)
+local Catalog = require(Shared.Config.Catalog)
+local CosmeticRules = require(script.Parent.CosmeticRules)
 
 local ProfileRules = {}
 
-ProfileRules.Schema = 1
+-- 1: original. 2 (TASK-0060): `cosmetics` (entitlements, ghost looks, capture effect, theme, decoration
+-- placements, reward claims). A schema-1 profile migrates by gaining empty cosmetics; nothing else changes.
+ProfileRules.Schema = 2
 ProfileRules.MaxOwned = 40
 
 export type OwnedMonster = { uid: string, species: string, variant: string, acquiredAt: number }
@@ -39,6 +43,7 @@ export type Profile = {
 	exhibits: { Exhibit },
 	tutorialStep: number,
 	lastSeen: number,
+	cosmetics: CosmeticRules.State,
 	[string]: any,
 }
 
@@ -70,6 +75,7 @@ function ProfileRules.default(): Profile
 		exhibits = {},
 		tutorialStep = 1,
 		lastSeen = 0,
+		cosmetics = CosmeticRules.default(),
 	}
 end
 
@@ -150,7 +156,8 @@ function ProfileRules.persistenceFor(mode: string, raw: any): string
 end
 
 -- Returns a fully valid profile built from untrusted data, plus a list of repaired field names.
-function ProfileRules.sanitize(raw: any, now: number): (Profile, { string })
+-- `catalog` defaults to Config.Catalog; specs pass a test catalog.
+function ProfileRules.sanitize(raw: any, now: number, catalog: CosmeticRules.Catalog?): (Profile, { string })
 	local repaired: { string } = {}
 	local p = ProfileRules.default()
 	if type(raw) ~= "table" then
@@ -269,6 +276,21 @@ function ProfileRules.sanitize(raw: any, now: number): (Profile, { string })
 				fix("exhibits", false)
 			end
 		end
+	end
+
+	local speciesByUid: { [string]: string } = {}
+	for _, m in p.owned do
+		speciesByUid[m.uid] = m.species
+	end
+	local rawCosmetics = raw.cosmetics
+	if rawCosmetics ~= nil and type(rawCosmetics) ~= "table" then
+		fix("cosmetics", false)
+		rawCosmetics = nil
+	end
+	local cosmeticFixes
+	p.cosmetics, cosmeticFixes = CosmeticRules.sanitize(rawCosmetics or {}, speciesByUid, catalog or Catalog)
+	for _, name in cosmeticFixes do
+		table.insert(repaired, "cosmetics." .. name)
 	end
 
 	p.schema = ProfileRules.Schema
