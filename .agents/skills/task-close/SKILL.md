@@ -17,7 +17,7 @@ This packages steps that already exist: AGENTS.md (knowledge protocol #9 and #17
 1. `scripts/check.sh` in the task checkout. Quote its summary line.
 2. Studio evidence: link the `TEST-` note, or report "needs manual Studio check". A Rojo build or headless specs are not runtime proof.
 3. Fill the task note's **Implementation record**: files changed, checks and their results, and each acceptance criterion with its evidence and a reporting state (implemented and tested / implemented, not tested / planned / blocked / needs manual Studio or Blender check).
-4. `python3 scripts/orchestrator.py record-exec $ARGUMENTS --result pass|fail --notes "<one line>"`.
+4. `python3 scripts/orchestrator.py record-exec $ARGUMENTS --result pass|fail --notes "<one line>"`. Then, if the session's token figure is available, `python3 scripts/orchestrator.py record-usage $ARGUMENTS --kind subscription --role executor --tokens <n> --model <model> --note "<one line>"` (check `--help` for the flags). Skip it if no figure exists; never estimate one.
 5. On a pass, the next step is the audit: the `auditor` agent, once per task. Don't start it unless jg asked.
 
 **`in_review`:** not a close-out. Run the audit, write the `AUD-` note, then `record-audit`.
@@ -26,7 +26,7 @@ This packages steps that already exist: AGENTS.md (knowledge protocol #9 and #17
 1. Go on only after jg approves the merge in chat. Then `python3 scripts/orchestrator.py approve-merge $ARGUMENTS --by jg`.
 2. Write the outcome notes on the task branch, so the merge carries them, and update `updated:` on each:
    - the task note's **Outcome**
-   - the game's `00 Overview`, the affected `SYS-` notes and the Technical Architecture note, where this task changed them
+   - the game's `00 Overview`, the affected `SYS-` notes and the Technical Architecture note, only where a fact in them changed (link the task note's evidence; don't restate it)
    - a Resource Catalog row if something reusable came out of it; a `LES-` note only with evidence
 3. Merge only through the `04 Agents/Workflow.md` merge procedure.
 

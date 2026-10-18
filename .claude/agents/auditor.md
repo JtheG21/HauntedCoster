@@ -1,6 +1,6 @@
 ---
 name: auditor
-description: Independent audit of one Rg1 task (the AGENTS.md Auditor role). Use once per task, after scripts/check.sh and the task's Studio checks are green, or for a delta re-audit after a revision (call it with model "sonnet" then, except for security, networking or DataStore code). Give it the task ID, the checkout path and branch, and for a delta re-audit the revision's commit range. Read-only; returns verdict, findings and file:line.
+description: Independent audit of one Rg1 task (the AGENTS.md Auditor role). Use once per task (not for Light tasks; call it with model "sonnet" for a Standard first audit, and keep Opus for Deep, security, networking or DataStore tasks), after scripts/check.sh and the task's Studio checks are green, or for a delta re-audit after a revision (call it with model "sonnet" then, except for security, networking or DataStore code). Give it the task ID, the checkout path and branch, and for a delta re-audit the revision's commit range. Read-only; returns verdict, findings and file:line.
 tools: Read, Grep, Glob, Bash
 model: opus
 ---

@@ -39,7 +39,7 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 ## Session and delegation budget
 - One primary agent. No subagents for reads, simple edits, single checks or note upkeep.
 - At most one audit subagent per task (not one per batch of tasks) unless the user authorizes more. It returns verdict + findings + file:line only.
-- Delta re-audits after a revision may use `model: sonnet`. First audits of security, networking or DataStore code stay on Opus.
+- Audit by depth tier ([[Task Intake]]): **Light** tasks rely on a green `scripts/check.sh` and skip the audit subagent. **Standard** tasks get one first audit with `model: sonnet`. **Deep** tasks and any security, networking or DataStore code get an Opus first audit. Delta re-audits after a revision may use `model: sonnet`, except for security, networking or DataStore code. jg can always ask for a stronger audit.
 - Don't poll with `sleep`. Use background runs and wait for the notification.
 - When the objective changes, or context passes ~150k, write a ≤20-line handoff in the task note and start a fresh session.
 
@@ -69,7 +69,7 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 6. In research, keep observations, hypotheses and recommendations apart. Keep source URLs and access dates.
 7. Audits are new records (`AUD-…-NN`). Never delete earlier findings or turn a failed audit into a pass.
 8. Record major architecture and design decisions as `ADR-` notes. Set `status: approved` only after explicit human approval, and record who approved it and when.
-9. After each completed task, update the task note's Outcome, the game's `00 Overview`, the relevant `SYS-` notes, the architecture note, and (through the orchestrator) the project state.
+9. After each completed task, update the task note's Outcome and (through the orchestrator) the project state. Update the game's `00 Overview`, the relevant `SYS-` notes and the architecture note only where a fact in them changed; link the task's evidence instead of restating it.
 10. After each milestone, write a short `RETRO-` note: progress, blockers, regressions, token use when known, and improvements.
 11. Promote a lesson to `09 Knowledge/LES-` only with evidence, and link it to the original task, test or audit.
 12. Keep notes short. Don't copy whole code files into notes. No secrets in the vault.
