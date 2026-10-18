@@ -21,8 +21,18 @@ local DEFAULTS = {
 	vfx = "rbxasset://textures/particles/sparkles_main.dds",
 	surface = "rbxasset://textures/SpawnLocation.png",
 }
+-- Far from any real map; assumed empty (checked only in scratch places), so keep pads out of a populated place.
 local ORIGIN = { vfx = Vector3.new(0, 40, -300), surface = Vector3.new(100, 10, -300) }
 local FRAME_SAMPLES = 30
+
+-- Everything a pad can add to: the world, the default GUI, and this client's own GUI when there is one.
+local function footprint(): number
+	local player = Players.LocalPlayer
+	local playerGui = if player then player:FindFirstChild("PlayerGui") else nil
+	return #Workspace:GetDescendants()
+		+ #StarterGui:GetDescendants()
+		+ (if playerGui then #playerGui:GetDescendants() else 0)
+end
 
 type Handle = {
 	name: string,
@@ -71,7 +81,10 @@ local function buildUi(texture: string): Handle
 		img.Parent = gui
 		table.insert(images, img)
 	end
-	game:GetService("ContentProvider"):PreloadAsync(images)
+	if player then
+		-- a server has nothing to render and PreloadAsync can hang there
+		game:GetService("ContentProvider"):PreloadAsync(images)
+	end
 	local loaded = 0
 	for _, img in images do
 		if (img :: ImageLabel).IsLoaded then
@@ -176,7 +189,12 @@ local function buildSurface(texture: string): Handle
 			wallStuds = `{PadRules.WALL.width}x{PadRules.WALL.height}`,
 			clockTime = Lighting.ClockTime,
 			brightness = Lighting.Brightness,
-			ambient = string.format("%02x%02x%02x", ambient.R * 255, ambient.G * 255, ambient.B * 255),
+			ambient = string.format(
+				"%02x%02x%02x",
+				math.round(ambient.R * 255),
+				math.round(ambient.G * 255),
+				math.round(ambient.B * 255)
+			),
 		},
 		cameras = { { distance = 25, from = ORIGIN.surface + Vector3.new(-4, 0, 25), to = ORIGIN.surface } },
 	}
@@ -233,9 +251,14 @@ return function(args: any): { [string]: any }
 			end
 			continue
 		end
-		local descendantsBefore = #Workspace:GetDescendants() + #StarterGui:GetDescendants()
+		local descendantsBefore = footprint()
 		local lightingBefore = #Lighting:GetChildren()
-		local handle = builders[pad](texture)
+		local built, handle = pcall(builders[pad], texture)
+		if not built then
+			removeAll() -- a half-built pad must not stay behind
+			check(`{pad}: builds`, false, handle)
+			continue
+		end
 		table.insert(lines, PadRules.metricsLine(pad, handle.metrics))
 		for _, c in handle.cameras do
 			table.insert(cameras, `{pad} d={c.distance} from={c.from} to={c.to}`)
@@ -254,8 +277,7 @@ return function(args: any): { [string]: any }
 			task.wait()
 			check(
 				`{pad}: back to baseline`,
-				#Workspace:GetDescendants() + #StarterGui:GetDescendants() == descendantsBefore
-					and #Lighting:GetChildren() == lightingBefore
+				footprint() == descendantsBefore and #Lighting:GetChildren() == lightingBefore
 			)
 		end
 	end

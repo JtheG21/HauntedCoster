@@ -3,7 +3,7 @@ id: TASK-0056
 title: "Studio Test Pads"
 type: task
 project: GAME-002
-status: in_progress
+status: approved
 priority: low
 risk: low
 owner: executor
@@ -44,7 +44,7 @@ Three reusable Studio test pads (spec item X11) so a texture, icon or effect is 
 - [x] AC1 Lune: the pure rules produce the three UI sizes on both backgrounds, three VFX camera distances and a wall layout; reject bad texture ids and sizes.
 - [x] AC2 Studio: each pad runs in a fresh Play session from the scenario with a built-in texture, prints its metrics line, and leaves the place at its baseline (descendants, emitters, Lighting).
 - [x] AC3 A capture of each pad is taken with the Studio tool and viewed; the note records how.
-- [ ] AC4 `scripts/check.sh` green; audit (light).
+- [x] AC4 `scripts/check.sh` green; audit (light).
 
 ## Tests
 - **Automated:** `scripts/check.sh`, Lune spec.
@@ -60,5 +60,6 @@ Low: new scenario and rules only. Studio capture tool behaviour is unverified un
 - Findings: the first capture after moving the camera can be stale or time out (capture twice); Edit mode caches `require`; `PreloadAsync` hangs on a server, so the UI pad is client-only and `all` skips it there.
 
 ## Audits
+- Light audit (2026-10-17, Sonnet): pass with notes; fixes applied in the same commit (see [[AUD-20261017-TASK-0056-01]]).
 
 ## Outcome
