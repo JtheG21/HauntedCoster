@@ -3,7 +3,7 @@ id: TASK-0068
 title: "Robux Purchase Research And ADR"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: medium
 risk: low
 owner: executor
@@ -65,5 +65,6 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 369,782, at close 391,494
 | AC3 open questions for jg; no code changes | met: seven questions in the ADR; the diff touches only notes |
 
 ## Audits
+[[AUD-20261018-TASK-0068-01]]: pass (Opus). Five findings, all fixed in the notes after the audit.
 
 ## Outcome

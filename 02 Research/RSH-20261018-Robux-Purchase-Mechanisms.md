@@ -34,7 +34,7 @@ The local clone may lag the live site; the web pages were not fetched.
 - A **developer product** can be bought more than once (currency, potions). A **pass** is a one-time purchase of a permanent privilege. *(developer-products, passes)*
 - A product is created in the Creator Hub for a **published** game, with a Robux price from 1 up. *(developer-products)*
 - Products are granted only through the server-side `ProcessReceipt` callback (or the newer `BindReceiptHandler`, which takes precedence and falls back to `ProcessReceipt`). The docs say not to grant on `PromptProductPurchaseFinished`, because the purchase can still fail on the backend. *(developer-products, MarketplaceService)*
-- `ProcessReceipt` is set once, in one server script, and must handle every product. Its receipt carries `PurchaseId`, `PlayerId`, `ProductId`, `CurrencySpent`, `CurrencyType` and the place. Returning `PurchaseGranted` resolves it; `NotProcessedYet` leaves it unresolved. *(MarketplaceService)*
+- `ProcessReceipt` is set once, in one server script, and must handle every product. Its receipt carries `PurchaseId`, `PlayerId`, `ProductId`, `CurrencySpent`, `CurrencyType` and the place. Returning `PurchaseGranted` resolves it; `NotProcessedYet` leaves it unresolved. `BindReceiptHandler` uses `Enum.ReceiptDecision.Processed` and `NotProcessedYet` instead. *(MarketplaceService)*
 - Unresolved purchases come back only when the player joins any server or starts another purchase: there is no time-based retry. The callback may run on two servers at once for the same purchase, runs in no fixed order, needs the player on the server, and can yield for as long as the server runs. Returning `PurchaseGranted` can still fail to record on the backend, leaving the purchase unresolved. Unresolved purchases are not refunded when escrow ends. *(MarketplaceService)*
 - With no `ProcessReceipt` callback, receipts are auto-acknowledged and cannot be recovered. *(MarketplaceService)*
 - **Listed** products and passes can be sold outside the game; Roblox checks the `ProcessReceipt` implementation, and a flagged product stops showing outside the game until fixed. *(developer-products)*
@@ -44,7 +44,7 @@ The local clone may lag the live site; the web pages were not fetched.
 
 ## Hypotheses
 - Our cosmetic entitlements (`profile.cosmetics.entitlements`) can be the single source of truth, with a Robux purchase being only another way to call `CosmeticRules.grant`. *(confidence: medium; the grant path and the Coin purchase already work this way, TASK-0067)*
-- One developer product per catalog item, recorded by `PurchaseId`, makes a double grant impossible even across two servers. *(confidence: medium; needs a spec and a Studio check, and a place to store processed IDs in the profile)*
+- One developer product per catalog item, with processed `PurchaseId`s recorded in the profile, can prevent a double grant even when the callback runs on two servers, but only if the profile store session-locks or saves atomically; otherwise both servers could load the profile before either saves. *(confidence: low to medium; the project has `SessionLockRules`, but this was not checked against the receipt case. The v2 profile schema has no field for processed purchase IDs yet, so one must be added.)*
 - Many cosmetics mean many passes, each created by hand in the Creator Hub, which scales worse than products. *(confidence: low; pass count limits were not looked up)*
 
 ## Relevance to our game
