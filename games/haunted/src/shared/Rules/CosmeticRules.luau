@@ -5,7 +5,11 @@
 -- Storage policy (SYS-Haunted-Monetization-UI): an entitlement is never dropped because the current catalog
 -- doesn't list it (a config gap must not destroy something a player earned or bought). Selections and
 -- placements must reference an owned entitlement and, when the catalog knows the item, fit its category and
--- compatibility. Cosmetics never touch income, capacity, rarity, variants or capture rules.
+-- compatibility. An ID the catalog doesn't list may fill only one kind of slot (skin, aura, capture effect,
+-- theme or decoration), so stored data can't spread it across categories. Placements are not protected like
+-- entitlements: if a later catalog lowers an item's placementLimit or changes its category, the extra or
+-- mismatched placements are dropped on load (and reported as repaired) while the item stays owned.
+-- Cosmetics never touch income, capacity, rarity, variants or capture rules.
 
 local Shared = script.Parent.Parent
 local CatalogConfig = require(Shared.Config.Catalog)
@@ -47,40 +51,79 @@ function CosmeticRules.default(): State
 	}
 end
 
-local function idSet(v: any, max: number): ({ [string]: boolean }, boolean)
-	local out, n, ok = {}, 0, true
+-- Over the cap, IDs the catalog knows are kept first, then the rest in sorted order, so which IDs survive
+-- never depends on table iteration order.
+local function idSet(v: any, max: number, known: { [string]: any }): ({ [string]: boolean }, boolean)
+	local out, ok = {}, true
 	if v ~= nil and type(v) ~= "table" then
 		return out, false
 	end
-	if type(v) == "table" then
-		for k, flag in v do
-			if CosmeticRules.isId(k) and flag == true and n < max then
-				out[k] = true
-				n += 1
-			else
-				ok = false
-			end
+	if type(v) ~= "table" then
+		return out, ok
+	end
+	local ids: { string } = {}
+	for k, flag in v do
+		if CosmeticRules.isId(k) and flag == true then
+			table.insert(ids, k)
+		else
+			ok = false
 		end
+	end
+	table.sort(ids, function(a, b)
+		local ka, kb = known[a] ~= nil, known[b] ~= nil
+		if ka ~= kb then
+			return ka
+		end
+		return a < b
+	end)
+	for i, id in ids do
+		if i > max then
+			ok = false
+			break
+		end
+		out[id] = true
 	end
 	return out, ok
 end
 
--- True when the item may sit in a slot of `category`: owned, and the catalog (if it knows the item) agrees.
-local function fits(s: State, catalog: Catalog, id: any, category: string, species: string?): boolean
+-- Why `id` can't go in a slot of `category` (nil if it can). The one ownership and compatibility check, used
+-- by the mutators and by sanitize.
+local function equipCheck(s: State, catalog: Catalog, id: string, category: string, species: string?): string?
+	local item = catalog.Items[id]
+	if item == nil then
+		return "unknown"
+	elseif not s.entitlements[id] then
+		return "notOwned"
+	elseif item.category ~= category then
+		return "wrongCategory"
+	elseif species and item.species and table.find(item.species, species) == nil then
+		return "incompatible"
+	end
+	return nil
+end
+
+-- Sanitize's version: an owned ID the catalog doesn't list is kept (see header), but only in the first kind
+-- of slot it was seen in; `unknownKind` records that per sanitize pass.
+local function fits(
+	s: State,
+	catalog: Catalog,
+	id: any,
+	category: string,
+	species: string?,
+	unknownKind: { [string]: string }
+): boolean
 	if not CosmeticRules.isId(id) or not s.entitlements[id] then
 		return false
 	end
-	local item = catalog.Items[id]
-	if item == nil then
-		return true -- unknown to this catalog: keep, never destroy (see header)
+	if catalog.Items[id] == nil then
+		local kind = unknownKind[id]
+		if kind == nil then
+			unknownKind[id] = category
+			return true
+		end
+		return kind == category
 	end
-	if item.category ~= category then
-		return false
-	end
-	if species and item.species then
-		return table.find(item.species, species) ~= nil
-	end
-	return true
+	return equipCheck(s, catalog, id, category, species) == nil
 end
 
 local function validRotation(r: any): boolean
@@ -127,21 +170,33 @@ function CosmeticRules.sanitize(
 	local s = CosmeticRules.default()
 
 	local ok
-	s.entitlements, ok = idSet(raw.entitlements, CatalogConfig.MaxEntitlements)
+	s.entitlements, ok = idSet(raw.entitlements, CatalogConfig.MaxEntitlements, catalog.Items)
 	fix("entitlements", ok)
-	s.rewardsClaimed, ok = idSet(raw.rewardsClaimed, CatalogConfig.MaxRewards)
+	s.rewardsClaimed, ok = idSet(raw.rewardsClaimed, CatalogConfig.MaxRewards, catalog.Rewards)
 	fix("rewardsClaimed", ok)
+	local unknownKind: { [string]: string } = {}
 
 	if type(raw.ghostLooks) == "table" then
 		local good = true
-		for uid, look in raw.ghostLooks do
-			local species = if type(uid) == "string" then speciesByUid[uid] else nil
-			if species == nil or type(look) ~= "table" then
+		-- Sorted, so the first slot an unknown ID claims is the same on every load.
+		local uids: { string } = {}
+		for uid in raw.ghostLooks do
+			if type(uid) == "string" and speciesByUid[uid] ~= nil then
+				table.insert(uids, uid)
+			else
+				good = false
+			end
+		end
+		table.sort(uids)
+		for _, uid in uids do
+			local species = speciesByUid[uid]
+			local look = raw.ghostLooks[uid]
+			if type(look) ~= "table" then
 				good = false
 				continue
 			end
-			local skin = if fits(s, catalog, look.skin, "Skin", species) then look.skin else nil
-			local aura = if fits(s, catalog, look.aura, "Aura", species) then look.aura else nil
+			local skin = if fits(s, catalog, look.skin, "Skin", species, unknownKind) then look.skin else nil
+			local aura = if fits(s, catalog, look.aura, "Aura", species, unknownKind) then look.aura else nil
 			good = good and skin == look.skin and aura == look.aura
 			if skin or aura then
 				s.ghostLooks[uid] = { skin = skin, aura = aura }
@@ -153,12 +208,14 @@ function CosmeticRules.sanitize(
 	end
 
 	if raw.captureEffect ~= nil then
-		s.captureEffect = if fits(s, catalog, raw.captureEffect, "CaptureEffect") then raw.captureEffect else nil
+		s.captureEffect = if fits(s, catalog, raw.captureEffect, "CaptureEffect", nil, unknownKind)
+			then raw.captureEffect
+			else nil
 		fix("captureEffect", s.captureEffect ~= nil)
 	end
 	-- Tier coverage is not checked here: an upgrade must not silently unequip a theme (the world falls back).
 	if raw.mansionTheme ~= nil then
-		s.mansionTheme = if fits(s, catalog, raw.mansionTheme, "Theme") then raw.mansionTheme else nil
+		s.mansionTheme = if fits(s, catalog, raw.mansionTheme, "Theme", nil, unknownKind) then raw.mansionTheme else nil
 		fix("mansionTheme", s.mansionTheme ~= nil)
 	end
 
@@ -166,7 +223,7 @@ function CosmeticRules.sanitize(
 		for _, pl in raw.placements do
 			if
 				type(pl) == "table"
-				and fits(s, catalog, pl.id, "Decoration")
+				and fits(s, catalog, pl.id, "Decoration", nil, unknownKind)
 				and inPlot(pl.x, pl.z)
 				and validRotation(pl.r)
 				and #s.placements < CatalogConfig.MaxPlacements
@@ -210,20 +267,6 @@ function CosmeticRules.grant(s: State, catalog: Catalog, id: string): (boolean, 
 	return true, nil
 end
 
-local function equipCheck(s: State, catalog: Catalog, id: string, category: string, species: string?): string?
-	local item = catalog.Items[id]
-	if item == nil then
-		return "unknown"
-	elseif not s.entitlements[id] then
-		return "notOwned"
-	elseif item.category ~= category then
-		return "wrongCategory"
-	elseif species and item.species and table.find(item.species, species) == nil then
-		return "incompatible"
-	end
-	return nil
-end
-
 -- slot is "skin" or "aura"; species is the owned ghost's species (nil if the UID isn't owned).
 function CosmeticRules.equipLook(
 	s: State,
@@ -256,10 +299,10 @@ end
 
 -- Removing a skin restores the natural look; removing an aura clears that layer. Ownership is kept.
 function CosmeticRules.removeLook(s: State, uid: string, slot: string): (boolean, string?)
-	local look = s.ghostLooks[uid]
 	if slot ~= "skin" and slot ~= "aura" then
 		return false, "badSlot"
 	end
+	local look = s.ghostLooks[uid]
 	if look then
 		if slot == "skin" then
 			look.skin = nil
@@ -345,16 +388,27 @@ function CosmeticRules.claimReward(s: State, catalog: Catalog, rewardId: string)
 	elseif s.rewardsClaimed[rewardId] then
 		return false, "claimed"
 	end
+	-- Validate everything first so the claim is all-or-nothing: no partial grant on a bad item or a full list.
+	local new: { [string]: boolean } = {}
+	local newCount = 0
 	for _, id in reward.grants do
 		if catalog.Items[id] == nil then
 			return false, "badReward"
 		end
-	end
-	for _, id in reward.grants do
-		local ok, why = CosmeticRules.grant(s, catalog, id)
-		if not ok then
-			return false, why
+		if not s.entitlements[id] and not new[id] then
+			new[id] = true
+			newCount += 1
 		end
+	end
+	local owned = 0
+	for _ in s.entitlements do
+		owned += 1
+	end
+	if owned + newCount > CatalogConfig.MaxEntitlements then
+		return false, "full"
+	end
+	for id in new do
+		s.entitlements[id] = true
 	end
 	s.rewardsClaimed[rewardId] = true
 	return true, nil

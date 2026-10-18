@@ -3685,7 +3685,7 @@
       "id": "TASK-0060",
       "title": "Monetization Persistence Schema",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0060-Monetization-Persistence-Schema",
@@ -3719,6 +3719,18 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T11:45:52",
+          "from": "approved",
+          "to": "changes_requested",
+          "note": "changes requested by jg: jg 2026-10-18: fix all AUD-20261018-TASK-0060-01 findings; revision 1/2"
+        },
+        {
+          "time": "2026-10-18T11:45:52",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [
@@ -3735,7 +3747,7 @@
           "report": "/Users/jg/Desktop/Rg1-worktrees/task-0060/06 QA/AUD-20261018-TASK-0060-01.md"
         }
       ],
-      "revisions": 0,
+      "revisions": 1,
       "approved_by": "jg"
     },
     {

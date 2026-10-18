@@ -3,7 +3,7 @@ id: TASK-0060
 title: "Monetization Persistence Schema"
 type: task
 project: GAME-002
-status: approved
+status: in_progress
 priority: medium
 risk: medium
 owner: executor

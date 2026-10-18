@@ -272,4 +272,79 @@ return function(t: TestRunner.T)
 		local raw = { schema = ProfileRules.Schema + 1, cosmetics = { entitlements = { WispSkin = true } } }
 		t.eq(ProfileRules.persistenceFor("saved", raw), "readonly")
 	end)
+
+	t.test("a reward that would overflow entitlements grants nothing (all-or-nothing)", function()
+		local s = CosmeticRules.default()
+		for i = 1, Catalog.MaxEntitlements - 1 do
+			s.entitlements["e" .. i] = true
+		end
+		local _, why = CosmeticRules.claimReward(s, cat, "HabitatOne") -- needs 2 free, has 1
+		t.eq(why, "full")
+		t.eq(s.entitlements.MossTheme, nil)
+		t.eq(s.entitlements.Lantern, nil)
+		t.eq(s.rewardsClaimed.HabitatOne, nil)
+		s.entitlements.MossTheme = true -- now only 1 new item is needed
+		(s.entitlements :: any).e1 = nil
+		t.eq((CosmeticRules.claimReward(s, cat, "HabitatOne")), true)
+		t.eq(s.entitlements.Lantern, true)
+	end)
+
+	t.test("over the entitlement cap, catalog items are kept first, then sorted IDs", function()
+		local many = { WispSkin = true }
+		for i = 1, Catalog.MaxEntitlements + 5 do
+			many[string.format("z%04d", i)] = true
+		end
+		local p = ProfileRules.sanitize({ cosmetics = { entitlements = many } }, now, cat)
+		local e = p.cosmetics.entitlements
+		t.eq(e.WispSkin, true)
+		t.eq(e.z0001, true)
+		t.eq(e[string.format("z%04d", Catalog.MaxEntitlements - 1)], true)
+		t.eq(e[string.format("z%04d", Catalog.MaxEntitlements)], nil)
+	end)
+
+	t.test("an unknown ID fills only one kind of slot", function()
+		local p, repaired = ProfileRules.sanitize({
+			owned = owned,
+			cosmetics = {
+				entitlements = { Mystery = true },
+				ghostLooks = { m1 = { skin = "Mystery" }, m2 = { skin = "Mystery", aura = "Mystery" } },
+				captureEffect = "Mystery",
+				mansionTheme = "Mystery",
+				placements = { { id = "Mystery", x = 0, z = 0, r = 0 } },
+			},
+		}, now, cat)
+		local c = p.cosmetics
+		t.eq(c.ghostLooks.m1.skin, "Mystery")
+		t.eq(c.ghostLooks.m2.skin, "Mystery") -- same kind on another ghost is fine
+		t.eq(c.ghostLooks.m2.aura, nil)
+		t.eq(c.captureEffect, nil)
+		t.eq(c.mansionTheme, nil)
+		t.eq(#c.placements, 0)
+		t.eq(c.entitlements.Mystery, true)
+		for _, name in
+			{ "cosmetics.ghostLooks", "cosmetics.captureEffect", "cosmetics.mansionTheme", "cosmetics.placements" }
+		do
+			t.truthy(has(repaired, name), name)
+		end
+	end)
+
+	t.test("a lowered placement limit drops extra placements but keeps the item", function()
+		local raw = {
+			cosmetics = {
+				entitlements = { Bench = true },
+				placements = { { id = "Bench", x = 0, z = 0, r = 0 }, { id = "Bench", x = 2, z = 2, r = 0 } },
+			},
+		}
+		local p, repaired = ProfileRules.sanitize(raw, now, cat) -- Bench limit is 1
+		t.eq(#p.cosmetics.placements, 1)
+		t.eq(p.cosmetics.entitlements.Bench, true)
+		t.truthy(has(repaired, "cosmetics.placements"))
+	end)
+
+	t.test("removeLook rejects a bad slot", function()
+		local s = CosmeticRules.default()
+		local ok, why = CosmeticRules.removeLook(s, "m1", "hat")
+		t.eq(ok, false)
+		t.eq(why, "badSlot")
+	end)
 end
