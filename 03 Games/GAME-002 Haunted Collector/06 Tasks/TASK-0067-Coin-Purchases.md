@@ -3,7 +3,7 @@ id: TASK-0067
 title: "Coin Purchases"
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: medium
 risk: high
 owner: executor
@@ -68,7 +68,9 @@ Executor: Claude. jg said the session was switched to Opus, but the session stil
 |---|---|
 | AC1 authoritative debit and grant, idempotent, exact shortfall, no Robux prompt | implemented and spec-tested |
 | AC2 pending, failure and rejoin states; prices from config | implemented; rejoin holds through ownership; Studio not run |
-| AC3 specs, ExploitProbe extended, check.sh, Opus audit | specs and check.sh done; ExploitProbe not run; audit pending |
+| AC3 specs, ExploitProbe extended, check.sh, Opus audit | specs and check.sh done; ExploitProbe extended but not run; Opus audit see Audits |
+
+**Studio skipped by jg, 2026-10-18.** No Play session, no ExploitProbe run, no Buy round trip, no screenshots. The Buy UI, the pending state and the extended probe are unverified at runtime.
 
 ## Audits
 
