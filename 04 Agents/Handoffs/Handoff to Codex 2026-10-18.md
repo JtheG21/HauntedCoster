@@ -79,3 +79,41 @@ Gameplay, income, capacity, rarity and capture rules; the Coin purchase atomicit
 
 ## Report back with
 Files changed, checks run and their output, the evidence for each acceptance criterion, what is unverified, and the remaining work, using: implemented and tested / implemented, not tested / planned / blocked / needs a manual check.
+
+
+## Codex verification record (2026-10-18)
+- **Reviewed:** main `494be30`; [[AUD-20261018-TASK-0069-02]] records per-remote and per-system verdicts. Changes requested; historical completed tasks stay terminal.
+- **Implemented and tested:** documentation/evidence only on `chore/codex-handoff-review-20261018`, checkout `/private/tmp/rg1-codex-handoff-review`. No production fixes started.
+- **Studio:** [[TEST-20261018-01]]; repaired 109 stale/empty scripts after Rojo connection, verified 151/151 source hashes, used memory-only test profiles, restored original source/helpers and verified again.
+- **Results:** Server specs 265/0; ExploitProbe 14/14; art 333 parts/0 bake failures, about 10–11 s. Cosmetic service probe 32 pass/1 failure (saved blocked decoration retained). FullLoop aborts at :223 without an owned monster. Two-client appearance: only 1/2 observer reports, no pass claimed.
+- **Needs a manual check:** full visual tour/reference comparison, all orientation/tier keep-outs, complete UI/input journeys, real-capture effect and isolated persistent rejoin. TEST note lists each omission and reason; screenshots preserved there.
+- **Environment:** Haunted placeId 108419797534540, Edit, no test helpers/override; Rojo from main on localhost:34872. Main checkout's unrelated edits preserved.
+- **Checks:** review branch `scripts/check.sh` ALL CHECKS PASSED with CI-pinned 1.63.0 definitions; 265 Lune specs, 157 Python tests.
+- **Usage:** no reliable token-growth counter or billing was exposed; no token count estimated. Subscription use recorded separately.
+
+## Proposed follow-ups (filed by Codex; no approval or start)
+- [[TASK-0070-Decoration-Load-Revalidation]] — deep; high risk.
+- [[TASK-0071-Stable-Decoration-Identity]] — deep; high risk.
+- [[TASK-0072-Cosmetic-Service-Behavior-Tests]] — deep; high risk.
+- [[TASK-0073-Complete-Mansion-Theme-Preview]] — standard; medium risk.
+- [[TASK-0074-Decoration-Editor-Interaction-Completion]] — standard; medium risk.
+- [[TASK-0075-Cosmetic-Cleanup-And-Placement-Constants]] — standard; medium risk.
+- [[TASK-0076-Environment-Revision-Remediation]] — deep; high risk.
+- [[TASK-0077-Monetization-Decision-Packet]] — light; low risk.
+- [[TASK-0078-Art-Loading-Failure-Recovery]] — standard; medium risk.
+- [[TASK-0079-Vacant-Plot-Decoration-Cleanup]] — standard; medium risk.
+- [[TASK-0080-Monetization-And-Art-Studio-Verification]] — deep; high risk.
+- [[TASK-0081-Finished-Cosmetic-Asset-Brief]] — standard; medium risk.
+- [[TASK-0082-Readonly-Cosmetic-Mutation-Guard]] — deep; high risk.
+- [[TASK-0083-Exhibit-Tier-Guard-Ordering]] — light; low risk.
+- [[TASK-0084-FullLoop-Capture-Secure-Investigation]] — deep; high risk.
+- [[TASK-0085-Narrow-Viewport-Hud-Navigation]] — standard; medium risk.
+
+## Decisions for jg (one batch; all unanswered)
+1. **Coin prices:** approve measured-income pricing for the placeholder SkinMoss 300, AuraEmbers 250 and DecoLantern 150 only after measurement; these values are not release approvals.
+2. **Save policy:** should a Coin purchase force a confirmed save, and what should players see on save failure?
+3. **Rewards:** approve the milestone list and sample reward mapping, including whether SpiderWoodland and Settlement need milestones.
+4. **Decorations:** approve grid 2, fine 1, margin 3, per-item/global caps; confirm direct/drag interaction requirements against the baseline before an editor redesign. Any stable-ID schema migration requires separate approval.
+5. **Finished art:** select and approve real cosmetic concepts meeting the quality baseline; review the ported creatures, habitats, houses and train visually. Current screenshots are evidence, not approval.
+6. **ADR-0013:** choose products/passes/hybrid; individual items versus separately approved bundles; Robux prices/regional pricing; Listed status; publishing timing and product creator; dual Coin/Robux purchase race policy; processed-receipt storage/retention and two-server safety. ADR remains proposed; no implementation/product IDs/spend/publishing authorized.
+7. **Work priority:** approve or amend the scoped proposals before implementation. Recommendation: readonly mutation guard and FullLoop investigation first, then decoration safety and missing behavior evidence. This is a recommendation, not a priority decision by jg.

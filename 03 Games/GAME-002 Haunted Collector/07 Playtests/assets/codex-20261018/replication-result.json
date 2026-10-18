@@ -1,0 +1,17 @@
+{
+  "result": {
+    "reports": {
+      "-2": {
+        "renderedModels": 1,
+        "themedHouse": true,
+        "equippedModels": 1,
+        "ok": true
+      }
+    },
+    "plotIndex": 1,
+    "ok": false,
+    "passed": 1,
+    "reported": 1
+  },
+  "callOk": true
+}
