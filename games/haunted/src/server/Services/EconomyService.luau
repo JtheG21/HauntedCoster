@@ -7,6 +7,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Economy = require(Shared:WaitForChild("Config"):WaitForChild("Economy"))
 local EconomyRules = require(Shared:WaitForChild("Rules"):WaitForChild("EconomyRules"))
+local ThemeRules = require(Shared:WaitForChild("Rules"):WaitForChild("ThemeRules"))
+local CatalogConfig = require(Shared:WaitForChild("Config"):WaitForChild("Catalog"))
 local Remotes = require(script.Parent.Parent.Remotes)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local StateService = require(script.Parent.StateService)
@@ -57,8 +59,20 @@ local function onPurchase(player: Player, item: any, expected: any): (boolean, s
 		)
 	else
 		local tier = Economy.HouseTiers[profile.houseTier + 1]
+		-- A theme that doesn't cover the new tier goes back to the default look, with a notice (TASK-0064).
+		local notice = ThemeRules.fallbackNotice(
+			profile.cosmetics,
+			{ Items = CatalogConfig.Items, Rewards = CatalogConfig.Rewards },
+			profile.houseTier
+		)
+		if notice then
+			profile.cosmetics.mansionTheme = nil
+		end
 		PlotService.rebuildHouse(player)
 		StateService.toast(player, `Your house is now a {tier.name}! {tier.blurb}`, "success")
+		if notice then
+			StateService.toast(player, notice, "info")
+		end
 		for _, cb in tierCallbacks do
 			task.spawn(cb, player, profile.houseTier)
 		end

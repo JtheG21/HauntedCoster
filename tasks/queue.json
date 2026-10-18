@@ -4269,7 +4269,7 @@
       "id": "TASK-0064",
       "title": "Mansion Themes",
       "project": "GAME-002",
-      "status": "ready",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4289,12 +4289,49 @@
           "from": "proposed",
           "to": "ready",
           "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T13:30:14",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T13:32:35",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T13:33:32",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T13:35:11",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
-      "executions": [],
-      "audits": [],
+      "executions": [
+        {
+          "time": "2026-10-18T13:32:35",
+          "result": "pass",
+          "notes": "mansion themes implemented; check.sh green, 230 specs; Studio skipped by jg; AC2 full preview not built"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-18T13:33:32",
+          "result": "pass",
+          "report": "06 QA/AUD-20261018-TASK-0064-01.md"
+        }
+      ],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0065",

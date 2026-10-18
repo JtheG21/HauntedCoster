@@ -282,7 +282,7 @@ end
 -- at the art's lit windows; the Grand Mansion's tower lamp keeps its purple light.
 local HOUSE_ART = { [0] = "house_t0", [1] = "house_t1", [2] = "house_t2" }
 local WARM = Color3.fromRGB(255, 200, 110)
-function PlotBuilder.buildHouse(plot: Model, index: number, tier: number)
+function PlotBuilder.buildHouse(plot: Model, index: number, tier: number, tint: { [string]: Color3 }?)
 	local houseFolder = plot:FindFirstChild("House") :: Folder
 	houseFolder:ClearAllChildren()
 	local t = math.clamp(tier, 0, 2)
@@ -296,6 +296,10 @@ function PlotBuilder.buildHouse(plot: Model, index: number, tier: number)
 	end
 	local anchor = Build.artSlot(houseFolder, HOUSE_ART[t], CFrame.new(World.Plot.house))
 	anchor.Name = "HouseArt"
+	-- A mansion theme (TASK-0064) tints the art's Walls, Trim and Roof; the client Dressing applies the tint.
+	for part, color in (tint or {}) :: { [string]: Color3 } do
+		anchor:SetAttribute("Tint_" .. part, color)
+	end
 	local label: string
 	if t == 0 then
 		local shack = findBox(0, "Shack")

@@ -9,6 +9,10 @@ local Workspace = game:GetService("Workspace")
 
 local World = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("World"))
 local PlotRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Rules"):WaitForChild("PlotRules"))
+local ThemeRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Rules"):WaitForChild("ThemeRules"))
+local CatalogConfig = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("Catalog"))
+local CosmeticLooks =
+	require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"):WaitForChild("CosmeticLooks"))
 local PlotBuilder = require(script.Parent.Parent.World.PlotBuilder)
 local PlayerDataService = require(script.Parent.PlayerDataService)
 local StateService = require(script.Parent.StateService)
@@ -65,11 +69,22 @@ function PlotService.onAssigned(cb: (Player, number) -> ())
 	end
 end
 
+-- The tint for the player's equipped mansion theme at their current tier (nil: the default look).
+local function themeTint(profile: any): { [string]: Color3 }?
+	local id = ThemeRules.resolve(
+		profile.cosmetics,
+		{ Items = CatalogConfig.Items, Rewards = CatalogConfig.Rewards },
+		profile.houseTier
+	)
+	local look = id and CosmeticLooks.Themes[id]
+	return if look then { Walls = look.Walls, Trim = look.Trim, Roof = look.Roof } else nil
+end
+
 function PlotService.rebuildHouse(player: Player)
 	local i = byPlayer[player]
 	local profile = PlayerDataService.get(player)
 	if i and profile then
-		PlotBuilder.buildHouse(plots[i], i, profile.houseTier)
+		PlotBuilder.buildHouse(plots[i], i, profile.houseTier, themeTint(profile))
 	end
 end
 
@@ -133,7 +148,7 @@ local function assign(player: Player)
 		owners[i] = player
 		byPlayer[player] = i
 		PlotBuilder.setOwner(plots[i], player)
-		PlotBuilder.buildHouse(plots[i], i, profile.houseTier)
+		PlotBuilder.buildHouse(plots[i], i, profile.houseTier, themeTint(profile))
 		player:SetAttribute("PlotIndex", i)
 		PlotService.rebuildTrophies(player)
 		for _, cb in assignedCallbacks do
