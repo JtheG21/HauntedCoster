@@ -77,4 +77,19 @@ function FinisherRules.snap(k: number): number
 	return 1 - r * r * r * r
 end
 
+-- Smooth 0..1 ease with zero slope at both ends.
+function FinisherRules.smoothstep(k: number): number
+	local x = math.clamp(k, 0, 1)
+	return x * x * (3 - 2 * x)
+end
+
+-- One component of a cubic Hermite curve: leaves p0 with velocity m0 and arrives at p1 with velocity m1
+-- (velocities are per whole curve, i.e. already multiplied by its duration). Used for the orb's
+-- break-off so it keeps the speed and direction it had on the orbit instead of jumping onto a new path.
+function FinisherRules.hermite(p0: number, m0: number, p1: number, m1: number, k: number): number
+	local k2 = k * k
+	local k3 = k2 * k
+	return (2 * k3 - 3 * k2 + 1) * p0 + (k3 - 2 * k2 + k) * m0 + (-2 * k3 + 3 * k2) * p1 + (k3 - k2) * m1
+end
+
 return FinisherRules

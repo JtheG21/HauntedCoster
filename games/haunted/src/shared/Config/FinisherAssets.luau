@@ -17,7 +17,7 @@ FinisherAssets.Meshes = {
 
 FinisherAssets.Textures = {
 	lightningA = "rbxassetid://12402856027",
-	lightningB = "rbxassetid://243043229",
+	lightningB = "rbxassetid://12402856928",
 	mandala = "rbxassetid://12402928708",
 	sparkle = "rbxassetid://12386386944",
 	radialBurst = "rbxassetid://12386392796",

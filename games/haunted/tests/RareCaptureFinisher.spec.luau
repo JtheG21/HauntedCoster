@@ -120,4 +120,37 @@ return function(t: TestRunner.T)
 		end
 		t.truthy(worst >= -7, "stays above the ground")
 	end)
+
+	t.test("smoothstep eases in and out", function()
+		t.eq(Rules.smoothstep(0), 0)
+		t.eq(Rules.smoothstep(1), 1)
+		t.eq(Rules.smoothstep(2), 1)
+		t.eq(Rules.smoothstep(-1), 0)
+		t.truthy(Rules.smoothstep(0.1) < 0.1 and Rules.smoothstep(0.9) > 0.9)
+	end)
+
+	t.test("hermite curve starts and ends where and how it is told", function()
+		local p0, m0, p1, m1 = 3, 12, 40, 55
+		t.truthy(math.abs(Rules.hermite(p0, m0, p1, m1, 0) - p0) < 1e-9)
+		t.truthy(math.abs(Rules.hermite(p0, m0, p1, m1, 1) - p1) < 1e-9)
+		local h = 1e-5
+		local startSlope = (Rules.hermite(p0, m0, p1, m1, h) - Rules.hermite(p0, m0, p1, m1, 0)) / h
+		local endSlope = (Rules.hermite(p0, m0, p1, m1, 1) - Rules.hermite(p0, m0, p1, m1, 1 - h)) / h
+		t.truthy(math.abs(startSlope - m0) < 1e-2, `start slope {startSlope}`)
+		t.truthy(math.abs(endSlope - m1) < 1e-2, `end slope {endSlope}`)
+	end)
+
+	t.test("orb break-off continues the orbit's own motion", function()
+		-- the exit velocity is the orbit's last step, so the curve's first step matches the orbit's step
+		local total, snap = 3.3, 0.55
+		local a = Rules.orbit(total - 1 / 60, total)
+		local b = Rules.orbit(total, total)
+		local v = { x = (b.x - a.x) * 60, y = (b.y - a.y) * 60, z = (b.z - a.z) * 60 }
+		local dt = 1 / 60
+		local first = Rules.hermite(b.x, v.x * snap, 30, 80, dt / snap) - b.x
+		t.truthy(
+			math.abs(first - v.x * dt) < 0.05 * math.max(1, math.abs(v.x * dt)) + 0.02,
+			`first step {first} vs {v.x * dt}`
+		)
+	end)
 end
