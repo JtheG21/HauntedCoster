@@ -57,6 +57,7 @@ A task may combine categories. The primary one governs the plan; the others add 
 | **Deep** | Shared state, DataStore, security, the core loop, a shared library, a new game, or anything costly to reverse | TASK plus an ADR for each decision, research if uncertain, a multi-player playtest, an Opus first audit |
 
 Pick the lowest tier that covers the risk. Raise it when something surprises you.
+Set `"tier": "light"` on a Light task in `tasks/queue.json`: `record-exec --result pass` then moves it straight to `approved` (no audit); `approve-merge` by jg still gates `done`.
 
 ## Autonomy: proceed or ask
 **Proceed, and record the assumption in the task note,** when the goal is clear, the acceptance criteria are sufficient, the choice is reversible and low-risk, an existing standard or decision resolves it, and it stays inside approved scope.

@@ -240,6 +240,8 @@ class Project:
         t.setdefault("executions", []).append({"time": now(), "result": result, "notes": notes})
         if result == "pass":
             self._move(t, "in_review", "execution checks passed")
+            if t.get("tier") == "light":
+                self._move(t, "approved", "Light tier: no audit; merge needs human approval")
         else:
             self._fail(t, "execution checks failed")
 
