@@ -4472,7 +4472,7 @@
       "id": "TASK-0067",
       "title": "Coin Purchases",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "high",
       "depends_on": [
         "TASK-0060",
@@ -4503,6 +4503,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T14:00:30",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -4512,7 +4518,13 @@
           "notes": "coin purchases implemented; check.sh green, 264 specs; Studio and ExploitProbe skipped by jg"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-18T14:00:30",
+          "result": "pass",
+          "report": "06 QA/AUD-20261018-TASK-0067-01.md"
+        }
+      ],
       "revisions": 0,
       "approved_by": "jg"
     },

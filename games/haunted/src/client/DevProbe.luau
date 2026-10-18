@@ -53,8 +53,8 @@ local function run(): { [string]: any }
 	local p1 = { call(remotes, "Purchase", "house", 0) }
 	local p2 = { call(remotes, "Purchase", {}, nil) }
 	local p3 = { call(remotes, "Purchase", "speed", "0") }
-	-- Forged BuyItem (TASK-0067): bad types, an unknown item, an unpriced item and an item the profile can't
-	-- afford must all be refused with no state change (the scenario checks coins and entitlements).
+	-- Forged BuyItem (TASK-0067): bad types, an unknown item, an unpriced item and an over-long ID must all be
+	-- refused with no state change (the scenario checks coins and entitlements against a snapshot).
 	local b1 = { call(remotes, "BuyItem", {}, "r1") }
 	local b2 = { call(remotes, "BuyItem", "NoSuchItem", "rb2") }
 	local b3 = { call(remotes, "BuyItem", "FxSparks", "rb3") }

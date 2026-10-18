@@ -3,7 +3,7 @@ id: TASK-0067
 title: "Coin Purchases"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: medium
 risk: high
 owner: executor
@@ -73,5 +73,6 @@ Executor: Claude. jg said the session was switched to Opus, but the session stil
 **Studio skipped by jg, 2026-10-18.** No Play session, no ExploitProbe run, no Buy round trip, no screenshots. The Buy UI, the pending state and the extended probe are unverified at runtime.
 
 ## Audits
+[[AUD-20261018-TASK-0067-01]]: pass (Opus). Fixed after the audit: only final refusals are remembered, receipts are per item, the probe check compares against a snapshot. Studio and the ExploitProbe run still owed.
 
 ## Outcome

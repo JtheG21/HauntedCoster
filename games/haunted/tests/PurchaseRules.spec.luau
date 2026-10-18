@@ -108,15 +108,26 @@ return function(t: TestRunner.T)
 
 	t.test("receipts return the same answer for a retried request and stay bounded", function()
 		local receipts: { PurchaseRules.Receipt } = {}
-		PurchaseRules.remember(receipts, { id = "r1", ok = true, message = nil })
-		local again = PurchaseRules.recall(receipts, "r1")
+		PurchaseRules.remember(receipts, { id = "r1", itemId = "Moss", ok = true, message = nil })
+		local again = PurchaseRules.recall(receipts, "r1", "Moss")
 		t.truthy(again ~= nil and again.ok)
-		t.eq(PurchaseRules.recall(receipts, "r2"), nil)
+		t.eq(PurchaseRules.recall(receipts, "r2", "Moss"), nil)
 		for i = 2, PurchaseRules.MaxReceipts + 5 do
-			PurchaseRules.remember(receipts, { id = "r" .. i, ok = false, message = "x" })
+			PurchaseRules.remember(receipts, { id = "r" .. i, itemId = "Moss", ok = false, message = "x" })
 		end
 		t.eq(#receipts, PurchaseRules.MaxReceipts)
-		t.eq(PurchaseRules.recall(receipts, "r1"), nil) -- the oldest fell off
+		t.eq(PurchaseRules.recall(receipts, "r1", "Moss"), nil) -- the oldest fell off
+	end)
+
+	t.test("a receipt answers only the same item, and only final refusals are remembered", function()
+		local receipts: { PurchaseRules.Receipt } = {}
+		PurchaseRules.remember(receipts, { id = "r1", itemId = "Moss", ok = true, message = "Bought" })
+		t.eq(PurchaseRules.recall(receipts, "r1", "Other"), nil) -- same ID, different item: a new request
+		t.eq(PurchaseRules.isFinal("insufficient"), false) -- coins can be earned, so a retry is judged afresh
+		t.eq(PurchaseRules.isFinal("full"), false)
+		t.eq(PurchaseRules.isFinal("alreadyOwned"), true)
+		t.eq(PurchaseRules.isFinal("notBuyable"), true)
+		t.eq(PurchaseRules.isFinal(nil), true)
 	end)
 
 	t.test("rapid distinct requests for one item charge once", function()

@@ -35,7 +35,7 @@ function PurchaseService.buy(player: Player, itemId: any, requestId: any): (bool
 		list = {}
 		receipts[player] = list
 	end
-	local seen = PurchaseRules.recall(list, req.requestId)
+	local seen = PurchaseRules.recall(list, req.requestId, req.itemId)
 	if seen then
 		return seen.ok, seen.message -- a retry gets the first answer; nothing is charged again
 	end
@@ -61,7 +61,9 @@ function PurchaseService.buy(player: Player, itemId: any, requestId: any): (bool
 	else
 		message = PurchaseRules.message(reason, item, quote)
 	end
-	PurchaseRules.remember(list, { id = req.requestId, ok = okApply, message = message })
+	if PurchaseRules.isFinal(reason) then
+		PurchaseRules.remember(list, { id = req.requestId, itemId = req.itemId, ok = okApply, message = message })
+	end
 	StateService.markDirty(player)
 	return okApply, message
 end

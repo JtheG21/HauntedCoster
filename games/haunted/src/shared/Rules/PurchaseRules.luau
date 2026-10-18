@@ -16,7 +16,7 @@ PurchaseRules.MaxReceipts = 20 -- remembered request IDs per player (a session c
 
 export type Request = { itemId: string, requestId: string }
 export type Quote = { ok: boolean, reason: string?, cost: number, need: number }
-export type Receipt = { id: string, ok: boolean, message: string? }
+export type Receipt = { id: string, itemId: string, ok: boolean, message: string? }
 
 -- Untrusted remote arguments: an item ID and a client-made request ID that makes a retry safe.
 function PurchaseRules.parse(itemId: any, requestId: any): (Request?, string?)
@@ -87,6 +87,12 @@ function PurchaseRules.apply(
 	return true, nil
 end
 
+-- Whether a refusal is permanent for this item (so remembering it is right). A shortfall or a full collection can
+-- change, so those are never remembered and a retry is judged afresh.
+function PurchaseRules.isFinal(reason: string?): boolean
+	return reason == nil or reason == "alreadyOwned" or reason == "notBuyable" or reason == "unknown"
+end
+
 function PurchaseRules.message(reason: string?, item: { name: string? }?, quote: Quote?): string
 	local name = (item and item.name) or "that item"
 	if reason == "insufficient" and quote then
@@ -112,9 +118,10 @@ function PurchaseRules.remember(receipts: { Receipt }, receipt: Receipt)
 	end
 end
 
-function PurchaseRules.recall(receipts: { Receipt }, requestId: string): Receipt?
+-- A receipt answers only the same request ID for the same item, so reusing an ID for another item is a new request.
+function PurchaseRules.recall(receipts: { Receipt }, requestId: string, itemId: string): Receipt?
 	for _, r in receipts do
-		if r.id == requestId then
+		if r.id == requestId and r.itemId == itemId then
 			return r
 		end
 	end
