@@ -22,6 +22,7 @@ local filter: ShopRules.Filter = { category = nil, ownership = "all", acquisitio
 local selected: string? = nil
 local listScroll = 0
 local catalog: any? = nil
+local loadingCatalog = false
 local tabButtons: { [string]: TextButton } = {}
 
 local CATEGORY_LABEL = {
@@ -171,7 +172,7 @@ function render(resetScroll: boolean?)
 	end
 	backButton.Visible = picked ~= nil
 	filterBar.Visible = picked == nil
-	titleLabel.Text = if picked then picked.name else "Shop"
+	titleLabel.Text = if picked then picked.name else tab
 	if picked then
 		local f = card()
 		Theme.label(f, picked.name, { Font = Theme.Bold, TextSize = 20, AutomaticSize = Enum.AutomaticSize.Y })
@@ -231,10 +232,12 @@ function render(resetScroll: boolean?)
 end
 
 local function loadCatalog()
-	if catalog ~= nil then
+	if catalog ~= nil or loadingCatalog then
 		return
 	end
+	loadingCatalog = true
 	catalog = ShopRules.catalogFromWire(State.invoke("GetCatalog"))
+	loadingCatalog = false
 	-- A nil result stays nil, so the screen says "couldn't load" instead of showing an empty shop.
 	render(false)
 end

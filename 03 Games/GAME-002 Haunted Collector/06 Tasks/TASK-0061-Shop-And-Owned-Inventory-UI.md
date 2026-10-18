@@ -3,7 +3,7 @@ id: TASK-0061
 title: "Shop And Owned Inventory UI"
 type: task
 project: GAME-002
-status: in_progress
+status: approved
 priority: medium
 risk: low
 owner: executor
@@ -51,7 +51,14 @@ Persistence, trust boundary and product details are governed by the baseline not
 
 ---
 ## Implementation record
+- Branch `task/TASK-0061-Shop-And-Owned-Inventory-UI`, worktree `~/Desktop/Rg1-wt/TASK-0061`. Owner: Claude (Sonnet) this session.
+- Built: `ShopRules` (pure view model: loading, unavailable, empty, noMatch, ready; filters; `catalogFromWire`), `ShopService` (read-only `GetCatalog`, rate-limited, copies), `cosmetics` in the State snapshot, `ShopUI` (Shop and Owned tabs, filters, details, Back keeps filters and scroll), HUD and Mansion Shop buttons. No price, no Buy, no equip.
+- References: none relevant (UI References is empty); followed the Mansion and Journal conventions and `Theme.luau`.
+- **Studio (partial):** the first desktop capture opened the Shop and exposed two bugs the specs missed: the server's `{items, rewards}` reply did not match the `{Items, Rewards}` shape ShopRules expects (crash), and the filter chips shared one position because the grid layout was destroyed on render. Both fixed, with a validating converter and specs. **The fixed UI was not re-screenshotted**: Play start then hung in Studio and jg chose to skip. No desktop or phone-width screenshots of the final UI exist; AC3's screenshots are not met. Layout needs jg's playtest.
+- Audit: [[AUD-20261018-TASK-0061-01]] pass (Sonnet); its two minor findings were fixed after the audit and re-checked with check.sh only.
+- Usage: context `tokensUsed` 160,573 at start, 268,391 at close (+107,818, in a long mixed-topic session; the audit subagent's 30,820 tokens are separate); weekly plan 92% at start, 93% at close.
 
 ## Audits
+- [[AUD-20261018-TASK-0061-01]]: pass, Sonnet, 2026-10-18.
 
 ## Outcome
