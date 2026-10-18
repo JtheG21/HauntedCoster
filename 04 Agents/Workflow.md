@@ -43,6 +43,13 @@ Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, proposed) → [HUMAN
 - One Git branch per task, from an up-to-date `main`. Workflow and doc changes use `chore/<slug>` branches.
 - Only `src/` and `tests/luau` reach Studio, through Rojo. Playtest in a **local place file**, never the published experience.
 
+## Who owns what (Claude, Codex, side sessions)
+- **Before starting:** `orchestrator.py status` for `in_progress` tasks, `git worktree list`, and `orchestrator.py next --parallel-safe` for overlapping "Files expected to change". If another session's task touches the same files, stop and ask jg.
+- **One owner per task, one writer per file set.** The task note's `owner:` is `executor` until jg names Claude or Codex; write the owner's name in the Implementation record when you start.
+- **Each session works in its own worktree and branch.** State changes (`approve`, `start`, `record-*`) are made in that branch's worktree so they merge with the code, not left uncommitted in the main checkout.
+- **Handoff between tools:** the `codex-handoff` skill writes it into the task note; the reviewer verifies, never inherits, the other's claims. A finished side session's report is a claim until the diff is checked.
+- **Studio and Rojo:** one assistant at a time; say in the task note who holds them.
+
 ## Check order: cheapest first
 1. `scripts/check.sh`: StyLua, Selene, strict types, Rojo build, JSON, queue, vault conventions, Python tests. Free and deterministic.
 2. The Studio playtest procedure from the task (human, or Claude through Studio MCP) → a `TEST-` note.
