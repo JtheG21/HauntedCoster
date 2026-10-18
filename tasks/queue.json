@@ -3682,6 +3682,290 @@
       "merge_approved_by": "jg"
     },
     {
+      "id": "TASK-0042",
+      "title": "Art Pipeline and Direction",
+      "project": "GAME-002",
+      "status": "approved",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": null,
+      "branch": "task/TASK-0042-Art-Pipeline-And-Direction",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0042-Art-Pipeline-And-Direction.md",
+      "acceptance_criteria": [
+        "A headless Blender pipeline (games/haunted/art) builds, paints, previews and exports assets; HCM1 codec has matching Python and Luau specs; generated data syncs through Rojo with no upload or generator call.",
+        "A client ArtLoader renders HCM1 assets as EditableMesh MeshParts with shared templates, LOD switching and a fail-safe fallback; server builders place tagged ArtSlot anchors that keep the existing colliders, lights and interaction points.",
+        "SYS-Haunted-Art-Direction records the selected references (positive and rejected), style, palette, materials, budgets, the full asset/UI inventory with replace/refine/retain/new decisions, and the dual live path (jg batch import or Mesh/Image API toggle).",
+        "The lamp post family replaces the rejected lamps in game, compared with MIN-064/MIN-069 and BAD-015/016 in front, side, rear and three-quarter views, neutral and night light, and without glow.",
+        "scripts/check.sh passes; FullLoop still passes in Studio; EditableMesh memory and triangle cost measured."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:49",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        },
+        {
+          "time": "2026-10-13T05:11:50",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-13T05:55:07",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-13T09:57:09",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-13T05:55:07",
+          "result": "pass",
+          "notes": "check.sh green via pre-commit (lint, types, 143 specs, codec tests); lamps dressed in Studio Play; server bake 2.0 MB client mesh memory; FullLoop 85/85 on rerun (first run teleport flake)"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-13T09:57:09",
+          "result": "pass",
+          "report": "06 QA/AUD-20261013-TASK-0042-01.md"
+        }
+      ],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0043",
+      "title": "Creature Models and Animation",
+      "project": "GAME-002",
+      "status": "approved",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0042",
+      "branch": "task/TASK-0043-Creature-Models-And-Animation",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0043-Creature-Models-And-Animation.md",
+      "acceptance_criteria": [
+        "Wisp, Stitched Hound, Hollow Gentleman and Bell Wraith are rebuilt as finished meshes that meet or exceed MIN-013/031/037-044/048-053 and avoid BAD-006-012, inspected in four views, neutral and night light, without glow.",
+        "Normal, Spectral and Ashen read as distinct natural identities on every species without hiding the form.",
+        "Client-side procedural animation covers idle, roam, startle, carried, chase, retaliation and display poses; server movement, colliders, prompts and capture behaviour are unchanged.",
+        "Wild, carried, contained and exhibited creatures all use the new art; LOD and triangle budgets hold with 8 wild plus full pens.",
+        "scripts/check.sh passes; FullLoop, CarryGuard and Retaliation scenarios pass."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:49",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        },
+        {
+          "time": "2026-10-13T05:53:55",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-13T10:02:55",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-13T10:10:39",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-13T10:02:55",
+          "result": "pass",
+          "notes": "check.sh green; FullLoop 85/85 x2, CarryGuard 21/21, Retaliation 36/36; pens/exhibits/jar/showroom captures"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-13T10:10:39",
+          "result": "pass",
+          "report": "06 QA/AUD-20261013-TASK-0043-01.md"
+        }
+      ],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0044",
+      "title": "Environment Kit and Ground",
+      "project": "GAME-002",
+      "status": "changes_requested",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0043",
+      "branch": "task/TASK-0044-Environment-Kit-And-Ground",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0044-Environment-Kit-And-Ground.md",
+      "acceptance_criteria": [
+        "Trees (dead, pine, haunted with faces, brood), roots, rocks, graves, fences, gates, walls, candles, pumpkins, mist and the hub wall/gates/road are rebuilt to meet MIN-010/054-056/060-070 and avoid BAD-001-005.",
+        "TASK-0041 haunted trees keep their gaze behaviour, palette rules and face controls with the new trunk and face art.",
+        "Ground and paths read as terrain rather than flat discs, with collisions and walk heights unchanged.",
+        "Each habitat and the hub are captured at gameplay distance in game lighting, before and after.",
+        "scripts/check.sh passes; Reachability and HauntedTrees scenarios pass."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:49",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        },
+        {
+          "time": "2026-10-13T10:03:26",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-13T20:49:27",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-13T20:56:24",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-13T20:49:27",
+          "result": "pass",
+          "notes": "check.sh pass; Reachability 4/4 habitats pass; HabitatSwap 35/35; HabitatRotation 28/28; HauntedTrees 1p live pass, 2p 23/28 latency-only under memory pressure (not counted as pass, re-run in TASK-0052)"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-13T20:56:24",
+          "result": "fail",
+          "report": "06 QA/AUD-20261013-TASK-0044-01.md"
+        }
+      ],
+      "revisions": 1,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0045",
+      "title": "Habitat Landmarks",
+      "project": "GAME-002",
+      "status": "approved",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0044",
+      "branch": "task/TASK-0045-Habitat-Landmarks",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0045-Habitat-Landmarks.md",
+      "acceptance_criteria": [
+        "Weeping Angel, Bell Tower, Sealed Crypt, mausoleums, hearse, well, standing stones, hollow oak, dens, brood tree, cocoons, ruined chapel, old barn and cottages are rebuilt as finished landmark meshes.",
+        "Landmark silhouettes stay readable from 80+ studs and keep their gameplay roles (crypt gate collision and client-side opening).",
+        "Four-view and night captures compared with MIN-067-070; no landmark relies on glow to read.",
+        "scripts/check.sh passes; HabitatSwap and HabitatRotation scenarios pass."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:49",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        },
+        {
+          "time": "2026-10-13T10:36:12",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-13T20:49:48",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-13T20:59:44",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-13T20:49:48",
+          "result": "pass",
+          "notes": "check.sh pass; HabitatSwap 35/35; HabitatRotation 28/28; Reachability 4 habitats pass; crypt gate opens for tier 1 (tour); intermittent oak/brood draw miss after a swap in one long session, not reproduced"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-13T20:59:44",
+          "result": "pass",
+          "report": "06 QA/AUD-20261013-TASK-0045-01.md"
+        }
+      ],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "id": "TASK-0046",
+      "title": "Mansion, Plot and Ghost Train Art",
+      "project": "GAME-002",
+      "status": "in_progress",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0041"
+      ],
+      "stacked_on": "TASK-0045",
+      "branch": "task/TASK-0046-Mansion-Plot-And-Train-Art",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0046-Mansion-Plot-And-Train-Art.md",
+      "acceptance_criteria": [
+        "The three mansion tiers, containment pen, station and canopy, ghost-train cart, track rails and supports, Scare Arch, Fog Tunnel, exhibit plinths, trophies, beacon and plot entrance are rebuilt; BAD-013/014/017 are not repeated.",
+        "Tier upgrades, house boxes used by decorations, ride, exhibits, pen pads and prompts behave as before.",
+        "Cart and track compared with MIN-057-059 (vehicle finish) and the house tiers with MIN-069 in four views.",
+        "scripts/check.sh passes; FullLoop and Persistence scenarios pass."
+      ],
+      "history": [
+        {
+          "time": "2026-10-13T05:11:50",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+        },
+        {
+          "time": "2026-10-13T20:50:19",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
       "id": "TASK-0060",
       "title": "Monetization Persistence Schema",
       "project": "GAME-002",
@@ -4052,7 +4336,7 @@
       "id": "TASK-0069",
       "title": "Art Salvage From Overhaul Branch",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "high",
       "depends_on": [],
       "branch": "task/TASK-0069-Art-Salvage-From-Overhaul-Branch",
@@ -4077,9 +4361,21 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-18T13:00:28",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
-      "executions": [],
+      "executions": [
+        {
+          "time": "2026-10-18T13:00:28",
+          "result": "pass",
+          "notes": "art 0042-0046 ported; check.sh green, specs 206/206; Studio skipped by jg"
+        }
+      ],
       "audits": [],
       "revisions": 0,
       "approved_by": "jg"

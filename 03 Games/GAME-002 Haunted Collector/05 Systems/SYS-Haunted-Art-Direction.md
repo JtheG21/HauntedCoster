@@ -90,7 +90,7 @@ Every current asset was built from primitive parts (ADR-0007 "simple parts") and
 | Skins, auras, capture effects, mansion themes, exterior decorations | none | **New** | approved scope ([[ADR-0011-Monetization-UI-Scope]]) | 0050 |
 
 ## Trust boundary
-Art is client-side presentation. The server never reads it; colliders, prompts and lights stay server-built. Cosmetic appearance comes from replicated attributes the server sets after validation ([[TASK-0047-Cosmetics-Backend-And-Persistence]]).
+Art is client-side presentation. The server never reads it; colliders, prompts and lights stay server-built. Cosmetic appearance comes from replicated attributes the server sets after validation (TASK-0047 (cosmetics backend, not ported)).
 
 ## Needs human review
 - The direction, palette and every "meets the floor" verdict are Claude's; jg owns visual acceptance.

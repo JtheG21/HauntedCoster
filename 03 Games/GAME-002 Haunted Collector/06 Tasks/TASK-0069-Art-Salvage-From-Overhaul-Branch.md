@@ -3,7 +3,7 @@ id: TASK-0069
 title: "Art Salvage From Overhaul Branch"
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: high
 risk: high
 owner: executor
@@ -52,6 +52,24 @@ Large diff (hundreds of files, mostly art data); server-baked templates affect l
 
 ---
 ## Implementation record
+Executor: Claude (Sonnet 5.5, at jg's choice; the plan called for Opus). Branch `task/TASK-0069-Art-Salvage-From-Overhaul-Branch`.
+
+**What was done:** `git merge 3457e64` from `task/TASK-0046-Mansion-Plot-And-Train-Art` (commit `c10773a`). This brings the art history for TASK-0042 (art pipeline), 0043 (creatures), 0044/0045 (environment, landmarks) and the 0046 mansion tiers, plot dressing and ghost-train art (PlotBuilder, TrainService, art data). Conflicts in the Roadmap, ADR-0011, `project-state.json` and `tasks/queue.json` were resolved to main; `init.server.luau` keeps both `ShopService` and `ArtBakeService`. Queue entries for 0042-0046 were copied from the branch with their branch statuses (0042, 0043, 0045 approved; 0044 changes_requested; 0046 in_progress), and two note statuses were aligned to the queue.
+
+**Deliberately not ported:** notes for TASK-0047 to 0052; `a5f0aaa` (Config/Cosmetics, PlotBuilder theme tint and `buildDecorations`), which belong to TASK-0064/0065; `199a82b`, `197c153`, `1e9ee4f` (cosmetics backend, cosmetic assets, UI overhaul). The old branch and its worktrees are untouched, including their uncommitted note edits.
+
+**Checks:** `scripts/check.sh` ALL CHECKS PASSED; Lune specs 206 passed, 0 failed; `validate_vault.py` 0 errors.
+
+**Not done (jg chose to skip, 2026-10-18):** Studio playtest and desktop/phone screenshots (AC4 visuals), the 3D Model Quality Baseline comparison and jg's visual review (AC5). Nothing here proves the art renders or loads in a Play session; the old branch notes record the earlier Studio evidence. `a5f0aaa` removal means the plot has no `buildDecorations` yet.
+
+| AC | State |
+|---|---|
+| AC1 art for 0042-0046 on main | implemented, not tested in Studio |
+| AC2 main's cosmetics/Shop/queue unchanged | implemented and tested (specs, check.sh) |
+| AC3 branch Cosmetics/CosmeticRules not imported | implemented and tested |
+| AC4 checks green, Studio shows art | checks green; Studio needs manual check |
+| AC5 baseline and jg review | needs manual Studio check / jg |
+| AC6 Opus audit | see Audits |
 
 ## Audits
 
