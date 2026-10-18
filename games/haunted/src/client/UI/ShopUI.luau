@@ -101,7 +101,7 @@ end
 
 local function renderFilters()
 	for _, ch in filterBar:GetChildren() do
-		if not ch:IsA("UIListLayout") then
+		if ch:IsA("TextButton") then
 			ch:Destroy()
 		end
 	end
@@ -234,10 +234,7 @@ local function loadCatalog()
 	if catalog ~= nil then
 		return
 	end
-	local result = State.invoke("GetCatalog")
-	if type(result) == "table" and type(result.items) == "table" and type(result.rewards) == "table" then
-		catalog = result
-	end
+	catalog = ShopRules.catalogFromWire(State.invoke("GetCatalog"))
 	-- A nil result stays nil, so the screen says "couldn't load" instead of showing an empty shop.
 	render(false)
 end

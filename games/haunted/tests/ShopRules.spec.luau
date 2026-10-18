@@ -107,4 +107,30 @@ return function(t: TestRunner.T)
 		t.eq(ids(v)[#v.cards], "WispSkin", "owned sorts last in the Shop")
 		t.eq(ids(v)[1], "GlowAura")
 	end)
+
+	t.test("the GetCatalog reply is converted and malformed replies are rejected", function()
+		local good = ShopRules.catalogFromWire({
+			items = { WispSkin = { category = "Skin", name = "Wisp" } },
+			rewards = { HabitatOne = { grants = { "WispSkin" } } },
+		})
+		t.truthy(good ~= nil, "well-formed reply")
+		t.eq((good :: CosmeticRules.Catalog).Items.WispSkin.category, "Skin")
+		t.eq(#(good :: CosmeticRules.Catalog).Rewards.HabitatOne.grants, 1)
+		local empty = ShopRules.catalogFromWire({ items = {}, rewards = {} })
+		t.truthy(empty ~= nil, "an empty catalog is valid, not a failure")
+		local bad: { any } = {
+			"x",
+			{},
+			{ items = {} },
+			{ items = { A = { category = "Bogus" } }, rewards = {} },
+			{ items = { A = "s" }, rewards = {} },
+			{ items = { ["bad id!"] = { category = "Skin" } }, rewards = {} },
+			{ items = { A = { category = "Skin", name = 5 } }, rewards = {} },
+			{ items = {}, rewards = { R = {} } },
+		}
+		for i, b in bad do
+			t.eq(ShopRules.catalogFromWire(b), nil, `bad reply {i}`)
+		end
+		t.eq(ShopRules.catalogFromWire(nil), nil, "nil reply")
+	end)
 end

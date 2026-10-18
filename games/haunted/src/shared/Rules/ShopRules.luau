@@ -171,6 +171,36 @@ function ShopRules.view(input: Input, tab: string, filter: Filter?): View
 	return { status = "ready", cards = cards, notice = notice }
 end
 
+-- Turns the GetCatalog reply into the Catalog shape, or nil if it isn't well-formed (the client treats nil as
+-- "couldn't load", never as an empty shop). The reply came over a remote, so every field is checked.
+function ShopRules.catalogFromWire(raw: any): CosmeticRules.Catalog?
+	if type(raw) ~= "table" or type(raw.items) ~= "table" or type(raw.rewards) ~= "table" then
+		return nil
+	end
+	local items: { [string]: any } = {}
+	for id, item in raw.items do
+		if
+			not CosmeticRules.isId(id)
+			or type(item) ~= "table"
+			or table.find(ShopRules.Categories, item.category) == nil
+		then
+			return nil
+		end
+		if item.name ~= nil and type(item.name) ~= "string" then
+			return nil
+		end
+		items[id] = item
+	end
+	local rewards: { [string]: any } = {}
+	for id, reward in raw.rewards do
+		if not CosmeticRules.isId(id) or type(reward) ~= "table" or type(reward.grants) ~= "table" then
+			return nil
+		end
+		rewards[id] = reward
+	end
+	return { Items = items, Rewards = rewards }
+end
+
 function ShopRules.emptyText(status: string, tab: string): string
 	if status == "loading" then
 		return "Loading..."
