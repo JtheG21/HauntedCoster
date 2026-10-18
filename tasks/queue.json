@@ -3294,6 +3294,43 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0054",
+      "title": "Rare Capture Finisher",
+      "project": "GAME-002",
+      "status": "in_progress",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0053"
+      ],
+      "branch": "task/TASK-0054-Rare-Capture-Finisher",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0054-Rare-Capture-Finisher.md",
+      "acceptance_criteria": [
+        "Lune spec: finisher validates, 10-15 s, at most 2 large-flash cues at least 2 s apart, reduced mode weaker.",
+        "Play scenario: effect folder and Lighting return to baseline after finish and cancel; no emitters left; within budget.",
+        "jg judges one client run against REF-VFX-001 beats and gives a floor verdict; ledger recorded.",
+        "scripts/check.sh green; one audit; no server file changed."
+      ],
+      "history": [
+        {
+          "time": "2026-10-17T19:02:29",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-17T19:02:29",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg",
+      "merge_approved_by": null
     }
   ]
 }
