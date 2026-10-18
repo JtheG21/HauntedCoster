@@ -14,6 +14,8 @@ local Monsters = require(Config:WaitForChild("Monsters"))
 local EconomyRules = require(Rules:WaitForChild("EconomyRules"))
 local ExhibitRules = require(Rules:WaitForChild("ExhibitRules"))
 local ProfileRules = require(Rules:WaitForChild("ProfileRules"))
+local LookRules = require(Rules:WaitForChild("LookRules"))
+local CatalogConfig = require(Config:WaitForChild("Catalog"))
 local Remotes = require(script.Parent.Parent.Remotes)
 local MonsterModels = require(script.Parent.Parent.World.MonsterModels)
 local PlayerDataService = require(script.Parent.PlayerDataService)
@@ -39,9 +41,15 @@ local function placeModel(
 	variantId: string,
 	pos: Vector3,
 	scale: number,
-	facing: Vector3
+	facing: Vector3,
+	look: LookRules.Appearance?
 )
 	local model = MonsterModels.build(speciesId, variantId)
+	if look then
+		-- Equipped cosmetics replicate as attributes; client/Art/Creatures turns them into a look.
+		model:SetAttribute("SkinId", look.skin)
+		model:SetAttribute("AuraId", look.aura)
+	end
 	local species = Monsters.Species[speciesId]
 	if scale ~= 1 then
 		model:ScaleTo(scale)
@@ -51,6 +59,16 @@ local function placeModel(
 	local at = pos + Vector3.new(0, species.hover * scale, 0)
 	model:PivotTo(CFrame.lookAt(at, at + facing))
 	model.Parent = parent
+end
+
+local function lookOf(profile: ProfileRules.Profile, m: ProfileRules.OwnedMonster): LookRules.Appearance
+	return LookRules.appearance(
+		profile.cosmetics,
+		{ Items = CatalogConfig.Items, Rewards = CatalogConfig.Rewards },
+		m.uid,
+		m.species,
+		m.variant
+	)
 end
 
 -- Rebuilds the pen residents and exhibit models on the player's plot.
@@ -73,7 +91,7 @@ function ContainmentService.refreshVisuals(player: Player)
 				local col = (shown - 1) % 3
 				local row = math.floor((shown - 1) / 3)
 				local pos = World.plotToWorld(i, World.Plot.pen + Vector3.new(-4.5 + col * 4.5, 0.4, -3 + row * 5))
-				placeModel(residents, m.species, m.variant, pos, 0.55, facing)
+				placeModel(residents, m.species, m.variant, pos, 0.55, facing, lookOf(profile, m))
 			end
 		end
 	end
@@ -109,7 +127,15 @@ function ContainmentService.refreshVisuals(player: Player)
 					local holder = Instance.new("Folder")
 					holder.Name = "Display"
 					holder.Parent = ped
-					placeModel(holder, m.species, m.variant, ped.Position + Vector3.new(0, 0.5, 0), 0.8, facing)
+					placeModel(
+						holder,
+						m.species,
+						m.variant,
+						ped.Position + Vector3.new(0, 0.5, 0),
+						0.8,
+						facing,
+						lookOf(profile, m)
+					)
 				end
 			end
 		end

@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Rules = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Rules")
 local ShopRules = require(Rules:WaitForChild("ShopRules"))
+local LookRules = require(Rules:WaitForChild("LookRules"))
 local Theme = require(script.Parent.Theme)
 local State = require(script.Parent.Parent.State)
 
@@ -93,10 +94,13 @@ local function describe(c: ShopRules.Card): string
 end
 
 local render
+local renderEquip
+local equipMessage: string? = nil -- the server's last refusal, shown in the details view
 
 local function showDetails(c: ShopRules.Card)
 	listScroll = content.CanvasPosition.Y
 	selected = c.id
+	equipMessage = nil
 	render(false)
 end
 
@@ -153,6 +157,64 @@ local function renderFilters()
 	end
 end
 
+-- Owned skins and auras: one row per owned ghost with Equip or Remove. The server decides; the row only
+-- shows what LookRules says is possible and the server's answer.
+function renderEquip(c: ShopRules.Card)
+	if not (c.owned and (c.category == "Skin" or c.category == "Aura") and catalog) then
+		return
+	end
+	local snap = State.snap
+	if not snap then
+		return
+	end
+	local slot = if c.category == "Skin" then "skin" else "aura"
+	local targets =
+		LookRules.targets(snap.cosmetics, { Items = catalog.Items, Rewards = catalog.Rewards }, snap.owned or {}, c.id)
+	if equipMessage then
+		local m = card()
+		Theme.label(
+			m,
+			equipMessage,
+			{ TextColor3 = Theme.Colors.gold, AutomaticSize = Enum.AutomaticSize.Y, Size = UDim2.fromScale(1, 0) }
+		)
+	end
+	local head = card(30)
+	Theme.label(head, if #targets == 0 then "You don't own any ghosts yet." else "Equip on:", {
+		Font = Theme.Bold,
+		TextColor3 = Theme.Colors.dim,
+	})
+	for _, tg in targets do
+		local row = card(48)
+		local name = `{tg.species}{if tg.variant ~= "Normal" then " (" .. tg.variant .. ")" else ""}`
+		Theme.label(row, name, { Size = UDim2.new(1, -110, 0, 22), Font = Theme.Bold })
+		local note = if tg.reason == "variant"
+			then "Rare ghosts keep their natural look."
+			elseif tg.reason == "incompatible" then "Doesn't fit this ghost."
+			elseif tg.equipped then "Equipped"
+			else ""
+		Theme.label(row, note, {
+			Position = UDim2.fromOffset(0, 24),
+			Size = UDim2.new(1, -110, 0, 18),
+			TextSize = 13,
+			TextColor3 = if tg.equipped then Theme.Colors.good else Theme.Colors.dim,
+		})
+		if tg.reason == nil then
+			local uid = tg.uid
+			Theme.button(row, if tg.equipped then "Remove" else "Equip", function()
+				local ok, msg = State.invoke("EquipLook", uid, slot, if tg.equipped then nil else c.id)
+				equipMessage = if ok ~= true
+					then (if type(msg) == "string" then msg else "Something went wrong. Try again.")
+					else nil
+				render(false)
+			end, {
+				AnchorPoint = Vector2.new(1, 0.5),
+				Position = UDim2.fromScale(1, 0.5),
+				Size = UDim2.fromOffset(90, 34),
+			})
+		end
+	end
+end
+
 function render(resetScroll: boolean?)
 	clear()
 	for name, b in tabButtons do
@@ -185,6 +247,7 @@ function render(resetScroll: boolean?)
 			AutomaticSize = Enum.AutomaticSize.Y,
 			Size = UDim2.fromScale(1, 0),
 		})
+		renderEquip(picked)
 		return
 	end
 	renderFilters()

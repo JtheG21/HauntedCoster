@@ -28,6 +28,7 @@ local TrainService = require(Services.TrainService)
 local TutorialService = require(Services.TutorialService)
 local HauntedTreeService = require(Services.HauntedTreeService)
 local ShopService = require(Services.ShopService)
+local CosmeticService = require(Services.CosmeticService)
 local ArtBakeService = require(Services.ArtBakeService)
 
 -- The persistent outer world, then every habitat module (one active inside the hub wall, ADR-0007). The
@@ -63,6 +64,7 @@ RetaliationService.start()
 RotationService.start(pinned)
 HauntedTreeService.start()
 ShopService.start()
+CosmeticService.start()
 
 -- A habitat swap clears the old module's wild monsters and populates the new one.
 HabitatService.onDeactivating(function()
