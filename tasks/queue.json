@@ -3361,6 +3361,41 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0056",
+      "title": "Studio Test Pads",
+      "project": "GAME-002",
+      "status": "in_progress",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0056-Studio-Test-Pads",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0056-Studio-Test-Pads.md",
+      "acceptance_criteria": [
+        "Lune: pure rules give the UI sizes on both backgrounds, three VFX distances and a wall layout; reject bad input.",
+        "Studio: each pad runs in a fresh Play session, prints its metrics line and leaves the place at baseline.",
+        "A capture of each pad is taken and viewed.",
+        "scripts/check.sh green; light audit."
+      ],
+      "history": [
+        {
+          "time": "2026-10-17T20:31:05",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-17T20:31:06",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg",
+      "merge_approved_by": null
     }
   ]
 }
