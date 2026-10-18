@@ -22,30 +22,30 @@ Status: approved for the workflow changes listed under "What changed" (jg's requ
 
 ## Baseline (measured 2026-10-18)
 
-Measured with `python3 scripts/context_budget.py` on the `main` checkout at commit `494be30`. Bytes are exact. Tokens are bytes / 4 (estimate).
+Measured with `python3 scripts/context_budget.py` on the `main` checkout at commit `1019581` (after PR #117 merged). Figures for the start docs include the one-line pointer added to Task Intake; the before/after prompt rows use the same sample task. Bytes are exact. Tokens are bytes / 4 (estimate).
 
 | Context | Bytes | Est. tokens | When loaded |
 |---|---|---|---|
 | `CLAUDE.md` + `AGENTS.md` (imported) | 17,630 | ~4,400 | Every session |
 | Skill descriptions (8 project skills) | 4,507 | ~1,100 | Every session (listed, not read) |
 | `.claude/agents/auditor.md` | 2,337 | ~580 | When an auditor subagent starts |
-| `Task Intake.md` + `Workflow.md` + `Executor.md` | 13,905 | ~3,480 | Task start, on instruction |
+| `Task Intake.md` + `Workflow.md` + `Executor.md` | 13,975 | ~3,490 | Task start, on instruction |
 | Skill bodies (8 skills) | 79,470 | ~19,900 | Only when invoked; `roblox-map` alone is 50,932 |
 | Dispatch prompt (executor, last task with a note), before this change | 472 | ~120 | Per dispatch |
-| Dispatch prompt (same task), after this change | 1,605 | ~400 | Per dispatch |
+| Dispatch prompt (same task), after this change | 1,810 | ~450 | Per dispatch |
 
 Findings:
 
 1. **Verbatim duplication is not measured.** No sentence of 60+ characters repeats across `CLAUDE.md`, `AGENTS.md` and the start docs. The suspected duplication was not confirmed, so no root rule was cut. Removing durable safety, governance or validation rules to save tokens would trade correctness for little gain.
 2. **The biggest always-on cost is `AGENTS.md`** (about 3,200 estimated tokens). It holds rules every session needs, so it stays. The largest optional cost is a skill body, which loads only when that skill is invoked.
-3. **The dispatch prompt was not the bottleneck** (about 120 estimated tokens). It did not state acceptance criteria or the expected file list, so the agent had to re-derive scope from the note. That is now included (see below), at a cost of about 1.1 KB more per dispatch. Whether this saves exploratory reads is not measured yet.
+3. **The dispatch prompt was not the bottleneck** (about 120 estimated tokens). It did not state acceptance criteria or the expected file list, so the agent had to re-derive scope from the note. That is now included (see below), at a cost of about 1.3 KB more per dispatch. Whether this saves exploratory reads is not measured yet.
 4. **Usage records are incomplete.** `tasks/usage-ledger.jsonl` has 44 rows, all `kind: subscription`. 15 have `tokens: null` and 17 have an empty `model`. Entries are written by hand through `record-usage`; the workflow has no automatic capture of session usage. Missing values are recorded as unavailable, not backfilled.
 5. **A Codex skill copy had drifted.** `.agents/skills/roblox-sfx/SKILL.md` pointed at `.Codex/skills/...` instead of `.claude/skills/...`, and the copy test did not cover it. Fixed; the test now covers `roblox-map` and `roblox-sfx`.
 
 ## What changed
 
-- `scripts/orchestrator.py` `build_prompt`: the dispatch prompt now lists the task's `acceptance_criteria` from `tasks/queue.json` and its "Files expected to change" from the task note. It adds no stored field, so the queue and note stay the only sources of truth. Tasks without a note get no file list.
-- `scripts/context_budget.py` (new, read-only): reports the context table above. Run it after changing any instruction file to see the effect.
+- `scripts/orchestrator.py` `build_prompt`: the dispatch prompt now lists the task's `acceptance_criteria` from `tasks/queue.json` and its "Files expected to change" from the task note. It adds no stored field, so the queue and note stay the only sources of truth. Tasks without a note get no file list. The prompt also tells the agent that a dependency, reusable module or test outside that list may be opened when the change needs it, with the reason named in the report; it still forbids scanning the whole repo.
+- `scripts/context_budget.py` (new, read-only): reports the context table above. Run it after changing any instruction file to see the effect. `--root` selects the checkout to measure; the dispatch sample is built by that checkout's own `scripts/orchestrator.py`, and the script fails with a message if it is missing.
 - `.agents/skills/roblox-sfx/SKILL.md`: copy restored to match `.claude/skills/`.
 - `tests/test_orchestrator.py`, `tests/test_claude_hooks.py`, `tests/test_context_budget.py`: cover the prompt scope, the copy check and the measurement.
 
