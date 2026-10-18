@@ -8,6 +8,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Economy = require(Shared:WaitForChild("Config"):WaitForChild("Economy"))
 local EconomyRules = require(Shared:WaitForChild("Rules"):WaitForChild("EconomyRules"))
 local ThemeRules = require(Shared:WaitForChild("Rules"):WaitForChild("ThemeRules"))
+local PlacementRules = require(Shared:WaitForChild("Rules"):WaitForChild("PlacementRules"))
 local CatalogConfig = require(Shared:WaitForChild("Config"):WaitForChild("Catalog"))
 local Remotes = require(script.Parent.Parent.Remotes)
 local PlayerDataService = require(script.Parent.PlayerDataService)
@@ -68,8 +69,26 @@ local function onPurchase(player: Player, item: any, expected: any): (boolean, s
 		if notice then
 			profile.cosmetics.mansionTheme = nil
 		end
+		-- Decorations the bigger house now touches are stored, still owned (TASK-0065).
+		local kept, stored = PlacementRules.afterUpgrade(profile.cosmetics.placements, function(id)
+			local deco = CatalogConfig.Items[id]
+			return (deco and deco.footprint) or PlacementRules.DefaultFootprint
+		end, profile.houseTier)
+		if stored > 0 then
+			profile.cosmetics.placements = kept
+		end
 		PlotService.rebuildHouse(player)
+		PlotService.rebuildDecorations(player)
 		StateService.toast(player, `Your house is now a {tier.name}! {tier.blurb}`, "success")
+		if stored > 0 then
+			StateService.toast(
+				player,
+				`{stored} decoration{if stored == 1 then "" else "s"} no longer fit and {if stored == 1
+					then "was"
+					else "were"} stored. You still own {if stored == 1 then "it" else "them"}.`,
+				"info"
+			)
+		end
 		if notice then
 			StateService.toast(player, notice, "info")
 		end

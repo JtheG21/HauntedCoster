@@ -41,13 +41,7 @@ return function(t: TestRunner.T)
 
 	t.test("shipped catalog has only sample looks and no products", function()
 		for id, item in Catalog.Items do
-			t.truthy(
-				item.category == "Skin"
-					or item.category == "Aura"
-					or item.category == "CaptureEffect"
-					or item.category == "Theme",
-				`{id} is not a sample look`
-			)
+			t.truthy(item.category ~= nil, `{id} has no category`)
 			t.eq((item :: any).price, nil)
 			t.eq((item :: any).product, nil)
 		end

@@ -3,7 +3,7 @@ id: TASK-0065
 title: "Exterior Decoration Editor"
 type: task
 project: GAME-002
-status: ready
+status: in_progress
 priority: medium
 risk: medium
 owner: executor
@@ -53,6 +53,23 @@ Persistence, trust boundary and product details are governed by the baseline not
 
 ---
 ## Implementation record
+Executor: Claude (Sonnet 5.5). Context tokens at start 283,615, at close 315,127 (growth 31,512, shared with earlier session work). Weekly plan 96% at start and close.
+
+**Numbers for jg's review (DRAFT, in `Rules/PlacementRules.luau`):** coarse grid 2 studs; fine nudge at most 1 stud off the grid in 0.5 steps; server accepts positions on a 0.5-stud step; 3-stud margin inside the plot edge; per-item copies from the catalog (`placementLimit`, sample 4) and a plot cap of 60 (`Catalog.MaxPlacements`). Keep-out areas, plot-local, at the current house tier: every house box plus 2 studs, the pen plus 3, the entrance corridor, the spawn, each exhibit pedestal (6), the track editor area plus 2, the beacon, the trophies (8), each lamp and entrance pillar. Decorations may overlap each other (not refused).
+
+**Files:** new `Rules/PlacementRules.luau` (keep-out rects, bounds, `refusal`, snap, `parseEdit`, `afterUpgrade`, messages) and `tests/PlacementRules.spec.luau`; `CosmeticService.editDecoration` plus the `EditDecoration` remote (place, move, store; rate limited 10 per 8 s; ownership, per-item limit and plot cap via `CosmeticRules.place`, geometry via `PlacementRules.refusal`, all inside one `PlayerDataService.update`); `PlotBuilder.buildDecorations` (art-only lantern post, no collision) and a `Decorations` folder; `PlotService.rebuildDecorations` and a build on plot assignment, so decorations show to every player and return on rejoin; `EconomyService` stores placements the bigger house now touches (kept owned) with a notice; new `client/UI/DecorEditor.luau` (draft, live valid or invalid answer, ghost marker) and a decoration section in the `ShopUI` details view (Place a copy, Move, Store, Confirm, Cancel); `Catalog` gains the sample `DecoLantern` and an optional `footprint`; `CosmeticLooks.Decorations`; `Net` registers `EditDecoration`; the CosmeticRules catalog spec no longer lists allowed categories.
+
+**Checks:** `scripts/check.sh` ALL CHECKS PASSED; Lune specs 251 passed.
+
+**Decisions:** the server never trusts a client number: `parseEdit` rejects non-numbers, NaN, infinity, off-step rotations and bad indexes before any rule runs. A refusal changes nothing. Storing keeps ownership (reusable decorations).
+
+**Limits (honest):** the editor moves a draft with Left, Right, Fwd, Back, fine and Rotate buttons, not by dragging with the mouse or touch, so AC1's drag-style placement is not built. The sample lantern is a few Parts, not a baseline-quality model. Nobody can own `DecoLantern` yet (no grant path until TASK-0067). The ghost marker's orientation and the ShopUI layout are untested. "Sample item meets the 3D Model Quality Baseline" is not met.
+
+| AC | State |
+|---|---|
+| AC1 place/move/rotate/store, live feedback, Confirm/Cancel, server validation | implemented and spec-tested (rules); button-based nudge instead of dragging; UI not run in Studio |
+| AC2 reusable ownership with a cap, upgrade stores with a notice, rejoin | implemented; upgrade storing and rejoin rebuild untested in Studio |
+| AC3 specs, Studio on all plot orientations, check.sh, Opus audit | specs and check.sh done; Studio not run; Opus audit pending |
 
 ## Audits
 

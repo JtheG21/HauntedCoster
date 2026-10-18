@@ -9,6 +9,7 @@ local Rules = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Rules")
 local ShopRules = require(Rules:WaitForChild("ShopRules"))
 local LookRules = require(Rules:WaitForChild("LookRules"))
 local CaptureFx = require(script.Parent.Parent.CaptureFx)
+local DecorEditor = require(script.Parent.DecorEditor)
 local ThemeRules = require(Rules:WaitForChild("ThemeRules"))
 local CosmeticLooks = require(ReplicatedStorage.Shared.Config.CosmeticLooks)
 local Theme = require(script.Parent.Theme)
@@ -249,7 +250,156 @@ end
 
 -- Owned skins and auras: one row per owned ghost with Equip or Remove. The server decides; the row only
 -- shows what LookRules says is possible and the server's answer.
+-- Owned decorations: how many are placed, a draft editor (move by grid and fine steps, rotate, live
+-- valid/invalid, Confirm, Cancel) and Move or Store for each placed copy. The server checks every edit again.
+local function renderDecoration(c: ShopRules.Card)
+	local snap = State.snap
+	local item = catalog and catalog.Items[c.id]
+	local placements = if snap and snap.cosmetics then snap.cosmetics.placements else {}
+	local limit = (item and item.placementLimit) or 1
+	local mine: { { index: number, p: any } } = {}
+	for i, p in placements do
+		if p.id == c.id then
+			table.insert(mine, { index = i, p = p })
+		end
+	end
+	if equipMessage then
+		local m = card()
+		Theme.label(
+			m,
+			equipMessage,
+			{ TextColor3 = Theme.Colors.gold, AutomaticSize = Enum.AutomaticSize.Y, Size = UDim2.fromScale(1, 0) }
+		)
+	end
+	local head = card(30)
+	Theme.label(head, `Placed {#mine}/{limit}`, { Font = Theme.Bold })
+	local d = DecorEditor.active()
+	if d and d.id == c.id then
+		local ok, text = DecorEditor.status()
+		local fb = card(30)
+		Theme.label(fb, text, { TextColor3 = if ok then Theme.Colors.good else Theme.Colors.gold })
+		local function row(labels: { { string | (() -> ()) } })
+			local r = card(40)
+			Theme.list(r, 6, true)
+			for _, entry in labels do
+				Theme.button(r, entry[1] :: string, function()
+					(entry[2] :: () -> ())()
+					render(false)
+				end, { Size = UDim2.fromOffset(66, 32) })
+			end
+		end
+		row({
+			{
+				"Left",
+				function()
+					DecorEditor.nudge(-1, 0)
+				end,
+			},
+			{
+				"Right",
+				function()
+					DecorEditor.nudge(1, 0)
+				end,
+			},
+			{
+				"Fwd",
+				function()
+					DecorEditor.nudge(0, -1)
+				end,
+			},
+			{
+				"Back",
+				function()
+					DecorEditor.nudge(0, 1)
+				end,
+			},
+		})
+		row({
+			{
+				"-X",
+				function()
+					DecorEditor.fine(-1, 0)
+				end,
+			},
+			{
+				"+X",
+				function()
+					DecorEditor.fine(1, 0)
+				end,
+			},
+			{
+				"-Z",
+				function()
+					DecorEditor.fine(0, -1)
+				end,
+			},
+			{
+				"+Z",
+				function()
+					DecorEditor.fine(0, 1)
+				end,
+			},
+			{
+				"Rotate",
+				function()
+					DecorEditor.rotate()
+				end,
+			},
+		})
+		local act = card(44)
+		Theme.list(act, 8, true)
+		if ok then
+			Theme.button(act, "Confirm", function()
+				local done, msg = DecorEditor.confirm()
+				equipMessage = if done then nil else msg
+				render(false)
+			end, { Size = UDim2.fromOffset(100, 34) })
+		end
+		Theme.button(act, "Cancel", function()
+			DecorEditor.cancel()
+			equipMessage = nil
+			render(false)
+		end, { Size = UDim2.fromOffset(100, 34), BackgroundColor3 = Theme.Colors.buttonOff })
+		return
+	end
+	if #mine < limit then
+		local add = card(44)
+		Theme.button(add, "Place a copy", function()
+			DecorEditor.start(c.id, nil)
+			equipMessage = nil
+			render(false)
+		end, { Size = UDim2.fromOffset(140, 34) })
+	end
+	for n, entry in mine do
+		local row = card(48)
+		Theme.label(row, `Copy {n}`, { Size = UDim2.new(1, -200, 0, 22) })
+		Theme.button(row, "Store", function()
+			local ok, msg = DecorEditor.store(entry.index)
+			equipMessage = if ok then nil else msg
+			render(false)
+		end, {
+			AnchorPoint = Vector2.new(1, 0.5),
+			Position = UDim2.fromScale(1, 0.5),
+			Size = UDim2.fromOffset(90, 34),
+			BackgroundColor3 = Theme.Colors.buttonOff,
+		})
+		Theme.button(row, "Move", function()
+			DecorEditor.start(c.id, entry.index, entry.p.x, entry.p.z, entry.p.r)
+			equipMessage = nil
+			render(false)
+		end, {
+			AnchorPoint = Vector2.new(1, 0.5),
+			Position = UDim2.new(1, -100, 0.5, 0),
+			Size = UDim2.fromOffset(90, 34),
+		})
+	end
+end
+
 function renderEquip(c: ShopRules.Card)
+	if c.owned and c.category == "Decoration" then
+		renderDecoration(c)
+		return
+	end
 	if c.owned and c.category == "Theme" then
 		renderTheme(c)
 		return
@@ -398,6 +548,9 @@ local function loadCatalog()
 	end
 	loadingCatalog = true
 	catalog = ShopRules.catalogFromWire(State.invoke("GetCatalog"))
+	DecorEditor.setCatalog(function()
+		return catalog
+	end)
 	loadingCatalog = false
 	-- A nil result stays nil, so the screen says "couldn't load" instead of showing an empty shop.
 	render(false)
@@ -411,6 +564,7 @@ function ShopUI.open()
 end
 
 function ShopUI.close()
+	DecorEditor.cancel() -- the ghost marker never outlives the screen
 	if panel then
 		panel.Visible = false
 	end

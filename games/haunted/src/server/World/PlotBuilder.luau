@@ -9,6 +9,7 @@ local Config = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")
 local World = require(Config:WaitForChild("World"))
 local Monsters = require(Config:WaitForChild("Monsters"))
 local PlotDecor = require(Config:WaitForChild("PlotDecor"))
+local CosmeticLooks = require(Config:WaitForChild("CosmeticLooks"))
 local Build = require(script.Parent.Build)
 local GroundPainter = require(script.Parent.GroundPainter)
 local Props = require(script.Parent.Props)
@@ -230,6 +231,7 @@ function PlotBuilder.build(parent: Instance, index: number): Model
 	Build.toFrame(plot, frame)
 	Build.folder(plot, "House")
 	Build.folder(plot, "Trophies")
+	Build.folder(plot, "Decorations")
 	Build.folder(plot, "Track")
 	plot.Parent = parent
 	GroundPainter.paint(plot, { [Enum.Material.Grass] = Enum.Material.LeafyGrass }) -- no blades over pens and exhibits
@@ -331,6 +333,45 @@ function PlotBuilder.buildHouse(plot: Model, index: number, tier: number, tint: 
 	local lp = labelPart :: BasePart
 	Build.billboard(lp, label, Color3.fromRGB(255, 220, 170), lp.Size.Y / 2 + 8, 150, 1.1)
 	Build.toFrame(houseFolder, World.plotFrame(index))
+end
+
+-- Exterior decorations (TASK-0065): the owner's validated placements, rebuilt whenever they change. Art only
+-- (no collision; PlacementRules keeps them off every gameplay area). The sample is a small lantern post.
+function PlotBuilder.buildDecorations(plot: Model, index: number, placements: { any })
+	local folder = plot:FindFirstChild("Decorations") :: Folder
+	folder:ClearAllChildren()
+	for i, p in placements do
+		local look = CosmeticLooks.Decorations[p.id]
+		if look then
+			local model = Instance.new("Model")
+			model.Name = `Decoration{i}`
+			local base = CFrame.new(p.x, 0, p.z) * CFrame.Angles(0, math.rad(p.r), 0)
+			local post = Build.part({
+				name = "Post",
+				size = Vector3.new(0.4, 3.2, 0.4),
+				cframe = base * CFrame.new(0, 1.6, 0),
+				color = look.color,
+				material = Enum.Material.Metal,
+				collide = false,
+				parent = model,
+			})
+			local lamp = Build.part({
+				name = "Lamp",
+				size = Vector3.new(0.9, 0.9, 0.9),
+				cframe = base * CFrame.new(0, 3.5, 0),
+				color = look.glow,
+				material = Enum.Material.Neon,
+				collide = false,
+				parent = model,
+			})
+			Build.light(lamp, look.glow, 12, 1)
+			post.CanQuery = false
+			lamp.CanQuery = false
+			model:SetAttribute("Decoration", p.id)
+			model.Parent = folder
+		end
+	end
+	Build.toFrame(folder, World.plotFrame(index))
 end
 
 -- Cosmetic trophies for journal milestones (no gameplay effect).

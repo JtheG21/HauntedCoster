@@ -80,6 +80,14 @@ local function themeTint(profile: any): { [string]: Color3 }?
 	return if look then { Walls = look.Walls, Trim = look.Trim, Roof = look.Roof } else nil
 end
 
+function PlotService.rebuildDecorations(player: Player)
+	local i = byPlayer[player]
+	local profile = PlayerDataService.get(player)
+	if i and profile then
+		PlotBuilder.buildDecorations(plots[i], i, profile.cosmetics.placements)
+	end
+end
+
 function PlotService.rebuildHouse(player: Player)
 	local i = byPlayer[player]
 	local profile = PlayerDataService.get(player)
@@ -149,6 +157,7 @@ local function assign(player: Player)
 		byPlayer[player] = i
 		PlotBuilder.setOwner(plots[i], player)
 		PlotBuilder.buildHouse(plots[i], i, profile.houseTier, themeTint(profile))
+		PlotBuilder.buildDecorations(plots[i], i, profile.cosmetics.placements)
 		player:SetAttribute("PlotIndex", i)
 		PlotService.rebuildTrophies(player)
 		for _, cb in assignedCallbacks do

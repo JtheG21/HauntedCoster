@@ -7,6 +7,7 @@
 export type Skin = { tint: Color3, material: Enum.Material? }
 export type Aura = { color: Color3, rate: number }
 export type Theme = { Walls: Color3, Trim: Color3, Roof: Color3 } -- the house art's tintable parts
+export type Decoration = { color: Color3, glow: Color3 }
 export type CaptureEffect = { color: Color3, count: number, seconds: number }
 
 local CosmeticLooks = {}
@@ -30,5 +31,9 @@ CosmeticLooks.Themes = {
 		Roof = Color3.fromRGB(60, 70, 110),
 	},
 } :: { [string]: Theme }
+
+CosmeticLooks.Decorations = {
+	DecoLantern = { color = Color3.fromRGB(70, 66, 74), glow = Color3.fromRGB(255, 190, 110) },
+} :: { [string]: Decoration }
 
 return CosmeticLooks
