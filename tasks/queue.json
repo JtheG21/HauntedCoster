@@ -3234,7 +3234,7 @@
       "id": "TASK-0053",
       "title": "Sequence Runner",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0053-Sequence-Runner",
@@ -3245,11 +3245,24 @@
         "evidence.py series --max-transitions 6 passes on a screen take of the demo.",
         "scripts/check.sh green; one audit; no server file changed."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-17T18:00:08",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-17T18:00:08",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0,
-      "approved_by": null,
+      "approved_by": "jg",
       "merge_approved_by": null
     }
   ]

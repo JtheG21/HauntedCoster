@@ -3,7 +3,7 @@ id: TASK-0053
 title: "Sequence Runner"
 type: task
 project: GAME-002
-status: proposed
+status: in_progress
 priority: low
 risk: medium
 owner: executor
