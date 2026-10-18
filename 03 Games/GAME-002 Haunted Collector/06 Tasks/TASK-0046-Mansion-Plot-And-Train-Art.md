@@ -3,7 +3,7 @@ id: TASK-0046
 title: "Mansion, Plot and Ghost Train Art"
 type: task
 project: GAME-002
-status: in_progress
+status: archived
 priority: high
 risk: medium
 owner: executor
@@ -15,7 +15,7 @@ related:
   - "[[SYS-Haunted-Monetization-UI]]"
   - "[[3D Model Quality Baseline]]"
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-18
 tags:
   - workflow/task
 ---
@@ -60,3 +60,6 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 ## Audits
 
 ## Outcome
+
+## Closure (2026-10-18)
+Archived by jg, superseded by [[TASK-0069-Art-Salvage-From-Overhaul-Branch]]. The mansion tiers, plot dressing and ghost-train art (commit 3457e64 of the overhaul branch) were carried to main by [[TASK-0069-Art-Salvage-From-Overhaul-Branch]]. The PlotBuilder theme-tint and decoration changes (a5f0aaa) were left for the monetization tasks, which rebuilt them. The Opus audit of TASK-0069 covered the port, not a fresh review of this task. Studio was never run for the ported art.
