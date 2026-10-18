@@ -3,7 +3,7 @@ id: TASK-0062
 title: "Ghost Skins And Auras Equipment"
 type: task
 project: GAME-002
-status: proposed
+status: ready
 priority: medium
 risk: medium
 owner: executor

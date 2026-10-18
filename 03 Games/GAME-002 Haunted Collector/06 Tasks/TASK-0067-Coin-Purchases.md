@@ -3,7 +3,7 @@ id: TASK-0067
 title: "Coin Purchases"
 type: task
 project: GAME-002
-status: proposed
+status: ready
 priority: medium
 risk: high
 owner: executor

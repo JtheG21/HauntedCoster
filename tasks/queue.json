@@ -3849,7 +3849,7 @@
       "id": "TASK-0062",
       "title": "Ghost Skins And Auras Equipment",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -3862,16 +3862,24 @@
         "The appearance shows on the owner's and other players' clients, previews never alter live models, and state survives rejoin.",
         "Specs for equip, remove, incompatible target and invalid input; check.sh green; one Sonnet audit; Studio FullLoop still passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-18T12:49:10",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0063",
       "title": "Capture Effects Equipment",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -3884,16 +3892,24 @@
         "Cosmetics change nothing about timing, success, the meter or retaliation; asserted by a spec and a Studio check.",
         "check.sh green; one Sonnet audit; VFX rights for any plugin asset checked first (see TASK-0054)."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-18T12:49:10",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0064",
       "title": "Mansion Themes",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -3906,16 +3922,24 @@
         "Complete exterior preview before purchase; the theme shows consistently to all players; state survives rejoin.",
         "Specs for compatibility and fallback; Studio check across tiers and plot orientations; check.sh green; one Sonnet audit."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-18T12:49:11",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0065",
       "title": "Exterior Decoration Editor",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -3929,16 +3953,24 @@
         "Reusable ownership with a per-plot cap (jg, this batch); a house upgrade stores incompatible placements with a notice and nothing is lost; state survives rejoin.",
         "Specs for placement validation, cap and storage; Studio check on all plot orientations; check.sh green; one Opus audit (server-validated persistent state)."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-18T12:49:11",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0066",
       "title": "Journal Collection Rewards",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -3951,16 +3983,24 @@
         "Milestone definitions come from the real species and habitat roster, written into the note; a paid skin never completes a discovery.",
         "Specs for eligibility, single grant and replay; check.sh green; one Sonnet audit."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-18T12:49:11",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0067",
       "title": "Coin Purchases",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "ready",
       "risk": "high",
       "depends_on": [
         "TASK-0060",
@@ -3973,10 +4013,18 @@
         "Pending, failure and rejoin states are covered; prices come from configured data, never UI constants.",
         "Specs for debit, grant, retry, insufficient funds and rapid repeats; ExploitProbe extended; check.sh green; one Opus audit (economy and persistence)."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-18T12:49:11",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0068",

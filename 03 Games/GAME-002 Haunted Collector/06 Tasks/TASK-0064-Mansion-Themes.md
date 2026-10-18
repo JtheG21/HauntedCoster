@@ -3,7 +3,7 @@ id: TASK-0064
 title: "Mansion Themes"
 type: task
 project: GAME-002
-status: proposed
+status: ready
 priority: medium
 risk: medium
 owner: executor
