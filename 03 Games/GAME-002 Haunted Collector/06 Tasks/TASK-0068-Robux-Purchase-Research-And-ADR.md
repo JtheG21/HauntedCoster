@@ -3,7 +3,7 @@ id: TASK-0068
 title: "Robux Purchase Research And ADR"
 type: task
 project: GAME-002
-status: proposed
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -50,7 +50,22 @@ Persistence, trust boundary and product details are governed by the baseline not
 
 ---
 ## Implementation record
+Executor: Claude (Sonnet 5.5). Context tokens at start 369,782, at close 391,494 (growth 21,712, shared with earlier session work). Weekly plan 97% at start and close.
+
+**Notes written:** [[RSH-20261018-Robux-Purchase-Mechanisms]] (observations, hypotheses and recommendations kept apart, with sources and access dates) and the draft [[ADR-0013-Robux-Purchase-Mechanism]] (`status: proposed`, no approver). No code, no product IDs, no prices, no publishing, no Robux spend, no web requests: the sources are the local creator-docs clone (commit af5f853, committed 2026-10-10).
+
+**Recommendation in the draft:** developer products feeding our own entitlements, with an idempotent, save-first receipt handler that grants by `PurchaseId` and remembers processed IDs.
+
+**Not read or verified:** Studio test purchases, pass and product limits, tax, payout and legal pages, price optimization, and the live web docs.
+
+| AC | State |
+|---|---|
+| AC1 research note and draft ADR comparing developer products and passes, receipts and grant recovery, with sources and access dates | done (receipt and recovery behaviour from the MarketplaceService reference; limits above) |
+| AC2 ADR stays draft; no product IDs, prices, publishing or spend | met |
+| AC3 open questions for jg; no code changes | met: seven questions in the ADR; the diff touches only notes |
 
 ## Audits
+[[AUD-20261018-TASK-0068-01]]: pass (Opus). Five findings, all fixed in the notes after the audit.
 
 ## Outcome
+The research note [[RSH-20261018-Robux-Purchase-Mechanisms]] and the draft [[ADR-0013-Robux-Purchase-Mechanism]] are on main (merge approved by jg, 2026-10-18). Opus audit passed and its five findings were fixed. The ADR stays `proposed`: it needs jg's answers to seven open questions before any implementation task, and no product IDs, prices, publishing or Robux spend are authorised. Sources were the local creator-docs clone only; the live docs, Studio test purchases and pass or product limits are unverified.
