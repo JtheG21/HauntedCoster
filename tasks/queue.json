@@ -4133,7 +4133,7 @@
       "id": "TASK-0062",
       "title": "Ghost Skins And Auras Equipment",
       "project": "GAME-002",
-      "status": "approved",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4171,6 +4171,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-18T13:23:54",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -4188,7 +4194,8 @@
         }
       ],
       "revisions": 0,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0063",

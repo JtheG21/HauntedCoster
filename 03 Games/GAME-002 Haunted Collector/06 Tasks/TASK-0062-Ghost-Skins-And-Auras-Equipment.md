@@ -3,7 +3,7 @@ id: TASK-0062
 title: "Ghost Skins And Auras Equipment"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -74,3 +74,4 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 143,861, at close 181,239
 [[AUD-20261018-TASK-0062-01]]: pass (Sonnet). Two minor findings fixed after the audit (a result check and a nil guard in `CosmeticService`); Studio still owed.
 
 ## Outcome
+Skins and auras can be equipped and removed per ghost through a server-checked remote, and models carry the look as attributes (merge approved by jg, 2026-10-18). Sonnet audit passed. Not verified: Studio rendering, the Equip UI, two-client replication, FullLoop. The two sample looks are recolours and particles, not baseline-quality models, and cannot be owned until a grant path exists (TASK-0066/0067).
