@@ -3,7 +3,7 @@ id: TASK-0062
 title: "Ghost Skins And Auras Equipment"
 type: task
 project: GAME-002
-status: in_progress
+status: in_review
 priority: medium
 risk: medium
 owner: executor
@@ -66,7 +66,9 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 143,861, at close 181,239
 |---|---|
 | AC1 equip/remove per ghost, server-validated, compatibility explained, Spectral/Ashen preserved | implemented and tested (specs); Studio not run |
 | AC2 visible to other clients, survives rejoin | implemented, not tested in Studio |
-| AC3 specs, check.sh, one Sonnet audit, FullLoop | specs and check.sh done; audit and FullLoop pending |
+| AC3 specs, check.sh, one Sonnet audit, FullLoop | specs and check.sh done; audit see Audits; FullLoop not run (Studio skipped) |
+
+**Studio skipped by jg, 2026-10-18.** No Play session, no two-client check, no FullLoop, no screenshots. Rendering of the skin and aura and the Equip buttons are unverified at runtime.
 
 ## Audits
 

@@ -4133,7 +4133,7 @@
       "id": "TASK-0062",
       "title": "Ghost Skins And Auras Equipment",
       "project": "GAME-002",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4159,9 +4159,21 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-18T13:16:37",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
-      "executions": [],
+      "executions": [
+        {
+          "time": "2026-10-18T13:16:37",
+          "result": "pass",
+          "notes": "skins/auras equip implemented; check.sh green, 217 specs; Studio skipped by jg"
+        }
+      ],
       "audits": [],
       "revisions": 0,
       "approved_by": "jg"
