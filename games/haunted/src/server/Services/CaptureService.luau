@@ -350,10 +350,12 @@ local function makeCage(player: Player, speciesId: string, variantId: string): B
 	return cage
 end
 
-local function startCarry(player: Player, speciesId: string, variantId: string, regrab: boolean?)
+-- `bonusSeconds` is cosmetic time the capture's finisher takes (TASK-0055): it is added to the carry timer so
+-- watching the finisher never costs the player return time.
+local function startCarry(player: Player, speciesId: string, variantId: string, regrab: boolean?, bonusSeconds: number?)
 	local species = Monsters.Species[speciesId]
 	local tuning = Monsters.Capture[species.rarity]
-	local seconds = if regrab then Monsters.Chase.regrabSeconds else tuning.returnSeconds
+	local seconds = (if regrab then Monsters.Chase.regrabSeconds else tuning.returnSeconds) + (bonusSeconds or 0)
 	local c: Carry = {
 		species = speciesId,
 		variant = variantId,
@@ -566,9 +568,16 @@ local function onCaptureRelease(player: Player): { [string]: any }
 	outcome, s.hits, s.misses = CaptureRules.applyRelease(hit, s.hits, s.misses, s.hitsNeeded, s.missesAllowed)
 	if outcome == "success" then
 		local e = s.encounter
+		local finisherSeconds = CaptureRules.finisherSeconds(Monsters.Species[e.species].rarity)
+		local where = e.root.Position -- before the monster is removed
 		endSession(player, "success")
 		EncounterService.remove(e)
-		startCarry(player, e.species, e.variant)
+		startCarry(player, e.species, e.variant, nil, finisherSeconds)
+		if finisherSeconds > 0 then
+			-- cosmetic, for the capturing player only; the client checks it again before playing
+			Remotes.event("CaptureFinisher")
+				:FireClient(player, { species = e.species, variant = e.variant, position = where })
+		end
 	elseif outcome == "fled" then
 		onFled(player, s)
 	elseif outcome == "miss" then

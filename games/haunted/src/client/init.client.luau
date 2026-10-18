@@ -14,6 +14,7 @@ local CaptureUI = require(script.UI.CaptureUI)
 local MansionUI = require(script.UI.MansionUI)
 local JournalUI = require(script.UI.JournalUI)
 local TrackEditor = require(script.UI.TrackEditor)
+local CaptureFinisher = require(script.CaptureFinisher)
 
 local BuildInfo = require(ReplicatedStorage.Shared.BuildInfo)
 
@@ -74,7 +75,8 @@ Hud.mount(gui, {
 CaptureUI.mount(gui, Hud.toast)
 MansionUI.mount(gui, Hud.toast)
 JournalUI.mount(gui)
-TrackEditor.mount(gui, Hud.toast);
+TrackEditor.mount(gui, Hud.toast)
+CaptureFinisher.mount();
 
 (State.remote("Toast") :: RemoteEvent).OnClientEvent:Connect(function(t)
 	if type(t) == "table" and type(t.text) == "string" then

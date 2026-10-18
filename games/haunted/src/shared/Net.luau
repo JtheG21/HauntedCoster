@@ -8,6 +8,7 @@ Net.Events = {
 	"Toast", -- S->C: { text, kind }
 	"Inspect", -- S->C: inspect card for a monster
 	"CaptureEnded", -- S->C: capture session finished (success/fled/cancelled)
+	"CaptureFinisher", -- S->C: { species, variant, position } a Rare was just captured; cosmetic, that player only; variant is reserved for per-variant looks (TASK-0055)
 	"RideState", -- S->C: ride started/ended
 	"RequestState", -- C->S
 	"CaptureCancel", -- C->S
