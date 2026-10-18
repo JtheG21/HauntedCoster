@@ -3,7 +3,7 @@ id: TASK-0056
 title: "Studio Test Pads"
 type: task
 project: GAME-002
-status: approved
+status: done
 priority: low
 risk: low
 owner: executor
