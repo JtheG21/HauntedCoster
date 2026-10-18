@@ -3,7 +3,7 @@ id: TASK-0062
 title: "Ghost Skins And Auras Equipment"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: medium
 risk: medium
 owner: executor
@@ -71,5 +71,6 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 143,861, at close 181,239
 **Studio skipped by jg, 2026-10-18.** No Play session, no two-client check, no FullLoop, no screenshots. Rendering of the skin and aura and the Equip buttons are unverified at runtime.
 
 ## Audits
+[[AUD-20261018-TASK-0062-01]]: pass (Sonnet). Two minor findings fixed after the audit (a result check and a nil guard in `CosmeticService`); Studio still owed.
 
 ## Outcome

@@ -46,20 +46,24 @@ function CosmeticService.equip(player: Player, uid: any, slot: any, id: any): (b
 			return false, reason
 		end
 		-- Dry run on a copy, so a refusal leaves the saved state untouched.
-		local probe = CosmeticRules.sanitize(profile.cosmetics :: any, { [m.uid] = m.species }, catalog())
+		local probe = CosmeticRules.sanitize((profile.cosmetics or {}) :: any, { [m.uid] = m.species }, catalog())
 		local err
 		ok, err = CosmeticRules.equipLook(probe, catalog(), req.uid, m.species, req.slot, req.id)
 		if not ok then
 			return false, LookRules.message(err)
 		end
 	end
+	local changed = true
 	local applied = PlayerDataService.update(player, function(p)
 		if req.id == nil then
-			CosmeticRules.removeLook(p.cosmetics, req.uid, req.slot)
+			changed = CosmeticRules.removeLook(p.cosmetics, req.uid, req.slot)
 		else
-			CosmeticRules.equipLook(p.cosmetics, catalog(), req.uid, m.species, req.slot, req.id)
+			changed = CosmeticRules.equipLook(p.cosmetics, catalog(), req.uid, m.species, req.slot, req.id)
 		end
 	end)
+	if not changed then
+		return false, "Something went wrong. Try again."
+	end
 	if not applied then
 		return false, "Your data is still loading."
 	end
