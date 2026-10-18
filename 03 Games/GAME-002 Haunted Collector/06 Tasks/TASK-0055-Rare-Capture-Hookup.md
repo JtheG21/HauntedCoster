@@ -3,7 +3,7 @@ id: TASK-0055
 title: "Rare Capture Hookup"
 type: task
 project: GAME-002
-status: in_progress
+status: approved
 priority: low
 risk: medium
 owner: executor
@@ -46,7 +46,7 @@ Play the rare capture finisher ([[TASK-0054-Rare-Capture-Finisher]]) to the capt
 - [x] AC1 Lune: `finisherSeconds` is the finisher's duration for Rare and 0 otherwise; the payload check rejects bad species, non-Vector3, far-away and non-Rare events; the essence cue is valid and ends before the sequence.
 - [x] AC2 A Rare success fires `CaptureFinisher` to that player only and extends that carry's `deadline`, `deadlineServer` and `returnSeconds` by the finisher's seconds; Common and Uncommon captures are unchanged. Evidence: Studio scenario or recorded test on the real place.
 - [x] AC3 The finisher plays on the client from that event, restores the camera, field of view and movement lock afterwards, and the HUD carry bar still reads correctly. Evidence: Studio on the Haunted place.
-- [ ] AC4 `scripts/check.sh` green; one audit (the Net contract and server timing are touched).
+- [x] AC4 `scripts/check.sh` green; one audit (the Net contract and server timing are touched).
 
 ## Tests
 - **Automated:** `scripts/check.sh`, Lune specs.
@@ -59,9 +59,12 @@ Server timing change (carry deadline) and a new remote: both small, both audited
 ## Implementation record
 - Server: `CaptureService.onCaptureRelease` reads the monster's position and rarity before removing it, adds `CaptureRules.finisherSeconds(rarity)` to the carry via `startCarry`'s new `bonusSeconds` (so `deadline`, `deadlineServer` and `returnSeconds` all grow), and fires `CaptureFinisher` to that player. Client: `CaptureFinisher.mount()` (wired in `init.client.luau`) checks the payload with `FinisherRules.parsePayload` and plays the finisher from a hidden marker on the ground under the monster; the finisher brings its own captured-spirit sphere because the monster is gone.
 - Studio evidence (2026-10-17), the real Haunted Collector place built from this branch (build 87a9b7f, unpublished so DataStores are in memory mode): a server script in the game's own context raised the test player's house tier (crypt gate) and drove the real capture meter through `CaptureService` on a Bell Wraith to success. The client received `CaptureFinisher` (species BellWraith), the camera went Scriptable and the movement lock was bound, then both were released; `FinisherFx` and the marker were gone; the server reported `isCarrying = true`; the HUD read "Carrying Bell Wraith: 126s" about 7 s after the capture and 107 s later with the bar at about 80%, consistent with 120 s plus the finisher's 12.8 s. A screen capture of the finisher in the real game was taken.
-- Not exercised: a second player (only the capturing client receives the event by construction, `FireClient`), Common and Uncommon captures in Studio (covered by the Lune spec: `finisherSeconds` is 0), the finisher interrupted by death or a habitat swap.
+- Revision 1 (audit): the finisher now stops when the character dies or is removed; checked in the real place by killing the player 3 s into the finisher: 5 s later the camera was Custom, movement unlocked and the effects gone (a stuck finisher would still have been active until 12.8 s). Nits: `parsePayload` finite check as a helper, named essence fallback, `variant` documented as reserved. `origin/main` merged in (TASK-0056).
+- Not exercised: a second player (only the capturing client receives the event by construction, `FireClient`), Common and Uncommon captures in Studio (covered by the Lune spec: `finisherSeconds` is 0), the finisher interrupted by a habitat swap.
 - Testing notes: `require` in `execute_luau` creates separate copies of each service with empty state; to use the game's real services, run a Script placed in `ServerScriptService`. An unpublished place file runs DataStores in memory mode; the profile loads normally in that case.
 
 ## Audits
+- Audit 2026-10-17 (auditor, Opus, networking and server code): **pass with notes**, no blocker or major. Minor: branch behind main (merged), no stop on death (fixed); nits fixed. See [[AUD-20261017-TASK-0055-01]].
 
 ## Outcome
+Open for jg: merge approval; rights of the plugin assets still block shipping the look.
