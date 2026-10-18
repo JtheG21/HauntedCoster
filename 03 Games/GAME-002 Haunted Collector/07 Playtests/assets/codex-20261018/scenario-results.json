@@ -1,0 +1,263 @@
+{
+  "baseline": {
+    "running": "done",
+    "runs": {
+      "FullLoop": {
+        "result": {
+          "ok": false,
+          "error": "TestService.Tests.scenarios.FullLoop:223: attempt to index nil with 'acquiredAt'"
+        },
+        "callOk": true
+      },
+      "ExploitProbe": {
+        "result": {
+          "ok": true,
+          "passed": 14,
+          "failed": 0,
+          "checks": {
+            "1": {
+              "ok": true,
+              "name": "editor unlocked for the route probe (test shortcut)",
+              "detail": "1"
+            },
+            "2": {
+              "ok": true,
+              "name": "client probe reported"
+            },
+            "3": {
+              "ok": true,
+              "name": "release without a session does nothing",
+              "detail": "none"
+            },
+            "4": {
+              "ok": true,
+              "name": "forged CaptureStart args rejected"
+            },
+            "5": {
+              "ok": true,
+              "name": "forged Purchase args rejected"
+            },
+            "6": {
+              "ok": true,
+              "name": "forged BuyItem args rejected, nothing charged or granted"
+            },
+            "7": {
+              "ok": true,
+              "name": "forged/huge/NaN routes rejected"
+            },
+            "8": {
+              "ok": true,
+              "name": "route rejections come from route validation, not the unlock or rate limit",
+              "detail": "At most 16 points | Bad point | No route"
+            },
+            "9": {
+              "ok": true,
+              "name": "forged exhibit args rejected"
+            },
+            "10": {
+              "ok": true,
+              "name": "state-request spam survived"
+            },
+            "11": {
+              "ok": true,
+              "name": "mash: real capture started"
+            },
+            "12": {
+              "ok": true,
+              "name": "mash: only one press of a rapid burst counts",
+              "detail": "counted=1 ignored=13 other=16"
+            },
+            "13": {
+              "ok": true,
+              "name": "server state unchanged by forged requests",
+              "detail": "coins 0"
+            },
+            "14": {
+              "ok": true,
+              "name": "no monster granted without securing"
+            }
+          }
+        },
+        "callOk": true
+      }
+    }
+  },
+  "cosmeticProbe": {
+    "ok": false,
+    "artBake": {
+      "seconds": 10.086570666637272,
+      "failed": 0,
+      "parts": 333
+    },
+    "checks": [
+      {
+        "ok": true,
+        "name": "isolated memory mode",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "fresh Server specs",
+        "detail": "265 passed, 0 failed"
+      },
+      {
+        "ok": true,
+        "name": "buy debit/grant",
+        "detail": "Bought Mossy Skin for 300 Coins."
+      },
+      {
+        "ok": true,
+        "name": "same request once",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "new request already-owned refusal",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "shortfall exact and unchanged",
+        "detail": "You need 150 more Coins for Ember Aura."
+      },
+      {
+        "ok": true,
+        "name": "buy aura",
+        "detail": "Bought Ember Aura for 250 Coins."
+      },
+      {
+        "ok": true,
+        "name": "buy decoration",
+        "detail": "Bought Garden Lantern for 150 Coins."
+      },
+      {
+        "ok": true,
+        "name": "normal skin",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "aura independent",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "Spectral skin refused",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "Ashen skin refused",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "unowned effect refused",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "ineligible reward refused",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "eligible claim grants effect",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "reward replay refused",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "effect equip",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "Shack theme refused",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "upgrade to manor",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "manor theme equip",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "theme tint replicated anchor",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "place",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "rotate",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "blocked move unchanged",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "store",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "upgrade collision test cell exists",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "place before upgrade",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "upgrade to mansion",
+        "detail": "true"
+      },
+      {
+        "ok": true,
+        "name": "theme fallback clears selection, keeps ownership",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "upgrade stores colliding placement",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "re-equip sample theme",
+        "detail": ""
+      },
+      {
+        "ok": true,
+        "name": "place after upgrade",
+        "detail": ""
+      },
+      {
+        "ok": false,
+        "name": "KNOWN GAP: reload rejects blocked cell",
+        "detail": ""
+      }
+    ],
+    "serverMemoryMb": 4727.15283203125,
+    "passed": 32,
+    "failed": 1
+  }
+}

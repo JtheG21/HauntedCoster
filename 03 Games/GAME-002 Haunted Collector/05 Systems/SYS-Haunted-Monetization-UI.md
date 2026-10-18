@@ -22,6 +22,9 @@ related:
 
 This is the approved product/UI scope baseline for the next major UI update (jg, 2026-10-13, approval of the presented baseline and local merge). The category, currency and equipment choices are recorded in [[ADR-0011-Monetization-UI-Scope]]. The screen arrangement, interactions and acceptance checklist establish the intended update; they are not implemented features. Discovery's confirmed decisions are carried forward; original evidence gaps are retained rather than reconstructed. Item/backend readiness decisions remain explicit below.
 
+## Implementation evidence (2026-10-18)
+The TASK-0060–0067 baseline is merged, including catalog/Owned, equipment, milestones, decoration editing and sample Coin purchases. Historical design tables below describe the approved target, not release certification. Codex's independent review found follow-up defects: [[AUD-20261018-TASK-0069-02]]. Runtime evidence and exact limitations: [[TEST-20261018-01]]. Full exterior preview, complete editor/UI journeys, rejoin, two-client proof, finished item art and jg's product/balance decisions remain open. Follow-ups are proposed in [[Handoff to Codex 2026-10-18]]; Robux is unimplemented and ADR-0013 remains proposed.
+
 ## Purpose
 Carry the approved monetization scope into the next major UI update.
 
