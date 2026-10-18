@@ -40,6 +40,18 @@ return function(t: TestRunner.T)
 		t.eq(ExhibitRules.setRefusal(profileWith(1), 3, "m1"), nil, "a higher tier opens slot 3")
 	end)
 
+	t.test("a corrupt house tier is refused, not an error", function()
+		local msg = "Something went wrong. Try again after rejoining."
+		local badTiers: { any } = { -1, -5, 0.5, 0 / 0, math.huge, -math.huge, 99, "1" }
+		for _, bad in badTiers do
+			local p = profileWith(0)
+			p.houseTier = bad
+			t.eq(ExhibitRules.setRefusal(p, 1, "m1"), msg, `tier {tostring(bad)}`)
+		end
+		t.eq(ExhibitRules.setRefusal(profileWith(0), 1, "m1"), nil, "valid tier 0")
+		t.eq(ExhibitRules.setRefusal(profileWith(1), 3, "m1"), nil, "valid tier 1")
+	end)
+
 	t.test("the monster must be an owned string uid", function()
 		local p = profileWith(0)
 		local badUids: { any } = { "nope", 5, true, {} }
