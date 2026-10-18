@@ -76,6 +76,7 @@ local function onPurchase(player: Player, item: any, expected: any): (boolean, s
 		end, profile.houseTier)
 		if stored > 0 then
 			profile.cosmetics.placements = kept
+			PlayerDataService.markDirty(player)
 		end
 		PlotService.rebuildHouse(player)
 		PlotService.rebuildDecorations(player)

@@ -4337,7 +4337,7 @@
       "id": "TASK-0065",
       "title": "Exterior Decoration Editor",
       "project": "GAME-002",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [
         "TASK-0060",
@@ -4369,6 +4369,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T13:49:32",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -4378,7 +4384,13 @@
           "notes": "decoration editor implemented; check.sh green, 251 specs; Studio skipped by jg; no drag placement"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-18T13:49:32",
+          "result": "pass",
+          "report": "06 QA/AUD-20261018-TASK-0065-01.md"
+        }
+      ],
       "revisions": 0,
       "approved_by": "jg"
     },

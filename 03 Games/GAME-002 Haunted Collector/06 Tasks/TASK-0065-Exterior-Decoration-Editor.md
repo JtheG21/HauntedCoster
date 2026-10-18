@@ -3,7 +3,7 @@ id: TASK-0065
 title: "Exterior Decoration Editor"
 type: task
 project: GAME-002
-status: in_review
+status: approved
 priority: medium
 risk: medium
 owner: executor
@@ -74,5 +74,6 @@ Executor: Claude (Sonnet 5.5). Context tokens at start 283,615, at close 315,127
 **Studio skipped by jg, 2026-10-18.** No Play session, no check on any plot orientation, no screenshots. The decoration build, the ghost marker, the editor buttons and the upgrade storing are unverified at runtime.
 
 ## Audits
+[[AUD-20261018-TASK-0065-01]]: pass (Opus). Fixed after the audit: `markDirty` when an upgrade stores decorations. Open follow-ups: re-validate placements on load, stable placement IDs. Studio still owed.
 
 ## Outcome
