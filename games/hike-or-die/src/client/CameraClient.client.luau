@@ -2,6 +2,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ContextActionService = game:GetService("ContextActionService")
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
@@ -9,11 +10,12 @@ local camera = workspace.CurrentCamera
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local actionRemote = remotes:WaitForChild("Action") :: RemoteEvent
 local eventRemote = remotes:WaitForChild("Event") :: RemoteEvent
+local Gameplay = require(ReplicatedStorage.Shared.Config.Gameplay)
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "HikeOrDieHUD"
 gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
+gui.IgnoreGuiInset = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local function label(name: string, text: string, position: UDim2, size: UDim2): TextLabel
@@ -49,6 +51,23 @@ local function button(name: string, text: string, position: UDim2): TextButton
 	return item
 end
 
+local function aimButton(name: string, text: string, position: UDim2): TextButton
+	local item = Instance.new("TextButton")
+	item.Name = name
+	item.Position = position
+	item.Size = UDim2.fromOffset(44, 44)
+	item.BackgroundColor3 = Color3.fromRGB(61, 74, 64)
+	item.BackgroundTransparency = 0.08
+	item.BorderSizePixel = 0
+	item.TextColor3 = Color3.fromRGB(245, 239, 215)
+	item.Font = Enum.Font.GothamBold
+	item.TextSize = 22
+	item.Text = text
+	item.Visible = false
+	item.Parent = gui
+	return item
+end
+
 local status = label(
 	"Status",
 	"Find the trail. Photograph the cryptid. Reach the beacon.",
@@ -67,11 +86,35 @@ local hint = label(
 local cameraButton = button("CameraButton", "CAMERA  [C]", UDim2.new(1, -150, 1, -120))
 local shutterButton = button("ShutterButton", "PHOTO  [SPACE]", UDim2.new(1, -150, 1, -64))
 local provokeButton = button("ProvokeButton", "CALL  [Q]", UDim2.new(0, 18, 1, -64))
+local aimLeftButton = aimButton("AimLeft", "◀", UDim2.new(0.5, -70, 1, -154))
+local aimRightButton = aimButton("AimRight", "▶", UDim2.new(0.5, 26, 1, -154))
+local aimUpButton = aimButton("AimUp", "▲", UDim2.new(0.5, -22, 1, -202))
+local aimDownButton = aimButton("AimDown", "▼", UDim2.new(0.5, -22, 1, -154))
 local reticle = label("Reticle", "+", UDim2.new(0.5, -18, 0.5, -24), UDim2.fromOffset(36, 48))
 reticle.BackgroundTransparency = 1
 reticle.TextSize = 32
 reticle.Visible = false
 shutterButton.Visible = false
+
+if UserInputService.TouchEnabled then
+	status.AnchorPoint = Vector2.new(0.5, 0)
+	status.Position = UDim2.new(0.5, 0, 0, 12)
+	status.Size = UDim2.new(0.92, 0, 0, 54)
+	behavior.Position = UDim2.fromOffset(18, 76)
+	score.Position = UDim2.fromOffset(18, 118)
+	cameraButton.Position = UDim2.new(1, -150, 0, 80)
+	shutterButton.Position = UDim2.new(1, -150, 0, 136)
+	provokeButton.Position = UDim2.fromOffset(18, 166)
+	hint.AnchorPoint = Vector2.new(0.5, 0)
+	hint.Position = UDim2.new(0.5, 0, 1, -82)
+	hint.Size = UDim2.new(0.9, 0, 0, 54)
+end
+
+local function defaultHint(): string
+	return if UserInputService.TouchEnabled
+		then "CAMERA: raise  ·  CALL: provoke"
+		else "C / CAMERA: raise camera   Q: call into the woods"
+end
 
 local cameraOpen = false
 local yaw = 0
@@ -83,11 +126,36 @@ local priorCameraSubject = camera.CameraSubject
 local dragging = false
 local touchPosition: Vector2? = nil
 
+local function adjustAim(horizontal: number, vertical: number)
+	local step = math.rad(3)
+	yaw = math.clamp(yaw + horizontal * step, math.rad(-80), math.rad(80))
+	pitch = math.clamp(pitch + vertical * step, math.rad(-55), math.rad(42))
+end
+
+local aimActionName = "HikeOrDieCameraAim"
+local function handleAimAction(_: string, state: Enum.UserInputState, input: InputObject): Enum.ContextActionResult
+	if not cameraOpen then
+		return Enum.ContextActionResult.Pass
+	end
+	if state == Enum.UserInputState.Begin then
+		if input.KeyCode == Enum.KeyCode.Left then
+			adjustAim(-1, 0)
+		elseif input.KeyCode == Enum.KeyCode.Right then
+			adjustAim(1, 0)
+		elseif input.KeyCode == Enum.KeyCode.Up then
+			adjustAim(0, 1)
+		elseif input.KeyCode == Enum.KeyCode.Down then
+			adjustAim(0, -1)
+		end
+	end
+	return Enum.ContextActionResult.Sink
+end
+
 local function setHint(text: string)
 	hint.Text = text
 	task.delay(4, function()
 		if hint.Parent and hint.Text == text then
-			hint.Text = "C / CAMERA: raise camera   Q: call into the woods"
+			hint.Text = defaultHint()
 		end
 	end)
 end
@@ -99,8 +167,19 @@ local function setCamera(open: boolean)
 		priorCameraType = camera.CameraType
 		priorCameraSubject = camera.CameraSubject
 		camera.CameraType = Enum.CameraType.Scriptable
+		ContextActionService:BindActionAtPriority(
+			aimActionName,
+			handleAimAction,
+			false,
+			Enum.ContextActionPriority.High.Value,
+			Enum.KeyCode.Left,
+			Enum.KeyCode.Right,
+			Enum.KeyCode.Up,
+			Enum.KeyCode.Down
+		)
 		actionRemote:FireServer("camera_opened")
 	else
+		ContextActionService:UnbindAction(aimActionName)
 		camera.CameraType = priorCameraType
 		if priorCameraSubject then
 			camera.CameraSubject = priorCameraSubject
@@ -108,13 +187,18 @@ local function setCamera(open: boolean)
 	end
 	reticle.Visible = cameraOpen
 	shutterButton.Visible = cameraOpen
+	local showAimButtons = cameraOpen and (UserInputService.TouchEnabled or RunService:IsStudio())
+	aimLeftButton.Visible = showAimButtons
+	aimRightButton.Visible = showAimButtons
+	aimUpButton.Visible = showAimButtons
+	aimDownButton.Visible = showAimButtons
 	cameraButton.Text = if cameraOpen then "LOWER  [C]" else "CAMERA  [C]"
 	if cameraOpen then
 		hint.Text = if UserInputService.TouchEnabled
-			then "Drag to aim  ·  PHOTO to shoot  ·  CALL to provoke"
-			else "Right-drag to aim  ·  SPACE / PHOTO to shoot  ·  Q to provoke"
+			then "Drag or tap arrows to aim  ·  PHOTO to shoot  ·  CALL to provoke"
+			else "Right-drag or arrow keys to aim  ·  SPACE / PHOTO to shoot  ·  Q to provoke"
 	else
-		hint.Text = "C / CAMERA: raise camera   Q: call into the woods"
+		hint.Text = defaultHint()
 	end
 end
 
@@ -140,6 +224,18 @@ cameraButton.Activated:Connect(function()
 end)
 shutterButton.Activated:Connect(shoot)
 provokeButton.Activated:Connect(provoke)
+aimLeftButton.Activated:Connect(function()
+	adjustAim(-1, 0)
+end)
+aimRightButton.Activated:Connect(function()
+	adjustAim(1, 0)
+end)
+aimUpButton.Activated:Connect(function()
+	adjustAim(0, 1)
+end)
+aimDownButton.Activated:Connect(function()
+	adjustAim(0, -1)
+end)
 
 UserInputService.InputBegan:Connect(function(input: InputObject, processed: boolean)
 	if processed then
@@ -194,7 +290,10 @@ RunService:BindToRenderStep("HikeOrDieSelfieCamera", Enum.RenderPriority.Camera.
 	if not (head and head:IsA("BasePart") and root and root:IsA("BasePart")) then
 		return
 	end
-	local pos = head.Position + root.CFrame.LookVector * 3.4 + root.CFrame.RightVector * 2.4 + Vector3.new(0, 1.2, 0)
+	local pos = head.Position
+		+ root.CFrame.LookVector * Gameplay.SelfieForwardOffset
+		+ root.CFrame.RightVector * Gameplay.SelfieSideOffset
+		+ Vector3.new(0, Gameplay.SelfieHeightOffset, 0)
 	local baseYaw = math.atan2(root.CFrame.LookVector.X, root.CFrame.LookVector.Z)
 	local direction = CFrame.fromOrientation(pitch, baseYaw + yaw, 0).LookVector
 	camera.CFrame = CFrame.lookAt(pos, pos + direction)

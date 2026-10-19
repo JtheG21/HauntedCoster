@@ -21,12 +21,12 @@
     },
     "Lighting": {
       "$properties": {
-        "ClockTime": 5.8,
-        "Brightness": 1.6,
+        "ClockTime": 17.5,
+        "Brightness": 2.4,
         "GlobalShadows": true,
         "Technology": "Future",
-        "Ambient": [0.17, 0.21, 0.19],
-        "OutdoorAmbient": [0.3, 0.34, 0.29]
+        "Ambient": [0.32, 0.36, 0.32],
+        "OutdoorAmbient": [0.42, 0.46, 0.38]
       }
     },
     "SoundService": {
