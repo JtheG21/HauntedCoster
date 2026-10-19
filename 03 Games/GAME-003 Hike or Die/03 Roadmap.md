@@ -13,12 +13,11 @@ tags:
 # Roadmap
 
 ## Gate 1 — Prove the hook
-1. Create isolated project and wire checks/build path.
-2. Implement pure evidence and state rules with specs.
-3. Build compact blockout and one cryptid state loop.
-4. Add camera candidate, input paths, evidence feedback, extraction and controlled restart.
-5. Run repeatable validation scenarios, then internal smoke and observed fresh-player sessions.
-6. Write results against criteria declared before formal testing. Gate 2 requires a separate human decision.
+**Current state:** isolated existence prototype merged; hook not proven. Direct HOD format/lint/spec/build/map evidence and partial historical Studio smoke exist. Camera failure is reported; physical touch, fair escape, repeatable successful full loop, and fresh-player study remain open. Three spawn positions/rotating roam start and console counts are only partial variation/instrumentation. The recovered source brief and later existence-stage acceptance are distinguished in [[RSH-20261019-Hike-Or-Die-Preparation]].
+
+1. **Done for the existence stage:** isolated project, map blockout, pure evidence/state rules, one cryptid, camera candidate, extraction/restart, direct checks and partial Studio smoke; see [[TASK-0087-Hike-Or-Die-Gate-1]] and [[TEST-20261018-03]].
+2. **Still required to prove the hook:** H01 checks/preflight wiring; camera root cause; repeatable photo/round regression, fair chase/cover/extraction, target-device proof and observed fresh-player comprehension/replay. See [[RSH-20261019-Hike-Or-Die-Delivery-Plan]] and the bounded preparation materials.
+3. Record outcomes against declared criteria before any Gate 2 review. Gate 2 requires a separate human decision.
 
 **Exit evidence:** understandable photo quality, player-driven risk, fair counterplay, extraction agreement, voluntary replay signal, desktop/touch usability, and reliable scoring/restart.
 

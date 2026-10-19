@@ -12,11 +12,11 @@ tags:
 
 # GAME-003: Hike or Die
 
-**Phase:** Gate 1 — prove the photographic risk/reward loop. The project is a candidate and is not the studio's active game. The design source is Hike_or_Die_GAME-003_Gate_1_Brief.md (2026-10-18). Gate 1 is not a production or commercial greenlight.
+**Phase:** Gate 1 existence prototype merged; the photographic risk/reward loop remains unproven. The project is a candidate and is not the studio's active game. The original brief is archived byte-for-byte in `08 Evidence/Hike_or_Die_GAME-003_Gate_1_Brief.original.md.source`; provenance is summarized in [[RSH-20261019-Hike-Or-Die-Preparation]]. Gate 1 is not a production or commercial greenlight.
 
 **Code:** implemented as an isolated source root at games/hike-or-die/ with hike-or-die.project.json and a local Rojo build output, separate from default.project.json (GAME-001) and haunted.project.json (GAME-002). No published place is part of this task.
 
-**Status:** An isolated existence prototype was merged in PR #120 (remote main `c85b279`) under [[TASK-0087-Hike-Or-Die-Gate-1]]. jg reports the camera still does not work; repair, physical touch evaluation and a successful full-loop test are deferred. This does not activate GAME-003 or authorize release. Task status remains in tasks/queue.json.
+**Status:** An isolated existence prototype was merged in PR #120 (remote main `c85b279`) under [[TASK-0087-Hike-Or-Die-Gate-1]]. One rotating roam start and three spawn positions, plus local console event counts, are implemented; these are limited prototype variation/instrumentation, not cohort analytics. jg reports the camera still does not work; repair, physical touch evaluation and a successful full-loop test are deferred. This does not activate GAME-003 or authorize release. Task status remains in tasks/queue.json.
 
 ## Project profile
 - **Status and phase:** Candidate; existence prototype merged in PR #120. Camera failure and incomplete full-loop validation are known follow-up work.
@@ -40,3 +40,6 @@ The user requested an income-focused launch plan, aiming for next week with most
 - [[RSH-20261019-Hike-Or-Die-Commercial-Plan]] — offers, income sensitivity, measurement and $50 reserve rules.
 
 These plans are proposed. Package labels are not queued TASKs, completed features, spending approvals or a promised launch date. The queue remains authoritative.
+
+## Preparation evidence — 2026-10-19
+The original Gate 1 brief was recovered from `/Users/jg/Downloads/Hike_or_Die_GAME-003_Gate_1_Brief.md` and archived byte-for-byte under this game's `08 Evidence/`. Current rights, platform ownership/eligibility, and target devices remain unknown. See [[RSH-20261019-Hike-Or-Die-Preparation]] and [[RSH-20261019-Hike-Or-Die-Sol-Handoff]].

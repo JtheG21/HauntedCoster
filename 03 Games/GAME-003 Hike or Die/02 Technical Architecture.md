@@ -38,7 +38,7 @@ No DataStore in Gate 1. Ephemeral round state contains captured evidence metadat
 One cryptid and one player; no pathfinding grid or procedural generator unless a test proves it necessary. Record frame time, instance count and any recurring server work on representative hardware before claiming a budget.
 
 ## World layout
-Use a handcrafted connected blockout and controlled spawn/state variation, based on the brief's recommendation. Exit direction must be readable from a landmark; include one alternate approach and cover route. [[ADR-0014-Hike-Or-Die-Gate-1-World]] records this as a proposed, reversible experiment, not a permanent architecture decision.
+Use a handcrafted connected blockout and controlled spawn/state variation, based on the brief's recommendation. Exit direction must be readable from a landmark; include one alternate approach and cover route. [[ADR-0014-Hike-Or-Die-Gate-1-World]] is approved by jg on 2026-10-18 for the Gate 1 experiment only; it is not a permanent architecture decision.
 
 ## Camera
 The first candidate is a real-world Scriptable camera offset front-right of the hiker, with free mouse movement, right-side touch drag, a centered crosshair, and server-validated aim. Movement is remapped through a smoothed frame that follows horizontal camera aim, while the hiker's facing remains stable. jg reports that the camera still does not work; this candidate is not a final design decision and its repair is deferred past the existence-stage merge. Desktop and touch tests must compare composition and controls before selecting it. CaptureService is for screenshot/gallery features, not a substitute for the server evidence contract. No permanent screenshot/gallery support is planned.

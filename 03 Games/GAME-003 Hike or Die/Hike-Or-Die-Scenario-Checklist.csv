@@ -1,0 +1,11 @@
+scenario_id,party_size,device_input,build_commit,expected_behavior,actual_raw_result,outcome_pass_fail_blocked_not_run,reason,duration_seconds,evidence_reference,observer,notes
+S01,1,Desktop keyboard/mouse,,Baseline and two consecutive shots keep camera open; feedback/count correct,,NOT RUN,,,,,
+S02,1,Desktop keyboard/mouse,,Invalid/out-of-view/occluded shot rejected with actionable reason,,NOT RUN,,,,,
+S03,1,Desktop keyboard/mouse,,"Risk shot, readable chase, cover escape and successful bank",,NOT RUN,,,,,
+S04,1,Desktop keyboard/mouse,,Catch/failure loses carried evidence; restart resets all round/camera state,,NOT RUN,,,,,
+S05,2,Two clients/mixed if available,,Join/leave/leader leave/disconnect behavior defined and safe; only after co-op implementation,,NOT RUN,,,,,
+S06,4,Four clients/mixed devices,,"Full round, performance/network/pathfinding profile; only after co-op implementation",,NOT RUN,,,,,
+S07,1,Physical iOS touch if targeted,,"Two-thumb move/aim/shutter, camera boundary, menu/focus/background-resume",,NOT RUN,,,,,
+S08,1,Physical Android touch if targeted,,Same controls and shot quality as agreed contract; emulator supplementary only,,NOT RUN,,,,,
+S09,1,Target device(s),,"Empty exit, death/extract race, no-path, rapid restart, disconnect, low FPS, missing asset/load failure",,NOT RUN,,,,,
+S10,1,Fresh participant/input recorded,,"Uncoached objective/photo/feedback comprehension, time, voluntary replay and stated reason",,NOT RUN,,,,,

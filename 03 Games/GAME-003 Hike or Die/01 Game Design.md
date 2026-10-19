@@ -39,7 +39,7 @@ Excluded. No currency economy, purchases, Robux, boosts, or paid API calls.
 | Selfie-style camera interaction with aiming, shutter and camera state | Must | Scriptable selfie-camera candidate is present, but jg reports mouse camera controls still do not work. The existence-stage merge defers repair for higher-model review; earlier Studio probes are historical only. Touch comparison remains pending. |
 | Server-validated evidence metadata and explainable grade | Must | Implemented; adversarial runtime validation pending |
 | Extraction, round summary and restart | Must | Implemented; runtime validation pending |
-| One controlled encounter variation and low-risk event instrumentation | Must | Planned |
+| One controlled encounter variation and low-risk event instrumentation | Must | Partially implemented: three spawn positions, rotating roam start, and console event counts; no cohort funnel or verified analytics ingestion |
 | Optional simple contract | Can | Deferred unless a test needs it |
 | Persistent gallery, journal UI, evidence recovery, co-op | Out | Gate 2+ |
 

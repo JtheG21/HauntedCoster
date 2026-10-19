@@ -1,0 +1,291 @@
+# HIKE OR DIE — GAME-003
+## Gate 1 Design & Validation Brief
+
+**Document status:** Design/documentation only — not an implementation instruction or authorization  
+**Revision:** 1.0 | **Date:** 2026-10-18  
+**Project:** GAME-003 candidate, Rg1 | **Stage:** Preproduction / Gate 1 specification  
+**Authority:** Original *Hike or Die* concept document, followed by five discovery rounds and HOD-001–HOD-030 decisions.  
+**Change control:** Original Google Doc, workspace, Git branches, Roblox Studio, assets, and repository are unchanged by this deliverable.
+
+> **Decision boundary:** This document is a brief that can be reviewed or supplied as context. It does not authorize Claude Code or any other agent to write code, create branches, modify the vault, build assets, purchase anything, or alter a Roblox experience. A separate explicit authorization is required before execution.
+
+## 1. Executive decision
+
+**Greenlight to specify and plan Gate 1; no production greenlight.** Hike or Die's testable commercial hook is to **approach, document, and survive cryptids**, with compelling photographic evidence created under real danger. Prove that players enjoy intentionally exposing themselves to risk for better photos *before* investing in a complete forest, four-creature roster, permanent galleries, elaborate progression, or monetization.
+
+**Primary Gate 1 question:** Does approaching a threatening cryptid to capture higher-value evidence create understandable, fair, replayable tension?
+
+**Secondary questions:** Can the camera remain usable during a chase on keyboard/mouse, touch, and gamepad? Do players distinguish photo value and counterplay? Does a compact trail support choice without aimless wandering? Does one cryptid support observation, provocation, and pursuit in an interesting, testable way?
+
+**Non-goal:** Gate 1 is not evidence of product-market fit, durable retention, or revenue potential. Those require later playtests and live metrics.
+
+## 2. Sources, terminology, and evidence status
+
+### Source-grounded concept
+The original two-page *Hike or Die* document describes 1–4 hikers entering a haunted forest, encountering four roaming “crypics” (interpreted here as *cryptids*), photographing them selfie-style to prove they exist, escaping and selling evidence, a party lobby and display area, dropped physical photos on death, flashlight/stealth pursuit, creature-specific difficulty, one currency, and purchasable upgrades. Its inspirations include Aisles of the Locust, Outlast, DOORS, Camping and PSX asset packs.
+
+### Decisions added during discovery
+Five subsequent interview rounds approved behavior-aware photo scoring, a collection/progression/challenge structure, voluntary contracts, a compact readable environment, individual extraction and cooperative rescue, metadata-first evidence, distinct state-dependent cryptid responses, and four production gates. These are **confirmed design directions**, not a mandate to ship every system at Gate 1.
+
+### Classification vocabulary
+- **Confirmed:** Explicitly selected or endorsed design requirement.
+- **Approved concept/direction:** Goal is accepted; exact implementation and balance remain open.
+- **Research open:** Compare plausible approaches using actual constraints before deciding.
+- **Testing required:** Resolve through controlled playable evidence, not speculation.
+- **Deferred:** Specifically not part of the Gate 1 commitment.
+- **Technical recommendation:** Nonbinding engineering hypothesis.
+- **Constraint:** Limits on activity, authority, scope, spending, or evidence claims.
+
+## 3. Player promise and game pillars
+
+**Pitch:** “Take your friends into a haunted forest, photograph the cryptids nobody believes exist, and make it out alive with the proof.”
+
+**Pillars:**
+1. **Dangerous documentation:** A close, well-framed shot of a rare state is worth taking risks for.
+2. **Understandable monster behavior:** Players discover tells, patterns, and player-triggered reactions rather than simply outrunning identical pursuers.
+3. **Meaningful expedition choices:** Explore and improve evidence or leave safely with what you have.
+4. **Cooperative responsibility:** Friends can rescue evidence and earn distinct cooperative rewards without stealing original discovery credit.
+5. **Economical replayability:** Behavior variations and contracts increase interesting choices before expensive map/content expansion.
+
+### Full-game loop (direction, not Gate 1 scope)
+Gather 1–4 hikers → optionally select a photography contract → explore readable trails → observe/provoke cryptids → frame high-value evidence → survive or recover dropped evidence → extract individually → earn currency/progress journal/unlocks → seek harder discoveries on another expedition.
+
+### Gate 1 minimal loop
+Spawn on compact trail → find and study **one** cryptid → position camera and photograph it in one or more states → receive clear quality feedback → dodge/escape its chase → reach extraction → review captured evidence → restart with a controlled variation.
+
+## 4. Gate 1 scope contract
+
+### Must demonstrate
+- One **small, handcrafted, readable blockout** trail with landmarks, cover/obstacles, at least one meaningful approach route, and a clearly signposted extraction point.
+- One functional **hybrid cryptid**, capable of passive observation, a simple player-caused reaction, and understandable chase / loss-of-pursuit; distinct states make photographic opportunities different.
+- One **selfie-camera interaction** with clear aiming, snap input, usable player/monster composition, and a visible camera-state indicator; keyboard/mouse and touch control evaluation is necessary before a camera is selected. Test gamepad if intended for launch.
+- **Deterministic evidence evaluation** with server-side plausibility checks and explainable feedback. At minimum prove visible subject, framing, distance, behavior state, and qualitative danger/stealth. Test numbers are adjustable and not permanent balance.
+- **Immediate snapshot result** including a recognizable evidence grade and explanation; a lightweight preview may be simulated without permanent image storage.
+- **Extraction and round-end** with evidence outcome and a restart affordance.
+- A **repeatability probe**: restart with at least one known variation in cryptid position/state or approach opportunity, so repeated decisions can be observed.
+- Instrumentation sufficient for a small playtest and a concise evidence-based results report.
+
+### Can be lightweight test representations
+- Journal discoveries (temporary test flags rather than full persistent collection UI); prototype rules must distinguish a basic sighting from an extracted rare behavior achievement.
+- One optional contract, represented as simple text/flag if included; full contract economy is not required to validate photography.
+- Evidence carrying capacity: a small configurable test capacity and replace/keep decision *only if needed* to test stakes. Do not build elaborate inventory UI prematurely.
+- Evidence drop and teammate rescue: **Gate 2**, except local simulation if required to establish an interface seam.
+
+### Explicit Gate 1 exclusions
+Production lobby and party matchmaking; 1–4 player networked co-op; four polished cryptids; multiple biomes; procedural or modular maze generator; extensive map art; live monetization; Robux items; currency economy balance; 2× boosts and rare-luck monetization; sophisticated persistent gallery; guaranteed viewable saved screenshots; complex journal UI; full persistence; seasonal systems; elaborate tutorial cinematics; massive asset imports; unrelated refactors of GAME-001/GAME-002; deployment or public release.
+
+**Scope rule:** If a feature does not help prove the photographic risk/reward loop, document it as future work and do not include it in Gate 1.
+
+## 5. Intended player experience and UX
+
+### First-session sequence (test script, not production tutorial)
+1. Player sees a short objective: “Photograph the creature and reach the marked exit.”
+2. Player learns camera-open / frame / shutter input with minimal text.
+3. Player notices the creature and one readable environmental hint.
+4. Player gets an easy baseline shot; feedback explains why it scored as it did.
+5. Player is offered an observable opportunity for a riskier shot through proximity or provocation.
+6. Cryptid reacts or pursues; player uses obstacles / sightlines and learns counterplay.
+7. Player reaches exit, sees evidence comparison, and is offered replay.
+
+**Design requirement:** A mediocre photograph must still give coherent feedback. The first encounter cannot demand prior knowledge of hidden scoring math or rare triggers.
+
+### Evidence-quality rubric (nonbinding example)
+- **Eligibility gate:** Correct cryptid visible within the capture cone, within allowed range, with sufficient unobstructed line of sight at shutter time. Ineligible images have explicit explanation, not arbitrary zeroes.
+- **Framing:** Is the cryptid centered/readably visible (ideally with a clear silhouette)?
+- **Distance:** Is it close enough to feel risky without forcing unavoidable damage?
+- **Behavior:** Is a distinctive, hard-to-observe state captured?
+- **Stealth/risk:** Did the player use skillful positioning or enter danger under understandable constraints?
+- **Output:** Quality tier, named photographed behavior, compact explanation, metadata record, and extraction outcome.
+
+**Do not hardcode previously illustrative weighting (25/20/35/20) as a decision.** Final weights and capacity are testing variables. Avoid quality metrics that reward exploitative camera placement, impossible behavior timing, or deliberate repeated deaths.
+
+### Evidence and discovery state distinctions
+- **Captured:** Snapshot event passing capture validation, associated with an owning player and cryptid/state/score metadata.
+- **Carried:** Extractable evidence currently held during the active round, subject to carrying rules.
+- **Basic discovery:** Cryptid sighting/unlock that persists immediately in the final-game design (HOD-027).
+- **Rare-behavior achievement:** Requires successfully extracting its associated evidence to become permanent (HOD-027).
+- **Recovery:** If evidence drops after death in co-op, original player keeps discovery attribution and rescuers receive separate cooperation credit (HOD-026). Exact payout and failure cases remain unresolved for Gate 2.
+
+**Prototype caveat:** A temporary mock journal is sufficient in Gate 1. Do not claim durable persistence exists without saving, migration and rejoin tests.
+
+## 6. Cryptid prototype specification
+
+**Prototype archetype:** A single hybrid cryptid supports three distinct play experiences: **observe → provoke → pursue**. Specific appearance, named creature, sound palette and source mesh are intentionally undecided until reference/asset inspection.
+
+| State / situation | Player-readable cue | Interaction | Evidence opportunity | Technical test |
+|---|---|---|---|---|
+| Passive / roaming | Visible idle pattern, motion or sound | Sneak and frame | Baseline vs stealth shot | Sight/awareness consistency |
+| Investigating / provoked | Distinct posture, turn, sound or route change | Trigger via a simple consistent stimulus | Capture state change | Reproducible trigger and timing |
+| Pursuing | Clear pursuit tell and line-of-sight pressure | Evade through terrain/corners | High-risk snapshot | Fair reaction time and path reliability |
+| Disengaging / returning | Obvious loss of aggression | Retreat to safety | Optional contrasting pose | No permanent stuck state |
+
+**Approved larger-game rule:** Different cryptids react differently to photography, and reactions may vary by state (HOD-019, HOD-024). **Gate 1 simplification:** Verify one nontrivial, state-dependent photo response, not a generalized architecture for all future creatures.
+
+**Fairness requirements:** No untelegraphed instant kills in the photographic learning window; no unavoidable monster contact directly after taking a picture; line-of-sight and cover behavior should be legible; no infinite chase that soft-locks extraction; failure produces actionable feedback.
+
+## 7. Forest layout decision and experiment
+
+**Confirmed:** Compact, readable environment. **Still open:** Fixed versus modular generation architecture (HOD-008).
+
+**Recommended Gate 1:** Handcrafted connected trail blockout with controlled encounter variation. Reasons: rapid iteration, reliable navigability, easier atmosphere/framing, fewer layout bugs, and reproducible tests. This is a recommendation, not authorization to implement the final layout.
+
+**Alternatives to compare briefly:** (A) fixed handcrafted; (B) fixed network with randomized encounters/objectives; (C) modular interconnected segments. Compare based on setup effort, navigation readability, reproducibility, AI path reliability, replay value and debugging surface. Do not build all three as part of the comparison.
+
+**Layout acceptance:** The player can identify an exit direction from landmarks, make at least one route/cover choice, and pursue one alternative approach to the creature. Track time lost without purposeful action during playtests. Exact dimensions and target round length are not fixed.
+
+## 8. Camera technical research and test plan
+
+**HOD-017:** Compare implementations before selecting; no approach is confirmed. The previous leading recommendation was a `CameraType.Scriptable` world-camera view with a lightweight phone UI and evidence metadata, but it remains a hypothesis.
+
+| Candidate | Advantage | Main technical risk | Minimum validation |
+|---|---|---|---|
+| Scriptable world camera + phone UI | Uses normal world rendering, lighting, and actors | Avatar composition, facing, movement, touch | Frame a moving cryptid while moving on PC/touch |
+| Phone ViewportFrame rendering | Convincing isolated phone view | World duplication, limitations of rendering and sync | Performance/visual fidelity spike only if required |
+| Roblox screenshot / CaptureService features | Potential actual images / sharing | Permissions, platform behaviors, storage limitations | Inspect current documentation, make isolated feasibility note |
+
+**Required research output before implementation:** API feasibility, known limits, touch and gamepad UX, anti-exploit implications, estimated code/assets needed, fallback, and a reasoned chosen *prototype* option. If a repository already has reusable camera code, inspect its quality first.
+
+**No automatic permanent gallery:** Metadata cannot recreate original photograph pixels. Actual image persistence/share is a separate deferred capability requiring its own policy, privacy, moderation and storage feasibility review.
+
+**Server trust boundary:** The client may request a shutter event and display effects; authoritative game logic must independently validate plausible target, timing, range, state and shot frequency. Do not rely on client-supplied score, subject ID, location or rarity without verification. Define latency tolerance and rate limits before implementation.
+
+## 9. Validation protocol
+
+### Test populations and sessions
+Run short internal smoke tests first, then several observed fresh-player sessions without explaining the mechanic in advance. Record device/input method, solo/group setting, tester familiarity with Roblox horror games, number of attempts, and whether the tester voluntarily selects replay. Avoid presenting a tiny convenience sample as market proof.
+
+### Observable questions and instrumentation
+- Can players state the objective after initial instruction?
+- Do they successfully locate, frame and photograph the creature?
+- Do they know *why* one shot was better than another?
+- Do they intentionally take additional risk for valuable evidence?
+- Can they recognize a creature's provocation and pursuit cues?
+- Do they learn and use environmental counterplay rather than getting trapped?
+- Can they reach the exit and understand what was banked?
+- Do they voluntarily replay, and what reason do they give?
+- Do touch and keyboard/mouse players encounter distinct control obstacles?
+
+### Proposed event fields (design only)
+`session_started`, `camera_opened`, `shot_attempted`, `shot_rejected(reason)`, `evidence_captured(quality_tier, cryptid_state, approximate_distance_band)`, `cryptid_provoked`, `chase_started`, `chase_ended`, `player_down_or_failed`, `extracted`, `restart_selected`, `session_ended`.
+
+Collect aggregated behavioral data without recording sensitive personal information, raw screenshots, unneeded chat, or persistent player identifiers for an internal test. Exact telemetry schema is an implementation decision later.
+
+### Predeclare pass/fail criteria before formal testing
+- **Core-comprehension:** At least a majority of fresh testers can articulate the goal and obtain a baseline photo without hands-on coaching; if not, improve the instructional path.
+- **Meaningful risk:** Observed players deliberately attempt a better / riskier shot after seeing quality feedback, rather than only maximizing safety or speed.
+- **Fair chase:** Testers can identify at least one counterplay tactic and deaths are explainable rather than seemingly random.
+- **Replay signal:** Some testers voluntarily restart and can articulate a concrete new objective; record actual rate without claiming an industry benchmark.
+- **Controls:** No consistently blocking camera/framing issue on a target platform.
+- **Reliability:** No recurring invalid scoring, broken extraction, stuck AI, or false evidence awards under repeatable smoke scenarios.
+
+**Important:** These are provisional qualitative gates, *not industry-standard metrics*. Set sample size and any numerical thresholds before reviewing outcome data; do not move the goalposts after a weak result.
+
+### Suggested reproducible acceptance scenarios
+1. **Valid baseline photo:** Clear monster in range yields ordinary evidence and actionable feedback.
+2. **Occlusion spoof:** Target behind terrain produces no valid evidence.
+3. **Out-of-view spoof:** Monster outside capture framing cannot be credited.
+4. **State timing:** Photograph of provoked state is credited only when that state actually exists.
+5. **High-frequency shutter:** Spam does not create duplicate evidence or overwhelm systems.
+6. **Chase reset:** Cryptid can disengage and return to functional navigation.
+7. **Extraction:** Banked evidence and displayed score agree with validated result.
+8. **Failure:** Lost/extracted outcomes are distinct and no reward duplicates.
+9. **Restart:** Same session can restart without stale creature/UI/camera state.
+10. **Input modes:** Touch and desktop complete the loop with comprehensible controls; assess gamepad if targeted.
+11. **Network authority:** Simulated client-forged identifiers, scores or distances do not grant rewards.
+12. **Performance:** Record frame rate and CPU/network hotspots on representative lower-end target hardware; no invented performance guarantee.
+
+## 10. Kill, revise, and advance rules
+
+**Advance to Gate 2 only if:** Photography creates observable player-driven risk, players understand scoring, the creature's rules appear fair, extraction works, testers show voluntary replay interest, and the camera architecture works on the intended input devices.
+
+**Revise Gate 1 if:** Players struggle to aim, monster behavior is too opaque, camera penalties remove agency, or shot feedback feels arbitrary. Fix the smallest causal problem and retest before adding features.
+
+**Pause or stop GAME-003 if:** Across repeated tests, players consistently prefer to ignore photography, cannot perceive a quality/reward difference even after UX revisions, or the only engaging moments depend on expensive scripted scares. Do not mask failure by adding more monsters, currency sinks, or visual polish.
+
+**No automatic advancement:** The reviewer should explicitly evaluate evidence and approve Gate 2 separately.
+
+## 11. Repository and tool readiness audit (future read-only activity only)
+
+Before any later implementation authorization, Claude Code should inspect the *actual* Rg1 workspace rather than rely on these historical notes. Audit current Git branch/worktrees, repo paths, project-specific task queue, Rojo config, Roblox Studio place synchronization, package/test scripts, baseline tests, AGENTS/CLAUDE conventions, asset licensing and provenance. Relevant candidate reference repositories are `SODT-RC-1`, `Npc_template`, and `vfx_template`; reuse only after compatibility checks. The historical project includes GAME-001 and GAME-002, which must remain untouched.
+
+**No assumed reuse:** Prior chase, pathfinding, camera, persistence, evidence or UI systems may exist, but their current compatibility is unverified. Do not copy features blindly or assume the local workspace still matches past discussions.
+
+**Proposed future audit report sections:** Facts verified with command/path references; reused components; gaps and risks; implementation alternatives; estimated scope; acceptance tests; token/time savings; blockers; exact authorization needed. Limit to one concise report and avoid re-running expensive scans without evidence of change.
+
+## 12. Token-efficiency and scope governance
+
+- One validation question per experiment, one small change at a time.
+- Prefer existing, verified Roblox/Studio/AI/test patterns rather than bespoke tooling.
+- No unrelated broad repo cleanups, new agent frameworks, or mass asset generation.
+- Prefer data/parameters to specialized code when behaviors are simple.
+- Small test maps first; quality art only after mechanics prove enjoyable.
+- Log decisions and measurements once; reference existing records rather than repeat prompts.
+- If required workspace context is missing, ask for the minimum information rather than invent it.
+- Stop at a failed gate; provide options and cost, do not autonomously expand scope.
+- Changes to source code, docs, vault, or live experience require separate explicit user permission.
+
+## 13. Full production gates (preserved)
+
+| Gate | Objective | Typical activities | Exit evidence |
+|---|---|---|---|
+| **1 — Prove the hook** | Validate photography + risk + extraction | One trail, one cryptid, camera, scoring, chase, controlled replay | Observed tests of fun, clarity, controls, reliability |
+| **2 — Prove repeat play** | Validate co-op and recurring motivation | 1–4 players, recoverable evidence, journal, varied encounters, optional contracts | Voluntary replays, group readability, state/recovery reliability |
+| **3 — Polish MVP** | Ship a coherent small finished game | Justified cryptid variety, onboarding, mobile, audio/VFX/UI, persistence, restrained monetization | Stable, polished release candidate and tested commerce flows |
+| **4 — Limited launch and measurement** | Assess market viability with real behavior | Controlled release, data gathering, tuning, selective acquisition | Retention, engagement, device performance and purchase evidence |
+
+Earlier 3–5 / 4–7 / 7–14 day estimates for Gates 1–3 were *rough aspirations*, not approved schedules. No live retention or revenue claims are established.
+
+## 14. Decisions register — HOD-001 through HOD-030
+
+| ID | Preserved design decision | Classification and qualifier |
+|---|---|---|
+| HOD-001 | Cooperative horror expedition centered on cryptid photography and survival | Confirmed design premise |
+| HOD-002 | Replay motivation combines collection, progression unlocks and skill challenges | Confirmed game direction; not full Gate 1 scope |
+| HOD-003 | Reward sneaking, environmental interactions and creature state changes in photos | Confirmed direction |
+| HOD-004 | Favor compact, readable trail layouts over a giant confusing maze | Confirmed direction |
+| HOD-005 | Different cryptids need distinctive behavior and counterplay | Confirmed game direction; one creature in Gate 1 |
+| HOD-006 | Carried evidence can be lost/recovered; discovery records endure | Confirmed; detailed co-op rules later |
+| HOD-007 | Use understandable evidence quality tiers/scoring | Approved concept; numerical model open |
+| HOD-008 | Compare map architectures and cost/replay; controlled variation recommended | Research open; architecture unapproved |
+| HOD-009 | Delay product/economy monetization decisions until loop is proven | Confirmed deferral |
+| HOD-010 | Retain four staged prototype, replay, polish, launch gates | Approved production plan |
+| HOD-011 | No implementation authorization | Binding constraint |
+| HOD-012 | Include naturally occurring and player-triggered cryptid states | Confirmed |
+| HOD-013 | Offer optional pre-expedition evidence contracts | Confirmed; minimal first contract |
+| HOD-014 | Permit individual extraction and reward teammate assistance | Confirmed; detailed rescue mechanics later |
+| HOD-015 | Choose expedition length from playtesting, not preconceived duration | Testing required |
+| HOD-016 | Starter cryptids available; advanced encounters/discoveries unlocked through play | Confirmed future progression direction |
+| HOD-017 | Research feasible Roblox selfie-camera approaches before approval | Research decision; implementation open |
+| HOD-018 | Score framing, distance, rarity of behavior and stealth/risk | Confirmed categories; values open |
+| HOD-019 | Photography reactions differ by cryptid | Confirmed future design direction |
+| HOD-020 | Discover behavior triggers via environmental cues and gradual journal hints | Confirmed design direction |
+| HOD-021 | Immediate snapshot presentation and quality feedback, optional later inspection | Confirmed experience; rendering unresolved |
+| HOD-022 | Begin with metadata-based collection; actual lasting image gallery deferred | Confirmed scope strategy |
+| HOD-023 | Use simple shared triggers before unique cryptid interactions | Confirmed incremental strategy |
+| HOD-024 | Photo reaction varies by cryptid's current behavior state | Confirmed |
+| HOD-025 | Start with modest evidence capacity and tune through tests | Confirmed direction; capacity open |
+| HOD-026 | Original owner retains discovery credit; rescuer earns distinct reward | Confirmed cooperative attribution |
+| HOD-027 | Basic discovery persists immediately; rare behavior achievements need evidence extracted | Confirmed persistence rule |
+| HOD-028 | Camera movement penalties must be determined by prototype testing | Testing required; no speed restriction set |
+| HOD-029 | First cryptid must support observation, provocation and pursuit | Confirmed Gate 1 archetype |
+| HOD-030 | Start with one optional evidence contract per expedition | Confirmed initial contract scope |
+
+## 15. Deferred decisions and dependency queue
+
+**Resolve in Gate 1 tests/research:** Camera selection and movement restrictions; exact photo-grade formula and feedback; initial monster cue/provocation; map variation approach; acceptable trail pacing, target round duration, and evidence carrying count; what minimum subject framing means across devices; formal test thresholds.
+
+**Gate 2 decisions:** Party/queue UX for 1–4, recoverable physical evidence representation, death timing and rescue edge cases, incentive size/anti-farming, journal persistence and migrations, contract generation, individual extraction/spectating, reconnect/disconnect, multiplayer anti-exploit.
+
+**Gate 3 decisions:** Final cryptid roster and model selection, aesthetic fidelity, soundtrack/audio/VFX, accessibility, controller support, polished lobby, high-quality onboarding, progression depth, earned cosmetic inventory, economy sinks and sources, and purchase flow design.
+
+**Deferred commercial decisions:** Robux prices, currency packs, boosters, luck modifiers, paid party expansion, passes, bundles, cosmetics catalogue, offer timing, purchase protection, randomized products, and marketing spend. Avoid pay-to-win dynamics; assess demand and platform policies before selecting products.
+
+**Separate product research:** Authentic captured screenshot retention, gallery privacy/moderation/storage and sharing; whether a phone-screen ViewportFrame is worth its complexity; new habitats; procedural map generation; rare encounter event depth.
+
+## 16. Next deliverable and authorization checklist
+
+**This document completes the requested design brief, not the prototype.** A future **read-only Rg1 readiness audit** could verify repository state and propose a small Gate 1 implementation plan. Even that audit requires a separate request before taking action outside this conversation.
+
+Before authorizing any build, explicitly agree on: (1) which repository/worktree is targeted, (2) whether Claude may modify files, (3) whether Studio changes are allowed, (4) scope confined to Gate 1, (5) test and rollback procedure, (6) allowed use of third-party assets after license verification, and (7) required completion report.
+
+**Final status:** Design specification complete; camera architecture not approved; no repository changes; no Google Doc edits; no asset generation; no implementation authorization.

@@ -18,6 +18,7 @@ related:
   - "[[AUD-20261018-TASK-0087-01]]"
   - "[[AUD-20261018-TASK-0087-02]]"
   - "[[AUD-20261019-TASK-0087-03]]"
+  - "[[AUD-20261019-TASK-0087-04]]"
 created: 2026-10-18
 updated: 2026-10-19
 tags:
@@ -38,7 +39,7 @@ Build and merge an isolated GAME-003 existence prototype. The camera currently f
 - **Category → workflow, depth:** Whole game → [[Game Production Workflow]], deep; also map, systems, and UI workflows.
 - **References:** [[REF-MAP-001-Dark-Fantasy-World]] (layered woodland depth and warm/cool separation), [[REF-MAP-002-Stylized-Swamp-Encounter]] (readable simplified cryptid silhouette). Viewed originals; both shape the greybox's atmosphere and silhouette only. They are not asset approvals. [[REF-UI-003-Check-UI-Clean-Roblox]] was read before adding camera controls; its demo images are not present to inspect and no package/assets were adopted. Existing HOD HUD colors and buttons remain in use.
 - **Reuse:** [[Resource Catalog]] and [[Reference_Code_Index]] inspected. Adapt server-created remotes, separated perception/scoring, bounded target/state cleanup from SODT-RC-1 and Npc_template; do not copy either full system. Existing Haunted UI kit is game-specific and not reused. `roblox-map` builds and proves the simple connected greybox.
-- **Decisions / assumptions / open questions:** **Decision (jg, 2026-10-18):** authorized execution of the brief and this task plan, approved the current visual direction, and approved [[ADR-0014-Hike-Or-Die-Gate-1-World]] and [[ADR-0015-Hike-Or-Die-Evidence-Trust-Boundary]]. **Decision (jg, 2026-10-18):** re-scoped this merge to an existence prototype; the camera is still broken and is explicitly deferred for a higher-model review and follow-up. Other prototype behavior is accepted for this stage; historical playtest evidence remains limited to what it observed. **Assumption:** use a front-right scriptable selfie-camera as the first test candidate. **Open:** physical touch, final camera framing and a repeatable successful full loop remain follow-up work.
+- **Decisions / assumptions / open questions:** **Decision (jg, 2026-10-18):** authorized execution of the brief, approved the current visual direction, and approved [[ADR-0014-Hike-Or-Die-Gate-1-World]] and [[ADR-0015-Hike-Or-Die-Evidence-Trust-Boundary]]. **Decision (jg, 2026-10-18):** re-scoped this merge to an existence prototype; the camera is still broken and is explicitly deferred for a higher-model review and follow-up. Other prototype behavior is accepted for this stage; historical playtest evidence remains limited to what it observed. The recovered source brief and this later existence-stage acceptance are distinct; the merge did not satisfy or waive the original Gate 1 hook-study, camera, variation, or telemetry goals. **Assumption:** use a front-right scriptable selfie-camera as the first test candidate. **Open:** physical touch, final camera framing and a repeatable successful full loop remain follow-up work.
 
 ## Files expected to change
 - `games/hike-or-die/`, `hike-or-die.project.json`, GAME-003 project notes and task state.
@@ -77,7 +78,7 @@ Implemented isolated GAME-003 code, project and trail blockout. First independen
 2. Camera repair, physical two-thumb input, route/cover polish and the successful full-loop scenario are deferred follow-ups; this merge does not claim they passed.
 3. Record new Studio results in [[TEST-20261018-03]]. The visual direction and both ADRs were approved by jg on 2026-10-18.
 
-The user approved an existence-stage merge. Independent audit passed; GitHub CI and merge remain pending. Do not publish or activate the experience.
+Historical handoff note: at the time it was written, CI and merge were pending. **Factual update (2026-10-19):** PR #120 is merged on remote main `c85b279`; the later audit [[AUD-20261019-TASK-0087-04]] still blocks launch. Do not publish or activate the experience.
 
 ## Outcome
 Existence prototype approved for merge after the required independent audit. User reports the camera still does not work; camera repair, physical touch and the repeatable full loop are explicitly deferred, and earlier playtest observations remain historical evidence only. The audit findings on chase-run races, evidence origin validation and restart concurrency were addressed; repository checks pass. [[AUD-20261019-TASK-0087-03]] records the passing final delta review. The two ADRs were approved by jg on 2026-10-18. A separate tooling `chore/` is required to add GAME-003 to `scripts/check.sh`, `scripts/typecheck.sh`, and the shared project map/Studio Index; GAME-003 remains a candidate and GAME-002 remains active.
