@@ -5080,7 +5080,7 @@
       "id": "TASK-0087",
       "title": "Hike or Die Gate 1 Prototype",
       "project": "GAME-003",
-      "status": "in_review",
+      "status": "done",
       "risk": "high",
       "depends_on": [],
       "branch": "task/TASK-0087-Hike-Or-Die-Gate-1",
@@ -5149,6 +5149,18 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-19T00:00:24",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-19T00:00:24",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -5178,10 +5190,16 @@
           "time": "2026-10-18T23:58:25",
           "result": "fail",
           "report": "06 QA/AUD-20261018-TASK-0087-02.md"
+        },
+        {
+          "time": "2026-10-19T00:00:24",
+          "result": "pass",
+          "report": "06 QA/AUD-20261019-TASK-0087-03.md"
         }
       ],
       "revisions": 2,
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }

@@ -3,7 +3,7 @@ id: TASK-0087
 title: Hike or Die Gate 1 Prototype
 type: task
 project: GAME-003
-status: in_review
+status: done
 priority: high
 risk: high
 owner: executor
@@ -15,8 +15,11 @@ related:
   - "[[GAME-003 Hike or Die/02 Technical Architecture]]"
   - "[[ADR-0014-Hike-Or-Die-Gate-1-World]]"
   - "[[ADR-0015-Hike-Or-Die-Evidence-Trust-Boundary]]"
+  - "[[AUD-20261018-TASK-0087-01]]"
+  - "[[AUD-20261018-TASK-0087-02]]"
+  - "[[AUD-20261019-TASK-0087-03]]"
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-19
 tags:
   - workflow/task
 ---
@@ -65,7 +68,7 @@ Build and merge an isolated GAME-003 existence prototype. The camera currently f
 Implemented isolated GAME-003 code, project and trail blockout. First independent review [[AUD-20261018-TASK-0087-01]] found a stale chase-loop race after yielding path computation, a mismatch between validated and raycast camera origins (including non-finite origin handling), and restart positioning. The first delta review [[AUD-20261018-TASK-0087-02]] found overlapping restarts across `LoadCharacterAsync`; the latest revision adds an in-flight token and post-load owner/round/phase checks. Current HOD formatting, lint, six pure-rule cases, isolated Rojo build, repository `scripts/check.sh` (265 Lune / 163 Python) and vault validation pass. jg reports the camera still does not work and accepts deferring its repair for the existence-stage merge; historical Studio camera probes are not proof of current functionality. Prior Studio evidence includes scoring, forged-origin rejection, extraction/restart, catch/loss and phone layout; no new Studio run was made for the audit fixes. Physical touch and successful full-loop behavior remain unverified. See [[TEST-20261018-03]]. GAME-003 check-script wiring remains a separate tooling chore.
 
 ## Audits
-[[AUD-20261018-TASK-0087-01]] requested changes for a stale chase-run race, inconsistent/non-finite photo-origin validation and restart positioning. [[AUD-20261018-TASK-0087-02]] confirmed the first fixes but requested an in-flight restart token and post-yield owner/round checks; those changes are now implemented. Final delta review remains pending. The camera remains a user-accepted known failure and is out of this existence-stage acceptance; no claim of camera functionality is made.
+[[AUD-20261018-TASK-0087-01]] requested changes for a stale chase-run race, inconsistent/non-finite photo-origin validation and restart positioning. [[AUD-20261018-TASK-0087-02]] confirmed the first fixes but requested an in-flight restart token and post-yield owner/round checks; those changes are now implemented. [[AUD-20261019-TASK-0087-03]] passed the final delta review. The camera remains a user-accepted known failure and is out of this existence-stage acceptance; no claim of camera functionality is made.
 
 ## Handoff
 **Receiver:** jg in the matched Hike or Die Studio place. Visual direction and both ADRs are approved. Rojo serves this checkout on port 34872 with `hike-or-die.project.json`. jg reports the camera still does not work; treat earlier aim probes as historical only. The existence-stage merge explicitly defers camera repair, physical touch and full-loop validation.
@@ -74,7 +77,7 @@ Implemented isolated GAME-003 code, project and trail blockout. First independen
 2. Camera repair, physical two-thumb input, route/cover polish and the successful full-loop scenario are deferred follow-ups; this merge does not claim they passed.
 3. Record new Studio results in [[TEST-20261018-03]]. The visual direction and both ADRs were approved by jg on 2026-10-18.
 
-The user has approved an existence-stage merge. Continue only after the required independent audit and GitHub CI are green; do not publish or activate the experience.
+The user approved an existence-stage merge. Independent audit passed; GitHub CI and merge remain pending. Do not publish or activate the experience.
 
 ## Outcome
-In progress. User requests an existence-stage merge and reports the camera still does not work. Camera repair, physical touch and the repeatable full loop are explicitly deferred; earlier playtest observations remain historical evidence only. The first independent audit found race, evidence-origin and restart issues; the current revision addresses those code findings and repository checks pass. [[AUD-20261018-TASK-0087-01]] records the original audit verdict. The two ADRs were approved by jg on 2026-10-18. A separate tooling `chore/` is required to add GAME-003 to `scripts/check.sh`, `scripts/typecheck.sh`, and the shared project map/Studio Index; GAME-003 remains a candidate and GAME-002 remains active.
+Existence prototype approved for merge after the required independent audit. User reports the camera still does not work; camera repair, physical touch and the repeatable full loop are explicitly deferred, and earlier playtest observations remain historical evidence only. The audit findings on chase-run races, evidence origin validation and restart concurrency were addressed; repository checks pass. [[AUD-20261019-TASK-0087-03]] records the passing final delta review. The two ADRs were approved by jg on 2026-10-18. A separate tooling `chore/` is required to add GAME-003 to `scripts/check.sh`, `scripts/typecheck.sh`, and the shared project map/Studio Index; GAME-003 remains a candidate and GAME-002 remains active.
