@@ -6,7 +6,7 @@ project: GAME-003
 status: proposed
 version: 0.1
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-19
 tags:
   - game/design
 ---

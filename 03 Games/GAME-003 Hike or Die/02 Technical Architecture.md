@@ -5,7 +5,7 @@ type: architecture
 project: GAME-003
 status: proposed
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-19
 tags:
   - game/architecture
 ---

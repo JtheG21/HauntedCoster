@@ -39,7 +39,7 @@ Use `Hike-Or-Die-Observer.csv` as one row per participant/run/attempt. Before fo
 - [ ] For each row record expected behavior, actual raw behavior, outcome, reason, duration and evidence pointer; mark NOT RUN until executed. Scenario coverage does not itself establish fair human escape or user comprehension.
 
 ## H28 support/incident template and week-one triage
-Copy `Hike-Or-Die-Incident.csv` once per report. Do not include passwords, payment details, player names/IDs, screenshots containing private information, or unneeded chat. Human chooses severity and support channel.
+Copy the inline incident table below once per report. Do not include passwords, payment details, player names/IDs, screenshots containing private information, or unneeded chat. Human chooses severity and support channel.
 | Field | Entry |
 |---|---|
 | Incident ID / date-time / reporter-safe reference | |
