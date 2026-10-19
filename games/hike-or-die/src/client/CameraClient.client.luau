@@ -130,6 +130,8 @@ local roundPhase = "active"
 local evidenceCount = 0
 local priorCameraType = camera.CameraType
 local priorCameraSubject = camera.CameraSubject
+local cameraHumanoid: Humanoid? = nil
+local priorAutoRotate = true
 local dragging = false
 local touchDragInput: InputObject? = nil
 local touchPosition: Vector2? = nil
@@ -174,6 +176,13 @@ local function setCamera(open: boolean)
 		yaw = 0
 		priorCameraType = camera.CameraType
 		priorCameraSubject = camera.CameraSubject
+		local character = player.Character
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			cameraHumanoid = humanoid
+			priorAutoRotate = humanoid.AutoRotate
+			humanoid.AutoRotate = false
+		end
 		camera.CameraType = Enum.CameraType.Scriptable
 		ContextActionService:BindActionAtPriority(
 			aimActionName,
@@ -189,6 +198,10 @@ local function setCamera(open: boolean)
 	else
 		touchDragInput = nil
 		touchPosition = nil
+		if cameraHumanoid and cameraHumanoid.Parent then
+			cameraHumanoid.AutoRotate = priorAutoRotate
+		end
+		cameraHumanoid = nil
 		ContextActionService:UnbindAction(aimActionName)
 		camera.CameraType = priorCameraType
 		if priorCameraSubject then
@@ -211,6 +224,38 @@ local function setCamera(open: boolean)
 		hint.Text = defaultHint()
 	end
 end
+
+RunService:BindToRenderStep("HikeOrDieSelfieMovement", Enum.RenderPriority.Input.Value + 1, function()
+	if not cameraOpen then
+		return
+	end
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not (root and root:IsA("BasePart") and humanoid) then
+		return
+	end
+
+	-- Roblox's default controls are camera-relative. The raised selfie camera
+	-- faces back toward the hiker, so remap that input to the hiker's heading.
+	local cameraForward = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z)
+	local cameraRight = Vector3.new(camera.CFrame.RightVector.X, 0, camera.CFrame.RightVector.Z)
+	local characterForward = Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z)
+	local characterRight = Vector3.new(root.CFrame.RightVector.X, 0, root.CFrame.RightVector.Z)
+	if cameraForward.Magnitude < 0.001 or cameraRight.Magnitude < 0.001 then
+		return
+	end
+
+	cameraForward = cameraForward.Unit
+	cameraRight = cameraRight.Unit
+	characterForward = characterForward.Unit
+	characterRight = characterRight.Unit
+	local currentMove = humanoid.MoveDirection
+	local forwardInput = currentMove:Dot(cameraForward)
+	local rightInput = currentMove:Dot(cameraRight)
+	local characterRelativeMove = characterForward * forwardInput + characterRight * rightInput
+	humanoid:Move(characterRelativeMove, false)
+end)
 
 local function shoot()
 	if not cameraOpen or roundPhase ~= "active" then
@@ -394,4 +439,5 @@ end)
 
 script.Destroying:Connect(function()
 	RunService:UnbindFromRenderStep("HikeOrDieSelfieCamera")
+	RunService:UnbindFromRenderStep("HikeOrDieSelfieMovement")
 end)
