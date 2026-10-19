@@ -5075,6 +5075,44 @@
       "executions": [],
       "audits": [],
       "revisions": 0
+    },
+    {
+      "id": "TASK-0087",
+      "title": "Hike or Die Gate 1 Prototype",
+      "project": "GAME-003",
+      "status": "in_progress",
+      "risk": "high",
+      "depends_on": [],
+      "branch": "task/TASK-0087-Hike-Or-Die-Gate-1",
+      "note": "03 Games/GAME-003 Hike or Die/06 Tasks/TASK-0087-Hike-Or-Die-Gate-1.md",
+      "acceptance_criteria": [
+        "GAME-003 has an isolated code root, Rojo project and validation path; GAME-001 and GAME-002 remain unchanged.",
+        "One compact readable trail supports a route/cover choice and marked extraction.",
+        "One cryptid supports readable observe, investigate, pursue and return states.",
+        "The camera interaction supports clear framing and shutter input, with desktop and touch evaluated before a final camera decision.",
+        "Evidence is computed on the server from validated target visibility, distance, state and risk signals; feedback explains result.",
+        "Extraction summary agrees with carried metadata; restart resets camera, UI, creature and round state.",
+        "Repeatable scenarios cover validation, spoofed inputs, chase reset, extraction and restart.",
+        "scripts/check.sh passes; local Studio results and limitations are recorded; no release or persistence claims are made."
+      ],
+      "history": [
+        {
+          "time": "2026-10-18T21:01:09",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T21:01:09",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "approved_by": "jg"
     }
   ]
 }

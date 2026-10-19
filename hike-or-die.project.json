@@ -1,0 +1,38 @@
+{
+  "name": "HikeOrDieGate1",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "games/hike-or-die/src/shared"
+      }
+    },
+    "ServerScriptService": {
+      "Server": {
+        "$path": "games/hike-or-die/src/server"
+      }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "games/hike-or-die/src/client"
+        }
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "ClockTime": 5.8,
+        "Brightness": 1.6,
+        "GlobalShadows": true,
+        "Technology": "Future",
+        "Ambient": [0.17, 0.21, 0.19],
+        "OutdoorAmbient": [0.3, 0.34, 0.29]
+      }
+    },
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    }
+  }
+}
