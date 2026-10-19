@@ -203,6 +203,9 @@ end)
 
 local function onCharacter()
 	setCamera(false)
+	if roundPhase == "extracted" or roundPhase == "failed" then
+		cameraButton.Text = "RESTART"
+	end
 	task.wait(0.25)
 	camera.CameraType = Enum.CameraType.Custom
 	local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
