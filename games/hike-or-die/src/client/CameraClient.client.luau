@@ -132,6 +132,7 @@ local priorCameraType = camera.CameraType
 local priorCameraSubject = camera.CameraSubject
 local cameraHumanoid: Humanoid? = nil
 local priorAutoRotate = true
+local lastMousePosition: Vector2? = nil
 local touchDragInput: InputObject? = nil
 local touchPosition: Vector2? = nil
 
@@ -173,6 +174,8 @@ local function setCamera(open: boolean)
 	cameraOpen = open and roundPhase == "active"
 	if cameraOpen then
 		yaw = 0
+		local mousePosition = UserInputService:GetMouseLocation()
+		lastMousePosition = if mousePosition.X >= 0 and mousePosition.Y >= 0 then mousePosition else nil
 		priorCameraType = camera.CameraType
 		priorCameraSubject = camera.CameraSubject
 		local character = player.Character
@@ -195,6 +198,7 @@ local function setCamera(open: boolean)
 		)
 		actionRemote:FireServer("camera_opened")
 	else
+		lastMousePosition = nil
 		touchDragInput = nil
 		touchPosition = nil
 		if cameraHumanoid and cameraHumanoid.Parent then
@@ -341,8 +345,11 @@ end)
 
 UserInputService.InputChanged:Connect(function(input: InputObject)
 	if cameraOpen and input.UserInputType == Enum.UserInputType.MouseMovement then
-		yaw -= input.Delta.X * 0.004
-		pitch = math.clamp(pitch - input.Delta.Y * 0.004, math.rad(-55), math.rad(42))
+		local position = Vector2.new(input.Position.X, input.Position.Y)
+		local delta = if lastMousePosition then position - lastMousePosition else Vector2.zero
+		lastMousePosition = position
+		yaw = math.clamp(yaw - delta.X * 0.004, math.rad(-80), math.rad(80))
+		pitch = math.clamp(pitch - delta.Y * 0.004, math.rad(-55), math.rad(42))
 	end
 end)
 
