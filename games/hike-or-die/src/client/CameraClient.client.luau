@@ -218,8 +218,8 @@ local function setCamera(open: boolean)
 	cameraButton.Text = if cameraOpen then "LOWER  [C]" else "CAMERA  [C]"
 	if cameraOpen then
 		hint.Text = if UserInputService.TouchEnabled
-			then "Drag on the right to aim  ·  move with left stick  ·  PHOTO to shoot"
-			else "Right-drag or arrow keys to aim  ·  SPACE / PHOTO to shoot  ·  Q to provoke"
+			then "Drag on the right to move camera  ·  move with left stick  ·  PHOTO to shoot"
+			else "Right-drag or arrow keys to move camera  ·  WASD to move  ·  SPACE / PHOTO to shoot"
 	else
 		hint.Text = defaultHint()
 	end
@@ -373,6 +373,9 @@ RunService:BindToRenderStep("HikeOrDieSelfieCamera", Enum.RenderPriority.Camera.
 		+ root.CFrame.LookVector * Gameplay.SelfieForwardOffset
 		+ root.CFrame.RightVector * Gameplay.SelfieSideOffset
 		+ Vector3.new(0, Gameplay.SelfieHeightOffset, 0)
+	-- Mouse yaw also shifts the camera around the hiker. Keep this positional
+	-- adjustment inside the origin tolerance enforced by EvidenceService.
+	pos += root.CFrame.RightVector * (math.sin(yaw) * Gameplay.MaxAimOriginOffset)
 	local baseYaw = math.atan2(root.CFrame.LookVector.X, root.CFrame.LookVector.Z)
 	local direction = CFrame.fromOrientation(pitch, baseYaw + yaw, 0).LookVector
 	camera.CFrame = CFrame.lookAt(pos, pos + direction)
