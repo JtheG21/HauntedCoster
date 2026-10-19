@@ -35,7 +35,7 @@ Build the smallest isolated GAME-003 prototype that can test the brief's photo/r
 - **Category → workflow, depth:** Whole game → [[Game Production Workflow]], deep; also map, systems, and UI workflows.
 - **References:** [[REF-MAP-001-Dark-Fantasy-World]] (layered woodland depth and warm/cool separation), [[REF-MAP-002-Stylized-Swamp-Encounter]] (readable simplified cryptid silhouette). Viewed originals; both shape the greybox's atmosphere and silhouette only. They are not asset approvals. [[REF-UI-003-Check-UI-Clean-Roblox]] was read before adding camera controls; its demo images are not present to inspect and no package/assets were adopted. Existing HOD HUD colors and buttons remain in use.
 - **Reuse:** [[Resource Catalog]] and [[Reference_Code_Index]] inspected. Adapt server-created remotes, separated perception/scoring, bounded target/state cleanup from SODT-RC-1 and Npc_template; do not copy either full system. Existing Haunted UI kit is game-specific and not reused. `roblox-map` builds and proves the simple connected greybox.
-- **Decisions / assumptions / open questions:** **Decision (jg, 2026-10-18):** authorized execution of the brief and this task plan. The two ADR notes remain proposed; no individual ADR approval is recorded. **Assumption:** use a front-right scriptable selfie-camera as the first test candidate; desktop/touch fit and camera choice remain unverified pending a matched Studio session. **Open:** confirm camera framing, touch dragging, creature readability, chase counterplay, and restart behavior in Studio before Gate 1 can pass.
+- **Decisions / assumptions / open questions:** **Decision (jg, 2026-10-18):** authorized execution of the brief and this task plan, approved the current visual direction, and approved [[ADR-0014-Hike-Or-Die-Gate-1-World]] and [[ADR-0015-Hike-Or-Die-Evidence-Trust-Boundary]]. **Assumption:** use a front-right scriptable selfie-camera as the first test candidate; desktop/touch fit and camera choice remain unverified pending a matched Studio session. **Open:** confirm camera framing, touch dragging, creature readability, chase counterplay, and restart behavior in Studio before Gate 1 can pass.
 
 ## Files expected to change
 - `games/hike-or-die/`, `hike-or-die.project.json`, GAME-003 project notes and task state.
@@ -43,7 +43,7 @@ Build the smallest isolated GAME-003 prototype that can test the brief's photo/r
 
 ## Acceptance criteria
 - [x] AC1 Isolated code root, Rojo project and validation path; GAME-001 and GAME-002 unchanged. Evidence: direct GAME-003 checks and isolated Rojo build pass; repo-wide wiring remains a separate chore.
-- [ ] AC2 Compact readable trail supports route/cover choice and marked extraction. Evidence: map proof passes; the brighter Studio view now separates path, cover, cryptid and beacon, but jg's visual/gameplay readability review is pending.
+- [ ] AC2 Compact readable trail supports route/cover choice and marked extraction. Map proof passes; the brighter Studio view separates path, cover, cryptid and beacon. jg approved the visual direction on 2026-10-18; gameplay route/cover choice still needs a live review.
 - [x] AC3 One cryptid supports observe, investigate, pursue and return states. [[TEST-20261018-03]] observed roaming, Investigating, a reaction-photo transition to Pursuing, and Returning after the investigation timed out. A successful return after an active chase remains unverified.
 - [ ] AC4 Camera supports clear framing and shutter input, with desktop and touch evaluated before a final camera decision. Shared client/server offsets, keyboard-arrow aim and the on-screen tap target were exercised; arrow aim did not move the hiker. A live shot with revised framing was not confirmed, Studio mouse movement still sends zero deltas, and physical touch evaluation remains pending ([[TEST-20261018-03]]).
 - [x] AC5 Server computes evidence from validated visibility, distance, state and risk; feedback explains result. Evidence: [[TEST-20261018-03]] records one banked server-scored photo and a forged-origin rejection with no reward.
@@ -68,13 +68,13 @@ Implemented separate `games/hike-or-die/` server/shared/client source and `hike-
 Pending; do not request AI review until the repository check and Studio checks are green.
 
 ## Handoff
-**Receiver:** jg in the matched Hike or Die Studio place. The repo and runtime checks are green, but this gate still needs human gameplay and visual judgment.
+**Receiver:** jg in the matched Hike or Die Studio place. Repo and prior runtime checks are green; visual direction and both ADRs are approved. Remaining live gameplay/device checks are still open. The Rojo server is confirmed to serve this checkout on port 34872, but Studio currently shows an empty place without the synced build stamp; reconnect the Rojo plugin to `127.0.0.1:34872` before Play.
 
 1. In Studio, confirm the Hike or Die place and matching `hike-or-die.project.json` Rojo server. Start one-player Play.
 2. From the spawn, judge whether the dusk lighting makes the path, cover choices, cryptid and beacon readable. Use C to raise the camera; arrows or the on-screen arrows aim, Space/PHOTO shoots, and Q/CALL provokes. Verify a clear frame can produce a photo grade and the framing feels usable.
 3. Capture the cryptid during `Investigating`, then immediately use WASD to break line of sight or reach the beacon. Confirm the chase can be escaped with visible counterplay, the extraction banks only carried proof, and restart clears the new round.
 4. Switch Studio to a phone viewport or use a touch device. Verify the safe-area layout does not overlap core controls; test drag aim and the four 44-pixel tap targets, shutter and call controls.
-5. Review and explicitly accept or reject proposed [[ADR-0014-Hike-Or-Die-Gate-1-World]] and [[ADR-0015-Hike-Or-Die-Evidence-Trust-Boundary]]. Then report the visual, touch and chase results so the playtest and task criteria can be updated.
+5. Report the visual, touch and chase results so the playtest and task criteria can be updated. The visual direction and both ADRs were approved by jg on 2026-10-18.
 
 Do not publish or merge from this handoff. After the manual checks are recorded, continue the task workflow with `record-exec`, independent audit, and the human merge gate.
 
