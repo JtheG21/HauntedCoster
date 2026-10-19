@@ -131,6 +131,7 @@ local evidenceCount = 0
 local priorCameraType = camera.CameraType
 local priorCameraSubject = camera.CameraSubject
 local dragging = false
+local touchDragInput: InputObject? = nil
 local touchPosition: Vector2? = nil
 
 local function adjustAim(horizontal: number, vertical: number)
@@ -186,6 +187,8 @@ local function setCamera(open: boolean)
 		)
 		actionRemote:FireServer("camera_opened")
 	else
+		touchDragInput = nil
+		touchPosition = nil
 		ContextActionService:UnbindAction(aimActionName)
 		camera.CameraType = priorCameraType
 		if priorCameraSubject then
@@ -202,7 +205,7 @@ local function setCamera(open: boolean)
 	cameraButton.Text = if cameraOpen then "LOWER  [C]" else "CAMERA  [C]"
 	if cameraOpen then
 		hint.Text = if UserInputService.TouchEnabled
-			then "Drag or tap arrows to aim  ·  PHOTO to shoot  ·  CALL to provoke"
+			then "Drag on the right to aim  ·  move with left stick  ·  PHOTO to shoot"
 			else "Right-drag or arrow keys to aim  ·  SPACE / PHOTO to shoot  ·  Q to provoke"
 	else
 		hint.Text = defaultHint()
@@ -256,8 +259,6 @@ UserInputService.InputBegan:Connect(function(input: InputObject, processed: bool
 		provoke()
 	elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
 		dragging = true
-	elseif input.UserInputType == Enum.UserInputType.Touch then
-		touchPosition = Vector2.new(input.Position.X, input.Position.Y)
 	end
 end)
 
@@ -265,7 +266,39 @@ UserInputService.InputEnded:Connect(function(input: InputObject)
 	if input.UserInputType == Enum.UserInputType.MouseButton2 then
 		dragging = false
 	end
-	if input.UserInputType == Enum.UserInputType.Touch then
+end)
+
+UserInputService.TouchStarted:Connect(function(input: InputObject, processed: boolean)
+	if not cameraOpen or processed then
+		return
+	end
+
+	local position = Vector2.new(input.Position.X, input.Position.Y)
+	local viewport = camera.ViewportSize
+	local inAimZone = position.X >= viewport.X * 0.52
+		and position.Y >= viewport.Y * 0.4
+		and position.Y <= viewport.Y * 0.82
+	if inAimZone then
+		touchDragInput = input
+		touchPosition = position
+	end
+end)
+
+UserInputService.TouchMoved:Connect(function(input: InputObject)
+	if not cameraOpen or input ~= touchDragInput or not touchPosition then
+		return
+	end
+
+	local position = Vector2.new(input.Position.X, input.Position.Y)
+	local delta = position - touchPosition
+	touchPosition = position
+	yaw -= delta.X * 0.006
+	pitch = math.clamp(pitch - delta.Y * 0.006, math.rad(-55), math.rad(42))
+end)
+
+UserInputService.TouchEnded:Connect(function(input: InputObject)
+	if input == touchDragInput then
+		touchDragInput = nil
 		touchPosition = nil
 	end
 end)
@@ -278,12 +311,6 @@ UserInputService.InputChanged:Connect(function(input: InputObject)
 	then
 		yaw -= input.Delta.X * 0.004
 		pitch = math.clamp(pitch - input.Delta.Y * 0.004, math.rad(-55), math.rad(42))
-	elseif cameraOpen and input.UserInputType == Enum.UserInputType.Touch and touchPosition then
-		local position = Vector2.new(input.Position.X, input.Position.Y)
-		local delta = position - touchPosition
-		touchPosition = position
-		yaw -= delta.X * 0.006
-		pitch = math.clamp(pitch - delta.Y * 0.006, math.rad(-55), math.rad(42))
 	end
 end)
 
