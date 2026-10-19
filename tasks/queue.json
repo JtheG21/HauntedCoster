@@ -5131,6 +5131,24 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T23:58:25",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 2/2"
+        },
+        {
+          "time": "2026-10-18T23:58:25",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T23:59:06",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
       "executions": [
@@ -5143,6 +5161,11 @@
           "time": "2026-10-18T23:56:01",
           "result": "pass",
           "notes": "Audit remediation: chase run-version guard, finite bounded camera origin for raycast/scoring, and restart respawn/position reset. HOD-specific checks and scripts/check.sh passed; camera remains an explicitly deferred known failure."
+        },
+        {
+          "time": "2026-10-18T23:59:06",
+          "result": "pass",
+          "notes": "Second audit remediation: serialize restart requests and verify token, owner, round, phase, and player after character loading. HOD-specific checks, repository check, and vault validation pass; camera remains explicitly deferred."
         }
       ],
       "audits": [
@@ -5150,9 +5173,14 @@
           "time": "2026-10-18T23:54:18",
           "result": "fail",
           "report": "06 QA/AUD-20261018-TASK-0087-01.md"
+        },
+        {
+          "time": "2026-10-18T23:58:25",
+          "result": "fail",
+          "report": "06 QA/AUD-20261018-TASK-0087-02.md"
         }
       ],
-      "revisions": 1,
+      "revisions": 2,
       "approved_by": "jg"
     }
   ]

@@ -26,6 +26,8 @@ local owner: Player? = nil
 local evidence: { Evidence } = {}
 local eventCounts: { [string]: number } = {}
 local prompt: ProximityPrompt? = nil
+local restartSequence = 0
+local activeRestartToken: number? = nil
 
 local function record(name: string)
 	eventCounts[name] = (eventCounts[name] or 0) + 1
@@ -234,6 +236,27 @@ function RoundService.restart(player: Player): (boolean, string?)
 	if not RoundRules.canRestart(phase) then
 		return false, "Finish this expedition before restarting."
 	end
+	if activeRestartToken then
+		return false, "The trail is already restarting."
+	end
+	restartSequence += 1
+	local token = restartSequence
+	activeRestartToken = token
+	local expectedRound = roundNumber
+	local expectedPhase = phase
+	local function abortRestart(reason: string): (boolean, string?)
+		if activeRestartToken == token then
+			activeRestartToken = nil
+		end
+		return false, reason
+	end
+	local function restartStillValid(): boolean
+		return activeRestartToken == token
+			and owner == player
+			and player.Parent == Players
+			and roundNumber == expectedRound
+			and phase == expectedPhase
+	end
 	local character = player.Character
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	if not character or not humanoid or humanoid.Health <= 0 then
@@ -241,16 +264,24 @@ function RoundService.restart(player: Player): (boolean, string?)
 			player:LoadCharacterAsync()
 		end)
 		if not loaded then
-			return false, "The hiker could not return to the trail. Try again."
+			return abortRestart("The hiker could not return to the trail. Try again.")
+		end
+		if not restartStillValid() then
+			return abortRestart("The expedition changed before the restart finished. Try again.")
 		end
 		character = player.Character
+	end
+	if not restartStillValid() then
+		return abortRestart("The expedition changed before the restart finished. Try again.")
 	end
 	local trail = Workspace:FindFirstChild("HikeOrDieTrail")
 	local spawns = trail and trail:FindFirstChild("Spawns")
 	local spawn = spawns and spawns:FindFirstChild("Spawn1")
-	if character and spawn and spawn:IsA("BasePart") then
-		character:PivotTo(spawn.CFrame + Vector3.new(0, 3, 0))
+	if not character or not spawn or not spawn:IsA("BasePart") then
+		return abortRestart("The trail start is not ready. Try again.")
 	end
+	character:PivotTo(spawn.CFrame + Vector3.new(0, 3, 0))
+	activeRestartToken = nil
 	startRound(true)
 	return true
 end
@@ -259,6 +290,7 @@ function RoundService.start()
 	Players.PlayerAdded:Connect(onPlayer)
 	Players.PlayerRemoving:Connect(function(player)
 		if player == owner then
+			activeRestartToken = nil
 			CryptidService.stop()
 			owner = nil
 			phase = "waiting"
