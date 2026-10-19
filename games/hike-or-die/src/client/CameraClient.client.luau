@@ -132,7 +132,6 @@ local priorCameraType = camera.CameraType
 local priorCameraSubject = camera.CameraSubject
 local cameraHumanoid: Humanoid? = nil
 local priorAutoRotate = true
-local dragging = false
 local touchDragInput: InputObject? = nil
 local touchPosition: Vector2? = nil
 
@@ -219,7 +218,7 @@ local function setCamera(open: boolean)
 	if cameraOpen then
 		hint.Text = if UserInputService.TouchEnabled
 			then "Drag on the right to move camera  ·  move with left stick  ·  PHOTO to shoot"
-			else "Right-drag or arrow keys to move camera  ·  WASD to move  ·  SPACE / PHOTO to shoot"
+			else "Move mouse or use arrows to move camera  ·  WASD to move  ·  SPACE / PHOTO to shoot"
 	else
 		hint.Text = defaultHint()
 	end
@@ -302,14 +301,6 @@ UserInputService.InputBegan:Connect(function(input: InputObject, processed: bool
 		shoot()
 	elseif input.KeyCode == Enum.KeyCode.Q then
 		provoke()
-	elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-		dragging = true
-	end
-end)
-
-UserInputService.InputEnded:Connect(function(input: InputObject)
-	if input.UserInputType == Enum.UserInputType.MouseButton2 then
-		dragging = false
 	end
 end)
 
@@ -349,11 +340,7 @@ UserInputService.TouchEnded:Connect(function(input: InputObject)
 end)
 
 UserInputService.InputChanged:Connect(function(input: InputObject)
-	if
-		cameraOpen
-		and input.UserInputType == Enum.UserInputType.MouseMovement
-		and (dragging or UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter)
-	then
+	if cameraOpen and input.UserInputType == Enum.UserInputType.MouseMovement then
 		yaw -= input.Delta.X * 0.004
 		pitch = math.clamp(pitch - input.Delta.Y * 0.004, math.rad(-55), math.rad(42))
 	end
