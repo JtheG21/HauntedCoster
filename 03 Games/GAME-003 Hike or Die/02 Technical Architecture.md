@@ -41,7 +41,7 @@ One cryptid and one player; no pathfinding grid or procedural generator unless a
 Use a handcrafted connected blockout and controlled spawn/state variation, based on the brief's recommendation. Exit direction must be readable from a landmark; include one alternate approach and cover route. [[ADR-0014-Hike-Or-Die-Gate-1-World]] records this as a proposed, reversible experiment, not a permanent architecture decision.
 
 ## Camera
-The first candidate is a real-world Scriptable camera offset front-right of the hiker, with mouse/touch drag, fixed crosshair, and server-validated aim. It is a test implementation, not a final design decision; desktop and touch tests must compare composition and controls before selecting it. CaptureService is for screenshot/gallery features, not a substitute for the server evidence contract. No permanent screenshot/gallery support is planned.
+The first candidate is a real-world Scriptable camera offset front-right of the hiker, with free mouse movement, right-side touch drag, a centered crosshair, and server-validated aim. Movement is remapped through a smoothed frame that follows horizontal camera aim, while the hiker's facing remains stable. It is a test implementation, not a final design decision; desktop and touch tests must compare composition and controls before selecting it. CaptureService is for screenshot/gallery features, not a substitute for the server evidence contract. No permanent screenshot/gallery support is planned.
 
 ## Startup, errors, cleanup
 One active solo round per server. Reset cleans camera mode, UI state, creature loops, timers and event counters. Disconnect, character death, extraction and restart must each have explicit cleanup. No persistent state survives a round.

@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ContextActionService = game:GetService("ContextActionService")
+local GuiService = game:GetService("GuiService")
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
@@ -126,6 +127,8 @@ end
 local cameraOpen = false
 local yaw = 0
 local pitch = math.rad(-5)
+local cameraYaw = 0
+local cameraPitch = math.rad(-5)
 local roundPhase = "active"
 local evidenceCount = 0
 local priorCameraType = camera.CameraType
@@ -174,7 +177,10 @@ local function setCamera(open: boolean)
 	cameraOpen = open and roundPhase == "active"
 	if cameraOpen then
 		yaw = 0
-		local mousePosition = UserInputService:GetMouseLocation()
+		cameraYaw = 0
+		pitch = math.rad(-5)
+		cameraPitch = pitch
+		local mousePosition = UserInputService:GetMouseLocation() - GuiService:GetGuiInset()
 		lastMousePosition = if mousePosition.X >= 0 and mousePosition.Y >= 0 then mousePosition else nil
 		priorCameraType = camera.CameraType
 		priorCameraSubject = camera.CameraSubject
@@ -221,14 +227,14 @@ local function setCamera(open: boolean)
 	cameraButton.Text = if cameraOpen then "LOWER  [C]" else "CAMERA  [C]"
 	if cameraOpen then
 		hint.Text = if UserInputService.TouchEnabled
-			then "Drag on the right to move camera  ·  move with left stick  ·  PHOTO to shoot"
-			else "Move mouse or use arrows to move camera  ·  WASD to move  ·  SPACE / PHOTO to shoot"
+			then "Drag on the right to aim  ·  move with left stick  ·  PHOTO to shoot"
+			else "Move mouse to aim  ·  WASD steers with aim  ·  SPACE / PHOTO to shoot"
 	else
 		hint.Text = defaultHint()
 	end
 end
 
-RunService:BindToRenderStep("HikeOrDieSelfieMovement", Enum.RenderPriority.Input.Value + 1, function()
+RunService:BindToRenderStep("HikeOrDieSelfieMovement", Enum.RenderPriority.Input.Value + 1, function(deltaTime: number)
 	if not cameraOpen then
 		return
 	end
@@ -238,6 +244,9 @@ RunService:BindToRenderStep("HikeOrDieSelfieMovement", Enum.RenderPriority.Input
 	if not (root and root:IsA("BasePart") and humanoid) then
 		return
 	end
+	local smoothing = 1 - math.exp(-deltaTime * 12)
+	cameraYaw += (yaw - cameraYaw) * smoothing
+	cameraPitch += (pitch - cameraPitch) * smoothing
 
 	-- Roblox's default controls are camera-relative. The raised selfie camera
 	-- faces back toward the hiker, so remap that input to the hiker's heading.
@@ -256,7 +265,11 @@ RunService:BindToRenderStep("HikeOrDieSelfieMovement", Enum.RenderPriority.Input
 	local currentMove = humanoid.MoveDirection
 	local forwardInput = currentMove:Dot(cameraForward)
 	local rightInput = currentMove:Dot(cameraRight)
-	local characterRelativeMove = characterForward * forwardInput + characterRight * rightInput
+	-- The center reticle is the camera's aim ray. Gently rotate the movement
+	-- frame toward that aim so sweeping left or right naturally steers movement.
+	local aimForward = characterForward * math.cos(cameraYaw) + characterRight * math.sin(cameraYaw)
+	local aimRight = characterRight * math.cos(cameraYaw) - characterForward * math.sin(cameraYaw)
+	local characterRelativeMove = aimForward * forwardInput + aimRight * rightInput
 	humanoid:Move(characterRelativeMove, false)
 end)
 
@@ -369,9 +382,9 @@ RunService:BindToRenderStep("HikeOrDieSelfieCamera", Enum.RenderPriority.Camera.
 		+ Vector3.new(0, Gameplay.SelfieHeightOffset, 0)
 	-- Mouse yaw also shifts the camera around the hiker. Keep this positional
 	-- adjustment inside the origin tolerance enforced by EvidenceService.
-	pos += root.CFrame.RightVector * (math.sin(yaw) * Gameplay.MaxAimOriginOffset)
+	pos += root.CFrame.RightVector * (math.sin(cameraYaw) * Gameplay.MaxAimOriginOffset)
 	local baseYaw = math.atan2(root.CFrame.LookVector.X, root.CFrame.LookVector.Z)
-	local direction = CFrame.fromOrientation(pitch, baseYaw + yaw, 0).LookVector
+	local direction = CFrame.fromOrientation(cameraPitch, baseYaw + cameraYaw, 0).LookVector
 	camera.CFrame = CFrame.lookAt(pos, pos + direction)
 	camera.Focus = CFrame.new(pos + direction * 16)
 end)
