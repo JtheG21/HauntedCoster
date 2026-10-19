@@ -16,6 +16,8 @@ local gui = Instance.new("ScreenGui")
 gui.Name = "HikeOrDieHUD"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = false
+gui.ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets
+gui.ClipToDeviceSafeArea = true
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local function label(name: string, text: string, position: UDim2, size: UDim2): TextLabel
@@ -107,7 +109,12 @@ if UserInputService.TouchEnabled then
 	provokeButton.Position = UDim2.fromOffset(18, 166)
 	hint.AnchorPoint = Vector2.new(0.5, 0)
 	hint.Position = UDim2.new(0.5, 0, 1, -82)
-	hint.Size = UDim2.new(0.9, 0, 0, 54)
+	hint.Size = UDim2.fromOffset(360, 42)
+	-- Keep tap-to-aim controls left of the reticle and clear of the move stick.
+	aimLeftButton.Position = UDim2.new(0.5, -212, 1, -178)
+	aimRightButton.Position = UDim2.new(0.5, -116, 1, -178)
+	aimUpButton.Position = UDim2.new(0.5, -164, 1, -226)
+	aimDownButton.Position = UDim2.new(0.5, -164, 1, -130)
 end
 
 local function defaultHint(): string
