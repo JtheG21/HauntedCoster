@@ -36,7 +36,7 @@ Excluded. No currency economy, purchases, Robux, boosts, or paid API calls.
 |---|---|---|
 | Small connected trail, landmarks, route/cover choice and marked extraction | Must | Generated and headlessly proved; Studio readability pending |
 | One hybrid cryptid: observe, investigate, pursue, disengage | Must | Implemented in server prototype; runtime pending |
-| Selfie-style camera interaction with aiming, shutter and camera state | Must | Scriptable selfie-camera candidate; mouse aim and aim-influenced movement verified in Studio, touch comparison pending |
+| Selfie-style camera interaction with aiming, shutter and camera state | Must | Scriptable selfie-camera candidate is present, but jg reports mouse camera controls still do not work. The existence-stage merge defers repair for higher-model review; earlier Studio probes are historical only. Touch comparison remains pending. |
 | Server-validated evidence metadata and explainable grade | Must | Implemented; adversarial runtime validation pending |
 | Extraction, round summary and restart | Must | Implemented; runtime validation pending |
 | One controlled encounter variation and low-risk event instrumentation | Must | Planned |

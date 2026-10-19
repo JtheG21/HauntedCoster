@@ -46,6 +46,15 @@ local function reject(player: Player, reason: string)
 	Remotes.Event:FireClient(player, { type = "shot_rejected", message = reason })
 end
 
+local function isFiniteVector3(value: Vector3): boolean
+	return value.X == value.X
+		and value.Y == value.Y
+		and value.Z == value.Z
+		and math.abs(value.X) < math.huge
+		and math.abs(value.Y) < math.huge
+		and math.abs(value.Z) < math.huge
+end
+
 local function handleShutter(player: Player, aimOrigin: any, aimDirection: any)
 	RoundService.record("shot_attempted")
 	if player ~= RoundService.getOwner() or not RoundService.canPhotograph() then
@@ -64,6 +73,10 @@ local function handleShutter(player: Player, aimOrigin: any, aimDirection: any)
 	lastShutterAt[player] = now
 
 	if typeof(aimOrigin) ~= "Vector3" or typeof(aimDirection) ~= "Vector3" then
+		reject(player, "The camera aim was invalid.")
+		return
+	end
+	if not isFiniteVector3(aimOrigin) or not isFiniteVector3(aimDirection) or aimDirection.Magnitude <= 0 then
 		reject(player, "The camera aim was invalid.")
 		return
 	end
@@ -118,13 +131,13 @@ local function handleShutter(player: Player, aimOrigin: any, aimDirection: any)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { character :: Model }
-	local hit = Workspace:Raycast(expectedOrigin, direction * Gameplay.MaxPhotoRange, params)
+	local hit = Workspace:Raycast(aimOrigin, direction * Gameplay.MaxPhotoRange, params)
 	if not hit or not hit.Instance:IsDescendantOf(creatureModel) then
 		reject(player, "No cryptid in the frame. Aim at its silhouette.")
 		return
 	end
 
-	local offset = creatureRoot.Position - expectedOrigin
+	local offset = creatureRoot.Position - aimOrigin
 	local distance = offset.Magnitude
 	if distance <= 0 or distance > Gameplay.MaxPhotoRange then
 		reject(player, "The cryptid is outside the camera's usable range.")

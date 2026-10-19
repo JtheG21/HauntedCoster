@@ -5080,7 +5080,7 @@
       "id": "TASK-0087",
       "title": "Hike or Die Gate 1 Prototype",
       "project": "GAME-003",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "high",
       "depends_on": [],
       "branch": "task/TASK-0087-Hike-Or-Die-Gate-1",
@@ -5107,11 +5107,52 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-18T23:54:17",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T23:54:18",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-18T23:54:18",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T23:56:01",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
-      "executions": [],
-      "audits": [],
-      "revisions": 0,
+      "executions": [
+        {
+          "time": "2026-10-18T23:54:17",
+          "result": "pass",
+          "notes": "Independent audit found stale chase-run and camera/evidence/restart issues; repaired stale-run safety, bounded photo ray origin, and restart positioning; camera remains a user-reported prototype limitation."
+        },
+        {
+          "time": "2026-10-18T23:56:01",
+          "result": "pass",
+          "notes": "Audit remediation: chase run-version guard, finite bounded camera origin for raycast/scoring, and restart respawn/position reset. HOD-specific checks and scripts/check.sh passed; camera remains an explicitly deferred known failure."
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-18T23:54:18",
+          "result": "fail",
+          "report": "06 QA/AUD-20261018-TASK-0087-01.md"
+        }
+      ],
+      "revisions": 1,
       "approved_by": "jg"
     }
   ]

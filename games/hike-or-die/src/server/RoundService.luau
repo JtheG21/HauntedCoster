@@ -234,6 +234,23 @@ function RoundService.restart(player: Player): (boolean, string?)
 	if not RoundRules.canRestart(phase) then
 		return false, "Finish this expedition before restarting."
 	end
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not character or not humanoid or humanoid.Health <= 0 then
+		local loaded = pcall(function()
+			player:LoadCharacterAsync()
+		end)
+		if not loaded then
+			return false, "The hiker could not return to the trail. Try again."
+		end
+		character = player.Character
+	end
+	local trail = Workspace:FindFirstChild("HikeOrDieTrail")
+	local spawns = trail and trail:FindFirstChild("Spawns")
+	local spawn = spawns and spawns:FindFirstChild("Spawn1")
+	if character and spawn and spawn:IsA("BasePart") then
+		character:PivotTo(spawn.CFrame + Vector3.new(0, 3, 0))
+	end
 	startRound(true)
 	return true
 end

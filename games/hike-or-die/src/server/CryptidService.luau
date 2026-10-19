@@ -292,19 +292,29 @@ function CryptidService.start(variation: number, onCaught: LostCallback)
 					if currentState == "Pursuing" then
 						if now >= nextPathAt then
 							waypoint = pathTarget(target)
+							-- ComputeAsync yields; extraction or restart may replace this run while it is suspended.
+							if not running or runVersion ~= thisRun then
+								break
+							end
 							nextPathAt = now + 0.8
 						end
-						if waypoint then
+						-- State and target may have changed while pathfinding yielded.
+						if currentState == "Pursuing" and targetPlayer == player and root and model and waypoint then
 							stepToward(waypoint, 12, dt)
-						end
-						if
-							now - chaseStartedAt >= Gameplay.CatchGraceSeconds
-							and (target.Position - (root :: BasePart).Position).Magnitude <= Gameplay.CatchDistance
-						then
-							running = false
-							local callback = lostCallback
-							if callback then
-								callback(player :: Player)
+							local currentTarget = getPlayerRoot(player :: Player)
+							local currentRoot = root
+							if
+								currentTarget
+								and currentRoot
+								and now - chaseStartedAt >= Gameplay.CatchGraceSeconds
+								and (currentTarget.Position - currentRoot.Position).Magnitude
+									<= Gameplay.CatchDistance
+							then
+								running = false
+								local callback = lostCallback
+								if callback then
+									callback(player :: Player)
+								end
 							end
 						end
 					end
