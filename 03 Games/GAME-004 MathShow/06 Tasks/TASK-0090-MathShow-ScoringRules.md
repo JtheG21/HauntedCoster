@@ -3,7 +3,7 @@ id: TASK-0090
 title: "MathShow ScoringRules"
 type: task
 project: GAME-004
-status: proposed
+status: in_progress
 priority: medium
 risk: low
 owner: executor
@@ -53,7 +53,16 @@ Pure answer parsing and speed-bonus scoring: `shared/ScoringRules` + `ScoringCon
 
 ---
 ## Implementation record
+- Worktree `~/Desktop/Rg1-worktrees/task-0090` on `task/TASK-0090-MathShow-ScoringRules`, cut from origin/main `ceafb9c`.
+- Added `shared/ScoringConfig.luau` (BasePoints 100, SpeedBonusMax 100, RawLengthCap 16, DigitCap 6) and `shared/ScoringRules.luau` (`parseAnswer`, `score`), plus `tests/ScoringRules.spec.luau` (14 tests).
+- Late correct answer (elapsed at or past timeLimit): base points, no bonus. jg chose this on 2026-10-25.
+- `parseAnswer`: optional leading and trailing spaces only, so tabs and newlines are rejected. The raw length cap runs before the pattern match.
+- `score`: a NaN, zero, negative or infinite timeLimit, or a NaN elapsed, gets base points with no bonus. Negative elapsed gets the full bonus.
 
 ## Audits
+- None. Light tier: a green `scripts/check.sh` is the gate.
 
 ## Outcome
+- `scripts/check.sh` exits 0 on this branch: StyLua, Selene, Luau types, Lune specs (MathShow 20 passed, 0 failed, including the 14 ScoringRules tests), Rojo build, JSON, queue, vault, refs, skills and Python tests.
+- Spec asserts properties: parse rejections; the digit cap covers the largest ProblemConfig answer (400); every ProblemRules answer for tiers 1-3, seeds 1-200, parses back to itself; score is 0 for wrong or missing answers; the bonus never rises and reaches base at timeLimit; late, zero and NaN windows keep base; output is always whole, non-negative and NaN-free.
+- Not run: Studio (pure module, no Instances). Not merged. Status left `in_progress` for jg's `/task-close`.
