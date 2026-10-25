@@ -5200,6 +5200,183 @@
       "revisions": 2,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0088",
+      "title": "MathShow Scaffold",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [],
+      "branch": "task/TASK-0088-MathShow-Scaffold",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0088-MathShow-Scaffold.md",
+      "acceptance_criteria": [
+        "mathshow.project.json syncs via Rojo without errors.",
+        "scripts/check.sh passes with zero or one trivial MathShow spec.",
+        "scripts/new-service.sh's spec template is confirmed to match (or fixed to match) how check.sh finds and runs lune specs."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "light"
+    },
+    {
+      "id": "TASK-0089",
+      "title": "MathShow ProblemRules",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0088"
+      ],
+      "branch": "task/TASK-0089-MathShow-ProblemRules",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0089-MathShow-ProblemRules.md",
+      "acceptance_criteria": [
+        "generate(seed, difficulty) is deterministic for a fixed seed/difficulty pair.",
+        "All three difficulty tiers produce integer answers only.",
+        "Spec covers add/sub/mul/div and all 3 tiers."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "light"
+    },
+    {
+      "id": "TASK-0090",
+      "title": "MathShow ScoringRules",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0088"
+      ],
+      "branch": "task/TASK-0090-MathShow-ScoringRules",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0090-MathShow-ScoringRules.md",
+      "acceptance_criteria": [
+        "parseAnswer rejects non-integer, oversized, or non-numeric strings without erroring; returns nil.",
+        "score awards 0 for incorrect/missing answers and a monotonically decreasing speed bonus as elapsed approaches timeLimit.",
+        "Spec covers the parse-rejection and scoring-boundary cases."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "light"
+    },
+    {
+      "id": "TASK-0091",
+      "title": "MathShow RoundRules",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0088"
+      ],
+      "branch": "task/TASK-0091-MathShow-RoundRules",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0091-MathShow-RoundRules.md",
+      "acceptance_criteria": [
+        "nextPhase produces the exact cycle: Intermission(10s) -> Question -> Reveal(4s) -> ... -> Results(8s) -> Intermission.",
+        "Transitions out of Question happen only after N questions have been served, matching config.",
+        "Spec asserts the phase sequence and durations as properties, not fixed Random values."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "light"
+    },
+    {
+      "id": "TASK-0092",
+      "title": "MathShow RoundService",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "high",
+      "depends_on": [
+        "TASK-0089",
+        "TASK-0090",
+        "TASK-0091"
+      ],
+      "branch": "task/TASK-0092-MathShow-RoundService",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0092-MathShow-RoundService.md",
+      "acceptance_criteria": [
+        "The server creates all three remotes; the client never receives the answer before Reveal.",
+        "Submissions are validated type -> range -> ownership -> rate limit; only the first valid submission per player per question is accepted.",
+        "A 1-player Studio playtest log shows a full cycle: Intermission -> Question -> Reveal -> ... -> Results -> Intermission."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "deep"
+    },
+    {
+      "id": "TASK-0093",
+      "title": "MathShow Hud",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0092"
+      ],
+      "branch": "task/TASK-0093-MathShow-Hud",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0093-MathShow-Hud.md",
+      "acceptance_criteria": [
+        "Timer counts down to the server's endsAt, not a client-local timer.",
+        "Submitting an answer sends exactly one SubmitAnswer call per question; input disabled after submission.",
+        "Feedback (correct/incorrect, points) renders on AnswerResult and clears for the next question."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "standard"
+    },
+    {
+      "id": "TASK-0094",
+      "title": "MathShow Scores",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0092"
+      ],
+      "branch": "task/TASK-0094-MathShow-Scores",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0094-MathShow-Scores.md",
+      "acceptance_criteria": [
+        "Each player has a visible Score leaderstat that updates after each Reveal.",
+        "The Results screen shows a ranked podium matching the server's scores at match end.",
+        "No DataStore or persistence call is introduced in this task."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "light"
+    },
+    {
+      "id": "TASK-0095",
+      "title": "MathShow 2-Player Test",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0093",
+        "TASK-0094"
+      ],
+      "branch": "task/TASK-0095-MathShow-TwoPlayer-Test",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0095-MathShow-TwoPlayer-Test.md",
+      "acceptance_criteria": [
+        "A full match completes with 2 players joined, each submitting at least one answer.",
+        "A TEST note records what worked, what didn't, and console evidence.",
+        "Every finding is filed as a follow-up task (or explicitly deferred with a reason)."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "standard"
     }
   ]
 }
