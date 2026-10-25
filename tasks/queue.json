@@ -5447,7 +5447,7 @@
       "id": "TASK-0092",
       "title": "MathShow RoundService",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "in_progress",
       "risk": "high",
       "depends_on": [
         "TASK-0089",
@@ -5461,11 +5461,25 @@
         "Submissions are validated type -> range -> ownership -> rate limit; only the first valid submission per player per question is accepted.",
         "A 1-player Studio playtest log shows a full cycle: Intermission -> Question -> Reveal -> ... -> Results -> Intermission."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-25T15:54:32",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-25T15:54:32",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0,
-      "tier": "deep"
+      "tier": "deep",
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0093",

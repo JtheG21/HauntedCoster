@@ -3,7 +3,7 @@ id: TASK-0092
 title: "MathShow RoundService"
 type: task
 project: GAME-004
-status: proposed
+status: in_progress
 priority: medium
 risk: high
 owner: executor
