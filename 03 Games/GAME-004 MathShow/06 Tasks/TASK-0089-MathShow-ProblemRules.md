@@ -3,7 +3,7 @@ id: TASK-0089
 title: "MathShow ProblemRules"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
