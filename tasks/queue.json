@@ -5325,7 +5325,7 @@
       "id": "TASK-0090",
       "title": "MathShow ScoringRules",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "in_progress",
       "risk": "low",
       "depends_on": [
         "TASK-0088"
@@ -5337,11 +5337,25 @@
         "score awards 0 for incorrect/missing answers and a monotonically decreasing speed bonus as elapsed approaches timeLimit.",
         "Spec covers the parse-rejection and scoring-boundary cases."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-25T14:42:54",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-25T14:42:55",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0,
-      "tier": "light"
+      "tier": "light",
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0091",
