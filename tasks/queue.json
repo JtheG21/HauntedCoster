@@ -5205,7 +5205,7 @@
       "id": "TASK-0088",
       "title": "MathShow Scaffold",
       "project": "GAME-004",
-      "status": "approved",
+      "status": "done",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0088-MathShow-Scaffold",
@@ -5239,6 +5239,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "Light tier: no audit; merge needs human approval"
+        },
+        {
+          "time": "2026-10-25T12:17:54",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -5251,7 +5257,8 @@
       "audits": [],
       "revisions": 0,
       "tier": "light",
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0089",
