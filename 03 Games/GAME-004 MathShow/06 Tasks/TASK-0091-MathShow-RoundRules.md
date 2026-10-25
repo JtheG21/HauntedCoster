@@ -3,7 +3,7 @@ id: TASK-0091
 title: "MathShow RoundRules"
 type: task
 project: GAME-004
-status: proposed
+status: approved
 priority: medium
 risk: low
 owner: executor
@@ -40,9 +40,9 @@ Pure phase state machine: `shared/RoundRules` + `RoundConfig`, `nextPhase(phase,
 - `games/mathshow/tests/RoundRules.spec.luau`
 
 ## Acceptance criteria
-- [ ] AC1 `nextPhase` produces the exact cycle: Intermission(10s) → Question → Reveal(4s) → ... → Results(8s) → Intermission.
-- [ ] AC2 Transitions out of Question happen only after N questions have been served, matching config.
-- [ ] AC3 Spec asserts the phase sequence and durations as properties, not fixed `Random` values (per `05 Engineering/Luau Standards.md`).
+- [x] AC1 `nextPhase` produces the exact cycle: Intermission(10s) → Question → Reveal(4s) → ... → Results(8s) → Intermission.
+- [x] AC2 Transitions out of Question happen only after N questions have been served, matching config.
+- [x] AC3 Spec asserts the phase sequence and durations as properties, not fixed `Random` values (per `05 Engineering/Luau Standards.md`).
 
 ## Tests
 - **Automated:** `scripts/check.sh`
@@ -53,7 +53,17 @@ None.
 
 ---
 ## Implementation record
+- Worktree `~/Desktop/Rg1-worktrees/task-0091` on `task/TASK-0091-MathShow-RoundRules`, cut from `main` `bb5f1c2`.
+- Added `shared/RoundConfig.luau` (IntermissionSeconds 10, RevealSeconds 4, ResultsSeconds 8, QuestionCount 6, DifficultyByQuestion {1,1,2,2,3,3}; jg approved these picks 2026-10-25), `shared/RoundRules.luau` (`nextPhase`, `difficultyFor`) and `tests/RoundRules.spec.luau` (6 tests).
+- `nextPhase(phase, questionIndex)` returns the next phase and its duration. `questionIndex` is 0 in Intermission, 1..N in Question and Reveal, N in Results; the caller increments it on entering Question. Reveal moves to Results only at index N.
+- Question duration is the ProblemConfig tier `timeLimit` for that question, so RoundService can pass the same value to `ScoringRules.score`.
+- Input outside the contract (unknown phase, non-integer or out-of-range index, index that does not fit the phase) raises an error.
 
 ## Audits
+- None. Light tier (risk low): a green `scripts/check.sh` is the gate.
 
 ## Outcome
+- `scripts/check.sh` exits 0 on this branch (MathShow specs 20 -> 26 passed, 0 failed). A first run failed Luau types in the new spec; fixed by annotating the step table.
+- Spec asserts properties: exact phase sequence and durations over a full cycle, Results only after question N, question durations equal `ProblemRules.generate(...).timeLimit`, non-decreasing difficulty, and errors for out-of-contract input.
+- Not run: Studio (pure module, no Instances).
+- For TASK-0092 (RoundService): call `nextPhase` with the index of the current phase and increment it when entering Question; use `difficultyFor(index)` to generate each problem.
