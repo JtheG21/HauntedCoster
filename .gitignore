@@ -34,7 +34,10 @@ tasks/prompts/
 # Built place, the GAME-001 sourcemap (sourcemap.json is GAME-002) and the local build stamp (scripts/stamp.sh)
 /HauntedCollector.rbxl
 /HauntedCollector.rbxl.lock
+/MathShow.rbxl
+/MathShow.rbxl.lock
 game001-sourcemap.json
+game004-sourcemap.json
 haunted-sourcemap.json
 games/haunted/src/shared/BuildStamp.txt
 .agents/skills/*/LOCAL.md
