@@ -5447,7 +5447,7 @@
       "id": "TASK-0092",
       "title": "MathShow RoundService",
       "project": "GAME-004",
-      "status": "approved",
+      "status": "done",
       "risk": "high",
       "depends_on": [
         "TASK-0089",
@@ -5509,6 +5509,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-25T16:24:17",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -5537,7 +5543,8 @@
       ],
       "revisions": 1,
       "tier": "deep",
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0093",

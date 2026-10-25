@@ -3,7 +3,7 @@ id: TASK-0092
 title: "MathShow RoundService"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: high
 owner: executor
@@ -117,3 +117,14 @@ including SubmissionRules and its spec.
 - [[AUD-20261025-TASK-0092-02]] (Opus delta, attempt 2): pass; both findings resolved; 2 nits, no change needed.
 
 ## Outcome
+- RoundService runs the full MathShow match loop server-side: remotes in `ReplicatedStorage.Remotes`, answer only in
+  Reveal, submissions validated by pure SubmissionRules (13 spec tests), first valid answer locks the question.
+- `scripts/check.sh` exits 0 (MathShow specs 26 -> 39 passed, 0 failed); strict typecheck clean.
+- Studio: [[TEST-20261025-01]] (two full cycles, every verdict, revision re-run with grace and throttle) pass.
+- Audits: [[AUD-20261025-TASK-0092-01]] pass with 2 minor; revision 1 (jg) fixed both;
+  [[AUD-20261025-TASK-0092-02]] delta pass. 1 of 2 revisions used.
+- Not run: 2 players, everyone leaving mid-match, loop-error backoff (2-player test task).
+- For TASK-0093 (Hud): listen to `RoundState` (`Net.RoundStatePayload`), send `SubmitAnswer(raw: string)`, show
+  `AnswerResult`. `endsAt` is server time; the server accepts answers for `LateGraceSeconds` (0.25 s) after it, so the
+  Hud may keep input open briefly at 0. Rejections can come back throttled (no reply), so do not wait on a reply.
+- Tooling follow-up: `scripts/studio-preflight.sh` and `scripts/stamp.sh` only support GAME-002.
