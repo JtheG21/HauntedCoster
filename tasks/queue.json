@@ -5550,7 +5550,7 @@
       "id": "TASK-0093",
       "title": "MathShow Hud",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0092"
@@ -5562,11 +5562,56 @@
         "Submitting an answer sends exactly one SubmitAnswer call per question; input disabled after submission.",
         "Feedback (correct/incorrect, points) renders on AnswerResult and clears for the next question."
       ],
-      "history": [],
-      "executions": [],
-      "audits": [],
+      "history": [
+        {
+          "time": "2026-10-25T16:40:21",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-25T16:40:21",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-25T16:52:46",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-25T16:53:57",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-25T16:59:22",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-25T16:52:46",
+          "result": "pass",
+          "notes": "Hud implemented; check.sh and strict typecheck green; Studio playtest TEST-20261025-02 AC1-AC3 pass; Submit click and device look need manual check"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-25T16:53:57",
+          "result": "pass",
+          "report": "06 QA/AUD-20261025-TASK-0093-01.md"
+        }
+      ],
       "revisions": 0,
-      "tier": "standard"
+      "tier": "standard",
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0094",
