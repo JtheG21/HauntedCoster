@@ -5386,7 +5386,7 @@
       "id": "TASK-0091",
       "title": "MathShow RoundRules",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "in_progress",
       "risk": "low",
       "depends_on": [
         "TASK-0088"
@@ -5398,11 +5398,25 @@
         "Transitions out of Question happen only after N questions have been served, matching config.",
         "Spec asserts the phase sequence and durations as properties, not fixed Random values."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-25T15:10:07",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-25T15:10:07",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0,
-      "tier": "light"
+      "tier": "light",
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0092",
