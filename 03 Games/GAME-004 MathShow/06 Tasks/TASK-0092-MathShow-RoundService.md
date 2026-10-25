@@ -61,10 +61,12 @@ including SubmissionRules and its spec.
 
 **Files** (all `games/mathshow/`)
 - `src/shared/Net.luau`: frozen remote names, `RoundStatePayload`, `ScoreEntry` (array), `AnswerResultPayload`.
-- `src/shared/SubmissionConfig.luau`: `MinSubmitIntervalSeconds = 0.3`, `LateGraceSeconds = 0.25`.
+- `src/shared/SubmissionConfig.luau`: `MinSubmitIntervalSeconds = 0.3`, `LateGraceSeconds = 0.25`,
+  `RejectReplyIntervalSeconds = 0.3`.
 - `src/shared/SubmissionRules.luau`: pure `evaluate(raw, ctx) -> (Verdict, number?)`, type → range → ownership →
-  rate limit → duplicate; `advancesRateLimit` (ok, duplicate) and `sendsReply` (not badType/rateLimited).
-- `tests/SubmissionRules.spec.luau`: 12 tests (each verdict, precedence pairs, length/digit/interval/deadline/index
+  rate limit → duplicate; `advancesRateLimit` (ok, duplicate), `sendsReply` (not badType/rateLimited) and
+  `rejectThrottled` (rejections inside RejectReplyIntervalSeconds get no reply or log).
+- `tests/SubmissionRules.spec.luau`: 13 tests (each verdict, precedence pairs, length/digit/interval/deadline/index
   boundaries, only-ok-returns-a-number).
 - `src/server/Remotes.luau`: create-or-reuse `ReplicatedStorage.Remotes` and the three RemoteEvents; errors on a
   wrong-class name clash.
@@ -74,8 +76,8 @@ including SubmissionRules and its spec.
 **Deviations from "Files expected to change"**
 - Added SubmissionConfig, SubmissionRules and its spec (jg-approved), so validation is pure and tested headlessly.
 - `init.server.luau` changed to start the service.
-- `LateGraceSeconds = 0.25`, abort to Intermission when all players leave, and a 1 s loop-error backoff are
-  pre-decided defaults jg has not vetoed yet.
+- `LateGraceSeconds = 0.25` (Question stays open 0.25 s past the shown deadline; Reveal starts that much later, jg
+  chose this in revision 1), abort to Intermission when all players leave, and a 1 s loop-error backoff.
 - Participants: every present player joins the match when a question opens, so a mid-question joiner plays from the
   next question.
 - No change to `shared/Problem*|Scoring*|Round*`.
@@ -86,10 +88,15 @@ including SubmissionRules and its spec.
 - `AnswerResult`: sender RoundService, receiver client Hud (TASK-0093).
 
 **Checks**
-- `scripts/check.sh`: every step PASS (StyLua, Selene, typecheck, Lune `MathShow: 38 passed, 0 failed` /
-  `303 passed, 0 failed`, Rojo builds, JSON, orchestrator, vault, refs, skills, Python tests).
+- `scripts/check.sh`: every step PASS (StyLua, Selene, typecheck, Lune `MathShow: 39 passed, 0 failed` /
+  `304 passed, 0 failed`, Rojo builds, JSON, orchestrator, vault, refs, skills, Python tests).
 - `TYPECHECK_REQUIRED=1 scripts/typecheck.sh`: `no type errors`.
 - Studio playtest: [[TEST-20261025-01]] pass.
+
+**Revision 1** (jg, 2026-10-25, from [[AUD-20261025-TASK-0092-01]] findings 1–2; commit `d5d042d`)
+- Rejected submissions are replied to and logged at most once per `RejectReplyIntervalSeconds` per player.
+- RoundService waits `deadline + LateGraceSeconds` before Reveal; `endsAt` still shows the deadline.
+- Nits 3–4 left as is (no behaviour change). Re-run in [[TEST-20261025-01]] "Revision 1 re-run": pass.
 
 **Acceptance criteria**
 - AC1 met (verified): `Remotes.luau` creates all three; `grep -n answer RoundService.luau` puts `answer` in a payload
