@@ -3,7 +3,7 @@ id: TASK-0092
 title: "MathShow RoundService"
 type: task
 project: GAME-004
-status: in_progress
+status: approved
 priority: medium
 risk: high
 owner: executor
@@ -113,6 +113,7 @@ including SubmissionRules and its spec.
 
 ## Audits
 - [[AUD-20261025-TASK-0092-01]] (Opus, attempt 1): pass with 2 minor findings (unthrottled replies/logs for badRange
-  and notOpen; `LateGraceSeconds` only covers loop jitter) and 2 nits. Revision pending jg's call.
+  and notOpen; `LateGraceSeconds` only covers loop jitter) and 2 nits. jg asked for revision 1.
+- [[AUD-20261025-TASK-0092-02]] (Opus delta, attempt 2): pass; both findings resolved; 2 nits, no change needed.
 
 ## Outcome
