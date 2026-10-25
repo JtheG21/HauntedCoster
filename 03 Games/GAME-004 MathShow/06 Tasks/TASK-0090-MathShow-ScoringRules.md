@@ -3,7 +3,7 @@ id: TASK-0090
 title: "MathShow ScoringRules"
 type: task
 project: GAME-004
-status: in_progress
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -65,4 +65,6 @@ Pure answer parsing and speed-bonus scoring: `shared/ScoringRules` + `ScoringCon
 ## Outcome
 - `scripts/check.sh` exits 0 on this branch: StyLua, Selene, Luau types, Lune specs (MathShow 20 passed, 0 failed, including the 14 ScoringRules tests), Rojo build, JSON, queue, vault, refs, skills and Python tests.
 - Spec asserts properties: parse rejections; the digit cap covers the largest ProblemConfig answer (400); every ProblemRules answer for tiers 1-3, seeds 1-200, parses back to itself; score is 0 for wrong or missing answers; the bonus never rises and reaches base at timeLimit; late, zero and NaN windows keep base; output is always whole, non-negative and NaN-free.
-- Not run: Studio (pure module, no Instances). Not merged. Status left `in_progress` for jg's `/task-close`.
+- Not run: Studio (pure module, no Instances).
+- Merged as PR #127 (`17ac8e4`, reviewed head `a5fafd7`); closed 2026-10-25. `check.sh` re-run green on `main`.
+- For TASK-0092 (RoundService): late correct answers earn base points with no bonus; the service must reject input over `RawLengthCap` before calling `parseAnswer`. Executor token usage was not recorded (no start reading).

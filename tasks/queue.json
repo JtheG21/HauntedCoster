@@ -5325,7 +5325,7 @@
       "id": "TASK-0090",
       "title": "MathShow ScoringRules",
       "project": "GAME-004",
-      "status": "in_progress",
+      "status": "done",
       "risk": "low",
       "depends_on": [
         "TASK-0088"
@@ -5349,13 +5349,38 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-25T14:57:34",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-25T14:57:34",
+          "from": "in_review",
+          "to": "approved",
+          "note": "Light tier: no audit; merge needs human approval"
+        },
+        {
+          "time": "2026-10-25T14:57:34",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
-      "executions": [],
+      "executions": [
+        {
+          "time": "2026-10-25T14:57:34",
+          "result": "pass",
+          "notes": "check.sh green on main 17ac8e4; 14 ScoringRules specs pass"
+        }
+      ],
       "audits": [],
       "revisions": 0,
       "tier": "light",
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0091",
