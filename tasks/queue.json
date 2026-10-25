@@ -5264,7 +5264,7 @@
       "id": "TASK-0089",
       "title": "MathShow ProblemRules",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "approved",
       "risk": "low",
       "depends_on": [
         "TASK-0088"
@@ -5276,11 +5276,43 @@
         "All three difficulty tiers produce integer answers only.",
         "Spec covers add/sub/mul/div and all 3 tiers."
       ],
-      "history": [],
-      "executions": [],
+      "history": [
+        {
+          "time": "2026-10-25T12:52:38",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-25T12:52:38",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-25T12:56:06",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-25T12:56:06",
+          "from": "in_review",
+          "to": "approved",
+          "note": "Light tier: no audit; merge needs human approval"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-25T12:56:06",
+          "result": "pass",
+          "notes": "ProblemRules + ProblemConfig implemented; full spec (determinism, integer-only, all 4 ops x 3 tiers, non-negative sub, exact div, timeLimits, error path). check.sh ALL CHECKS PASSED."
+        }
+      ],
       "audits": [],
       "revisions": 0,
-      "tier": "light"
+      "tier": "light",
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0090",
