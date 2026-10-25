@@ -3,7 +3,7 @@ id: TASK-0091
 title: "MathShow RoundRules"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -66,4 +66,5 @@ None.
 - `scripts/check.sh` exits 0 on this branch (MathShow specs 20 -> 26 passed, 0 failed). A first run failed Luau types in the new spec; fixed by annotating the step table.
 - Spec asserts properties: exact phase sequence and durations over a full cycle, Results only after question N, question durations equal `ProblemRules.generate(...).timeLimit`, non-decreasing difficulty, and errors for out-of-contract input.
 - Not run: Studio (pure module, no Instances).
+- Merged as PR #129 (`45a0583`); closed 2026-10-25. Executor token usage was not recorded (no start reading).
 - For TASK-0092 (RoundService): call `nextPhase` with the index of the current phase and increment it when entering Question; use `difficultyFor(index)` to generate each problem.
