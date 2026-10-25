@@ -105,5 +105,7 @@ including SubmissionRules and its spec.
   MathShow build stamp). Sync was verified by checking the new instances in Studio instead.
 
 ## Audits
+- [[AUD-20261025-TASK-0092-01]] (Opus, attempt 1): pass with 2 minor findings (unthrottled replies/logs for badRange
+  and notOpen; `LateGraceSeconds` only covers loop jitter) and 2 nits. Revision pending jg's call.
 
 ## Outcome
