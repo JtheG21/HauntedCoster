@@ -37,8 +37,8 @@ Lobby → **Intermission** (10s) → **Question** (host shows a problem, timer r
 1. **Scaffold**: folders, bootstrap scripts, TestRunner, check passes.
 2. **ProblemRules**: add/sub/mul/div with integer answers, 3 difficulty tiers. Spec.
 3. **ScoringRules**: answer parsing and speed-bonus scoring. Spec.
-4. **RoundRules**: pure phase transitions and durations. Spec.
-5. **RoundService**: match loop, remotes, validation, rate limit. Pass: 1-player playtest log shows full cycle.
+4. **RoundRules**: pure phase transitions and durations. Spec. Reference: `games/hike-or-die/src/shared/Rules/RoundRules.luau` for a recent phase-machine shape; adapt, don't copy its phases or durations.
+5. **RoundService**: match loop, remotes, validation, rate limit. Pass: 1-player playtest log shows full cycle. Reference: `games/hike-or-die/src/server/RoundService.luau` for a recent server-authoritative round-loop precedent; adapt the pattern, not the game-specific logic.
 6. **Hud**: question, timer, input, feedback. Built in code, no assets.
 7. **Scores**: leaderstats + Results screen.
 8. **2-player test**: Studio local server with 2 players; file a fix list, no fixes in this task.

@@ -5218,7 +5218,8 @@
       "history": [],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "tier": "light"
     },
     {
       "id": "TASK-0089",
@@ -5239,7 +5240,8 @@
       "history": [],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "tier": "light"
     },
     {
       "id": "TASK-0090",
@@ -5260,7 +5262,8 @@
       "history": [],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "tier": "light"
     },
     {
       "id": "TASK-0091",
@@ -5281,7 +5284,8 @@
       "history": [],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "tier": "light"
     },
     {
       "id": "TASK-0092",
@@ -5304,7 +5308,8 @@
       "history": [],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "tier": "deep"
     },
     {
       "id": "TASK-0093",
@@ -5325,7 +5330,8 @@
       "history": [],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "tier": "standard"
     },
     {
       "id": "TASK-0094",
@@ -5346,7 +5352,8 @@
       "history": [],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "tier": "light"
     },
     {
       "id": "TASK-0095",
@@ -5368,7 +5375,8 @@
       "history": [],
       "executions": [],
       "audits": [],
-      "revisions": 0
+      "revisions": 0,
+      "tier": "standard"
     }
   ]
 }

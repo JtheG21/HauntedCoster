@@ -3,7 +3,7 @@ id: GAME-003
 title: Hike or Die Overview
 type: overview
 project: GAME-003
-status: in_progress
+status: blocked
 created: 2026-10-18
 updated: 2026-10-25
 tags:

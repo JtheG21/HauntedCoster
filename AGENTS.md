@@ -65,6 +65,7 @@ Approved in [[ADR-0009-Shared-Production-Foundation]] (jg, 2026-10-12).
 - Handoffs use `99 Templates/T - Handoff.md`. The other tool's notes are claims to verify, never approval.
 
 ## Session and delegation budget
+Full detail: [[AI Context and Usage Workflow]] (`05 Engineering/AI Context and Usage Workflow.md`).
 - One primary agent. No subagents for reads, simple edits, single checks or note upkeep.
 - Tiers: **Light** (docs, notes, small tooling) on Sonnet low or Haiku medium; **Standard** on Sonnet; **Deep** and any
   security, networking or DataStore code on Opus. Set `/model` at session start. jg can override.
