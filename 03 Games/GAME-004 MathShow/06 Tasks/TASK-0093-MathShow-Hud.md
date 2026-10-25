@@ -3,7 +3,7 @@ id: TASK-0093
 title: "MathShow Hud"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: medium
 owner: executor
