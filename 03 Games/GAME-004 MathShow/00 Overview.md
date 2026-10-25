@@ -18,7 +18,8 @@ tags:
 **Code:** `games/mathshow/src/server|shared|client` and `games/mathshow/tests`, synced by `mathshow.project.json` into `MathShow.rbxl`. Scaffolding script `scripts/new-service.sh` stamps a Service/Config/Rules/spec quartet per module.
 
 ## Project profile
-- **Status and phase:** Candidate vertical slice; no code written yet. Eight slice tasks are queued (TASK-0088–0095, below); none has started.
+- **Status and phase:** Candidate vertical slice in progress. TASK-0088–0092 are done (scaffold, ProblemRules, ScoringRules,
+  RoundRules, RoundService: a full server match loop, playtested in [[TEST-20261025-01]]); next is TASK-0093 Hud.
 - **Player cap:** not yet decided; the slice assumes a shared lobby of players answering simultaneously.
 - **Validation:** `scripts/check.sh` (lune specs); `mathshow.project.json` currently maps `tests` → TestService, which may need to change if lune specs end up living outside the place (flagged for the Scaffold task).
 - **Known risk (flagged at intake, not fixed):** `scripts/new-service.sh` generates specs as `tests/<Name>Rules.spec.luau` using `require(script.Parent.TestRunner)` / `TestRunner.T`, but `check.sh` runs lune specs the way `games/hike-or-die/tests/lune/*.spec.luau` does. Compare the two before the Scaffold task (TASK-0088) and fix the template there if they don't match.

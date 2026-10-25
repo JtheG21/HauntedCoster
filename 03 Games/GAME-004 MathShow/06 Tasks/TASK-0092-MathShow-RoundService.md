@@ -127,4 +127,5 @@ including SubmissionRules and its spec.
 - For TASK-0093 (Hud): listen to `RoundState` (`Net.RoundStatePayload`), send `SubmitAnswer(raw: string)`, show
   `AnswerResult`. `endsAt` is server time; the server accepts answers for `LateGraceSeconds` (0.25 s) after it, so the
   Hud may keep input open briefly at 0. Rejections can come back throttled (no reply), so do not wait on a reply.
+- Merged as PR #132 (`f09e1cc`); closed 2026-10-25. Executor usage recorded: 141,237 context tokens.
 - Tooling follow-up: `scripts/studio-preflight.sh` and `scripts/stamp.sh` only support GAME-002.
