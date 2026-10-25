@@ -3,7 +3,7 @@ id: TASK-0088
 title: "MathShow Scaffold"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -84,3 +84,5 @@ Light tier — relies on green `check.sh` (`04 Agents/Task Intake.md` depth tier
 
 ## Outcome
 Scaffold complete. GAME-004 has a working `games/mathshow/src/{server,client}` + `tests/TestRunner.luau`, and — more importantly — `scripts/lune/specs.luau` now runs any game's specs, not just GAME-002's, so TASK-0089 onward can add real `*.spec.luau` files and have `check.sh` actually run them. Studio sync (`rojo serve mathshow.project.json`) not yet verified in this session; do that before or during TASK-0089.
+
+**Post-merge fix (merge-close pass, 2026-10-25):** `games/mathshow/src/shared` was an empty directory in the working tree during this task's own checks, so it passed locally, but git doesn't track empty directories — after the PR merged and a fresh worktree checked it out, the directory didn't exist on disk and `rojo build mathshow.project.json` / `rojo sourcemap` failed outright (`$path` target missing). Added `games/mathshow/src/shared/.gitkeep` so the directory survives a checkout; re-ran `scripts/check.sh` clean in the fresh worktree before recording the merge approval. Lesson for future scaffolds: an empty `$path` directory must have a tracked placeholder file, not just exist locally.
