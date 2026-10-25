@@ -5550,7 +5550,7 @@
       "id": "TASK-0093",
       "title": "MathShow Hud",
       "project": "GAME-004",
-      "status": "in_progress",
+      "status": "in_review",
       "risk": "medium",
       "depends_on": [
         "TASK-0092"
@@ -5574,9 +5574,21 @@
           "from": "ready",
           "to": "in_progress",
           "note": "started"
+        },
+        {
+          "time": "2026-10-25T16:52:46",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
         }
       ],
-      "executions": [],
+      "executions": [
+        {
+          "time": "2026-10-25T16:52:46",
+          "result": "pass",
+          "notes": "Hud implemented; check.sh and strict typecheck green; Studio playtest TEST-20261025-02 AC1-AC3 pass; Submit click and device look need manual check"
+        }
+      ],
       "audits": [],
       "revisions": 0,
       "tier": "standard",

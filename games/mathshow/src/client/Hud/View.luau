@@ -64,6 +64,7 @@ function View.build(parent: Instance): View
 		Visible = false,
 	}, gui) :: TextLabel
 	Theme.textLimit(timerLabel, 24)
+	Theme.outline(timerLabel)
 
 	local question = make("TextLabel", {
 		Name = "Question",
@@ -77,6 +78,7 @@ function View.build(parent: Instance): View
 		Text = "",
 	}, gui) :: TextLabel
 	Theme.textLimit(question, 56)
+	Theme.outline(question)
 
 	local row = make("Frame", {
 		Name = "AnswerRow",
@@ -130,6 +132,7 @@ function View.build(parent: Instance): View
 		Visible = false,
 	}, gui) :: TextLabel
 	Theme.textLimit(feedback, 28)
+	Theme.outline(feedback)
 
 	local view = {} :: any
 	view.gui = gui

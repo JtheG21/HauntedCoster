@@ -44,6 +44,12 @@ function Theme.textLimit(parent: Instance, maxSize: number, minSize: number?)
 	limit.Parent = parent
 end
 
+-- Dark outline so text stays readable over any world behind the Hud.
+function Theme.outline(label: TextLabel)
+	label.TextStrokeColor3 = Color3.new(0, 0, 0)
+	label.TextStrokeTransparency = 0.45
+end
+
 function Theme.sizeLimit(parent: Instance, maxSize: Vector2)
 	local limit = Instance.new("UISizeConstraint")
 	limit.MaxSize = maxSize
