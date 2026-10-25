@@ -13,6 +13,7 @@ local ProblemRules = require(ReplicatedStorage.Shared.ProblemRules)
 local RoundConfig = require(ReplicatedStorage.Shared.RoundConfig)
 local RoundRules = require(ReplicatedStorage.Shared.RoundRules)
 local ScoringRules = require(ReplicatedStorage.Shared.ScoringRules)
+local SubmissionConfig = require(ReplicatedStorage.Shared.SubmissionConfig)
 local SubmissionRules = require(ReplicatedStorage.Shared.SubmissionRules)
 local Remotes = require(script.Parent.Parent.Remotes)
 
@@ -23,6 +24,7 @@ type PlayerState = {
 	participant: boolean, -- joined the match by the time a question opened
 	points: number,
 	lastSubmitAt: number?, -- os.clock()
+	lastRejectAt: number?, -- os.clock() of the last rejection that was replied to or logged
 	answeredIndex: number, -- last question this player has an accepted submission for; 0 = none
 }
 
@@ -41,7 +43,7 @@ local questionEndsClock = 0
 local states: { [Player]: PlayerState } = {}
 
 local function newState(): PlayerState
-	return { participant = false, points = 0, lastSubmitAt = nil, answeredIndex = 0 }
+	return { participant = false, points = 0, lastSubmitAt = nil, lastRejectAt = nil, answeredIndex = 0 }
 end
 
 local function scores(): { Net.ScoreEntry }
@@ -112,7 +114,8 @@ local function resetMatch()
 end
 
 -- Sets the phase state before anything yields, broadcasts, then waits out the phase. `base` is the previous
--- phase's deadline (or now), so each deadline is computed once and waits never accumulate drift.
+-- phase's end (or now), so each deadline is computed once and waits never accumulate drift. A Question stays open
+-- LateGraceSeconds past its shown deadline (endsAt), so the next phase starts that much later.
 local function runPhase(nextPhase: RoundRules.Phase, index: number, duration: number, base: number): number
 	local deadline = base + duration
 	phase = nextPhase
@@ -128,8 +131,9 @@ local function runPhase(nextPhase: RoundRules.Phase, index: number, duration: nu
 	end
 	print(`[MathShow] phase={nextPhase} q={index} seed={matchSeed} endsAt={string.format("%.2f", endsAt)}`)
 	broadcast()
-	waitUntil(deadline)
-	return deadline
+	local closeAt = if nextPhase == "Question" then deadline + SubmissionConfig.LateGraceSeconds else deadline
+	waitUntil(closeAt)
+	return closeAt
 end
 
 -- One match: Intermission (after waiting for a player), six Question/Reveal pairs, Results. Returns early to
@@ -195,6 +199,13 @@ local function onSubmit(player: Player, raw: any)
 	})
 	if SubmissionRules.advancesRateLimit(verdict) then
 		state.lastSubmitAt = now
+	end
+	-- Rejections are replied to and logged at most once per RejectReplyIntervalSeconds, so spam cannot flood either.
+	if SubmissionRules.rejectThrottled(verdict, now, state.lastRejectAt) then
+		return
+	end
+	if verdict ~= "ok" then
+		state.lastRejectAt = now
 	end
 
 	local reply: Net.AnswerResultPayload = { accepted = false }

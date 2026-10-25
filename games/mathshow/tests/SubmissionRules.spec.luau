@@ -147,4 +147,15 @@ return function(t: TestRunner.T)
 			t.eq(SubmissionRules.sendsReply(verdict), silent[verdict] ~= true, `replies {verdict}`)
 		end
 	end)
+
+	t.test("rejectThrottled: rejections inside the reply interval are dropped, ok never is", function()
+		local last = 10
+		local interval = SubmissionConfig.RejectReplyIntervalSeconds
+		for _, verdict in { "badType", "badRange", "notOpen", "rateLimited", "duplicate" } :: { any } do
+			t.eq(SubmissionRules.rejectThrottled(verdict, last, nil), false, `{verdict} first rejection`)
+			t.eq(SubmissionRules.rejectThrottled(verdict, last + interval * 0.5, last), true, `{verdict} inside`)
+			t.eq(SubmissionRules.rejectThrottled(verdict, last + interval, last), false, `{verdict} at interval`)
+		end
+		t.eq(SubmissionRules.rejectThrottled("ok", last, last), false, "ok inside interval")
+	end)
 end

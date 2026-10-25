@@ -5447,7 +5447,7 @@
       "id": "TASK-0092",
       "title": "MathShow RoundService",
       "project": "GAME-004",
-      "status": "approved",
+      "status": "in_progress",
       "risk": "high",
       "depends_on": [
         "TASK-0089",
@@ -5485,6 +5485,18 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-25T16:16:34",
+          "from": "approved",
+          "to": "changes_requested",
+          "note": "changes requested by jg: Revision 1 per AUD-20261025-TASK-0092-01 findings 1-2: throttle rejected-verdict replies/logs; hold Question open until deadline + LateGraceSeconds; revision 1/2"
+        },
+        {
+          "time": "2026-10-25T16:16:34",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "executions": [
@@ -5501,7 +5513,7 @@
           "report": "06 QA/AUD-20261025-TASK-0092-01.md"
         }
       ],
-      "revisions": 0,
+      "revisions": 1,
       "tier": "deep",
       "approved_by": "jg"
     },

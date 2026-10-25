@@ -62,4 +62,13 @@ function SubmissionRules.sendsReply(verdict: Verdict): boolean
 	return verdict ~= "badType" and verdict ~= "rateLimited"
 end
 
+-- Whether a rejected (non-ok) submission is dropped with no reply and no log, because the player's last reported
+-- rejection (lastRejectAt, same clock as now) is inside RejectReplyIntervalSeconds. An ok verdict is never throttled.
+function SubmissionRules.rejectThrottled(verdict: Verdict, now: number, lastRejectAt: number?): boolean
+	if verdict == "ok" or lastRejectAt == nil then
+		return false
+	end
+	return now < lastRejectAt + SubmissionConfig.RejectReplyIntervalSeconds
+end
+
 return table.freeze(SubmissionRules)
