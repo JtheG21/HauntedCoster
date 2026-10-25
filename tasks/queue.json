@@ -5447,7 +5447,7 @@
       "id": "TASK-0092",
       "title": "MathShow RoundService",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "done",
       "risk": "high",
       "depends_on": [
         "TASK-0089",
@@ -5461,11 +5461,90 @@
         "Submissions are validated type -> range -> ownership -> rate limit; only the first valid submission per player per question is accepted.",
         "A 1-player Studio playtest log shows a full cycle: Intermission -> Question -> Reveal -> ... -> Results -> Intermission."
       ],
-      "history": [],
-      "executions": [],
-      "audits": [],
-      "revisions": 0,
-      "tier": "deep"
+      "history": [
+        {
+          "time": "2026-10-25T15:54:32",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-25T15:54:32",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-25T16:10:09",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-25T16:14:44",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-25T16:16:34",
+          "from": "approved",
+          "to": "changes_requested",
+          "note": "changes requested by jg: Revision 1 per AUD-20261025-TASK-0092-01 findings 1-2: throttle rejected-verdict replies/logs; hold Question open until deadline + LateGraceSeconds; revision 1/2"
+        },
+        {
+          "time": "2026-10-25T16:16:34",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-25T16:22:51",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-25T16:22:51",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-25T16:24:17",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-25T16:10:09",
+          "result": "pass",
+          "notes": "RoundService loop, remotes, SubmissionRules+spec; check.sh green; TEST-20261025-01 full cycle pass"
+        },
+        {
+          "time": "2026-10-25T16:22:51",
+          "result": "pass",
+          "notes": "Revision 1: reject throttle + grace hold; check.sh green; TEST-20261025-01 re-run pass"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-25T16:14:44",
+          "result": "pass",
+          "report": "06 QA/AUD-20261025-TASK-0092-01.md"
+        },
+        {
+          "time": "2026-10-25T16:22:51",
+          "result": "pass",
+          "report": "06 QA/AUD-20261025-TASK-0092-02.md"
+        }
+      ],
+      "revisions": 1,
+      "tier": "deep",
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0093",
