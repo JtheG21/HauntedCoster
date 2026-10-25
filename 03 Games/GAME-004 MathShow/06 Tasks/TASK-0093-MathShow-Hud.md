@@ -3,7 +3,7 @@ id: TASK-0093
 title: "MathShow Hud"
 type: task
 project: GAME-004
-status: in_review
+status: approved
 priority: medium
 risk: medium
 owner: executor
@@ -62,5 +62,6 @@ None beyond needing TASK-0092's remotes finished first.
 - **Needs a manual check (jg):** Submit button click, phone-landscape emulator, touch targets and keyboard, gamepad.
 
 ## Audits
+- [[AUD-20261025-TASK-0093-01]] pass (Sonnet, attempt 1): 1 minor, 1 nit, none blocking.
 
 ## Outcome
