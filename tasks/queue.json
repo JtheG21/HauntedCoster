@@ -5205,7 +5205,7 @@
       "id": "TASK-0088",
       "title": "MathShow Scaffold",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "approved",
       "risk": "low",
       "depends_on": [],
       "branch": "task/TASK-0088-MathShow-Scaffold",
@@ -5215,11 +5215,43 @@
         "scripts/check.sh passes with zero or one trivial MathShow spec.",
         "scripts/new-service.sh's spec template is confirmed to match (or fixed to match) how check.sh finds and runs lune specs."
       ],
-      "history": [],
-      "executions": [],
+      "history": [
+        {
+          "time": "2026-10-25T12:03:53",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-25T12:03:53",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-25T12:11:16",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-25T12:11:16",
+          "from": "in_review",
+          "to": "approved",
+          "note": "Light tier: no audit; merge needs human approval"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-25T12:11:16",
+          "result": "pass",
+          "notes": "Scaffold complete; scripts/lune/specs.luau generalized to run any game's specs (was GAME-002-only), fixing the real check.sh gap. check.sh ALL CHECKS PASSED."
+        }
+      ],
       "audits": [],
       "revisions": 0,
-      "tier": "light"
+      "tier": "light",
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0089",

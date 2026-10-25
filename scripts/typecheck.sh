@@ -18,5 +18,9 @@ if [ -n "$out" ]; then echo "$out"; fail=1; fi
 rojo sourcemap haunted.project.json -o sourcemap.json >/dev/null
 out="$(luau-lsp analyze --sourcemap=sourcemap.json --definitions="$defs" --base-luaurc=.luaurc games/haunted 2>&1 | grep -v '^\[INFO\]' || true)"
 if [ -n "$out" ]; then echo "$out"; fail=1; fi
+# GAME-004 (mathshow.project.json). Its own sourcemap file, so sourcemap.json always stays GAME-002 for the editor.
+rojo sourcemap mathshow.project.json -o game004-sourcemap.json >/dev/null
+out="$(luau-lsp analyze --sourcemap=game004-sourcemap.json --definitions="$defs" --base-luaurc=.luaurc games/mathshow 2>&1 | grep -v '^\[INFO\]' || true)"
+if [ -n "$out" ]; then echo "$out"; fail=1; fi
 if [ $fail -ne 0 ]; then exit 1; fi
 echo "no type errors"
