@@ -4698,6 +4698,508 @@
       "revisions": 0,
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0070",
+      "title": "Decoration Load Revalidation",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "tier": "deep",
+      "depends_on": [
+        "TASK-0065"
+      ],
+      "branch": "task/TASK-0070-Decoration-Load-Revalidation",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0070-Decoration-Load-Revalidation.md",
+      "acceptance_criteria": [
+        "Saved placements in house, pen, exhibit, track, entrance or margin keep-outs are stored safely before rendering; entitlements remain owned.",
+        "Valid placements survive save/load unchanged at tiers 0\u20132 and every plot orientation; malformed and boundary data have meaningful specs.",
+        "Repairs are reported; check.sh and Studio rejoin evidence pass; schema changes, if needed, require jg approval."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0071",
+      "title": "Stable Decoration Identity",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "tier": "deep",
+      "depends_on": [
+        "TASK-0065"
+      ],
+      "branch": "task/TASK-0071-Stable-Decoration-Identity",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0071-Stable-Decoration-Identity.md",
+      "acceptance_criteria": [
+        "jg approves any schema/migration change before implementation; legacy placements get stable unique IDs without losing ownership.",
+        "Store A then stale move B cannot edit C; duplicate store, replayed move, missing ID and reordered replies are covered by behavior tests.",
+        "Client/server protocol, saved state and editor use the same identity; check.sh and a 2-client test pass."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0072",
+      "title": "Cosmetic Service Behavior Tests",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "tier": "deep",
+      "depends_on": [
+        "TASK-0067"
+      ],
+      "branch": "task/TASK-0072-Cosmetic-Service-Behavior-Tests",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0072-Cosmetic-Service-Behavior-Tests.md",
+      "acceptance_criteria": [
+        "Exercise equipLook, equipCaptureEffect, equipTheme, claimReward, editDecoration, buy and upgrade fallback using isolated fake profiles/remotes or Studio scenarios.",
+        "Assert unchanged state on malformed/unowned/incompatible/insufficient/full/readonly refusals; test rate wrappers, repeated and stale requests, one debit and one grant.",
+        "Cover theme removal, decoration storing and notices during upgrades, and successful real wiring; check.sh and fresh-session results are recorded."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0073",
+      "title": "Complete Mansion Theme Preview",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "tier": "standard",
+      "depends_on": [
+        "TASK-0064"
+      ],
+      "branch": "task/TASK-0073-Complete-Mansion-Theme-Preview",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0073-Complete-Mansion-Theme-Preview.md",
+      "acceptance_criteria": [
+        "Preview shows the complete supported house exterior, all tinted regions and truthful tier coverage before purchase.",
+        "Preview never mutates the owned house, profile, gameplay or live models; closing/cancel restores the previous screen and scroll.",
+        "Desktop, controller and 300\u2013520 px layouts are verified; physical-device limits remain explicit; check.sh passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0074",
+      "title": "Decoration Editor Interaction Completion",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "tier": "standard",
+      "depends_on": [
+        "TASK-0065",
+        "TASK-0071"
+      ],
+      "branch": "task/TASK-0074-Decoration-Editor-Interaction-Completion",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0074-Decoration-Editor-Interaction-Completion.md",
+      "acceptance_criteria": [
+        "Before implementation, compare the approved baseline with the handoff and confirm whether drag/direct placement is required; do not infer an approved control design.",
+        "If approved, direct placement retains grid, bounded fine adjustment, rotation, valid/invalid feedback, Confirm/Cancel/Move/Store/Exit and stable target identity.",
+        "Server validation stays authoritative; cancellation preserves previous placement; touch/controller/desktop journeys are evidenced; check.sh passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0075",
+      "title": "Cosmetic Cleanup And Placement Constants",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "tier": "standard",
+      "depends_on": [
+        "TASK-0065",
+        "TASK-0067"
+      ],
+      "branch": "task/TASK-0075-Cosmetic-Cleanup-And-Placement-Constants",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0075-Cosmetic-Cleanup-And-Placement-Constants.md",
+      "acceptance_criteria": [
+        "Consolidate duplicate banner/refusal presentation without changing user-facing refusal meanings or ownership behavior.",
+        "Replace hard-coded entrance keep-out z extents with verified layout data and constrain firstSpot scanning to usable bounds; add boundary evidence.",
+        "Remove only proven redundant dirty notifications; state updates, refusal snapshots and toasts remain correct; check.sh and Studio smoke checks pass."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0076",
+      "title": "Environment Revision Remediation",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "tier": "deep",
+      "depends_on": [
+        "TASK-0069"
+      ],
+      "branch": "task/TASK-0076-Environment-Revision-Remediation",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0076-Environment-Revision-Remediation.md",
+      "acceptance_criteria": [
+        "Reproduce and disposition every finding in AUD-20261013-TASK-0044-01 on current code before fixing; do not assume old findings still reproduce.",
+        "Verify deterministic random draw behavior, terrain cleanup/generation protection, supported paint heights and collision deviations; preserve approved walk/layout behavior.",
+        "Provide the missing hub/habitat/tree captures and reference comparison plus fresh 2-client HauntedTrees results; check.sh passes and jg judges visuals."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0077",
+      "title": "Monetization Decision Packet",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "tier": "light",
+      "depends_on": [
+        "TASK-0068"
+      ],
+      "branch": "task/TASK-0077-Monetization-Decision-Packet",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0077-Monetization-Decision-Packet.md",
+      "acceptance_criteria": [
+        "One decision packet covers measured-income Coin prices, forced save policy, milestone roster/reward mapping including SpiderWoodland/Settlement, decoration grid/fine/margin/caps, and visual approval.",
+        "Include ADR-0013 options and all seven questions: mechanism; per-item/bundles scope; Robux/regional prices; Listed; publishing/creator; dual-currency race; receipt storage and two-server safety.",
+        "All unanswered choices remain open; recommendations are labelled; no product IDs, paid calls, publishing, code or schema changes occur; check.sh passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0078",
+      "title": "Art Loading Failure Recovery",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "tier": "standard",
+      "depends_on": [
+        "TASK-0069"
+      ],
+      "branch": "task/TASK-0078-Art-Loading-Failure-Recovery",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0078-Art-Loading-Failure-Recovery.md",
+      "acceptance_criteria": [
+        "A timeout covers dispatch as well as completion even when all bake slots stall; expected parts and failure states prevent silent partial success.",
+        "An asset becoming ready after an initial timeout can recover through a bounded path; failures use an explicit fallback and retain gameplay.",
+        "Overlapping Dressing attaches cannot create duplicate/orphaned visuals; failed-part, delayed-bake and cancellation probes plus timing/memory evidence are recorded; check.sh passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0079",
+      "title": "Vacant Plot Decoration Cleanup",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "tier": "standard",
+      "depends_on": [
+        "TASK-0065"
+      ],
+      "branch": "task/TASK-0079-Vacant-Plot-Decoration-Cleanup",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0079-Vacant-Plot-Decoration-Cleanup.md",
+      "acceptance_criteria": [
+        "Leaving clears decoration instances/lights immediately without deleting saved placements or entitlements.",
+        "A second player assigned the same plot sees only their own decorations; the first player gets their saved placements on rejoin.",
+        "Fresh 2-client leave/reassign evidence and check.sh pass."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0080",
+      "title": "Monetization And Art Studio Verification",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "tier": "deep",
+      "depends_on": [
+        "TASK-0069",
+        "TASK-0067"
+      ],
+      "branch": "task/TASK-0080-Monetization-And-Art-Studio-Verification",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0080-Monetization-And-Art-Studio-Verification.md",
+      "acceptance_criteria": [
+        "Run every outstanding row of TEST-20261018-01 after preflight and module-content sync verification; record exact results and screenshots, never mark a source inference as runtime pass.",
+        "Use memory-only isolated profiles for exploit/setup shortcuts; prove rejoin separately in an explicitly approved isolated persistent test namespace, without live data writes.",
+        "FullLoop, ExploitProbe, fresh Server specs and two-client appearance/leave behavior are evidenced; phone/desktop shots, bake time and memory are recorded; real device gaps stay explicit."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0081",
+      "title": "Finished Cosmetic Asset Brief",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "tier": "standard",
+      "depends_on": [
+        "TASK-0069"
+      ],
+      "branch": "task/TASK-0081-Finished-Cosmetic-Asset-Brief",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0081-Finished-Cosmetic-Asset-Brief.md",
+      "acceptance_criteria": [
+        "Select relevant baseline/gallery originals and record positive and rejected IDs; identify target silhouette, materials, scale and in-game readability for each sample category.",
+        "jg approves a coherent concept and production scope before modeling; placeholders are never labelled final or used as the quality floor.",
+        "Produce scoped per-asset follow-ups with matched-view comparison criteria, neutral/game lighting and gameplay budgets; no uploads or paid generation."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0082",
+      "title": "Readonly Cosmetic Mutation Guard",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "tier": "deep",
+      "depends_on": [
+        "TASK-0067"
+      ],
+      "branch": "task/TASK-0082-Readonly-Cosmetic-Mutation-Guard",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0082-Readonly-Cosmetic-Mutation-Guard.md",
+      "acceptance_criteria": [
+        "All six cosmetic/purchase remotes reject readonly profiles including loss of lock after successful load; no debit, grant, selection, claim or placement changes and no success notification.",
+        "A clear retry/refusal reaches the UI; forged remote calls cannot bypass it; explicitly isolated memory-only Studio mode remains usable with its unsaved banner.",
+        "Behavior tests cover loading, saved, memory, newer-schema readonly and lock-loss readonly; define scope for existing EconomyService consistently with project policy; check.sh and a 2-client test pass."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0083",
+      "title": "Exhibit Tier Guard Ordering",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "low",
+      "tier": "light",
+      "depends_on": [
+        "TASK-0059"
+      ],
+      "branch": "task/TASK-0083-Exhibit-Tier-Guard-Ordering",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0083-Exhibit-Tier-Guard-Ordering.md",
+      "acceptance_criteria": [
+        "setRefusal returns the documented refusal without throwing for nil, strings, tables, NaN, infinities, fractional and out-of-range houseTier values.",
+        "Valid sanitized profiles retain existing slot and owned-ghost behavior; meaningful guard specs and check.sh pass."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0084",
+      "title": "FullLoop Capture Secure Investigation",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "tier": "deep",
+      "depends_on": [
+        "TASK-0069"
+      ],
+      "branch": "task/TASK-0084-FullLoop-Capture-Secure-Investigation",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0084-FullLoop-Capture-Secure-Investigation.md",
+      "acceptance_criteria": [
+        "Reproduce TEST-20261018-01 FullLoop failure in a fresh isolated memory session; identify whether capture/secure regressed or the harness assumption failed before changing production code.",
+        "A missing owned monster records earlier failed checks and exits clearly instead of throwing at acquiredAt; preserve legitimate capture, transport and securing requirements.",
+        "FullLoop and ExploitProbe pass with exact check counts; relevant two-client behavior is evidenced; check.sh passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0085",
+      "title": "Narrow Viewport HUD Navigation",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "medium",
+      "tier": "standard",
+      "depends_on": [
+        "TASK-0061"
+      ],
+      "branch": "task/TASK-0085-Narrow-Viewport-Hud-Navigation",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0085-Narrow-Viewport-Hud-Navigation.md",
+      "acceptance_criteria": [
+        "At actual simulated widths 300, 390 and 520 px, all HUD/navigation controls fit inside the safe area and remain readable/reachable; no left-edge clipping.",
+        "Verify Shop/Mansion header-title spacing, filters, details, Back scroll, Buy/Confirm/pending and editor controls on touch and controller without blocking ordinary gameplay.",
+        "Record desktop and phone screenshots plus manual-device limits; check.sh passes."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0086",
+      "title": "Accepted Wisp Revision Recovery",
+      "project": "GAME-002",
+      "status": "proposed",
+      "risk": "high",
+      "tier": "deep",
+      "depends_on": [
+        "TASK-0069"
+      ],
+      "branch": "task/TASK-0086-Accepted-Wisp-Revision-Recovery",
+      "note": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0086-Accepted-Wisp-Revision-Recovery.md",
+      "acceptance_criteria": [
+        "Recover the accepted final Wisp data and existing imported PBR asset plus minimal MeshBuild, ArtBake, ImportYaw and animation/scale dependencies from the preserved revision branch; no uploads or paid generation.",
+        "Preserve main cosmetics, SkinId/AuraId, rare-variant restrictions, persistence, UI and CI-pinned type compatibility; do not merge excluded overhaul ancestry.",
+        "Verify normal/Spectral/Ashen wild, carried, pen and exhibit appearances in fresh Studio; capture matched views against the accepted Wisp and baseline originals, measure budgets, test two-client visibility and imported fallback; check.sh green.",
+        "Record every selected commit/file and any omitted dependency; jg reviews visual equivalence and explicitly approves the integration merge."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0
+    },
+    {
+      "id": "TASK-0087",
+      "title": "Hike or Die Gate 1 Prototype",
+      "project": "GAME-003",
+      "status": "done",
+      "risk": "high",
+      "depends_on": [],
+      "branch": "task/TASK-0087-Hike-Or-Die-Gate-1",
+      "note": "03 Games/GAME-003 Hike or Die/06 Tasks/TASK-0087-Hike-Or-Die-Gate-1.md",
+      "acceptance_criteria": [
+        "GAME-003 has an isolated code root, Rojo project and validation path; GAME-001 and GAME-002 remain unchanged.",
+        "One compact readable trail supports a route/cover choice and marked extraction.",
+        "One cryptid supports readable observe, investigate, pursue and return states.",
+        "The camera interaction supports clear framing and shutter input, with desktop and touch evaluated before a final camera decision.",
+        "Evidence is computed on the server from validated target visibility, distance, state and risk signals; feedback explains result.",
+        "Extraction summary agrees with carried metadata; restart resets camera, UI, creature and round state.",
+        "Repeatable scenarios cover validation, spoofed inputs, chase reset, extraction and restart.",
+        "scripts/check.sh passes; local Studio results and limitations are recorded; no release or persistence claims are made."
+      ],
+      "history": [
+        {
+          "time": "2026-10-18T21:01:09",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-18T21:01:09",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T23:54:17",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T23:54:18",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-18T23:54:18",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T23:56:01",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-18T23:58:25",
+          "from": "in_review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 2/2"
+        },
+        {
+          "time": "2026-10-18T23:58:25",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-18T23:59:06",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-19T00:00:24",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-19T00:00:24",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-18T23:54:17",
+          "result": "pass",
+          "notes": "Independent audit found stale chase-run and camera/evidence/restart issues; repaired stale-run safety, bounded photo ray origin, and restart positioning; camera remains a user-reported prototype limitation."
+        },
+        {
+          "time": "2026-10-18T23:56:01",
+          "result": "pass",
+          "notes": "Audit remediation: chase run-version guard, finite bounded camera origin for raycast/scoring, and restart respawn/position reset. HOD-specific checks and scripts/check.sh passed; camera remains an explicitly deferred known failure."
+        },
+        {
+          "time": "2026-10-18T23:59:06",
+          "result": "pass",
+          "notes": "Second audit remediation: serialize restart requests and verify token, owner, round, phase, and player after character loading. HOD-specific checks, repository check, and vault validation pass; camera remains explicitly deferred."
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-18T23:54:18",
+          "result": "fail",
+          "report": "06 QA/AUD-20261018-TASK-0087-01.md"
+        },
+        {
+          "time": "2026-10-18T23:58:25",
+          "result": "fail",
+          "report": "06 QA/AUD-20261018-TASK-0087-02.md"
+        },
+        {
+          "time": "2026-10-19T00:00:24",
+          "result": "pass",
+          "report": "06 QA/AUD-20261019-TASK-0087-03.md"
+        }
+      ],
+      "revisions": 2,
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }

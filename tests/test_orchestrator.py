@@ -214,6 +214,22 @@ class TestBudgetAndDispatch(Base):
         self.assertIn("04 Agents/Executor.md", prompt)
         self.assertFalse((self.root / "tasks" / "usage-ledger.jsonl").exists())
 
+    def test_dispatch_prompt_carries_criteria_and_expected_files(self):
+        # Scope is read from existing queue and note fields, not stored as a new source of truth.
+        note = self.root / "TASK-0001-X.md"
+        note.write_text("# X\n\n## Files expected to change\n- `scripts/x.py`\n- `tests/test_x.py`\n\n## Tests\nStudio scenario\n")
+        self.write_queue([task("TASK-0001", note="TASK-0001-X.md")])
+        p = self.proj()
+        p.queue["tasks"][0]["acceptance_criteria"] = ["first criterion", "second criterion"]
+        prompt = p.build_prompt(p.task("TASK-0001"), "executor")
+        self.assertIn("- first criterion\n- second criterion", prompt)
+        self.assertIn("- scripts/x.py\n- tests/test_x.py", prompt)
+
+    def test_dispatch_prompt_without_note_has_no_file_list(self):
+        prompt = self.proj().build_prompt(self.proj().task("TASK-0001"), "auditor")
+        self.assertNotIn("Files expected", prompt)
+        self.assertIn("- works", prompt)
+
     def test_live_dispatch_refused(self):
         p = self.proj()
         p.approve("TASK-0001", "jg")

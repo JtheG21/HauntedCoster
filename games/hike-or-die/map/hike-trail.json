@@ -1,0 +1,879 @@
+{
+  "name": "HikeOrDieTrail",
+  "profile": "games/hike-or-die/map/profile.json",
+  "ground_is_parts": "Gate 1 blockout uses a flat part floor for reproducible route and cover tests; organic terrain is deferred.",
+  "open_edges": "The compact test area is enclosed by four visible collision boundaries; the surrounding void is outside the play volume.",
+  "volume": {
+    "bounds": [
+      [
+        -51,
+        -32,
+        -61
+      ],
+      [
+        51,
+        52,
+        61
+      ]
+    ],
+    "killPlane": -32,
+    "ringOutOffset": 10,
+    "lift": 8
+  },
+  "parts": [
+    {
+      "id": "Ground",
+      "size": [
+        100,
+        1,
+        120
+      ],
+      "pos": [
+        0,
+        -0.5,
+        0
+      ],
+      "roles": [
+        "arena_floor"
+      ],
+      "color": [
+        38,
+        48,
+        38
+      ],
+      "material": "Ground"
+    },
+    {
+      "id": "MainTrailNorth",
+      "size": [
+        10,
+        0.12,
+        38
+      ],
+      "pos": [
+        0,
+        0.08,
+        28
+      ],
+      "roles": [
+        "trail_route"
+      ],
+      "color": [
+        112,
+        91,
+        66
+      ],
+      "material": "Ground",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "MainTrailSouth",
+      "size": [
+        10,
+        0.12,
+        36
+      ],
+      "pos": [
+        0,
+        0.08,
+        -32
+      ],
+      "roles": [
+        "trail_route"
+      ],
+      "color": [
+        112,
+        91,
+        66
+      ],
+      "material": "Ground",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "WestTrail",
+      "size": [
+        14,
+        0.12,
+        30
+      ],
+      "pos": [
+        -15,
+        0.08,
+        -4
+      ],
+      "roles": [
+        "alternate_route"
+      ],
+      "color": [
+        112,
+        91,
+        66
+      ],
+      "material": "Ground",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "EastTrail",
+      "size": [
+        14,
+        0.12,
+        30
+      ],
+      "pos": [
+        15,
+        0.08,
+        -4
+      ],
+      "roles": [
+        "alternate_route"
+      ],
+      "color": [
+        112,
+        91,
+        66
+      ],
+      "material": "Ground",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "WestJoinN",
+      "size": [
+        16,
+        0.12,
+        10
+      ],
+      "pos": [
+        -8,
+        0.08,
+        11
+      ],
+      "roles": [
+        "trail_route"
+      ],
+      "color": [
+        112,
+        91,
+        66
+      ],
+      "material": "Ground",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "EastJoinN",
+      "size": [
+        16,
+        0.12,
+        10
+      ],
+      "pos": [
+        8,
+        0.08,
+        11
+      ],
+      "roles": [
+        "trail_route"
+      ],
+      "color": [
+        112,
+        91,
+        66
+      ],
+      "material": "Ground",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "WestJoinS",
+      "size": [
+        16,
+        0.12,
+        10
+      ],
+      "pos": [
+        -8,
+        0.08,
+        -19
+      ],
+      "roles": [
+        "trail_route"
+      ],
+      "color": [
+        112,
+        91,
+        66
+      ],
+      "material": "Ground",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "EastJoinS",
+      "size": [
+        16,
+        0.12,
+        10
+      ],
+      "pos": [
+        8,
+        0.08,
+        -19
+      ],
+      "roles": [
+        "trail_route"
+      ],
+      "color": [
+        112,
+        91,
+        66
+      ],
+      "material": "Ground",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "CoverA",
+      "size": [
+        10,
+        7,
+        3
+      ],
+      "pos": [
+        -9,
+        3.5,
+        2
+      ],
+      "roles": [
+        "cover"
+      ],
+      "color": [
+        70,
+        75,
+        61
+      ],
+      "material": "Slate",
+      "decor": true
+    },
+    {
+      "id": "CoverB",
+      "size": [
+        3,
+        7,
+        10
+      ],
+      "pos": [
+        9,
+        3.5,
+        -7
+      ],
+      "roles": [
+        "cover"
+      ],
+      "color": [
+        70,
+        75,
+        61
+      ],
+      "material": "Slate",
+      "decor": true
+    },
+    {
+      "id": "CoverC",
+      "size": [
+        8,
+        5,
+        3
+      ],
+      "pos": [
+        -17,
+        2.5,
+        -16
+      ],
+      "roles": [
+        "cover"
+      ],
+      "color": [
+        78,
+        75,
+        63
+      ],
+      "material": "Slate",
+      "decor": true
+    },
+    {
+      "id": "CoverD",
+      "size": [
+        3,
+        6,
+        9
+      ],
+      "pos": [
+        19,
+        3,
+        -12
+      ],
+      "roles": [
+        "cover"
+      ],
+      "color": [
+        78,
+        75,
+        63
+      ],
+      "material": "Slate",
+      "decor": true
+    },
+    {
+      "id": "TrailheadSign",
+      "size": [
+        2,
+        10,
+        2
+      ],
+      "pos": [
+        -8,
+        5,
+        43
+      ],
+      "roles": [
+        "landmark"
+      ],
+      "color": [
+        106,
+        83,
+        48
+      ],
+      "material": "Wood",
+      "decor": true
+    },
+    {
+      "id": "ExitBeacon",
+      "size": [
+        6,
+        18,
+        6
+      ],
+      "pos": [
+        0,
+        9,
+        -52
+      ],
+      "roles": [
+        "extraction_landmark"
+      ],
+      "color": [
+        197,
+        150,
+        67
+      ],
+      "material": "Neon",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "NorthWall",
+      "size": [
+        2,
+        16,
+        124
+      ],
+      "pos": [
+        -51,
+        8,
+        0
+      ],
+      "roles": [
+        "boundary"
+      ],
+      "color": [
+        30,
+        37,
+        30
+      ],
+      "material": "Slate",
+      "barrier": true
+    },
+    {
+      "id": "SouthWall",
+      "size": [
+        2,
+        16,
+        124
+      ],
+      "pos": [
+        51,
+        8,
+        0
+      ],
+      "roles": [
+        "boundary"
+      ],
+      "color": [
+        30,
+        37,
+        30
+      ],
+      "material": "Slate",
+      "barrier": true
+    },
+    {
+      "id": "WestWall",
+      "size": [
+        100,
+        16,
+        2
+      ],
+      "pos": [
+        0,
+        8,
+        61
+      ],
+      "roles": [
+        "boundary"
+      ],
+      "color": [
+        30,
+        37,
+        30
+      ],
+      "material": "Slate",
+      "barrier": true
+    },
+    {
+      "id": "EastWall",
+      "size": [
+        100,
+        16,
+        2
+      ],
+      "pos": [
+        0,
+        8,
+        -61
+      ],
+      "roles": [
+        "boundary"
+      ],
+      "color": [
+        30,
+        37,
+        30
+      ],
+      "material": "Slate",
+      "barrier": true
+    },
+    {
+      "id": "TreeTrunk1",
+      "size": [
+        3,
+        12,
+        3
+      ],
+      "pos": [
+        -28,
+        6,
+        28
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        63,
+        48,
+        37
+      ],
+      "material": "Wood",
+      "decor": true
+    },
+    {
+      "id": "TreeCanopy1",
+      "size": [
+        12,
+        12,
+        12
+      ],
+      "pos": [
+        -28,
+        14,
+        28
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        35,
+        55,
+        40
+      ],
+      "material": "LeafyGrass",
+      "shape": "ball",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "TreeTrunk2",
+      "size": [
+        3,
+        12,
+        3
+      ],
+      "pos": [
+        28,
+        6,
+        27
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        63,
+        48,
+        37
+      ],
+      "material": "Wood",
+      "decor": true
+    },
+    {
+      "id": "TreeCanopy2",
+      "size": [
+        12,
+        12,
+        12
+      ],
+      "pos": [
+        28,
+        14,
+        27
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        35,
+        55,
+        40
+      ],
+      "material": "LeafyGrass",
+      "shape": "ball",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "TreeTrunk3",
+      "size": [
+        3,
+        12,
+        3
+      ],
+      "pos": [
+        -31,
+        6,
+        -5
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        63,
+        48,
+        37
+      ],
+      "material": "Wood",
+      "decor": true
+    },
+    {
+      "id": "TreeCanopy3",
+      "size": [
+        12,
+        12,
+        12
+      ],
+      "pos": [
+        -31,
+        14,
+        -5
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        35,
+        55,
+        40
+      ],
+      "material": "LeafyGrass",
+      "shape": "ball",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "TreeTrunk4",
+      "size": [
+        3,
+        12,
+        3
+      ],
+      "pos": [
+        31,
+        6,
+        2
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        63,
+        48,
+        37
+      ],
+      "material": "Wood",
+      "decor": true
+    },
+    {
+      "id": "TreeCanopy4",
+      "size": [
+        12,
+        12,
+        12
+      ],
+      "pos": [
+        31,
+        14,
+        2
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        35,
+        55,
+        40
+      ],
+      "material": "LeafyGrass",
+      "shape": "ball",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "TreeTrunk5",
+      "size": [
+        3,
+        12,
+        3
+      ],
+      "pos": [
+        -28,
+        6,
+        -34
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        63,
+        48,
+        37
+      ],
+      "material": "Wood",
+      "decor": true
+    },
+    {
+      "id": "TreeCanopy5",
+      "size": [
+        12,
+        12,
+        12
+      ],
+      "pos": [
+        -28,
+        14,
+        -34
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        35,
+        55,
+        40
+      ],
+      "material": "LeafyGrass",
+      "shape": "ball",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "TreeTrunk6",
+      "size": [
+        3,
+        12,
+        3
+      ],
+      "pos": [
+        29,
+        6,
+        -36
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        63,
+        48,
+        37
+      ],
+      "material": "Wood",
+      "decor": true
+    },
+    {
+      "id": "TreeCanopy6",
+      "size": [
+        12,
+        12,
+        12
+      ],
+      "pos": [
+        29,
+        14,
+        -36
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        35,
+        55,
+        40
+      ],
+      "material": "LeafyGrass",
+      "shape": "ball",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "TreeTrunk7",
+      "size": [
+        3,
+        12,
+        3
+      ],
+      "pos": [
+        -24,
+        6,
+        49
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        63,
+        48,
+        37
+      ],
+      "material": "Wood",
+      "decor": true
+    },
+    {
+      "id": "TreeCanopy7",
+      "size": [
+        12,
+        12,
+        12
+      ],
+      "pos": [
+        -24,
+        14,
+        49
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        35,
+        55,
+        40
+      ],
+      "material": "LeafyGrass",
+      "shape": "ball",
+      "solid": false,
+      "decor": true
+    },
+    {
+      "id": "TreeTrunk8",
+      "size": [
+        3,
+        12,
+        3
+      ],
+      "pos": [
+        24,
+        6,
+        48
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        63,
+        48,
+        37
+      ],
+      "material": "Wood",
+      "decor": true
+    },
+    {
+      "id": "TreeCanopy8",
+      "size": [
+        12,
+        12,
+        12
+      ],
+      "pos": [
+        24,
+        14,
+        48
+      ],
+      "roles": [
+        "tree_blockout"
+      ],
+      "color": [
+        35,
+        55,
+        40
+      ],
+      "material": "LeafyGrass",
+      "shape": "ball",
+      "solid": false,
+      "decor": true
+    }
+  ],
+  "spawns": [
+    [
+      0,
+      3,
+      52
+    ]
+  ],
+  "intent": {
+    "reachable": [
+      "Ground"
+    ],
+    "transit": [],
+    "reachableOnlyBy": {},
+    "ringOut": {
+      "counterplay": "none",
+      "minWindow": 0.0,
+      "from": [
+        "Ground"
+      ]
+    }
+  },
+  "sightlines": {
+    "minClearFraction": 0.18,
+    "maxClearFraction": 0.96
+  }
+}

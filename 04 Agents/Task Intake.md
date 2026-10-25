@@ -25,7 +25,7 @@ The entry point for every task, in any game. [[AGENTS]] holds the rules, [[Workf
 
 ## Start procedure
 1. **Project and task.** `python3 scripts/orchestrator.py status`, the game's `00 Overview`, `git status` and the branch. Run `scripts/preflight.sh` before any state-changing Git operation. Note `get_usage` context tokens in the task note, so `task-close` can log the growth.
-2. **Instructions.** `AGENTS.md`, then only the project notes the task touches. Don't reread what is already in context.
+2. **Instructions.** `AGENTS.md`, then only the project notes the task touches. Don't reread what is already in context. Context, dispatch and usage rules: [[AI Context and Usage Workflow]].
 3. **Decisions already made.** The queue entry, the TASK note, ADRs, the Game Design, and memory. Never ask for something already documented.
 4. **Classify** (table below) and open only the matching workflow(s).
 5. **Reuse search.** Check the [[Resource Catalog]], the lessons in `09 Knowledge/` and the [[Video Research Index]] for the task's area, then the [[Reference_Code_Index]], then `10 References/<area>/` (`python3 scripts/refs.py brief --task TASK-####` or `--category <name>` prints the matching notes' Intent and open questions; `orchestrator.py start` prints it too), then the existing code (grep). If the task hits a gap those can't fill (a document to extract, a blocked source, structured data, a second perspective, repeatable captures), check the trigger table in [[RSH-20261017-Repo-Adoption-Plan]]; its candidates are optional, trialled only on a real need, never a default stage. Write reuse, adapt or replace, and why, in the task note.
