@@ -1,4 +1,4 @@
-# GAME-003 MathShow — Design
+# GAME-004 MathShow — Design
 
 Keep this to one page. Agents read it per task.
 

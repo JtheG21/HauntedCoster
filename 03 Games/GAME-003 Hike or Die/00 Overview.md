@@ -5,12 +5,14 @@ type: overview
 project: GAME-003
 status: in_progress
 created: 2026-10-18
-updated: 2026-10-19
+updated: 2026-10-25
 tags:
   - game/overview
 ---
 
 # GAME-003: Hike or Die
+
+**Paused (jg, 2026-10-25):** GAME-004 MathShow is now the studio's active game. Hike or Die stops at the Gate 1 state below; no further work on it unless a task says so.
 
 **Phase:** Gate 1 — prove the photographic risk/reward loop. The project is a candidate and is not the studio's active game. The design source is Hike_or_Die_GAME-003_Gate_1_Brief.md (2026-10-18). Gate 1 is not a production or commercial greenlight.
 

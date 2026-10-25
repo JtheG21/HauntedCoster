@@ -8,11 +8,12 @@ proceed-or-ask, handoffs). Check `00 Studio/Resource Catalog.md` before building
 Approved in [[ADR-0009-Shared-Production-Foundation]] (jg, 2026-10-12).
 
 ## Project map
-- **Active game: GAME-003 MathShow** (`03 Games/GAME-003 MathShow/`): a timed math gameshow. Design: `games/mathshow/DESIGN.md`.
+- **Active game: GAME-004 MathShow** (`03 Games/GAME-004 MathShow/`): a timed math gameshow. Design: `games/mathshow/DESIGN.md`.
   Code: `games/mathshow/src/server|shared|client` and `games/mathshow/tests`, synced by **`mathshow.project.json`** into
   `MathShow.rbxl`. **Only these reach that game.**
-- Paused: GAME-002 Haunted Collector (`games/haunted`, `haunted.project.json`) and GAME-001 Rg1 (`src/`, `tests/luau`,
-  `default.project.json`). Source material only. Don't change them unless a task says so.
+- Paused: GAME-003 Hike or Die (`games/hike-or-die`, `hike-or-die.project.json`), GAME-002 Haunted Collector (`games/haunted`,
+  `haunted.project.json`) and GAME-001 Rg1 (`src/`, `tests/luau`, `default.project.json`). Source material only. Don't
+  change them unless a task says so.
 - **One Rojo server, matched to its place.** Check what's serving first (`ps aux | grep "rojo serve"`). Never connect a
   project file to another game's place: it pulls that game's Baseplate, Lighting and scripts in ([[TEST-20261011-02]]).
   Switching branches under a running server can crash Rojo ([[LES-0003-Rojo-Crash-On-Branch-Switch]]); use a worktree.
