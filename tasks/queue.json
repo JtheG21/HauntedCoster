@@ -5678,7 +5678,7 @@
       "id": "TASK-0095",
       "title": "MathShow 2-Player Test",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "changes_requested",
       "risk": "low",
       "depends_on": [
         "TASK-0093",
@@ -5691,11 +5691,37 @@
         "A TEST note records what worked, what didn't, and console evidence.",
         "Every finding is filed as a follow-up task (or explicitly deferred with a reason)."
       ],
-      "history": [],
-      "executions": [],
+      "history": [
+        {
+          "time": "2026-10-25T18:56:55",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-25T18:57:15",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-25T19:03:39",
+          "from": "in_progress",
+          "to": "changes_requested",
+          "note": "execution checks failed; revision 1/2"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-25T19:03:39",
+          "result": "fail",
+          "notes": "AC1 blocked: second Studio client never joined in 2 attempts; TEST-20261025-04"
+        }
+      ],
       "audits": [],
-      "revisions": 0,
-      "tier": "standard"
+      "revisions": 1,
+      "tier": "standard",
+      "approved_by": "jg"
     }
   ]
 }
