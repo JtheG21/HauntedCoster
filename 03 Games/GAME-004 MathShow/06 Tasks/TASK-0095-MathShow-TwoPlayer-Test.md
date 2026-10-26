@@ -3,7 +3,7 @@ id: TASK-0095
 title: "MathShow 2-Player Test"
 type: task
 project: GAME-004
-status: proposed
+status: archived
 priority: medium
 risk: low
 owner: executor
@@ -40,7 +40,7 @@ Run the full vertical slice in Studio with a 2-player local server and file a fi
 
 ## Acceptance criteria
 - [ ] AC1 A full match completes with 2 players joined, each submitting at least one answer.
-- [ ] AC2 A TEST note records what worked, what didn't, and console evidence.
+- [x] AC2 A TEST note records what worked, what didn't, and console evidence.
 - [ ] AC3 Every finding is filed as a follow-up task (or explicitly deferred with a reason) — no silent gaps.
 
 ## Tests
@@ -54,7 +54,9 @@ This is the slice's acceptance gate — don't start Design/implementation on any
 
 ---
 ## Implementation record
+Test-only task, no `games/mathshow/` change. Two attempts at `ExecuteMultiplayerTestAsync(2, ...)` (the original and the one allowed retry) both ended with a single client; see [[TEST-20261025-04]]. AC1 not met (blocked, needs a manual check or a new harness task); AC2 met (TEST note with console evidence); AC3: findings listed in the TEST note, each deferred with a reason because new task IDs come from jg. Reporting state: blocked.
 
 ## Audits
 
 ## Outcome
+- jg waived the 2-player check on 2026-10-25 ("unnecessary"). AC1 was never met and is not claimed; AC3 is closed by that waiver: the 2-client harness finding is dropped, not filed. Task archived, not done. Two-player behaviour (ties, `+N more`, mid-match join/leave) stays untested; see [[TEST-20261025-04]].

@@ -20,7 +20,7 @@ tags:
 ## Project profile
 - **Status and phase:** Candidate vertical slice in progress. TASK-0088–0094 are done (scaffold, ProblemRules, ScoringRules,
   RoundRules, RoundService: a full server match loop, playtested in [[TEST-20261025-01]]; Hud: client countdown, input and
-  feedback, playtested in [[TEST-20261025-02]]; Scores: a `Score` leaderstat published at Reveal and a Results podium, playtested in [[TEST-20261025-03]]); next is TASK-0095 2-player test.
+  feedback, playtested in [[TEST-20261025-02]]; Scores: a `Score` leaderstat published at Reveal and a Results podium, playtested in [[TEST-20261025-03]]); the TASK-0095 2-player test was waived by jg and archived (two-player behaviour untested).
 - **Player cap:** not yet decided; the slice assumes a shared lobby of players answering simultaneously.
 - **Validation:** `scripts/check.sh` (lune specs); `mathshow.project.json` currently maps `tests` → TestService, which may need to change if lune specs end up living outside the place (flagged for the Scaffold task).
 - **Known risk (flagged at intake, not fixed):** `scripts/new-service.sh` generates specs as `tests/<Name>Rules.spec.luau` using `require(script.Parent.TestRunner)` / `TestRunner.T`, but `check.sh` runs lune specs the way `games/hike-or-die/tests/lune/*.spec.luau` does. Compare the two before the Scaffold task (TASK-0088) and fix the template there if they don't match.
