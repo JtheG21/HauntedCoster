@@ -11,6 +11,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local HudConfig = require(Shared:WaitForChild("HudConfig"))
 local HudRules = require(Shared:WaitForChild("HudRules"))
 local Net = require(Shared:WaitForChild("Net"))
+local StandingsRules = require(Shared:WaitForChild("StandingsRules"))
 
 local Fx = require(script.Fx)
 local View = require(script.View)
@@ -70,6 +71,23 @@ local function startCountdown(s: Session)
 	end)
 end
 
+-- Cosmetic: a fault here warns and leaves the rest of the Hud working.
+local function applyResults(s: Session, show: HudRules.Visibility, payload: any)
+	local ok, err = pcall(function()
+		if not show.results then
+			s.view.setResults(nil, nil)
+		elseif StandingsRules.isValidScores(payload.scores) then
+			s.view.setResults(StandingsRules.build(payload.scores, Players.LocalPlayer.UserId), nil)
+		else
+			warn("[MathShow] Hud ignored malformed scores")
+			s.view.setResults(nil, Strings.ScoresUnavailable)
+		end
+	end)
+	if not ok then
+		warn(`[MathShow] Hud results failed: {err}`)
+	end
+end
+
 local function applyState(s: Session, payload: any)
 	if not HudRules.isValidState(payload) then
 		warn("[MathShow] Hud ignored a malformed RoundState")
@@ -110,6 +128,8 @@ local function applyState(s: Session, payload: any)
 	elseif phase == "Reveal" and s.submittedIndex ~= s.questionIndex then
 		s.view.setFeedback(Strings.TimesUp, "info")
 	end
+
+	applyResults(s, show, payload)
 
 	local counting = show.timer and payload.endsAt > 0
 	if counting then

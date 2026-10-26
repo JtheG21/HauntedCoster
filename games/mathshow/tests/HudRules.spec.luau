@@ -129,12 +129,18 @@ return function(t: TestRunner.T)
 			t.truthy(v.question and v.timer, phase)
 			t.eq(v.input, false, phase)
 		end
-		for _, phase in { "Results", "Bogus", "" } do
+		for _, phase in { "Question", "Intermission", "Reveal", "Bogus", "" } do
+			t.eq(HudRules.visibility(phase).results, false, phase)
+		end
+		local results = HudRules.visibility("Results")
+		t.truthy(results.results)
+		t.eq(results.question or results.timer or results.input, false)
+		for _, phase in { "Bogus", "" } do
 			local v = HudRules.visibility(phase)
-			t.eq(v.question or v.timer or v.input, false)
+			t.eq(v.question or v.timer or v.input or v.results, false)
 		end
 		local none = HudRules.visibility(nil)
-		t.eq(none.question or none.timer or none.input, false)
+		t.eq(none.question or none.timer or none.input or none.results, false)
 	end)
 
 	t.test("questionLabel per phase", function()

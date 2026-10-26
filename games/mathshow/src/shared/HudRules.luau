@@ -11,7 +11,7 @@ local ScoringRules = require(script.Parent.ScoringRules)
 
 export type Phase = "Intermission" | "Question" | "Reveal" | "Results"
 export type FeedbackKind = "correct" | "incorrect" | "notCounted"
-export type Visibility = { question: boolean, timer: boolean, input: boolean }
+export type Visibility = { question: boolean, timer: boolean, input: boolean, results: boolean }
 
 local PHASES: { [string]: boolean } = { Intermission = true, Question = true, Reveal = true, Results = true }
 
@@ -131,11 +131,13 @@ end
 
 function HudRules.visibility(phase: any): Visibility
 	if phase == "Question" then
-		return { question = true, timer = true, input = true }
+		return { question = true, timer = true, input = true, results = false }
 	elseif phase == "Intermission" or phase == "Reveal" then
-		return { question = true, timer = true, input = false }
+		return { question = true, timer = true, input = false, results = false }
+	elseif phase == "Results" then
+		return { question = false, timer = false, input = false, results = true }
 	end
-	return { question = false, timer = false, input = false }
+	return { question = false, timer = false, input = false, results = false }
 end
 
 return table.freeze(HudRules)

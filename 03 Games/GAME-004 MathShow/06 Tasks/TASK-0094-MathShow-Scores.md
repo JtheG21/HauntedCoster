@@ -3,7 +3,7 @@ id: TASK-0094
 title: "MathShow Scores"
 type: task
 project: GAME-004
-status: proposed
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -39,9 +39,9 @@ leaderstats integration and a Results screen showing the podium at match end, so
 - `games/mathshow/src/client/Hud/` (Results screen, extends TASK-0093's HUD)
 
 ## Acceptance criteria
-- [ ] AC1 Each player has a visible `Score` leaderstat that updates after each Reveal.
-- [ ] AC2 The Results screen shows a ranked podium matching the server's `scores` at match end.
-- [ ] AC3 No DataStore or persistence call is introduced in this task.
+- [x] AC1 Each player has a visible `Score` leaderstat that updates after each Reveal.
+- [x] AC2 The Results screen shows a ranked podium matching the server's `scores` at match end.
+- [x] AC3 No DataStore or persistence call is introduced in this task.
 
 ## Tests
 - **Automated:** `scripts/check.sh`
@@ -53,6 +53,15 @@ None.
 
 ---
 ## Implementation record
+Tier light (Sonnet). Context-usage reading: not taken, the executor has no tool to read it (TASK-0093 also closed without one). Branch `task/TASK-0094-MathShow-Scores`.
+
+- **New:** `server/Services/LeaderstatsService.luau`, `shared/StandingsConfig.luau`, `shared/StandingsRules.luau`, `tests/StandingsRules.spec.luau`.
+- **Changed:** `RoundService.luau` (reset in `resetMatch`, publish before the Reveal broadcast, both pcall-wrapped), `server/init.server.luau` (start order), `HudRules` (+`results` visibility) and its spec, `HudConfig` strings (plus `MoreFormat`, needed for `+N more`), `client/Hud/View.luau` (Results panel, `setResults`), `client/Hud/init.luau` (`applyResults`).
+- **Untouched:** `Net.luau`, `Remotes.luau`, scoring and submission logic.
+- **Checks:** `scripts/check.sh` ALL CHECKS PASSED, MathShow 75 specs (57 before); `TYPECHECK_REQUIRED=1 scripts/typecheck.sh` no type errors.
+- **Playtest:** [[TEST-20261025-03]], two one-player matches, AC1-AC3 met. No Results screenshot (see the TEST note).
+- **Assumptions:** leaderstats are match-level (reset at match start, in-memory); updated at Reveal for secrecy; podium 3 plus 5 list rows plus the local player's row; ties share a rank.
+- **Follow-ups open:** Reveal "who got it" needs a payload change; `studio-preflight.sh`/`stamp.sh` are GAME-002-only; FireServer-failure message.
 
 ## Audits
 
