@@ -3,7 +3,7 @@ id: TASK-0094
 title: "MathShow Scores"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor

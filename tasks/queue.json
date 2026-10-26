@@ -5617,7 +5617,7 @@
       "id": "TASK-0094",
       "title": "MathShow Scores",
       "project": "GAME-004",
-      "status": "approved",
+      "status": "done",
       "risk": "low",
       "depends_on": [
         "TASK-0092"
@@ -5653,6 +5653,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "Light tier: no audit; merge needs human approval"
+        },
+        {
+          "time": "2026-10-25T18:01:56",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -5665,7 +5671,8 @@
       "audits": [],
       "revisions": 0,
       "tier": "light",
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0095",
