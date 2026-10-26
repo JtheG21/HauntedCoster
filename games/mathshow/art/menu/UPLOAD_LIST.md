@@ -1,0 +1,83 @@
+# MathShow menu: upload list (TASK-0098)
+
+Nothing has been uploaded. 75 PNGs from the design handoff, one per `MenuTheme.Image` key (the 13 reused HUD images are
+already in `Theme.Image`). After jg approves: upload (Studio MCP `upload_image`, as TASK-0097 did), paste each id into
+`MenuTheme.Image` in `client/Menu/MenuTheme.luau`, wait for moderation, then run the textured visual checks.
+
+| file | px | key |
+|---|---|---|
+| `shard-menu-title-violet.png` | 660x176 | `MenuTheme.Image["shard-menu-title-violet"]` |
+| `shard-menu-primary-red.png` | 580x124 | `MenuTheme.Image["shard-menu-primary-red"]` |
+| `shard-menu-primary-blue.png` | 580x124 | `MenuTheme.Image["shard-menu-primary-blue"]` |
+| `shard-menu-primary-silver.png` | 580x124 | `MenuTheme.Image["shard-menu-primary-silver"]` |
+| `shard-menu-secondary-silver.png` | 460x88 | `MenuTheme.Image["shard-menu-secondary-silver"]` |
+| `shard-menu-secondary-locked.png` | 460x88 | `MenuTheme.Image["shard-menu-secondary-locked"]` |
+| `shard-menu-player-violet.png` | 720x312 | `MenuTheme.Image["shard-menu-player-violet"]` |
+| `shard-menu-mode-red.png` | 464x384 | `MenuTheme.Image["shard-menu-mode-red"]` |
+| `shard-menu-mode-blue.png` | 464x384 | `MenuTheme.Image["shard-menu-mode-blue"]` |
+| `shard-menu-mode-violet.png` | 464x384 | `MenuTheme.Image["shard-menu-mode-violet"]` |
+| `shard-menu-mode-locked.png` | 464x384 | `MenuTheme.Image["shard-menu-mode-locked"]` |
+| `shard-menu-panel-red.png` | 1000x448 | `MenuTheme.Image["shard-menu-panel-red"]` |
+| `shard-menu-panel-blue.png` | 1000x448 | `MenuTheme.Image["shard-menu-panel-blue"]` |
+| `shard-menu-panel-violet.png` | 1000x448 | `MenuTheme.Image["shard-menu-panel-violet"]` |
+| `shard-menu-panel-green.png` | 1000x448 | `MenuTheme.Image["shard-menu-panel-green"]` |
+| `shard-menu-panel-silver.png` | 1000x448 | `MenuTheme.Image["shard-menu-panel-silver"]` |
+| `shard-menu-count-blue.png` | 400x320 | `MenuTheme.Image["shard-menu-count-blue"]` |
+| `shard-menu-count-red.png` | 400x320 | `MenuTheme.Image["shard-menu-count-red"]` |
+| `shard-menu-vs-you-green.png` | 660x300 | `MenuTheme.Image["shard-menu-vs-you-green"]` |
+| `shard-menu-vs-them-violet.png` | 660x300 | `MenuTheme.Image["shard-menu-vs-them-violet"]` |
+| `shard-menu-choice-indigo.png` | 580x108 | `MenuTheme.Image["shard-menu-choice-indigo"]` |
+| `shard-menu-choice-white.png` | 580x108 | `MenuTheme.Image["shard-menu-choice-white"]` |
+| `shard-menu-choice-green.png` | 580x108 | `MenuTheme.Image["shard-menu-choice-green"]` |
+| `shard-menu-choice-red.png` | 580x108 | `MenuTheme.Image["shard-menu-choice-red"]` |
+| `shard-menu-action.png` | 460x128 | `MenuTheme.Image["shard-menu-action"]` |
+| `shard-menu-square-silver.png` | 88x88 | `MenuTheme.Image["shard-menu-square-silver"]` |
+| `shard-menu-toggle-on.png` | 152x64 | `MenuTheme.Image["shard-menu-toggle-on"]` |
+| `shard-menu-toggle-off.png` | 152x64 | `MenuTheme.Image["shard-menu-toggle-off"]` |
+| `shard-menu-banner-violet.png` | 960x88 | `MenuTheme.Image["shard-menu-banner-violet"]` |
+| `shard-menu-problem-silver.png` | 870x279 | `MenuTheme.Image["shard-menu-problem-silver"]` |
+| `glow-menu-title-violet.png` | 804x320 | `MenuTheme.Image["glow-menu-title-violet"]` |
+| `glow-menu-primary-red.png` | 724x268 | `MenuTheme.Image["glow-menu-primary-red"]` |
+| `glow-menu-player-violet.png` | 864x456 | `MenuTheme.Image["glow-menu-player-violet"]` |
+| `glow-menu-mode-red.png` | 608x528 | `MenuTheme.Image["glow-menu-mode-red"]` |
+| `glow-menu-mode-blue.png` | 608x528 | `MenuTheme.Image["glow-menu-mode-blue"]` |
+| `glow-menu-mode-violet.png` | 608x528 | `MenuTheme.Image["glow-menu-mode-violet"]` |
+| `glow-menu-panel-red.png` | 858x444 | `MenuTheme.Image["glow-menu-panel-red"]` |
+| `glow-menu-panel-blue.png` | 858x444 | `MenuTheme.Image["glow-menu-panel-blue"]` |
+| `glow-menu-panel-violet.png` | 858x444 | `MenuTheme.Image["glow-menu-panel-violet"]` |
+| `glow-menu-panel-green.png` | 858x444 | `MenuTheme.Image["glow-menu-panel-green"]` |
+| `glow-menu-panel-silver.png` | 858x444 | `MenuTheme.Image["glow-menu-panel-silver"]` |
+| `glow-menu-count-blue.png` | 544x464 | `MenuTheme.Image["glow-menu-count-blue"]` |
+| `glow-menu-count-red.png` | 544x464 | `MenuTheme.Image["glow-menu-count-red"]` |
+| `glow-menu-vsyou-green.png` | 804x444 | `MenuTheme.Image["glow-menu-vsyou-green"]` |
+| `glow-menu-vsthem-violet.png` | 804x444 | `MenuTheme.Image["glow-menu-vsthem-violet"]` |
+| `glow-menu-choice-green.png` | 724x252 | `MenuTheme.Image["glow-menu-choice-green"]` |
+| `glow-menu-banner-violet.png` | 828x174 | `MenuTheme.Image["glow-menu-banner-violet"]` |
+| `glow-menu-problem-silver.png` | 978x387 | `MenuTheme.Image["glow-menu-problem-silver"]` |
+| `glow-menu-rank-plastic.png` | 384x384 | `MenuTheme.Image["glow-menu-rank-plastic"]` |
+| `glow-menu-rank-bronze.png` | 384x384 | `MenuTheme.Image["glow-menu-rank-bronze"]` |
+| `glow-menu-rank-silver.png` | 384x384 | `MenuTheme.Image["glow-menu-rank-silver"]` |
+| `glow-menu-rank-gold.png` | 384x384 | `MenuTheme.Image["glow-menu-rank-gold"]` |
+| `glow-menu-rank-platinum.png` | 384x384 | `MenuTheme.Image["glow-menu-rank-platinum"]` |
+| `glow-menu-rank-diamond.png` | 384x384 | `MenuTheme.Image["glow-menu-rank-diamond"]` |
+| `glow-menu-rank-demon.png` | 384x384 | `MenuTheme.Image["glow-menu-rank-demon"]` |
+| `glow-menu-rank-white.png` | 384x384 | `MenuTheme.Image["glow-menu-rank-white"]` |
+| `icon-menu-lock.png` | 48x48 | `MenuTheme.Image["icon-menu-lock"]` |
+| `icon-menu-check.png` | 48x48 | `MenuTheme.Image["icon-menu-check"]` |
+| `icon-menu-cross.png` | 48x48 | `MenuTheme.Image["icon-menu-cross"]` |
+| `icon-menu-star.png` | 48x48 | `MenuTheme.Image["icon-menu-star"]` |
+| `icon-menu-chevron.png` | 48x48 | `MenuTheme.Image["icon-menu-chevron"]` |
+| `icon-menu-back.png` | 48x48 | `MenuTheme.Image["icon-menu-back"]` |
+| `icon-menu-clock.png` | 48x48 | `MenuTheme.Image["icon-menu-clock"]` |
+| `icon-menu-alert.png` | 48x48 | `MenuTheme.Image["icon-menu-alert"]` |
+| `icon-menu-focus.png` | 96x96 | `MenuTheme.Image["icon-menu-focus"]` |
+| `rank-plastic.png` | 240x240 | `MenuTheme.Image["rank-plastic"]` |
+| `rank-bronze.png` | 240x240 | `MenuTheme.Image["rank-bronze"]` |
+| `rank-silver.png` | 240x240 | `MenuTheme.Image["rank-silver"]` |
+| `rank-gold.png` | 240x240 | `MenuTheme.Image["rank-gold"]` |
+| `rank-platinum.png` | 240x240 | `MenuTheme.Image["rank-platinum"]` |
+| `rank-diamond.png` | 240x240 | `MenuTheme.Image["rank-diamond"]` |
+| `rank-demon-1.png` | 240x240 | `MenuTheme.Image["rank-demon-1"]` |
+| `rank-demon-2.png` | 240x240 | `MenuTheme.Image["rank-demon-2"]` |
+| `rank-demon-3.png` | 240x240 | `MenuTheme.Image["rank-demon-3"]` |
+| `rank-demon-4.png` | 240x240 | `MenuTheme.Image["rank-demon-4"]` |

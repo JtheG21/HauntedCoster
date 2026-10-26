@@ -418,6 +418,14 @@ function Hud.start()
 	task.spawn(connectRemotes, s)
 end
 
+-- Shows or hides the HUD ScreenGui; the menu hides it until JOIN SHOW. The match loop keeps running either way.
+function Hud.setVisible(visible: boolean)
+	local s = session
+	if s then
+		s.view.gui.Enabled = visible
+	end
+end
+
 function Hud.stop()
 	local s = session
 	if not s then
