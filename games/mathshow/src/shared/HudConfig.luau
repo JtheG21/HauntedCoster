@@ -17,6 +17,11 @@ local HudConfig = table.freeze({
 		Sent = "Answer sent",
 		Submit = "Submit",
 		Placeholder = "Your answer",
+		ResultsTitle = "Final standings",
+		NoScores = "No scores this match",
+		ScoresUnavailable = "Scores unavailable",
+		PointsFormat = "%d pts",
+		MoreFormat = "+%d more",
 	}),
 })
 

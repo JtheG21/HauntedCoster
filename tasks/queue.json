@@ -5617,7 +5617,7 @@
       "id": "TASK-0094",
       "title": "MathShow Scores",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "approved",
       "risk": "low",
       "depends_on": [
         "TASK-0092"
@@ -5629,11 +5629,43 @@
         "The Results screen shows a ranked podium matching the server's scores at match end.",
         "No DataStore or persistence call is introduced in this task."
       ],
-      "history": [],
-      "executions": [],
+      "history": [
+        {
+          "time": "2026-10-25T17:15:28",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-25T17:16:38",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-25T17:56:14",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-25T17:56:14",
+          "from": "in_review",
+          "to": "approved",
+          "note": "Light tier: no audit; merge needs human approval"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-25T17:56:14",
+          "result": "pass",
+          "notes": "check.sh green, 75 MathShow specs, typecheck clean, TEST-20261025-03"
+        }
+      ],
       "audits": [],
       "revisions": 0,
-      "tier": "light"
+      "tier": "light",
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0095",

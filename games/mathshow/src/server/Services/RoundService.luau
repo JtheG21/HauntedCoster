@@ -16,6 +16,7 @@ local ScoringRules = require(ReplicatedStorage.Shared.ScoringRules)
 local SubmissionConfig = require(ReplicatedStorage.Shared.SubmissionConfig)
 local SubmissionRules = require(ReplicatedStorage.Shared.SubmissionRules)
 local Remotes = require(script.Parent.Parent.Remotes)
+local LeaderstatsService = require(script.Parent.LeaderstatsService)
 
 local ERROR_BACKOFF_SECONDS = 1
 local PLAYER_POLL_SECONDS = 1
@@ -111,6 +112,12 @@ local function resetMatch()
 		state.points = 0
 		state.answeredIndex = 0
 	end
+	local ok, err = pcall(function()
+		LeaderstatsService.reset()
+	end)
+	if not ok then
+		warn(`[MathShow] leaderstats reset failed: {err}`)
+	end
 end
 
 -- Sets the phase state before anything yields, broadcasts, then waits out the phase. `base` is the previous
@@ -130,6 +137,18 @@ local function runPhase(nextPhase: RoundRules.Phase, index: number, duration: nu
 		questionEndsClock = deadline
 	end
 	print(`[MathShow] phase={nextPhase} q={index} seed={matchSeed} endsAt={string.format("%.2f", endsAt)}`)
+	if nextPhase == "Reveal" then
+		-- Leaderstats change here, with the scores the Reveal payload carries, and not at submit (secrecy).
+		local list = scores()
+		local ok, err = pcall(function()
+			LeaderstatsService.publish(list)
+		end)
+		if ok then
+			print(`[MathShow] leaderstats published n={#list}`)
+		else
+			warn(`[MathShow] leaderstats publish failed: {err}`)
+		end
+	end
 	broadcast()
 	local closeAt = if nextPhase == "Question" then deadline + SubmissionConfig.LateGraceSeconds else deadline
 	waitUntil(closeAt)
