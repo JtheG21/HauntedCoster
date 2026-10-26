@@ -4,9 +4,11 @@
 # no Rojo server or several, a server for the wrong project (TEST-20261011-02) or the wrong checkout, extra
 # Studio windows (2-player runs fail to start their second client), low memory, and Studio running stale code.
 #
-#   scripts/studio-preflight.sh [--root <checkout>]
+#   scripts/studio-preflight.sh [--root <checkout>] [--game haunted|mathshow]
 #
 #   --root   the checkout whose code is about to be tested (default: this script's checkout). Rojo must serve it.
+#   --game   which game's Rojo project must be served (default: haunted = haunted.project.json;
+#            mathshow = mathshow.project.json).
 #
 # It changes nothing except the gitignored build stamp: it runs scripts/stamp.sh in that checkout and prints the
 # value Studio must show at ReplicatedStorage.Shared.BuildStamp. The Studio-side checks (place, Edit or Play,
@@ -16,6 +18,7 @@
 set -u
 
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
+game="haunted"
 while [ $# -gt 0 ]; do
 	case "$1" in
 	--root)
@@ -23,8 +26,13 @@ while [ $# -gt 0 ]; do
 		root="$2"
 		shift 2
 		;;
+	--game)
+		[ $# -ge 2 ] || { echo "studio-preflight: --game needs a value" >&2; exit 2; }
+		game="$2"
+		shift 2
+		;;
 	-h | --help)
-		sed -n '2,14p' "$0"
+		sed -n '2,17p' "$0"
 		exit 0
 		;;
 	*)
@@ -33,8 +41,17 @@ while [ $# -gt 0 ]; do
 		;;
 	esac
 done
-if [ ! -f "$root/haunted.project.json" ]; then
-	echo "studio-preflight: $root is not a Haunted Collector checkout (no haunted.project.json)" >&2
+case "$game" in
+haunted) game_name="Haunted Collector" ;;
+mathshow) game_name="MathShow" ;;
+*)
+	echo "studio-preflight: unknown game '$game' (haunted or mathshow)" >&2
+	exit 2
+	;;
+esac
+project_file="$game.project.json"
+if [ ! -f "$root/$project_file" ]; then
+	echo "studio-preflight: $root is not a $game_name checkout (no $project_file)" >&2
 	exit 2
 fi
 root="$(cd "$root" && pwd -P)"
@@ -47,7 +64,7 @@ fail() {
 	fails=$((fails + 1))
 }
 
-echo "studio-preflight: checkout under test: $root"
+echo "studio-preflight: checkout under test: $root ($game_name)"
 
 # Rojo servers. The rokit shim and the real binary both show up as "rojo serve"; keep only the outermost.
 procs="$(ps -axo pid=,ppid=,command=)"
@@ -72,8 +89,8 @@ while read -r pid ppid exe sub args; do
 	done
 	cwd="$(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')"
 	label="Rojo pid $pid: $project on port $port, serving ${cwd:-<unknown cwd>}"
-	if [ "$(basename "$project")" != "haunted.project.json" ]; then
-		fail "$label. That is not GAME-002: stop it, then run 'rojo serve haunted.project.json' in $root."
+	if [ "$(basename "$project")" != "$project_file" ]; then
+		fail "$label. That is not $game_name: stop it, then run 'rojo serve $project_file' in $root."
 	elif [ -n "$cwd" ] && [ "$cwd" != "$root" ]; then
 		fail "$label, not the checkout under test. Stop it and serve from $root, or pass --root $cwd if that is the code you mean to test."
 	else
@@ -81,7 +98,7 @@ while read -r pid ppid exe sub args; do
 	fi
 done <<<"$procs"
 if [ $servers -eq 0 ]; then
-	warn "no Rojo server: Studio won't get code changes. Start one with: cd \"$root\" && rojo serve haunted.project.json (or sync by hand and say so in the TEST note)."
+	warn "no Rojo server: Studio won't get code changes. Start one with: cd \"$root\" && rojo serve $project_file (or sync by hand and say so in the TEST note)."
 elif [ $servers -gt 1 ]; then
 	fail "$servers Rojo servers are running. Keep one, matched to its place (AGENTS.md \"One Rojo server\")."
 fi
@@ -118,7 +135,7 @@ fi
 
 # Build stamp: proves Studio runs this checkout's current code.
 if [ -x "$root/scripts/stamp.sh" ]; then
-	stamp="$("$root/scripts/stamp.sh" 2>/dev/null | tail -1)"
+	stamp="$("$root/scripts/stamp.sh" --game "$game" 2>/dev/null | tail -1)"
 	echo "STAMP: Studio must show \"$stamp\" at ReplicatedStorage.Shared.BuildStamp (or in the boot line in Output). An older value means Rojo isn't syncing this checkout."
 else
 	warn "$root has no scripts/stamp.sh, so Studio's code can't be checked against it."

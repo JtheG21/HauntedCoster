@@ -8,6 +8,7 @@ local ProblemConfig = require(script.Parent.ProblemConfig)
 local RoundConfig = require(script.Parent.RoundConfig)
 local ScoringConfig = require(script.Parent.ScoringConfig)
 local ScoringRules = require(script.Parent.ScoringRules)
+local StandingsRules = require(script.Parent.StandingsRules)
 
 export type Phase = "Intermission" | "Question" | "Reveal" | "Results"
 export type FeedbackKind = "correct" | "incorrect" | "notCounted"
@@ -127,6 +128,34 @@ function HudRules.feedbackFor(result: any): (FeedbackKind, string)
 		return "correct", if isFinite(points) then strings.Correct:format(points) else strings.CorrectPlain
 	end
 	return "incorrect", strings.Incorrect
+end
+
+-- The Reveal "who got it" line from the server's solvers list; "" when the list is malformed.
+function HudRules.solversLabel(solvers: any): string
+	local strings = HudConfig.Strings
+	if not StandingsRules.isValidScores(solvers) then
+		return ""
+	end
+	local list = solvers :: { Net.ScoreEntry }
+	if #list == 0 then
+		return strings.NobodyGotIt
+	end
+	local parts: { string } = {}
+	for index = 1, math.min(#list, HudConfig.MaxSolverNames) do
+		local entry = list[index]
+		table.insert(
+			parts,
+			strings.SolverFormat:format(
+				StandingsRules.displayName(entry.name),
+				StandingsRules.cleanPoints(entry.points)
+			)
+		)
+	end
+	local text = table.concat(parts, ", ")
+	if #list > HudConfig.MaxSolverNames then
+		text ..= " " .. strings.MoreFormat:format(#list - HudConfig.MaxSolverNames)
+	end
+	return strings.GotItFormat:format(text)
 end
 
 function HudRules.visibility(phase: any): Visibility

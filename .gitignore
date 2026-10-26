@@ -40,5 +40,6 @@ game001-sourcemap.json
 game004-sourcemap.json
 haunted-sourcemap.json
 games/haunted/src/shared/BuildStamp.txt
+games/mathshow/src/shared/BuildStamp.txt
 .agents/skills/*/LOCAL.md
 .agents/skills/*/work/

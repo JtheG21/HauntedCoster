@@ -24,6 +24,7 @@ export type View = {
 	setInputText: (text: string) -> (),
 	setFeedback: (text: string, tone: FeedbackTone) -> (),
 	clearFeedback: () -> (),
+	setSolvers: (text: string) -> (), -- the Reveal "who got it" line; "" hides it
 	-- model nil and message nil hides the panel; message alone shows just the title and that line.
 	setResults: (model: StandingsRules.Model?, message: string?) -> (),
 	feedbackLabel: TextLabel,
@@ -112,6 +113,21 @@ function View.build(parent: Instance): View
 	}, gui) :: TextLabel
 	Theme.textLimit(question, 56)
 	Theme.outline(question)
+
+	local solversLabel = make("TextLabel", {
+		Name = "Solvers",
+		Position = UDim2.fromScale(0.5, 0.45),
+		AnchorPoint = Vector2.new(0.5, 0),
+		Size = UDim2.new(0.9, 0, 0, 40),
+		BackgroundTransparency = 1,
+		Font = Theme.Body,
+		TextColor3 = C.good,
+		TextScaled = true,
+		Text = "",
+		Visible = false,
+	}, gui) :: TextLabel
+	Theme.textLimit(solversLabel, 28, MIN_TEXT)
+	Theme.outline(solversLabel)
 
 	local row = make("Frame", {
 		Name = "AnswerRow",
@@ -339,6 +355,11 @@ function View.build(parent: Instance): View
 		if model ~= nil and shownMessage == nil then
 			showPodium(model)
 		end
+	end
+
+	function view.setSolvers(text: string)
+		solversLabel.Text = text
+		solversLabel.Visible = text ~= ""
 	end
 
 	function view.destroy()
