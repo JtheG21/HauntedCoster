@@ -2,6 +2,7 @@
 local TestRunner = require(script.Parent.TestRunner)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HudConfig = require(ReplicatedStorage.Shared.HudConfig)
+local HudCopy = require(ReplicatedStorage.Shared.HudCopy)
 local HudRules = require(ReplicatedStorage.Shared.HudRules)
 local ProblemConfig = require(ReplicatedStorage.Shared.ProblemConfig)
 local RoundConfig = require(ReplicatedStorage.Shared.RoundConfig)
@@ -99,26 +100,46 @@ return function(t: TestRunner.T)
 		t.truthy(HudRules.canSubmit("Question", 3, 2, "9"))
 	end)
 
-	t.test("feedbackFor maps each reply", function()
-		local kind, text = HudRules.feedbackFor({ accepted = true, correct = true, points = 150 })
+	t.test("feedbackFor maps each reply to a toast kind", function()
+		local kind, points = HudRules.feedbackFor({ accepted = true, correct = true, points = 150 })
 		t.eq(kind, "correct")
-		t.eq(text, "Correct! +150")
-		kind, text = HudRules.feedbackFor({ accepted = true, correct = false, points = 0 })
-		t.eq(kind, "incorrect")
-		t.eq(text, HudConfig.Strings.Incorrect)
-		kind, text = HudRules.feedbackFor({ accepted = false })
-		t.eq(kind, "notCounted")
-		t.eq(text, HudConfig.Strings.NotCounted)
+		t.eq(points, 150)
+		kind, points = HudRules.feedbackFor({ accepted = true, correct = false, points = 0 })
+		t.eq(kind, "wrong")
+		t.eq(points, nil)
+		kind, points = HudRules.feedbackFor({ accepted = false })
+		t.eq(kind, "rejected")
+		t.eq(points, nil)
 	end)
 
 	t.test("feedbackFor survives malformed replies", function()
-		t.eq((HudRules.feedbackFor({})), "notCounted")
-		t.eq((HudRules.feedbackFor(nil)), "notCounted")
-		t.eq((HudRules.feedbackFor("x")), "notCounted")
-		t.eq((HudRules.feedbackFor({ accepted = "yes" })), "notCounted")
-		local kind, text = HudRules.feedbackFor({ accepted = true, correct = true })
+		t.eq((HudRules.feedbackFor({})), "rejected")
+		t.eq((HudRules.feedbackFor(nil)), "rejected")
+		t.eq((HudRules.feedbackFor("x")), "rejected")
+		t.eq((HudRules.feedbackFor({ accepted = "yes" })), "rejected")
+		local kind, points = HudRules.feedbackFor({ accepted = true, correct = true })
 		t.eq(kind, "correct")
-		t.eq(text, HudConfig.Strings.CorrectPlain)
+		t.eq(points, nil)
+	end)
+
+	t.test("toastFor has the copy for every kind", function()
+		t.eq(HudRules.toastFor("sent", nil).text, "LOCKED IN")
+		t.eq(HudRules.toastFor("wrong", nil).text, "NOT QUITE")
+		t.eq(HudRules.toastFor("timesup", nil).text, "TIME'S UP")
+		t.eq(HudRules.toastFor("rejected", nil).text, "NOT COUNTED")
+		t.eq(HudRules.toastFor("sendfail", nil).text, "DIDN'T SEND · TRY AGAIN")
+		local correct = HudRules.toastFor("correct", 181)
+		t.eq(correct.text, "CORRECT")
+		t.eq(correct.points, "+181")
+		t.eq(correct.kind, "correct")
+	end)
+
+	t.test("toastFor shows points only for a correct answer", function()
+		t.eq(HudRules.toastFor("correct", nil).points, "")
+		t.eq(HudRules.toastFor("correct", NAN).points, "")
+		t.eq(HudRules.toastFor("correct", -5).points, "+0")
+		t.eq(HudRules.toastFor("wrong", 100).points, "")
+		t.eq(HudRules.toastFor("sent", 100).points, "")
 	end)
 
 	t.test("visibility per phase", function()
@@ -143,71 +164,187 @@ return function(t: TestRunner.T)
 		t.eq(none.question or none.timer or none.input or none.results, false)
 	end)
 
-	t.test("solversLabel lists who got it", function()
-		local S = HudConfig.Strings
-		t.eq(HudRules.solversLabel({}), S.NobodyGotIt)
-		t.eq(HudRules.solversLabel({ { userId = 1, name = "Ann", points = 186 } }), "Got it: Ann +186")
-		t.eq(
-			HudRules.solversLabel({
-				{ userId = 1, name = "Ann", points = 186 },
-				{ userId = 2, name = "Bo", points = 150 },
-			}),
-			"Got it: Ann +186, Bo +150"
-		)
+	t.test("solversModel lists chips with points", function()
+		local model = HudRules.solversModel({
+			{ userId = 1, name = "Ann", points = 186 },
+			{ userId = 2, name = "Bo", points = 150 },
+		}, 2) :: HudRules.SolversModel
+		t.eq(#model.chips, 2)
+		t.eq(model.chips[1].name, "Ann")
+		t.eq(model.chips[1].points, "+186")
+		t.eq(model.chips[1].isYou, false)
+		t.eq(model.chips[2].isYou, true)
+		t.eq(model.more, "")
+		t.eq(model.nobody, false)
 	end)
 
-	t.test("solversLabel caps names and counts the rest", function()
-		local list = {}
-		for i = 1, HudConfig.MaxSolverNames + 2 do
-			table.insert(list, { userId = i, name = `P{i}`, points = 100 - i })
+	t.test("solversModel is nobody for an empty list", function()
+		local model = HudRules.solversModel({}, 1) :: HudRules.SolversModel
+		t.eq(#model.chips, 0)
+		t.truthy(model.nobody)
+		t.eq(model.more, "")
+	end)
+
+	t.test("solversModel caps chips and counts the rest", function()
+		local max = HudConfig.MaxSolverNames
+		for extra = 0, 2 do
+			local list = {}
+			for i = 1, max + extra do
+				table.insert(list, { userId = i, name = `P{i}`, points = 100 - i })
+			end
+			local model = HudRules.solversModel(list, 99) :: HudRules.SolversModel
+			t.eq(#model.chips, max)
+			t.eq(model.more, if extra == 0 then "" else `+{extra} MORE`)
 		end
-		t.eq(HudRules.solversLabel(list), "Got it: P1 +99, P2 +98, P3 +97 +2 more")
 	end)
 
-	t.test("solversLabel is empty for malformed lists", function()
-		t.eq(HudRules.solversLabel(nil), "")
-		t.eq(HudRules.solversLabel("x"), "")
-		t.eq(HudRules.solversLabel({ { userId = 1, name = "A", points = -5 } }), "")
+	t.test("solversModel truncates long names and is nil for malformed lists", function()
+		local long = string.rep("x", 25)
+		local model = HudRules.solversModel({ { userId = 1, name = long, points = 5 } }, 1) :: HudRules.SolversModel
+		t.eq(utf8.len(model.chips[1].name), 20)
+		t.eq(HudRules.solversModel(nil, 1), nil)
+		t.eq(HudRules.solversModel("x", 1), nil)
+		t.eq(HudRules.solversModel({ { userId = 1, name = "A", points = -5 } }, 1), nil)
 		t.eq(
-			HudRules.solversLabel({ { userId = 1, name = "A", points = 5 }, { userId = 1, name = "B", points = 4 } }),
-			""
+			HudRules.solversModel({ { userId = 1, name = "A", points = 5 }, { userId = 1, name = "B", points = 4 } }, 1),
+			nil
 		)
 	end)
 
-	t.test("questionLabel per phase", function()
-		local S = HudConfig.Strings
-		t.eq(
-			HudRules.questionLabel(
-				"Question",
-				{ phase = "Question", endsAt = 5, questionIndex = 1, problemText = "3 + 4" }
-			),
-			"3 + 4 = ?"
-		)
-		t.eq(
-			HudRules.questionLabel(
-				"Reveal",
-				{ phase = "Reveal", endsAt = 5, questionIndex = 1, problemText = "3 + 4", answer = 7 }
-			),
-			"3 + 4 = 7"
-		)
-		t.eq(HudRules.questionLabel("Question", { phase = "Question", endsAt = 5, questionIndex = 1 }), "")
-		t.eq(
-			HudRules.questionLabel("Intermission", { phase = "Intermission", endsAt = 0, questionIndex = 0 }),
-			S.WaitingForPlayers
-		)
-		t.eq(
-			HudRules.questionLabel("Intermission", { phase = "Intermission", endsAt = 50, questionIndex = 0 }),
-			S.GetReady
-		)
-		t.eq(HudRules.questionLabel("Results", { phase = "Results", endsAt = 5, questionIndex = 6 }), "")
+	t.test("problemSize steps at 9, 11 and 12 characters", function()
+		t.eq(HudRules.problemSize(1), 88)
+		t.eq(HudRules.problemSize(9), 88)
+		t.eq(HudRules.problemSize(10), 76)
+		t.eq(HudRules.problemSize(11), 76)
+		t.eq(HudRules.problemSize(12), 64)
+		t.eq(HudRules.problemSize(40), 64)
+		t.eq(HudRules.problemSize(nil), 88)
+		t.eq(HudRules.problemSize(NAN), 88)
 	end)
 
-	t.test("questionLabel never shows an answer before Reveal", function()
-		local label = HudRules.questionLabel(
+	t.test("problemChars counts characters, not bytes", function()
+		t.eq(HudRules.problemChars("7 + 5", "= ?"), 9)
+		t.eq(HudRules.problemChars("18 \u{00d7} 7", "= ?"), 10) -- the multiplication sign is two bytes
+		t.eq(HudRules.problemChars("204 \u{00f7} 12", "= ?"), 12)
+	end)
+
+	t.test("problemModel sizes by the whole line", function()
+		local function model(text: string, answer: number?)
+			local phase: HudRules.Phase = if answer ~= nil then "Reveal" else "Question"
+			return HudRules.problemModel(
+				phase,
+				{ phase = phase, endsAt = 5, questionIndex = 3, problemText = text, answer = answer }
+			) :: HudRules.ProblemModel
+		end
+		t.eq(model("7 + 5").size, 88)
+		t.eq(model("18 \u{00d7} 7").size, 76)
+		t.eq(model("204 \u{00f7} 12").size, 64)
+		t.eq(model("7 + 5").gap, 22)
+		t.eq(model("204 \u{00f7} 12").gap, 16)
+		-- A long answer can push the revealed line into a smaller size than the question had.
+		t.eq(model("7 + 5").size, 88)
+		t.eq(model("7 + 5", 12).size, 76)
+	end)
+
+	t.test("problemModel text per phase", function()
+		local q = HudRules.problemModel(
+			"Question",
+			{ phase = "Question", endsAt = 5, questionIndex = 3, problemText = "3 + 4" }
+		) :: HudRules.ProblemModel
+		t.eq(q.lead, "3 + 4")
+		t.eq(q.tail, "= ?")
+		t.eq(q.tag, "Q3 \u{00b7} MEDIUM \u{00b7} 12S")
+		local r = HudRules.problemModel(
+			"Reveal",
+			{ phase = "Reveal", endsAt = 5, questionIndex = 3, problemText = "3 + 4", answer = 7 }
+		) :: HudRules.ProblemModel
+		t.eq(r.tail, "= 7")
+		t.eq(r.tag, HudCopy.AnswerTag)
+		t.eq(HudRules.problemModel("Question", { phase = "Question", endsAt = 5, questionIndex = 1 }), nil)
+		t.eq(HudRules.problemModel("Results", { phase = "Results", endsAt = 5, questionIndex = 6 }), nil)
+		t.eq(HudRules.problemModel("Intermission", { phase = "Intermission", endsAt = 5, questionIndex = 0 }), nil)
+	end)
+
+	t.test("problemModel never shows an answer before Reveal", function()
+		local q = HudRules.problemModel(
 			"Question",
 			{ phase = "Question", endsAt = 5, questionIndex = 1, problemText = "3 + 4", answer = 7 }
-		)
-		t.eq(label, "3 + 4 = ?")
+		) :: HudRules.ProblemModel
+		t.eq(q.tail, "= ?")
+	end)
+
+	t.test("questionTag follows tier and time limit", function()
+		t.eq(HudRules.questionTag(1), "Q1 \u{00b7} EASY \u{00b7} 15S")
+		t.eq(HudRules.questionTag(2), "Q2 \u{00b7} EASY \u{00b7} 15S")
+		t.eq(HudRules.questionTag(3), "Q3 \u{00b7} MEDIUM \u{00b7} 12S")
+		t.eq(HudRules.questionTag(4), "Q4 \u{00b7} MEDIUM \u{00b7} 12S")
+		t.eq(HudRules.questionTag(5), "Q5 \u{00b7} HARD \u{00b7} 9S")
+		t.eq(HudRules.questionTag(6), "Q6 \u{00b7} HARD \u{00b7} 9S")
+		t.eq(HudRules.questionTag(0), "")
+		t.eq(HudRules.questionTag(7), "")
+		t.eq(HudRules.questionTag(1.5), "")
+		t.eq(HudRules.questionTag(nil), "")
+	end)
+
+	t.test("difficultyOf matches the round config", function()
+		for index, difficulty in RoundConfig.DifficultyByQuestion do
+			t.eq(HudRules.difficultyOf(index), difficulty)
+		end
+		t.eq(HudRules.difficultyOf(0), nil)
+		t.eq(HudRules.difficultyOf(NAN), nil)
+	end)
+
+	t.test("intermissionMode is waiting until the server sets an end time", function()
+		t.eq(HudRules.intermissionMode(0), "waiting")
+		t.eq(HudRules.intermissionMode(NAN), "waiting")
+		t.eq(HudRules.intermissionMode(nil), "waiting")
+		t.eq(HudRules.intermissionMode(123.5), "ready")
+	end)
+
+	t.test("pipStates marks done, current and upcoming", function()
+		local function join(states: { any }): string
+			return table.concat(states, ",")
+		end
+		t.eq(join(HudRules.pipStates("Question", 1)), "current,todo,todo,todo,todo,todo")
+		t.eq(join(HudRules.pipStates("Question", 3)), "done,done,current,todo,todo,todo")
+		t.eq(join(HudRules.pipStates("Reveal", 3)), "done,done,done,todo,todo,todo")
+		t.eq(join(HudRules.pipStates("Reveal", 6)), "done,done,done,done,done,done")
+		t.eq(#HudRules.pipStates("Question", 0), RoundConfig.QuestionCount)
+		t.eq(HudRules.pipStates("Question", nil)[1], "todo")
+	end)
+
+	t.test("topModel text and pips per phase", function()
+		local q = HudRules.topModel("Question", 3)
+		t.eq(q.label, "QUESTION 3 / 6")
+		t.truthy(q.pips ~= nil)
+		t.eq(HudRules.topModel("Reveal", 6).label, "QUESTION 6 / 6")
+		t.eq(HudRules.topModel("Intermission", 0).label, HudCopy.TopLobby)
+		t.eq(HudRules.topModel("Intermission", 0).pips, nil)
+		t.eq(HudRules.topModel("Results", 6).label, HudCopy.TopResults)
+		t.eq(HudRules.topModel("Results", 6).pips, nil)
+		t.eq(HudRules.topModel("Bogus", 1).pips, nil)
+	end)
+
+	t.test("secondsTag and scoreTag follow the phase", function()
+		t.eq(HudRules.secondsTag("Question", 2), "SEC")
+		t.eq(HudRules.secondsTag("Intermission", 0), "SEC")
+		t.eq(HudRules.secondsTag("Reveal", 5), "NEXT UP")
+		t.eq(HudRules.secondsTag("Reveal", 6), "RESULTS")
+		t.eq(HudRules.scoreTag("Results"), "NEXT MATCH")
+		t.eq(HudRules.scoreTag("Question"), "SCORE")
+		t.eq(HudRules.scoreTag(nil), "SCORE")
+	end)
+
+	t.test("rootScale fits the reference canvas into any viewport", function()
+		t.eq(HudRules.rootScale(844, 390), 1)
+		t.eq(HudRules.rootScale(1688, 780), 2)
+		t.eq(HudRules.rootScale(1920, 1080), 1920 / 844) -- width limits
+		t.eq(HudRules.rootScale(844, 1000), 1) -- width limits again
+		t.eq(HudRules.rootScale(2000, 195), 0.5) -- height limits
+		t.eq(HudRules.rootScale(0, 390), 1)
+		t.eq(HudRules.rootScale(-5, 390), 1)
+		t.eq(HudRules.rootScale(NAN, 390), 1)
+		t.eq(HudRules.rootScale(nil, 390), 1)
 	end)
 
 	t.test("isValidState checks shape", function()

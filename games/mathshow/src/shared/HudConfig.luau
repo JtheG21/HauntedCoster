@@ -1,33 +1,19 @@
 --!strict
--- Tunables and strings for the client Hud (HudRules, client/Hud). Frozen: never mutate at runtime.
+-- Tunables for the client Hud (HudRules, client/Hud). Frozen: never mutate at runtime. Strings: HudCopy.
 
 local HudConfig = table.freeze({
-	TimerWarnSeconds = 3, -- at or below this the bar changes colour and the number goes bold
-	FeedbackFadeSeconds = 0.5,
-	MaxSolverNames = 3, -- names listed in the Reveal "got it" line before "+N more"
+	TimerWarnSeconds = 3, -- at or below this the bar, number and current pip turn alert red
+	MaxSolverNames = 3, -- chips listed in the Reveal "solved by" row before "+N MORE"
 	ConnectTimeoutSeconds = 10, -- how long the Hud waits for the server's Remotes folder
-	Strings = table.freeze({
-		Connecting = "Connecting...",
-		WaitingForPlayers = "Waiting for players...",
-		GetReady = "Get ready!",
-		TimesUp = "Time's up",
-		Correct = "Correct! +%d",
-		CorrectPlain = "Correct!", -- used when the server sent no points
-		Incorrect = "Not quite",
-		NotCounted = "Not counted - wait for the next question",
-		Sent = "Answer sent",
-		Submit = "Submit",
-		Placeholder = "Your answer",
-		ResultsTitle = "Final standings",
-		NoScores = "No scores this match",
-		ScoresUnavailable = "Scores unavailable",
-		PointsFormat = "%d pts",
-		MoreFormat = "+%d more",
-		NobodyGotIt = "Nobody got it",
-		GotItFormat = "Got it: %s",
-		SolverFormat = "%s +%d",
-		SendFailed = "Couldn't send - try again",
-	}),
+	ReferenceWidth = 844, -- the design canvas; View scales it to the viewport with HudRules.rootScale
+	ReferenceHeight = 390,
+	-- Problem text size by the character count of "a op b = ?" (HudRules.problemSize).
+	ProblemSizeSmall = 88, -- up to ProblemShortChars characters
+	ProblemSizeMedium = 76, -- up to ProblemMediumChars
+	ProblemSizeLarge = 64,
+	ProblemShortChars = 9,
+	ProblemMediumChars = 11,
+	ProblemGapRatio = 0.25, -- gap between the problem and "= ?" as a fraction of the text size
 })
 
 return HudConfig
