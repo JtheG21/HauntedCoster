@@ -27,6 +27,8 @@ type PlayerState = {
 	lastSubmitAt: number?, -- os.clock()
 	lastRejectAt: number?, -- os.clock() of the last rejection that was replied to or logged
 	answeredIndex: number, -- last question this player has an accepted submission for; 0 = none
+	solvedIndex: number, -- last question this player got right; 0 = none
+	solvedPoints: number, -- points that question earned
 }
 
 local RoundService = {}
@@ -44,7 +46,15 @@ local questionEndsClock = 0
 local states: { [Player]: PlayerState } = {}
 
 local function newState(): PlayerState
-	return { participant = false, points = 0, lastSubmitAt = nil, lastRejectAt = nil, answeredIndex = 0 }
+	return {
+		participant = false,
+		points = 0,
+		lastSubmitAt = nil,
+		lastRejectAt = nil,
+		answeredIndex = 0,
+		solvedIndex = 0,
+		solvedPoints = 0,
+	}
 end
 
 local function scores(): { Net.ScoreEntry }
@@ -63,7 +73,24 @@ local function scores(): { Net.ScoreEntry }
 	return list
 end
 
--- Secrecy: problemText from Question on, answer only in Reveal, scores only in Reveal and Results.
+-- Players who got the current question right, best first. Only ever sent in Reveal.
+local function solvers(): { Net.ScoreEntry }
+	local list: { Net.ScoreEntry } = {}
+	for player, state in states do
+		if state.participant and state.solvedIndex == questionIndex and questionIndex > 0 then
+			table.insert(list, { userId = player.UserId, name = player.Name, points = state.solvedPoints })
+		end
+	end
+	table.sort(list, function(a, b)
+		if a.points ~= b.points then
+			return a.points > b.points
+		end
+		return a.userId < b.userId
+	end)
+	return list
+end
+
+-- Secrecy: problemText from Question on, answer and solvers only in Reveal, scores only in Reveal and Results.
 local function payload(): Net.RoundStatePayload
 	local out: Net.RoundStatePayload = { phase = phase, endsAt = endsAt, questionIndex = questionIndex }
 	local current = problem
@@ -73,6 +100,7 @@ local function payload(): Net.RoundStatePayload
 		out.problemText = current.text
 		out.answer = current.answer
 		out.scores = scores()
+		out.solvers = solvers()
 	elseif phase == "Results" then
 		out.scores = scores()
 	end
@@ -111,6 +139,8 @@ local function resetMatch()
 		state.participant = false
 		state.points = 0
 		state.answeredIndex = 0
+		state.solvedIndex = 0
+		state.solvedPoints = 0
 	end
 	local ok, err = pcall(function()
 		LeaderstatsService.reset()
@@ -235,6 +265,10 @@ local function onSubmit(player: Player, raw: any)
 		local points = ScoringRules.score(correct, now - questionStartClock, current.timeLimit)
 		state.answeredIndex = questionIndex
 		state.points += points
+		if correct then
+			state.solvedIndex = questionIndex
+			state.solvedPoints = points
+		end
 		reply = { accepted = true, correct = correct, points = points }
 		print(`[MathShow] submit user={player.UserId} q={questionIndex} verdict=ok correct={correct} points={points}`)
 	elseif verdict == "ok" then

@@ -21,7 +21,7 @@
 - `python3 scripts/refs.py review-next|decide`: review packet for the next Index item, and `decide ... --apply` to record jg's decision (dry run by default)
 - `python3 scripts/refs.py pin|drift|rights|ledger`: source commit pins, upstream drift, the licence adaptation gate (`rights --check ID --use code|asset|method`) and what tasks citing a REF cost
 - `python3 scripts/refs.py list|brief|trace|lint|guard|new`: the `10 References/` library (briefs per task or category, lint, jg-approval guard, scaffold). `REFS_JG_APPROVED=1` lets a commit that jg asked for change an Intent section or approve a note. The same guard refuses (no override) any staged file byte-identical to a file in `~/Roblox-Work/resource-packs/`: the Resource Boy and ActorCore licences forbid storing pack files in a repository
-- `scripts/studio-preflight.sh [--root <checkout>]`: Rojo, Studio windows, memory and build stamp before a Studio run
+- `scripts/studio-preflight.sh [--root <checkout>] [--game haunted|mathshow]`: Rojo, Studio windows, memory and build stamp before a Studio run
 
 ## Claude Code automations (`.claude/`)
 - **Hooks** (`settings.json`, scripts in `hooks/`, tests in `tests/test_claude_hooks.py`). `guard.sh` blocks state-changing Git without a chained `scripts/preflight.sh`, a bare `rojo serve`, `.env`, and edits in `Agents/`, `Chats/` and `.obsidian/`. It asks jg before `gh pr merge`, `rojo upload` and edits in `10 References/`. `luau-format.sh` runs StyLua and Selene on each edited `.luau` file under `src/`, `tests/luau/` or `games/`. `ref-lint.sh` lints each edited `REF-*` note. If a block is wrong, fix the hook rather than working around it.

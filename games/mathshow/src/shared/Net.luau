@@ -23,6 +23,7 @@ export type RoundStatePayload = {
 	problemText: string?,
 	answer: number?,
 	scores: { ScoreEntry }?,
+	solvers: { ScoreEntry }?, -- Reveal only: who got this question right and the points it earned them, best first
 }
 
 export type AnswerResultPayload = {

@@ -143,6 +143,37 @@ return function(t: TestRunner.T)
 		t.eq(none.question or none.timer or none.input or none.results, false)
 	end)
 
+	t.test("solversLabel lists who got it", function()
+		local S = HudConfig.Strings
+		t.eq(HudRules.solversLabel({}), S.NobodyGotIt)
+		t.eq(HudRules.solversLabel({ { userId = 1, name = "Ann", points = 186 } }), "Got it: Ann +186")
+		t.eq(
+			HudRules.solversLabel({
+				{ userId = 1, name = "Ann", points = 186 },
+				{ userId = 2, name = "Bo", points = 150 },
+			}),
+			"Got it: Ann +186, Bo +150"
+		)
+	end)
+
+	t.test("solversLabel caps names and counts the rest", function()
+		local list = {}
+		for i = 1, HudConfig.MaxSolverNames + 2 do
+			table.insert(list, { userId = i, name = `P{i}`, points = 100 - i })
+		end
+		t.eq(HudRules.solversLabel(list), "Got it: P1 +99, P2 +98, P3 +97 +2 more")
+	end)
+
+	t.test("solversLabel is empty for malformed lists", function()
+		t.eq(HudRules.solversLabel(nil), "")
+		t.eq(HudRules.solversLabel("x"), "")
+		t.eq(HudRules.solversLabel({ { userId = 1, name = "A", points = -5 } }), "")
+		t.eq(
+			HudRules.solversLabel({ { userId = 1, name = "A", points = 5 }, { userId = 1, name = "B", points = 4 } }),
+			""
+		)
+	end)
+
 	t.test("questionLabel per phase", function()
 		local S = HudConfig.Strings
 		t.eq(

@@ -4,6 +4,7 @@
 local HudConfig = table.freeze({
 	TimerWarnSeconds = 3, -- at or below this the bar changes colour and the number goes bold
 	FeedbackFadeSeconds = 0.5,
+	MaxSolverNames = 3, -- names listed in the Reveal "got it" line before "+N more"
 	ConnectTimeoutSeconds = 10, -- how long the Hud waits for the server's Remotes folder
 	Strings = table.freeze({
 		Connecting = "Connecting...",
@@ -22,6 +23,10 @@ local HudConfig = table.freeze({
 		ScoresUnavailable = "Scores unavailable",
 		PointsFormat = "%d pts",
 		MoreFormat = "+%d more",
+		NobodyGotIt = "Nobody got it",
+		GotItFormat = "Got it: %s",
+		SolverFormat = "%s +%d",
+		SendFailed = "Couldn't send - try again",
 	}),
 })
 
