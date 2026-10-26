@@ -2,6 +2,7 @@
 -- Pure Results-screen rules (TASK-0094). No Instances, no services. Nothing here throws on bad input.
 -- Ordering matches RoundService.scores(): points descending, then userId ascending. Ties share a rank (1, 1, 3).
 
+local HudCopy = require(script.Parent.HudCopy)
 local Net = require(script.Parent.Net)
 local StandingsConfig = require(script.Parent.StandingsConfig)
 
@@ -84,6 +85,50 @@ function StandingsRules.displayName(name: any): string
 		return "?"
 	end
 	return name:sub(1, cut - 1) .. ELLIPSIS
+end
+
+-- The points a player has in a scores list; 0 when the list is malformed or does not hold them.
+function StandingsRules.scoreFor(scores: any, userId: any): number
+	if not StandingsRules.isValidScores(scores) then
+		return 0
+	end
+	for _, entry in scores :: { Net.ScoreEntry } do
+		if entry.userId == userId then
+			return StandingsRules.cleanPoints(entry.points)
+		end
+	end
+	return 0
+end
+
+-- 1102 -> "1,102".
+function StandingsRules.formatNumber(value: any): string
+	local text = tostring(StandingsRules.cleanPoints(value))
+	local formatted = text:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+	return (formatted:gsub("^,", ""))
+end
+
+-- "1,102 PTS".
+function StandingsRules.pointsLabel(points: any): string
+	return HudCopy.Points:format(StandingsRules.formatNumber(points))
+end
+
+-- "+3 MORE" for the rows beyond the list; "" when there are none.
+function StandingsRules.moreLabel(hiddenCount: any): string
+	if not isFinite(hiddenCount) or hiddenCount <= 0 then
+		return ""
+	end
+	return HudCopy.More:format(hiddenCount)
+end
+
+-- First-place tag: "TIED FOR FIRST" when second place shares rank 1, else "TOP SCORE".
+function StandingsRules.topTag(model: Model): string
+	local second = model.podium[2]
+	return if second ~= nil and second.rank == 1 then HudCopy.TiedFirst else HudCopy.TopScore
+end
+
+-- The message card text for an empty board; nil when there are rows to show.
+function StandingsRules.emptyMessage(model: Model): string?
+	return if model.empty then HudCopy.NoScores else nil
 end
 
 function StandingsRules.build(scores: any, localUserId: any): Model

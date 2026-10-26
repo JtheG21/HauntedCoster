@@ -5796,6 +5796,62 @@
       "tier": "standard",
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0097",
+      "title": "MathShow HUD Shards",
+      "project": "GAME-004",
+      "status": "approved",
+      "risk": "low",
+      "depends_on": [
+        "TASK-0093",
+        "TASK-0096"
+      ],
+      "branch": "task/TASK-0097-MathShow-HUD-Shards",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0097-MathShow-HUD-Shards.md",
+      "acceptance_criteria": [
+        "All 16 HUD states are rebuilt as Shards (Theme.Layout positions, shard anatomy, 844x390 root with UIScale) and show the HudCopy strings.",
+        "Fx is isolated: every entry point and delayed callback is pcall-wrapped and warns, secondTick never yields the countdown, and reduced motion snaps to the final state with identical layout.",
+        "Pure HUD logic (ProblemSize, name truncation, ties, pinned own row, +N MORE, TOP SCORE/TIED, toast kind, question tag) lives in HudRules/StandingsRules with boundary specs; MathShow spec count rises above 78.",
+        "No game rules or remote payloads change; assets are filed in the repo and an upload list is written, with nothing uploaded."
+      ],
+      "history": [
+        {
+          "time": "2026-10-25T21:53:37",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-25T21:53:37",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-25T22:20:04",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-25T22:20:04",
+          "from": "in_review",
+          "to": "approved",
+          "note": "Light tier: no audit; merge needs human approval"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-25T22:20:04",
+          "result": "pass",
+          "notes": "check.sh green, MathShow 97 specs, Studio live run clean, image checks blocked on upload"
+        }
+      ],
+      "audits": [],
+      "revisions": 0,
+      "tier": "light",
+      "approved_by": "jg"
     }
   ]
 }
