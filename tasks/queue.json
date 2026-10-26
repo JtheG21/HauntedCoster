@@ -5678,7 +5678,7 @@
       "id": "TASK-0095",
       "title": "MathShow 2-Player Test",
       "project": "GAME-004",
-      "status": "changes_requested",
+      "status": "archived",
       "risk": "low",
       "depends_on": [
         "TASK-0093",
@@ -5709,6 +5709,12 @@
           "from": "in_progress",
           "to": "changes_requested",
           "note": "execution checks failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-25T19:04:43",
+          "from": "changes_requested",
+          "to": "archived",
+          "note": "archived by jg"
         }
       ],
       "executions": [

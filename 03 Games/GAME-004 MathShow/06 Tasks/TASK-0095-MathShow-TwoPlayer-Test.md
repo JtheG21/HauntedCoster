@@ -3,7 +3,7 @@ id: TASK-0095
 title: "MathShow 2-Player Test"
 type: task
 project: GAME-004
-status: changes_requested
+status: archived
 priority: medium
 risk: low
 owner: executor
@@ -59,3 +59,4 @@ Test-only task, no `games/mathshow/` change. Two attempts at `ExecuteMultiplayer
 ## Audits
 
 ## Outcome
+- jg waived the 2-player check on 2026-10-25 ("unnecessary"). AC1 was never met and is not claimed; AC3 is closed by that waiver: the 2-client harness finding is dropped, not filed. Task archived, not done. Two-player behaviour (ties, `+N more`, mid-match join/leave) stays untested; see [[TEST-20261025-04]].
