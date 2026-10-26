@@ -66,3 +66,8 @@ Tier light (Sonnet). Context-usage reading: not taken, the executor has no tool 
 ## Audits
 
 ## Outcome
+- A per-player `Score` leaderstat (`server/Services/LeaderstatsService`) is published when each Reveal starts and reset at match start; in-memory only. The client Results panel (`client/Hud/View`, `Hud/init`) shows a podium of up to 3, up to 5 list rows and the local player's row, built by `shared/StandingsRules` from the `scores` RoundState already sends. No payload change; no DataStore. MathShow specs 57 -> 75 passed.
+- `scripts/check.sh` ALL CHECKS PASSED; strict typecheck no type errors. Studio: [[TEST-20261025-03]] (two one-player matches, AC1-AC3 pass). Light tier: no audit. jg checked the Results screen by eye and approved the merge in chat; `approve-merge` recorded 2026-10-25.
+- Not run: two or more players, ties, `+N more`, joining or leaving mid-match (TASK-0095); phone landscape, touch, gamepad and the mobile player list.
+- Open: Reveal still shows only running scores, not who got each question (payload change); `studio-preflight.sh` and `stamp.sh` are GAME-002-only; no error feedback if `FireServer` throws.
+- Merged as PR #136 (`38407ba`); closed 2026-10-25. No executor usage recorded: no start-of-task context reading was taken.
