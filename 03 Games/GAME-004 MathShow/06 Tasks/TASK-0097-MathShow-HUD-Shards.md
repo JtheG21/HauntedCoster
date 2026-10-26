@@ -3,7 +3,7 @@ id: TASK-0097
 title: "MathShow HUD Shards"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -14,7 +14,7 @@ branch: task/TASK-0097-MathShow-HUD-Shards
 related:
   - "[[GAME-004 MathShow/00 Overview]]"
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-26
 tags:
   - workflow/task
 ---

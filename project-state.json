@@ -4,12 +4,11 @@
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "mathshow.project.json",
   "dispatch_mode": "dry-run",
-  "updated": "2026-10-25T22:20:04",
+  "updated": "2026-10-26T14:04:20",
   "task_counts": {
-    "done": 66,
+    "done": 67,
     "archived": 6,
-    "proposed": 17,
-    "approved": 1
+    "proposed": 17
   },
   "ready": [],
   "needs_human": [
@@ -29,8 +28,7 @@
     "TASK-0083",
     "TASK-0084",
     "TASK-0085",
-    "TASK-0086",
-    "TASK-0097"
+    "TASK-0086"
   ],
   "api_spend_this_month_usd": 0.0,
   "active_game": "GAME-004",
