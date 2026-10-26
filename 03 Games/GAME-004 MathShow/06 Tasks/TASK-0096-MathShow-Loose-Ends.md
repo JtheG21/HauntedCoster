@@ -3,7 +3,7 @@ id: TASK-0096
 title: "MathShow Loose Ends"
 type: task
 project: GAME-004
-status: in_review
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -45,7 +45,7 @@ Close the three items left open by TASK-0092 to TASK-0094: Reveal shows who got 
 
 ---
 ## Implementation record
-Tier standard, no audit run (jg asked for the loose ends to be fixed without further steps; the change is small and `check.sh` is green). Approval came from jg's chat instruction, recorded with `approve --by jg`.
+Tier standard. One Sonnet audit: [[AUD-20261025-TASK-0096-01]] pass, 3 nits (the pcall nit and the slot comment were fixed after the audit; the duplicated game-name check was left). Approval came from jg's chat instruction, recorded with `approve --by jg`.
 
 - **Reveal solvers (AC1):** `Net.RoundStatePayload.solvers` (Reveal only, `ScoreEntry` shape); `RoundService` tracks `solvedIndex`/`solvedPoints` per player and sends `solvers()` with the Reveal; `HudRules.solversLabel`, `HudConfig` strings and `MaxSolverNames`, `View.setSolvers`, `Hud.applyState`. Sender, receiver and the type changed together; no other remote changed. 3 new specs (MathShow 75 -> 78).
 - **Send failed (AC2):** `Hud.trySubmit` unlocks the question and shows `Strings.SendFailed` when `FireServer` throws.

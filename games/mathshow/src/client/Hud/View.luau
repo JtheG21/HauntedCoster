@@ -114,6 +114,7 @@ function View.build(parent: Instance): View
 	Theme.textLimit(question, 56)
 	Theme.outline(question)
 
+	-- Shares AnswerRow's slot: the input is hidden in Reveal, the only phase this line shows.
 	local solversLabel = make("TextLabel", {
 		Name = "Solvers",
 		Position = UDim2.fromScale(0.5, 0.45),

@@ -5733,7 +5733,7 @@
       "id": "TASK-0096",
       "title": "MathShow Loose Ends",
       "project": "GAME-004",
-      "status": "in_review",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0093",
@@ -5764,6 +5764,18 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-25T19:14:10",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-25T19:14:10",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -5773,10 +5785,17 @@
           "notes": "check.sh green, 78 MathShow specs, typecheck clean, TEST-20261025-05"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-25T19:14:10",
+          "result": "pass",
+          "report": "06 QA/AUD-20261025-TASK-0096-01.md"
+        }
+      ],
       "revisions": 0,
       "tier": "standard",
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }

@@ -130,14 +130,20 @@ local function applyState(s: Session, payload: any)
 	end
 
 	applyResults(s, show, payload)
-	local solvers = ""
-	if phase == "Reveal" and payload.solvers ~= nil then
-		solvers = HudRules.solversLabel(payload.solvers)
-		if solvers == "" then
-			warn("[MathShow] Hud ignored malformed solvers")
+	-- Cosmetic: a fault here warns and leaves the rest of the Hud working.
+	local solversOk, solversErr = pcall(function()
+		local solvers = ""
+		if phase == "Reveal" and payload.solvers ~= nil then
+			solvers = HudRules.solversLabel(payload.solvers)
+			if solvers == "" then
+				warn("[MathShow] Hud ignored malformed solvers")
+			end
 		end
+		s.view.setSolvers(solvers)
+	end)
+	if not solversOk then
+		warn(`[MathShow] Hud solvers failed: {solversErr}`)
 	end
-	s.view.setSolvers(solvers)
 
 	local counting = show.timer and payload.endsAt > 0
 	if counting then
