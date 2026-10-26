@@ -65,3 +65,11 @@ None beyond needing TASK-0092's remotes finished first.
 - [[AUD-20261025-TASK-0093-01]] pass (Sonnet, attempt 1): 1 minor, 1 nit, none blocking.
 
 ## Outcome
+- The client Hud (`client/Hud`: init, View, Theme, Fx) shows the question, a server-time countdown, a digit-only input with a Submit button, and feedback from `AnswerResult`. It sends exactly one `SubmitAnswer` per question and never waits on a reply. Pure rules live in `shared/HudConfig`, `shared/HudRules` and `tests/HudRules.spec` (18 tests; MathShow specs 39 -> 57 passed).
+- `scripts/check.sh` ALL CHECKS PASSED; strict typecheck no type errors.
+- Studio: [[TEST-20261025-02]] (full match, AC1-AC3 pass). Audit: [[AUD-20261025-TASK-0093-01]] pass (1 minor, 1 nit, neither fixed). 1 of 2 revisions used (text outline).
+- jg did the manual checks (Submit click, device look) and approved the merge in chat; `approve-merge` recorded 2026-10-25.
+- Not run: two players, joining or leaving mid-match (TASK-0095). The optional minor audit finding (no error feedback if `FireServer` throws) is open.
+- Open from TASK-0092: Reveal still shows only running scores, not who got each question; a payload change would touch sender, handler and receiver.
+- Tooling follow-up (still open): `scripts/studio-preflight.sh` and `scripts/stamp.sh` only support GAME-002; the playtest ran without them.
+- Merged as PR #134 (`c3f1fb0`); closed 2026-10-25. No executor usage recorded: no start-of-task context reading was taken.
