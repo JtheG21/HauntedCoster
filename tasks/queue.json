@@ -6068,7 +6068,7 @@
       "id": "TASK-0101",
       "title": "MathShow Practice Home, Skill Test Intro And Rank Ladder",
       "project": "GAME-004",
-      "status": "approved",
+      "status": "done",
       "risk": "medium",
       "depends_on": [
         "TASK-0099"
@@ -6104,6 +6104,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-26T20:00:07",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -6122,13 +6128,14 @@
       ],
       "revisions": 0,
       "tier": "standard",
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     },
     {
       "id": "TASK-0102",
       "title": "MathShow Skill Test Play And Result",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "in_review",
       "risk": "high",
       "depends_on": [
         "TASK-0099",
@@ -6142,11 +6149,37 @@
         "Remote payloads listed for sender, handler and receiver; validated type, range, ownership, rate limit.",
         "Opus audit (DataStore, remotes); Studio run of a full test."
       ],
-      "history": [],
-      "executions": [],
+      "history": [
+        {
+          "time": "2026-10-26T20:00:07",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-26T20:00:07",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        },
+        {
+          "time": "2026-10-26T20:15:04",
+          "from": "in_progress",
+          "to": "in_review",
+          "note": "execution checks passed"
+        }
+      ],
+      "executions": [
+        {
+          "time": "2026-10-26T20:15:04",
+          "result": "pass",
+          "notes": "check.sh green, MathShow 185 specs; Studio: server flow via remotes, validation, timeout, UI typed and choice, result, gate 1977 rows 0 failures; real DataStore and 2 clients not run"
+        }
+      ],
       "audits": [],
       "revisions": 0,
-      "tier": "deep"
+      "tier": "deep",
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0103",

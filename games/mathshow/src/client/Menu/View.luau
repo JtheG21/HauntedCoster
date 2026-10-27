@@ -12,7 +12,9 @@ local MenuConfig = require(Shared:WaitForChild("MenuConfig"))
 local MenuCopy = require(Shared:WaitForChild("MenuCopy"))
 local CooldownRules = require(Shared:WaitForChild("CooldownRules"))
 local ModeRules = require(Shared:WaitForChild("ModeRules"))
+local HudRulesSkill = HudRules
 local PracticeRules = require(Shared:WaitForChild("PracticeRules"))
+local TextFitRules = require(Shared:WaitForChild("TextFitRules"))
 local NameRules = require(Shared:WaitForChild("NameRules"))
 local RankRules = require(Shared:WaitForChild("RankRules"))
 
@@ -36,6 +38,28 @@ export type PracticeModel = {
 	failed: boolean?,
 	loading: boolean?,
 }
+export type SkillModel = {
+	kind: string, -- "integer" | "choice"
+	rank: number, -- the rank being asked (0..9)
+	problem: string,
+	choices: { string }?,
+	misses: number,
+	total: number, -- seconds the question lasts (the tag shows it)
+	phase: string, -- "question" | "reveal"
+	selected: number?, -- choice index picked but not locked
+	locked: boolean, -- an answer was sent for this question
+	chosen: number?, -- reveal: the index the player locked
+	correct: boolean?, -- reveal
+	correctValue: number?, -- reveal, typed
+	correctIndex: number?, -- reveal, choice
+}
+export type ResultModel = {
+	kind: string, -- "first" | "up" | "held"
+	best: number,
+	cleared: number?,
+	previousBest: number?,
+	retryRemaining: number,
+}
 export type Model = {
 	flags: { [string]: boolean }?,
 	secondary: { [string]: boolean }?,
@@ -45,7 +69,10 @@ export type Model = {
 	waiting: boolean?, -- 03b action after FIND OPPONENT is pressed in a preview
 	toast: string?,
 	practice: PracticeModel?,
-	holdToast: boolean?, -- Preview only: keep the toast on screen
+	holdToast: boolean?,
+	skill: SkillModel?,
+	result: ResultModel?,
+	quiet: boolean?, -- re-render without entrances (a selection changed, a timer tick) -- Preview only: keep the toast on screen
 }
 export type Handlers = {
 	go: (id: string) -> (),
@@ -53,6 +80,8 @@ export type Handlers = {
 	locked: (what: string) -> (),
 	join: () -> (),
 	retry: () -> (),
+	skillSelect: (index: number) -> (),
+	skillLock: (value: number) -> (),
 	setting: (key: string, value: number | boolean) -> (),
 }
 export type Options = { overlay: boolean?, name: string?, displayOrder: number? }
@@ -62,6 +91,7 @@ export type View = {
 	render: (id: string, model: Model) -> (),
 	toast: (text: string, icon: boolean, hold: boolean?) -> (),
 	setRetakeLabel: (text: string) -> (),
+	setSkillTimer: (fraction: number, seconds: number) -> (),
 	defaultFocus: () -> GuiObject?,
 	setReduced: (on: boolean) -> (),
 	destroy: () -> (),
@@ -260,6 +290,9 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	local reduced = false
 	local firstSelectable: GuiObject? = nil
 	local retakeLabel: TextLabel? = nil
+	local skillFill: Frame? = nil
+	local skillSeconds: TextLabel? = nil
+	local quiet = false
 	local toastToken = 0
 	local selection = focusBrackets()
 
@@ -274,6 +307,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		end
 		firstSelectable = nil
 		retakeLabel = nil
+		skillFill = nil
+		skillSeconds = nil
 	end
 
 	-- A button's interaction layer: full-box TextButton, brackets + 1.04 on gamepad focus, 0.95 while pressed.
@@ -342,6 +377,9 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	end
 
 	local function playFx(name: string, target: GuiObject, delay: number?)
+		if quiet then
+			return
+		end
 		local fn = (Fx :: any)[name]
 		if fn then
 			fn(target, delay)
@@ -362,9 +400,13 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	-- Components
 	------------------------------------------------------------------------------------------------------------
 
-	local function topLabel(str: string)
-		text(screen :: Frame, "TopLabel", str, 13, 0, L.TopLabel.y, 844, 16, {
-			TextXAlignment = Enum.TextXAlignment.Center,
+	local function topLabel(str: string, left: boolean?)
+		local x, w = 0, 844
+		if left then
+			x, w = L.LeftTopLabel.x, L.LeftTopLabel.w
+		end
+		text(screen :: Frame, "TopLabel", str, 13, x, L.TopLabel.y, w, 16, {
+			TextXAlignment = if left then Enum.TextXAlignment.Left else Enum.TextXAlignment.Center,
 			TextTransparency = 0.5,
 			TextStrokeTransparency = 1,
 		})
@@ -587,20 +629,28 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		return item
 	end
 
-	local function toast(str: string, withIcon: boolean, hold: boolean?)
+	-- style: silver | green | red toast art; iconKey: an icon before the text; bottom: the in-match position (110, 338).
+	local function toastAt(str: string, iconKey: string?, kind: string, bottom: boolean, hold: boolean?)
 		toastToken += 1
 		local token = toastToken
-		toastToken = token
 		for _, child in toastLayer:GetChildren() do
 			child:Destroy()
 		end
 		local TO = MenuTheme.Toast
-		local width = math.ceil(measureWidth(str, T.Toast)) + TO.PadX * 2 + (if withIcon then TO.IconExtra else 0)
-		local box = { x = 422 - width // 2, y = L.ToastTop.y, w = width, h = TO.Height, rot = L.ToastTop.rot }
-		local shard = Shard.new(toastLayer, "Toast", box, "shard-toast-silver", "glow-toast-silver", "silver")
+		local width = math.ceil(measureWidth(str, T.Toast)) + TO.PadX * 2 + (if iconKey then TO.IconExtra else 0)
+		local at = if bottom then L.ToastBottom else L.ToastTop
+		local box = { x = if bottom then at.x else 422 - width // 2, y = at.y, w = width, h = TO.Height, rot = at.rot }
+		local shard = Shard.new(
+			toastLayer,
+			"Toast",
+			box,
+			"shard-toast-" .. kind,
+			"glow-toast-" .. kind,
+			if kind == "silver" then "silver" elseif kind == "green" then "green" else "red"
+		)
 		local x = TO.PadX
-		if withIcon then
-			icon(shard.content, "Lock", "icon-menu-lock", TO.PadX, 15, TO.IconSize)
+		if iconKey then
+			icon(shard.content, "Mark", iconKey, TO.PadX, 15, TO.IconSize)
 			x += TO.IconExtra
 		end
 		text(shard.content, "Label", str, T.Toast, x, TO.TextY, width - x - TO.PadX, TO.TextH)
@@ -613,6 +663,10 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 				shard.root:Destroy()
 			end
 		end)
+	end
+
+	local function toast(str: string, withIcon: boolean, hold: boolean?)
+		toastAt(str, if withIcon then "icon-menu-lock" else nil, "silver", false, hold)
 	end
 
 	------------------------------------------------------------------------------------------------------------
@@ -1213,6 +1267,385 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		playFx("rise", back.shard.group, 0.4)
 	end
 
+	-- 13 / 14: one Skill Test question (typed or multiple choice), or its reveal.
+	local function buildSkill(model: Model)
+		local sk = model.skill :: SkillModel
+		local integer = sk.kind == "integer"
+		local reveal = sk.phase == "reveal"
+		topLabel(MenuCopy.Top.SkillTest, true)
+
+		-- Rank strip: ten badges (current 32 px with brackets, cleared opaque, above faded) then MISSES and two slots.
+		local strip = make("Frame", {
+			Name = "RankStrip",
+			Position = UDim2.fromOffset(L.RankStrip.x, L.RankStrip.y),
+			Size = UDim2.fromOffset(L.RankStrip.w, L.RankStrip.h),
+			BackgroundTransparency = 1,
+		}, screen :: Frame) :: Frame
+		local sx = 0
+		for rank = 0, 9 do
+			local size = if rank == sk.rank then 32 else 24
+			local node = badgeIcon(strip, RankRules.tierOf(rank) :: RankRules.Tier, sx, (36 - size) / 2, size)
+			node.Name = "Node" .. rank
+			if rank > sk.rank then
+				node.ImageTransparency = 0.7
+				node.BackgroundTransparency = 0.9
+			elseif rank == sk.rank then
+				make("UIStroke", { Color = C.Ink, Thickness = 2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, node)
+			end
+			sx += size + 10
+		end
+		local misses = make("Frame", {
+			Name = "Misses",
+			Position = UDim2.fromOffset(sx + 6, 9),
+			Size = UDim2.fromOffset(0, 18),
+			AutomaticSize = Enum.AutomaticSize.X,
+			BackgroundTransparency = 1,
+		}, strip) :: Frame
+		make("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			Padding = UDim.new(0, 6),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+			VerticalAlignment = Enum.VerticalAlignment.Center,
+		}, misses)
+		tag(misses, "Tag", MenuCopy.Common.Misses, false, 1)
+		for slot = 1, 2 do
+			local used = slot <= sk.misses
+			local box = make("Frame", {
+				Name = "Slot" .. slot,
+				LayoutOrder = slot + 1,
+				Size = UDim2.fromOffset(18, 18),
+				BackgroundColor3 = if used then MenuTheme.Color.MissUsed else C.Ground,
+				BackgroundTransparency = if used then 0 else 0.5,
+				BorderSizePixel = 0,
+			}, misses) :: Frame
+			make("UIStroke", { Color = C.Ink, Transparency = 0.55, Thickness = 1 }, box)
+			if used then
+				icon(box, "Cross", "icon-menu-cross", 3, 3, 12)
+			end
+		end
+
+		-- Problem shard with a measured size (audit A8): the largest of the tiers that fits one line, else two lines at 40.
+		local box = if integer then L.SkillProblem else L.ChoiceProblem
+		local problem = newShard("Problem", box, "shard-menu-problem-silver", "glow-menu-problem-silver", "silver")
+		local tier = RankRules.tierOf(sk.rank) :: RankRules.Tier
+		local label =
+			string.gsub(string.gsub(MenuCopy.Skill.QuestionTag, "{n}", tostring(sk.rank + 1)), "{tier}", tier.name)
+		label = string.gsub(label, "{time}", tostring(sk.total))
+		-- (60, 40): the problem shard has a tab cut out of its top left; anything higher or further left is inside the cut.
+		tag(problem.content, "Tag", label).Position = UDim2.fromOffset(60, 40)
+		local shown = sk.problem
+		if reveal then
+			local answer = if integer
+				then tostring(sk.correctValue)
+				else ((sk.choices or {})[sk.correctIndex or 0] or "")
+			shown = string.gsub(shown, "%?%s*$", answer)
+		end
+		local sizes = if integer then { 88, 76, 64, 56, 48, 40 } else { 64, 56, 48, 40 } -- the choice box is 150 tall, not 186
+		local fit = TextFitRules.fitSize(measureWidth, shown, sizes, 456)
+		local labelHeight = fit.size * fit.lines
+		local problemLabel =
+			text(problem.content, "Text", shown, fit.size, 62, if integer then 60 else 55, 456, labelHeight, {
+				TextWrapped = fit.lines > 1,
+				TextYAlignment = Enum.TextYAlignment.Center,
+				LineHeight = 1,
+			})
+		problemLabel.TextXAlignment = Enum.TextXAlignment.Center
+		glowLoop({ shard = problem, name = "Problem" }, 0)
+		playFx("slam", problem.group, 0)
+
+		-- Timer bar and the seconds column.
+		local bar = if integer then L.SkillTimerBar else L.ChoiceTimerBar
+		local track = make("Frame", {
+			Name = "TimerBar",
+			Position = UDim2.fromOffset(bar.x, bar.y),
+			Size = UDim2.fromOffset(bar.w, bar.h),
+			Rotation = bar.rot,
+			BackgroundColor3 = C.Ink,
+			BackgroundTransparency = 0.82,
+			BorderSizePixel = 0,
+		}, screen :: Frame)
+		skillFill = make("Frame", {
+			Name = "Fill",
+			Size = UDim2.fromScale(if reveal then 0 else 1, 1),
+			BackgroundColor3 = C.Ink,
+			BorderSizePixel = 0,
+		}, track) :: Frame
+		local sec = L.SkillSeconds
+		tag(screen :: Frame, "SecTag", if reveal then MenuCopy.Common.NextUp else MenuCopy.Common.Sec).Position =
+			UDim2.fromOffset(sec.x + 4, sec.y)
+		skillSeconds = text(
+			screen :: Frame,
+			"Seconds",
+			if reveal then "0" else tostring(sk.total),
+			100,
+			sec.x,
+			sec.y + 22,
+			sec.w,
+			108,
+			{
+				TextXAlignment = Enum.TextXAlignment.Right,
+			}
+		)
+
+		-- Feedback toast at the bottom (silver LOCKED IN, green CORRECT, red NOT QUITE).
+		if reveal then
+			if sk.correct then
+				toastAt(MenuCopy.Skill.Correct, "icon-menu-check", "green", true, true)
+			else
+				toastAt(
+					if sk.misses >= 2 then MenuCopy.Skill.NotQuiteMisses else MenuCopy.Skill.NotQuiteMiss,
+					"icon-menu-cross",
+					"red",
+					true,
+					true
+				)
+			end
+		elseif sk.locked then
+			toastAt(MenuCopy.Common.LockedIn, "icon-menu-lock", "silver", true, true)
+		end
+
+		local canAnswer = not (reveal or sk.locked)
+		if integer then
+			local inputShard = newShard("Input", L.SkillInput, "shard-input", nil, "silver")
+			local lockShard = newShard("LockIn", L.SkillLock, "shard-button", nil, "silver")
+			local answerBox = make("TextBox", {
+				Name = "Answer",
+				Size = UDim2.fromOffset(L.SkillInput.w, L.SkillInput.h),
+				BackgroundTransparency = 1,
+				FontFace = FONT.Body,
+				Text = "",
+				PlaceholderText = MenuCopy.Common.TypeAnswer,
+				PlaceholderColor3 = C.InkDim,
+				TextSize = 30,
+				TextColor3 = C.Ink,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				ClearTextOnFocus = false,
+				TextEditable = canAnswer,
+				SelectionImageObject = selection,
+				ZIndex = 12,
+			}, inputShard.content) :: TextBox
+			make("UIPadding", { PaddingLeft = UDim.new(0, 22), PaddingRight = UDim.new(0, 18) }, answerBox)
+			local lockLabel =
+				text(lockShard.content, "Label", MenuCopy.Common.LockIn, T.Action, 0, 0, L.SkillLock.w, L.SkillLock.h, {
+					TextXAlignment = Enum.TextXAlignment.Center,
+					TextColor3 = C.ButtonInk,
+					TextStrokeTransparency = 1,
+				})
+			local lockItem: Item = { shard = lockShard, name = "LockIn" }
+			local function submit()
+				local digits = HudRulesSkill.sanitizeInput(answerBox.Text)
+				if canAnswer and digits ~= "" then
+					handlers.skillLock(tonumber(digits) :: number)
+				end
+			end
+			answerBox:GetPropertyChangedSignal("Text"):Connect(function()
+				local clean = HudRulesSkill.sanitizeInput(answerBox.Text)
+				if clean ~= answerBox.Text then
+					answerBox.Text = clean
+				end
+			end)
+			answerBox.FocusLost:Connect(function(enter: boolean)
+				if enter then
+					submit()
+				end
+			end)
+			if canAnswer then
+				interactive(lockItem, submit, nil)
+				firstSelectable = firstSelectable or answerBox
+			else
+				lockLabel.TextTransparency = MenuTheme.DisabledTransparency
+				lockShard.image.ImageTransparency = MenuTheme.DisabledTransparency
+			end
+			playFx("rise", inputShard.group, 0.28)
+			playFx("pop", lockShard.group, 0.3)
+			return
+		end
+
+		local boxes = { L.ChoiceA, L.ChoiceB, L.ChoiceC, L.ChoiceD }
+		local items: { Item } = {}
+		for index = 1, 4 do
+			local isChosen = if reveal then sk.chosen == index else sk.selected == index
+			local isCorrect = reveal and sk.correctIndex == index
+			local isWrongPick = reveal and sk.chosen == index and not isCorrect
+			local key = if isCorrect
+				then "shard-menu-choice-green"
+				elseif isWrongPick then "shard-menu-choice-red"
+				elseif isChosen then "shard-menu-choice-white"
+				else "shard-menu-choice-indigo"
+			local gem = if isCorrect then "green" elseif isWrongPick then "red" else "blue"
+			local shard =
+				newShard("Choice" .. index, boxes[index], key, if isChosen then "glow-menu-choice-green" else nil, gem)
+			local item: Item = { shard = shard, name = "Choice" .. index }
+			local ink = if key == "shard-menu-choice-white" then C.ButtonInk else C.Ink
+			local dim = if (reveal or sk.locked) and not (isChosen or isCorrect)
+				then MenuTheme.DisabledTransparency
+				else 0
+			shard.image.ImageTransparency = if dim > 0 then dim else 0
+			local square = make("Frame", {
+				Name = "Letter",
+				Position = UDim2.fromOffset(16, 13),
+				Size = UDim2.fromOffset(28, 28),
+				BackgroundColor3 = C.Tag,
+				BackgroundTransparency = dim,
+				BorderSizePixel = 0,
+				ZIndex = 5,
+			}, shard.content)
+			local letter = text(square, "Text", string.char(64 + index), T.ChoiceLetter, 0, 0, 28, 28, {
+				TextXAlignment = Enum.TextXAlignment.Center,
+				TextStrokeTransparency = 1,
+			})
+			letter.TextTransparency = dim
+			local answerLabel =
+				text(shard.content, "Answer", (sk.choices or {})[index] or "", T.Choice, 56, 0, 190, 54, {
+					TextScaled = true,
+					TextColor3 = ink,
+					TextStrokeTransparency = if ink == C.ButtonInk then 1 else MenuTheme.TextStrokeTransparency,
+					TextXAlignment = Enum.TextXAlignment.Left,
+				})
+			make("UITextSizeConstraint", { MinTextSize = 14, MaxTextSize = 18 }, answerLabel)
+			answerLabel.TextTransparency = dim
+			local mark: string? = if isCorrect
+				then "icon-menu-check"
+				elseif isWrongPick then "icon-menu-cross"
+				elseif sk.locked and isChosen and not reveal then "icon-menu-lock"
+				else nil
+			if mark then
+				icon(shard.content, "Mark", mark, 250, 17, 20)
+			end
+			if canAnswer then
+				interactive(item, function()
+					if sk.selected == index then
+						handlers.skillLock(index)
+					else
+						handlers.skillSelect(index)
+					end
+				end, 1.02)
+			end
+			items[index] = item
+			playFx("rowIn", shard.group, 0.28 + (index - 1) * 0.06)
+		end
+		if canAnswer then
+			local lockShard = newShard("LockIn", L.ChoiceLockIn, "shard-button", nil, "silver")
+			local lockItem: Item = { shard = lockShard, name = "LockIn" }
+			local ready = sk.selected ~= nil
+			local lockLabel = text(
+				lockShard.content,
+				"Label",
+				MenuCopy.Common.LockIn,
+				T.Action,
+				0,
+				0,
+				L.ChoiceLockIn.w,
+				L.ChoiceLockIn.h,
+				{
+					TextXAlignment = Enum.TextXAlignment.Center,
+					TextColor3 = C.ButtonInk,
+					TextStrokeTransparency = 1,
+				}
+			)
+			if ready then
+				interactive(lockItem, function()
+					handlers.skillLock(sk.selected :: number)
+				end, nil)
+			else
+				lockLabel.TextTransparency = MenuTheme.DisabledTransparency
+				lockShard.image.ImageTransparency = MenuTheme.DisabledTransparency
+			end
+			link(items[1], "Right", items[2])
+			link(items[3], "Right", items[4])
+			link(items[1], "Down", items[3])
+			link(items[2], "Down", items[4])
+			if ready then
+				link(items[4], "Down", lockItem)
+				link(items[3], "Down", lockItem)
+			end
+		end
+	end
+
+	-- 15 Skill Test result (first rank / rank up / rank held).
+	local function buildSkillResult(model: Model)
+		local r = model.result :: ResultModel
+		local P = MenuTheme.Panel
+		topLabel(MenuCopy.Top.SkillResult)
+		local gems = { first = "green", up = "violet", held = "silver" }
+		local titles = { first = MenuCopy.Skill.FirstRank, up = MenuCopy.Skill.RankUp, held = MenuCopy.Skill.Held }
+		local sizes = { first = 50, up = 58, held = 58 }
+		local kind = if r.kind == "up" or r.kind == "held" then r.kind else "first"
+		local tier = RankRules.tierOf(r.best) :: RankRules.Tier
+		local p = panel(
+			(gems :: { [string]: string })[kind],
+			if kind == "first" then MenuCopy.Skill.FirstRankTag else MenuCopy.Top.SkillResult,
+			(titles :: { [string]: string })[kind],
+			(sizes :: { [string]: number })[kind],
+			{},
+			{}
+		)
+		local size = (sizes :: { [string]: number })[kind]
+		local rowY = P.TitleY + size + 6
+		badgeIcon(p.shard.content, tier, P.LeftPad, rowY, MenuTheme.BadgeSizes.Card)
+		text(p.shard.content, "Tier", tier.name, 20, P.LeftPad + 58, rowY + 2, 240, 24)
+		text(
+			p.shard.content,
+			"Subject",
+			tier.subject,
+			14,
+			P.LeftPad + 58,
+			rowY + 26,
+			240,
+			18,
+			{ FontFace = FONT.Italic }
+		)
+		local line = if kind == "held"
+			then string.gsub(
+				MenuCopy.Skill.HeldLine,
+				"{tier}",
+				(RankRules.tierOf(r.cleared or 0) :: RankRules.Tier).name
+			)
+			else string.gsub(MenuCopy.Skill.RetakeLine, "{time}", CooldownRules.formatClock(r.retryRemaining))
+		text(p.shard.content, "Line", line, T.PanelLine, P.LeftPad, rowY + 56, 406, 20, { FontFace = FONT.Italic })
+
+		-- Badges on the right: the old one faded with an arrow (rank up only), the new one large on its tier glow.
+		local glowKey = "glow-menu-rank-" .. tier.key
+		local glow = make("ImageLabel", {
+			Name = "TierGlow",
+			Position = UDim2.fromOffset(616, 24),
+			Size = UDim2.fromOffset(192, 192),
+			BackgroundTransparency = 1,
+			ZIndex = 3,
+		}, screen :: Frame) :: ImageLabel
+		Shard.setImage(glow, glowKey, nil, nil)
+		table.insert(stops, Fx.breathe(glow, 0))
+		local newBadge = badgeIcon(screen :: Frame, tier, L.RankNew.x, L.RankNew.y, MenuTheme.BadgeSizes.Hero)
+		newBadge.Name = "NewBadge"
+		newBadge.ZIndex = 6
+		make("UIScale", {}, newBadge)
+		if kind == "up" and r.previousBest ~= nil then
+			local old = badgeIcon(
+				screen :: Frame,
+				RankRules.tierOf(r.previousBest) :: RankRules.Tier,
+				L.RankOld.x,
+				L.RankOld.y,
+				48
+			)
+			old.Name = "OldBadge"
+			old.ImageTransparency = 0.4
+			icon(screen :: Frame, "Arrow", "icon-menu-chevron", L.RankArrow.x, L.RankArrow.y, 24)
+		end
+		local done = action(L.BottomAction, MenuCopy.Common.Done, true, false)
+		interactive(done, handlers.back, nil)
+		local ladder = secondary("Ladder", L.BottomSecondary, MenuCopy.Skill.Ladder, false)
+		interactive(ladder, function()
+			handlers.go("ladder")
+		end, nil)
+		link(done, "Right", ladder)
+		glowLoop(p, 0)
+		playFx("slam", p.shard.group, 0)
+		playFx("badgeSlam", newBadge, 0.45)
+		playFx("flash", p.shard.flash, 0.62)
+		playFx("pop", done.shard.group, 0.6)
+		playFx("rise", ladder.shard.group, 0.66)
+	end
+
 	local function buildWatching()
 		local shard = newShard("Banner", L.WatchBanner, "shard-menu-banner-violet", "glow-menu-banner-violet", "violet")
 		-- The banner shard (480x44) has a cut along the top right and the bottom left: only y 14..30 clears 6 px at every x, so
@@ -1226,6 +1659,11 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 
 	local function render(id: string, model: Model)
 		clearScreen()
+		quiet = model.quiet == true
+		-- A screen builds the toast it needs (CORRECT, LOCKED IN, ...); one left from the previous screen or question goes.
+		for _, child in toastLayer:GetChildren() do
+			child:Destroy()
+		end
 		local frame = make(
 			"Frame",
 			{ Name = "Screen_" .. id, Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1 },
@@ -1238,6 +1676,10 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		local ok, err = pcall(function()
 			if id == "watching" then
 				buildWatching()
+			elseif id == "skill" and model.skill then
+				buildSkill(model)
+			elseif id == "skillresult" and model.result then
+				buildSkillResult(model)
 			elseif id == "practice" then
 				buildPractice(model)
 			elseif id == "skillintro" then
@@ -1273,6 +1715,14 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		root = root,
 		render = render,
 		toast = toast,
+		setSkillTimer = function(fraction: number, seconds: number)
+			if skillFill then
+				skillFill.Size = UDim2.fromScale(math.clamp(fraction, 0, 1), 1)
+			end
+			if skillSeconds then
+				skillSeconds.Text = tostring(math.max(0, math.ceil(seconds)))
+			end
+		end,
 		setRetakeLabel = function(str: string)
 			if retakeLabel then
 				retakeLabel.Text = str

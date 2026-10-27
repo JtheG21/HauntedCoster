@@ -73,9 +73,50 @@ local function applySettings()
 	end
 end
 
+-- The Skill Test run on screen (TASK-0102). The server decides everything; this only shows its SkillState and sends answers.
+local skillCtx: {
+	attempt: number,
+	model: View.SkillModel?,
+	endsAt: number,
+	total: number,
+	selected: number?,
+	locked: boolean,
+	chosen: number?,
+	prevBest: number?,
+	result: View.ResultModel?,
+	started: boolean,
+} =
+	{
+		attempt = 0,
+		model = nil,
+		endsAt = 0,
+		total = 0,
+		selected = nil,
+		locked = false,
+		chosen = nil,
+		prevBest = nil,
+		result = nil,
+		started = false,
+	}
+local skillToken = 0
+
+local function skillModel(): View.SkillModel?
+	local m = skillCtx.model
+	if m == nil then
+		return nil
+	end
+	local copy = table.clone(m)
+	copy.selected = skillCtx.selected
+	copy.locked = skillCtx.locked
+	copy.chosen = skillCtx.chosen
+	return copy
+end
+
 local function model(): View.Model
 	local player = Players.LocalPlayer
 	return {
+		skill = if stack[#stack] == "skill" then skillModel() else nil,
+		result = if stack[#stack] == "skillresult" then skillCtx.result else nil,
 		player = {
 			name = player.DisplayName,
 			userId = player.UserId,
@@ -152,12 +193,77 @@ local function show(id: string, focusKey: string?)
 	end
 end
 
+local function remoteNamed(name: string): Instance?
+	local folder = ReplicatedStorage:WaitForChild("Remotes", 10)
+	return if folder then folder:WaitForChild(name, 10) else nil
+end
+
+local function fire(name: string, payload: any?)
+	local ok, err = pcall(function()
+		local remote = remoteNamed(name)
+		if remote and remote:IsA("RemoteEvent") then
+			if payload == nil then
+				remote:FireServer()
+			else
+				remote:FireServer(payload)
+			end
+		else
+			warn(`[MathShow] Menu: {name} remote not found`)
+		end
+	end)
+	if not ok then
+		warn(`[MathShow] Menu could not send {name}: {err}`)
+	end
+end
+
+-- Counts the question clock down on screen (bar and seconds). A tick re-renders nothing.
+local function startSkillTimer()
+	skillToken += 1
+	local token = skillToken
+	task.spawn(function()
+		while token == skillToken and view and stack[#stack] == "skill" do
+			local m = skillCtx.model
+			if m == nil or m.phase ~= "question" then
+				break
+			end
+			local left = math.max(0, skillCtx.endsAt - workspace:GetServerTimeNow())
+			view.setSkillTimer(left / math.max(skillCtx.total, 1), left)
+			task.wait(0.1)
+		end
+	end)
+end
+
+local function renderSkill(isQuiet: boolean)
+	if not view then
+		return
+	end
+	local m = model()
+	m.quiet = isQuiet
+	view.render("skill", m)
+	focusDefault(nil)
+	local current = skillCtx.model
+	if current and current.phase == "question" then
+		startSkillTimer()
+	end
+end
+
 local function go(id: string)
+	if id == "skill" then
+		-- START on the intro: ask the server; the screen opens when its first question arrives.
+		skillCtx.started = true
+		skillCtx.prevBest = profile.rank
+		skillCtx.result = nil
+		fire(Net.SkillStart)
+		return
+	end
 	table.insert(stack, id)
 	show(id)
 end
 
 local function back()
+	if stack[#stack] == "skill" then
+		return -- no leaving a Skill Test question: the run ends on its own
+	end
 	if #stack > 1 then
 		table.remove(stack)
 		show(stack[#stack])
@@ -168,11 +274,6 @@ local function unbindBack()
 	pcall(function()
 		ContextActionService:UnbindAction(BACK_ACTION)
 	end)
-end
-
-local function remoteNamed(name: string): Instance?
-	local folder = ReplicatedStorage:WaitForChild("Remotes", 10)
-	return if folder then folder:WaitForChild(name, 10) else nil
 end
 
 -- Sends the settings once, SettingsSaveDebounceSeconds after the last change. The server validates and rate limits.
@@ -259,6 +360,113 @@ function Menu.getSettings(): View.Settings
 	return table.clone(settings)
 end
 
+-- SkillState / SkillResult from the server. Malformed payloads are ignored with a warning.
+local function onSkillState(p: any)
+	if typeof(p) ~= "table" or typeof(p.state) ~= "string" or not view then
+		warn("[MathShow] Menu ignored a malformed SkillState")
+		return
+	end
+	if p.state == "question" or p.state == "reveal" then
+		if typeof(p.problem) ~= "string" or typeof(p.rank) ~= "number" or typeof(p.kind) ~= "string" then
+			warn("[MathShow] Menu ignored a malformed SkillState question")
+			return
+		end
+		if not skillCtx.started then
+			return -- a stale state from a run this menu did not start
+		end
+		local reveal = p.state == "reveal"
+		local phase: string = p.state
+		skillCtx.attempt = p.attempt
+		skillCtx.endsAt = p.endsAt
+		skillCtx.total = p.total
+		if not reveal then
+			skillCtx.locked = false
+			skillCtx.selected = nil
+			skillCtx.chosen = nil
+		end
+		skillCtx.model = {
+			kind = p.kind,
+			rank = p.rank,
+			problem = p.problem,
+			choices = p.choices or (skillCtx.model and skillCtx.model.choices),
+			misses = p.misses,
+			total = if reveal and skillCtx.model then skillCtx.model.total else p.total,
+			phase = phase,
+			selected = nil,
+			locked = skillCtx.locked,
+			chosen = skillCtx.chosen,
+			correct = p.correct,
+			correctValue = p.correctValue,
+			correctIndex = p.correctIndex,
+		}
+		if stack[#stack] ~= "skill" then
+			table.insert(stack, "skill")
+		end
+		renderSkill(false)
+	elseif p.state == "cooldown" then
+		skillCtx.started = false
+		profile.retryAt = if typeof(p.retryAt) == "number" then p.retryAt else profile.retryAt
+		stack = { "main", "practice" }
+		show("practice")
+	elseif p.state == "unavailable" then
+		skillCtx.started = false
+		if view then
+			view.toast(MenuCopy.Main.RankUnavailable, false)
+		end
+	end
+end
+
+local function onSkillResult(p: any)
+	if
+		typeof(p) ~= "table"
+		or typeof(p.best) ~= "number"
+		or typeof(p.kind) ~= "string"
+		or typeof(p.retryAt) ~= "number"
+	then
+		warn("[MathShow] Menu ignored a malformed SkillResult")
+		return
+	end
+	skillCtx.started = false
+	skillToken += 1
+	profile.rank = p.best
+	profile.lastTestRank = if typeof(p.cleared) == "number" then p.cleared else 0
+	profile.retryAt = p.retryAt
+	skillCtx.result = {
+		kind = p.kind,
+		best = p.best,
+		cleared = p.cleared,
+		previousBest = skillCtx.prevBest,
+		retryRemaining = PracticeRules.remaining(p.retryAt, workspace:GetServerTimeNow()),
+	}
+	stack = { "main", "practice", "skillresult" }
+	show("skillresult")
+end
+
+local function connectSkillRemotes()
+	local state = remoteNamed(Net.SkillState)
+	local result = remoteNamed(Net.SkillResult)
+	if state and state:IsA("RemoteEvent") then
+		state.OnClientEvent:Connect(function(p: any)
+			local ok, err = pcall(function()
+				onSkillState(p)
+			end)
+			if not ok then
+				warn(`[MathShow] Menu SkillState failed: {err}`)
+			end
+		end)
+	end
+	if result and result:IsA("RemoteEvent") then
+		result.OnClientEvent:Connect(function(p: any)
+			local ok, err = pcall(function()
+				onSkillResult(p)
+			end)
+			if not ok then
+				warn(`[MathShow] Menu SkillResult failed: {err}`)
+			end
+		end)
+	end
+end
+
 function Menu.start(opts: Options)
 	if view then
 		return
@@ -270,6 +478,26 @@ function Menu.start(opts: Options)
 		back = back,
 		retry = function()
 			Menu.retryProfile()
+		end,
+		skillSelect = function(index: number)
+			local m = skillCtx.model
+			if m and m.phase == "question" and not skillCtx.locked then
+				skillCtx.selected = index
+				renderSkill(true)
+			end
+		end,
+		skillLock = function(value: number)
+			local m = skillCtx.model
+			if not m or m.phase ~= "question" or skillCtx.locked then
+				return
+			end
+			-- Lock first, synchronously, so nothing can send a second answer for this question.
+			skillCtx.locked = true
+			if m.kind == "choice" then
+				skillCtx.chosen = value
+			end
+			fire(Net.SkillAnswer, { attempt = skillCtx.attempt, answer = value })
+			renderSkill(true)
 		end,
 		locked = function(_what: string)
 			if view then
@@ -307,6 +535,7 @@ function Menu.start(opts: Options)
 	stack = { "main" }
 	show("main")
 	requestProfile()
+	task.spawn(connectSkillRemotes)
 
 	ContextActionService:BindAction(BACK_ACTION, function(_name, state)
 		if state == Enum.UserInputState.Begin and #stack > 1 then
