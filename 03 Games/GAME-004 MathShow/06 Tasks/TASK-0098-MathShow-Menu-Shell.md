@@ -100,9 +100,12 @@ Margins are the tightest measured by the gate at 844x390 (min over all fixtures)
 Practice home + Skill Test intro (11, 12, 19a); Skill Test play and result (13-15) with rank persistence; Rank ladder (16); Blitz (06, 07); VS flow (04, 05, 08, 09, 19b) with the 2-player test; Group Battle watching banner (10) and server-side join; SettingsSave; `badgeSlam`; upload of the 75 PNGs; make the gate's viewport run a true window resize.
 
 ## Audits
-Standard tier: one Sonnet audit after check.sh and Studio checks.
+Standard tier, one Sonnet audit (2026-10-26, `main..HEAD`): **pass**, no blocker or major finding; AC1-AC4 met (textures need the upload). It did not re-run the Studio gate.
+- Minor, fixed: `TextFitRules.rectFits` returned true for NaN rect, margin or target size (now false, with a NaN spec); `Menu.hide()` left the stepper `InputBegan` handler connected (now disconnected and `SelectedObject` cleared). Added a half-open band-boundary spec. MathShow specs 134.
+- Nits, left: `Menu.model()` hard-codes `rank = nil` (no rank persistence yet); `Preview`/`TextFit` ship to live clients but are `IsStudio()`-gated; `Preview.show` leaves reduced motion on (Studio only).
+- Note gap, fixed: `mathshow.project.json` also changed (maps `tests/studio` to `StarterPlayerScripts.StudioTests`).
 
 ## Outcome
-- `scripts/check.sh` ALL CHECKS PASSED (StyLua, Selene, strict types, Rojo build); MathShow 132 specs (baseline 97), 397 total.
+- `scripts/check.sh` ALL CHECKS PASSED (StyLua, Selene, strict types, Rojo build); MathShow 134 specs after the audit fixes (baseline 97), 399 total.
 - Studio TextFit gate: 1164 rows, 0 failures (see Studio verification). Glyph sheet, behaviour and reduced-motion checks done; textured visuals, exact window sizes and real controller/touch are not.
 - Pending for jg: approve the upload of the 75 PNGs (`games/mathshow/art/menu/UPLOAD_LIST.md`), the one Standard-tier Sonnet audit, and the merge. A 2-player test is pending for VS.

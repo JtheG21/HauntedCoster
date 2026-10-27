@@ -29,6 +29,9 @@ function TextFitRules.rectFits(
 	local sx = tw / profile.w
 	local sy = th / profile.h
 	local x0, y0, x1, y1 = rect.x0 - margin, rect.y0 - margin, rect.x1 + margin, rect.y1 + margin
+	if x0 ~= x0 or y0 ~= y0 or x1 ~= x1 or y1 ~= y1 or tw ~= tw or th ~= th then
+		return false -- NaN compares false everywhere, so it would otherwise pass
+	end
 	if x1 < x0 or y1 < y0 or x0 < 0 or y0 < 0 or x1 > tw or y1 > th then
 		return false
 	end

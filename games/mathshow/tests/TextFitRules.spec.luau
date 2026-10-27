@@ -53,6 +53,19 @@ return function(t: TestRunner.T)
 		t.eq(fits("shard-menu-action", rect(100, 30, 50, 40)), false)
 	end)
 
+	t.test("NaN rects, margins and target sizes fail", function()
+		local nan = 0 / 0
+		t.eq(fits("shard-menu-action", rect(nan, 20, 100, 40)), false)
+		t.eq(fits("shard-menu-action", rect(40, 20, 100, nan)), false)
+		t.eq(fits("shard-menu-action", rect(40, 20, 100, 40), nan), false)
+		t.eq(TextFitRules.rectFits(ShapeProfiles["shard-menu-action"], rect(40, 20, 100, 40), 6, nan, 64), false)
+	end)
+
+	t.test("bands are half-open: a rect starting exactly on a band edge ignores the band above", function()
+		-- action step is 4: y 16..(16+h) with margin 0 touches bands 5.. only, so a cut in band 4 cannot matter
+		t.eq(fits("shard-menu-action", rect(60, 16, 150, 44), 0), true)
+	end)
+
 	t.test("stretched shards scale the profile", function()
 		local p = ShapeProfiles["shard-score-silver"]
 		t.eq(TextFitRules.rectFits(p, rect(40, 14, 250, 28), 6, 296, 44), true)

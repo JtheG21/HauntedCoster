@@ -178,6 +178,13 @@ end
 
 function Menu.hide()
 	unbindBack()
+	if inputConnection then
+		inputConnection:Disconnect()
+		inputConnection = nil
+	end
+	pcall(function()
+		GuiService.SelectedObject = nil
+	end)
 	if view then
 		view.gui.Enabled = false
 	end
