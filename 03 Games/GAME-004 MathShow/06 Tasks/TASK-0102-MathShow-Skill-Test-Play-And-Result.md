@@ -3,7 +3,7 @@ id: TASK-0102
 title: "MathShow Skill Test Play And Result"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: high
 owner: executor

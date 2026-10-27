@@ -26,6 +26,7 @@ function Watching.start()
 			retry = noop,
 			skillSelect = function(_index: number) end,
 			skillLock = function(_value: number) end,
+			blitzLock = function(_value: number) end,
 			setting = function(_key: string, _value: number | boolean) end,
 		}
 		local built = View.build(Players.LocalPlayer:WaitForChild("PlayerGui"), handlers, {
