@@ -5927,6 +5927,143 @@
       "tier": "standard",
       "approved_by": "jg",
       "merge_approved_by": "jg"
+    },
+    {
+      "id": "TASK-0099",
+      "title": "MathShow Profile Store And Settings Save",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "high",
+      "depends_on": [
+        "TASK-0098"
+      ],
+      "branch": "task/TASK-0099-MathShow-Profile-Store-And-Settings-Save",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0099-MathShow-Profile-Store-And-Settings-Save.md",
+      "acceptance_criteria": [
+        "Server `ProfileService` (idempotent start, pcall-isolated DataStore calls with retries and a session cache; never blocks the match loop) stores `{settings, bestRank, lastTestAt, blitzBest}` with a schema version; pure `ProfileRules` validates and migrates it with boundary specs.",
+        "New remotes `MenuRequest` (client asks for its profile) and `SettingsSave` (client sends settings): server validates type, range, ownership and rate limit, ignores everything else, and debounces writes.",
+        "Menu main card shows the real best rank, UNRANKED when none, and RANK UNAVAILABLE when the profile fails to load; settings load on join and save debounced; a DataStore failure warns and never blocks the menu or the match.",
+        "check.sh green, MathShow specs rise; Studio run with a DataStore failure simulated; Opus audit (DataStore and remotes)."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "deep"
+    },
+    {
+      "id": "TASK-0100",
+      "title": "MathShow Group Join And Watching Banner",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0098"
+      ],
+      "branch": "task/TASK-0100-MathShow-Group-Join-And-Watching-Banner",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0100-MathShow-Group-Join-And-Watching-Banner.md",
+      "acceptance_criteria": [
+        "Server tracks joined players per match; only joined players can submit, score and appear in standings; a new `JoinShow` remote is validated and rate limited, and the match loop still runs with zero joiners.",
+        "A player pressing JOIN SHOW mid-match sees the WATCHING banner (`banner-violet`, HUD question layout without the answer row) until the next Intermission, then plays.",
+        "RoundService changes keep every existing spec green; pure join rules live in `shared/` with boundary specs; Studio 1-player run shows full cycle.",
+        "Opus audit (networking, remotes)."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "deep"
+    },
+    {
+      "id": "TASK-0101",
+      "title": "MathShow Practice Home, Skill Test Intro And Rank Ladder",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "medium",
+      "depends_on": [
+        "TASK-0099"
+      ],
+      "branch": "task/TASK-0101-MathShow-Practice-Home-Skill-Test-Intro-And-Rank-Ladder",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0101-MathShow-Practice-Home-Skill-Test-Intro-And-Rank-Ladder.md",
+      "acceptance_criteria": [
+        "PRACTICE opens Practice home; TAKE TEST shows the retake countdown from `CooldownRules`; TOPIC DRILLS locked; RETRY re-requests the profile; ladder shows current/cleared/locked via `RankRules.ladderMark`.",
+        "`Fx.badgeSlam` added (pcall-isolated, no yield, reduced-motion snap); Preview states and TextFit gate cover every new state with 0 failures.",
+        "Specs for any new pure logic; check.sh green; screenshots compared."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "standard"
+    },
+    {
+      "id": "TASK-0102",
+      "title": "MathShow Skill Test Play And Result",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "high",
+      "depends_on": [
+        "TASK-0099",
+        "TASK-0101"
+      ],
+      "branch": "task/TASK-0102-MathShow-Skill-Test-Play-And-Result",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0102-MathShow-Skill-Test-Play-And-Result.md",
+      "acceptance_criteria": [
+        "Server `SkillTestService` generates problems per rank (pure `SkillTestRules`/problem generator with specs), holds the answer server-side until reveal (no answer on the client), enforces two misses in a row ends the run, a per-rank time limit and the 5:00 retake cooldown.",
+        "Result persists `bestRank` (never decreases) via the profile store; screens 13/14/15 (typed + multiple choice, rank strip, result with badgeSlam) match the handoff and pass the TextFit gate with the audit's stress fixtures (27-char calc problems, 14-char answers, negatives).",
+        "Remote payloads listed for sender, handler and receiver; validated type, range, ownership, rate limit.",
+        "Opus audit (DataStore, remotes); Studio run of a full test."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "deep"
+    },
+    {
+      "id": "TASK-0103",
+      "title": "MathShow Blitz",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "high",
+      "depends_on": [
+        "TASK-0099"
+      ],
+      "branch": "task/TASK-0103-MathShow-Blitz",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0103-MathShow-Blitz.md",
+      "acceptance_criteria": [
+        "Server `BlitzService`: problem set per run, one total clock from config, answers validated server-side, no right/wrong shown until review; pure `BlitzRules` (scoreText, isNewBest, reviewRows, bestText) with boundary specs.",
+        "Blitz best persists in the profile; screens 06/07 match the handoff (neutral pips, LOCKED IN toast, review columns, NEW BEST) and pass the TextFit gate with 99:59 / 10:00 and 10/10 fixtures.",
+        "ModeEnabled.blitz flips to true only when the flow is complete; Opus audit."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "deep"
+    },
+    {
+      "id": "TASK-0104",
+      "title": "MathShow VS Matchmaking And Flow",
+      "project": "GAME-004",
+      "status": "proposed",
+      "risk": "high",
+      "depends_on": [
+        "TASK-0099",
+        "TASK-0100"
+      ],
+      "branch": "task/TASK-0104-MathShow-VS-Matchmaking-And-Flow",
+      "note": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0104-MathShow-VS-Matchmaking-And-Flow.md",
+      "acceptance_criteria": [
+        "Server queue with timeout (60 s default), cancel and keep-waiting remotes, per-match state so VS does not touch the Group Battle loop (RoundService refactor behind the existing specs); forfeit on leave.",
+        "Pure `MatchRules` (vsResult, headToHeadPct, searchPhase) with specs; screens render and pass the TextFit gate with 4- and 5-digit scores.",
+        "A real 2-client Studio test (max 2 clients) of search, found, play, result and rematch is recorded; ModeEnabled.vs flips on only after it passes; Opus audit."
+      ],
+      "history": [],
+      "executions": [],
+      "audits": [],
+      "revisions": 0,
+      "tier": "deep"
     }
   ]
 }

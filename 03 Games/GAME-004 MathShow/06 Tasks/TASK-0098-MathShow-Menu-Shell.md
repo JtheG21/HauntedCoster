@@ -97,8 +97,8 @@ Margins are the tightest measured by the gate at 844x390 (min over all fixtures)
 - None required for the built scope: every element passed with the number changes above (no new art needed). Closest to the edge: toast text (6.0 at 15 px) and the settings labels (6.5). If a larger toast label or 16 px settings labels are wanted, the toast shard needs a taller clear band (about 36 px) and the row shard more left inset.
 - Carry forward from the audit for the unbuilt screens: title shard at 330x104 only if the tag must stay inside it (A2 chosen: sticker), 38 px list/review rows if A9 still fails when built.
 
-## Follow-up tasks (proposed, not created)
-Practice home + Skill Test intro (11, 12, 19a); Skill Test play and result (13-15) with rank persistence; Rank ladder (16); Blitz (06, 07); VS flow (04, 05, 08, 09, 19b) with the 2-player test; Group Battle watching banner (10) and server-side join; SettingsSave; `badgeSlam`; upload of the 75 PNGs; make the gate's viewport run a true window resize.
+## Follow-up tasks (created 2026-10-26, jg: build everything)
+[[TASK-0099-MathShow-Profile-Store-And-Settings-Save]] (profile DataStore, MenuRequest, SettingsSave) -> [[TASK-0100-MathShow-Group-Join-And-Watching-Banner]] (server-side JOIN SHOW) -> [[TASK-0101-MathShow-Practice-Home-Skill-Test-Intro-And-Rank-Ladder]] (screens 11, 12, 16, 19a, badgeSlam) -> [[TASK-0102-MathShow-Skill-Test-Play-And-Result]] (13-15, rank persistence) -> [[TASK-0103-MathShow-Blitz]] (06, 07) -> [[TASK-0104-MathShow-VS-Matchmaking-And-Flow]] (04, 05, 08, 09, 19b, 2-client test). Also open: a true window-resize pass for the TextFit gate.
 
 ## Audits
 Standard tier, one Sonnet audit (2026-10-26, `main..HEAD`): **pass**, no blocker or major finding; AC1-AC4 met (textures need the upload). It did not re-run the Studio gate.
