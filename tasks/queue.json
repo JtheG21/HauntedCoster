@@ -6271,7 +6271,7 @@
       "id": "TASK-0104",
       "title": "MathShow VS Matchmaking And Flow",
       "project": "GAME-004",
-      "status": "in_review",
+      "status": "approved",
       "risk": "high",
       "depends_on": [
         "TASK-0099",
@@ -6302,6 +6302,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-26T20:57:43",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -6311,7 +6317,13 @@
           "notes": "check.sh green, MathShow 204 specs; Studio: 2-client VsTwoClients ok, single-client UI vs bot incl. rematch, timeout/keep waiting/failed/retry/cancel, gate 2859 rows 0 failures; Group join 2-client and controller/touch not run"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-26T20:57:43",
+          "result": "pass",
+          "report": "06 QA/AUD-20261027-TASK-0104-01.md"
+        }
+      ],
       "revisions": 0,
       "tier": "deep",
       "approved_by": "jg"

@@ -93,6 +93,21 @@ local function cardOf(seat: Seat): Net.PlayerCard
 	return { userId = seat.userId, displayName = seat.name, rank = 3 }
 end
 
+local function newSeat(player: Player?, name: string, bot: boolean): Seat
+	return {
+		player = player,
+		userId = if player then player.UserId else 1,
+		name = name,
+		bot = bot,
+		score = 0,
+		answeredAt = nil,
+		correct = false,
+		points = 0,
+		rematch = false,
+		stamps = {},
+	}
+end
+
 local function sendQueue(player: Player, payload: Net.QueueStatePayload)
 	pcall(function()
 		Remotes.QueueState:FireClient(player, payload)
@@ -268,6 +283,7 @@ local function startMatch(a: Seat, b: Seat)
 		if not ok then
 			warn(`[MathShow] VS match {match.id} failed: {err}`)
 			match.over = true
+			sendResult(match, "draw", nil) -- tell both players so neither is stuck on the match screen
 			release(match)
 		end
 	end)
@@ -292,6 +308,7 @@ runMatch = function(match: Match)
 	local result = MatchRules.vsResult(a.score, b.score, false)
 	local winner: Seat? = nil
 	if result == "draw" then
+		-- Not final: this "draw" starts the SUDDEN DEATH IN countdown; the real result (win / lose, or a standing draw) follows.
 		sendResult(match, "draw", nil)
 		match.phase = "SuddenCountdown"
 		broadcastVs(match, "SuddenCountdown", MenuConfig.VsCountdownSeconds, false)
@@ -344,6 +361,21 @@ runMatch = function(match: Match)
 	end
 	local again = match.rematchOpen and a.rematch and b.rematch
 	match.rematchOpen = false
+	if not again then
+		-- The window closed: a player who asked for a rematch gets the result screen back (REMATCH again, not "waiting").
+		for _, seat in match.seats do
+			local seatPlayer = seat.player
+			if seat.rematch and seatPlayer and playerMatch[seatPlayer] == match then
+				pcall(function()
+					Remotes.VsResult:FireClient(seatPlayer, {
+						result = if winner then (if winner == seat then "win" else "lose") else "draw",
+						you = seat.score,
+						them = otherSeat(match, seat).score,
+					})
+				end)
+			end
+		end
+	end
 	release(match)
 	if again then
 		startMatch(a, b)
@@ -361,21 +393,7 @@ local function tryPair()
 	while #waiting >= 2 do
 		local x, y = table.remove(waiting, 1) :: Player, table.remove(waiting, 1) :: Player
 		queue[x], queue[y] = nil, nil
-		local function seat(player: Player): Seat
-			return {
-				player = player,
-				userId = player.UserId,
-				name = player.DisplayName,
-				bot = false,
-				score = 0,
-				answeredAt = nil,
-				correct = false,
-				points = 0,
-				rematch = false,
-				stamps = {},
-			}
-		end
-		startMatch(seat(x), seat(y))
+		startMatch(newSeat(x, x.DisplayName, false), newSeat(y, y.DisplayName, false))
 	end
 end
 
@@ -404,30 +422,8 @@ local function maybeBot(player: Player, entry: Queued)
 			return
 		end
 		queue[player] = nil
-		local human: Seat = {
-			player = player,
-			userId = player.UserId,
-			name = player.DisplayName,
-			bot = false,
-			score = 0,
-			answeredAt = nil,
-			correct = false,
-			points = 0,
-			rematch = false,
-			stamps = {},
-		}
-		local bot: Seat = {
-			player = nil,
-			userId = 1,
-			name = "Practice Bot",
-			bot = true,
-			score = 0,
-			answeredAt = nil,
-			correct = false,
-			points = 0,
-			rematch = false,
-			stamps = {},
-		}
+		local human = newSeat(player, player.DisplayName, false)
+		local bot = newSeat(nil, "Practice Bot", true)
 		startMatch(human, bot)
 	end)
 end
@@ -515,7 +511,14 @@ end
 local function onRematch(player: Player, raw: any)
 	local match = playerMatch[player]
 	local seat = if match then seatOf(match, player) else nil
-	if match and seat and VsRules.validEmpty(raw) and match.rematchOpen and not match.forfeited then
+	if
+		match
+		and seat
+		and VsRules.validEmpty(raw)
+		and allowAction(player)
+		and match.rematchOpen
+		and not match.forfeited
+	then
 		seat.rematch = true
 	end
 end

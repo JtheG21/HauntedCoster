@@ -3,7 +3,7 @@ id: TASK-0104
 title: "MathShow VS Matchmaking And Flow"
 type: task
 project: GAME-004
-status: in_review
+status: approved
 priority: medium
 risk: high
 owner: executor
@@ -70,5 +70,9 @@ Deep tier (networking, remotes). Baseline: MathShow 195 specs. Branch also recor
 
 
 ## Audits
+Deep tier, one Opus audit: **pass** (AUD-20261027-TASK-0104-01); no secrecy leak or exploit found. Fixed after it: a declined rematch window returns the result screen, a match error tells both players, `RematchRequest` is rate limited, `newSeat` helper, a comment on the draw result. Left: a sudden-death win shows equal totals (cosmetic). The two-client scenario was re-run after the fixes.
 
 ## Outcome
+- `scripts/check.sh` ALL CHECKS PASSED; MathShow 204 specs (baseline 195). Studio: 2-client scenario, single-client UI runs, gate 2859 rows 0 failures. Opus audit pass.
+- **Not verified:** the Group Battle 2-client join check (TASK-0100), a draw's sudden-death screen live, motion, controller/touch.
+- Pending for jg: merge decision. Claude Design list: 38 px review/ladder rows, taller toast and banner bands, a deeper score shard and count shard.
