@@ -19,6 +19,8 @@ return function(t: TestRunner.T)
 		t.eq(PracticeRules.remaining(NAN, 1000), 0)
 		t.eq(PracticeRules.remaining(1300, NAN), 0)
 		t.eq(PracticeRules.remaining(math.huge, 1000), 0)
+		t.eq(PracticeRules.remaining(-math.huge, 1000), 0)
+		t.eq(PracticeRules.remaining(1300, -math.huge), 0)
 	end)
 
 	t.test("state: unavailable beats everything", function()

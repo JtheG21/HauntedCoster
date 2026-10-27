@@ -81,6 +81,7 @@ local function model(): View.Model
 			userId = player.UserId,
 			rank = profile.rank,
 			failed = profile.loaded and not profile.ok,
+			loading = not profile.loaded,
 		},
 		settings = settings,
 		practice = {
@@ -222,7 +223,8 @@ local function requestProfile()
 				retryAt = p.retryAt,
 				blitzBest = p.blitzBest,
 			}
-			-- Studio-only test hook: pretend a Skill Test cooldown of N seconds (workspace attribute MathShowFakeRetakeSeconds).
+			-- Studio-only test hook: pretend a Skill Test cooldown of N seconds (workspace attribute MathShowFakeRetakeSeconds). It also
+			-- fills in a rank and last test (2) when there are none, so the Practice home has something to show.
 			local fake = workspace:GetAttribute("MathShowFakeRetakeSeconds")
 			if RunService:IsStudio() and typeof(fake) == "number" then
 				profile.retryAt = workspace:GetServerTimeNow() + fake
@@ -339,6 +341,7 @@ function Menu.start(opts: Options)
 end
 
 function Menu.hide()
+	tickToken += 1 -- a running retake ticker must not re-render or take focus while the menu is hidden
 	unbindBack()
 	if inputConnection then
 		inputConnection:Disconnect()

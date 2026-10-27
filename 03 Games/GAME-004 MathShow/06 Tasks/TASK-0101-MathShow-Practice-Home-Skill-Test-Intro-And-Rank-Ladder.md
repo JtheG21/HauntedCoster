@@ -3,7 +3,7 @@ id: TASK-0101
 title: "MathShow Practice Home, Skill Test Intro And Rank Ladder"
 type: task
 project: GAME-004
-status: in_review
+status: approved
 priority: medium
 risk: medium
 owner: executor
@@ -73,5 +73,9 @@ Standard tier. Baseline: MathShow 159 specs. Branch also carries the orchestrato
 
 
 ## Audits
+Standard tier, one Sonnet audit: **pass** (AUD-20261027-TASK-0101-01). Minor findings fixed after it: the ticker stops when the menu hides, a loading state for the Practice home, no last-test fallback in the BEST tag; nits fixed too. Studio re-run after the fixes: gate 1590 rows 0 failures; live PRACTICE shows an enabled TAKE TEST and opens 12b.
 
 ## Outcome
+- `scripts/check.sh` ALL CHECKS PASSED; MathShow 165 specs (baseline 159). Studio gate 1590 rows, 0 failures. Sonnet audit pass.
+- **Not verified:** the 19a RETRY button live, textured captures of 11/12, controller/touch, a real cooldown (TASK-0102).
+- Pending for jg: merge decision. Claude Design list: 38 px ladder rows (names 15 px), taller toast and banner bands.

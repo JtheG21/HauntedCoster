@@ -29,7 +29,13 @@ export type Settings = {
 	colorBlind: boolean,
 	haptics: boolean,
 }
-export type PracticeModel = { rank: number?, lastTestRank: number?, retryRemaining: number?, failed: boolean? }
+export type PracticeModel = {
+	rank: number?,
+	lastTestRank: number?,
+	retryRemaining: number?,
+	failed: boolean?,
+	loading: boolean?,
+}
 export type Model = {
 	flags: { [string]: boolean }?,
 	secondary: { [string]: boolean }?,
@@ -1068,16 +1074,18 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			lastTag.Position = UDim2.fromOffset(P.LeftPad, rowY + 62)
 		end
 		local remaining = pr.retryRemaining or 0
-		local cooling = PracticeRules.state(true, remaining, 0) == "cooldown"
+		local cooling = remaining > 0
+		local loading = pr.loading == true -- the profile has not answered yet: show the button disabled, not a wrong state
 		local act = action(
 			L.Action,
 			if cooling then CooldownRules.retakeLabel(remaining) else MenuCopy.Skill.TakeTest,
-			not cooling,
+			not (cooling or loading),
 			cooling
 		)
 		if cooling then
 			retakeLabel = act.shard.content:FindFirstChild("Label") :: TextLabel?
-		else
+		elseif not loading then
+			-- While loading the button stays disabled until the profile arrives (init re-renders the screen then).
 			interactive(act, function()
 				handlers.go("skillintro")
 			end, nil)
@@ -1113,8 +1121,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 				{ MenuCopy.Skill.Unranked, true },
 			})
 		else
-			local tier = RankRules.tierOf(pr.rank or pr.lastTestRank or 0)
-			local best = string.gsub(MenuCopy.Skill.Best, "{tier}", if tier then tier.name else "")
+			local tier = if pr.rank then RankRules.tierOf(pr.rank) else nil
+			local best = if tier then string.gsub(MenuCopy.Skill.Best, "{tier}", tier.name) else MenuCopy.Skill.Unranked
 			p = panel("green", MenuCopy.Skill.Tag, MenuCopy.Skill.IntroTitle, 32, MenuCopy.Skill.IntroLines, {
 				{ best, true },
 				{ MenuCopy.Skill.Formats },

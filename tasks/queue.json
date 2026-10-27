@@ -6068,7 +6068,7 @@
       "id": "TASK-0101",
       "title": "MathShow Practice Home, Skill Test Intro And Rank Ladder",
       "project": "GAME-004",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [
         "TASK-0099"
@@ -6098,6 +6098,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-26T19:58:29",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -6107,7 +6113,13 @@
           "notes": "check.sh green, MathShow 165 specs; Studio gate 1590 rows 0 failures; practice/intro/ladder behaviour, cooldown ticker, badgeSlam; RETRY live and controller/touch not run"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-26T19:58:29",
+          "result": "pass",
+          "report": "06 QA/AUD-20261027-TASK-0101-01.md"
+        }
+      ],
       "revisions": 0,
       "tier": "standard",
       "approved_by": "jg"
