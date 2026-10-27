@@ -24,6 +24,13 @@ local MenuConfig = table.freeze({
 		haptics = true,
 	}),
 	SettingMax = 10,
+	BlitzTotal = 10, -- questions in a Blitz run (BlitzRules, TASK-0103); also the highest stored blitz best
+	MenuRequestsPer30s = 5, -- server rate limits, ProfileService (ENGINEERING_NEEDS)
+	-- ENGINEERING_NEEDS says 1 per second; a client debounce of 1 s plus network jitter can bunch two saves, so allow 2 per 2 s
+	-- (same average) rather than drop the player's latest change.
+	SettingsSavesPerWindow = 2,
+	SettingsSaveWindowSeconds = 2,
+	SettingsSaveDebounceSeconds = 1, -- client: send this long after the last change
 	TextFitMargin = 6, -- px between text and the shard edge (audit), enforced by tests/studio/TextFit
 })
 

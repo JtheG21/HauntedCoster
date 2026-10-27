@@ -810,7 +810,7 @@ function View.build(parent: Instance, handlers: Handlers): View
 				Position = UDim2.fromOffset(x, 0),
 				Size = UDim2.fromOffset(44, 44),
 				BackgroundTransparency = 1,
-				ZIndex = 5,
+				ZIndex = 15, -- above the row's own Hit (10): siblings stack by ZIndex, so a lower value hides the buttons
 			}, shard.content) :: ImageLabel
 			Shard.setImage(b, "shard-menu-square-silver", "silver", nil)
 			if off then

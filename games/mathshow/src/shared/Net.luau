@@ -4,7 +4,10 @@
 --   RoundState   server -> all clients   RoundStatePayload
 --   SubmitAnswer client -> server        (raw: string)
 --   AnswerResult server -> one client    AnswerResultPayload
+--   MenuRequest  client -> server (RemoteFunction)  { kind: "profile" } -> MenuProfileReply
+--   SettingsSave client -> server        SettingsPayload (validated by ProfileRules.sanitizeSettings)
 
+local ProfileRules = require(script.Parent.ProfileRules)
 local RoundRules = require(script.Parent.RoundRules)
 
 -- An array of these, not a map keyed by userId, so it survives a remote unchanged.
@@ -32,10 +35,19 @@ export type AnswerResultPayload = {
 	points: number?,
 }
 
+-- MenuRequest reply. ok = false means no usable profile: the menu shows RANK UNAVAILABLE and keeps local settings.
+export type MenuProfileReply = {
+	ok: boolean,
+	reason: string?, -- "rate" | "unavailable" | "loading" | "bad request"
+	profile: ProfileRules.ClientProfile?,
+}
+
 local Net = table.freeze({
 	RoundState = "RoundState",
 	SubmitAnswer = "SubmitAnswer",
 	AnswerResult = "AnswerResult",
+	MenuRequest = "MenuRequest",
+	SettingsSave = "SettingsSave",
 })
 
 return Net

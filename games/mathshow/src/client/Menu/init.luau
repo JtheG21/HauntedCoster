@@ -15,6 +15,8 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local MenuConfig = require(Shared:WaitForChild("MenuConfig"))
 local MenuCopy = require(Shared:WaitForChild("MenuCopy"))
 
+local Net = require(Shared:WaitForChild("Net"))
+
 local Fx = require(script.Parent.Hud.Fx)
 local View = require(script.View)
 
@@ -29,6 +31,12 @@ local stack: { string } = {}
 local settings: View.Settings = table.clone(MenuConfig.SettingsDefaults)
 local inputConnection: RBXScriptConnection? = nil
 local options: Options? = nil
+
+-- What the server said about this player (TASK-0099). loaded = the MenuRequest finished; ok = it returned a profile.
+local profile: { loaded: boolean, ok: boolean, rank: number?, retryAt: number?, blitzBest: number? } =
+	{ loaded = false, ok = false }
+local settingsTouched = false -- the player changed a setting before the profile arrived: keep theirs and send it
+local saveToken = 0
 
 local function soundGroup(name: string): SoundGroup
 	local existing = SoundService:FindFirstChild(name)
@@ -58,7 +66,12 @@ end
 local function model(): View.Model
 	local player = Players.LocalPlayer
 	return {
-		player = { name = player.DisplayName, userId = player.UserId, rank = nil, failed = false },
+		player = {
+			name = player.DisplayName,
+			userId = player.UserId,
+			rank = profile.rank,
+			failed = profile.loaded and not profile.ok,
+		},
 		settings = settings,
 	}
 end
@@ -109,6 +122,76 @@ local function unbindBack()
 	end)
 end
 
+local function remoteNamed(name: string): Instance?
+	local folder = ReplicatedStorage:WaitForChild("Remotes", 10)
+	return if folder then folder:WaitForChild(name, 10) else nil
+end
+
+-- Sends the settings once, SettingsSaveDebounceSeconds after the last change. The server validates and rate limits.
+local function scheduleSave()
+	saveToken += 1
+	local token = saveToken
+	task.delay(MenuConfig.SettingsSaveDebounceSeconds, function()
+		if token ~= saveToken then
+			return
+		end
+		local ok, err = pcall(function()
+			local remote = remoteNamed(Net.SettingsSave)
+			if remote and remote:IsA("RemoteEvent") then
+				remote:FireServer({
+					music = settings.music,
+					sfx = settings.sfx,
+					reducedMotion = settings.reducedMotion,
+					colorBlind = settings.colorBlind,
+					haptics = settings.haptics,
+				})
+			end
+		end)
+		if not ok then
+			warn(`[MathShow] Menu could not send settings: {err}`)
+		end
+	end)
+end
+
+-- Asks the server for this player's profile. Never throws and never blocks the menu: on any failure the menu keeps its
+-- local defaults and the player card says RANK UNAVAILABLE.
+local function requestProfile()
+	task.spawn(function()
+		local ok, reply = pcall(function()
+			local remote = remoteNamed(Net.MenuRequest)
+			if remote and remote:IsA("RemoteFunction") then
+				return remote:InvokeServer({ kind = "profile" })
+			end
+			return nil
+		end)
+		local usable = ok and typeof(reply) == "table" and reply.ok == true and typeof(reply.profile) == "table"
+		if usable then
+			local p = reply.profile
+			profile = { loaded = true, ok = true, rank = p.rank, retryAt = p.retryAt, blitzBest = p.blitzBest }
+			if not settingsTouched and typeof(p.settings) == "table" then
+				settings = table.clone(p.settings)
+				applySettings()
+			end
+		else
+			profile = { loaded = true, ok = false }
+			warn(
+				`[MathShow] Menu profile unavailable: {if ok and typeof(reply) == "table" then reply.reason else reply}`
+			)
+		end
+		if usable and settingsTouched then
+			scheduleSave()
+		end
+		if view and #stack > 0 then
+			show(stack[#stack])
+		end
+	end)
+end
+
+function Menu.retryProfile()
+	profile = { loaded = false, ok = false }
+	requestProfile()
+end
+
 function Menu.getSettings(): View.Settings
 	return table.clone(settings)
 end
@@ -135,7 +218,9 @@ function Menu.start(opts: Options)
 		end,
 		setting = function(key: string, value: number | boolean)
 			(settings :: any)[key] = value
+			settingsTouched = true
 			applySettings()
+			scheduleSave()
 			show(stack[#stack], key)
 		end,
 	}
@@ -143,6 +228,7 @@ function Menu.start(opts: Options)
 	applySettings()
 	stack = { "main" }
 	show("main")
+	requestProfile()
 
 	ContextActionService:BindAction(BACK_ACTION, function(_name, state)
 		if state == Enum.UserInputState.Begin and #stack > 1 then
