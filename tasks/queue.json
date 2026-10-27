@@ -5864,7 +5864,7 @@
       "id": "TASK-0098",
       "title": "MathShow Menu Shell",
       "project": "GAME-004",
-      "status": "approved",
+      "status": "done",
       "risk": "low",
       "depends_on": [
         "TASK-0097"
@@ -5901,6 +5901,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-26T19:04:46",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -5919,7 +5925,8 @@
       ],
       "revisions": 0,
       "tier": "standard",
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }
