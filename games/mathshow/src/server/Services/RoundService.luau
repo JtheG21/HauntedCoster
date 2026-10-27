@@ -8,8 +8,11 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
+local JoinRules = require(ReplicatedStorage.Shared.JoinRules)
+local MenuConfig = require(ReplicatedStorage.Shared.MenuConfig)
 local Net = require(ReplicatedStorage.Shared.Net)
 local ProblemRules = require(ReplicatedStorage.Shared.ProblemRules)
+local RateRules = require(ReplicatedStorage.Shared.RateRules)
 local RoundConfig = require(ReplicatedStorage.Shared.RoundConfig)
 local RoundRules = require(ReplicatedStorage.Shared.RoundRules)
 local ScoringRules = require(ReplicatedStorage.Shared.ScoringRules)
@@ -22,7 +25,9 @@ local ERROR_BACKOFF_SECONDS = 1
 local PLAYER_POLL_SECONDS = 1
 
 type PlayerState = {
-	participant: boolean, -- joined the match by the time a question opened
+	joined: boolean, -- pressed JOIN SHOW (JoinShow remote); stays true across matches until the player leaves
+	joinStamps: { number }, -- os.clock() of recent JoinShow calls, for the rate limit
+	participant: boolean, -- in the current match: joined when question 1 opened (JoinRules.participantAt)
 	points: number,
 	lastSubmitAt: number?, -- os.clock()
 	lastRejectAt: number?, -- os.clock() of the last rejection that was replied to or logged
@@ -47,6 +52,8 @@ local states: { [Player]: PlayerState } = {}
 
 local function newState(): PlayerState
 	return {
+		joined = false,
+		joinStamps = {},
 		participant = false,
 		points = 0,
 		lastSubmitAt = nil,
@@ -120,6 +127,27 @@ local function broadcast()
 	Remotes.RoundState:FireAllClients(payload())
 end
 
+-- Tells one player whether they are in this match or only watching (ShowState); the HUD hides the answer row and shows the
+-- WATCHING banner from it. Nothing secret: it only says what that player already knows about themself.
+local function sendShow(player: Player)
+	local state = states[player]
+	if not state then
+		return
+	end
+	local ok, err = pcall(function()
+		Remotes.ShowState:FireClient(player, { joined = state.joined, participant = state.participant })
+	end)
+	if not ok then
+		warn(`[MathShow] ShowState to {player.Name} failed: {err}`)
+	end
+end
+
+local function broadcastShow()
+	for player in states do
+		sendShow(player)
+	end
+end
+
 local function waitUntil(deadline: number)
 	while true do
 		local remaining = deadline - os.clock()
@@ -136,7 +164,7 @@ local function resetMatch()
 	endsAt = 0
 	problem = nil
 	for _, state in states do
-		state.participant = false
+		state.participant = false -- `joined` is kept: a joined player is admitted when the next match opens question 1
 		state.points = 0
 		state.answeredIndex = 0
 		state.solvedIndex = 0
@@ -148,6 +176,7 @@ local function resetMatch()
 	if not ok then
 		warn(`[MathShow] leaderstats reset failed: {err}`)
 	end
+	broadcastShow()
 end
 
 -- Sets the phase state before anything yields, broadcasts, then waits out the phase. `base` is the previous
@@ -160,11 +189,14 @@ local function runPhase(nextPhase: RoundRules.Phase, index: number, duration: nu
 	endsAt = Workspace:GetServerTimeNow() + (deadline - os.clock())
 	if nextPhase == "Question" then
 		for _, state in states do
-			state.participant = true
+			state.participant = JoinRules.participantAt(state.joined, index, state.participant)
 		end
 		problem = ProblemRules.generate(matchSeed + index, RoundRules.difficultyFor(index))
 		questionStartClock = base
 		questionEndsClock = deadline
+	end
+	if nextPhase == "Question" and index == 1 then
+		broadcastShow() -- who is in this match is now decided
 	end
 	print(`[MathShow] phase={nextPhase} q={index} seed={matchSeed} endsAt={string.format("%.2f", endsAt)}`)
 	if nextPhase == "Reveal" then
@@ -287,6 +319,23 @@ local function onPlayerAdded(player: Player)
 	end
 	states[player] = newState()
 	sendState(player)
+	sendShow(player)
+end
+
+-- JOIN SHOW: no data, rate limited. Joining mid-match makes the player a watcher until the next match (JoinRules).
+local function onJoin(player: Player, raw: any)
+	local state = states[player]
+	if not state or not JoinRules.validJoin(raw) then
+		return
+	end
+	local allowed
+	state.joinStamps, allowed = RateRules.allow(state.joinStamps, os.clock(), MenuConfig.JoinsPer10s, 10)
+	if not allowed then
+		return
+	end
+	state.joined = true
+	sendShow(player)
+	sendState(player)
 end
 
 function RoundService.start(): ()
@@ -301,6 +350,14 @@ function RoundService.start(): ()
 		end)
 		if not ok then
 			warn(`[MathShow] SubmitAnswer from {player.Name} failed: {err}`)
+		end
+	end)
+	Remotes.JoinShow.OnServerEvent:Connect(function(player: Player, raw: any)
+		local ok, err = pcall(function()
+			onJoin(player, raw)
+		end)
+		if not ok then
+			warn(`[MathShow] JoinShow from {player.Name} failed: {err}`)
 		end
 	end)
 	Players.PlayerAdded:Connect(onPlayerAdded)

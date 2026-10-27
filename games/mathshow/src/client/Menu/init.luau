@@ -211,6 +211,16 @@ function Menu.start(opts: Options)
 			end
 		end,
 		join = function()
+			-- Tell the server first (it decides who is in the match); the menu hides and the HUD shows either way.
+			local ok, err = pcall(function()
+				local remote = remoteNamed(Net.JoinShow)
+				if remote and remote:IsA("RemoteEvent") then
+					remote:FireServer()
+				end
+			end)
+			if not ok then
+				warn(`[MathShow] Menu could not send JoinShow: {err}`)
+			end
 			Menu.hide()
 			if options then
 				options.onJoin()

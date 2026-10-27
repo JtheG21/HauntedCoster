@@ -5993,7 +5993,7 @@
       "id": "TASK-0100",
       "title": "MathShow Group Join And Watching Banner",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "in_progress",
       "risk": "medium",
       "depends_on": [
         "TASK-0098"
@@ -6006,11 +6006,25 @@
         "RoundService changes keep every existing spec green; pure join rules live in `shared/` with boundary specs; Studio 1-player run shows full cycle.",
         "Opus audit (networking, remotes)."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-26T19:33:30",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-26T19:33:30",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0,
-      "tier": "deep"
+      "tier": "deep",
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0101",

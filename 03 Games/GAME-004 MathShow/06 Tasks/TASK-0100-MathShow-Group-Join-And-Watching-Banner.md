@@ -3,7 +3,7 @@ id: TASK-0100
 title: "MathShow Group Join And Watching Banner"
 type: task
 project: GAME-004
-status: proposed
+status: in_progress
 priority: medium
 risk: medium
 owner: executor

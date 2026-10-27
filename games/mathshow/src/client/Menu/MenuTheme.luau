@@ -101,6 +101,7 @@ MenuTheme.Text = {
 	ReviewValue = 16,
 	SettingLabel = 15, -- A4: 16 px ran into the toggle
 	ToggleState = 12,
+	WatchBanner = 17,
 	Toast = 15, -- A10 follow-up: the toast shard (320x46) has a 28 px tall clear band, so 15 px text is the largest with slack for 6 px
 	ActionWaiting = 16, -- A5: "WAITING FOR RIVAL" at 19 px is too wide for the action shard
 }

@@ -11,6 +11,8 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local HudConfig = require(Shared:WaitForChild("HudConfig"))
 local HudCopy = require(Shared:WaitForChild("HudCopy"))
+local JoinRules = require(Shared:WaitForChild("JoinRules"))
+local MenuCopy = require(Shared:WaitForChild("MenuCopy"))
 local HudRules = require(Shared:WaitForChild("HudRules"))
 local Net = require(Shared:WaitForChild("Net"))
 local StandingsRules = require(Shared:WaitForChild("StandingsRules"))
@@ -45,11 +47,15 @@ type Session = {
 	glowStops: { () -> () },
 	ambientStops: { () -> () },
 	submit: RemoteEvent?,
+	joined: boolean, -- ShowState: pressed JOIN SHOW
+	participant: boolean, -- ShowState: in the current match
+	watching: boolean, -- joined but not in this match: answer row hidden, score shown as a dash, banner on
 	startedAt: number,
 	gotState: boolean,
 }
 
 local session: Session? = nil
+local watchingListener: ((watching: boolean) -> ())? = nil -- the menu's WATCHING banner
 
 local function stopAll(stops: { () -> () })
 	for _, stop in stops do
@@ -202,6 +208,26 @@ local function enterPhase(s: Session, mode: string)
 	end
 end
 
+-- Recomputes whether this player is only watching (JoinRules) and, when it changed, updates the answer row, the score
+-- text and the banner. Cosmetic: a fault warns and leaves the Hud working.
+local function refreshWatching(s: Session)
+	local watching = JoinRules.isWatching(s.joined, s.participant, s.phase)
+	if watching == s.watching then
+		return
+	end
+	s.watching = watching
+	local ok, err = pcall(function()
+		s.view.setInputVisible(HudRules.visibility(s.phase).input and not watching)
+		s.view.setScore(HudRules.scoreTag(s.phase), if watching then MenuCopy.Common.ScoreHidden else s.scoreText)
+		if watchingListener then
+			watchingListener(watching)
+		end
+	end)
+	if not ok then
+		warn(`[MathShow] Hud watching update failed: {err}`)
+	end
+end
+
 local function applyState(s: Session, payload: any)
 	if not HudRules.isValidState(payload) then
 		warn("[MathShow] Hud ignored a malformed RoundState")
@@ -221,6 +247,7 @@ local function applyState(s: Session, payload: any)
 	s.key = key
 	s.phase = phase
 	s.questionIndex = payload.questionIndex
+	refreshWatching(s)
 	s.endsAt = payload.endsAt
 	local total = HudRules.phaseSeconds(phase, payload.questionIndex)
 	s.totalSeconds = total or HudRules.secondsLeft(payload.endsAt, workspace:GetServerTimeNow())
@@ -247,11 +274,11 @@ local function applyState(s: Session, payload: any)
 	local show = HudRules.visibility(phase)
 	s.shownWarn = false
 	view.setTop(HudRules.topModel(phase, payload.questionIndex), false)
-	view.setScore(HudRules.scoreTag(phase), s.scoreText)
+	view.setScore(HudRules.scoreTag(phase), if s.watching then MenuCopy.Common.ScoreHidden else s.scoreText)
 	view.setIntermission(if phase == "Intermission" then mode else "hidden")
 	local difficulty = HudRules.difficultyOf(payload.questionIndex) or 1
 	view.setProblem(HudRules.problemModel(phase, payload), Theme.TierGem[difficulty] or "green", phase == "Reveal")
-	view.setInputVisible(show.input)
+	view.setInputVisible(show.input and not s.watching)
 	view.setInputLocked(s.submittedIndex == s.questionIndex)
 	refreshSubmit(s)
 	view.setTimer(1, "", false, false, HudRules.secondsTag(phase, payload.questionIndex), phase == "Reveal")
@@ -324,6 +351,7 @@ local function connectRemotes(s: Session)
 	local state = if folder then folder:WaitForChild(Net.RoundState, HudConfig.ConnectTimeoutSeconds) else nil
 	local submit = if folder then folder:WaitForChild(Net.SubmitAnswer, HudConfig.ConnectTimeoutSeconds) else nil
 	local result = if folder then folder:WaitForChild(Net.AnswerResult, HudConfig.ConnectTimeoutSeconds) else nil
+	local showState = if folder then folder:WaitForChild(Net.ShowState, HudConfig.ConnectTimeoutSeconds) else nil
 	if session ~= s then
 		return -- stopped while waiting
 	end
@@ -344,6 +372,21 @@ local function connectRemotes(s: Session)
 			applyResult(s, payload)
 		end)
 	)
+	if showState and showState:IsA("RemoteEvent") then
+		table.insert(
+			s.connections,
+			showState.OnClientEvent:Connect(function(payload: any)
+				if not JoinRules.isValidShowState(payload) then
+					warn("[MathShow] Hud ignored a malformed ShowState")
+					return
+				end
+				s.joined, s.participant = payload.joined, payload.participant
+				refreshWatching(s)
+			end)
+		)
+	else
+		warn("[MathShow] Hud: ShowState remote not found; the WATCHING banner stays off")
+	end
 end
 
 function Hud.start()
@@ -377,6 +420,9 @@ function Hud.start()
 		glowStops = {},
 		ambientStops = {},
 		submit = nil,
+		joined = false,
+		participant = false,
+		watching = false,
 		startedAt = os.clock(),
 		gotState = false,
 	}
@@ -424,6 +470,11 @@ function Hud.setVisible(visible: boolean)
 	if s then
 		s.view.gui.Enabled = visible
 	end
+end
+
+-- The menu's WATCHING banner listens here; called with true/false whenever the player starts or stops only watching.
+function Hud.setWatchingListener(listener: ((watching: boolean) -> ())?)
+	watchingListener = listener
 end
 
 function Hud.stop()

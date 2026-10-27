@@ -4,6 +4,8 @@
 --   RoundState   server -> all clients   RoundStatePayload
 --   SubmitAnswer client -> server        (raw: string)
 --   AnswerResult server -> one client    AnswerResultPayload
+--   JoinShow     client -> server        (no payload; validated by JoinRules.validJoin)
+--   ShowState    server -> one client    ShowStatePayload (is this player in the match, or watching)
 --   MenuRequest  client -> server (RemoteFunction)  { kind: "profile" } -> MenuProfileReply
 --   SettingsSave client -> server        SettingsPayload (validated by ProfileRules.sanitizeSettings)
 
@@ -42,10 +44,19 @@ export type MenuProfileReply = {
 	profile: ProfileRules.ClientProfile?,
 }
 
+-- Per-player: joined = pressed JOIN SHOW; participant = counted in the current match (set when it starts, so a player
+-- who joins mid-match is joined but not a participant until the next one).
+export type ShowStatePayload = {
+	joined: boolean,
+	participant: boolean,
+}
+
 local Net = table.freeze({
 	RoundState = "RoundState",
 	SubmitAnswer = "SubmitAnswer",
 	AnswerResult = "AnswerResult",
+	JoinShow = "JoinShow",
+	ShowState = "ShowState",
 	MenuRequest = "MenuRequest",
 	SettingsSave = "SettingsSave",
 })
