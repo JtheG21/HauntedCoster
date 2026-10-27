@@ -97,6 +97,7 @@ MenuTheme.Text = {
 	Choice = 18,
 	ChoiceLetter = 15,
 	RowName = 15,
+	LadderName = 10, -- 16 rank ladder rungs: README 15 does not fit the 34 px row art, see View.buildLadder
 	RowSubject = 13,
 	ReviewValue = 16,
 	SettingLabel = 15, -- A4: 16 px ran into the toggle
@@ -150,6 +151,7 @@ MenuTheme.Layout = {
 	-- panel screens (03, 04, 09, 11, 12, 15, 19)
 	Panel = box(52, 56, 500, 224, -2), -- content padding 28 top, 50 left, 44 right
 	Action = box(566, 84, 230, 64, 2), -- README 572: its rotated box ran 2 px into the 44 px right inset
+	LadderLink = box(172, 332, 200, 44, 1), -- RANK LADDER beside BACK on the Practice home (not in the README: the ladder had no entry)
 	SideSecondary = box(576, 168, 220, 44, -1), -- README 580: right edge sat on the inset
 	Count = box(588, 60, 200, 160, 3),
 	RankOld = box(580, 96, 48, 48, 0),

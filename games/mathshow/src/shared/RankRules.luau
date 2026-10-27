@@ -91,4 +91,19 @@ function RankRules.newBest(previousBest: number?, cleared: number?): number?
 	return math.max(previousBest, cleared)
 end
 
+export type LadderSlot = { rank: number, column: number, row: number }
+
+-- The 16 ladder: two columns of five rows, higher ranks higher up (column 1 holds ranks 4 down to 0, column 2 holds 9
+-- down to 5). Row 1 is the top row.
+function RankRules.ladderLayout(): { LadderSlot }
+	local slots: { LadderSlot } = {}
+	for row = 1, 5 do
+		table.insert(slots, { rank = 5 - row, column = 1, row = row })
+	end
+	for row = 1, 5 do
+		table.insert(slots, { rank = 10 - row, column = 2, row = row })
+	end
+	return slots
+end
+
 return RankRules

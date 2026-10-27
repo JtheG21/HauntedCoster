@@ -23,6 +23,7 @@ function Watching.start()
 			back = noop,
 			locked = function(_what: string) end,
 			join = noop,
+			retry = noop,
 			setting = function(_key: string, _value: number | boolean) end,
 		}
 		local built = View.build(Players.LocalPlayer:WaitForChild("PlayerGui"), handlers, {
