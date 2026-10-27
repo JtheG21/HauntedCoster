@@ -47,7 +47,7 @@ Preview.States = {
 	{
 		id = "20-coming-soon",
 		screen = "main",
-		model = { player = Preview.PlayerFixtures.standard, toast = "COMING SOON" },
+		model = { player = Preview.PlayerFixtures.standard, toast = "COMING SOON", holdToast = true },
 	},
 } :: { State }
 

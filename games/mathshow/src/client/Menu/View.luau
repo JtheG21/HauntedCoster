@@ -35,6 +35,7 @@ export type Model = {
 	best: string?, -- "6/10": the white BEST tag on the Blitz panel
 	waiting: boolean?, -- 03b action after FIND OPPONENT is pressed in a preview
 	toast: string?,
+	holdToast: boolean?, -- Preview only: keep the toast on screen
 }
 export type Handlers = {
 	go: (id: string) -> (),
@@ -47,7 +48,7 @@ export type View = {
 	gui: ScreenGui,
 	root: Frame,
 	render: (id: string, model: Model) -> (),
-	toast: (text: string, icon: boolean) -> (),
+	toast: (text: string, icon: boolean, hold: boolean?) -> (),
 	defaultFocus: () -> GuiObject?,
 	setReduced: (on: boolean) -> (),
 	destroy: () -> (),
@@ -567,7 +568,7 @@ function View.build(parent: Instance, handlers: Handlers): View
 		return item
 	end
 
-	local function toast(str: string, withIcon: boolean)
+	local function toast(str: string, withIcon: boolean, hold: boolean?)
 		toastToken += 1
 		local token = toastToken
 		toastToken = token
@@ -585,6 +586,9 @@ function View.build(parent: Instance, handlers: Handlers): View
 		end
 		text(shard.content, "Label", str, T.Toast, x, TO.TextY, width - x - TO.PadX, TO.TextH)
 		playFx("pop", shard.group, 0)
+		if hold then
+			return
+		end
 		task.delay(MenuConfig.ToastSeconds, function()
 			if toastToken == token and shard.root.Parent then
 				shard.root:Destroy()
@@ -708,7 +712,7 @@ function View.build(parent: Instance, handlers: Handlers): View
 		playFx("rowIn", board.shard.group, 0.46)
 		playFx("rowIn", daily.shard.group, 0.52)
 		if model.toast then
-			toast(model.toast, true)
+			toast(model.toast, true, model.holdToast)
 		end
 	end
 
