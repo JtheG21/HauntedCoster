@@ -3,7 +3,7 @@ id: TASK-0106
 title: "MathShow Identity UI Primitives And Cards"
 type: task
 project: GAME-004
-status: proposed
+status: ready
 priority: medium
 risk: medium
 owner: executor
@@ -61,11 +61,11 @@ Open questions for jg: (a) stacked on TASK-0105's branch (PR base becomes that b
 - Bookkeeping: `tasks/queue.json`, this note.
 
 ## Acceptance criteria
-- [ ] AC1 Modules added with numbers unchanged; unset id warns once and renders nothing.
-- [ ] AC2 Primitives pure; rules specs cover priority, tag, progress, widths, copy.
-- [ ] AC3 Four cards, six variants, 3 s headshot fallback.
+- [x] AC1 Modules added with numbers unchanged; unset id warns once and renders nothing.
+- [x] AC2 Primitives pure; rules specs cover priority, tag, progress, widths, copy.
+- [x] AC3 (builders and variants exist; headshot fallback by construction, not run in Studio) Four cards, six variants, 3 s headshot fallback.
 - [ ] AC4 Board harness and text-fit gate run; differences over 2 px reported.
-- [ ] AC5 Nothing wired or uploaded; `check.sh` passes; MathShow specs above 258.
+- [x] AC5 Nothing wired or uploaded; `check.sh` passes; MathShow specs above 258.
 
 ## Tests
 - **Automated:** `scripts/check.sh 2>&1 | tail -30`.
@@ -77,6 +77,33 @@ Open questions for jg: (a) stacked on TASK-0105's branch (PR base becomes that b
 
 ---
 ## Implementation record
+Approved by jg 2026-10-27 (stack on TASK-0105, do the UI reference check first, run the package audit in parallel). The orchestrator refuses `start` while TASK-0105 is not `done`, so this task stays `ready` in the queue until PR 152 merges; the work below was done on the stacked branch anyway.
+
+References (`10 References/01 UI`): nothing relevant. REF-UI-001..004 are a Halloween/distressed-text direction and tools; only the Good UI Principles note applies (show-don't-tell icons, consistent icon reuse, small HUD), and the package already follows it.
+
+Built (all under `games/mathshow/`):
+- `src/client/Identity/`: `IdentityTheme` and `AssetIds` from the package (numbers unchanged), `Kit` (asset lookup, shard anatomy, fixed text, headshot slot with 3 s fallback), `Primitives` (RankBadge, ModeIcon, FormatIcon, TrackChip, TagChip, StatusChip, StatusSlot, DeltaPill, RankChangePill, ProgressBar), `Cards` (GameplayCard, RevealCard, IntroCard, ResultsRow, six variants).
+- `src/shared/IdentityCopy` (moved from client so headless specs can read it) and `IdentityRules` (status priority, variant, tag, chip widths, fill width, delta/progress/track/stat strings, headshot state) with `tests/IdentityRules.spec.luau` (12 specs; MathShow 258 -> 270).
+- `tests/studio/IdentityBoards.luau`: Studio board harness (text clipping, shard content, keep-clear rails, text-fit where a profile exists).
+- `art/identity/`: the 48 PNGs copied unchanged and `UPLOAD_LIST.md` (nothing uploaded; every `AssetIds` value is `""`).
+- Nothing mounted in the HUD or menu; no remote, payload or DataStore change; no existing file edited except the queue.
+
+Not done / not verified:
+- The Studio harness was written and typechecked but **not run in Studio**; AC4 stays open. New `shard-id-*` shards have no ShapeProfiles yet, so the text-fit margin rows say "no profile" until the audited profiles land (PR 151 also rewrites that file).
+- No screenshot comparison to S1-S7 (placeholders only, no ids).
+- Reduced motion / Fx (step 6), payload extension (step 2) and HUD placements (step 5) are left for later tasks.
+
+Package audit (independent Sonnet raster check, report in the session scratchpad, not stored in the repo): PNG sizes and AssetIds names pass; 9-slice middles are flat (max alpha difference 0/255; `glow-id-card-gold` 13/255, no claim made); glyph check passes; keep-clear passes but the answer row ends 2 px from the bottom-right zone. Disagreements with the README to send back to Design:
+| item | README | measured |
+|---|---|---|
+| Card-ghost gameplay margin | 6.4 px | 5.70 px (under the 6 px rule) |
+| Results row margin | 6.0 px | 5.59 ghost, 5.70 others (pixel-box method; about 6.0 by pixel centre) |
+| Copper vs Bronze luma | about 0.45 vs 0.6 | 0.458 vs 0.508 over opaque pixels; interior 0.49 vs 0.48, so shape and chevron count separate them, not brightness |
+| Progress strip SliceScale | README says 0.5 | `IdentityTheme` has 0.25 (32 px art x 0.25 = 8 px, so 0.25 is right; README text is wrong) |
+Not verified: S2 colour-vision screenshots, HTML sheet, seconds/score positions, DeviceSafeInsets, the reused menu and HUD PNGs.
+
+Decisions: `IdentityCopy` lives in `shared/`; `Kit.assetId` resolves `AssetIds` first, then `MenuTheme.Image`/`HudTheme.Image` for the reused art (so the real `icon-menu-check` id is not overwritten); headshot arrivals after the 3 s mark still replace the fallback.
+
 
 ## Audits
 

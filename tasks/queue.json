@@ -6398,7 +6398,7 @@
       "id": "TASK-0106",
       "title": "MathShow Identity UI Primitives And Cards",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "ready",
       "risk": "medium",
       "depends_on": [
         "TASK-0105"
@@ -6412,11 +6412,19 @@
         "A Studio board harness renders the README stress fixtures at 844x390 and the text-fit gate passes every row with a 6 px margin; differences from the S-screenshots over 2 px are reported.",
         "Nothing is wired into the HUD or menu, no remote, payload or DataStore field changes, nothing is uploaded, and check.sh passes with the MathShow spec count above 258."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-27T12:19:11",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0,
-      "tier": "standard"
+      "tier": "standard",
+      "approved_by": "jg"
     }
   ]
 }
