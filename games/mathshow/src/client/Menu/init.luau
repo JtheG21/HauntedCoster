@@ -367,7 +367,15 @@ local function onSkillState(p: any)
 		return
 	end
 	if p.state == "question" or p.state == "reveal" then
-		if typeof(p.problem) ~= "string" or typeof(p.rank) ~= "number" or typeof(p.kind) ~= "string" then
+		if
+			typeof(p.problem) ~= "string"
+			or typeof(p.rank) ~= "number"
+			or typeof(p.kind) ~= "string"
+			or typeof(p.attempt) ~= "number"
+			or typeof(p.endsAt) ~= "number"
+			or typeof(p.total) ~= "number"
+			or typeof(p.misses) ~= "number"
+		then
 			warn("[MathShow] Menu ignored a malformed SkillState question")
 			return
 		end

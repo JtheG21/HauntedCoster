@@ -55,6 +55,11 @@ function SkillRules.advance(run: Run, correct: boolean): Run
 	return { rank = run.rank, misses = misses, cleared = run.cleared, finished = misses >= MenuConfig.SkillMaxMisses }
 end
 
+-- A run that ends now (no question left to ask); keeps run construction in one place.
+function SkillRules.finish(run: Run): Run
+	return { rank = run.rank, misses = run.misses, cleared = run.cleared, finished = true }
+end
+
 -- A first test that clears nothing still lands on PLASTIC (rank 0, jg default); a later one that clears nothing holds.
 function SkillRules.outcome(previousBest: number?, cleared: number?): Outcome
 	local kind = RankRules.resultKind(previousBest, cleared)

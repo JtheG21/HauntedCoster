@@ -68,6 +68,15 @@ return function(t: TestRunner.T)
 		t.truthy((after :: any) ~= run)
 	end)
 
+	t.test("finish ends a run without changing the rest", function()
+		local run = { rank = 4, misses = 1, cleared = 3, finished = false }
+		local done = SkillRules.finish(run)
+		t.eq(done.finished, true)
+		t.eq(done.rank, 4)
+		t.eq(done.cleared, 3)
+		t.eq(run.finished, false)
+	end)
+
 	t.test("outcome: first test", function()
 		local o = SkillRules.outcome(nil, 4)
 		t.eq(o.kind, "first")

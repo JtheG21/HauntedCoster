@@ -41,6 +41,26 @@ return function(t: TestRunner.T)
 		end
 	end)
 
+	t.test("the answer is not always in the middle of its choices", function()
+		local positions: { [number]: number } = {}
+		for seed = 1, 300 do
+			local p = SkillProblemRules.generate(6, seed) :: SkillProblemRules.Problem
+			local values: { number } = {}
+			for _, c in p.choices :: { string } do
+				table.insert(values, tonumber(c) :: number)
+			end
+			table.sort(values)
+			for rank, value in values do
+				if value == p.answer then
+					positions[rank] = (positions[rank] or 0) + 1
+				end
+			end
+		end
+		for rank = 1, 4 do
+			t.truthy((positions[rank] or 0) >= 20, "answer sorted position " .. rank .. " occurs often enough")
+		end
+	end)
+
 	t.test("typed ranks have no choices", function()
 		for rank = 0, 4 do
 			local p = SkillProblemRules.generate(rank, 7) :: SkillProblemRules.Problem

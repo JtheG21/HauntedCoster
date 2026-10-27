@@ -86,6 +86,7 @@ local GENERATORS: { [number]: (rng: Random) -> (string, number) } = {
 	end,
 	[9] = function(rng)
 		local a, b = rng:NextInteger(2, 6), rng:NextInteger(2, 6)
+		-- both wordings have the same answer (2ab); the coin flip only varies the text
 		if rng:NextInteger(1, 2) == 1 then
 			return `d/dx (x\u{00B2}y) at ({a}, {b}) = ?`, 2 * a * b
 		end
@@ -103,7 +104,14 @@ local function choicesFor(answer: number, rng: Random): ({ string }, number)
 			table.insert(pool, value)
 		end
 	end
-	local near = { 1, -1, 2, -2, 3, -3 }
+	-- A window of nearby values (-6..+6) shuffled, so the answer is not always the middle of a tight cluster; then the answer
+	-- doubled and +10 as fallbacks when the window is cut off at zero.
+	local near: { number } = {}
+	for delta = -6, 6 do
+		if delta ~= 0 then
+			table.insert(near, delta)
+		end
+	end
 	for index = #near, 2, -1 do
 		local swap = rng:NextInteger(1, index)
 		near[index], near[swap] = near[swap], near[index]
@@ -113,7 +121,7 @@ local function choicesFor(answer: number, rng: Random): ({ string }, number)
 	end
 	add(answer * 2)
 	add(answer + 10)
-	local step = 4
+	local step = 7
 	while #pool < 3 do
 		add(answer + step)
 		step += 1

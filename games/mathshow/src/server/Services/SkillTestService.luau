@@ -67,11 +67,16 @@ end
 
 local askQuestion: (Player, Session) -> ()
 
-local function finish(player: Player, session: Session)
+-- Writes a finished run's result to the profile. Returns the outcome and the cooldown end.
+local function persist(player: Player, session: Session): (SkillRules.Outcome, number)
 	local outcome = SkillRules.outcome(session.previousBest, session.run.cleared)
 	local now = os.time()
-	local retryAt = ProfileRules.retryAt(now, nil) :: number
 	ProfileService.apply(player, { bestRank = outcome.best, lastTestRank = outcome.lastTest, lastTakenAt = now })
+	return outcome, ProfileRules.retryAt(now, nil) :: number
+end
+
+local function finish(player: Player, session: Session)
+	local outcome, retryAt = persist(player, session)
 	sessions[player] = nil
 	send(player, {
 		state = "ended",
@@ -142,7 +147,7 @@ askQuestion = function(player: Player, session: Session)
 	local problem = SkillProblemRules.generate(rank, session.seedBase + attempt)
 	if not problem then
 		warn(`[MathShow] no skill problem for rank {rank}; ending the run`)
-		session.run = { rank = rank, misses = session.run.misses, cleared = session.run.cleared, finished = true }
+		session.run = SkillRules.finish(session.run)
 		finish(player, session)
 		return
 	end
@@ -254,7 +259,15 @@ function SkillTestService.start(): ()
 		end
 	end)
 	Players.PlayerRemoving:Connect(function(player: Player)
-		sessions[player] = nil -- leaving mid-run costs nothing; pending timers see the session gone
+		local session = sessions[player]
+		-- A run that is already over (the last reveal is showing) still counts: leaving then must not dodge the cooldown.
+		-- Leaving mid-run costs nothing (jg default), and the best rank can never go down.
+		if session and session.run.finished then
+			pcall(function()
+				persist(player, session)
+			end)
+		end
+		sessions[player] = nil -- pending timers see the session gone
 		startStamps[player] = nil
 	end)
 end

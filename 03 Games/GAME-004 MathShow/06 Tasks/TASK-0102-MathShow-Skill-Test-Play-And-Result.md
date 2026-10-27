@@ -3,7 +3,7 @@ id: TASK-0102
 title: "MathShow Skill Test Play And Result"
 type: task
 project: GAME-004
-status: in_review
+status: approved
 priority: medium
 risk: high
 owner: executor
@@ -72,5 +72,9 @@ Deep tier (DataStore, remotes). Baseline: MathShow 165 specs. Branch also record
 
 
 ## Audits
+Deep tier, one Opus audit: **pass** (AUD-20261027-TASK-0102-01). Fixed after it: a finished run is persisted when the player leaves during the last reveal, choice distractors come from a shuffled -6..+6 window, SkillState payload type checks on the client, `SkillRules.finish`, a comment on rank 9. The typed-input concern needed no change (`sanitizeInput` caps at six digits). MathShow specs 187; Studio smoke re-run clean.
 
 ## Outcome
+- `scripts/check.sh` ALL CHECKS PASSED; MathShow 187 specs (baseline 165). Studio: server flow, validation, timeout, UI and result paths, gate 1977 rows 0 failures. Opus audit pass.
+- **Not verified:** a real 2-client run, real DataStore persistence, the result screen's motion visually, controller/touch.
+- Pending for jg: merge decision.
