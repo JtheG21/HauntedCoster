@@ -6271,7 +6271,7 @@
       "id": "TASK-0104",
       "title": "MathShow VS Matchmaking And Flow",
       "project": "GAME-004",
-      "status": "approved",
+      "status": "done",
       "risk": "high",
       "depends_on": [
         "TASK-0099",
@@ -6308,6 +6308,12 @@
           "from": "in_review",
           "to": "approved",
           "note": "audit passed; merge needs human approval"
+        },
+        {
+          "time": "2026-10-26T20:58:48",
+          "from": "approved",
+          "to": "done",
+          "note": "merge approved by jg"
         }
       ],
       "executions": [
@@ -6326,7 +6332,8 @@
       ],
       "revisions": 0,
       "tier": "deep",
-      "approved_by": "jg"
+      "approved_by": "jg",
+      "merge_approved_by": "jg"
     }
   ]
 }
