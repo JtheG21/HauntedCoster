@@ -528,7 +528,7 @@ local function onBlitzState(p: any)
 		renderBlitz(p.questionIndex > 1)
 	elseif p.state == "unavailable" then
 		blitzCtx.started = false
-		view.toast(MenuCopy.Main.RankUnavailable, false)
+		view.toast(MenuCopy.Blitz.Unavailable, false)
 	end
 end
 

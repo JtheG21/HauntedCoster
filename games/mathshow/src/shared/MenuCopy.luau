@@ -123,6 +123,7 @@ local MenuCopy = {
 		PreviousBest = "Previous best {best}",
 		FirstScore = "First Blitz score",
 		NewBest = "NEW BEST",
+		Unavailable = "BLITZ UNAVAILABLE",
 		PlayAgain = "PLAY AGAIN",
 		ColQ = "Q",
 		ColYou = "YOU",

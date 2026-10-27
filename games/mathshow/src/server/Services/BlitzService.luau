@@ -80,8 +80,13 @@ local function finish(player: Player, session: Session)
 		end
 	end
 	local newBest = BlitzRules.isNewBest(correct, session.previousBest)
-	ProfileService.apply(player, { blitzBest = correct })
-	sessions[player] = nil
+	sessions[player] = nil -- cleared first: a fault below must never leave the player unable to start another run
+	local saved, saveErr = pcall(function()
+		ProfileService.apply(player, { blitzBest = correct })
+	end)
+	if not saved then
+		warn(`[MathShow] blitz best not saved for {player.Name}: {saveErr}`)
+	end
 	local ok, err = pcall(function()
 		Remotes.BlitzResult:FireClient(player, {
 			correct = correct,
