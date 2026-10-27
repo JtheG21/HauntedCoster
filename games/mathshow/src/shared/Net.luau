@@ -15,6 +15,12 @@
 --   BlitzState   server -> one client    BlitzStatePayload (never any answer or score)
 --   AnswerAck    server -> one client    { questionIndex } (identical for right and wrong)
 --   BlitzResult  server -> one client    BlitzResultPayload (only after the run ends)
+--   QueueJoin    client -> server        { mode: "vs" } (VsRules.validQueueJoin)
+--   QueueCancel / QueueKeepWaiting / RematchRequest   client -> server (no payload)
+--   QueueState   server -> one client    QueueStatePayload
+--   VsAnswer     client -> server        { questionIndex, answer } (VsRules.parseAnswerPayload)
+--   VsState      server -> one client    VsStatePayload (the opponent's answer is never sent)
+--   VsResult     server -> one client    VsResultPayload
 --   MenuRequest  client -> server (RemoteFunction)  { kind: "profile" } -> MenuProfileReply
 --   SettingsSave client -> server        SettingsPayload (validated by ProfileRules.sanitizeSettings)
 
@@ -103,10 +109,47 @@ export type BlitzResultPayload = {
 	newBest: boolean,
 }
 
+export type PlayerCard = { userId: number, displayName: string, rank: number? }
+
+-- state "searching" | "timeout" | "found" | "failed"; found carries the opponent and when the countdown ends.
+export type QueueStatePayload = {
+	state: string,
+	startedAt: number, -- workspace:GetServerTimeNow() when this search (or wait) began
+	opponent: PlayerCard?,
+	startsAt: number?,
+}
+
+-- phase "Countdown" | "Question" | "Reveal" | "SuddenCountdown"; answer only in Reveal; you / them are the running totals.
+export type VsStatePayload = {
+	phase: string,
+	questionIndex: number,
+	total: number, -- questions in the match (sudden death counts past it)
+	endsAt: number,
+	problemText: string?,
+	answer: number?,
+	you: number,
+	them: number,
+	suddenDeath: boolean,
+}
+
+export type VsResultPayload = {
+	result: string, -- "win" | "lose" | "draw" | "forfeit"
+	you: number,
+	them: number,
+}
+
 local Net = table.freeze({
 	RoundState = "RoundState",
 	SubmitAnswer = "SubmitAnswer",
 	AnswerResult = "AnswerResult",
+	QueueJoin = "QueueJoin",
+	QueueCancel = "QueueCancel",
+	QueueKeepWaiting = "QueueKeepWaiting",
+	QueueState = "QueueState",
+	VsAnswer = "VsAnswer",
+	VsState = "VsState",
+	VsResult = "VsResult",
+	RematchRequest = "RematchRequest",
 	BlitzStart = "BlitzStart",
 	BlitzAnswer = "BlitzAnswer",
 	BlitzState = "BlitzState",

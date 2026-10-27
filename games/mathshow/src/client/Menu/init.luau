@@ -114,6 +114,51 @@ local blitzCtx: {
 	{ started = false, index = 0, problem = "", endsAt = 0, total = 0, locked = false, review = nil }
 local blitzToken = 0
 
+-- The VS match on screen (TASK-0104): the server owns the queue, the problems, the clock and the scores.
+local vsCtx: {
+	stage: string,
+	startedClock: number, -- os.clock() when this search or wait began
+	you: View.Player?,
+	rival: View.Player?,
+	startsAt: number,
+	index: number,
+	total: number,
+	problem: string,
+	youPts: number,
+	themPts: number,
+	suddenDeath: boolean,
+	endsAt: number,
+	locked: boolean,
+	feedback: string?,
+	points: number?,
+	answer: number?,
+	result: string?,
+	rematch: boolean,
+	suddenEndsAt: number,
+} =
+	{
+		stage = "",
+		startedClock = 0,
+		you = nil,
+		rival = nil,
+		startsAt = 0,
+		index = 0,
+		total = 6,
+		problem = "",
+		youPts = 0,
+		themPts = 0,
+		suddenDeath = false,
+		endsAt = 0,
+		locked = false,
+		feedback = nil,
+		points = nil,
+		answer = nil,
+		result = nil,
+		rematch = false,
+		suddenEndsAt = 0,
+	}
+local vsToken = 0
+
 local function skillModel(): View.SkillModel?
 	local m = skillCtx.model
 	if m == nil then
@@ -129,6 +174,36 @@ end
 local function model(): View.Model
 	local player = Players.LocalPlayer
 	return {
+		vs = if stack[#stack] == "vs"
+			then {
+				stage = vsCtx.stage,
+				seconds = if vsCtx.stage == "found"
+					then math.max(0, math.ceil(vsCtx.startsAt - workspace:GetServerTimeNow()))
+					elseif vsCtx.stage == "result" then math.max(
+						0,
+						math.ceil(vsCtx.suddenEndsAt - workspace:GetServerTimeNow())
+					)
+					elseif vsCtx.stage == "question" then math.max(
+						0,
+						math.ceil(vsCtx.endsAt - workspace:GetServerTimeNow())
+					)
+					else math.floor(os.clock() - vsCtx.startedClock),
+				you = vsCtx.you,
+				rival = vsCtx.rival,
+				index = vsCtx.index,
+				total = vsCtx.total,
+				problem = vsCtx.problem,
+				youPts = vsCtx.youPts,
+				themPts = vsCtx.themPts,
+				suddenDeath = vsCtx.suddenDeath,
+				locked = vsCtx.locked,
+				feedback = vsCtx.feedback,
+				points = vsCtx.points,
+				answer = vsCtx.answer,
+				result = vsCtx.result,
+				rematch = vsCtx.rematch,
+			}
+			else nil,
 		blitz = if stack[#stack] == "blitz"
 			then { index = blitzCtx.index, problem = blitzCtx.problem, total = blitzCtx.total, locked = blitzCtx.locked }
 			else nil,
@@ -289,7 +364,53 @@ local function renderBlitz(isQuiet: boolean)
 	startBlitzClock()
 end
 
+-- Updates the live number on the VS screen each second: the search clock, or the STARTS IN / SUDDEN DEATH IN countdown.
+local function startVsTicker()
+	vsToken += 1
+	local token = vsToken
+	task.spawn(function()
+		while token == vsToken and view and stack[#stack] == "vs" do
+			local stage = vsCtx.stage
+			local now = workspace:GetServerTimeNow()
+			if stage == "search" or stage == "timeout" then
+				view.setVsCount(CooldownRules.formatShort(os.clock() - vsCtx.startedClock))
+			elseif stage == "found" then
+				view.setVsCount(tostring(math.max(0, math.ceil(vsCtx.startsAt - now))))
+			elseif stage == "result" and vsCtx.result == "draw" then
+				view.setVsCount(tostring(math.max(0, math.ceil(vsCtx.suddenEndsAt - now))))
+			elseif stage == "question" then
+				local left = math.max(0, vsCtx.endsAt - now)
+				view.setSkillTimer(left / math.max(vsCtx.total > 0 and (vsCtx.endsAt - vsCtx.startsAt) or 1, 1), left)
+			else
+				break
+			end
+			task.wait(0.2)
+		end
+	end)
+end
+
+local function renderVs(isQuiet: boolean)
+	if not view then
+		return
+	end
+	local m = model()
+	m.quiet = isQuiet
+	view.render("vs", m)
+	focusDefault(nil)
+	startVsTicker()
+end
+
+local function ensureVsOnTop()
+	if stack[#stack] ~= "vs" then
+		table.insert(stack, "vs")
+	end
+end
+
 local function go(id: string)
+	if id == "vsqueue" then
+		fire(Net.QueueJoin, { mode = "vs" })
+		return
+	end
 	if id == "blitz" then
 		blitzCtx.started = true
 		blitzCtx.review = nil
@@ -311,6 +432,23 @@ end
 local function back()
 	if stack[#stack] == "skill" or stack[#stack] == "blitz" then
 		return -- no leaving a Skill Test or Blitz question: the run ends on its own
+	end
+	if stack[#stack] == "vs" then
+		local stage = vsCtx.stage
+		if stage == "search" or stage == "timeout" then
+			vsToken += 1
+			fire(Net.QueueCancel) -- CANCEL: leave the queue, back to the VS panel
+			table.remove(stack)
+			show(stack[#stack])
+		elseif stage == "nomatch" then
+			table.remove(stack)
+			show(stack[#stack])
+		elseif stage == "result" and vsCtx.result ~= "draw" then
+			vsToken += 1
+			stack = { "main" } -- MENU
+			show("main")
+		end
+		return -- no leaving a match that is starting or running
 	end
 	if #stack > 1 then
 		table.remove(stack)
@@ -557,6 +695,137 @@ local function onBlitzResult(p: any)
 	show("blitzreview")
 end
 
+local function cardOf(p: any): View.Player?
+	if typeof(p) ~= "table" or typeof(p.displayName) ~= "string" then
+		return nil
+	end
+	return {
+		name = p.displayName,
+		userId = if typeof(p.userId) == "number" then p.userId else nil,
+		rank = if typeof(p.rank) == "number" then p.rank else nil,
+		failed = nil,
+	}
+end
+
+local function onQueueState(p: any)
+	if typeof(p) ~= "table" or typeof(p.state) ~= "string" or not view then
+		warn("[MathShow] Menu ignored a malformed QueueState")
+		return
+	end
+	local state: string = p.state
+	if state == "searching" then
+		vsCtx.stage, vsCtx.startedClock, vsCtx.result, vsCtx.rematch = "search", os.clock(), nil, false
+		if stack[#stack] == "vs" and (vsCtx.index > 0) then
+			vsCtx.index, vsCtx.youPts, vsCtx.themPts = 0, 0, 0
+		end
+		ensureVsOnTop()
+		renderVs(false)
+	elseif state == "timeout" then
+		vsCtx.stage = "timeout"
+		ensureVsOnTop()
+		renderVs(false)
+	elseif state == "failed" then
+		vsCtx.stage = "nomatch"
+		ensureVsOnTop()
+		renderVs(false)
+	elseif state == "found" then
+		if typeof(p.startsAt) ~= "number" or cardOf(p.opponent) == nil then
+			warn("[MathShow] Menu ignored a malformed QueueState found")
+			return
+		end
+		local player = Players.LocalPlayer
+		vsCtx.stage, vsCtx.startsAt, vsCtx.rival = "found", p.startsAt, cardOf(p.opponent)
+		vsCtx.you = { name = player.DisplayName, userId = player.UserId, rank = profile.rank, failed = nil }
+		vsCtx.index, vsCtx.youPts, vsCtx.themPts, vsCtx.suddenDeath, vsCtx.result, vsCtx.rematch =
+			0, 0, 0, false, nil, false
+		ensureVsOnTop()
+		renderVs(false)
+	end
+end
+
+local function onVsState(p: any)
+	if
+		typeof(p) ~= "table"
+		or typeof(p.phase) ~= "string"
+		or typeof(p.questionIndex) ~= "number"
+		or typeof(p.endsAt) ~= "number"
+		or typeof(p.you) ~= "number"
+		or typeof(p.them) ~= "number"
+		or not view
+	then
+		warn("[MathShow] Menu ignored a malformed VsState")
+		return
+	end
+	local phase: string = p.phase
+	vsCtx.youPts, vsCtx.themPts = p.you, p.them
+	vsCtx.total = if typeof(p.total) == "number" then p.total else 6
+	vsCtx.suddenDeath = p.suddenDeath == true
+	if phase == "Question" then
+		if typeof(p.problemText) ~= "string" then
+			return
+		end
+		vsCtx.stage, vsCtx.index, vsCtx.problem, vsCtx.endsAt = "question", p.questionIndex, p.problemText, p.endsAt
+		vsCtx.startsAt = workspace:GetServerTimeNow() -- the bar fills from now to endsAt
+		vsCtx.locked, vsCtx.feedback, vsCtx.points, vsCtx.answer, vsCtx.result = false, nil, nil, nil, nil
+		ensureVsOnTop()
+		renderVs(false)
+	elseif phase == "Reveal" then
+		vsCtx.stage, vsCtx.answer = "reveal", if typeof(p.answer) == "number" then p.answer else nil
+		if typeof(p.problemText) == "string" then
+			vsCtx.problem = p.problemText
+		end
+		ensureVsOnTop()
+		renderVs(false)
+	elseif phase == "SuddenCountdown" then
+		vsCtx.suddenEndsAt = p.endsAt
+	end
+end
+
+local function onVsResult(p: any)
+	if
+		typeof(p) ~= "table"
+		or typeof(p.result) ~= "string"
+		or typeof(p.you) ~= "number"
+		or typeof(p.them) ~= "number"
+	then
+		warn("[MathShow] Menu ignored a malformed VsResult")
+		return
+	end
+	vsCtx.stage, vsCtx.result, vsCtx.youPts, vsCtx.themPts, vsCtx.rematch = "result", p.result, p.you, p.them, false
+	vsCtx.suddenEndsAt = workspace:GetServerTimeNow() + 3
+	ensureVsOnTop()
+	renderVs(false)
+end
+
+local function onAnswerResult(p: any)
+	if vsCtx.stage ~= "question" or typeof(p) ~= "table" or p.accepted ~= true then
+		return
+	end
+	vsCtx.feedback = if p.correct == true then "correct" else "wrong"
+	vsCtx.points = if typeof(p.points) == "number" then p.points else nil
+	renderVs(true)
+end
+
+local function connectVsRemotes()
+	local function hook(name: string, fn: (any) -> ())
+		local remote = remoteNamed(name)
+		if remote and remote:IsA("RemoteEvent") then
+			remote.OnClientEvent:Connect(function(p: any)
+				local ok, err = pcall(function()
+					fn(p)
+				end)
+				if not ok then
+					warn(`[MathShow] Menu {name} failed: {err}`)
+				end
+			end)
+		end
+	end
+	hook(Net.QueueState, onQueueState)
+	hook(Net.VsState, onVsState)
+	hook(Net.VsResult, onVsResult)
+	hook(Net.AnswerResult, onAnswerResult)
+end
+
 local function connectBlitzRemotes()
 	local state = remoteNamed(Net.BlitzState)
 	local result = remoteNamed(Net.BlitzResult)
@@ -618,6 +887,26 @@ function Menu.start(opts: Options)
 		back = back,
 		retry = function()
 			Menu.retryProfile()
+		end,
+		vsLock = function(value: number)
+			if vsCtx.stage ~= "question" or vsCtx.locked then
+				return
+			end
+			-- Lock first, synchronously, so nothing can send a second answer for this question.
+			vsCtx.locked = true
+			fire(Net.VsAnswer, { questionIndex = vsCtx.index, answer = value })
+			renderVs(true)
+		end,
+		vsKeepWaiting = function()
+			fire(Net.QueueKeepWaiting)
+		end,
+		vsRematch = function()
+			vsCtx.rematch = true
+			fire(Net.RematchRequest)
+			renderVs(true)
+		end,
+		vsRetry = function()
+			fire(Net.QueueJoin, { mode = "vs" })
 		end,
 		blitzLock = function(value: number)
 			if not blitzCtx.started or blitzCtx.locked or blitzCtx.index == 0 then
@@ -686,6 +975,7 @@ function Menu.start(opts: Options)
 	requestProfile()
 	task.spawn(connectSkillRemotes)
 	task.spawn(connectBlitzRemotes)
+	task.spawn(connectVsRemotes)
 
 	ContextActionService:BindAction(BACK_ACTION, function(_name, state)
 		if state == Enum.UserInputState.Begin and #stack > 1 then

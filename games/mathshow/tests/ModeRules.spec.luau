@@ -26,9 +26,9 @@ return function(t: TestRunner.T)
 		t.eq(ModeRules.cardState("group", flags), "open")
 	end)
 
-	t.test("cardState defaults to config: Group Battle and Blitz are open", function()
+	t.test("cardState defaults to config: all three shows are open", function()
 		t.eq(ModeRules.cardState("blitz"), "open")
-		t.eq(ModeRules.cardState("vs"), "locked")
+		t.eq(ModeRules.cardState("vs"), "open")
 		t.eq(ModeRules.cardState("group"), "open")
 	end)
 

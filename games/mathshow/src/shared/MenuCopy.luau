@@ -148,6 +148,10 @@ local MenuCopy = {
 		ScoreRival = "RIVAL {them}",
 		Rematch = "REMATCH",
 		FindNewRival = "FIND NEW RIVAL",
+		SuddenDeath = "SUDDEN DEATH",
+		NotQuite = "NOT QUITE",
+		CorrectPoints = "CORRECT · +{n}",
+		WaitingForRival = "WAITING FOR RIVAL",
 	},
 	Skill = {
 		Tag = "SKILL TEST",

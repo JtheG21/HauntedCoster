@@ -171,7 +171,7 @@ MenuTheme.Layout = {
 	VsCount = box(362, 236, 120, 124, 0), -- STARTS IN tag + 100 px number
 	-- in-match (06, 08, 10, 13, 14); HUD boxes are in Theme.Layout
 	BlitzClock = box(650, 84, 154, 80, 0), -- "1:42" at 60 px over "LEFT" tag
-	HeadToHead = box(504, 6, 296, 44, 1.5), -- shard-score-silver stretched; bar 76x8 centered
+	HeadToHead = box(456, 6, 344, 44, 1.5), -- README 504 x 296: 4-digit points need 344 (audit A3) -- shard-score-silver stretched; bar 76x8 centered
 	WatchBanner = box(110, 276, 480, 44, 1),
 	RankStrip = box(300, 8, 500, 36, 0), -- 10 nodes 24 px (current 32), gap 10; MISSES + 2 slots 18x18
 	ChoiceProblem = box(52, 46, 580, 150, -2), -- shard-menu-problem-silver, padding 30 top
