@@ -74,7 +74,7 @@ MenuTheme.Color = {
 
 -- Text sizes (all <= 100; Roblox TextSize caps at 100).
 MenuTheme.Text = {
-	Title = 40, -- MATHSHOW logo (A2: 46 px does not fit the 330x88 shard; the gate decides)
+	Title = 46, -- MATHSHOW logo (Art v2: the 330x104 title shard holds 46 px; README, the gate decides)
 	Primary = 28,
 	Secondary = 15,
 	Action = 19,
@@ -97,13 +97,16 @@ MenuTheme.Text = {
 	Choice = 18,
 	ChoiceLetter = 15,
 	RowName = 15,
-	LadderName = 10, -- 16 rank ladder rungs: README 15 does not fit the 34 px row art, see View.buildLadder
+	LadderName = 15, -- 16 rank ladder rungs: Art v2 rows are 38 px tall and hold README 15
 	RowSubject = 13,
+	ReviewQ = 13, -- Blitz review question number (README 13)
 	ReviewValue = 16,
-	SettingLabel = 15, -- A4: 16 px ran into the toggle
+	SettingLabel = 16, -- README 16 (Art v2 row; the gate decides)
 	ToggleState = 12,
-	WatchBanner = 15, -- README 17: only y 14..30 of the 44 px banner clears 6 px of its cuts, see View.buildWatching
-	Toast = 15, -- A10 follow-up: the toast shard (320x46) has a 28 px tall clear band, so 15 px text is the largest with slack for 6 px
+	WatchBanner = 17, -- README 17 (Art v2 banner is 48 px tall with 20 px end slants)
+	Toast = 18, -- Art v2 toast (46 px tall, flat middle): README 18
+	H2HPoints = 20, -- head-to-head points (README 20)
+	CountDraw = 100, -- sudden-death count number (README 100)
 	ActionWaiting = 16, -- A5: "WAITING FOR RIVAL" at 19 px is too wide for the action shard
 }
 -- Blitz score "n/10": TextScaled label 184x84, UITextSizeConstraint MinTextSize 48, MaxTextSize 84.
@@ -122,7 +125,7 @@ MenuTheme.Panel = {
 	TagGap = 6,
 }
 -- Toast width = text + 2 * PadX (+ IconExtra when it carries an icon) (A10).
-MenuTheme.Toast = { PadX = 36, IconExtra = 24, Height = 46, IconSize = 16, TextY = 15, TextH = 15 }
+MenuTheme.Toast = { PadX = 24, IconExtra = 24, Height = 46, IconSize = 16, TextY = 14, TextH = 18 }
 MenuTheme.TagPadX = 8 -- README: tag padding 2 / 8, 11 px Bold, single line
 MenuTheme.TagPadY = 2
 
@@ -136,7 +139,7 @@ MenuTheme.Layout = {
 	ToastTop = box(422, 8, 0, 40, -1), -- AnchorPoint (0.5, 0); width = text + 60
 	ToastBottom = box(110, 338, 0, 46, -1), -- in-match, same as HUD Feedback
 	-- 01 main
-	Title = box(52, 52, 330, 88, -2),
+	Title = box(52, 44, 330, 104, -2), -- Art v2 title shard is 104 tall
 	Play = box(60, 156, 290, 62, -1.5),
 	Practice = box(72, 226, 290, 62, 1),
 	Settings = box(60, 296, 290, 62, -1),
@@ -158,7 +161,7 @@ MenuTheme.Layout = {
 	SkillSeconds = box(646, 64, 154, 130, 0),
 	LadderLink = box(172, 332, 200, 44, 1), -- RANK LADDER beside BACK on the Practice home (not in the README: the ladder had no entry)
 	SideSecondary = box(576, 168, 220, 44, -1), -- README 580: right edge sat on the inset
-	Count = box(588, 60, 200, 160, 3),
+	Count = box(588, 48, 200, 184, 3), -- Art v2 count shard is 200x184
 	RankOld = box(580, 96, 48, 48, 0),
 	RankArrow = box(628, 108, 24, 24, 0),
 	RankNew = box(652, 60, 120, 120, 0), -- glow-menu-rank-* 192x192 at (616, 24)
@@ -171,8 +174,8 @@ MenuTheme.Layout = {
 	VsCount = box(362, 236, 120, 124, 0), -- STARTS IN tag + 100 px number
 	-- in-match (06, 08, 10, 13, 14); HUD boxes are in Theme.Layout
 	BlitzClock = box(650, 84, 154, 80, 0), -- "1:42" at 60 px over "LEFT" tag
-	HeadToHead = box(456, 6, 344, 44, 1.5), -- README 504 x 296: 4-digit points need 344 (audit A3) -- shard-score-silver stretched; bar 76x8 centered
-	WatchBanner = box(110, 276, 480, 44, 1),
+	HeadToHead = box(456, 2, 344, 52, 1.5), -- Art v2 h2h shard (fixed width, 344x52)
+	WatchBanner = box(110, 274, 480, 48, 1), -- Art v2 banner is 48 tall
 	RankStrip = box(300, 8, 500, 36, 0), -- 10 nodes 24 px (current 32), gap 10; MISSES + 2 slots 18x18
 	ChoiceProblem = box(52, 46, 580, 150, -2), -- shard-menu-problem-silver, padding 30 top
 	ChoiceTimerBar = box(92, 204, 520, 10, -1),
@@ -202,9 +205,29 @@ MenuTheme.Layout = {
 }
 MenuTheme.LadderOffsets = { 0, 14, 4, 18, 8 }
 
+local UNSET = "rbxassetid://0"
+
 -- Upload every PNG in assets/roblox/ and paste the ids. HUD images (shard-input, shard-button, shard-score-silver,
 -- shard-problem-blue, shard-row-*, shard-toast-*, glow-toast-*, glow-problem-blue) come from Theme.Image.
 MenuTheme.Image = {
+	-- Art v2 (TASK-0107): ids stay unset until jg approves the upload (art/menu/UPLOAD_LIST.md).
+	["shard-menu-row-indigo-v2"] = UNSET,
+	["shard-menu-row-green-v2"] = UNSET,
+	["shard-menu-toast-silver-v2"] = UNSET,
+	["shard-menu-toast-green-v2"] = UNSET,
+	["shard-menu-toast-red-v2"] = UNSET,
+	["shard-menu-banner-violet-v2"] = UNSET,
+	["shard-menu-h2h-silver-v2"] = UNSET,
+	["shard-menu-count-blue-v2"] = UNSET,
+	["shard-menu-count-red-v2"] = UNSET,
+	["shard-menu-title-violet-v2"] = UNSET,
+	["glow-menu-toast-silver-v2"] = UNSET,
+	["glow-menu-toast-green-v2"] = UNSET,
+	["glow-menu-toast-red-v2"] = UNSET,
+	["glow-menu-banner-violet-v2"] = UNSET,
+	["glow-menu-count-blue-v2"] = UNSET,
+	["glow-menu-count-red-v2"] = UNSET,
+	["glow-menu-title-violet-v2"] = UNSET,
 	["shard-menu-title-violet"] = "rbxassetid://102403330056161",
 	["shard-menu-primary-red"] = "rbxassetid://126024347039405",
 	["shard-menu-primary-blue"] = "rbxassetid://80197953804871",
@@ -281,6 +304,20 @@ MenuTheme.Image = {
 	["rank-demon-3"] = "rbxassetid://130283705731751",
 	["rank-demon-4"] = "rbxassetid://124282519465338",
 }
+
+-- Horizontal 9-slice art (Art v2): SliceCenter in image px, SliceScale 0.5 for the 2x PNGs. Rows and toasts stretch their
+-- flat middle; every other shard is fixed width and keeps ScaleType.Stretch.
+MenuTheme.Slice = {
+	["shard-menu-row-indigo-v2"] = { center = Rect.new(52, 0, 548, 76), scale = 0.5 },
+	["shard-menu-row-green-v2"] = { center = Rect.new(52, 0, 548, 76), scale = 0.5 },
+	["shard-menu-toast-silver-v2"] = { center = Rect.new(48, 0, 592, 92), scale = 0.5 },
+	["shard-menu-toast-green-v2"] = { center = Rect.new(48, 0, 592, 92), scale = 0.5 },
+	["shard-menu-toast-red-v2"] = { center = Rect.new(48, 0, 592, 92), scale = 0.5 },
+	["glow-menu-toast-silver-v2"] = { center = Rect.new(120, 0, 664, 236), scale = 0.5 },
+	["glow-menu-toast-green-v2"] = { center = Rect.new(120, 0, 664, 236), scale = 0.5 },
+	["glow-menu-toast-red-v2"] = { center = Rect.new(120, 0, 664, 236), scale = 0.5 },
+}
+MenuTheme.RowHeight = 38 -- Art v2 rows are drawn 38 tall, centred in their old slots (settings rows keep their 44 px slot)
 
 -- Rank 0..9. Strings mirror MenuCopy.Rank; RankRules returns these by rank (see RULES_SPEC).
 local function tier(rank: number, key: string, name: string, subject: string, badge: string, rgb: Color3, pips: number)

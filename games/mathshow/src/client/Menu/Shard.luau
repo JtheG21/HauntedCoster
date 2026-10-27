@@ -28,6 +28,18 @@ local Shard = {}
 
 local warned: { [string]: boolean } = {}
 
+-- Rows and toasts are horizontal 9-slices (MenuTheme.Slice); everything else stretches.
+local function applyScale(label: ImageLabel, key: string)
+	local slice = (MenuTheme.Slice :: { [string]: { center: Rect, scale: number } })[key]
+	if slice then
+		label.ScaleType = Enum.ScaleType.Slice
+		label.SliceCenter = slice.center
+		label.SliceScale = slice.scale
+	elseif label.ScaleType == Enum.ScaleType.Slice then
+		label.ScaleType = Enum.ScaleType.Stretch -- swapped from a sliced key to a fixed-width one
+	end
+end
+
 local function idOf(key: string): string?
 	local id = (MenuTheme.Image :: { [string]: string })[key] or (HudTheme.Image :: { [string]: string })[key]
 	if id == nil or id == UNSET then
@@ -39,6 +51,7 @@ Shard.idOf = idOf
 
 -- Real image, or a flat placeholder of the same size (shard) / nothing (glow, icon) while the id is unset.
 function Shard.setImage(label: ImageLabel, key: string, gem: Gem?, flat: Color3?)
+	applyScale(label, key)
 	local id = idOf(key)
 	if id then
 		label.Image = id
