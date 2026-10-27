@@ -7,7 +7,8 @@ local MenuConfig = table.freeze({
 	-- Secondary menu items (ModeRules.secondaryState).
 	SecondaryEnabled = table.freeze({
 		howto = true,
-		practice = false,
+		practice = true,
+		skilltest = false, -- START on the Skill Test intro: flips on with TASK-0102
 		leaderboard = false,
 		daily = false,
 		drills = false,

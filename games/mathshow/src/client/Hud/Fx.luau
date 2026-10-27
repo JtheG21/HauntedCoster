@@ -284,6 +284,14 @@ function Fx.slam(g: GuiObject, delay: number?)
 	end)
 end
 
+-- A rank badge lands: scale 2.4 and a 12 degree tilt settle to rest with the same two-stage ease as slam (TASK-0101; used by
+-- the Skill Test result, TASK-0102). Reduced motion: snaps to the final state.
+function Fx.badgeSlam(g: GuiObject, delay: number?)
+	guarded("badgeSlam", g, function()
+		settle(g, 0, 0, -12, 2.4, 0.5, delay or 0)
+	end)
+end
+
 function Fx.slamRight(g: GuiObject, delay: number?)
 	guarded("slamRight", g, function()
 		settle(g, 60, -10, 9, 1.1, 0.56, delay or 0)

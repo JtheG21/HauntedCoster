@@ -63,4 +63,24 @@ return function(t: TestRunner.T)
 		t.eq(RankRules.newBest(4, 2), 4)
 		t.eq(RankRules.newBest(2, 4), 4)
 	end)
+
+	t.test("ladderLayout covers ranks 0-9 once, higher ranks higher", function()
+		local slots = RankRules.ladderLayout()
+		t.eq(#slots, 10)
+		local seen: { [number]: boolean } = {}
+		for _, slot in slots do
+			t.eq(seen[slot.rank], nil, "rank " .. slot.rank .. " twice")
+			seen[slot.rank] = true
+		end
+		for rank = 0, 9 do
+			t.eq(seen[rank], true, "rank " .. rank)
+		end
+		t.eq(slots[1].rank, 4)
+		t.eq(slots[5].rank, 0)
+		t.eq(slots[6].rank, 9)
+		t.eq(slots[10].rank, 5)
+		t.eq(slots[1].column, 1)
+		t.eq(slots[6].column, 2)
+		t.eq(slots[10].row, 5)
+	end)
 end

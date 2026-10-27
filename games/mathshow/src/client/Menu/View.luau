@@ -10,7 +10,9 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local HudRules = require(Shared:WaitForChild("HudRules"))
 local MenuConfig = require(Shared:WaitForChild("MenuConfig"))
 local MenuCopy = require(Shared:WaitForChild("MenuCopy"))
+local CooldownRules = require(Shared:WaitForChild("CooldownRules"))
 local ModeRules = require(Shared:WaitForChild("ModeRules"))
+local PracticeRules = require(Shared:WaitForChild("PracticeRules"))
 local NameRules = require(Shared:WaitForChild("NameRules"))
 local RankRules = require(Shared:WaitForChild("RankRules"))
 
@@ -27,6 +29,7 @@ export type Settings = {
 	colorBlind: boolean,
 	haptics: boolean,
 }
+export type PracticeModel = { rank: number?, lastTestRank: number?, retryRemaining: number?, failed: boolean? }
 export type Model = {
 	flags: { [string]: boolean }?,
 	secondary: { [string]: boolean }?,
@@ -35,6 +38,7 @@ export type Model = {
 	best: string?, -- "6/10": the white BEST tag on the Blitz panel
 	waiting: boolean?, -- 03b action after FIND OPPONENT is pressed in a preview
 	toast: string?,
+	practice: PracticeModel?,
 	holdToast: boolean?, -- Preview only: keep the toast on screen
 }
 export type Handlers = {
@@ -42,6 +46,7 @@ export type Handlers = {
 	back: () -> (),
 	locked: (what: string) -> (),
 	join: () -> (),
+	retry: () -> (),
 	setting: (key: string, value: number | boolean) -> (),
 }
 export type Options = { overlay: boolean?, name: string?, displayOrder: number? }
@@ -50,6 +55,7 @@ export type View = {
 	root: Frame,
 	render: (id: string, model: Model) -> (),
 	toast: (text: string, icon: boolean, hold: boolean?) -> (),
+	setRetakeLabel: (text: string) -> (),
 	defaultFocus: () -> GuiObject?,
 	setReduced: (on: boolean) -> (),
 	destroy: () -> (),
@@ -247,6 +253,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	local stops: { () -> () } = {}
 	local reduced = false
 	local firstSelectable: GuiObject? = nil
+	local retakeLabel: TextLabel? = nil
 	local toastToken = 0
 	local selection = focusBrackets()
 
@@ -260,6 +267,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			screen = nil
 		end
 		firstSelectable = nil
+		retakeLabel = nil
 	end
 
 	-- A button's interaction layer: full-box TextButton, brackets + 1.04 on gamepad focus, 0.95 while pressed.
@@ -1002,6 +1010,201 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		playFx("rise", back.shard.group, 0.4)
 	end
 
+	local function badgeIcon(host: Instance, tier: RankRules.Tier, x: number, y: number, size: number): ImageLabel
+		local badge = icon(host, "Badge", tier.badge, x, y, size)
+		badge.BackgroundTransparency = if Shard.idOf(tier.badge) then 1 else 0.2
+		return badge
+	end
+
+	-- 11 Practice home (11a ready, 11b retake clock running) and 19a (profile did not load).
+	local function buildPractice(model: Model)
+		local pr: PracticeModel = model.practice or {}
+		topLabel(MenuCopy.Top.Practice)
+		if pr.failed then
+			local p = panel(
+				"silver",
+				MenuCopy.Skill.Tag,
+				MenuCopy.Main.RankUnavailable,
+				36,
+				MenuCopy.Skill.UnavailableLines,
+				{
+					{ MenuCopy.Skill.UnavailableTag, true },
+				}
+			)
+			local retry = action(L.Action, MenuCopy.Common.Retry, true, false)
+			interactive(retry, handlers.retry, nil)
+			local back = backButton(MenuCopy.Common.Back)
+			link(retry, "Down", back)
+			playFx("slam", p.shard.group, 0)
+			playFx("pop", retry.shard.group, 0.36)
+			playFx("rise", back.shard.group, 0.4)
+			return
+		end
+		local P = MenuTheme.Panel
+		local p = panel("green", MenuCopy.Skill.Tag, MenuCopy.Skill.HomeTitle, 42, {}, {})
+		local tier = if pr.rank then RankRules.tierOf(pr.rank) else nil
+		local rowY = P.TitleY + 42 + 10
+		if tier then
+			badgeIcon(p.shard.content, tier, P.LeftPad, rowY, MenuTheme.BadgeSizes.Card)
+			text(p.shard.content, "Tier", tier.name, 20, P.LeftPad + 58, rowY + 2, 240, 24)
+			text(
+				p.shard.content,
+				"Subject",
+				tier.subject,
+				14,
+				P.LeftPad + 58,
+				rowY + 26,
+				240,
+				18,
+				{ FontFace = FONT.Italic }
+			)
+		else
+			text(p.shard.content, "Unranked", MenuCopy.Skill.Unranked, 20, P.LeftPad, rowY + 12, 240, 24)
+		end
+		local last = if pr.lastTestRank then RankRules.tierOf(pr.lastTestRank) else nil
+		if last then
+			local lastTag =
+				tag(p.shard.content, "LastTest", (string.gsub(MenuCopy.Skill.LastTest, "{tier}", last.name)))
+			lastTag.Position = UDim2.fromOffset(P.LeftPad, rowY + 62)
+		end
+		local remaining = pr.retryRemaining or 0
+		local cooling = PracticeRules.state(true, remaining, 0) == "cooldown"
+		local act = action(
+			L.Action,
+			if cooling then CooldownRules.retakeLabel(remaining) else MenuCopy.Skill.TakeTest,
+			not cooling,
+			cooling
+		)
+		if cooling then
+			retakeLabel = act.shard.content:FindFirstChild("Label") :: TextLabel?
+		else
+			interactive(act, function()
+				handlers.go("skillintro")
+			end, nil)
+		end
+		local drills = secondary("Drills", L.SideSecondary, MenuCopy.Skill.TopicDrills, true)
+		lockedPress(drills, "drills")
+		local ladder = secondary("LadderLink", L.LadderLink, MenuCopy.Skill.Ladder, false)
+		interactive(ladder, function()
+			handlers.go("ladder")
+		end, nil)
+		local back = backButton(MenuCopy.Common.Back)
+		link(act, "Down", drills)
+		link(drills, "Down", back)
+		link(back, "Right", ladder)
+		if cooling then
+			firstSelectable = back.hit -- the disabled action is skipped: BACK is the default
+		end
+		glowLoop(p, 0)
+		playFx("slam", p.shard.group, 0)
+		playFx("pop", act.shard.group, 0.36)
+		playFx("rise", drills.shard.group, 0.44)
+		playFx("rise", back.shard.group, 0.4)
+	end
+
+	-- 12 Skill Test intro (12a, and 12b for a first test). START is locked until the Skill Test exists (TASK-0102).
+	local function buildSkillIntro(model: Model)
+		local pr: PracticeModel = model.practice or {}
+		topLabel(MenuCopy.Top.SkillTestHeader)
+		local first = PracticeRules.isFirstTest(pr.rank, pr.lastTestRank)
+		local p
+		if first then
+			p = panel("green", MenuCopy.Skill.FirstTag, MenuCopy.Skill.FirstTitle, 54, MenuCopy.Skill.FirstLines, {
+				{ MenuCopy.Skill.Unranked, true },
+			})
+		else
+			local tier = RankRules.tierOf(pr.rank or pr.lastTestRank or 0)
+			local best = string.gsub(MenuCopy.Skill.Best, "{tier}", if tier then tier.name else "")
+			p = panel("green", MenuCopy.Skill.Tag, MenuCopy.Skill.IntroTitle, 32, MenuCopy.Skill.IntroLines, {
+				{ best, true },
+				{ MenuCopy.Skill.Formats },
+			})
+		end
+		local act = action(L.Action, MenuCopy.Common.Start, true, false)
+		local locked = ModeRules.secondaryState("skilltest", model.secondary) == "locked"
+		interactive(act, function()
+			if locked then
+				playFx("shake", act.shard.group, 0)
+				handlers.locked("skilltest")
+			else
+				handlers.go("skill")
+			end
+		end, nil)
+		local back = backButton(MenuCopy.Common.Back)
+		link(act, "Down", back)
+		glowLoop(p, 0)
+		playFx("slam", p.shard.group, 0)
+		playFx("pop", act.shard.group, 0.36)
+		playFx("rise", back.shard.group, 0.4)
+	end
+
+	-- 16 Rank ladder: two columns of five rungs, higher ranks higher up. Display only; BACK is the one focus target.
+	local function buildLadder(model: Model)
+		topLabel(MenuCopy.Top.Ladder)
+		local pm: PracticeModel = model.practice or {}
+		local best = pm.rank
+		local offsets = MenuTheme.LadderOffsets
+		for _, slot in RankRules.ladderLayout() do
+			local column = if slot.column == 1 then L.LadderCol1 else L.LadderCol2
+			local box = {
+				x = column.x + offsets[slot.row],
+				y = column.y + (slot.row - 1) * 40,
+				w = column.w,
+				h = column.h,
+				rot = if slot.row % 2 == 1 then -0.8 else 0.8,
+			}
+			local mark = RankRules.ladderMark(slot.rank, best)
+			local tier = RankRules.tierOf(slot.rank) :: RankRules.Tier
+			local current = mark == "current"
+			local dim = if mark == "locked" then 0.45 else 0
+			local shard = newShard(
+				"Rung" .. slot.rank,
+				box,
+				if current then "shard-row-green" else "shard-row-indigo",
+				if current then "glow-menu-choice-green" else nil,
+				if current then "green" else "blue"
+			)
+			shard.image.ImageTransparency = dim
+			-- Audit A9: badge 22 and a 20 px left / right inset keep the content 6 px off the stretched row's cuts.
+			local badge = badgeIcon(shard.content, tier, 20, 6, 22)
+			badge.ImageTransparency = dim
+			-- The row art (stretched HUD shard-row) has a deep cut at the bottom left and a notch at the top right: left of x 125
+			-- only y 10..22 clears 6 px, so rank names are 10 px here (README 15; 11 px leaves no slack for the +-0.8 degree tilt). A 38 px row would hold 15 px (Claude Design).
+			local nameLabel = text(shard.content, "Name", tier.name, T.LadderName, 50, 11, 94, 10)
+			nameLabel.TextTransparency = dim
+			local subjectWidth = if current then 104 else 150
+			local subject = text(shard.content, "Subject", tier.subject, T.RowSubject, 146, 0, subjectWidth, 34, {
+				FontFace = FONT.Italic,
+				TextTruncate = Enum.TextTruncate.AtEnd,
+			})
+			subject:SetAttribute("AllowTruncate", true)
+			subject.TextTransparency = dim
+			if current then
+				local you = tag(shard.content, "You", MenuCopy.Common.You, true)
+				you.TextSize = T.Sticker
+				you.Position = UDim2.fromOffset(254, 11)
+			end
+			local square = make("Frame", {
+				Name = "Mark",
+				Position = UDim2.fromOffset(302, 8),
+				Size = UDim2.fromOffset(18, 18),
+				BackgroundColor3 = C.ButtonInk,
+				BackgroundTransparency = dim,
+				BorderSizePixel = 0,
+				ZIndex = 5,
+			}, shard.content)
+			local markIcon =
+				icon(square, "Icon", if mark == "locked" then "icon-menu-lock" else "icon-menu-check", 3, 3, 12)
+			markIcon.ImageTransparency = dim
+			playFx("rowIn", shard.group, (slot.row - 1) * 0.04)
+			if current then
+				glowLoop({ shard = shard, name = "Rung" }, 0)
+			end
+		end
+		local back = backButton(MenuCopy.Common.Back)
+		playFx("rise", back.shard.group, 0.4)
+	end
+
 	local function buildWatching()
 		local shard = newShard("Banner", L.WatchBanner, "shard-menu-banner-violet", "glow-menu-banner-violet", "violet")
 		-- The banner shard (480x44) has a cut along the top right and the bottom left: only y 14..30 clears 6 px at every x, so
@@ -1027,6 +1230,12 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		local ok, err = pcall(function()
 			if id == "watching" then
 				buildWatching()
+			elseif id == "practice" then
+				buildPractice(model)
+			elseif id == "skillintro" then
+				buildSkillIntro(model)
+			elseif id == "ladder" then
+				buildLadder(model)
 			elseif id == "main" then
 				buildMain(model)
 			elseif id == "modes" then
@@ -1056,6 +1265,11 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		root = root,
 		render = render,
 		toast = toast,
+		setRetakeLabel = function(str: string)
+			if retakeLabel then
+				retakeLabel.Text = str
+			end
+		end,
 		defaultFocus = function()
 			return firstSelectable
 		end,

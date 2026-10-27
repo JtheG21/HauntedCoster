@@ -4,7 +4,7 @@
 local MenuConfig = require(script.Parent.MenuConfig)
 
 export type Mode = "blitz" | "vs" | "group"
-export type Secondary = "howto" | "practice" | "leaderboard" | "daily" | "drills"
+export type Secondary = "howto" | "practice" | "skilltest" | "leaderboard" | "daily" | "drills"
 export type State = "open" | "locked"
 
 local ModeRules = {}

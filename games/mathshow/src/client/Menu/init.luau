@@ -7,13 +7,16 @@
 local ContextActionService = game:GetService("ContextActionService")
 local GuiService = game:GetService("GuiService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local SoundService = game:GetService("SoundService")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local MenuConfig = require(Shared:WaitForChild("MenuConfig"))
+local CooldownRules = require(Shared:WaitForChild("CooldownRules"))
 local MenuCopy = require(Shared:WaitForChild("MenuCopy"))
+local PracticeRules = require(Shared:WaitForChild("PracticeRules"))
 
 local Net = require(Shared:WaitForChild("Net"))
 
@@ -33,7 +36,14 @@ local inputConnection: RBXScriptConnection? = nil
 local options: Options? = nil
 
 -- What the server said about this player (TASK-0099). loaded = the MenuRequest finished; ok = it returned a profile.
-local profile: { loaded: boolean, ok: boolean, rank: number?, retryAt: number?, blitzBest: number? } =
+local profile: {
+	loaded: boolean,
+	ok: boolean,
+	rank: number?,
+	lastTestRank: number?,
+	retryAt: number?,
+	blitzBest: number?,
+} =
 	{ loaded = false, ok = false }
 local settingsTouched = false -- the player changed a setting before the profile arrived: keep theirs and send it
 local saveToken = 0
@@ -73,6 +83,12 @@ local function model(): View.Model
 			failed = profile.loaded and not profile.ok,
 		},
 		settings = settings,
+		practice = {
+			rank = profile.rank,
+			lastTestRank = profile.lastTestRank,
+			retryRemaining = PracticeRules.remaining(profile.retryAt, workspace:GetServerTimeNow()),
+			failed = profile.loaded and not profile.ok,
+		},
 	}
 end
 
@@ -97,10 +113,41 @@ local function focusDefault(key: string?)
 	end)
 end
 
+local tickToken = 0
+
+-- While the Practice home shows a retake clock, counts it down each second (label only: no re-render) and re-renders the
+-- screen when it reaches zero so TAKE TEST comes back. Stops as soon as another screen is shown.
+local function startRetakeTicker()
+	tickToken += 1
+	local token = tickToken
+	task.spawn(function()
+		while token == tickToken and view and stack[#stack] == "practice" do
+			local remaining = PracticeRules.remaining(profile.retryAt, workspace:GetServerTimeNow())
+			if remaining <= 0 then
+				break
+			end
+			view.setRetakeLabel(CooldownRules.retakeLabel(remaining))
+			task.wait(1)
+		end
+		if token == tickToken and view and stack[#stack] == "practice" then
+			view.render("practice", model())
+			focusDefault(nil)
+		end
+	end)
+end
+
 local function show(id: string, focusKey: string?)
+	tickToken += 1 -- any running retake ticker belongs to the previous screen
 	if view then
 		view.render(id, model())
 		focusDefault(focusKey)
+		if
+			id == "practice"
+			and profile.ok
+			and PracticeRules.remaining(profile.retryAt, workspace:GetServerTimeNow()) > 0
+		then
+			startRetakeTicker()
+		end
 	end
 end
 
@@ -167,7 +214,21 @@ local function requestProfile()
 		local usable = ok and typeof(reply) == "table" and reply.ok == true and typeof(reply.profile) == "table"
 		if usable then
 			local p = reply.profile
-			profile = { loaded = true, ok = true, rank = p.rank, retryAt = p.retryAt, blitzBest = p.blitzBest }
+			profile = {
+				loaded = true,
+				ok = true,
+				rank = p.rank,
+				lastTestRank = p.lastTestRank,
+				retryAt = p.retryAt,
+				blitzBest = p.blitzBest,
+			}
+			-- Studio-only test hook: pretend a Skill Test cooldown of N seconds (workspace attribute MathShowFakeRetakeSeconds).
+			local fake = workspace:GetAttribute("MathShowFakeRetakeSeconds")
+			if RunService:IsStudio() and typeof(fake) == "number" then
+				profile.retryAt = workspace:GetServerTimeNow() + fake
+				profile.rank = profile.rank or 2
+				profile.lastTestRank = profile.lastTestRank or 2
+			end
 			if not settingsTouched and typeof(p.settings) == "table" then
 				settings = table.clone(p.settings)
 				applySettings()
@@ -205,6 +266,9 @@ function Menu.start(opts: Options)
 	local handlers: View.Handlers = {
 		go = go,
 		back = back,
+		retry = function()
+			Menu.retryProfile()
+		end,
 		locked = function(_what: string)
 			if view then
 				view.toast(MenuCopy.Common.ComingSoon, true)

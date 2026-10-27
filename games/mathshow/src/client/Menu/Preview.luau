@@ -44,6 +44,23 @@ Preview.States = {
 	{ id = "17a-settings", screen = "settings", model = { settings = MenuConfig.SettingsDefaults } },
 	{ id = "17b-settings-alt", screen = "settings", model = { settings = UNSETTLED } },
 	{ id = "10-group-watching", screen = "watching", model = {} },
+	{
+		id = "11a-practice",
+		screen = "practice",
+		model = { practice = { rank = 3, lastTestRank = 3, retryRemaining = 0 } },
+	},
+	{
+		id = "11b-practice-cooldown",
+		screen = "practice",
+		model = { practice = { rank = 7, lastTestRank = 6, retryRemaining = 272 } },
+	},
+	{ id = "11c-practice-unranked", screen = "practice", model = { practice = { retryRemaining = 0 } } },
+	{ id = "19a-rank-unavailable", screen = "practice", model = { practice = { failed = true } } },
+	{ id = "12a-skill-intro", screen = "skillintro", model = { practice = { rank = 3, lastTestRank = 3 } } },
+	{ id = "12b-skill-intro-first", screen = "skillintro", model = { practice = {} } },
+	{ id = "16a-rank-ladder", screen = "ladder", model = { practice = { rank = 3 } } },
+	{ id = "16b-rank-ladder-demon", screen = "ladder", model = { practice = { rank = 8 } } },
+	{ id = "16c-rank-ladder-unranked", screen = "ladder", model = { practice = {} } },
 	{ id = "18-how-to-play", screen = "howto", model = {} },
 	{
 		id = "20-coming-soon",
@@ -87,6 +104,7 @@ function Preview.show(id: string, fixture: string?): View.View?
 		back = noop,
 		locked = function(_what: string) end,
 		join = noop,
+		retry = noop,
 		setting = function(_key: string, _value: number | boolean) end,
 	}
 	local view = View.build(Players.LocalPlayer:WaitForChild("PlayerGui"), handlers)
