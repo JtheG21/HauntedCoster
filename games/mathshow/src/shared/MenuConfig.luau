@@ -3,7 +3,7 @@
 
 local MenuConfig = table.freeze({
 	-- Mode availability (ModeRules.cardState). Missing or false = locked (COMING SOON). Only Group Battle exists today.
-	ModeEnabled = table.freeze({ blitz = true, vs = false, group = true }),
+	ModeEnabled = table.freeze({ blitz = true, vs = true, group = true }),
 	-- Secondary menu items (ModeRules.secondaryState).
 	SecondaryEnabled = table.freeze({
 		howto = true,
@@ -15,6 +15,17 @@ local MenuConfig = table.freeze({
 	}),
 	RetakeCooldownSeconds = 300,
 	-- Skill Test (SkillRules, SkillTestService). jg defaults, TASK-0102: ranks 0-4 typed, 5-9 multiple choice.
+	-- VS (VsService, jg defaults TASK-0104): in-server queue, 6 questions, sudden death on a tie.
+	VsQuestions = 6,
+	VsSearchTimeoutSeconds = 60,
+	VsMaxWaits = 2, -- search timeouts (KEEP WAITING resets) before the queue gives up (screen 19b)
+	VsCountdownSeconds = 3, -- STARTS IN, and SUDDEN DEATH IN
+	VsRevealSeconds = 4,
+	VsRematchWindowSeconds = 15,
+	VsSuddenDeathSeconds = 15,
+	VsSuddenDeathMax = 5, -- sudden-death questions before a tie stands
+	VsQueueActionsPer10s = 4,
+	VsAnswersPer5s = 8,
 	BlitzClockSeconds = 120, -- one clock for the whole run (jg default, TASK-0103)
 	BlitzNextDelaySeconds = 0.6, -- after an answer, the next question slams in this much later
 	BlitzGraceSeconds = 0.25,

@@ -14,7 +14,9 @@ local BlitzRules = require(Shared:WaitForChild("BlitzRules"))
 local CooldownRules = require(Shared:WaitForChild("CooldownRules"))
 local ModeRules = require(Shared:WaitForChild("ModeRules"))
 local HudRulesSkill = HudRules
+local MatchRules = require(Shared:WaitForChild("MatchRules"))
 local PracticeRules = require(Shared:WaitForChild("PracticeRules"))
+local StandingsRules = require(Shared:WaitForChild("StandingsRules"))
 local TextFitRules = require(Shared:WaitForChild("TextFitRules"))
 local NameRules = require(Shared:WaitForChild("NameRules"))
 local RankRules = require(Shared:WaitForChild("RankRules"))
@@ -60,6 +62,24 @@ export type BlitzModel = {
 	total: number, -- seconds the run clock lasts
 	locked: boolean, -- an answer was sent for this question
 }
+export type VsModel = {
+	stage: string, -- "search" | "timeout" | "found" | "question" | "reveal" | "result" | "nomatch"
+	seconds: number, -- search elapsed / waited / a countdown number, whole seconds
+	you: Player?,
+	rival: Player?,
+	index: number, -- question number (past `total` = sudden death)
+	total: number,
+	problem: string,
+	youPts: number,
+	themPts: number,
+	suddenDeath: boolean,
+	locked: boolean,
+	feedback: string?, -- "correct" | "wrong" once the server answered this player's lock-in
+	points: number?,
+	answer: number?, -- reveal only
+	result: string?, -- "win" | "lose" | "draw" | "forfeit"
+	rematch: boolean?, -- REMATCH was pressed, waiting for the rival
+}
 export type ReviewModel = {
 	correct: number,
 	answers: { any }, -- number, or false for a question not answered
@@ -88,6 +108,7 @@ export type Model = {
 	result: ResultModel?,
 	blitz: BlitzModel?,
 	review: ReviewModel?,
+	vs: VsModel?,
 	quiet: boolean?, -- re-render without entrances (a selection changed, a timer tick) -- Preview only: keep the toast on screen
 }
 export type Handlers = {
@@ -99,6 +120,10 @@ export type Handlers = {
 	skillSelect: (index: number) -> (),
 	skillLock: (value: number) -> (),
 	blitzLock: (value: number) -> (),
+	vsLock: (value: number) -> (),
+	vsKeepWaiting: () -> (),
+	vsRematch: () -> (),
+	vsRetry: () -> (),
 	setting: (key: string, value: number | boolean) -> (),
 }
 export type Options = { overlay: boolean?, name: string?, displayOrder: number? }
@@ -110,6 +135,7 @@ export type View = {
 	setRetakeLabel: (text: string) -> (),
 	setSkillTimer: (fraction: number, seconds: number) -> (),
 	setBlitzClock: (fraction: number, text: string) -> (),
+	setVsCount: (text: string) -> (),
 	defaultFocus: () -> GuiObject?,
 	setReduced: (on: boolean) -> (),
 	destroy: () -> (),
@@ -311,6 +337,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	local skillFill: Frame? = nil
 	local skillSeconds: TextLabel? = nil
 	local blitzClock: TextLabel? = nil
+	local vsCount: TextLabel? = nil
 	local quiet = false
 	local toastToken = 0
 	local selection = focusBrackets()
@@ -329,6 +356,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		skillFill = nil
 		skillSeconds = nil
 		blitzClock = nil
+		vsCount = nil
 	end
 
 	-- A button's interaction layer: full-box TextButton, brackets + 1.04 on gamepad focus, 0.95 while pressed.
@@ -876,6 +904,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 					handlers.join()
 				elseif mode == "blitz" then
 					handlers.go("blitz")
+				elseif mode == "vs" then
+					handlers.go("vsqueue")
 				end
 			end, nil)
 		end
@@ -1903,6 +1933,381 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		playFx("rise", menuButton.shard.group, 0.48)
 	end
 
+	local function vsPlayerBlock(shard: Shard.Shard, tagText: string, player: Player?, x: number)
+		tag(shard.content, "Tag", tagText).Position = UDim2.fromOffset(x, 26)
+		local who = player or { name = "?", userId = nil, rank = nil, failed = nil }
+		text(shard.content, "Name", NameRules.truncateName(who.name), T.VsName, x, 50, 262, 28, {
+			TextTruncate = Enum.TextTruncate.AtEnd,
+		}):SetAttribute("AllowTruncate", true)
+		local tier = if who.rank then RankRules.tierOf(who.rank) else nil
+		if tier then
+			badgeIcon(shard.content, tier, x, 86, MenuTheme.BadgeSizes.Card)
+			text(shard.content, "Tier", tier.name, T.TierName, x + 58, 88, 200, 22)
+			text(shard.content, "Subject", tier.subject, T.Subject, x + 58, 112, 200, 18, { FontFace = FONT.Italic })
+		else
+			text(shard.content, "Unranked", MenuCopy.Skill.Unranked, T.TierName, x, 98, 200, 22)
+		end
+	end
+
+	-- 04a / 04b: searching for a rival, or the search timed out (KEEP WAITING resets the clock).
+	local function buildVsSearch(vm: VsModel)
+		local P = MenuTheme.Panel
+		local timeout = vm.stage == "timeout"
+		topLabel(MenuCopy.Top.Matchmaking)
+		local p
+		if timeout then
+			p = panel("blue", MenuCopy.Mode.Vs.Tag, MenuCopy.Search.TimeoutTitle, 44, MenuCopy.Search.TimeoutLines, {
+				{ (string.gsub(MenuCopy.Search.Waited, "{time}", CooldownRules.formatShort(vm.seconds))), true },
+			})
+			local keep = action(L.Action, MenuCopy.Search.KeepWaiting, true, false)
+			interactive(keep, handlers.vsKeepWaiting, nil)
+			local back = backButton(MenuCopy.Common.Cancel)
+			link(keep, "Down", back)
+			playFx("pop", keep.shard.group, 0.36)
+			playFx("rise", back.shard.group, 0.4)
+		else
+			p = panel("blue", MenuCopy.Mode.Vs.Tag, MenuCopy.Search.Title, 40, { MenuCopy.Search.Line }, {
+				{ MenuCopy.Mode.Vs.Questions },
+				{ MenuCopy.Mode.Vs.Feedback },
+			})
+			local width = math.ceil(measureWidth(MenuCopy.Search.Title, 40)) + 14
+			for index = 1, 3 do
+				local dot = make("Frame", {
+					Name = "Dot" .. index,
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					Position = UDim2.fromOffset(P.LeftPad + width + (index - 1) * 18 + 5, P.TitleY + 22),
+					Size = UDim2.fromOffset(10, 10),
+					Rotation = 45,
+					BackgroundColor3 = C.Ink,
+					BorderSizePixel = 0,
+				}, p.shard.content)
+				dot:SetAttribute("FitSticker", true)
+			end
+			local count = newShard("Count", L.Count, "shard-menu-count-blue", "glow-menu-count-blue", "blue")
+			tag(count.content, "Tag", MenuCopy.Search.Elapsed).Position = UDim2.fromOffset(40, 36)
+			vsCount =
+				text(count.content, "Value", CooldownRules.formatShort(vm.seconds), T.ElapsedClock, 20, 62, 160, 70, {
+					TextXAlignment = Enum.TextXAlignment.Center,
+				})
+			glowLoop({ shard = count, name = "Count" }, 0.3)
+			playFx("slamRight", count.group, 0.14)
+			local back = backButton(MenuCopy.Common.Cancel)
+			playFx("rise", back.shard.group, 0.4)
+		end
+		glowLoop(p, 0)
+		playFx("slam", p.shard.group, 0)
+	end
+
+	-- 05 Opponent found: YOU and RIVAL shards, VS, and the STARTS IN countdown. No focus, Back disabled.
+	local function buildVsFound(vm: VsModel)
+		topLabel(MenuCopy.Top.RivalFound)
+		local you = newShard("You", L.VsYou, "shard-menu-vs-you-green", "glow-menu-vsyou-green", "green")
+		vsPlayerBlock(you, MenuCopy.Common.You, vm.you, 34)
+		local rival = newShard("Rival", L.VsThem, "shard-menu-vs-them-violet", "glow-menu-vsthem-violet", "violet")
+		vsPlayerBlock(rival, MenuCopy.Common.Rival, vm.rival, 38)
+		local word = text(
+			screen :: Frame,
+			"Vs",
+			MenuCopy.Mode.Vs.Title,
+			T.VsWord,
+			L.VsWord.x,
+			L.VsWord.y,
+			L.VsWord.w,
+			L.VsWord.h,
+			{
+				TextXAlignment = Enum.TextXAlignment.Center,
+			}
+		)
+		word.ZIndex = 8
+		local at = L.VsCount
+		tag(screen :: Frame, "StartsIn", MenuCopy.Common.StartsIn).Position = UDim2.fromOffset(at.x + 20, at.y)
+		vsCount = text(
+			screen :: Frame,
+			"Number",
+			tostring(math.max(vm.seconds, 0)),
+			T.Countdown,
+			at.x,
+			at.y + 18,
+			at.w,
+			104,
+			{
+				TextXAlignment = Enum.TextXAlignment.Center,
+			}
+		)
+		glowLoop({ shard = you, name = "You" }, 0)
+		glowLoop({ shard = rival, name = "Rival" }, 0.3)
+		playFx("flyLeft", you.group, 0)
+		playFx("slamRight", rival.group, 0.12)
+		playFx("pop", word, 0.4)
+	end
+
+	local function h2hShard(vm: VsModel)
+		local h = newShard("H2H", L.HeadToHead, "shard-score-silver", nil, "silver")
+		tag(h.content, "YouTag", MenuCopy.Common.You).Position = UDim2.fromOffset(24, 15)
+		text(
+			h.content,
+			"YouPts",
+			StandingsRules.formatNumber(vm.youPts),
+			16, -- 16 px at y 14..30: the score shard is a sliver along its top and has a cut at the bottom left
+			66,
+			14,
+			58,
+			16,
+			{ TextXAlignment = Enum.TextXAlignment.Right }
+		)
+		local track = make("Frame", {
+			Name = "Bar",
+			Position = UDim2.fromOffset(134, 18),
+			Size = UDim2.fromOffset(64, 8),
+			BackgroundColor3 = MenuTheme.Gem.violet,
+			BorderSizePixel = 0,
+		}, h.content) :: Frame
+		make("Frame", {
+			Name = "Fill",
+			Size = UDim2.fromScale(MatchRules.headToHeadPct(vm.youPts, vm.themPts) / 100, 1),
+			BackgroundColor3 = MenuTheme.Gem.green,
+			BorderSizePixel = 0,
+		}, track)
+		make("Frame", {
+			Name = "Tick",
+			Position = UDim2.fromOffset(31, -3),
+			Size = UDim2.fromOffset(2, 14),
+			BackgroundColor3 = C.Ink,
+			BorderSizePixel = 0,
+		}, track)
+		text(h.content, "ThemPts", StandingsRules.formatNumber(vm.themPts), 16, 210, 14, 58, 16)
+		tag(h.content, "RivalTag", MenuCopy.Common.Rival).Position = UDim2.fromOffset(272, 15)
+		playFx("pop", h.group, 0.12)
+	end
+
+	-- 08 VS question (and its reveal): the typed layout with a head-to-head shard instead of the score.
+	local function buildVsQuestion(vm: VsModel)
+		local reveal = vm.stage == "reveal"
+		local label = if vm.suddenDeath
+			then MenuCopy.Vs.SuddenDeath
+			else (string.gsub(MenuCopy.Top.VsQuestion, "{n}", tostring(vm.index)))
+		topLabel(label, true)
+		for pip = 1, vm.total do
+			local alpha = if pip < vm.index or vm.suddenDeath then 0 elseif pip == vm.index then 0.25 else 0.82
+			make("Frame", {
+				Name = "Pip" .. pip,
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromOffset(318 + (pip - 1) * 13, 22),
+				Size = UDim2.fromOffset(8, 8),
+				Rotation = 45,
+				BackgroundColor3 = C.Ink,
+				BackgroundTransparency = alpha,
+				BorderSizePixel = 0,
+			}, screen :: Frame)
+		end
+		h2hShard(vm)
+		local problem =
+			newShard("Problem", L.SkillProblem, "shard-menu-problem-silver", "glow-menu-problem-silver", "silver")
+		local tagText = if vm.suddenDeath then MenuCopy.Vs.SuddenDeath else "Q" .. vm.index .. " · VS"
+		tag(problem.content, "Tag", tagText).Position = UDim2.fromOffset(60, 40)
+		local shown = vm.problem .. (if reveal and vm.answer ~= nil then " = " .. tostring(vm.answer) else " = ?")
+		local fit = TextFitRules.fitSize(measureWidth, shown, { 88, 76, 64, 56, 48, 40 }, 456)
+		local problemLabel = text(problem.content, "Text", shown, fit.size, 62, 60, 456, fit.size * fit.lines, {
+			TextWrapped = fit.lines > 1,
+			LineHeight = 1,
+		})
+		problemLabel.TextXAlignment = Enum.TextXAlignment.Center
+		glowLoop({ shard = problem, name = "Problem" }, 0)
+		playFx("slam", problem.group, 0)
+		local bar = L.SkillTimerBar
+		local track = make("Frame", {
+			Name = "TimerBar",
+			Position = UDim2.fromOffset(bar.x, bar.y),
+			Size = UDim2.fromOffset(bar.w, bar.h),
+			Rotation = bar.rot,
+			BackgroundColor3 = C.Ink,
+			BackgroundTransparency = 0.82,
+			BorderSizePixel = 0,
+		}, screen :: Frame)
+		skillFill = make("Frame", {
+			Name = "Fill",
+			Size = UDim2.fromScale(if reveal then 0 else 1, 1),
+			BackgroundColor3 = C.Ink,
+			BorderSizePixel = 0,
+		}, track) :: Frame
+		local sec = L.SkillSeconds
+		tag(screen :: Frame, "SecTag", if reveal then MenuCopy.Common.NextUp else MenuCopy.Common.Sec).Position =
+			UDim2.fromOffset(sec.x + 4, sec.y)
+		skillSeconds = text(
+			screen :: Frame,
+			"Seconds",
+			if reveal then "0" else tostring(vm.seconds),
+			100,
+			sec.x,
+			sec.y + 22,
+			sec.w,
+			108,
+			{
+				TextXAlignment = Enum.TextXAlignment.Right,
+			}
+		)
+		-- Live feedback: LOCKED IN after the lock, then CORRECT + points or NOT QUITE once the server has answered.
+		if vm.feedback == "correct" then
+			toastAt(
+				(string.gsub(MenuCopy.Vs.CorrectPoints, "{n}", tostring(vm.points or 0))),
+				"icon-menu-check",
+				"green",
+				true,
+				true
+			)
+		elseif vm.feedback == "wrong" then
+			toastAt(MenuCopy.Vs.NotQuite, "icon-menu-cross", "red", true, true)
+		elseif vm.locked then
+			toastAt(MenuCopy.Common.LockedIn, "icon-menu-lock", "silver", true, true)
+		end
+		local inputShard = newShard("Input", L.SkillInput, "shard-input", nil, "silver")
+		local lockShard = newShard("LockIn", L.SkillLock, "shard-button", nil, "silver")
+		local canAnswer = not (vm.locked or reveal)
+		local answerBox = make("TextBox", {
+			Name = "Answer",
+			Size = UDim2.fromOffset(L.SkillInput.w, L.SkillInput.h),
+			BackgroundTransparency = 1,
+			FontFace = FONT.Body,
+			Text = "",
+			PlaceholderText = MenuCopy.Common.TypeAnswer,
+			PlaceholderColor3 = C.InkDim,
+			TextSize = 30,
+			TextColor3 = C.Ink,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ClearTextOnFocus = false,
+			TextEditable = canAnswer,
+			SelectionImageObject = selection,
+			ZIndex = 12,
+		}, inputShard.content) :: TextBox
+		make("UIPadding", { PaddingLeft = UDim.new(0, 22), PaddingRight = UDim.new(0, 18) }, answerBox)
+		local lockLabel =
+			text(lockShard.content, "Label", MenuCopy.Common.LockIn, T.Action, 0, 0, L.SkillLock.w, L.SkillLock.h, {
+				TextXAlignment = Enum.TextXAlignment.Center,
+				TextColor3 = C.ButtonInk,
+				TextStrokeTransparency = 1,
+			})
+		local function submit()
+			local digits = HudRulesSkill.sanitizeInput(answerBox.Text)
+			if canAnswer and digits ~= "" then
+				handlers.vsLock(tonumber(digits) :: number)
+			end
+		end
+		answerBox:GetPropertyChangedSignal("Text"):Connect(function()
+			local clean = HudRulesSkill.sanitizeInput(answerBox.Text)
+			if clean ~= answerBox.Text then
+				answerBox.Text = clean
+			end
+		end)
+		answerBox.FocusLost:Connect(function(enter: boolean)
+			if enter then
+				submit()
+			end
+		end)
+		if canAnswer then
+			interactive({ shard = lockShard, name = "LockIn" }, submit, nil)
+			firstSelectable = firstSelectable or answerBox
+		else
+			lockLabel.TextTransparency = MenuTheme.DisabledTransparency
+			lockShard.image.ImageTransparency = MenuTheme.DisabledTransparency
+		end
+		playFx("rise", inputShard.group, 0.28)
+		playFx("pop", lockShard.group, 0.3)
+	end
+
+	-- 09 VS result (win / lose / draw -> sudden death / forfeit) with REMATCH and MENU.
+	local function buildVsResult(vm: VsModel)
+		local kind = vm.result or "lose"
+		topLabel(MenuCopy.Top.VsFinal)
+		local titles =
+			{ win = MenuCopy.Vs.Win, lose = MenuCopy.Vs.Lose, draw = MenuCopy.Vs.Draw, forfeit = MenuCopy.Vs.Win }
+		local sizes = { win = 58, lose = 52, draw = 54, forfeit = 58 }
+		local lines = {
+			win = { MenuCopy.Vs.WinLine },
+			lose = { MenuCopy.Vs.LoseLine },
+			draw = MenuCopy.Vs.DrawLines,
+			forfeit = MenuCopy.Vs.ForfeitLines,
+		}
+		local labelKind = { win = MenuCopy.Vs.ResultWin, lose = MenuCopy.Vs.ResultLoss, draw = MenuCopy.Vs.ResultTie }
+		local tags: { { any } } = {}
+		if kind == "forfeit" then
+			tags = { { MenuCopy.Vs.ForfeitTag, true } }
+		else
+			tags = {
+				{ (labelKind :: { [string]: string })[kind], true },
+				{ (string.gsub(MenuCopy.Vs.ScoreYou, "{you}", StandingsRules.formatNumber(vm.youPts))) },
+				{ (string.gsub(MenuCopy.Vs.ScoreRival, "{them}", StandingsRules.formatNumber(vm.themPts))) },
+			}
+		end
+		local gem = (MenuTheme.ResultGem :: { [string]: string })[kind]
+		local p = panel(
+			gem,
+			if kind == "draw" then MenuCopy.Vs.DrawTag else MenuCopy.Mode.Vs.Tag,
+			(titles :: { [string]: string })[kind],
+			(sizes :: { [string]: number })[kind],
+			(lines :: { [string]: { string } })[kind],
+			tags
+		)
+		glowLoop(p, 0)
+		playFx("slam", p.shard.group, 0)
+		if kind == "draw" then
+			local count = newShard("Count", L.Count, "shard-menu-count-red", "glow-menu-count-red", "red")
+			tag(count.content, "Tag", MenuCopy.Vs.SuddenDeathIn).Position = UDim2.fromOffset(30, 30)
+			vsCount = text(
+				count.content,
+				"Value",
+				tostring(math.max(vm.seconds, 0)),
+				80,
+				20,
+				48,
+				160,
+				84,
+				{ -- 80 px, not 100: the count shard clears 6 px only up to about 90
+					TextXAlignment = Enum.TextXAlignment.Center,
+				}
+			)
+			glowLoop({ shard = count, name = "Count" }, 0.3)
+			playFx("slamRight", count.group, 0.14)
+			return
+		end
+		local waiting = vm.rematch == true
+		local label = if waiting
+			then MenuCopy.Vs.WaitingForRival
+			elseif kind == "forfeit" then MenuCopy.Vs.FindNewRival
+			else MenuCopy.Vs.Rematch
+		local act = action(L.Action, label, not waiting, waiting, if waiting then T.ActionWaiting else nil)
+		if not waiting then
+			interactive(act, if kind == "forfeit" then handlers.vsRetry else handlers.vsRematch, nil)
+		end
+		local menuButton = secondary("Menu", L.SideSecondary, MenuCopy.Common.Menu, false)
+		interactive(menuButton, handlers.back, nil)
+		link(act, "Down", menuButton)
+		playFx("pop", act.shard.group, 0.36)
+		playFx("rise", menuButton.shard.group, 0.44)
+	end
+
+	-- 19b: matchmaking gave up.
+	local function buildVsNoMatch()
+		topLabel(MenuCopy.Top.Matchmaking)
+		local p =
+			panel("silver", MenuCopy.Top.Matchmaking, MenuCopy.Search.NoMatchTitle, 30, MenuCopy.Search.NoMatchLines, {
+				{ MenuCopy.Search.NoMatchTag, true },
+			})
+		local retry = action(L.Action, MenuCopy.Common.Retry, true, false)
+		interactive(retry, handlers.vsRetry, nil)
+		local choose = secondary("Choose", L.SideSecondary, MenuCopy.Search.ChooseShow, false)
+		interactive(choose, function()
+			handlers.go("modes")
+		end, nil)
+		local back = backButton(MenuCopy.Common.Back)
+		link(retry, "Down", choose)
+		link(choose, "Down", back)
+		glowLoop(p, 0)
+		playFx("slam", p.shard.group, 0)
+		playFx("pop", retry.shard.group, 0.36)
+		playFx("rise", choose.shard.group, 0.44)
+		playFx("rise", back.shard.group, 0.4)
+	end
+
 	local function buildWatching()
 		local shard = newShard("Banner", L.WatchBanner, "shard-menu-banner-violet", "glow-menu-banner-violet", "violet")
 		-- The banner shard (480x44) has a cut along the top right and the bottom left: only y 14..30 clears 6 px at every x, so
@@ -1933,6 +2338,19 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		local ok, err = pcall(function()
 			if id == "watching" then
 				buildWatching()
+			elseif id == "vs" and model.vs then
+				local vm = model.vs
+				if vm.stage == "search" or vm.stage == "timeout" then
+					buildVsSearch(vm)
+				elseif vm.stage == "found" then
+					buildVsFound(vm)
+				elseif vm.stage == "question" or vm.stage == "reveal" then
+					buildVsQuestion(vm)
+				elseif vm.stage == "result" then
+					buildVsResult(vm)
+				else
+					buildVsNoMatch()
+				end
 			elseif id == "blitz" and model.blitz then
 				buildBlitz(model)
 			elseif id == "blitzreview" and model.review then
@@ -1976,6 +2394,11 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		root = root,
 		render = render,
 		toast = toast,
+		setVsCount = function(str: string)
+			if vsCount then
+				vsCount.Text = str
+			end
+		end,
 		setBlitzClock = function(fraction: number, str: string)
 			if skillFill then
 				skillFill.Size = UDim2.fromScale(math.clamp(fraction, 0, 1), 1)

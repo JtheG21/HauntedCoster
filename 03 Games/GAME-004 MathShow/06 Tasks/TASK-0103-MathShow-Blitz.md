@@ -3,7 +3,7 @@ id: TASK-0103
 title: "MathShow Blitz"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: high
 owner: executor

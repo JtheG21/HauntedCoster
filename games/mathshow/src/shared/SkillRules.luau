@@ -94,7 +94,13 @@ function SkillRules.parseAnswerPayload(raw: any): (number?, number?)
 		return nil, nil
 	end
 	local attempt = raw.attempt
-	if typeof(attempt) ~= "number" or attempt ~= attempt or attempt ~= math.floor(attempt) or attempt < 1 then
+	if
+		typeof(attempt) ~= "number"
+		or attempt ~= attempt
+		or attempt ~= math.floor(attempt)
+		or attempt < 1
+		or attempt == math.huge
+	then
 		return nil, nil
 	end
 	if typeof(raw.answer) ~= "number" then
