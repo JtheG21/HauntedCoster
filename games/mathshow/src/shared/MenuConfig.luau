@@ -3,7 +3,7 @@
 
 local MenuConfig = table.freeze({
 	-- Mode availability (ModeRules.cardState). Missing or false = locked (COMING SOON). Only Group Battle exists today.
-	ModeEnabled = table.freeze({ blitz = false, vs = false, group = true }),
+	ModeEnabled = table.freeze({ blitz = true, vs = false, group = true }),
 	-- Secondary menu items (ModeRules.secondaryState).
 	SecondaryEnabled = table.freeze({
 		howto = true,
@@ -15,6 +15,11 @@ local MenuConfig = table.freeze({
 	}),
 	RetakeCooldownSeconds = 300,
 	-- Skill Test (SkillRules, SkillTestService). jg defaults, TASK-0102: ranks 0-4 typed, 5-9 multiple choice.
+	BlitzClockSeconds = 120, -- one clock for the whole run (jg default, TASK-0103)
+	BlitzNextDelaySeconds = 0.6, -- after an answer, the next question slams in this much later
+	BlitzGraceSeconds = 0.25,
+	BlitzStartsPer10s = 4,
+	BlitzAnswersPer10s = 14,
 	SkillChoiceFromRank = 5,
 	SkillTypedSeconds = 20,
 	SkillChoiceSeconds = 25,

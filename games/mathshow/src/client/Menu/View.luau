@@ -10,6 +10,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local HudRules = require(Shared:WaitForChild("HudRules"))
 local MenuConfig = require(Shared:WaitForChild("MenuConfig"))
 local MenuCopy = require(Shared:WaitForChild("MenuCopy"))
+local BlitzRules = require(Shared:WaitForChild("BlitzRules"))
 local CooldownRules = require(Shared:WaitForChild("CooldownRules"))
 local ModeRules = require(Shared:WaitForChild("ModeRules"))
 local HudRulesSkill = HudRules
@@ -53,6 +54,19 @@ export type SkillModel = {
 	correctValue: number?, -- reveal, typed
 	correctIndex: number?, -- reveal, choice
 }
+export type BlitzModel = {
+	index: number, -- question 1..10
+	problem: string,
+	total: number, -- seconds the run clock lasts
+	locked: boolean, -- an answer was sent for this question
+}
+export type ReviewModel = {
+	correct: number,
+	answers: { any }, -- number, or false for a question not answered
+	solutions: { number },
+	previousBest: number?,
+	newBest: boolean,
+}
 export type ResultModel = {
 	kind: string, -- "first" | "up" | "held"
 	best: number,
@@ -72,6 +86,8 @@ export type Model = {
 	holdToast: boolean?,
 	skill: SkillModel?,
 	result: ResultModel?,
+	blitz: BlitzModel?,
+	review: ReviewModel?,
 	quiet: boolean?, -- re-render without entrances (a selection changed, a timer tick) -- Preview only: keep the toast on screen
 }
 export type Handlers = {
@@ -82,6 +98,7 @@ export type Handlers = {
 	retry: () -> (),
 	skillSelect: (index: number) -> (),
 	skillLock: (value: number) -> (),
+	blitzLock: (value: number) -> (),
 	setting: (key: string, value: number | boolean) -> (),
 }
 export type Options = { overlay: boolean?, name: string?, displayOrder: number? }
@@ -92,6 +109,7 @@ export type View = {
 	toast: (text: string, icon: boolean, hold: boolean?) -> (),
 	setRetakeLabel: (text: string) -> (),
 	setSkillTimer: (fraction: number, seconds: number) -> (),
+	setBlitzClock: (fraction: number, text: string) -> (),
 	defaultFocus: () -> GuiObject?,
 	setReduced: (on: boolean) -> (),
 	destroy: () -> (),
@@ -292,6 +310,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	local retakeLabel: TextLabel? = nil
 	local skillFill: Frame? = nil
 	local skillSeconds: TextLabel? = nil
+	local blitzClock: TextLabel? = nil
 	local quiet = false
 	local toastToken = 0
 	local selection = focusBrackets()
@@ -309,6 +328,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		retakeLabel = nil
 		skillFill = nil
 		skillSeconds = nil
+		blitzClock = nil
 	end
 
 	-- A button's interaction layer: full-box TextButton, brackets + 1.04 on gamepad focus, 0.95 while pressed.
@@ -854,6 +874,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 					handlers.locked(mode)
 				elseif mode == "group" then
 					handlers.join()
+				elseif mode == "blitz" then
+					handlers.go("blitz")
 				end
 			end, nil)
 		end
@@ -1646,6 +1668,241 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		playFx("rise", ladder.shard.group, 0.66)
 	end
 
+	-- 06 Blitz question: the HUD question layout with neutral pips, a dash for the score and one run clock. No right or wrong
+	-- is ever shown here; the review (07) is the only place that tells.
+	local function buildBlitz(model: Model)
+		local bm = model.blitz :: BlitzModel
+		local count = MenuConfig.BlitzTotal
+		topLabel(string.gsub(MenuCopy.Top.BlitzQuestion, "{n}", tostring(bm.index)), true)
+		for pip = 1, count do
+			local alpha = if pip < bm.index then 0 elseif pip == bm.index then 0.25 else 0.82
+			make("Frame", {
+				Name = "Pip" .. pip,
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromOffset(318 + (pip - 1) * 13, 22),
+				Size = UDim2.fromOffset(8, 8),
+				Rotation = 45,
+				BackgroundColor3 = C.Ink,
+				BackgroundTransparency = alpha,
+				BorderSizePixel = 0,
+			}, screen :: Frame)
+		end
+		-- Score stays a dash for the whole run.
+		local scoreBox = { x = 650, y = 10, w = 150, h = 44, rot = 1.5 }
+		local score = newShard("Score", scoreBox, "shard-score-silver", nil, "silver")
+		text(score.content, "Tag", MenuCopy.Common.Score, T.Tag, 20, 0, 60, 44, { TextTransparency = 0.3 })
+		text(
+			score.content,
+			"Value",
+			MenuCopy.Common.ScoreHidden,
+			18, -- 18 px at y 15..33: the score shard is a sliver along its top edge, only y 14..34 clears 6 px at this x
+			80,
+			15,
+			50,
+			18,
+			{ TextXAlignment = Enum.TextXAlignment.Right }
+		)
+
+		local problem =
+			newShard("Problem", L.SkillProblem, "shard-menu-problem-silver", "glow-menu-problem-silver", "silver")
+		tag(problem.content, "Tag", (string.gsub(MenuCopy.Blitz.QuestionTag, "{n}", tostring(bm.index)))).Position =
+			UDim2.fromOffset(60, 40)
+		local shown = bm.problem .. " = ?"
+		local fit = TextFitRules.fitSize(measureWidth, shown, { 88, 76, 64, 56, 48, 40 }, 456)
+		local problemLabel = text(problem.content, "Text", shown, fit.size, 62, 60, 456, fit.size * fit.lines, {
+			TextWrapped = fit.lines > 1,
+			LineHeight = 1,
+		})
+		problemLabel.TextXAlignment = Enum.TextXAlignment.Center
+		glowLoop({ shard = problem, name = "Problem" }, 0)
+		playFx("slam", problem.group, 0)
+
+		-- One run clock: the bar and the column on the right show the total time left.
+		local bar = L.SkillTimerBar
+		local track = make("Frame", {
+			Name = "TimerBar",
+			Position = UDim2.fromOffset(bar.x, bar.y),
+			Size = UDim2.fromOffset(bar.w, bar.h),
+			Rotation = bar.rot,
+			BackgroundColor3 = C.Ink,
+			BackgroundTransparency = 0.82,
+			BorderSizePixel = 0,
+		}, screen :: Frame)
+		skillFill = make(
+			"Frame",
+			{ Name = "Fill", Size = UDim2.fromScale(1, 1), BackgroundColor3 = C.Ink, BorderSizePixel = 0 },
+			track
+		) :: Frame
+		local clock = L.BlitzClock
+		tag(screen :: Frame, "ClockTag", MenuCopy.Common.Left).Position = UDim2.fromOffset(clock.x + 4, clock.y)
+		blitzClock = text(
+			screen :: Frame,
+			"Clock",
+			CooldownRules.formatShort(bm.total),
+			60,
+			clock.x,
+			clock.y + 22,
+			clock.w,
+			64,
+			{
+				TextXAlignment = Enum.TextXAlignment.Right,
+				TextScaled = true,
+			}
+		)
+		make("UITextSizeConstraint", { MinTextSize = 36, MaxTextSize = 60 }, blitzClock)
+
+		if bm.locked then
+			toastAt(MenuCopy.Common.LockedIn, "icon-menu-lock", "silver", true, true)
+		end
+		local inputShard = newShard("Input", L.SkillInput, "shard-input", nil, "silver")
+		local lockShard = newShard("LockIn", L.SkillLock, "shard-button", nil, "silver")
+		local answerBox = make("TextBox", {
+			Name = "Answer",
+			Size = UDim2.fromOffset(L.SkillInput.w, L.SkillInput.h),
+			BackgroundTransparency = 1,
+			FontFace = FONT.Body,
+			Text = "",
+			PlaceholderText = MenuCopy.Common.TypeAnswer,
+			PlaceholderColor3 = C.InkDim,
+			TextSize = 30,
+			TextColor3 = C.Ink,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ClearTextOnFocus = false,
+			TextEditable = not bm.locked,
+			SelectionImageObject = selection,
+			ZIndex = 12,
+		}, inputShard.content) :: TextBox
+		make("UIPadding", { PaddingLeft = UDim.new(0, 22), PaddingRight = UDim.new(0, 18) }, answerBox)
+		local lockLabel =
+			text(lockShard.content, "Label", MenuCopy.Common.LockIn, T.Action, 0, 0, L.SkillLock.w, L.SkillLock.h, {
+				TextXAlignment = Enum.TextXAlignment.Center,
+				TextColor3 = C.ButtonInk,
+				TextStrokeTransparency = 1,
+			})
+		local function submit()
+			local digits = HudRulesSkill.sanitizeInput(answerBox.Text)
+			if not bm.locked and digits ~= "" then
+				handlers.blitzLock(tonumber(digits) :: number)
+			end
+		end
+		answerBox:GetPropertyChangedSignal("Text"):Connect(function()
+			local clean = HudRulesSkill.sanitizeInput(answerBox.Text)
+			if clean ~= answerBox.Text then
+				answerBox.Text = clean
+			end
+		end)
+		answerBox.FocusLost:Connect(function(enter: boolean)
+			if enter then
+				submit()
+			end
+		end)
+		if bm.locked then
+			lockLabel.TextTransparency = MenuTheme.DisabledTransparency
+			lockShard.image.ImageTransparency = MenuTheme.DisabledTransparency
+		else
+			interactive({ shard = lockShard, name = "LockIn" }, submit, nil)
+			firstSelectable = firstSelectable or answerBox
+		end
+		playFx("rise", inputShard.group, 0.28)
+		playFx("pop", lockShard.group, 0.3)
+	end
+
+	-- 07 Blitz review: the score card and the ten answers in two columns (green + check right, indigo + cross wrong).
+	local function buildBlitzReview(model: Model)
+		local rv = model.review :: ReviewModel
+		topLabel(MenuCopy.Top.BlitzReview)
+		local card = newShard("Card", L.ReviewCard, "shard-menu-mode-violet", "glow-menu-mode-violet", "violet")
+		tag(card.content, "Tag", MenuCopy.Blitz.FinalTag).Position = UDim2.fromOffset(24, 24)
+		local scoreLabel = text(card.content, "Score", BlitzRules.scoreText(rv.correct), 84, 24, 52, 184, 84, {
+			TextScaled = true,
+			TextXAlignment = Enum.TextXAlignment.Left,
+		})
+		make("UITextSizeConstraint", { MinTextSize = 48, MaxTextSize = 84 }, scoreLabel)
+		text(
+			card.content,
+			"Best",
+			BlitzRules.bestText(rv.previousBest),
+			15,
+			24,
+			144,
+			184,
+			24,
+			{ FontFace = FONT.Italic }
+		)
+		if rv.newBest then
+			local newBestTag = tag(screen :: Frame, "NewBest", MenuCopy.Blitz.NewBest, true)
+			newBestTag.TextSize = 13
+			newBestTag.Position = UDim2.fromOffset(L.NewBest.x, L.NewBest.y)
+			newBestTag.Rotation = L.NewBest.rot
+			newBestTag.ZIndex = 20
+			newBestTag:SetAttribute("FitSticker", true)
+		end
+		local rows = BlitzRules.reviewRows(rv.answers, rv.solutions)
+		for column = 1, 2 do
+			local origin = if column == 1 then L.ReviewCol1 else L.ReviewCol2
+			local captions: { { string | number } } = {
+				{ MenuCopy.Blitz.ColQ, 12 },
+				{ MenuCopy.Blitz.ColYou, 70 },
+				{ MenuCopy.Blitz.ColAnswer, 150 },
+			}
+			for _, entry in captions do
+				local caption, offset = entry[1] :: string, entry[2] :: number
+				local header = text(
+					screen :: Frame,
+					"Header" .. column .. caption,
+					caption,
+					10,
+					origin.x + offset,
+					32,
+					70,
+					14,
+					{ TextTransparency = 0.45, TextStrokeTransparency = 1 }
+				)
+				header:SetAttribute("FitEdge", true)
+			end
+			for slot = 1, 5 do
+				local entry = rows[(column - 1) * 5 + slot]
+				if entry then
+					local box = { x = origin.x, y = origin.y + (slot - 1) * 38, w = origin.w, h = origin.h, rot = 0 }
+					local shard = newShard(
+						"Row" .. ((column - 1) * 5 + slot),
+						box,
+						if entry.ok then "shard-row-green" else "shard-row-indigo",
+						nil,
+						if entry.ok then "green" else "blue"
+					)
+					-- Audit A9 / TASK-0103: the 32 px row art leaves 10 px clear left of x 88 and 14 px right of it, so the question
+					-- number is 9 px in the left zone and the two answers are 12 px (README 13 / 16) from x 92. 38 px rows fix it.
+					text(shard.content, "Q", entry.q, 9, 44, 10.7, 40, 9, { TextTransparency = 0.3 })
+					local markSquare = make("Frame", {
+						Name = "Mark",
+						Position = UDim2.fromOffset(18, 7),
+						Size = UDim2.fromOffset(18, 18),
+						BackgroundColor3 = C.ButtonInk,
+						BorderSizePixel = 0,
+						ZIndex = 5,
+					}, shard.content)
+					icon(markSquare, "Icon", if entry.ok then "icon-menu-check" else "icon-menu-cross", 3, 3, 12)
+					text(shard.content, "You", entry.you, 12, 92, 10, 62, 12)
+					local ans = text(shard.content, "Answer", entry.ans, 12, 160, 10, 64, 12)
+					ans.TextTransparency = 0.4
+					playFx("rowIn", shard.group, 0.3 + ((column - 1) * 5 + slot) * 0.05)
+				end
+			end
+		end
+		local again = action(L.PlayAgain, MenuCopy.Blitz.PlayAgain, true, false)
+		interactive(again, function()
+			handlers.go("blitz")
+		end, nil)
+		local menuButton = secondary("Menu", L.ReviewMenu, MenuCopy.Common.Menu, false)
+		interactive(menuButton, handlers.back, nil)
+		link(again, "Down", menuButton)
+		glowLoop({ shard = card, name = "Card" }, 0)
+		playFx("slam", card.group, 0)
+		playFx("pop", again.shard.group, 0.42)
+		playFx("rise", menuButton.shard.group, 0.48)
+	end
+
 	local function buildWatching()
 		local shard = newShard("Banner", L.WatchBanner, "shard-menu-banner-violet", "glow-menu-banner-violet", "violet")
 		-- The banner shard (480x44) has a cut along the top right and the bottom left: only y 14..30 clears 6 px at every x, so
@@ -1676,6 +1933,10 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		local ok, err = pcall(function()
 			if id == "watching" then
 				buildWatching()
+			elseif id == "blitz" and model.blitz then
+				buildBlitz(model)
+			elseif id == "blitzreview" and model.review then
+				buildBlitzReview(model)
 			elseif id == "skill" and model.skill then
 				buildSkill(model)
 			elseif id == "skillresult" and model.result then
@@ -1715,6 +1976,14 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		root = root,
 		render = render,
 		toast = toast,
+		setBlitzClock = function(fraction: number, str: string)
+			if skillFill then
+				skillFill.Size = UDim2.fromScale(math.clamp(fraction, 0, 1), 1)
+			end
+			if blitzClock then
+				blitzClock.Text = str
+			end
+		end,
 		setSkillTimer = function(fraction: number, seconds: number)
 			if skillFill then
 				skillFill.Size = UDim2.fromScale(math.clamp(fraction, 0, 1), 1)

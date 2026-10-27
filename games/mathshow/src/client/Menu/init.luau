@@ -14,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local MenuConfig = require(Shared:WaitForChild("MenuConfig"))
+local BlitzRules = require(Shared:WaitForChild("BlitzRules"))
 local CooldownRules = require(Shared:WaitForChild("CooldownRules"))
 local MenuCopy = require(Shared:WaitForChild("MenuCopy"))
 local PracticeRules = require(Shared:WaitForChild("PracticeRules"))
@@ -100,6 +101,19 @@ local skillCtx: {
 	}
 local skillToken = 0
 
+-- The Blitz run on screen (TASK-0103): the server owns the problems, the clock and the score.
+local blitzCtx: {
+	started: boolean,
+	index: number,
+	problem: string,
+	endsAt: number,
+	total: number,
+	locked: boolean,
+	review: View.ReviewModel?,
+} =
+	{ started = false, index = 0, problem = "", endsAt = 0, total = 0, locked = false, review = nil }
+local blitzToken = 0
+
 local function skillModel(): View.SkillModel?
 	local m = skillCtx.model
 	if m == nil then
@@ -115,6 +129,11 @@ end
 local function model(): View.Model
 	local player = Players.LocalPlayer
 	return {
+		blitz = if stack[#stack] == "blitz"
+			then { index = blitzCtx.index, problem = blitzCtx.problem, total = blitzCtx.total, locked = blitzCtx.locked }
+			else nil,
+		review = if stack[#stack] == "blitzreview" then blitzCtx.review else nil,
+		best = if profile.blitzBest then BlitzRules.scoreText(profile.blitzBest) else nil,
 		skill = if stack[#stack] == "skill" then skillModel() else nil,
 		result = if stack[#stack] == "skillresult" then skillCtx.result else nil,
 		player = {
@@ -247,7 +266,36 @@ local function renderSkill(isQuiet: boolean)
 	end
 end
 
+local function startBlitzClock()
+	blitzToken += 1
+	local token = blitzToken
+	task.spawn(function()
+		while token == blitzToken and view and stack[#stack] == "blitz" do
+			local left = math.max(0, blitzCtx.endsAt - workspace:GetServerTimeNow())
+			view.setBlitzClock(left / math.max(blitzCtx.total, 1), CooldownRules.formatShort(left))
+			task.wait(0.1)
+		end
+	end)
+end
+
+local function renderBlitz(isQuiet: boolean)
+	if not view then
+		return
+	end
+	local m = model()
+	m.quiet = isQuiet
+	view.render("blitz", m)
+	focusDefault(nil)
+	startBlitzClock()
+end
+
 local function go(id: string)
+	if id == "blitz" then
+		blitzCtx.started = true
+		blitzCtx.review = nil
+		fire(Net.BlitzStart)
+		return
+	end
 	if id == "skill" then
 		-- START on the intro: ask the server; the screen opens when its first question arrives.
 		skillCtx.started = true
@@ -261,8 +309,8 @@ local function go(id: string)
 end
 
 local function back()
-	if stack[#stack] == "skill" then
-		return -- no leaving a Skill Test question: the run ends on its own
+	if stack[#stack] == "skill" or stack[#stack] == "blitz" then
+		return -- no leaving a Skill Test or Blitz question: the run ends on its own
 	end
 	if #stack > 1 then
 		table.remove(stack)
@@ -450,6 +498,90 @@ local function onSkillResult(p: any)
 	show("skillresult")
 end
 
+local function onBlitzState(p: any)
+	if typeof(p) ~= "table" or typeof(p.state) ~= "string" or not view then
+		warn("[MathShow] Menu ignored a malformed BlitzState")
+		return
+	end
+	if p.state == "question" then
+		if
+			typeof(p.problem) ~= "string"
+			or typeof(p.questionIndex) ~= "number"
+			or typeof(p.endsAt) ~= "number"
+			or typeof(p.total) ~= "number"
+		then
+			warn("[MathShow] Menu ignored a malformed BlitzState question")
+			return
+		end
+		if not blitzCtx.started then
+			return
+		end
+		blitzCtx.index, blitzCtx.problem, blitzCtx.endsAt, blitzCtx.total =
+			p.questionIndex, p.problem, p.endsAt, p.total
+		blitzCtx.locked = false
+		if stack[#stack] == "blitzreview" then
+			table.remove(stack) -- PLAY AGAIN: the review gives way to the new run
+		end
+		if stack[#stack] ~= "blitz" then
+			table.insert(stack, "blitz")
+		end
+		renderBlitz(p.questionIndex > 1)
+	elseif p.state == "unavailable" then
+		blitzCtx.started = false
+		view.toast(MenuCopy.Blitz.Unavailable, false)
+	end
+end
+
+local function onBlitzResult(p: any)
+	if
+		typeof(p) ~= "table"
+		or typeof(p.correct) ~= "number"
+		or typeof(p.answers) ~= "table"
+		or typeof(p.solutions) ~= "table"
+		or typeof(p.newBest) ~= "boolean"
+	then
+		warn("[MathShow] Menu ignored a malformed BlitzResult")
+		return
+	end
+	blitzCtx.started = false
+	blitzToken += 1
+	profile.blitzBest = math.max(profile.blitzBest or 0, p.correct)
+	blitzCtx.review = {
+		correct = p.correct,
+		answers = p.answers,
+		solutions = p.solutions,
+		previousBest = p.previousBest,
+		newBest = p.newBest,
+	}
+	stack = { "main", "blitzreview" }
+	show("blitzreview")
+end
+
+local function connectBlitzRemotes()
+	local state = remoteNamed(Net.BlitzState)
+	local result = remoteNamed(Net.BlitzResult)
+	if state and state:IsA("RemoteEvent") then
+		state.OnClientEvent:Connect(function(p: any)
+			local ok, err = pcall(function()
+				onBlitzState(p)
+			end)
+			if not ok then
+				warn(`[MathShow] Menu BlitzState failed: {err}`)
+			end
+		end)
+	end
+	if result and result:IsA("RemoteEvent") then
+		result.OnClientEvent:Connect(function(p: any)
+			local ok, err = pcall(function()
+				onBlitzResult(p)
+			end)
+			if not ok then
+				warn(`[MathShow] Menu BlitzResult failed: {err}`)
+			end
+		end)
+	end
+end
+
 local function connectSkillRemotes()
 	local state = remoteNamed(Net.SkillState)
 	local result = remoteNamed(Net.SkillResult)
@@ -486,6 +618,15 @@ function Menu.start(opts: Options)
 		back = back,
 		retry = function()
 			Menu.retryProfile()
+		end,
+		blitzLock = function(value: number)
+			if not blitzCtx.started or blitzCtx.locked or blitzCtx.index == 0 then
+				return
+			end
+			-- Lock first, synchronously, so nothing can send a second answer for this question.
+			blitzCtx.locked = true
+			fire(Net.BlitzAnswer, { questionIndex = blitzCtx.index, answer = value })
+			renderBlitz(true)
 		end,
 		skillSelect = function(index: number)
 			local m = skillCtx.model
@@ -544,6 +685,7 @@ function Menu.start(opts: Options)
 	show("main")
 	requestProfile()
 	task.spawn(connectSkillRemotes)
+	task.spawn(connectBlitzRemotes)
 
 	ContextActionService:BindAction(BACK_ACTION, function(_name, state)
 		if state == Enum.UserInputState.Begin and #stack > 1 then

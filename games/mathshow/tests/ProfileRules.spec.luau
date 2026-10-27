@@ -153,7 +153,7 @@ return function(t: TestRunner.T)
 		t.eq(client.retryAt, 100 + MenuConfig.RetakeCooldownSeconds)
 		t.eq(client.persistence, "saved")
 		t.eq(client.modes.group, true)
-		t.eq(client.modes.blitz, false)
+		t.eq(client.modes.blitz, true)
 		client.settings.music = 0
 		t.eq(profile.settings.music, MenuConfig.SettingsDefaults.music, "the client copy is detached")
 	end)

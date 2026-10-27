@@ -10,6 +10,11 @@
 --   SkillAnswer  client -> server        { attempt, answer } (SkillRules.parseAnswerPayload)
 --   SkillState   server -> one client    SkillStatePayload
 --   SkillResult  server -> one client    SkillResultPayload
+--   BlitzStart   client -> server        (no payload; BlitzRules.validStart)
+--   BlitzAnswer  client -> server        { questionIndex, answer } (BlitzRules.parseAnswerPayload)
+--   BlitzState   server -> one client    BlitzStatePayload (never any answer or score)
+--   AnswerAck    server -> one client    { questionIndex } (identical for right and wrong)
+--   BlitzResult  server -> one client    BlitzResultPayload (only after the run ends)
 --   MenuRequest  client -> server (RemoteFunction)  { kind: "profile" } -> MenuProfileReply
 --   SettingsSave client -> server        SettingsPayload (validated by ProfileRules.sanitizeSettings)
 
@@ -80,10 +85,33 @@ export type SkillResultPayload = {
 	retryAt: number,
 }
 
+-- state "question" (the problem text only), "unavailable" (profile not loaded or Blitz switched off).
+export type BlitzStatePayload = {
+	state: string,
+	questionIndex: number, -- 1..BlitzTotal
+	problem: string?,
+	endsAt: number, -- when the single run clock ends, workspace:GetServerTimeNow() based
+	total: number, -- seconds the run clock lasts
+}
+
+-- answers / solutions hold 10 entries each; a question that was not answered has `false` in answers (nil cannot cross a remote).
+export type BlitzResultPayload = {
+	correct: number,
+	answers: { number | boolean },
+	solutions: { number },
+	previousBest: number?,
+	newBest: boolean,
+}
+
 local Net = table.freeze({
 	RoundState = "RoundState",
 	SubmitAnswer = "SubmitAnswer",
 	AnswerResult = "AnswerResult",
+	BlitzStart = "BlitzStart",
+	BlitzAnswer = "BlitzAnswer",
+	BlitzState = "BlitzState",
+	AnswerAck = "AnswerAck",
+	BlitzResult = "BlitzResult",
 	SkillStart = "SkillStart",
 	SkillAnswer = "SkillAnswer",
 	SkillState = "SkillState",

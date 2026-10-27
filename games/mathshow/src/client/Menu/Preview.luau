@@ -200,6 +200,59 @@ Preview.States = {
 		screen = "skillresult",
 		model = { result = { kind = "up", best = 8, cleared = 8, previousBest = 7, retryRemaining = 299 } },
 	},
+	{
+		id = "06a-blitz-question",
+		screen = "blitz",
+		model = { blitz = { index = 3, problem = "40 / 5", total = 120, locked = false } },
+	},
+	{
+		id = "06b-blitz-locked",
+		screen = "blitz",
+		model = { blitz = { index = 10, problem = "19 x 20", total = 600, locked = true } },
+	},
+	{
+		id = "06c-blitz-clock-max",
+		screen = "blitz",
+		model = { blitz = { index = 6, problem = "123456 + 98765", total = 5999, locked = false } },
+	},
+	{
+		id = "07a-blitz-review-best",
+		screen = "blitzreview",
+		model = {
+			review = {
+				correct = 7,
+				answers = { 12, 9, false, 5, 6, 8, 100, 2, -123456, 20 },
+				solutions = { 12, 10, 7, 5, 6, 8, 100, 3, -123456, 20 },
+				previousBest = 6,
+				newBest = true,
+			},
+		},
+	},
+	{
+		id = "07b-blitz-review-perfect-first",
+		screen = "blitzreview",
+		model = {
+			review = {
+				correct = 10,
+				answers = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+				solutions = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 },
+				newBest = true,
+			},
+		},
+	},
+	{
+		id = "07c-blitz-review-zero",
+		screen = "blitzreview",
+		model = {
+			review = {
+				correct = 0,
+				answers = { false, false, false, false, false, false, false, false, false, false },
+				solutions = { 100000, 2, 3, 4, 5, 6, 7, 8, 9, 999999 },
+				previousBest = 8,
+				newBest = false,
+			},
+		},
+	},
 	{ id = "18-how-to-play", screen = "howto", model = {} },
 	{
 		id = "20-coming-soon",
@@ -246,6 +299,7 @@ function Preview.show(id: string, fixture: string?): View.View?
 		retry = noop,
 		skillSelect = function(_index: number) end,
 		skillLock = function(_value: number) end,
+		blitzLock = function(_value: number) end,
 		setting = function(_key: string, _value: number | boolean) end,
 	}
 	local view = View.build(Players.LocalPlayer:WaitForChild("PlayerGui"), handlers)
