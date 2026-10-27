@@ -6339,7 +6339,7 @@
       "id": "TASK-0105",
       "title": "MathShow Rules Foundation",
       "project": "GAME-004",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [],
       "branch": "task/TASK-0105-rules-foundation",
@@ -6368,6 +6368,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-27T12:08:32",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -6377,7 +6383,13 @@
           "notes": "check.sh green, MathShow 258 specs (was 204), additive files only"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-27T12:08:32",
+          "result": "pass",
+          "report": "06 QA/AUD-20261027-TASK-0105-01.md"
+        }
+      ],
       "revisions": 0,
       "tier": "standard",
       "approved_by": "jg"

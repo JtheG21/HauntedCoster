@@ -3,7 +3,7 @@ id: TASK-0105
 title: "MathShow Rules Foundation"
 type: task
 project: GAME-004
-status: in_review
+status: approved
 priority: medium
 risk: medium
 owner: executor

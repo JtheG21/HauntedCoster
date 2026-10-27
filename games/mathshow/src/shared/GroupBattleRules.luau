@@ -1,7 +1,8 @@
 --!strict
 -- Group Battle v2 question rules: 100 for a correct answer, +50 for the first correct one, and a closing countdown
 -- that starts at the first correct answer. Pure: no Instances, no clock. The server supplies `acceptedAt` (its own
--- timestamp) and `order` (a unique, increasing acceptance sequence). Ties are resolved by `order`, never by player id.
+-- timestamp) and `order` (a unique, increasing acceptance sequence; uniqueness across players is a precondition, equal
+-- orders from different players resolve in table order). Ties are resolved by `order`, never by player id.
 -- Not wired into live gameplay; the prototype's continuous speed bonus (ScoringRules) is untouched.
 
 local GroupBattleConfig = require(script.Parent.GroupBattleConfig)
