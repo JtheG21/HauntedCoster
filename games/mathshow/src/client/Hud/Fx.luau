@@ -94,7 +94,12 @@ local function later(name: string, delay: number, fn: () -> ())
 	end)
 end
 
+local reducedOverride = false -- the menu's REDUCED MOTION setting (Fx.setReducedMotion)
+
 local function reduced(): boolean
+	if reducedOverride then
+		return true
+	end
 	local ok, value = pcall(function()
 		return GuiService.ReducedMotionEnabled
 	end)
@@ -671,6 +676,15 @@ function Fx.secondTick(p: TickParts, phase: string, secondsLeft: number)
 			Fx.pop(p.CountNumber, 0, 0.38)
 		end
 	end)
+end
+
+-- The in-game REDUCED MOTION setting; GuiService.ReducedMotionEnabled always applies on top of it.
+function Fx.setReducedMotion(on: boolean)
+	reducedOverride = on == true
+end
+
+function Fx.reducedMotion(): boolean
+	return reduced()
 end
 
 -- Cancels every running tween (Hud stop).
