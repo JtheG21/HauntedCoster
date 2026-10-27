@@ -78,3 +78,10 @@ Deep tier, one Opus audit: **pass** (AUD-20261027-TASK-0099-01). Minor findings 
 - `scripts/check.sh` ALL CHECKS PASSED; MathShow 152 specs (baseline 134). Studio verified in an unpublished place (memory mode), plus the simulated load failure. Opus audit pass.
 - **Not verified:** real DataStore reads/writes, autosave and `BindToClose`, a two-server race (needs a published place); real controller/touch.
 - Pending for jg: merge decision.
+
+## Close-out: real DataStore check (2026-10-26)
+Published place 95891457594442, Studio API access on, one Studio Play session.
+- `MenuRequest` replied `persistence = "saved"` (real DataStore, not memory mode).
+- `SettingsSave` landed in `MathShow_Profiles_v1` key `p_<userId>` within 4 s (read back with GetAsync: the sent values).
+- A change made 0.3 s before stopping Play was in the store afterwards (save on leave / `BindToClose` path).
+- Still not verified: a two-server race, real devices.
