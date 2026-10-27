@@ -3,7 +3,7 @@ id: TASK-0100
 title: "MathShow Group Join And Watching Banner"
 type: task
 project: GAME-004
-status: in_review
+status: approved
 priority: medium
 risk: medium
 owner: executor
@@ -71,5 +71,9 @@ Deep tier (networking, remotes). Baseline: MathShow 152 specs.
 
 
 ## Audits
+Deep tier, one Opus audit: **pass** (AUD-20261027-TASK-0100-01). Fixed after it: a warn when the JoinShow remote is missing, the stale client comment, a spec for unknown phases. Kept: `sendState` after `sendShow` (commented). MathShow specs 159. The 2-client run moves to TASK-0104.
 
 ## Outcome
+- `scripts/check.sh` ALL CHECKS PASSED; MathShow 159 specs (baseline 152). Studio 1-player run and the TextFit gate (1167 rows, 0 failures) pass. Opus audit pass.
+- **Not verified:** two real clients; the score dash text in Studio; controller/touch.
+- Pending for jg: merge decision.

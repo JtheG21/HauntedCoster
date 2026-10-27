@@ -216,6 +216,8 @@ function Menu.start(opts: Options)
 				local remote = remoteNamed(Net.JoinShow)
 				if remote and remote:IsA("RemoteEvent") then
 					remote:FireServer()
+				else
+					warn("[MathShow] Menu: JoinShow remote not found; the server will not count this player")
 				end
 			end)
 			if not ok then

@@ -335,7 +335,7 @@ local function onJoin(player: Player, raw: any)
 	end
 	state.joined = true
 	sendShow(player)
-	sendState(player)
+	sendState(player) -- the HUD gets the current phase at once, not at the next broadcast
 end
 
 function RoundService.start(): ()

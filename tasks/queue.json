@@ -5993,7 +5993,7 @@
       "id": "TASK-0100",
       "title": "MathShow Group Join And Watching Banner",
       "project": "GAME-004",
-      "status": "in_review",
+      "status": "approved",
       "risk": "medium",
       "depends_on": [
         "TASK-0098"
@@ -6024,6 +6024,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-26T19:44:05",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -6033,7 +6039,13 @@
           "notes": "check.sh green, MathShow 158 specs; Studio 1-player: not joined, mid-match join, banner, next-match admit, rate limit, gate 1167 rows 0 failures; 2 clients not run"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-26T19:44:05",
+          "result": "pass",
+          "report": "06 QA/AUD-20261027-TASK-0100-01.md"
+        }
+      ],
       "revisions": 0,
       "tier": "deep",
       "approved_by": "jg"

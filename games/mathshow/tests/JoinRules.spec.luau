@@ -37,6 +37,12 @@ return function(t: TestRunner.T)
 		t.eq(JoinRules.isWatching(true, false, "Intermission"), false, "the banner goes away at the next Intermission")
 	end)
 
+	t.test("isWatching treats any phase other than Intermission as a match under way", function()
+		t.eq(JoinRules.isWatching(true, false, "Connecting"), true)
+		t.eq(JoinRules.isWatching(true, false, ""), true)
+		t.eq(JoinRules.isWatching(true, false, "intermission"), true, "the phase name is case sensitive")
+	end)
+
 	t.test("validJoin accepts nothing or an empty table only", function()
 		t.eq(JoinRules.validJoin(nil), true)
 		t.eq(JoinRules.validJoin({}), true)
