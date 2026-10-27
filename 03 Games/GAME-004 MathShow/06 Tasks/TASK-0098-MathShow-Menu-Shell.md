@@ -3,7 +3,7 @@ id: TASK-0098
 title: "MathShow Menu Shell"
 type: task
 project: GAME-004
-status: in_progress
+status: in_review
 priority: medium
 risk: low
 owner: executor
@@ -67,25 +67,42 @@ Standard tier. Baseline before work: check.sh green, MathShow 97 specs, 362 tota
 - **Deviations from the README:** no letter-spacing; no dot screen; sparkles are rotated squares; the player card shows UNRANKED (no rank persistence exists); PRACTICE is locked (Skill Test is not built); Blitz and VS cards are locked via `ModeEnabled`.
 - **Assets:** the 75 PNGs are filed in `games/mathshow/art/menu/` with `UPLOAD_LIST.md`. Nothing uploaded; `MenuTheme.Image` ids are `rbxassetid://0`.
 
-## Diff table (README -> this task; gate margins fill in after the Studio run)
-| number | old | new | why |
-|---|---|---|---|
-| title text | 46 px at (30,40), tag at (30,16) | 40 px at (30,28), tag a top-edge sticker | A2 |
-| 3-line panel title | 58 | 50 (Group stays 44) | A1 |
-| panel line leading / gaps | 21 / 8, 10 | 20 / 6, 8 | A1 |
-| setting labels | 16 | 15, "COLOR-BLIND MODE" | A4 |
-| action waiting label | 19 | 16 | A5 |
-| toast padding | 30 per side | 36 (+24 with icon) | A10 |
-| tag padding | HUD 12 | README 8 | README spec |
+## Diff table (README -> this task)
+Margins are the tightest measured by the gate at 844x390 (min over all fixtures); required >= 6.
+| number | old | new | why | gate margin |
+|---|---|---|---|---|
+| title text | 46 px at (30,40), tag at (30,16) | 40 px at (30,28), tag a top-edge sticker | A2 | 7.5 |
+| 3-line panel title | 58 | 50 (Group stays 44) | A1 | >= 7 (tags) |
+| panel stack | leading 21, gaps 8/10 | leading 20, gaps 6/8 | A1 | >= 7 |
+| panel tag position | (50,28) | (50,32) | tag crossed the top-left cut (3.5 at 28) | >= 8 |
+| setting labels | 16 px "COLOR-BLIND MARKS" at x 20 | 15 px "COLOR-BLIND MODE" at x 26 | A4 | 6.5 |
+| stepper glyphs | 22 px | 18 px | glyph box 3.5 from the square's corner | >= 8 |
+| action waiting label | 19 px | 16 px | A5 | 7.0 |
+| action button | x 572 | x 566 | rotated box ran 2 px into the 44 px right inset | n/a (target) |
+| side secondary | x 580 | x 576 | same, ahead of the follow-up screens | not built |
+| toast | h 40, 18 px, padding 30 | h 46, 15 px, padding 36 (+24 icon), text y 15 | the 320x46 toast shard has a 28 px clear band; 18 px text cannot keep 6 px | 6.0 |
+| tag padding | HUD 12 | README 8 | README spec | >= 7 |
 
-## Back to Claude Design / follow-up tasks
-- Claude Design list: none confirmed yet (needs the Studio gate). Candidates from the audit if the gate still fails: 330x104 title shard (A2), 38 px list/review rows (A9).
-- Proposed follow-ups (not created): Practice home + Skill Test intro (11, 12, 19a); Skill Test play and result (13-15) with rank persistence; Rank ladder (16); Blitz (06, 07); VS flow (04, 05, 08, 09, 19b) with the 2-player test; Group Battle watching banner (10) and server-side join; SettingsSave; badgeSlam; upload of the 75 PNGs.
+## Studio verification (TASK-0098, Rojo from this worktree, fresh Play sessions, client)
+- **TextFit gate:** 11 states (main x 6 player fixtures, modes, modes locked, confirm x4 incl. "WAITING FOR RIVAL", settings x2, how-to, coming-soon) x 3 viewports (844x390, 1920x1080, phone 812x375) = **1164 rows, 0 failures**. Viewports are emulated by setting the root scale to `rootScale(w, h)` (a real window resize was not done). The gate caught real defects first (toast margin, panel tags, settings labels, stepper glyphs, Action inside the right inset); two of its own bugs were fixed (a `{ nil }` fixtures table that skipped every non-main state; rotation drift of up to 2 px on tilted shards, now removed by un-rotating centre offsets).
+- **Stress fixtures covered:** 20 x "W" name, "SirCountsALot_Official" (truncates to "SirCountsALot_Offic..."), DEMON II/III with "Calculus 1, second half" / "Calculus 2", RANK UNAVAILABLE, UNRANKED, 0/10 steppers, longest COMING SOON and WAITING FOR RIVAL. **Not applicable to this scope** (screens not built): answers, scores, clocks, calc-style problems.
+- **Tightest margins (px):** toast 6.0, settings labels 6.5, MATHSHOW title 7.5, DAILY CHALLENGE 7.5, WAITING FOR RIVAL 7.0, primary labels 9.0. A tagged `FitSticker` (COMING SOON, THE MATH GAMESHOW) is excepted by design.
+- **Glyph sheet (Merriweather Bold and Italic both load):** render: ² ³ × ÷ − · ... — ± ½ ° √ π ∫ ∞ <= >= != and the check mark. **Box (missing):** the cross mark U+2715. The calculus symbols draw serif shapes in both faces; whether they are Merriweather's own or a system fallback cannot be told from a capture. Policy stands: check/cross use icon images, never the glyphs.
+- **Screenshots vs `screenshots/<id>.png`:** captured 01 main, 03a Blitz and 17a settings at the Studio viewport (1336x669, about 2:1; not exactly 844x390 or 1920x1080). Layout, copy, rotation and order match; shard art is flat placeholder (textures blocked on the upload), except the settings rows which use the uploaded HUD art. 02, 03b/c, 18 and 20 were verified by the gate and by behaviour, not by side-by-side screenshots.
+- **Acceptance:** locked LEADERBOARD and the locked Blitz card toast, shake and never navigate (checked with real mouse clicks); PLAY -> modes -> Group Battle -> confirm; B = Back; JOIN SHOW hides the menu and enables the HUD; an Fx fault (deleted UIScale) warned `[MathShow] Hud Fx.slam failed ... has no UIScale` and navigation still worked; reduced motion leaves every shard, label and button at the same position and size (only the drift and twinkle loops differ); every state's focus graph reaches all its buttons, all targets are >= 44x44 and carry focus brackets (outline until `icon-menu-focus` has an id). Gamepad input itself was simulated (B key, static reachability), not tried on a controller; touch uses the same `Activated` path as the mouse.
+- **Not verified:** textured visuals; exact 844x390 / 1920x1080 / phone window sizes; real controller and touch device; 2-player VS (pending).
+
+## Back to Claude Design
+- None required for the built scope: every element passed with the number changes above (no new art needed). Closest to the edge: toast text (6.0 at 15 px) and the settings labels (6.5). If a larger toast label or 16 px settings labels are wanted, the toast shard needs a taller clear band (about 36 px) and the row shard more left inset.
+- Carry forward from the audit for the unbuilt screens: title shard at 330x104 only if the tag must stay inside it (A2 chosen: sticker), 38 px list/review rows if A9 still fails when built.
+
+## Follow-up tasks (proposed, not created)
+Practice home + Skill Test intro (11, 12, 19a); Skill Test play and result (13-15) with rank persistence; Rank ladder (16); Blitz (06, 07); VS flow (04, 05, 08, 09, 19b) with the 2-player test; Group Battle watching banner (10) and server-side join; SettingsSave; `badgeSlam`; upload of the 75 PNGs; make the gate's viewport run a true window resize.
 
 ## Audits
 Standard tier: one Sonnet audit after check.sh and Studio checks.
 
 ## Outcome
 - `scripts/check.sh` ALL CHECKS PASSED (StyLua, Selene, strict types, Rojo build); MathShow 132 specs (baseline 97), 397 total.
-- **Not verified (Studio):** the TextFit gate, glyph sheet, screenshot comparisons at 844x390 and 1920x1080, reduced motion, the Fx-fault test, and mouse/touch/gamepad reach. The Rojo server is running for this worktree, but Studio's Rojo plugin was not connected to it and could not be driven (window capture unusable), so nothing from Studio is claimed.
-- A 2-player test is pending for VS.
+- Studio TextFit gate: 1164 rows, 0 failures (see Studio verification). Glyph sheet, behaviour and reduced-motion checks done; textured visuals, exact window sizes and real controller/touch are not.
+- Pending for jg: approve the upload of the 75 PNGs (`games/mathshow/art/menu/UPLOAD_LIST.md`), the one Standard-tier Sonnet audit, and the merge. A 2-player test is pending for VS.

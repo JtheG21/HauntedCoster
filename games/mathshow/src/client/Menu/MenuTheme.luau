@@ -101,14 +101,14 @@ MenuTheme.Text = {
 	ReviewValue = 16,
 	SettingLabel = 15, -- A4: 16 px ran into the toggle
 	ToggleState = 12,
-	Toast = 18,
+	Toast = 15, -- A10 follow-up: the toast shard (320x46) has a 28 px tall clear band, so 15 px text is the largest with slack for 6 px
 	ActionWaiting = 16, -- A5: "WAITING FOR RIVAL" at 19 px is too wide for the action shard
 }
 -- Blitz score "n/10": TextScaled label 184x84, UITextSizeConstraint MinTextSize 48, MaxTextSize 84.
 -- Panel text stack (A1), shard-local px. Titles are single lines; 3-line panels (Blitz, VS) use TitleSize3, Group uses
 -- TitleSizeGroup. Line height is a multiplier: Leading / PanelLine.
 MenuTheme.Panel = {
-	TagY = 28,
+	TagY = 32, -- README 28: the tag ran 2.5 px into the panel's top-left cut
 	TitleY = 52,
 	LeftPad = 50,
 	RightPad = 44,
@@ -120,7 +120,7 @@ MenuTheme.Panel = {
 	TagGap = 6,
 }
 -- Toast width = text + 2 * PadX (+ IconExtra when it carries an icon) (A10).
-MenuTheme.Toast = { PadX = 36, IconExtra = 24, Height = 40, IconSize = 16 }
+MenuTheme.Toast = { PadX = 36, IconExtra = 24, Height = 46, IconSize = 16, TextY = 15, TextH = 15 }
 MenuTheme.TagPadX = 8 -- README: tag padding 2 / 8, 11 px Bold, single line
 MenuTheme.TagPadY = 2
 
@@ -148,8 +148,8 @@ MenuTheme.Layout = {
 	Card3 = box(548, 44, 232, 192, -2.5),
 	-- panel screens (03, 04, 09, 11, 12, 15, 19)
 	Panel = box(52, 56, 500, 224, -2), -- content padding 28 top, 50 left, 44 right
-	Action = box(572, 84, 230, 64, 2),
-	SideSecondary = box(580, 168, 220, 44, -1),
+	Action = box(566, 84, 230, 64, 2), -- README 572: its rotated box ran 2 px into the 44 px right inset
+	SideSecondary = box(576, 168, 220, 44, -1), -- README 580: right edge sat on the inset
 	Count = box(588, 60, 200, 160, 3),
 	RankOld = box(580, 96, 48, 48, 0),
 	RankArrow = box(628, 108, 24, 24, 0),

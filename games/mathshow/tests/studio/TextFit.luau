@@ -175,8 +175,17 @@ local function checkGui(gui: ScreenGui, state: string, rows: { Row })
 			local ow = owner:GetAttribute("ShapeW") :: number
 			local oh = owner:GetAttribute("ShapeH") :: number
 			local k = owner.AbsoluteSize.X / ow
-			local lx = (label.AbsolutePosition.X - owner.AbsolutePosition.X) / k
-			local ly = (label.AbsolutePosition.Y - owner.AbsolutePosition.Y) / k
+			-- Centre-to-centre offset, un-rotated by the shard's own rotation: AbsolutePosition alone drifts by
+			-- up to 2 px on a tilted row because ancestors rotate the child's position but not its box.
+			local theta = math.rad(owner.AbsoluteRotation)
+			local dx = (label.AbsolutePosition.X + label.AbsoluteSize.X / 2)
+				- (owner.AbsolutePosition.X + owner.AbsoluteSize.X / 2)
+			local dy = (label.AbsolutePosition.Y + label.AbsoluteSize.Y / 2)
+				- (owner.AbsolutePosition.Y + owner.AbsoluteSize.Y / 2)
+			local cx = (dx * math.cos(theta) + dy * math.sin(theta)) / k
+			local cy = (-dx * math.sin(theta) + dy * math.cos(theta)) / k
+			local lx = ow / 2 + cx - lw / 2
+			local ly = oh / 2 + cy - lh / 2
 			local rect: TextFitRules.Rect
 			if label.BackgroundTransparency < 1 or autoSized then
 				rect = { x0 = lx, y0 = ly, x1 = lx + lw, y1 = ly + lh } -- the visible box (tags)
@@ -227,22 +236,22 @@ function TextFit.run(): ({ Row }, number)
 	local rows: { Row } = {}
 	for _, size in SIZES do
 		for _, state in Preview.States do
-			local fixtures: { string? } = { nil }
+			local fixtures: { string } = { "" } -- "" = the state's own model
 			if state.screen == "main" then
 				fixtures = {}
 				for name in Preview.PlayerFixtures do
 					table.insert(fixtures, name :: string)
 				end
-				table.sort(fixtures :: { string })
+				table.sort(fixtures)
 			end
 			for _, fixture in fixtures do
-				local view = Preview.show(state.id, fixture)
+				local view = Preview.show(state.id, if fixture == "" then nil else fixture)
 				if view then
 					-- Emulate the viewport: the root scales to min(w / 844, h / 390) exactly as on that device.
 					local uiScale = view.root:FindFirstChildOfClass("UIScale") :: UIScale
 					uiScale.Scale = HudRules.rootScale(size.w, size.h)
 					task.wait() -- let AbsoluteSize / TextBounds settle
-					local label = size.name .. " " .. state.id .. (if fixture then " [" .. fixture .. "]" else "")
+					local label = size.name .. " " .. state.id .. (if fixture ~= "" then " [" .. fixture .. "]" else "")
 					checkGui(view.gui, label, rows)
 				end
 			end

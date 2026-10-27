@@ -580,10 +580,10 @@ function View.build(parent: Instance, handlers: Handlers): View
 		local shard = Shard.new(toastLayer, "Toast", box, "shard-toast-silver", "glow-toast-silver", "silver")
 		local x = TO.PadX
 		if withIcon then
-			icon(shard.content, "Lock", "icon-menu-lock", TO.PadX, 12, TO.IconSize)
+			icon(shard.content, "Lock", "icon-menu-lock", TO.PadX, 15, TO.IconSize)
 			x += TO.IconExtra
 		end
-		text(shard.content, "Label", str, T.Toast, x, 0, width - x - TO.PadX, TO.Height)
+		text(shard.content, "Label", str, T.Toast, x, TO.TextY, width - x - TO.PadX, TO.TextH)
 		playFx("pop", shard.group, 0)
 		task.delay(MenuConfig.ToastSeconds, function()
 			if toastToken == token and shard.root.Parent then
@@ -598,14 +598,13 @@ function View.build(parent: Instance, handlers: Handlers): View
 
 	local function edges()
 		for index, side in { "Left", "Right" } do
-			local label = text(screen :: Frame, "Edge" .. side, string.rep("MATHSHOW · ", 4), 28, 0, 0, 400, 32, {
+			local label = text(screen :: Frame, "Edge" .. side, string.rep("MATHSHOW · ", 2), 28, 0, 0, 340, 32, {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				Position = UDim2.fromOffset(if index == 1 then 22 else 822, 195),
 				Rotation = if index == 1 then -90 else 90,
 				TextTransparency = 0.945,
 				TextStrokeTransparency = 1,
-				ClipsDescendants = true,
-				ZIndex = 0,
+				ZIndex = 0, -- no clipping: it is ignored on a rotated label and would hide most of the text
 			})
 			label:SetAttribute("FitEdge", true)
 			table.insert(stops, Fx.drift(label))
@@ -799,7 +798,7 @@ function View.build(parent: Instance, handlers: Handlers): View
 		}
 		local shard = newShard("Row" .. key, box, "shard-row-indigo", nil, "blue")
 		local item: Item = { shard = shard, name = key }
-		text(shard.content, "Label", label, T.SettingLabel, 20, 0, 170, 44)
+		text(shard.content, "Label", label, T.SettingLabel, 26, 0, 168, 44)
 		local max = MenuConfig.SettingMax
 		local function square(name: string, str: string, x: number, off: boolean, delta: number)
 			local b = make("ImageLabel", {
@@ -813,7 +812,7 @@ function View.build(parent: Instance, handlers: Handlers): View
 			if off then
 				b.ImageTransparency = MenuTheme.DisabledTransparency
 			end
-			local l = text(b, "Glyph", str, 22, 0, 0, 44, 44, { TextXAlignment = Enum.TextXAlignment.Center })
+			local l = text(b, "Glyph", str, 18, 0, 0, 44, 44, { TextXAlignment = Enum.TextXAlignment.Center })
 			if off then
 				l.TextTransparency = MenuTheme.DisabledTransparency
 			end
@@ -900,7 +899,7 @@ function View.build(parent: Instance, handlers: Handlers): View
 		}
 		local shard = newShard("Row" .. key, box, "shard-row-indigo", nil, "blue")
 		local item: Item = { shard = shard, name = key }
-		text(shard.content, "Label", label, T.SettingLabel, 20, 0, 170, 44)
+		text(shard.content, "Label", label, T.SettingLabel, 26, 0, 168, 44)
 		local t = make("ImageLabel", {
 			Name = "Toggle",
 			Position = UDim2.fromOffset(L.Toggle.x, L.Toggle.y),
