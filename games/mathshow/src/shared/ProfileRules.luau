@@ -172,9 +172,12 @@ function ProfileRules.merge(stored: any, patch: Patch): Profile
 	end
 	base.bestRank = maxOf(base.bestRank, clean.bestRank)
 	base.blitzBest = maxOf(base.blitzBest, clean.blitzBest)
-	if clean.lastTakenAt ~= nil and (base.lastTakenAt == nil or clean.lastTakenAt >= base.lastTakenAt) then
-		base.lastTakenAt = clean.lastTakenAt
-		base.lastTestRank = clean.lastTestRank
+	if clean.lastTakenAt ~= nil then
+		local newer = base.lastTakenAt == nil or clean.lastTakenAt > base.lastTakenAt
+		if newer or (clean.lastTakenAt == base.lastTakenAt and clean.lastTestRank ~= nil) then
+			base.lastTakenAt = clean.lastTakenAt
+			base.lastTestRank = clean.lastTestRank
+		end
 	end
 	return base
 end

@@ -3,7 +3,7 @@ id: TASK-0099
 title: "MathShow Profile Store And Settings Save"
 type: task
 project: GAME-004
-status: in_progress
+status: approved
 priority: medium
 risk: high
 owner: executor
@@ -72,5 +72,9 @@ Deep tier (DataStore + remotes). Baseline: check.sh green, MathShow 134 specs.
 
 
 ## Audits
+Deep tier, one Opus audit: **pass** (AUD-20261027-TASK-0099-01). Minor findings fixed after it: load wait raised to 20 s (above the 14 s backoff), a rejoin waits for the previous leave save, leave saves retry up to 4 times, `merge` no longer clears the stored rank on an equal time without a rank, `apply` documented (send `lastTestRank` with `lastTakenAt`). Left: `userIds` tagging (UpdateAsync takes no options). MathShow specs 152.
 
 ## Outcome
+- `scripts/check.sh` ALL CHECKS PASSED; MathShow 152 specs (baseline 134). Studio verified in an unpublished place (memory mode), plus the simulated load failure. Opus audit pass.
+- **Not verified:** real DataStore reads/writes, autosave and `BindToClose`, a two-server race (needs a published place); real controller/touch.
+- Pending for jg: merge decision.

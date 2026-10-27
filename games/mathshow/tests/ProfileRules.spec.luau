@@ -119,6 +119,14 @@ return function(t: TestRunner.T)
 		t.eq(same.lastTestRank, 3, "equal time takes the patch")
 	end)
 
+	t.test("merge: an equal time without a rank keeps the stored rank", function()
+		local stored = { lastTakenAt = 500, lastTestRank = 2 }
+		local merged = ProfileRules.merge(stored, { lastTakenAt = 500 })
+		t.eq(merged.lastTestRank, 2)
+		t.eq(ProfileRules.merge(stored, { lastTestRank = 9 }).lastTestRank, 2, "a rank without a time is ignored")
+		t.eq(ProfileRules.merge(nil, { lastTakenAt = 10, lastTestRank = 0 }).lastTestRank, 0, "rank 0 is real")
+	end)
+
 	t.test("merge of a stored profile with its own patch is stable", function()
 		local p = ProfileRules.sanitize({
 			bestRank = 3,

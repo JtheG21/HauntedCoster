@@ -43,13 +43,14 @@ local STORE_NAME = "MathShow_Profiles_v1"
 local RETRIES = 4
 local SAVE_DEBOUNCE_SECONDS = 2
 local AUTOSAVE_SECONDS = 60
-local LOAD_WAIT_SECONDS = 10
+local LOAD_WAIT_SECONDS = 20 -- longer than the load backoff (2 + 4 + 8 s), so a slow load is not reported as unavailable
 local DEVELOPMENT_PLACE = RunService:IsStudio() or game.PlaceId == 0
 
 local started = false
 local store: DataStore? = nil
 local storeError = "no DataStore" -- why GetDataStore failed, so load() can tell "unpublished place" from a real outage
 local sessions: { [Player]: Session } = {}
+local releasing: { [number]: Session } = {} -- leave saves still in flight, by userId (a rejoin must wait for them)
 
 local function keyFor(userId: number): string
 	return `p_{userId}`
@@ -172,7 +173,8 @@ function ProfileService.persistence(player: Player): Persistence?
 end
 
 -- Folds a patch into the player's profile and schedules a debounced save. Returns false when nothing was changed
--- (not loaded, read-only). Later tasks (Skill Test, Blitz) call this; clients never do.
+-- (not loaded, read-only). Later tasks (Skill Test, Blitz) call this; clients never do. A patch's lastTestRank is only kept
+-- together with its lastTakenAt (the pair follows the newest test), so always send both.
 function ProfileService.apply(player: Player, patch: ProfileRules.Patch): boolean
 	local session = sessions[player]
 	if not session or (session.persistence ~= "saved" and session.persistence ~= "memory") then
@@ -249,6 +251,11 @@ local function onPlayerAdded(player: Player)
 	if sessions[player] then
 		return
 	end
+	-- A quick rejoin must not read the stored value before the previous visit's save has landed.
+	local deadline = os.clock() + 30
+	while releasing[player.UserId] and os.clock() < deadline and player.Parent do
+		task.wait(0.2)
+	end
 	local session: Session = {
 		profile = ProfileRules.defaults(),
 		persistence = "loading",
@@ -275,13 +282,28 @@ local function onPlayerRemoving(player: Player)
 		return
 	end
 	local userId = player.UserId
+	releasing[userId] = session
 	task.spawn(function()
-		saveNow(userId, session)
-		while session.saving do
-			task.wait(0.1)
+		-- A failed leave save is retried a few times: once the session is dropped nothing else would write it.
+		for attempt = 1, 4 do
+			saveNow(userId, session)
+			while session.saving do
+				task.wait(0.1)
+			end
+			if not session.dirty or session.persistence ~= "saved" then
+				break
+			end
+			if attempt < 4 then
+				task.wait(2)
+			else
+				warn(`[MathShow] giving up saving the profile of {userId} after the player left`)
+			end
 		end
 		if sessions[player] == session then
 			sessions[player] = nil
+		end
+		if releasing[userId] == session then
+			releasing[userId] = nil
 		end
 	end)
 end
