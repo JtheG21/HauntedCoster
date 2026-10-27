@@ -5932,7 +5932,7 @@
       "id": "TASK-0099",
       "title": "MathShow Profile Store And Settings Save",
       "project": "GAME-004",
-      "status": "proposed",
+      "status": "in_progress",
       "risk": "high",
       "depends_on": [
         "TASK-0098"
@@ -5945,11 +5945,25 @@
         "Menu main card shows the real best rank, UNRANKED when none, and RANK UNAVAILABLE when the profile fails to load; settings load on join and save debounced; a DataStore failure warns and never blocks the menu or the match.",
         "check.sh green, MathShow specs rise; Studio run with a DataStore failure simulated; Opus audit (DataStore and remotes)."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-26T19:16:47",
+          "from": "proposed",
+          "to": "ready",
+          "note": "plan approved by jg"
+        },
+        {
+          "time": "2026-10-26T19:16:47",
+          "from": "ready",
+          "to": "in_progress",
+          "note": "started"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0,
-      "tier": "deep"
+      "tier": "deep",
+      "approved_by": "jg"
     },
     {
       "id": "TASK-0100",

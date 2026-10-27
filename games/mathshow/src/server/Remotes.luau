@@ -36,8 +36,24 @@ local function event(name: string): RemoteEvent
 	return remote
 end
 
+local function remoteFunction(name: string): RemoteFunction
+	local existing = parent:FindFirstChild(name)
+	if existing then
+		if not existing:IsA("RemoteFunction") then
+			error(`Remotes: {name} is a {existing.ClassName}, expected RemoteFunction`)
+		end
+		return existing
+	end
+	local remote = Instance.new("RemoteFunction")
+	remote.Name = name
+	remote.Parent = parent
+	return remote
+end
+
 return table.freeze({
 	RoundState = event(Net.RoundState),
 	SubmitAnswer = event(Net.SubmitAnswer),
 	AnswerResult = event(Net.AnswerResult),
+	MenuRequest = remoteFunction(Net.MenuRequest),
+	SettingsSave = event(Net.SettingsSave),
 })
