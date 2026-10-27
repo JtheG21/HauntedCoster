@@ -3,7 +3,7 @@ id: TASK-0100
 title: "MathShow Group Join And Watching Banner"
 type: task
 project: GAME-004
-status: proposed
+status: approved
 priority: medium
 risk: medium
 owner: executor
@@ -53,7 +53,27 @@ Make JOIN SHOW real on the server: players opt in to the Group Battle match, lat
 
 ---
 ## Implementation record
+Deep tier (networking, remotes). Baseline: MathShow 152 specs.
+
+- **Pure (shared/):** `JoinRules` (`participantAt`: only question 1 admits new participants; `isWatching`: joined, not in the match, phase is not Intermission; `validJoin`; `isValidShowState`) with boundary specs. MathShow 152 -> 158. `Net` gains `JoinShow` and `ShowState` and the `ShowStatePayload` type; `MenuConfig.JoinsPer10s = 4`.
+- **Server (RoundService):** per-player `joined` and `joinStamps`; `JoinShow` (validated empty payload, 4 per 10 s) sets `joined` and tells that player; `participant` is decided when question 1 opens (`JoinRules.participantAt`), so before this task every player present became a participant, now only joined players do; `ShowState` is sent to one player on join, on join of the match, at match reset and when question 1 opens. The match loop, scoring and standings are unchanged (they already used `participant`).
+- **Client:** `Menu` fires `JoinShow` before hiding on JOIN SHOW; `Hud` listens to `ShowState`, computes `watching`, hides the answer row, shows the score as a dash and tells the banner via `Hud.setWatchingListener`; `Menu/Watching` draws the banner (`View.build` with `overlay = true`, DisplayOrder 5, between the HUD and the menu) using the same `watching` screen the Preview and the TextFit gate render.
+- **Deviation:** banner text is 15 px, not 17: only y 14..30 of the 44 px banner shard clears 6 px of its cuts. Gate margin 6.5.
+- **Persistence of intent:** `joined` stays true across matches until the player leaves; there is no "leave show" yet.
+
+## Studio verification (Rojo via studio-sync, fresh Play, 1 player)
+- Not joined: the first match ran with 0 participants (`leaderstats published n=0`) and a `SubmitAnswer` was rejected (`notOpen`); the HUD stayed hidden.
+- Joined mid-match (question 2): banner on with `WATCHING . YOU JOIN NEXT MATCH`, answer row hidden, a submit from the watcher rejected. At the next Intermission the banner went off; at question 1 of the next match `ShowState` gave `participant = true`, the submit was accepted and scored (199 points) and the banner stayed off.
+- `JoinShow` burst of 12: 4 `ShowState` replies (rate limit); `{x=1}`, `"join"`, `5`, `{1}`: 0 replies.
+- Real menu path (PLAY -> Group Battle -> JOIN SHOW with mouse): the menu hides, the HUD shows, `ShowState joined = true` arrives.
+- TextFit gate with the new banner state: 1167 rows, 0 failures.
+- **Not verified:** two real clients (a second player joining while the first plays); the score dash was set in code but its text was not read in Studio; controller/touch.
+
 
 ## Audits
+Deep tier, one Opus audit: **pass** (AUD-20261027-TASK-0100-01). Fixed after it: a warn when the JoinShow remote is missing, the stale client comment, a spec for unknown phases. Kept: `sendState` after `sendShow` (commented). MathShow specs 159. The 2-client run moves to TASK-0104.
 
 ## Outcome
+- `scripts/check.sh` ALL CHECKS PASSED; MathShow 159 specs (baseline 152). Studio 1-player run and the TextFit gate (1167 rows, 0 failures) pass. Opus audit pass.
+- **Not verified:** two real clients; the score dash text in Studio; controller/touch.
+- Pending for jg: merge decision.

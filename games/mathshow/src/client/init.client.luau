@@ -3,11 +3,14 @@
 
 local Hud = require(script.Hud)
 local Menu = require(script.Menu)
+local Watching = require(script.Menu.Watching)
 
 Hud.start()
--- The menu opens first. The match loop already runs for every player, so JOIN SHOW only reveals the HUD (no server
--- change, no new remote).
+-- The menu opens first. JOIN SHOW tells the server (JoinShow remote; it decides who is in the match) and reveals the HUD;
+-- a player who joins mid-match sees the WATCHING banner (Hud tells Watching) until the next match.
 Hud.setVisible(false)
+Watching.start()
+Hud.setWatchingListener(Watching.set)
 Menu.start({
 	onJoin = function()
 		Hud.setVisible(true)

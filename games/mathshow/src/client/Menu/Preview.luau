@@ -43,6 +43,7 @@ Preview.States = {
 	{ id = "03c-confirm-group", screen = "confirm_group", model = { flags = ALL_OPEN } },
 	{ id = "17a-settings", screen = "settings", model = { settings = MenuConfig.SettingsDefaults } },
 	{ id = "17b-settings-alt", screen = "settings", model = { settings = UNSETTLED } },
+	{ id = "10-group-watching", screen = "watching", model = {} },
 	{ id = "18-how-to-play", screen = "howto", model = {} },
 	{
 		id = "20-coming-soon",

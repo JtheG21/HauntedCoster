@@ -44,6 +44,7 @@ export type Handlers = {
 	join: () -> (),
 	setting: (key: string, value: number | boolean) -> (),
 }
+export type Options = { overlay: boolean?, name: string?, displayOrder: number? }
 export type View = {
 	gui: ScreenGui,
 	root: Frame,
@@ -201,23 +202,27 @@ end
 -- Build
 ------------------------------------------------------------------------------------------------------------------
 
-function View.build(parent: Instance, handlers: Handlers): View
+-- overlay = no ground and no edge text: a banner drawn over the HUD (Menu/Watching) instead of a menu screen.
+function View.build(parent: Instance, handlers: Handlers, options: Options?): View
+	local overlay = options ~= nil and options.overlay == true
 	local gui = make("ScreenGui", {
-		Name = "MathShowMenu",
+		Name = if options and options.name then options.name else "MathShowMenu",
 		ResetOnSpawn = false,
-		DisplayOrder = 10,
+		DisplayOrder = if options and options.displayOrder then options.displayOrder else 10,
 		ScreenInsets = Enum.ScreenInsets.DeviceSafeInsets,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 		IgnoreGuiInset = false,
 	}, nil) :: ScreenGui
 
-	make("Frame", {
-		Name = "Ground",
-		Size = UDim2.fromScale(1, 1),
-		BackgroundColor3 = C.Ground,
-		BackgroundTransparency = MenuTheme.LobbyOverlayTransparency,
-		BorderSizePixel = 0,
-	}, gui)
+	if not overlay then
+		make("Frame", {
+			Name = "Ground",
+			Size = UDim2.fromScale(1, 1),
+			BackgroundColor3 = C.Ground,
+			BackgroundTransparency = MenuTheme.LobbyOverlayTransparency,
+			BorderSizePixel = 0,
+		}, gui)
+	end
 	local root = make("Frame", {
 		Name = "Root",
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -997,6 +1002,17 @@ function View.build(parent: Instance, handlers: Handlers): View
 		playFx("rise", back.shard.group, 0.4)
 	end
 
+	local function buildWatching()
+		local shard = newShard("Banner", L.WatchBanner, "shard-menu-banner-violet", "glow-menu-banner-violet", "violet")
+		-- The banner shard (480x44) has a cut along the top right and the bottom left: only y 14..30 clears 6 px at every x, so
+		-- the label is 15 px (README 17) and centred.
+		text(shard.content, "Label", MenuCopy.Mode.Group.Watching, T.WatchBanner, 0, 0, 480, 44, {
+			TextXAlignment = Enum.TextXAlignment.Center,
+		})
+		glowLoop({ shard = shard, name = "Banner" }, 0)
+		playFx("rise", shard.group, 0.3)
+	end
+
 	local function render(id: string, model: Model)
 		clearScreen()
 		local frame = make(
@@ -1005,9 +1021,13 @@ function View.build(parent: Instance, handlers: Handlers): View
 			root
 		) :: Frame
 		screen = frame
-		edges()
+		if not overlay then
+			edges()
+		end
 		local ok, err = pcall(function()
-			if id == "main" then
+			if id == "watching" then
+				buildWatching()
+			elseif id == "main" then
 				buildMain(model)
 			elseif id == "modes" then
 				buildModes(model)

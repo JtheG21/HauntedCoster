@@ -23,6 +23,7 @@ local MenuConfig = table.freeze({
 		colorBlind = true,
 		haptics = true,
 	}),
+	JoinsPer10s = 4, -- JoinShow rate limit (ENGINEERING_NEEDS: queue join 4 per 10 s)
 	SettingMax = 10,
 	BlitzTotal = 10, -- questions in a Blitz run (BlitzRules, TASK-0103); also the highest stored blitz best
 	MenuRequestsPer30s = 5, -- server rate limits, ProfileService (ENGINEERING_NEEDS)

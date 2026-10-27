@@ -54,6 +54,8 @@ return table.freeze({
 	RoundState = event(Net.RoundState),
 	SubmitAnswer = event(Net.SubmitAnswer),
 	AnswerResult = event(Net.AnswerResult),
+	JoinShow = event(Net.JoinShow),
+	ShowState = event(Net.ShowState),
 	MenuRequest = remoteFunction(Net.MenuRequest),
 	SettingsSave = event(Net.SettingsSave),
 })
