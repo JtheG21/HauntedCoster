@@ -174,6 +174,7 @@ local MenuCopy = {
 		QuestionTag = "RANK {n} · {tier} · {time}S",
 		TheAnswer = "THE ANSWER",
 		NotQuiteMiss = "NOT QUITE · 1 MISS",
+		NotQuiteMisses = "NOT QUITE · 2 MISSES",
 		Correct = "CORRECT",
 		RankUp = "RANK UP",
 		Held = "RANK HELD",

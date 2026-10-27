@@ -8,12 +8,21 @@ local MenuConfig = table.freeze({
 	SecondaryEnabled = table.freeze({
 		howto = true,
 		practice = true,
-		skilltest = false, -- START on the Skill Test intro: flips on with TASK-0102
+		skilltest = true, -- START on the Skill Test intro (TASK-0102); SkillTestService checks it too
 		leaderboard = false,
 		daily = false,
 		drills = false,
 	}),
 	RetakeCooldownSeconds = 300,
+	-- Skill Test (SkillRules, SkillTestService). jg defaults, TASK-0102: ranks 0-4 typed, 5-9 multiple choice.
+	SkillChoiceFromRank = 5,
+	SkillTypedSeconds = 20,
+	SkillChoiceSeconds = 25,
+	SkillMaxMisses = 2, -- consecutive misses that end a run
+	SkillGraceSeconds = 0.25, -- an answer this late still counts (the HUD's grace)
+	SkillRevealSeconds = 3,
+	SkillStartsPer10s = 4,
+	SkillAnswersPer5s = 6,
 	NameMax = 20,
 	ToastSeconds = 1.6, -- how long the COMING SOON toast stays
 	-- Local-only settings defaults (no SettingsSave yet): README 17a values.

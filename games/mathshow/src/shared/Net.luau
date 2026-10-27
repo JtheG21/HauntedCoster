@@ -6,6 +6,10 @@
 --   AnswerResult server -> one client    AnswerResultPayload
 --   JoinShow     client -> server        (no payload; validated by JoinRules.validJoin)
 --   ShowState    server -> one client    ShowStatePayload (is this player in the match, or watching)
+--   SkillStart   client -> server        (no payload; SkillRules.validStart)
+--   SkillAnswer  client -> server        { attempt, answer } (SkillRules.parseAnswerPayload)
+--   SkillState   server -> one client    SkillStatePayload
+--   SkillResult  server -> one client    SkillResultPayload
 --   MenuRequest  client -> server (RemoteFunction)  { kind: "profile" } -> MenuProfileReply
 --   SettingsSave client -> server        SettingsPayload (validated by ProfileRules.sanitizeSettings)
 
@@ -51,10 +55,39 @@ export type ShowStatePayload = {
 	participant: boolean,
 }
 
+-- state: "question" (no answer in it), "reveal" (correct / correctValue / correctIndex, only here), "ended" (a SkillResult
+-- follows), "cooldown" (retryAt), "unavailable" (profile not loaded, or the Skill Test is switched off).
+export type SkillStatePayload = {
+	state: string,
+	attempt: number, -- the question number within this run, 1-based; echoed by SkillAnswer
+	rank: number, -- the rank this question asks
+	kind: string, -- "integer" | "choice"
+	problem: string?,
+	choices: { string }?,
+	endsAt: number, -- workspace:GetServerTimeNow() based
+	total: number, -- seconds this state lasts
+	misses: number, -- consecutive misses so far
+	retryAt: number?,
+	correct: boolean?, -- reveal only
+	correctValue: number?, -- reveal only, typed
+	correctIndex: number?, -- reveal only, choice
+}
+
+export type SkillResultPayload = {
+	kind: string, -- "first" | "up" | "held"
+	cleared: number?,
+	best: number,
+	retryAt: number,
+}
+
 local Net = table.freeze({
 	RoundState = "RoundState",
 	SubmitAnswer = "SubmitAnswer",
 	AnswerResult = "AnswerResult",
+	SkillStart = "SkillStart",
+	SkillAnswer = "SkillAnswer",
+	SkillState = "SkillState",
+	SkillResult = "SkillResult",
 	JoinShow = "JoinShow",
 	ShowState = "ShowState",
 	MenuRequest = "MenuRequest",

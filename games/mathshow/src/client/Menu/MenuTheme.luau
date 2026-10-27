@@ -151,6 +151,11 @@ MenuTheme.Layout = {
 	-- panel screens (03, 04, 09, 11, 12, 15, 19)
 	Panel = box(52, 56, 500, 224, -2), -- content padding 28 top, 50 left, 44 right
 	Action = box(566, 84, 230, 64, 2), -- README 572: its rotated box ran 2 px into the 44 px right inset
+	SkillProblem = box(52, 46, 580, 186, -2), -- 13: HUD Problem box
+	SkillTimerBar = box(92, 244, 520, 10, -1),
+	SkillInput = box(110, 270, 260, 58, 1),
+	SkillLock = box(382, 270, 150, 58, 1),
+	SkillSeconds = box(646, 64, 154, 130, 0),
 	LadderLink = box(172, 332, 200, 44, 1), -- RANK LADDER beside BACK on the Practice home (not in the README: the ladder had no entry)
 	SideSecondary = box(576, 168, 220, 44, -1), -- README 580: right edge sat on the inset
 	Count = box(588, 60, 200, 160, 3),
