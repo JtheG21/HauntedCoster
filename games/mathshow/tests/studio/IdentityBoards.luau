@@ -141,7 +141,7 @@ end
 
 function IdentityBoards.run(): boolean
 	local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
-	local Identity = script.Parent.Parent:WaitForChild("Identity") :: Instance
+	local Identity = script.Parent.Parent:WaitForChild("Client"):WaitForChild("Identity") :: Instance
 	local Theme = require(Identity:WaitForChild("IdentityTheme")) :: any
 	local Primitives = require(Identity:WaitForChild("Primitives")) :: any
 	local Cards = require(Identity:WaitForChild("Cards")) :: any

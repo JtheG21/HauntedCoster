@@ -89,7 +89,7 @@ Built (all under `games/mathshow/`):
 - Nothing mounted in the HUD or menu; no remote, payload or DataStore change; no existing file edited except the queue.
 
 Not done / not verified:
-- The Studio harness was written and typechecked but **not run in Studio**; AC4 stays open. New `shard-id-*` shards have no ShapeProfiles yet, so the text-fit margin rows say "no profile" until the audited profiles land (PR 151 also rewrites that file).
+- Studio run 2026-10-27 (BuildStamp 535f5e5, fresh Play, client DM): the harness logic ran inline (Studio kept a stale copy of the script after a Rojo hiccup; its path bug is fixed in the repo): 109 rows, 0 failed (48 keep-clear rail rows, 61 text rows; 57 text rows had no shape profile so text-fit margin was not checked). One fixed 844x390 canvas only, so 1920x1080 and phone landscape were not separately exercised; no screenshots compared. AC4 stays open for the text-fit margin and sizes. New `shard-id-*` shards have no ShapeProfiles yet, so the text-fit margin rows say "no profile" until the audited profiles land (PR 151 also rewrites that file).
 - No screenshot comparison to S1-S7 (placeholders only, no ids).
 - Reduced motion / Fx (step 6), payload extension (step 2) and HUD placements (step 5) are left for later tasks.
 
