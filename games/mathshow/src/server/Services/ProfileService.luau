@@ -48,6 +48,7 @@ local DEVELOPMENT_PLACE = RunService:IsStudio() or game.PlaceId == 0
 
 local started = false
 local store: DataStore? = nil
+local storeError = "no DataStore" -- why GetDataStore failed, so load() can tell "unpublished place" from a real outage
 local sessions: { [Player]: Session } = {}
 
 local function keyFor(userId: number): string
@@ -64,6 +65,7 @@ local function getStore(): DataStore?
 	if ok then
 		store = result
 	else
+		storeError = tostring(result)
 		warn(`[MathShow] GetDataStore failed: {result}`)
 	end
 	return store
@@ -86,7 +88,7 @@ local function load(player: Player, session: Session)
 				return ds:GetAsync(keyFor(userId))
 			end)
 		else
-			ok, result = false, "no DataStore"
+			ok, result = false, storeError
 		end
 		if ok then
 			session.profile = ProfileRules.sanitize(result)
