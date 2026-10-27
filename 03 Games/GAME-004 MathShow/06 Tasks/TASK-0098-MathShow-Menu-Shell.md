@@ -3,7 +3,7 @@ id: TASK-0098
 title: "MathShow Menu Shell"
 type: task
 project: GAME-004
-status: in_review
+status: approved
 priority: medium
 risk: low
 owner: executor

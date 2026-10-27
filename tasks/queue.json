@@ -5864,7 +5864,7 @@
       "id": "TASK-0098",
       "title": "MathShow Menu Shell",
       "project": "GAME-004",
-      "status": "in_review",
+      "status": "approved",
       "risk": "low",
       "depends_on": [
         "TASK-0097"
@@ -5895,6 +5895,12 @@
           "from": "in_progress",
           "to": "in_review",
           "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-26T17:05:56",
+          "from": "in_review",
+          "to": "approved",
+          "note": "audit passed; merge needs human approval"
         }
       ],
       "executions": [
@@ -5904,7 +5910,13 @@
           "notes": "check.sh green, MathShow 132 specs, Studio TextFit 1164 rows 0 failures, glyph sheet and behaviour checks; textured visuals blocked on upload"
         }
       ],
-      "audits": [],
+      "audits": [
+        {
+          "time": "2026-10-26T17:05:56",
+          "result": "pass",
+          "report": "06 QA/AUD-20261026-TASK-0098-01.md"
+        }
+      ],
       "revisions": 0,
       "tier": "standard",
       "approved_by": "jg"
