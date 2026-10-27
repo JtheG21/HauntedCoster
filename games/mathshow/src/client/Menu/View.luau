@@ -1004,6 +1004,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 
 	local function buildWatching()
 		local shard = newShard("Banner", L.WatchBanner, "shard-menu-banner-violet", "glow-menu-banner-violet", "violet")
+		-- The banner shard (480x44) has a cut along the top right and the bottom left: only y 14..30 clears 6 px at every x, so
+		-- the label is 15 px (README 17) and centred.
 		text(shard.content, "Label", MenuCopy.Mode.Group.Watching, T.WatchBanner, 0, 0, 480, 44, {
 			TextXAlignment = Enum.TextXAlignment.Center,
 		})
