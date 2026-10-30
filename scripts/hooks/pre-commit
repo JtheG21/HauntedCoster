@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
-# Fast half of scripts/check.sh: format, lint, headless GAME-002 specs, reference lint and the jg-approval guard (~1.5s). CI still runs the full check.
+# Fast half of scripts/check.sh: format, lint, headless specs for the active game, reference lint and the jg-approval guard (~1.5s). CI still runs the full check.
 # Skip once with `git commit --no-verify`.
 set -u
 cd "$(git rev-parse --show-toplevel)"
+. scripts/active-game.env
 fail=0
-stylua --check src tests/luau games/haunted || fail=1
-selene --display-style quiet src tests/luau games/haunted || fail=1
+stylua --check "$ACTIVE_GAME_ROOT" || fail=1
+selene --display-style quiet "$ACTIVE_GAME_ROOT" || fail=1
 lune run scripts/lune/specs || fail=1
 python3 scripts/refs.py lint || fail=1
 python3 scripts/refs.py guard --staged || fail=1
-if [ $fail -ne 0 ]; then echo "pre-commit: a check failed (Luau format: stylua src tests/luau games/haunted; reference notes: see the messages above)"; fi
+if [ $fail -ne 0 ]; then echo "pre-commit: a check failed (Luau format: stylua $ACTIVE_GAME_ROOT; reference notes: see the messages above)"; fi
 exit $fail

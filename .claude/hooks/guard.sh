@@ -43,7 +43,7 @@ if [ "$tool" = "Bash" ] && [ -n "$cmd" ]; then
 		fi
 	fi
 	if grep -Eq "${start}rojo +serve( |$)" <<<"$cmd" && ! grep -q '\.project\.json' <<<"$cmd"; then
-		block "a bare 'rojo serve' serves GAME-001 (default.project.json). Use: rojo serve haunted.project.json (AGENTS.md \"One Rojo server\")"
+		block "a bare 'rojo serve' has no project at the repo root. Use: rojo serve mathshow.project.json (AGENTS.md \"One Rojo server\")"
 	fi
 	if grep -Eq "(^|[[:space:]<=/'\"])\.env([[:space:];|&)'\"]|$)" <<<"$cmd" && ! grep -Eq "${git_cmd}commit( |$)" <<<"$cmd"; then
 		block "the command references .env, which holds credentials (AGENTS.md \"Safety rules\"). Use .env.example for key names; if you only mention the name, rephrase."
@@ -72,7 +72,7 @@ if [ -n "$path" ]; then
 			dir="$(dirname "$dir")"
 		done
 		top="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null || true)"
-		if [ -n "$top" ] && [ -f "$top/haunted.project.json" ]; then
+		if [ -n "$top" ] && [ -f "$top/scripts/active-game.env" ]; then
 			rel="$(git -C "$dir" rev-parse --show-prefix)$rest"
 			case "$rel" in
 			Agents/* | Chats/* | .obsidian/*) block "$rel is on the do-not-edit list (AGENTS.md \"Project map\"): plugin data and settings." ;;

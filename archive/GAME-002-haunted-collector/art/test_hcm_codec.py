@@ -1,11 +1,11 @@
-"""HCM1 encoder round trip (games/haunted/art/hcart/codec.py). The Luau decoder has the twin spec
-games/haunted/tests/MeshCodec.spec.luau, which embeds FIXTURE below."""
+"""HCM1 encoder round trip (art/hcart/codec.py). The Luau decoder has the twin spec
+tests/MeshCodec.spec.luau, which embeds FIXTURE below."""
 
 import sys
 import unittest
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "games" / "haunted" / "art"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from hcart import codec  # noqa: E402
 

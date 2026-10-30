@@ -4,11 +4,11 @@
 # no Rojo server or several, a server for the wrong project (TEST-20261011-02) or the wrong checkout, extra
 # Studio windows (2-player runs fail to start their second client), low memory, and Studio running stale code.
 #
-#   scripts/studio-preflight.sh [--root <checkout>] [--game haunted|mathshow]
+#   scripts/studio-preflight.sh [--root <checkout>] [--game <active slug>|haunted]
 #
 #   --root   the checkout whose code is about to be tested (default: this script's checkout). Rojo must serve it.
-#   --game   which game's Rojo project must be served (default: haunted = haunted.project.json;
-#            mathshow = mathshow.project.json).
+#   --game   which game's Rojo project must be served (default: the active game in scripts/active-game.env;
+#            haunted = the archived GAME-002 project).
 #
 # It changes nothing except the gitignored build stamp: it runs scripts/stamp.sh in that checkout and prints the
 # value Studio must show at ReplicatedStorage.Shared.BuildStamp. The Studio-side checks (place, Edit or Play,
@@ -18,7 +18,8 @@
 set -u
 
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
-game="haunted"
+. "$root/scripts/active-game.env"
+game="$ACTIVE_GAME_SLUG"
 while [ $# -gt 0 ]; do
 	case "$1" in
 	--root)
@@ -42,16 +43,16 @@ while [ $# -gt 0 ]; do
 	esac
 done
 case "$game" in
-haunted) game_name="Haunted Collector" ;;
-mathshow) game_name="MathShow" ;;
+"$ACTIVE_GAME_SLUG") game_name="$ACTIVE_GAME_NAME"; project_path="$ACTIVE_GAME_PROJECT" ;;
+haunted) game_name="Haunted Collector"; project_path="archive/GAME-002-haunted-collector/haunted.project.json" ;;
 *)
-	echo "studio-preflight: unknown game '$game' (haunted or mathshow)" >&2
+	echo "studio-preflight: unknown game '$game' ($ACTIVE_GAME_SLUG or haunted)" >&2
 	exit 2
 	;;
 esac
-project_file="$game.project.json"
-if [ ! -f "$root/$project_file" ]; then
-	echo "studio-preflight: $root is not a $game_name checkout (no $project_file)" >&2
+project_file="$(basename "$project_path")"
+if [ ! -f "$root/$project_path" ]; then
+	echo "studio-preflight: $root is not a $game_name checkout (no $project_path)" >&2
 	exit 2
 fi
 root="$(cd "$root" && pwd -P)"
@@ -90,7 +91,7 @@ while read -r pid ppid exe sub args; do
 	cwd="$(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')"
 	label="Rojo pid $pid: $project on port $port, serving ${cwd:-<unknown cwd>}"
 	if [ "$(basename "$project")" != "$project_file" ]; then
-		fail "$label. That is not $game_name: stop it, then run 'rojo serve $project_file' in $root."
+		fail "$label. That is not $game_name: stop it, then run 'rojo serve $project_path' in $root."
 	elif [ -n "$cwd" ] && [ "$cwd" != "$root" ]; then
 		fail "$label, not the checkout under test. Stop it and serve from $root, or pass --root $cwd if that is the code you mean to test."
 	else

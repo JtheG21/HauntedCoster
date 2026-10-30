@@ -4703,7 +4703,7 @@
       "id": "TASK-0070",
       "title": "Decoration Load Revalidation",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "high",
       "tier": "deep",
       "depends_on": [
@@ -4716,7 +4716,14 @@
         "Valid placements survive save/load unchanged at tiers 0\u20132 and every plot orientation; malformed and boundary data have meaningful specs.",
         "Repairs are reported; check.sh and Studio rejoin evidence pass; schema changes, if needed, require jg approval."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:18",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4725,7 +4732,7 @@
       "id": "TASK-0071",
       "title": "Stable Decoration Identity",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "high",
       "tier": "deep",
       "depends_on": [
@@ -4738,7 +4745,14 @@
         "Store A then stale move B cannot edit C; duplicate store, replayed move, missing ID and reordered replies are covered by behavior tests.",
         "Client/server protocol, saved state and editor use the same identity; check.sh and a 2-client test pass."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:18",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4747,7 +4761,7 @@
       "id": "TASK-0072",
       "title": "Cosmetic Service Behavior Tests",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "high",
       "tier": "deep",
       "depends_on": [
@@ -4760,7 +4774,14 @@
         "Assert unchanged state on malformed/unowned/incompatible/insufficient/full/readonly refusals; test rate wrappers, repeated and stale requests, one debit and one grant.",
         "Cover theme removal, decoration storing and notices during upgrades, and successful real wiring; check.sh and fresh-session results are recorded."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:18",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4769,7 +4790,7 @@
       "id": "TASK-0073",
       "title": "Complete Mansion Theme Preview",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "medium",
       "tier": "standard",
       "depends_on": [
@@ -4782,7 +4803,14 @@
         "Preview never mutates the owned house, profile, gameplay or live models; closing/cancel restores the previous screen and scroll.",
         "Desktop, controller and 300\u2013520 px layouts are verified; physical-device limits remain explicit; check.sh passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:18",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4791,7 +4819,7 @@
       "id": "TASK-0074",
       "title": "Decoration Editor Interaction Completion",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "medium",
       "tier": "standard",
       "depends_on": [
@@ -4805,7 +4833,14 @@
         "If approved, direct placement retains grid, bounded fine adjustment, rotation, valid/invalid feedback, Confirm/Cancel/Move/Store/Exit and stable target identity.",
         "Server validation stays authoritative; cancellation preserves previous placement; touch/controller/desktop journeys are evidenced; check.sh passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:18",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4814,7 +4849,7 @@
       "id": "TASK-0075",
       "title": "Cosmetic Cleanup And Placement Constants",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "medium",
       "tier": "standard",
       "depends_on": [
@@ -4828,7 +4863,14 @@
         "Replace hard-coded entrance keep-out z extents with verified layout data and constrain firstSpot scanning to usable bounds; add boundary evidence.",
         "Remove only proven redundant dirty notifications; state updates, refusal snapshots and toasts remain correct; check.sh and Studio smoke checks pass."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:18",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4837,7 +4879,7 @@
       "id": "TASK-0076",
       "title": "Environment Revision Remediation",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "high",
       "tier": "deep",
       "depends_on": [
@@ -4850,7 +4892,14 @@
         "Verify deterministic random draw behavior, terrain cleanup/generation protection, supported paint heights and collision deviations; preserve approved walk/layout behavior.",
         "Provide the missing hub/habitat/tree captures and reference comparison plus fresh 2-client HauntedTrees results; check.sh passes and jg judges visuals."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:18",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4859,7 +4908,7 @@
       "id": "TASK-0077",
       "title": "Monetization Decision Packet",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "low",
       "tier": "light",
       "depends_on": [
@@ -4872,7 +4921,14 @@
         "Include ADR-0013 options and all seven questions: mechanism; per-item/bundles scope; Robux/regional prices; Listed; publishing/creator; dual-currency race; receipt storage and two-server safety.",
         "All unanswered choices remain open; recommendations are labelled; no product IDs, paid calls, publishing, code or schema changes occur; check.sh passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:19",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4881,7 +4937,7 @@
       "id": "TASK-0078",
       "title": "Art Loading Failure Recovery",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "medium",
       "tier": "standard",
       "depends_on": [
@@ -4894,7 +4950,14 @@
         "An asset becoming ready after an initial timeout can recover through a bounded path; failures use an explicit fallback and retain gameplay.",
         "Overlapping Dressing attaches cannot create duplicate/orphaned visuals; failed-part, delayed-bake and cancellation probes plus timing/memory evidence are recorded; check.sh passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:19",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4903,7 +4966,7 @@
       "id": "TASK-0079",
       "title": "Vacant Plot Decoration Cleanup",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "medium",
       "tier": "standard",
       "depends_on": [
@@ -4916,7 +4979,14 @@
         "A second player assigned the same plot sees only their own decorations; the first player gets their saved placements on rejoin.",
         "Fresh 2-client leave/reassign evidence and check.sh pass."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:19",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4925,7 +4995,7 @@
       "id": "TASK-0080",
       "title": "Monetization And Art Studio Verification",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "high",
       "tier": "deep",
       "depends_on": [
@@ -4939,7 +5009,14 @@
         "Use memory-only isolated profiles for exploit/setup shortcuts; prove rejoin separately in an explicitly approved isolated persistent test namespace, without live data writes.",
         "FullLoop, ExploitProbe, fresh Server specs and two-client appearance/leave behavior are evidenced; phone/desktop shots, bake time and memory are recorded; real device gaps stay explicit."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:19",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4948,7 +5025,7 @@
       "id": "TASK-0081",
       "title": "Finished Cosmetic Asset Brief",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "medium",
       "tier": "standard",
       "depends_on": [
@@ -4961,7 +5038,14 @@
         "jg approves a coherent concept and production scope before modeling; placeholders are never labelled final or used as the quality floor.",
         "Produce scoped per-asset follow-ups with matched-view comparison criteria, neutral/game lighting and gameplay budgets; no uploads or paid generation."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:19",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4970,7 +5054,7 @@
       "id": "TASK-0082",
       "title": "Readonly Cosmetic Mutation Guard",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "high",
       "tier": "deep",
       "depends_on": [
@@ -4983,7 +5067,14 @@
         "A clear retry/refusal reaches the UI; forged remote calls cannot bypass it; explicitly isolated memory-only Studio mode remains usable with its unsaved banner.",
         "Behavior tests cover loading, saved, memory, newer-schema readonly and lock-loss readonly; define scope for existing EconomyService consistently with project policy; check.sh and a 2-client test pass."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:19",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -4992,7 +5083,7 @@
       "id": "TASK-0083",
       "title": "Exhibit Tier Guard Ordering",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "low",
       "tier": "light",
       "depends_on": [
@@ -5004,7 +5095,14 @@
         "setRefusal returns the documented refusal without throwing for nil, strings, tables, NaN, infinities, fractional and out-of-range houseTier values.",
         "Valid sanitized profiles retain existing slot and owned-ghost behavior; meaningful guard specs and check.sh pass."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:19",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -5013,7 +5111,7 @@
       "id": "TASK-0084",
       "title": "FullLoop Capture Secure Investigation",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "high",
       "tier": "deep",
       "depends_on": [
@@ -5026,7 +5124,14 @@
         "A missing owned monster records earlier failed checks and exits clearly instead of throwing at acquiredAt; preserve legitimate capture, transport and securing requirements.",
         "FullLoop and ExploitProbe pass with exact check counts; relevant two-client behavior is evidenced; check.sh passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:19",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -5035,7 +5140,7 @@
       "id": "TASK-0085",
       "title": "Narrow Viewport HUD Navigation",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "medium",
       "tier": "standard",
       "depends_on": [
@@ -5048,7 +5153,14 @@
         "Verify Shop/Mansion header-title spacing, filters, details, Back scroll, Buy/Confirm/pending and editor controls on touch and controller without blocking ordinary gameplay.",
         "Record desktop and phone screenshots plus manual-device limits; check.sh passes."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:19",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0
@@ -5057,7 +5169,7 @@
       "id": "TASK-0086",
       "title": "Accepted Wisp Revision Recovery",
       "project": "GAME-002",
-      "status": "proposed",
+      "status": "archived",
       "risk": "high",
       "tier": "deep",
       "depends_on": [
@@ -5071,7 +5183,14 @@
         "Verify normal/Spectral/Ashen wild, carried, pen and exhibit appearances in fresh Studio; capture matched views against the accepted Wisp and baseline originals, measure budgets, test two-client visibility and imported fallback; check.sh green.",
         "Record every selected commit/file and any omitted dependency; jg reviews visual equivalence and explicitly approves the integration merge."
       ],
-      "history": [],
+      "history": [
+        {
+          "time": "2026-10-30T16:54:19",
+          "from": "proposed",
+          "to": "archived",
+          "note": "archived by jg"
+        }
+      ],
       "executions": [],
       "audits": [],
       "revisions": 0

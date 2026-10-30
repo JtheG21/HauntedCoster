@@ -3,7 +3,7 @@ id: TASK-0071
 title: "Stable Decoration Identity"
 type: task
 project: GAME-002
-status: proposed
+status: archived
 priority: high
 risk: high
 owner: executor
@@ -14,7 +14,7 @@ related:
   - "[[AUD-20261018-TASK-0069-02]]"
   - "[[SYS-Haunted-Monetization-UI]]"
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-30
 tags:
   - workflow/task
 ---
