@@ -51,6 +51,9 @@ if [ "$tool" = "Bash" ] && [ -n "$cmd" ]; then
 	if grep -Eq "${start}gh +pr +merge( |$)" <<<"$cmd"; then
 		ask "Merging needs jg's explicit approval (AGENTS.md \"Safety rules\", 04 Agents/Workflow.md merge procedure)."
 	fi
+	if grep -Eq "${start}python3? +[^ ]*orchestrator\.py( +--root +[^ ]+)? +override-merge( |$)" <<<"$cmd"; then
+		ask "override-merge records a merge over a failed audit; only jg decides that (docs/workflow/TASKS.md)."
+	fi
 	if grep -Eq "${start}rojo +upload( |$)" <<<"$cmd"; then
 		ask "rojo upload publishes to Roblox; publishing needs jg's explicit approval (AGENTS.md \"Safety rules\")."
 	fi

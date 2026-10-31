@@ -47,11 +47,11 @@ if [ -n "$blockers" ]; then
 	exit 1
 fi
 
-scripts/stamp.sh >/dev/null
 echo "serve: $ACTIVE_GAME_ID $ACTIVE_GAME_NAME, project $ACTIVE_GAME_PROJECT, port $port, from $(pwd -P)"
 echo "serve: $(rojo --version). In Studio, open $ACTIVE_GAME_PLACE and connect one Rojo plugin of this same version."
-echo "serve: stamp $(cat "$ACTIVE_GAME_ROOT/src/shared/BuildStamp.txt")"
 if [ $dry_run -eq 1 ]; then
 	exit 0
 fi
+scripts/stamp.sh >/dev/null
+echo "serve: stamp $(cat "$ACTIVE_GAME_ROOT/src/shared/BuildStamp.txt")"
 exec rojo serve "$ACTIVE_GAME_PROJECT" --port "$port"
