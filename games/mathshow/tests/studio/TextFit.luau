@@ -22,6 +22,8 @@ local SIZES: { { name: string, w: number, h: number } } = {
 	{ name = "844x390", w = 844, h = 390 },
 	{ name = "1920x1080", w = 1920, h = 1080 },
 	{ name = "phone 812x375", w = 812, h = 375 },
+	{ name = "1024x768", w = 1024, h = 768 },
+	{ name = "1180x820", w = 1180, h = 820 },
 }
 -- x0, y0, x1, y1 on the 844x390 canvas.
 local ZONES = {
