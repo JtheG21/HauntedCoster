@@ -1,0 +1,74 @@
+{
+  "id": "TASK-0004",
+  "game": "GAME-001",
+  "title": "Ki Burst",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0002"
+  ],
+  "branch": "task/TASK-0004-Ki-Burst",
+  "acceptance": [
+    "Only Ki players can activate it. The charge time is measured on the **server**, so a client can't claim a full charge",
+    "CrackedWall in range breaks once and respawns after 10 s",
+    "HeavyBlock moves the same way for all clients. Its network owner is the server (verified with `GetNetworkOwner`)",
+    "Knockback math specs pass. `check.sh` passes",
+    "The decision on network ownership is recorded in the implementation record (input for an ADR if non-trivial)"
+  ],
+  "evidence": [
+    "06 QA/AUD-20261010-TASK-0004-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0004-Ki-Burst.md",
+  "risk": "medium",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-10T17:03:09",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-10T17:08:26",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-10T17:12:10",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-10T17:16:34",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-10T19:00:36",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-10T17:12:10",
+      "result": "pass",
+      "notes": "check.sh green; specs 28/0; TEST-20261010-06 (tap 0/1.9 studs, full 1.00/17.2 studs, probes a-c rejected/minimum)"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-10T17:16:34",
+      "result": "pass",
+      "report": "06 QA/AUD-20261010-TASK-0004-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
+}

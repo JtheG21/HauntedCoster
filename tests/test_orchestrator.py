@@ -40,7 +40,13 @@ class Base(unittest.TestCase):
         (self.root / "00 Studio" / "budget.json").write_text(json.dumps(b))
 
     def write_queue(self, tasks):
-        (self.root / "tasks" / "queue.json").write_text(json.dumps({"version": 1, "tasks": tasks}))
+        items = self.root / "tasks" / "items"
+        items.mkdir(exist_ok=True)
+        for old in items.glob("*.json"):
+            old.unlink()
+        for n, t in enumerate(tasks):
+            name = t["id"] if not (items / f"{t['id']}.json").exists() else f"{t['id']}-copy{n}"
+            (items / f"{name}.json").write_text(json.dumps(t))
 
     def proj(self):
         return orch.Project(self.root)
@@ -73,7 +79,7 @@ class TestValidation(Base):
         self.assertTrue(any("cycle" in e for e in self.proj().validate()))
 
     def test_invalid_json_reported(self):
-        (self.root / "tasks" / "queue.json").write_text("{nope")
+        (self.root / "tasks" / "items" / "TASK-0001.json").write_text("{nope")
         code, out = self.cli("validate")
         self.assertEqual(code, 2)
         self.assertIn("invalid JSON", out)
@@ -252,9 +258,11 @@ class TestBudgetAndDispatch(Base):
     def test_report_and_state(self):
         code, out = self.cli("report")
         self.assertEqual(code, 0, out)
-        state = json.loads((self.root / "project-state.json").read_text())
-        self.assertIn("TASK-0001", state["needs_human"])
         self.assertTrue(list((self.root / "08 Reviews").glob("HLT-*.md")))
+        self.assertFalse((self.root / "project-state.json").exists())  # calculated, never stored
+        code, out = self.cli("state")
+        self.assertEqual(code, 0, out)
+        self.assertIn("TASK-0001", json.loads(out)["needs_human"])
 
 
 class TestReports(Base):

@@ -1,0 +1,33 @@
+{
+  "id": "TASK-0085",
+  "game": "GAME-002",
+  "title": "Narrow Viewport HUD Navigation",
+  "status": "archived",
+  "tier": "standard",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0061"
+  ],
+  "branch": "task/TASK-0085-Narrow-Viewport-Hud-Navigation",
+  "acceptance": [
+    "At actual simulated widths 300, 390 and 520 px, all HUD/navigation controls fit inside the safe area and remain readable/reachable; no left-edge clipping.",
+    "Verify Shop/Mansion header-title spacing, filters, details, Back scroll, Buy/Confirm/pending and editor controls on touch and controller without blocking ordinary gameplay.",
+    "Record desktop and phone screenshots plus manual-device limits; check.sh passes."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0085-Narrow-Viewport-Hud-Navigation.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:19",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

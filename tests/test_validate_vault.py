@@ -42,7 +42,11 @@ class VaultTest(unittest.TestCase):
         p.write_text(text)
 
     def queue(self, tasks):
-        self.write("tasks/queue.json", json.dumps({"tasks": tasks}))
+        (self.root / "tasks" / "items").mkdir(parents=True, exist_ok=True)
+        for old in (self.root / "tasks" / "items").glob("*.json"):
+            old.unlink()
+        for t in tasks:
+            self.write(f"tasks/items/{t['id']}.json", json.dumps(t))
 
     def errors(self):
         return "\n".join(vv.validate(self.root).errors)
@@ -94,7 +98,7 @@ class VaultTest(unittest.TestCase):
     def test_task_note_not_in_queue_warns(self):
         self.queue([])
         rep = vv.validate(self.root)
-        self.assertTrue(any("isn't in tasks/queue.json" in w for w in rep.warnings))
+        self.assertTrue(any("has no file in tasks/items/" in w for w in rep.warnings))
 
     def test_overview_table_matches_queue(self):
         self.write(f"{GAME}/00 Overview.md", note("GAME-001", "overview", project="GAME-001",

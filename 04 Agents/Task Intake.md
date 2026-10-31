@@ -4,7 +4,7 @@ title: Task Intake
 type: agent
 status: approved
 created: 2026-10-12
-updated: 2026-10-18
+updated: 2026-10-30
 tags:
   - workflow/process
 related:
@@ -21,7 +21,7 @@ The entry point for every task, in any game. [[AGENTS]] holds the rules, [[Workf
 |---|---|---|
 | **Shared** (every game) | `AGENTS.md`, `04 Agents/` (this note, [[Workflow]], `Workflows/`), [[Resource Catalog]], `05 Engineering/` standards, `99 Templates/`, `09 Knowledge/` | One game's balance, assets, map or art direction |
 | **Project** (one game) | `03 Games/GAME-### Name/`: the `00 Overview` (project profile, see [[Game Production Workflow]]), Game Design, Technical Architecture, ADRs, SYS notes; plus the game's code root and Rojo project | Rules that apply to every game (link the shared note instead) |
-| **Task** | The TASK note and its `tasks/queue.json` entry, an optional handoff ([[T - Handoff]]), TEST and AUD notes | Copies of shared or project docs (link them) |
+| **Task** | The TASK note and its `tasks/items/` file, an optional handoff ([[T - Handoff]]), TEST and AUD notes | Copies of shared or project docs (link them) |
 
 ## Start procedure
 1. **Project and task.** `python3 scripts/orchestrator.py status`, the game's `00 Overview`, `git status` and the branch. Run `scripts/preflight.sh` before any state-changing Git operation. Note `get_usage` context tokens in the task note, so `task-close` can log the growth.
@@ -57,7 +57,7 @@ A task may combine categories. The primary one governs the plan; the others add 
 | **Deep** | Shared state, DataStore, security, the core loop, a shared library, a new game, or anything costly to reverse | TASK plus an ADR for each decision, research if uncertain, a multi-player playtest, an Opus first audit |
 
 Pick the lowest tier that covers the risk. Raise it when something surprises you.
-Set `"tier": "light"` on a Light task in `tasks/queue.json`: `record-exec --result pass` then moves it straight to `approved` (no audit); `approve-merge` by jg still gates `done`.
+Set `"tier": "light"` on a Light task in its `tasks/items/` file: `record-exec --result pass` then moves it straight to `approved` (no audit); `approve-merge` by jg still gates `done`.
 
 ## Autonomy: proceed or ask
 **Proceed, and record the assumption in the task note,** when the goal is clear, the acceptance criteria are sufficient, the choice is reversible and low-risk, an existing standard or decision resolves it, and it stays inside approved scope.

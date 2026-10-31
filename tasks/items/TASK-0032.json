@@ -1,0 +1,75 @@
+{
+  "id": "TASK-0032",
+  "game": "GAME-002",
+  "title": "Retaliation Hardening",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0031"
+  ],
+  "branch": "task/TASK-0032-Retaliation-Hardening",
+  "acceptance": [
+    "An error inside the retaliation tick is caught and warned; every pursuit is finished (pursuers roam and can be inspected again) and the loop keeps running.",
+    "An erroring onFled handler is caught and warned, and the fled monster still falls back to the slipped-away removal unless a handler took it.",
+    "A fled capture clears that player's saved counters on the monster, so a retry on a monster that retaliated starts at 0 hits and 0 misses (jg, 2026-10-12).",
+    "The Retaliation scenario checks containment with the player just outside the hub edge and within the give-up distance (pursuit still running, pursuers inside the habitat footprint), and a death ending (Health 0 -> pursuersOf empty).",
+    "setPursuing(nil)'s Inspect re-enable assumption is commented. Retaliation, FullLoop and ExploitProbe pass; scripts/check.sh passes."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261012-TASK-0032-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0032-Retaliation-Hardening.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-12T12:54:47",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-12T12:54:47",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-12T13:04:30",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-12T13:06:11",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-12T13:08:04",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-12T13:04:30",
+      "result": "pass",
+      "notes": "check.sh pass; specs 96/0; Retaliation 31/31 (run 2, seeded counters); FullLoop 85/85; ExploitProbe 13/13 (TEST-20261012-08)"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-12T13:06:11",
+      "result": "pass",
+      "report": "06 QA/AUD-20261012-TASK-0032-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

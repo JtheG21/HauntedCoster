@@ -1,0 +1,48 @@
+{
+  "id": "TASK-0046",
+  "game": "GAME-002",
+  "title": "Mansion, Plot and Ghost Train Art",
+  "status": "archived",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0041"
+  ],
+  "branch": "task/TASK-0046-Mansion-Plot-And-Train-Art",
+  "acceptance": [
+    "The three mansion tiers, containment pen, station and canopy, ghost-train cart, track rails and supports, Scare Arch, Fog Tunnel, exhibit plinths, trophies, beacon and plot entrance are rebuilt; BAD-013/014/017 are not repeated.",
+    "Tier upgrades, house boxes used by decorations, ride, exhibits, pen pads and prompts behave as before.",
+    "Cart and track compared with MIN-057-059 (vehicle finish) and the house tiers with MIN-069 in four views.",
+    "scripts/check.sh passes; FullLoop and Persistence scenarios pass."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0046-Mansion-Plot-And-Train-Art.md",
+  "risk": "medium",
+  "stacked_on": "TASK-0045",
+  "history": [
+    {
+      "time": "2026-10-13T05:11:50",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "time": "2026-10-13T20:50:19",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-18T14:07:12",
+      "from": "in_progress",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0,
+  "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+}

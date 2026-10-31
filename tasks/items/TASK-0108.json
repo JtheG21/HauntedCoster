@@ -1,0 +1,147 @@
+{
+  "id": "TASK-0108",
+  "game": "GAME-004",
+  "title": "Workflow Hardening",
+  "status": "done",
+  "tier": "deep",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    ".agents/skills/art-import/",
+    ".agents/skills/studio-preflight/",
+    ".agents/skills/task-close/",
+    ".claude/hooks/",
+    ".claude/skills/art-import/",
+    ".claude/skills/studio-preflight/",
+    ".claude/skills/task-close/",
+    ".github/workflows/",
+    ".gitignore",
+    ".vscode/settings.json",
+    "00 Studio/Obsidian Conventions.md",
+    "00 Studio/Resource Catalog.md",
+    "00 Studio/Start Here.md",
+    "00 Studio/Studio Index.md",
+    "03 Games/GAME-001 Rg1/00 Overview.md",
+    "03 Games/GAME-002 Haunted Collector/",
+    "03 Games/GAME-003 Hike or Die/00 Overview.md",
+    "03 Games/GAME-004 MathShow/00 Overview.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0108-Workflow-Hardening.md",
+    "04 Agents/",
+    "05 Engineering/Luau Standards.md",
+    "05 Engineering/Multi-Client Testing.md",
+    "05 Engineering/Studio Test Pads.md",
+    "06 QA/",
+    "98 Archive/",
+    "99 Templates/T - Handoff.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "README.md",
+    "archive/",
+    "default.project.json",
+    "docs/workflow/",
+    "experiments/reference-feedback/demo.project.json",
+    "games/haunted/",
+    "games/hike-or-die/",
+    "games/mathshow/assets/",
+    "haunted.project.json",
+    "hike-or-die.project.json",
+    "intake/",
+    "maps/",
+    "project-state.json",
+    "scripts/",
+    "src/",
+    "tasks/queue.json",
+    "tests/"
+  ],
+  "depends_on": [],
+  "branch": "chore/workflow-hardening",
+  "acceptance": [
+    "Only MathShow is active in AGENTS.md, CLAUDE.md and the vault index.",
+    "scripts/check.sh passes on the active game.",
+    "Every archived game still builds with rojo build.",
+    "The queue validates with no files_owned overlap.",
+    "CI paths resolve after the moves.",
+    "All 4 templates and PARALLEL.md contain every required section.",
+    "intake/ exists with the triage table and checklist.",
+    "No dependencies added and no secrets read."
+  ],
+  "evidence": [
+    "docs/workflow/AUDIT-2026-10-30.md",
+    "06 QA/AUD-20261030-TASK-0108-01.md",
+    "06 QA/AUD-20261030-TASK-0108-02.md",
+    "docs/workflow/PR-workflow-hardening.md"
+  ],
+  "notes": "Keeps approved and changes_requested beside the seven requested statuses (jg, 2026-10-30).",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0108-Workflow-Hardening.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-30T16:59:07",
+      "from": "backlog",
+      "to": "in_progress",
+      "note": "plan and all phases approved by jg in chat"
+    },
+    {
+      "time": "2026-10-30T17:09:17",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-30T17:09:17",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-30T17:09:17",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-30T17:11:36",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-30T17:11:36",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-30T17:15:50",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "approved_by": "jg",
+  "revisions": 1,
+  "executions": [
+    {
+      "time": "2026-10-30T17:09:17",
+      "result": "pass",
+      "notes": "check.sh green at ede584f"
+    },
+    {
+      "time": "2026-10-30T17:11:36",
+      "result": "pass",
+      "notes": "revision 1: check.sh green at c0eebe4"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-30T17:09:17",
+      "result": "fail",
+      "report": "06 QA/AUD-20261030-TASK-0108-01.md"
+    },
+    {
+      "time": "2026-10-30T17:11:36",
+      "result": "pass",
+      "report": "06 QA/AUD-20261030-TASK-0108-02.md"
+    }
+  ],
+  "merge_approved_by": "jg"
+}

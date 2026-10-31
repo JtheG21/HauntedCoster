@@ -36,5 +36,5 @@ This packages steps that already exist: AGENTS.md (knowledge protocol #9 and #17
 
 ## 4. Hand off and summarize
 - If work leaves this session (Codex review, another tool, a fresh session), fill `99 Templates/T - Handoff.md`, sized to the task, under the task note's "Handoff" heading.
-- `python3 scripts/orchestrator.py report` to refresh `project-state.json` and the health report; commit them with the task.
+- `python3 scripts/orchestrator.py report` to refresh the health report; commit it with the task.
 - Session summary: the notes created, updated and left pending, and why.
