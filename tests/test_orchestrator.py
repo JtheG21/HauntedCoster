@@ -284,6 +284,19 @@ class TestOverrideMerge(Base):
         self.assertEqual(t["audits"][-1]["merge_override"]["reason"], "placeholders accepted")
         self.assertIn("over failed audit", t["history"][-1]["note"])
 
+    def test_allows_a_blocked_task(self):
+        self.write_queue([task("TASK-0001", "blocked") | {"audits": [{"result": "fail", "report": "a.md"}]}])
+        self.assertEqual(self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "x")[0], 0)
+        self.assertEqual(self.proj().task("TASK-0001")["status"], "done")
+
+    def test_refuses_other_statuses_and_a_later_passing_audit(self):
+        for status in ("review", "approved"):
+            self.write_queue([task("TASK-0001", status) | {"audits": [{"result": "fail", "report": "a.md"}]}])
+            self.assertEqual(self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "x")[0], 2)
+        audits = [{"result": "fail", "report": "a.md"}, {"result": "pass", "report": "b.md"}]
+        self.write_queue([task("TASK-0001", "changes_requested") | {"audits": audits}])
+        self.assertEqual(self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "x")[0], 2)
+
     def test_refuses_without_a_failed_audit_or_a_reason(self):
         self.write_queue([task("TASK-0001", "changes_requested")])
         self.assertEqual(self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "x")[0], 2)

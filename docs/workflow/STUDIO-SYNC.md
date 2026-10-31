@@ -50,6 +50,12 @@ Setup: Studio freshly restarted, `scripts/serve.sh`, `MathShow.rbxl`, only the 7
 
 **Keep doing:** start with `scripts/serve.sh`, and keep one Rojo plugin enabled, matching the server's version.
 
+**HudSpec:** the untracked `games/mathshow/src/shared/HudSpec.json` is gone from the main checkout, which clears its `+dirty` stamp. The file now exists only on this branch, as `docs/design/hud/HudSpec.json`, until the branch merges.
+
+**Play ran from this branch, not `main`:** `git diff main...HEAD` touches nothing under `games/`, so the game code is the same.
+
+**`serve.sh` refusal, checked by hand:** with Rojo on 34872, `--port 34999 --dry-run` exited 1 and named the running server. No automated test covers this branch.
+
 ## Gate results (fresh Play, viewport 1336x669)
 Console: no errors from MathShow. Expected warnings: DataStores unavailable (unpublished place) and placeholder images. `rbxassetid://203785492` failed to load; it isn't in `games/`, and it appeared in Edit before Play too.
 

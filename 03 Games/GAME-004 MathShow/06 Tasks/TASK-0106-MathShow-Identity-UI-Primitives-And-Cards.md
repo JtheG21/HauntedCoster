@@ -109,3 +109,5 @@ Decisions: `IdentityCopy` lives in `shared/`; `Kit.assetId` resolves `AssetIds` 
 
 ## Outcome
 Merged through PR 153, approved by jg in chat (2026-10-30). Modules, primitives and cards are in, and nothing is wired into the HUD or menu. **AC4 is not met:** the text-fit gate ran on one canvas, and 57 rows had no shape profile, so their 6 px margin is unchecked. Asset ids are unset because nothing is uploaded. Audit: [[AUD-20261030-TASK-0106-01]].
+
+**Later, 2026-10-30 (TASK-0110):** the gate ran again: 109 rows, 0 failed, at 844x390 only. AC4 is still not met, because `ShapeProfiles` has no `shard-id-*` profiles. Results: `docs/workflow/STUDIO-SYNC.md`.
