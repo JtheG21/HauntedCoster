@@ -18,7 +18,7 @@ One sentence: what is true when this is done.
 - `path`: why
 
 ## Owned files
-Must match `files_owned` for this task in `tasks/queue.json`. Shared contracts this task consumes but doesn't own: list them here as read-only.
+Must match `files_owned` for this task in its `tasks/items/` file. Shared contracts this task consumes but doesn't own: list them here as read-only.
 -
 
 ## Acceptance criteria and evidence

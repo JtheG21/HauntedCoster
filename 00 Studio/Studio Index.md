@@ -12,7 +12,7 @@ tags:
 
 **New here:** [[Start Here]]
 **Rules:** [[AGENTS]] · [[Obsidian Conventions]] · [[Workflow]] · budget `00 Studio/budget.json`
-**Machine state:** `tasks/queue.json` · `project-state.json` · `python3 scripts/orchestrator.py status`
+**Machine state:** `tasks/items/` · `python3 scripts/orchestrator.py status` and `state`
 
 **Review the new reference collection:** [[Reference Review Index]] (19 notes, original media and review checklist).
 
@@ -39,7 +39,7 @@ tags:
 - `99 Templates/`: `T - *` templates (references: `T - Reference`, handoff prompts: `T - Handoff`)
 
 ## Needs human attention
-`python3 scripts/orchestrator.py status` lists what's waiting on jg; `project-state.json` keeps the same list under `needs_human`.
+`python3 scripts/orchestrator.py state` lists what's waiting on jg under `needs_human`.
 
 ## All notes
 ![[Notes.base]]

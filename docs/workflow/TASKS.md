@@ -1,7 +1,8 @@
-# Task queue schema
+# Task files and schema (version 2)
 
-`tasks/queue.json` is authoritative for task status. `python3 scripts/validate_queue.py` checks this schema, and
-`scripts/check.sh` runs it.
+Each task is one file, `tasks/items/TASK-####.json`, and those files are authoritative for task status. `python3 scripts/validate_queue.py` checks them, and `scripts/check.sh` runs it. It also requires the file name to equal `id`, and fails if there are no task files or a `tasks/queue.json` is still present.
+
+`python3 scripts/orchestrator.py status` lists every task. `state` prints the counts, what is ready and what waits on jg. They are calculated, not stored: `project-state.json` holds only `project`, `phase` and `conventions`.
 
 ## Fields
 
@@ -51,7 +52,24 @@ A file may be in the `files_owned` of **at most one `in_progress` task**. That i
 - Two globs overlap if their fixed prefixes overlap. That is deliberately cautious, so narrow the globs if it complains.
 - See `docs/workflow/PARALLEL.md` for how shared contracts are handled.
 
-## Adding and migrating
-- The orchestrator has no `add` command. Add entries by hand with `ensure_ascii=True` and indent 2, and create the task note.
-- `scripts/migrate_queue.py` upgrades old-format entries and their notes, and it's safe to rerun. PRs opened before this schema
-  add old-format entries: after merging one, run it, set `owner_agent` by hand on any task that isn't finished (and `tier` if it's null), then commit. The validator names what's missing. Expect a text conflict in the queue: keep every entry.
+## How to add a task
+1. Run `python3 scripts/orchestrator.py next-id`, which checks `main` and every branch.
+2. Create one file, `tasks/items/TASK-####.json`, with every field above: indent 2, ASCII only, trailing newline.
+3. Create the task note and set `note_path` to it. The note's `status` must match.
+4. **Never edit another task's file.** Transitions go through the orchestrator, which writes only the file that changed.
+
+If two branches still pick one ID, git reports an add/add conflict on that file. Renumber one of them.
+
+## Migrating a branch
+A branch from before this format has a `tasks/queue.json`. Merging `main` reports a modify/delete conflict on it and usually a conflict on `project-state.json`.
+
+```bash
+git merge origin/main
+git checkout origin/main -- project-state.json
+python3 scripts/migrate-queue-to-items.py
+git add -A
+git commit
+scripts/check.sh
+```
+
+The script upgrades old-format entries, writes the missing task files, mirrors renamed statuses into task notes and removes `queue.json`. If an existing task file differs, it stops, writes nothing and names the task. Check it, then rerun with `--keep-existing` if the existing file is right.

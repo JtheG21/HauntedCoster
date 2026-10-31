@@ -4,7 +4,7 @@ title: Obsidian Conventions
 type: index
 status: approved
 created: 2026-10-10
-updated: 2026-10-12
+updated: 2026-10-30
 tags:
   - studio/conventions
 ---
@@ -13,7 +13,7 @@ tags:
 This is the canonical spec for how project knowledge is stored. `scripts/validate_vault.py` enforces it, and Claude follows it through [[AGENTS]].
 
 ## 1. Vault layout
-The vault is the `Rg1` repo folder (approved, see [[ADR-0001-Repo-Is-Vault]]). Game code stays in `src/`. Machine files stay in `tasks/`, `project-state.json` and `scripts/`.
+The vault is the `Rg1` repo folder (approved, see [[ADR-0001-Repo-Is-Vault]]). Game code stays in `games/<slug>/`, and archived games in `archive/`. Machine files stay in `tasks/`, `project-state.json` and `scripts/`.
 
 | Folder | Holds |
 |---|---|
@@ -27,6 +27,8 @@ The vault is the `Rg1` repo folder (approved, see [[ADR-0001-Repo-Is-Vault]]). G
 | `07 Metrics/` | Playtest metrics, retention, monetization experiments (`EXP-`) |
 | `08 Reviews/` | `REV-` weekly reviews, `HLT-` generated health reports |
 | `09 Knowledge/` | `LES-` lessons, only when backed by evidence |
+| `10 References/` | `REF-` notes and reference material, checked by `scripts/refs.py lint` |
+| `98 Archive/` | Notes retired as outdated, with a reason in its README. Kept as history and skipped by the vault validator's note checks |
 | `99 Templates/` | `T - *.md` note templates |
 
 Leave these alone: `Agents/` and `Chats/` (Smart Second Brain plugin), `.obsidian/`.
@@ -76,7 +78,7 @@ Every note except templates has these fields: `id`, `title`, `type`, `status`, `
 
 Task notes mirror the queue, which uses `backlog` and `review` (`docs/workflow/TASKS.md`); other notes keep `proposed` and `in_review`.
 
-For **tasks**, `tasks/queue.json` is authoritative and the note mirrors it (the orchestrator updates both):
+For **tasks**, the file in `tasks/items/` is authoritative and the note mirrors it (the orchestrator updates both):
 
 | Status | Task meaning |
 |---|---|
@@ -96,7 +98,7 @@ For an **ADR**, `approved` means accepted by a human. For an **audit**, `done` m
 | Information | Authority |
 |---|---|
 | Game code | Git (`src/`) |
-| Task status | `tasks/queue.json` (mirrored to the task note). If they disagree, the validator flags it; nobody guesses |
+| Task status | `tasks/items/` (mirrored to the task note). If they disagree, the validator flags it; nobody guesses |
 | Approved game design | `01 Game Design.md` plus approved ADRs |
 | Research, lessons | Obsidian notes |
 | Audit evidence | `06 QA/AUD-*` (versioned in Git) |
