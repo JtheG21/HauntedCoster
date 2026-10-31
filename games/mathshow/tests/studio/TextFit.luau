@@ -532,6 +532,9 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 		end
 	end
 
+	if string.find(state, "05a-vs-found", 1, true) then
+		print(`[TextFit] DEBUG {state} labels={#labelBoxes} rowsSoFar={#rows}`)
+	end
 	-- 5. Review rows: gap between neighbouring Row<n> controls, per column. Diagnostic, with a gate at REVIEW_GAP_MIN.
 	local groups: { [string]: { { inst: GuiObject, box: { number }, parent: Instance } } } = {}
 	for _, d in root:GetDescendants() do
