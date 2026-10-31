@@ -2,7 +2,7 @@
 
 **Reserved ID:** TASK-0109. It's the next free number across `main` and every branch, whose highest is TASK-0108. **Tier:** standard.
 
-**Status:** waiting for jg's "approved". Recon ran read-only against `main` at `7fdef5c`. No task has moved and nothing is pushed.
+**Status:** approved by jg with all seven decisions on 2026-10-30, and Phases 1 to 3 are done on this branch. Recon ran read-only against `main` at `7fdef5c`. Nothing is pushed. The 7 leftover files were deleted from the main checkout. The CI table below is as of recon.
 
 ## Recommendation
 - One file per task at `tasks/items/TASK-####.json`.
@@ -104,12 +104,88 @@ tasks/
 - **Rule for agents:** add one file; never edit another task's file.
 - **Migration:** `scripts/migrate-queue-to-items.py`, committed so open branches can run it. It reads whichever `queue.json` is present, upgrades old-format entries, writes missing item files and removes `queue.json`. If an item already exists and differs, it stops and names the task instead of overwriting.
 
-## After approval
-- **Phase 1:** one migration commit, then the code and docs. TASK-0109 is added as its own item file.
-- **Phase 2:** two-branch merge test in a temporary clone, `check.sh`, task count (98 plus TASK-0109, so 99), hook tests, then one Sonnet audit as `AGENTS.md` requires for Standard tasks.
-- **Phase 3:** written plan only. **`chore/workflow-hardening-report` needs no steps:** it merged as PR 156 and was deleted. Expected order, to be confirmed against the sharded `main`:
-  1. 151 and 152: merge `main`, run the migration script, run `check.sh`.
-  2. 154: merge updated 151; 153: merge updated 152. This also clears the conflict above and lets CI run.
-  3. Stop. jg approves pushes per branch.
+## Phase 2 results
 
-No file under `games/` changes in any phase.
+Run from `dc62848` in a temporary clone. Each branch added its own task file and note, appended a ledger line, then changed its own status with `orchestrator.py approve`.
+
+```
+$ git merge --no-edit b-TASK-0901
+Fast-forward
+unmerged files: 0
+$ git merge --no-edit b-TASK-0902
+Auto-merging tasks/usage-ledger.jsonl
+Merge made by the 'ort' strategy.
+unmerged files: 0
+tasks: 101 task files, 1 in_progress, 0 errors
+```
+
+Both ledger lines survived. The same exercise on the old format:
+```
+CONFLICT (content): Merge conflict in tasks/queue.json
+```
+
+| Check | Result |
+|---|---|
+| Tasks before and after | 98 and 98, all identical in content when compared with the old queue. TASK-0109 makes 99 |
+| `validate_queue.py` | `tasks: 99 task files, 1 in_progress, 0 errors` |
+| `scripts/check.sh` | All 12 steps pass, exit 0 |
+| Hook tests | 17 tests, OK |
+| `git diff --stat main -- games/` | Empty |
+
+## Phase 3: updating the open PRs
+
+**Do this only after this branch has merged to `main`. jg approves each push.** `chore/workflow-hardening-report` needs no steps: it merged as PR 156 and was deleted.
+
+Every step below was rehearsed in a temporary clone, using this branch as `main`:
+
+| Branch | Conflicts during its update | Task files written | `check.sh` | `games/` changes |
+|---|---|---|---|---|
+| 151 | `project-state.json` | None (it has no task) | Pass | 0 |
+| 152 | `project-state.json`, `tasks/queue.json` | TASK-0105 | Pass | 0 |
+| 154 | `project-state.json`, `tasks/queue.json` | TASK-0107 | Pass | 0 |
+| 153 | `project-state.json`, `tasks/queue.json` | TASK-0106 | Pass | 0 |
+
+Afterwards, 152 with 153 and 151 with 154 had no conflicts. Merging all four onto the sharded base in order also had no conflicts: `check.sh` passed, with 102 task files and 275 specs.
+
+### Order
+1. Merge this branch to `main`.
+2. Update and push **151**, then **152**, because each has `main` as its base.
+3. Update and push **154**, from updated 151, and **153**, from updated 152. CI should then run on both, because the conflicts with their bases are gone.
+4. Merge in any order that respects the stacks, retargeting a child to `main` when its base merges. Each merge should be clean.
+
+### Commands
+**151:** in `/Users/jg/Desktop/Rg1-worktrees/mathshow-art-v2`
+```bash
+git fetch origin
+scripts/preflight.sh --root "$PWD" --branch chore/mathshow-art-v2-shapefit --clean && git merge --no-commit --no-ff origin/main
+git checkout origin/main -- project-state.json
+python3 scripts/migrate-queue-to-items.py
+git add -A
+scripts/preflight.sh --root "$PWD" --branch chore/mathshow-art-v2-shapefit && git commit -m "chore: merge main and move to task files"
+scripts/check.sh
+```
+
+**152:** the same in `/Users/jg/Desktop/Rg1-worktrees/task-0105`, with `--branch task/TASK-0105-rules-foundation`.
+
+**154:** in `/Users/jg/Desktop/Rg1-worktrees/task-0107`, after 151 is pushed
+```bash
+git fetch origin
+scripts/preflight.sh --root "$PWD" --branch task/TASK-0107-menu-art-v2 --clean && git merge --no-commit --no-ff origin/chore/mathshow-art-v2-shapefit
+git checkout origin/chore/mathshow-art-v2-shapefit -- project-state.json
+python3 scripts/migrate-queue-to-items.py
+git add -A
+scripts/preflight.sh --root "$PWD" --branch task/TASK-0107-menu-art-v2 && git commit -m "chore: merge base and move to task files"
+scripts/check.sh
+```
+
+**153:** the same as 154 in `/Users/jg/Desktop/Rg1-worktrees/task-0106`, with `--branch task/TASK-0106-identity-ui` and `origin/task/TASK-0105-rules-foundation` as the base.
+
+**After each `check.sh` passes, and once jg approves that branch:**
+```bash
+scripts/preflight.sh --root "$PWD" --branch <branch> --clean && git push origin <branch>
+```
+
+### If something differs
+- **The script says a task file differs:** the entry has changed on one side since this rehearsal, for example a status change after a merge. It writes nothing. Compare the two, then rerun with `--keep-existing` if the existing file is right.
+- **Any conflict outside these two files:** stop and report it. None appeared in the rehearsal, but new commits could change that.
+- **This branch's upstream:** it was created from `origin/main`, so push it with `git push -u origin chore/queue-sharding`, not a bare `git push`.
