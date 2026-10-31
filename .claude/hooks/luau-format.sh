@@ -18,7 +18,7 @@ top="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null)" || exit 0
 [ -f "$top/stylua.toml" ] && [ -f "$top/selene.toml" ] || exit 0
 rel="$(git -C "$dir" rev-parse --show-prefix)$(basename "$path")"
 case "$rel" in
-src/* | tests/luau/* | games/*) ;;
+games/* | archive/*) ;;
 *) exit 0 ;; # third-party skills, maps and other files check.sh doesn't own
 esac
 

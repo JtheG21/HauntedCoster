@@ -665,7 +665,7 @@ def iso(ts: str) -> datetime.datetime:
 def task_cycle(t: dict) -> dict:
     hist = t.get("history", [])
     start = next((iso(h["time"]) for h in hist if h.get("to") == "in_progress"), None)
-    review = next((iso(h["time"]) for h in hist if h.get("to") == "in_review"), None)
+    review = next((iso(h["time"]) for h in hist if h.get("to") in ("review", "in_review")), None)
     return {"revisions": t.get("revisions", 0), "executions": len(t.get("executions", [])),
             "audits": len(t.get("audits", [])),
             "hours": round((review - start).total_seconds() / 3600, 1) if start and review else None}
@@ -714,7 +714,7 @@ def cmd_ledger(root: Path, only: str | None) -> int:
         print(f"{tid:10} {t['status']:12} {c['revisions']:3} {c['executions']:4} {c['audits']:3} "
               f"{str(c['hours']) if c['hours'] is not None else 'n/a':6} {str(tok) if tok else 'n/a':8} {floor:17} "
               f"{', '.join(sorted(task_refs[tid]))}")
-    print("Hours run from first start to first in_review; tokens are only what record-usage logged. Interview length and "
+    print("Hours run from first start to first review; tokens are only what record-usage logged. Interview length and "
           "prompt count are not recorded by the queue: note them in the task. This is evidence for jg, not a verdict.")
     return 0
 

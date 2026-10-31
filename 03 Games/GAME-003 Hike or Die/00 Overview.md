@@ -5,18 +5,18 @@ type: overview
 project: GAME-003
 status: blocked
 created: 2026-10-18
-updated: 2026-10-25
+updated: 2026-10-30
 tags:
   - game/overview
 ---
 
 # GAME-003: Hike or Die
 
-**Paused (jg, 2026-10-25):** GAME-004 MathShow is now the studio's active game. Hike or Die stops at the Gate 1 state below; no further work on it unless a task says so.
+**Archived (paused by jg, 2026-10-25).** GAME-004 MathShow is the active game ([[AGENTS]]). Code: `archive/GAME-003-hike-or-die/`. Hike or Die stops at the Gate 1 state below; no further work on it unless a task says so.
 
 **Phase:** Gate 1 — prove the photographic risk/reward loop. The project is a candidate and is not the studio's active game. The design source is Hike_or_Die_GAME-003_Gate_1_Brief.md (2026-10-18). Gate 1 is not a production or commercial greenlight.
 
-**Code:** implemented as an isolated source root at games/hike-or-die/ with hike-or-die.project.json and a local Rojo build output, separate from default.project.json (GAME-001) and haunted.project.json (GAME-002). No published place is part of this task.
+**Code:** an isolated source root at archive/GAME-003-hike-or-die/ with its hike-or-die.project.json and a local Rojo build output. No published place is part of this task.
 
 **Status:** An isolated existence prototype is approved for merge under [[TASK-0087-Hike-Or-Die-Gate-1]]. jg reports the camera still does not work; repair, physical touch evaluation and a successful full-loop test are deferred. This does not activate GAME-003 or authorize release. Task status remains in tasks/queue.json.
 

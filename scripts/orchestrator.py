@@ -4,7 +4,7 @@
 Tracks tasks in tasks/queue.json (authoritative), mirrors each task's status into
 its Obsidian note, enforces approval gates and revision limits, records a usage
 ledger, updates project-state.json and writes Markdown health reports.
-Statuses follow 00 Studio/Obsidian Conventions.md.
+Statuses and fields follow docs/workflow/TASKS.md.
 It never calls an AI itself: `dispatch` builds the prompt and, in dry-run mode
 (the only mode currently enabled), prints what it would run.
 
@@ -21,16 +21,16 @@ import sys
 from pathlib import Path
 
 STATES = {
-    "inbox", "research", "proposed", "ready", "in_progress", "blocked",
-    "in_review", "changes_requested", "approved", "done", "archived",
+    "backlog", "ready", "in_progress", "blocked",
+    "review", "changes_requested", "approved", "done", "archived",
 }
 TERMINAL = {"done", "archived"}
-NEEDS_HUMAN = ("proposed", "approved", "blocked")
+NEEDS_HUMAN = ("backlog", "approved", "blocked")
 GEN_START = "<!-- orchestrator:generated:start -->"
 GEN_END = "<!-- orchestrator:generated:end -->"
 RISKS = {"low", "medium", "high"}
 ID_RE = re.compile(r"^TASK-\d{4}$")
-REQUIRED = ("id", "title", "status", "risk", "depends_on", "acceptance_criteria")
+REQUIRED = ("id", "title", "status", "risk", "depends_on", "acceptance")
 USAGE_KINDS = {"subscription", "api"}
 
 
@@ -96,12 +96,12 @@ class Project:
                 errors.append(f"{tid}: invalid status '{t.get('status')}'")
             if t.get("risk") not in RISKS:
                 errors.append(f"{tid}: invalid risk '{t.get('risk')}'")
-            if not t.get("acceptance_criteria"):
+            if not t.get("acceptance"):
                 errors.append(f"{tid}: needs at least one acceptance criterion")
             for dep in t.get("depends_on", []):
                 if dep not in ids:
                     errors.append(f"{tid}: depends on unknown task {dep}")
-            note = t.get("note")
+            note = t.get("note_path")
             if note and not (self.root / note).exists():
                 errors.append(f"{tid}: note not found: {note}")
         errors += self._cycles()
@@ -180,7 +180,7 @@ class Project:
 
     def _sync_note(self, t: dict) -> None:
         """Mirror status/updated into the task note's frontmatter (queue is authoritative)."""
-        rel = t.get("note")
+        rel = t.get("note_path")
         if not rel:
             return
         path = self.root / rel
@@ -212,7 +212,7 @@ class Project:
 
     def approve(self, task_id: str, by: str) -> None:
         t = self.task(task_id)
-        self._expect(t, "proposed")
+        self._expect(t, "backlog")
         t["approved_by"] = by
         self._move(t, "ready", f"plan approved by {by}")
 
@@ -239,7 +239,7 @@ class Project:
         self._expect(t, "in_progress")
         t.setdefault("executions", []).append({"time": now(), "result": result, "notes": notes})
         if result == "pass":
-            self._move(t, "in_review", "execution checks passed")
+            self._move(t, "review", "execution checks passed")
             if t.get("tier") == "light":
                 self._move(t, "approved", "Light tier: no audit; merge needs human approval")
         else:
@@ -247,7 +247,7 @@ class Project:
 
     def record_audit(self, task_id: str, result: str, report: str) -> None:
         t = self.task(task_id)
-        self._expect(t, "in_review")
+        self._expect(t, "review")
         if not (self.root / report).exists():
             raise OrchestratorError(f"audit report not found: {report}")
         t.setdefault("audits", []).append({"time": now(), "result": result, "report": report})
@@ -259,7 +259,7 @@ class Project:
     def request_changes(self, task_id: str, by: str, reason: str) -> None:
         """Human sends an audited (or in-review) task back for fixes. Counts as a revision."""
         t = self.task(task_id)
-        self._expect(t, "in_review", "approved")
+        self._expect(t, "review", "approved")
         self._fail(t, f"changes requested by {by}: {reason}")
 
     def approve_merge(self, task_id: str, by: str) -> None:
@@ -271,8 +271,8 @@ class Project:
     def unblock(self, task_id: str, to: str, by: str) -> None:
         t = self.task(task_id)
         self._expect(t, "blocked")
-        if to not in ("ready", "proposed", "archived"):
-            raise OrchestratorError("unblock target must be ready, proposed or archived")
+        if to not in ("ready", "backlog", "archived"):
+            raise OrchestratorError("unblock target must be ready, backlog or archived")
         t["revisions"] = 0
         self._move(t, to, f"unblocked by {by}")
 
@@ -296,14 +296,14 @@ class Project:
 
     # ---- dispatch (dry-run) ---------------------------------------------
     def build_prompt(self, t: dict, role: str) -> str:
-        note = t.get("note", f"(task note for {t['id']})")
+        note = t.get("note_path", f"(task note for {t['id']})")
         lines = [
             f"You are the {role.upper()} for task {t['id']}: {t['title']}.",
             f"Follow '04 Agents/{role.capitalize()}.md' exactly. Read CLAUDE.md and '{note}'.",
             "Read only the files listed in the spec unless blocked; do not scan the whole repo.",
         ]
         # Scope comes from fields the queue and note already hold; nothing new is stored.
-        criteria = t.get("acceptance_criteria") or []
+        criteria = t.get("acceptance") or []
         if isinstance(criteria, str):
             criteria = [criteria]
         if criteria:
@@ -323,8 +323,8 @@ class Project:
 
     def dispatch(self, task_id: str, role: str, live: bool) -> str:
         t = self.task(task_id)
-        expected = {"executor": ("in_progress",), "auditor": ("in_review",),
-                    "planner": ("proposed",), "researcher": ("proposed", "research")}[role]
+        expected = {"executor": ("in_progress",), "auditor": ("review",),
+                    "planner": ("backlog",), "researcher": ("backlog",)}[role]
         self._expect(t, *expected)
         reason = self.budget_block_reason(task_id)
         if reason:
@@ -371,7 +371,7 @@ class Project:
             "| Task | Title | Status | Risk | Revisions |", "|---|---|---|---|---|",
         ]
         for t in self.tasks:
-            name = Path(t["note"]).stem if t.get("note") else t["id"]
+            name = Path(t["note_path"]).stem if t.get("note_path") else t["id"]
             lines.append(f"| [[{name}]] | {t['title']} | {t['status']} | {t['risk']} | {t.get('revisions', 0)} |")
         needs = [t for t in self.tasks if t["status"] in NEEDS_HUMAN]
         lines += ["", "## Needs human"]
@@ -423,7 +423,7 @@ def cycle_report(proj: "Project") -> str:
 
 def files_expected(proj: "Project", t: dict) -> tuple[set[str], bool]:
     """Paths listed under '## Files expected to change' in the task note, and whether its Tests mention Studio."""
-    note = proj.root / t.get("note", "")
+    note = proj.root / t.get("note_path", "")
     if not note.is_file():
         return set(), False
     text = note.read_text(encoding="utf-8")
@@ -491,7 +491,7 @@ def main(argv: list[str] | None = None) -> int:
         s.add_argument("id")
         s.add_argument("--by", required=True, help="name of the human approving")
     s = sub.add_parser("start"); s.add_argument("id")
-    s = sub.add_parser("request-changes", help="HUMAN: send an in_review/approved task back for fixes (counts as a revision)")
+    s = sub.add_parser("request-changes", help="HUMAN: send a review/approved task back for fixes (counts as a revision)")
     s.add_argument("id"); s.add_argument("--by", required=True); s.add_argument("--reason", required=True)
     s = sub.add_parser("unblock"); s.add_argument("id"); s.add_argument("--to", required=True); s.add_argument("--by", required=True)
     s = sub.add_parser("record-exec"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--notes", default="")
@@ -525,7 +525,7 @@ def main(argv: list[str] | None = None) -> int:
                 block = proj.budget_block_reason(t["id"])
                 print(f"{t['id']} ({t['status']}): {t['title']}" + (f"  [BLOCKED: {block}]" if block else ""))
             if not ready:
-                print("nothing ready (approve a proposed task, or finish dependencies)")
+                print("nothing ready (approve a backlog task, or finish dependencies)")
             if a.parallel_safe:
                 print(parallel_report(proj))
             return 0

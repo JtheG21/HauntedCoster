@@ -1,29 +1,43 @@
 # AGENTS.md: operating rules for AI agents in this studio
 
-Permanent instruction file; `CLAUDE.md` imports it. Roles: `04 Agents/` (only copy). Naming and metadata:
-`00 Studio/Obsidian Conventions.md`. Process: `04 Agents/Workflow.md`.
+The canonical rulebook. `CLAUDE.md` imports it and adds Claude-only notes; if another document disagrees, this file and
+`tasks/queue.json` win. Roles: `04 Agents/`. Naming and metadata: `00 Studio/Obsidian Conventions.md`. Process:
+`04 Agents/Workflow.md`. Vault entry point: `00 Studio/Start Here.md`.
 
 **Starting any task:** follow `04 Agents/Task Intake.md` (start procedure, category workflows in `04 Agents/Workflows/`,
-proceed-or-ask, handoffs). Check `00 Studio/Resource Catalog.md` before building anything that might exist.
-Approved in [[ADR-0009-Shared-Production-Foundation]] (jg, 2026-10-12).
+proceed-or-ask, handoffs). Check `00 Studio/Resource Catalog.md` before building anything that might exist. New material
+of any kind goes through `intake/README.md`. Approved in [[ADR-0009-Shared-Production-Foundation]] (jg, 2026-10-12).
+
+## Active game
+**GAME-004 MathShow:** a timed math gameshow. `scripts/active-game.env` is the one machine-readable record; tools read it.
+
+| | |
+|---|---|
+| Design | `games/mathshow/DESIGN.md`, notes in `03 Games/GAME-004 MathShow/` |
+| Code | `games/mathshow/src/{server,shared,client}`, tests in `games/mathshow/tests` |
+| Rojo project | `mathshow.project.json`. **Only this reaches the game.** |
+| Place | `MathShow.rbxl` (local, gitignored) |
+
+| Source | Studio |
+|---|---|
+| `src/shared` | `ReplicatedStorage.Shared` |
+| `src/server` | `ServerScriptService.Server` |
+| `src/client` | `StarterPlayer.StarterPlayerScripts.Client` |
+| `tests` | `TestService.Tests` |
+| `tests/studio` | `StarterPlayer.StarterPlayerScripts.StudioTests` (client-side Studio gates) |
+
+**Archived:** GAME-001 Rg1, GAME-002 Haunted Collector and GAME-003 Hike or Die, in `archive/<id>-<slug>/`. Source material
+only; don't change them unless a task says so. Table, build commands and old-to-new path map: `archive/README.md`.
 
 ## Project map
-- **Active game: GAME-004 MathShow** (`03 Games/GAME-004 MathShow/`): a timed math gameshow. Design: `games/mathshow/DESIGN.md`.
-  Code: `games/mathshow/src/server|shared|client` and `games/mathshow/tests`, synced by **`mathshow.project.json`** into
-  `MathShow.rbxl`. **Only these reach that game.**
-- Paused: GAME-003 Hike or Die (`games/hike-or-die`, `hike-or-die.project.json`), GAME-002 Haunted Collector (`games/haunted`,
-  `haunted.project.json`) and GAME-001 Rg1 (`src/`, `tests/luau`, `default.project.json`). Source material only. Don't
-  change them unless a task says so.
-- **One Rojo server, matched to its place.** Check what's serving first (`ps aux | grep "rojo serve"`). Never connect a
-  project file to another game's place: it pulls that game's Baseplate, Lighting and scripts in ([[TEST-20261011-02]]).
-  Switching branches under a running server can crash Rojo ([[LES-0003-Rojo-Crash-On-Branch-Switch]]); use a worktree.
-- Machine state (authoritative for task status): `tasks/queue.json`, `tasks/usage-ledger.jsonl`, `project-state.json`.
-  Policy: `00 Studio/budget.json`. Task IDs come from the queue; never invent one.
-- Tools: `scripts/check.sh` (run as `scripts/check.sh 2>&1 | tail -30`), `scripts/new-service.sh <game> <Name>` (stamps
-  Service, Config, Rules, spec; use it instead of hand-writing boilerplate), `scripts/orchestrator.py` (task gates),
-  `scripts/validate_vault.py`, `scripts/refs.py`, `scripts/typecheck.sh`, `scripts/preflight.sh` (Git checkout guard),
-  `scripts/studio-preflight.sh` (before a Play test).
-- Project skills: `task-close`, `studio-preflight`, `art-import`, `codex-handoff`, `reference-review`, `reference-brief`
+- **One Rojo server, matched to its place.** Check what's serving first (`ps aux | grep "rojo serve"`). Always name the project
+  (`rojo serve mathshow.project.json`). Never connect a project file to another game's place: it pulls that game's Baseplate,
+  Lighting and scripts in ([[TEST-20261011-02]]). Switching branches under a running server can crash Rojo
+  ([[LES-0003-Rojo-Crash-On-Branch-Switch]]); use a worktree. Disk is the source of truth: never edit scripts in Studio.
+- Machine state (authoritative for task status): `tasks/queue.json` (schema: `docs/workflow/TASKS.md`),
+  `tasks/usage-ledger.jsonl`, `project-state.json`. Policy: `00 Studio/budget.json`. Task IDs come from the queue, and from
+  open branches that add to it; never invent one.
+- Project skills: `task-close`, `studio-preflight`, `art-import`, `codex-handoff`, `reference-brief`, `reference-review`
   in `.claude/skills/`, mirrored in `.agents/skills/` for Codex (`tests/test_claude_hooks.py` keeps them equal).
 - Roblox API reference: `~/Code/creator-docs` (refresh: `git -C ~/Code/creator-docs pull`). Unsure of an API? Grep
   `content/en-us/reference/engine/{classes,datatypes,enums}/<Name>.yaml`. If the clone is missing, say so; don't guess.
@@ -31,50 +45,80 @@ Approved in [[ADR-0009-Shared-Production-Foundation]] (jg, 2026-10-12).
   Research is evidence, not approval; a `proposed` LES isn't a rule until jg approves it.
 - The vault is this repo, in numbered folders (`00 Studio` … `99 Templates`). **Do not edit:** `Agents/`, `Chats/`, `.obsidian/`.
 
+## Commands
+- `scripts/check.sh 2>&1 | tail -30`: the required gate for the active game; one summary line per step, non-zero on any failure.
+  `scripts/check.sh --archive`: archived games, on demand.
+- `scripts/new-service.sh mathshow <Name>`: stamps Service, Config, Rules and spec. Use it instead of hand-writing boilerplate.
+- `scripts/preflight.sh --root <checkout> --branch <name> [--clean]`: before any state-changing Git operation.
+- `scripts/studio-preflight.sh [--root <checkout>]`: Rojo, Studio windows, memory and build stamp before a Studio run.
+- `python3 scripts/orchestrator.py status|next|approve|start|record-exec|record-audit|approve-merge|report ...` (`--help`).
+- `python3 scripts/validate_queue.py`: queue schema and `files_owned` overlap. `python3 scripts/validate_vault.py`: note
+  conventions, links, queue and note sync. `scripts/typecheck.sh`: strict Luau types.
+- `python3 scripts/refs.py list|brief|trace|lint|guard|new`: the `10 References/` library. `review-next|decide`: review with jg
+  (`decide ... --apply` records it; dry run by default). `pin|drift|rights|ledger`: commit pins, upstream drift, the licence gate
+  (`rights --check ID --use code|asset|method`) and task cost. `actions [--by-blocker]`: outcomes and what each waits on.
+  `REFS_JG_APPROVED=1` lets a commit jg asked for change an Intent section or approve a note. The guard refuses (no override)
+  any staged file byte-identical to one in `~/Roblox-Work/resource-packs/`: those licences forbid storing pack files in a repo.
+- `python3 scripts/evidence.py matrix|silhouette|frames|strip|beats|sheet|stats|series|audio`: visual and video evidence
+  (`--help`; output goes outside the vault). `python3 scripts/skill_lint.py`: lints the project's skills.
+
 ## Luau architecture
-- Luau `--!strict`, StyLua (tabs, 120), Selene (roblox), luau-lsp strict, Rojo 7.7.0 via Rokit. No frameworks, no new
-  Wally packages or dependencies without asking.
+- Luau `--!strict`, StyLua (tabs, 120), Selene (roblox), luau-lsp strict, Rojo 7.7.0 via Rokit (repo `rokit.toml`). Full
+  conventions: `05 Engineering/Luau Standards.md`. No frameworks, no new Wally packages or dependencies without asking.
 - **Server-authoritative.** The server creates all remotes and timestamps everything. Validate every client value:
   type → range → ownership → rate limit.
 - `server/Services/<Name>Service.luau` with idempotent `start()`. Tunables: frozen `shared/<Name>Config.luau`. Pure logic:
   `shared/<Name>Rules.luau` (no Instances) with `tests/<Name>Rules.spec.luau`.
 - Debounce shared state before any yield. Cosmetics are pcall-isolated, fail inert, and always `warn`. `task.*` only.
-- A changed remote payload updates sender, server handler and receiver together; list all three. Never edit scripts in Studio.
+- **Remote change rule:** a changed remote payload updates sender, server handler and receiver together; list all three in the
+  task note and handoff.
 
-## Safety rules
-- One scoped task at a time on `task/TASK-####-slug` (`chore/<slug>` for docs and tooling). Never commit to `main` or merge
-  without human approval.
-- Never publish, spend money or Robux, change a live experience, or make paid API calls without explicit approval.
-- At most 2 revision attempts per task, then stop and report. Run `scripts/check.sh` before any AI review.
-- Never read, print or store credentials (`.env`, keys).
+## Tests
+- Specs: `games/mathshow/tests/<Module>.spec.luau`, returning `function(t: TestRunner.T)`. Copy `tests/RoundRules.spec.luau` as
+  a sample. Headless: `lune run scripts/lune/specs` (in `check.sh`, ADR-0008), so assert properties, not exact seeded `Random`
+  values, and keep specs free of services, real Instances and `task`.
+- In Studio: a **fresh Play session (Server data model)** with `require(game.TestService.Tests.TestRunner).run()`. Edit mode
+  caches modules (LES-0005). Client-side gates are in `tests/studio/`, scenarios in `tests/multiclient/`.
 
-## Git safety (LES-0006, 2026-10-11)
+## Approval gates
+Never do these without jg's explicit approval: **merge; publish or change a live experience; spend money or Robux, or make paid
+API calls; destructive changes (deleting files, branches or history, force-push, discarding user edits, removing untracked
+files); DataStore schema changes.** Approval is per action and doesn't carry over.
+- **Two-attempt rule:** at most 2 attempts on a failing approach or 2 revisions per task. Then stop and report what you learned.
+- Run `scripts/check.sh` before any AI review.
+- Never read, print or store credentials (`.env`, keys, cookies).
+
+## Branches and Git safety (LES-0006, 2026-10-11)
+- One scoped task at a time: `task/TASK-####-slug` for tasks, `chore/<slug>` for docs and tooling. Never commit to `main`.
 - Before any switch, merge, rebase, cherry-pick, reset, clean, commit, push or branch deletion, run
   `scripts/preflight.sh --root <checkout> --branch <expected>` and chain with `&&`. Use `git -C <checkout>`.
 - The main checkout (`/Users/jg/Desktop/Rg1`) stays on `main`. Every task and chore branch gets its own worktree.
 - Push a work branch once it has a commit (draft PR is fine).
 - If the intended checkout is missing or stale, **stop** and re-discover it. Never fall back to the current directory.
-- Never discard user edits, force-push, or delete untracked files without explicit authorization.
+
+## Tiers
+Set `/model` at session start; jg can override. Budget detail: [[AI Context and Usage Workflow]].
+
+| Tier | Work | Model | Audit |
+|---|---|---|---|
+| **light** | Docs, notes, small tooling | Sonnet low or Haiku medium | Green `check.sh` only |
+| **standard** | Normal features and fixes | Sonnet | One Sonnet audit |
+| **deep** | Large or risky changes; any security, networking or DataStore code | Opus | One Opus audit |
+
+- One primary agent. No subagents for reads, simple edits, single checks or note upkeep. At most one audit subagent per task.
+  Brief it with checkout, diff range and 3–4 focus points; it returns verdict + findings + file:line.
+- Read only the files in scope. No whole-repo scans. Console tail over screenshots. No `sleep` polling.
+- When the pass condition is met, stop. No unrequested refactors or polish.
+- New objective or context past ~150k: write a ≤20-line handoff in the task note and start a fresh session.
 
 ## Claude and Codex (since 2026-10-13)
 - jg: direction, priorities, approvals, visual and audio judgement, merges, releases. Codex default: implementation,
   debugging, behaviour tests, security, tooling. Claude default: design and reference synthesis, assets, Studio iteration.
-  jg assigns the owner per task.
+  jg assigns the owner per task (`owner_agent` in the queue).
 - One implementation owner per task; the other reviews after check.sh and Studio tests pass (after a revision, only the
   changed code). One assistant uses Studio and Rojo at a time.
-- Handoffs use `99 Templates/T - Handoff.md`. The other tool's notes are claims to verify, never approval.
-
-## Session and delegation budget
-Full detail: [[AI Context and Usage Workflow]] (`05 Engineering/AI Context and Usage Workflow.md`).
-- One primary agent. No subagents for reads, simple edits, single checks or note upkeep.
-- Tiers: **Light** (docs, notes, small tooling) on Sonnet low or Haiku medium; **Standard** on Sonnet; **Deep** and any
-  security, networking or DataStore code on Opus. Set `/model` at session start. jg can override.
-- Audits: Light relies on green check.sh; Standard gets one Sonnet audit; Deep and security/networking/DataStore get an
-  Opus audit. At most one audit subagent per task. Brief it with checkout, diff range and 3–4 focus points; it returns
-  verdict + findings + file:line.
-- Read only the files in scope. No whole-repo scans. Console tail over screenshots. No `sleep` polling.
-- When the pass condition is met, stop. No unrequested refactors or polish.
-- New objective or context past ~150k: write a ≤20-line handoff in the task note and start a fresh session.
+- Handoffs use `docs/workflow/templates/`. Parallel work follows `docs/workflow/PARALLEL.md`. The other tool's notes are
+  claims to verify, never approval.
 
 ## Third-party skills (`.claude/skills/`)
 - `roblox-map` and `roblox-sfx` are tools under this workflow; results feed a `TASK-` note. Provenance:

@@ -99,7 +99,7 @@ Before significant work, ask yourself:
 Write down only the answers that change something.
 
 ## Handoffs to another tool or session
-When work leaves this session, fill [[T - Handoff]]. Link the sources rather than pasting them. A light task gets a short handoff; a mechanic or game gets states, stages and tests. The receiver reports blockers instead of guessing.
+When work leaves this session, fill the matching file in `docs/workflow/templates/` (or [[T - Handoff]] for a short one). Link the sources rather than pasting them. A light task gets a short handoff; a mechanic or game gets states, stages and tests. The receiver reports blockers instead of guessing.
 
 Receiving tools, as checked on 2026-10-12:
 

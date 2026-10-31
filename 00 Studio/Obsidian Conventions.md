@@ -72,7 +72,9 @@ Every note except templates has these fields: `id`, `title`, `type`, `status`, `
 `type` values: `index, overview, design, architecture, roadmap, task, bug, audit, adr, system, playtest, release, review, health, lesson, retro, research, experiment, inbox, agent`.
 
 ### Controlled statuses (no alternative spellings)
-`inbox · research · proposed · ready · in_progress · blocked · in_review · changes_requested · approved · done · archived`
+`inbox · research · proposed · backlog · ready · in_progress · blocked · in_review · review · changes_requested · approved · done · archived`
+
+Task notes mirror the queue, which uses `backlog` and `review` (`docs/workflow/TASKS.md`); other notes keep `proposed` and `in_review`.
 
 For **tasks**, `tasks/queue.json` is authoritative and the note mirrors it (the orchestrator updates both):
 
