@@ -1,6 +1,6 @@
 # Studio sync: why Studio stopped receiving scripts (TASK-0110)
 
-**Status:** Phase 0. The cause isn't confirmed yet: the checks that need an open place are waiting on Studio.
+**Status:** sync works in a clean setup (below). The exact cause is **not proven**: the old failure wasn't reproduced.
 
 ## Symptom (2026-10-27 to 10-30)
 The plugin connects and `ReplicatedStorage.Shared.BuildStamp` updates, but existing scripts keep their old source. New instances do appear.
@@ -35,7 +35,30 @@ The plugin connects and `ReplicatedStorage.Shared.BuildStamp` updates, but exist
 | Plugin lacks script injection permission | Fits the symptom: `Source` writes are the gated ones, `StringValue` updates aren't. Not yet observed | **Medium, needs Studio** |
 | Script drafts or an open editor holding old source | Task names in the log only | **Low, needs Studio** |
 
-## Still to do with a place open
-1. Read the Rojo panel and Output for `lacking permission` or property errors on connect.
-2. Compare `BuildStamp` and a script's `Source` with disk.
-3. Change a comment on disk and see whether `Source` follows.
+## Live results (2026-10-30)
+Setup: Studio freshly restarted, `scripts/serve.sh`, `MathShow.rbxl`, only the 7.7.0 plugin enabled. jg reported Script Injection was already allowed, which **rules that suspect out**.
+
+| Check | Result |
+|---|---|
+| BuildStamp, Studio vs disk | Match: `4ade979 2026-10-31T01:32:43Z` |
+| `MenuTheme` source | 16,890 characters, same as disk |
+| Comment added on disk | In Studio's `Source` at the first read, under 12 s window |
+| Comment reverted | Gone at the first read; BuildStamp also followed |
+| Play: `MenuTheme.Text.Title` | 46 (the old failure showed 40) |
+
+**Most likely cause (not proven):** more than one Rojo plugin loaded, including 7.6.1, which can't speak this server's protocol, and 7.7.1, which logged a protocol error. Disabling them was one of several things that changed at once, alongside a Studio restart and a Studio update to 0.745. To prove it, re-enable a plugin and repeat the probe.
+
+**Keep doing:** start with `scripts/serve.sh`, and keep one Rojo plugin enabled, matching the server's version.
+
+## Gate results (fresh Play, viewport 1336x669)
+Console: no errors from MathShow. Expected warnings: DataStores unavailable (unpublished place) and placeholder images. `rbxassetid://203785492` failed to load; it isn't in `games/`, and it appeared in Edit before Play too.
+
+| Gate | Result |
+|---|---|
+| TASK-0107 TextFit, 844x390 / 1920x1080 / phone 812x375 | **PASS:** 953 rows each, 2,859 total, 0 failures |
+| Margins | 2,007 rows measured across 210 elements; tightest 6.5 px (`Screen_blitz/Score` Value, `Screen_vs/Back` Label) against the 6 px rule |
+| Not margin-measured | 852 rows: tap targets, stickers and labels not on a shard |
+| TASK-0106 IdentityBoards | 109 rows, 0 failed, **844x390 only** |
+| TASK-0106 margins | **Still incomplete:** `ShapeProfiles` has no `shard-id-*` profiles, so its text rows have no 6 px check. The harness has one canvas, so the other viewports weren't run |
+
+The gate measures geometry against shape profiles. With the 17 PNGs not uploaded, the visible menu is placeholders. Evidence: `docs/workflow/evidence/TASK-0110/menu-01-main-standard.jpg`. Full per-row output went to Studio's Output, and only this summary is saved. No identity board screenshot was taken.

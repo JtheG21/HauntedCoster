@@ -31,7 +31,8 @@
     "The override command exists and is tested, and check.sh passes."
   ],
   "evidence": [
-    "docs/workflow/STUDIO-SYNC.md"
+    "docs/workflow/STUDIO-SYNC.md",
+    "docs/workflow/evidence/TASK-0110/menu-01-main-standard.jpg"
   ],
   "notes": "Sole agent while it runs. Studio gates need a place open in Studio.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0110-Studio-Sync-And-Gates.md",
@@ -48,12 +49,14 @@
     },
     {
       "item": "Studio sync fix",
-      "status": "in_progress",
-      "see": "docs/workflow/STUDIO-SYNC.md"
+      "status": "done",
+      "see": "docs/workflow/STUDIO-SYNC.md",
+      "note": "Works in a clean setup; exact cause not proven, see STUDIO-SYNC.md"
     },
     {
       "item": "TextFit gate results for TASK-0106 and TASK-0107",
-      "status": "pending"
+      "status": "partial",
+      "result": "TASK-0107 pass: 2859 rows, 0 failures, tightest 6.5 px. TASK-0106: 109 rows, 0 failed, 844x390 only, no shard-id profiles, so 6 px unmeasured for its text; no board screenshot."
     },
     {
       "item": "TASK-0106 Kit.luau headshot minor findings",
