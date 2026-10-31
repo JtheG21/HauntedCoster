@@ -1,0 +1,26 @@
+{
+  "id": "TASK-0112",
+  "game": "GAME-004",
+  "title": "MathShow Startup Asset Warnings",
+  "status": "backlog",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/client/Menu/MenuTheme.luau",
+    "games/mathshow/art/menu/"
+  ],
+  "depends_on": [
+    "TASK-0107"
+  ],
+  "branch": "task/TASK-0112-startup-asset-warnings",
+  "acceptance": [
+    "Phase A (locate, read-only): every instance that references rbxassetid://203785492 is recorded with its path, property, class, and whether it is Rojo-managed or place-only, and the asset type that property requires is stated. The place is not saved.",
+    "Phase B (upload, user-gated): the 17 -v2 PNGs are uploaded only after jg approves the upload set, and each returned rbxassetid is recorded. No upload happens without that approval.",
+    "Phase C (wire and verify): MenuTheme.luau takes the uploaded ids for the 17 -v2 slots, 203785492 is fixed by the route jg approves, and a Play log shows no asset warnings from these ids. check.sh passes.",
+    "Unpublished Play still warns and runs memory-only."
+  ],
+  "evidence": [],
+  "notes": "Startup warnings: shard-menu-title-violet-v2 and glow-menu-title-violet-v2 are UNSET (MenuTheme.luau:223, :230). Asset 203785492 fails with 'Asset type does not match requested type'. TASK-0107 (done) left the 17 -v2 slots UNSET until upload, so this task picks up that remaining work. Scope and route choices are open for jg.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0112-MathShow-Startup-Asset-Warnings.md",
+  "risk": "low"
+}
