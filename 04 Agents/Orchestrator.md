@@ -5,14 +5,14 @@ type: agent
 status: approved
 tool: scripts/orchestrator.py
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-30
 tags:
   - workflow/agent
 ---
 # Role: Orchestrator
 
 ## Goal
-Move tasks through the [[Workflow]], keep `tasks/queue.json` and the task notes in sync, and stop at every gate.
+Move tasks through the [[Workflow]], keep `tasks/items/` and the task notes in sync, and stop at every gate.
 
 ## Responsibilities
 - `orchestrator.py next`: pick a `ready` task whose dependencies are done and that has budget left
@@ -21,7 +21,7 @@ Move tasks through the [[Workflow]], keep `tasks/queue.json` and the task notes 
 - `orchestrator.py report`: writes `08 Reviews/HLT-YYYYMMDD.md`
 
 ## Stop and ask a human when
-A task is `proposed` or `approved` (waiting to merge) · `blocked` · the budget is reached · anything touches publishing, spending, live DataStores or deleting data · the validator reports a queue and note mismatch
+A task is `backlog` or `approved` (waiting to merge) · `blocked` · the budget is reached · anything touches publishing, spending, live DataStores or deleting data · the validator reports a queue and note mismatch
 
 ## Never
 Bypass a failed audit, hand-edit statuses, or loop without a limit.

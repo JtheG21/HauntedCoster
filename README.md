@@ -1,6 +1,6 @@
 # Rg1: Roblox AI Studio
 
-Roblox games built with [Rojo](https://rojo.space) 7.7.0 and an AI-assisted workflow (Claude Code) that has human approval gates. This folder is also the Obsidian vault. Start at [[Studio Index]]. Agent rules are in `AGENTS.md`, note rules in [[Obsidian Conventions]].
+Roblox games built with [Rojo](https://rojo.space) 7.7.0 and an AI-assisted workflow (Claude Code) that has human approval gates. This folder is also the Obsidian vault. Start at [[Start Here]]. Agent rules are in `AGENTS.md`, note rules in [[Obsidian Conventions]].
 
 ## Install (one time)
 Already on this Mac: Rokit, Rojo, StyLua, luau-lsp, Selene (Homebrew), Python 3, VS Code with the Rojo, Luau-LSP, StyLua and Selene extensions, the Rojo Studio plugin, and Obsidian.
@@ -10,15 +10,16 @@ Already on this Mac: Rokit, Rojo, StyLua, luau-lsp, Selene (Homebrew), Python 3,
 ## Start a work session
 ```bash
 cd ~/Desktop/Rg1
-ps aux | grep "rojo serve"            # stop any server for the other game first
-rojo serve haunted.project.json       # GAME-002 Haunted Collector (active): games/haunted → Studio (port 34872)
+ps aux | grep "rojo serve"            # stop any other server first
+rojo serve mathshow.project.json      # GAME-004 MathShow (active): games/mathshow → Studio (port 34872)
 ```
-In Studio: open the **local `HauntedCollector.rbxl`** place (first time: `rojo build haunted.project.json -o HauntedCollector.rbxl`) → Plugins → Rojo → **Connect**. Keep only one Rojo plugin enabled.
+In Studio: open the **local `MathShow.rbxl`** place (first time: `rojo build mathshow.project.json -o MathShow.rbxl`) → Plugins → Rojo → **Connect**. Keep only one Rojo plugin enabled.
 
-**Match the project to the place.** A bare `rojo serve` uses `default.project.json` (GAME-001, paused). Connecting it to the Haunted Collector place pulls in GAME-001's Baseplate and Lighting ([[TEST-20261011-02]]). Use GAME-001's server only with the Rg1 place.
+**Match the project to the place.** There's no default project at the repo root, so a bare `rojo serve` fails on purpose. Archived games have their own project files and places (`archive/README.md`).
 
 ```bash
-scripts/check.sh                                   # format, lint, types, build, JSON, queue, vault, Python tests
+scripts/check.sh                                   # the required gate for the active game
+scripts/check.sh --archive                         # archived games, on demand
 scripts/install-hooks.sh                           # once per clone: pre-commit StyLua+Selene, build stamp on commit/checkout
 scripts/stamp.sh                                   # refresh the build stamp before a Play test
 python3 scripts/orchestrator.py status             # task list
@@ -27,15 +28,15 @@ python3 scripts/validate_vault.py                  # note conventions + links + 
 python3 scripts/orchestrator.py report             # 08 Reviews/HLT-<date>.md
 ```
 
-**Is Studio running your code?** Both boot scripts print `[HauntedCollector] server build <sha> <time>` / `client build ...`. It must match `cat games/haunted/src/shared/BuildStamp.txt`; if not, the sync is stale. VS Code's luau-lsp reads `sourcemap.json`, which is GAME-002 (`.vscode/settings.json`); GAME-001 type checks use `game001-sourcemap.json`.
+**Is Studio running your code?** `ReplicatedStorage.Shared.BuildStamp` must match `cat games/mathshow/src/shared/BuildStamp.txt`; if not, the sync is stale. VS Code's luau-lsp reads `sourcemap.json`, which is the active game (`.vscode/settings.json`).
 
 ## Task lifecycle (see [[Workflow]])
 ```bash
-python3 scripts/orchestrator.py approve TASK-0002 --by jg        # HUMAN: proposed → ready
+python3 scripts/orchestrator.py approve TASK-0002 --by jg        # HUMAN: backlog → ready
 python3 scripts/orchestrator.py start TASK-0002                  # → in_progress
 git switch -c task/TASK-0002-slug
 python3 scripts/orchestrator.py dispatch TASK-0002 --role executor   # dry-run: writes tasks/prompts/…
-python3 scripts/orchestrator.py record-exec TASK-0002 --result pass --notes "check.sh green"   # → in_review
+python3 scripts/orchestrator.py record-exec TASK-0002 --result pass --notes "check.sh green"   # → review
 python3 scripts/orchestrator.py record-audit TASK-0002 --result pass --report "06 QA/AUD-…-01.md"   # → approved
 python3 scripts/orchestrator.py approve-merge TASK-0002 --by jg  # HUMAN: → done, then merge the branch
 ```
@@ -48,20 +49,18 @@ A failed check or audit → `changes_requested`. After 2 revisions → `blocked`
 | Project builds | `rojo build` | ✅ check.sh |
 | Tooling logic | `python3 -m unittest discover -s tests` | ✅ check.sh |
 | Note conventions, links, task sync | `scripts/validate_vault.py` | ✅ check.sh |
-| GAME-002 unit specs | `lune run scripts/lune/specs` (headless, [[ADR-0008-Headless-Specs-With-Lune]]); also in Studio: `require(game.TestService.Tests.TestRunner).run()` | ✅ check.sh |
-| GAME-001 unit specs | Studio, fresh Play session (Server): `require(game.TestService.Tests.TestRunner).run()` (Claude can run it through Studio MCP) | ⚠️ needs Studio |
-| GAME-002 play scenarios | `games/haunted/tests/scenarios/` (FullLoop, Reachability, ExploitProbe, CrossPlot), see [[GAME-002 Haunted Collector/00 Overview]] | ⚠️ needs Studio |
+| Active game unit specs | `lune run scripts/lune/specs` (headless, [[ADR-0008-Headless-Specs-With-Lune]]); also in Studio: `require(game.TestService.Tests.TestRunner).run()` | ✅ check.sh |
 | Gameplay, replication, feel | The task's playtest procedure → a `TEST-` note | ❌ manual or Studio MCP |
 
 GitHub Actions (`.github/workflows/check.yml`) runs `scripts/check.sh` on every PR with `TYPECHECK_REQUIRED=1`, so a skipped type check fails there. Static checks don't prove the gameplay is correct.
 
 ## Layout
-- **Code and tooling:** `games/haunted/` GAME-002 code and tests (`haunted.project.json`) · `src/` GAME-001 code · `tests/` · `scripts/` · `tasks/` queue, ledger, generated prompts · `project-state.json`
+- **Code and tooling:** `games/mathshow/` active game code and tests (`mathshow.project.json`) · `archive/` paused games · `tests/` · `scripts/` · `tasks/` task files, ledger, generated prompts · `project-state.json`
 - **Vault:**
   - `00 Studio` config and index
   - `01 Inbox`
   - `02 Research`
-  - `03 Games/GAME-002 Haunted Collector` (active) and `03 Games/GAME-001 Rg1` (paused): overview, design, architecture, roadmap, decisions, systems, tasks, playtests, releases, retros
+  - `03 Games/GAME-004 MathShow` (active) and the archived GAME-001 to 003: overview, design, architecture, roadmap, decisions, systems, tasks, playtests, releases, retros
   - `04 Agents` roles and workflow
   - `05 Engineering`
   - `06 QA`
@@ -81,5 +80,5 @@ GitHub Actions (`.github/workflows/check.yml`) runs `scripts/check.sh` on every 
 - **`stylua`/`luau-lsp`: "Failed to find tool"**: run them from inside this folder (`rokit.toml` pins them).
 - **Rojo connect fails with `attempt to index number with 'protocolVersion'`**: the plugin and server versions differ. See [[LES-0001-Rojo-Version-Mismatch]].
 - **Studio doesn't show the scripts**: make sure `rojo serve` is running and click Connect. Check port 34872 (`lsof -i :34872`).
-- **Validator reports a status mismatch**: `tasks/queue.json` is authoritative. Find out why the note drifted; don't just edit the note.
+- **Validator reports a status mismatch**: the file in `tasks/items/` is authoritative. Find out why the note drifted; don't just edit the note.
 - **Mac feels slow (8 GB)**: close extra Studio windows. Don't run local AI models.

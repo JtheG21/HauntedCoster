@@ -79,6 +79,7 @@ def load_orchestrator(root: Path):
     path = root / "scripts" / "orchestrator.py"
     if not path.is_file():
         raise FileNotFoundError(f"{path} not found; --root must be a checkout with scripts/orchestrator.py")
+    sys.path.insert(0, str(path.parent))  # its task_store must come from the same checkout
     spec = importlib.util.spec_from_file_location("rg1_root_orchestrator", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -92,7 +93,7 @@ def sample_prompt(root: Path, role: str, task_id: str | None) -> str | None:
     if task_id:
         task = proj.task(task_id)
     else:
-        candidates = [t for t in tasks if t.get("note")]
+        candidates = [t for t in tasks if t.get("note_path")]
         if not candidates:
             return None
         task = candidates[-1]
@@ -170,8 +171,8 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     root = Path(a.root).resolve()
     try:
-        sample = sample_prompt(root, a.role, a.sample) if (root / "tasks" / "queue.json").is_file() else None
-    except Exception as e:  # bad --root, unknown --sample or invalid queue: report it, don't guess a prompt
+        sample = sample_prompt(root, a.role, a.sample) if (root / "tasks" / "items").is_dir() else None
+    except Exception as e:  # bad --root, unknown --sample or invalid task file: report it, don't guess a prompt
         print(f"error: {e}", file=sys.stderr)
         return 2
     print(report(root, a.role, sample))

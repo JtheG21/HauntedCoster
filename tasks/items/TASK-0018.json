@@ -1,0 +1,109 @@
+{
+  "id": "TASK-0018",
+  "game": "GAME-002",
+  "title": "Journal, Tutorial and Rare Clue",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0012",
+    "TASK-0013",
+    "TASK-0014",
+    "TASK-0015",
+    "TASK-0016",
+    "TASK-0017"
+  ],
+  "branch": "task/TASK-0018-Journal-Tutorial-And-Rare-Clue",
+  "acceptance": [
+    "Journal shows known/unknown entries and clues consistent with the profile; completion gives trophies only",
+    "Tutorial follows brief \u00a712, resumes after rejoin, and auto-advances if the step is already satisfied (spec covers every step)",
+    "After the first paid ride the Bell Tower clue points to the Bell Wraith; it spawns only in the Sealed Crypt once the condition is met",
+    "A TEST- note records a fresh-profile run of the full brief \u00a720 journey, with times; persistence result stated honestly",
+    "scripts/check.sh passes"
+  ],
+  "evidence": [
+    "06 QA/AUD-20261011-TASK-0018-01.md",
+    "06 QA/AUD-20261011-TASK-0018-02.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0018-Journal-Tutorial-And-Rare-Clue.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-11T09:24:05",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-11T19:46:45",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-11T19:46:45",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-11T19:46:45",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-11T19:46:45",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-11T19:46:45",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-11T19:46:45",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-11T19:47:05",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-11T19:46:45",
+      "result": "pass",
+      "notes": "Revision-0 build (17cb5ae) merged with TASK-0011"
+    },
+    {
+      "time": "2026-10-11T19:46:45",
+      "result": "pass",
+      "notes": "Revision 1 at 5878f6d; TEST-20261011-03/04"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-11T19:46:45",
+      "result": "fail",
+      "report": "06 QA/AUD-20261011-TASK-0018-01.md"
+    },
+    {
+      "time": "2026-10-11T19:46:45",
+      "result": "pass",
+      "report": "06 QA/AUD-20261011-TASK-0018-02.md"
+    }
+  ],
+  "revisions": 1,
+  "merge_approved_by": "jg"
+}

@@ -1,0 +1,33 @@
+{
+  "id": "TASK-0081",
+  "game": "GAME-002",
+  "title": "Finished Cosmetic Asset Brief",
+  "status": "archived",
+  "tier": "standard",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0069"
+  ],
+  "branch": "task/TASK-0081-Finished-Cosmetic-Asset-Brief",
+  "acceptance": [
+    "Select relevant baseline/gallery originals and record positive and rejected IDs; identify target silhouette, materials, scale and in-game readability for each sample category.",
+    "jg approves a coherent concept and production scope before modeling; placeholders are never labelled final or used as the quality floor.",
+    "Produce scoped per-asset follow-ups with matched-view comparison criteria, neutral/game lighting and gameplay budgets; no uploads or paid generation."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0081-Finished-Cosmetic-Asset-Brief.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:19",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

@@ -1,0 +1,134 @@
+{
+  "id": "TASK-0087",
+  "game": "GAME-003",
+  "title": "Hike or Die Gate 1 Prototype",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [],
+  "branch": "task/TASK-0087-Hike-Or-Die-Gate-1",
+  "acceptance": [
+    "GAME-003 has an isolated code root, Rojo project and validation path; GAME-001 and GAME-002 remain unchanged.",
+    "One compact readable trail supports a route/cover choice and marked extraction.",
+    "One cryptid supports readable observe, investigate, pursue and return states.",
+    "The camera interaction supports clear framing and shutter input, with desktop and touch evaluated before a final camera decision.",
+    "Evidence is computed on the server from validated target visibility, distance, state and risk signals; feedback explains result.",
+    "Extraction summary agrees with carried metadata; restart resets camera, UI, creature and round state.",
+    "Repeatable scenarios cover validation, spoofed inputs, chase reset, extraction and restart.",
+    "scripts/check.sh passes; local Studio results and limitations are recorded; no release or persistence claims are made."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261018-TASK-0087-01.md",
+    "06 QA/AUD-20261018-TASK-0087-02.md",
+    "06 QA/AUD-20261019-TASK-0087-03.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-003 Hike or Die/06 Tasks/TASK-0087-Hike-Or-Die-Gate-1.md",
+  "risk": "high",
+  "history": [
+    {
+      "time": "2026-10-18T21:01:09",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-18T21:01:09",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-18T23:54:17",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-18T23:54:18",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-18T23:54:18",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-18T23:56:01",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-18T23:58:25",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
+    },
+    {
+      "time": "2026-10-18T23:58:25",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-18T23:59:06",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-19T00:00:24",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-19T00:00:24",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-18T23:54:17",
+      "result": "pass",
+      "notes": "Independent audit found stale chase-run and camera/evidence/restart issues; repaired stale-run safety, bounded photo ray origin, and restart positioning; camera remains a user-reported prototype limitation."
+    },
+    {
+      "time": "2026-10-18T23:56:01",
+      "result": "pass",
+      "notes": "Audit remediation: chase run-version guard, finite bounded camera origin for raycast/scoring, and restart respawn/position reset. HOD-specific checks and scripts/check.sh passed; camera remains an explicitly deferred known failure."
+    },
+    {
+      "time": "2026-10-18T23:59:06",
+      "result": "pass",
+      "notes": "Second audit remediation: serialize restart requests and verify token, owner, round, phase, and player after character loading. HOD-specific checks, repository check, and vault validation pass; camera remains explicitly deferred."
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-18T23:54:18",
+      "result": "fail",
+      "report": "06 QA/AUD-20261018-TASK-0087-01.md"
+    },
+    {
+      "time": "2026-10-18T23:58:25",
+      "result": "fail",
+      "report": "06 QA/AUD-20261018-TASK-0087-02.md"
+    },
+    {
+      "time": "2026-10-19T00:00:24",
+      "result": "pass",
+      "report": "06 QA/AUD-20261019-TASK-0087-03.md"
+    }
+  ],
+  "revisions": 2,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

@@ -1,0 +1,31 @@
+{
+  "name": "MathShow",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "games/mathshow/src/shared"
+      }
+    },
+    "ServerScriptService": {
+      "Server": {
+        "$path": "games/mathshow/src/server"
+      }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "games/mathshow/src/client"
+        },
+        "StudioTests": {
+          "$path": "games/mathshow/tests/studio"
+        }
+      }
+    },
+    "TestService": {
+      "Tests": {
+        "$path": "games/mathshow/tests"
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "id": "TASK-0084",
+  "game": "GAME-002",
+  "title": "FullLoop Capture Secure Investigation",
+  "status": "archived",
+  "tier": "deep",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0069"
+  ],
+  "branch": "task/TASK-0084-FullLoop-Capture-Secure-Investigation",
+  "acceptance": [
+    "Reproduce TEST-20261018-01 FullLoop failure in a fresh isolated memory session; identify whether capture/secure regressed or the harness assumption failed before changing production code.",
+    "A missing owned monster records earlier failed checks and exits clearly instead of throwing at acquiredAt; preserve legitimate capture, transport and securing requirements.",
+    "FullLoop and ExploitProbe pass with exact check counts; relevant two-client behavior is evidenced; check.sh passes."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0084-FullLoop-Capture-Secure-Investigation.md",
+  "risk": "high",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:19",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

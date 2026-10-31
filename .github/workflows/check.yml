@@ -1,11 +1,17 @@
-# Runs scripts/check.sh (format, lint, strict types, both Rojo builds, JSON, queue, vault, Python tests)
-# on every PR and on pushes to main. GAME-002 unit specs run headlessly via Lune; play scenarios still need Studio (see README).
+# Runs scripts/check.sh for the active game (scripts/active-game.env) on every PR and on pushes to main.
+# Play scenarios still need Studio. Archived games are checked only on a manual run with "archive" ticked.
 name: check
 
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      archive:
+        description: "Check archived games instead of the active game"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -42,4 +48,4 @@ jobs:
       - name: scripts/check.sh
         env:
           TYPECHECK_REQUIRED: "1"
-        run: scripts/check.sh
+        run: scripts/check.sh ${{ inputs.archive && '--archive' || '' }}

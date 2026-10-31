@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Lightweight task orchestrator for the Rg1 workflow (standard library only).
 
-Tracks tasks in tasks/queue.json (authoritative), mirrors each task's status into
-its Obsidian note, enforces approval gates and revision limits, records a usage
-ledger, updates project-state.json and writes Markdown health reports.
-Statuses follow 00 Studio/Obsidian Conventions.md.
+Tracks tasks in tasks/items/ (one file per task, authoritative), mirrors each task's
+status into its Obsidian note, enforces approval gates and revision limits, records a
+usage ledger and writes Markdown health reports.
+Statuses and fields follow docs/workflow/TASKS.md.
 It never calls an AI itself: `dispatch` builds the prompt and, in dry-run mode
 (the only mode currently enabled), prints what it would run.
 
@@ -17,20 +17,23 @@ import argparse
 import datetime as dt
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
+import task_store
+
 STATES = {
-    "inbox", "research", "proposed", "ready", "in_progress", "blocked",
-    "in_review", "changes_requested", "approved", "done", "archived",
+    "backlog", "ready", "in_progress", "blocked",
+    "review", "changes_requested", "approved", "done", "archived",
 }
 TERMINAL = {"done", "archived"}
-NEEDS_HUMAN = ("proposed", "approved", "blocked")
+NEEDS_HUMAN = ("backlog", "approved", "blocked")
 GEN_START = "<!-- orchestrator:generated:start -->"
 GEN_END = "<!-- orchestrator:generated:end -->"
 RISKS = {"low", "medium", "high"}
 ID_RE = re.compile(r"^TASK-\d{4}$")
-REQUIRED = ("id", "title", "status", "risk", "depends_on", "acceptance_criteria")
+REQUIRED = ("id", "title", "status", "risk", "depends_on", "acceptance")
 USAGE_KINDS = {"subscription", "api"}
 
 
@@ -45,13 +48,15 @@ def now() -> str:
 class Project:
     def __init__(self, root: Path):
         self.root = root
-        self.queue_path = root / "tasks" / "queue.json"
         self.budget_path = root / "00 Studio" / "budget.json"
         self.state_path = root / "project-state.json"
         self.ledger_path = root / "tasks" / "usage-ledger.jsonl"
         self.reviews_dir = root / "08 Reviews"
         self.prompts_dir = root / "tasks" / "prompts"
-        self.queue = self._load(self.queue_path, {"version": 1, "tasks": []})
+        try:
+            self.queue = {"tasks": task_store.load_tasks(root)}
+        except task_store.TaskStoreError as e:
+            raise OrchestratorError(str(e)) from e
         self.budget = self._load(self.budget_path, {})
 
     @staticmethod
@@ -64,8 +69,8 @@ class Project:
             raise OrchestratorError(f"{path}: invalid JSON ({e})") from e
 
     def save(self) -> None:
-        self.queue_path.write_text(json.dumps(self.queue, indent=2) + "\n")
-        self._write_state()
+        for t in self.tasks:
+            task_store.save_task(self.root, t)
 
     # ---- lookup / validation -------------------------------------------
     @property
@@ -96,12 +101,12 @@ class Project:
                 errors.append(f"{tid}: invalid status '{t.get('status')}'")
             if t.get("risk") not in RISKS:
                 errors.append(f"{tid}: invalid risk '{t.get('risk')}'")
-            if not t.get("acceptance_criteria"):
+            if not t.get("acceptance"):
                 errors.append(f"{tid}: needs at least one acceptance criterion")
             for dep in t.get("depends_on", []):
                 if dep not in ids:
                     errors.append(f"{tid}: depends on unknown task {dep}")
-            note = t.get("note")
+            note = t.get("note_path")
             if note and not (self.root / note).exists():
                 errors.append(f"{tid}: note not found: {note}")
         errors += self._cycles()
@@ -180,7 +185,7 @@ class Project:
 
     def _sync_note(self, t: dict) -> None:
         """Mirror status/updated into the task note's frontmatter (queue is authoritative)."""
-        rel = t.get("note")
+        rel = t.get("note_path")
         if not rel:
             return
         path = self.root / rel
@@ -212,7 +217,7 @@ class Project:
 
     def approve(self, task_id: str, by: str) -> None:
         t = self.task(task_id)
-        self._expect(t, "proposed")
+        self._expect(t, "backlog")
         t["approved_by"] = by
         self._move(t, "ready", f"plan approved by {by}")
 
@@ -239,7 +244,7 @@ class Project:
         self._expect(t, "in_progress")
         t.setdefault("executions", []).append({"time": now(), "result": result, "notes": notes})
         if result == "pass":
-            self._move(t, "in_review", "execution checks passed")
+            self._move(t, "review", "execution checks passed")
             if t.get("tier") == "light":
                 self._move(t, "approved", "Light tier: no audit; merge needs human approval")
         else:
@@ -247,7 +252,7 @@ class Project:
 
     def record_audit(self, task_id: str, result: str, report: str) -> None:
         t = self.task(task_id)
-        self._expect(t, "in_review")
+        self._expect(t, "review")
         if not (self.root / report).exists():
             raise OrchestratorError(f"audit report not found: {report}")
         t.setdefault("audits", []).append({"time": now(), "result": result, "report": report})
@@ -259,7 +264,7 @@ class Project:
     def request_changes(self, task_id: str, by: str, reason: str) -> None:
         """Human sends an audited (or in-review) task back for fixes. Counts as a revision."""
         t = self.task(task_id)
-        self._expect(t, "in_review", "approved")
+        self._expect(t, "review", "approved")
         self._fail(t, f"changes requested by {by}: {reason}")
 
     def approve_merge(self, task_id: str, by: str) -> None:
@@ -271,8 +276,8 @@ class Project:
     def unblock(self, task_id: str, to: str, by: str) -> None:
         t = self.task(task_id)
         self._expect(t, "blocked")
-        if to not in ("ready", "proposed", "archived"):
-            raise OrchestratorError("unblock target must be ready, proposed or archived")
+        if to not in ("ready", "backlog", "archived"):
+            raise OrchestratorError("unblock target must be ready, backlog or archived")
         t["revisions"] = 0
         self._move(t, to, f"unblocked by {by}")
 
@@ -296,14 +301,14 @@ class Project:
 
     # ---- dispatch (dry-run) ---------------------------------------------
     def build_prompt(self, t: dict, role: str) -> str:
-        note = t.get("note", f"(task note for {t['id']})")
+        note = t.get("note_path", f"(task note for {t['id']})")
         lines = [
             f"You are the {role.upper()} for task {t['id']}: {t['title']}.",
             f"Follow '04 Agents/{role.capitalize()}.md' exactly. Read CLAUDE.md and '{note}'.",
             "Start from the note and the files listed below. Open a dependency, reusable module or test outside that list only when the change needs it, and name it in your report with the reason. Do not scan the whole repo.",
         ]
         # Scope comes from fields the queue and note already hold; nothing new is stored.
-        criteria = t.get("acceptance_criteria") or []
+        criteria = t.get("acceptance") or []
         if isinstance(criteria, str):
             criteria = [criteria]
         if criteria:
@@ -323,8 +328,8 @@ class Project:
 
     def dispatch(self, task_id: str, role: str, live: bool) -> str:
         t = self.task(task_id)
-        expected = {"executor": ("in_progress",), "auditor": ("in_review",),
-                    "planner": ("proposed",), "researcher": ("proposed", "research")}[role]
+        expected = {"executor": ("in_progress",), "auditor": ("review",),
+                    "planner": ("backlog",), "researcher": ("backlog",)}[role]
         self._expect(t, *expected)
         reason = self.budget_block_reason(task_id)
         if reason:
@@ -347,16 +352,34 @@ class Project:
             c[t["status"]] = c.get(t["status"], 0) + 1
         return c
 
-    def _write_state(self) -> None:
-        state = self._load(self.state_path, {})
-        state.update({
-            "updated": now(),
+    def state(self) -> dict:
+        """project-state.json's fixed facts plus everything calculated from the task files. Never stored."""
+        return self._load(self.state_path, {}) | {
             "task_counts": self.counts(),
             "ready": [t["id"] for t in self.ready()],
             "needs_human": [t["id"] for t in self.tasks if t["status"] in NEEDS_HUMAN],
             "api_spend_this_month_usd": self.api_spend(),
-        })
-        self.state_path.write_text(json.dumps(state, indent=2) + "\n")
+        }
+
+    def next_id(self) -> str:
+        """The next TASK-#### free across the task files here and every local and remote branch. Fetch first."""
+        seen = {t["id"] for t in self.tasks if ID_RE.match(str(t.get("id")))}
+        git = ["git", "-C", str(self.root)]
+        try:
+            inside = subprocess.run(git + ["rev-parse", "--is-inside-work-tree"], capture_output=True, text=True)
+        except OSError as e:
+            raise OrchestratorError(f"next-id needs git: {e}") from e
+        if inside.returncode != 0:
+            raise OrchestratorError(f"next-id needs a git checkout, and {self.root} isn't one")
+        refs = subprocess.run(git + ["for-each-ref", "--format=%(refname)", "refs/heads", "refs/remotes"],
+                              capture_output=True, text=True).stdout.split()
+        for ref in refs:
+            files = subprocess.run(git + ["ls-tree", "--name-only", ref, "tasks/items/"],
+                                   capture_output=True, text=True).stdout
+            seen |= set(re.findall(r"TASK-\d{4}", files))
+            queue = subprocess.run(git + ["show", f"{ref}:tasks/queue.json"], capture_output=True, text=True).stdout
+            seen |= set(re.findall(r'"id": "(TASK-\d{4})"', queue))
+        return f"TASK-{max((int(i[5:]) for i in seen), default=0) + 1:04d}"
 
     def report(self) -> Path:
         today = dt.date.today().isoformat()
@@ -371,7 +394,7 @@ class Project:
             "| Task | Title | Status | Risk | Revisions |", "|---|---|---|---|---|",
         ]
         for t in self.tasks:
-            name = Path(t["note"]).stem if t.get("note") else t["id"]
+            name = Path(t["note_path"]).stem if t.get("note_path") else t["id"]
             lines.append(f"| [[{name}]] | {t['title']} | {t['status']} | {t['risk']} | {t.get('revisions', 0)} |")
         needs = [t for t in self.tasks if t["status"] in NEEDS_HUMAN]
         lines += ["", "## Needs human"]
@@ -396,7 +419,6 @@ class Project:
             out.write_text(text)
         else:
             out.write_text("\n".join(header) + "\n" + block + "\n\nRelated: [[Studio Index]]\n")
-        self._write_state()
         return out
 
 
@@ -423,7 +445,7 @@ def cycle_report(proj: "Project") -> str:
 
 def files_expected(proj: "Project", t: dict) -> tuple[set[str], bool]:
     """Paths listed under '## Files expected to change' in the task note, and whether its Tests mention Studio."""
-    note = proj.root / t.get("note", "")
+    note = proj.root / t.get("note_path", "")
     if not note.is_file():
         return set(), False
     text = note.read_text(encoding="utf-8")
@@ -480,18 +502,20 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
     sub = p.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("validate", help="validate queue.json and budget.json")
+    sub.add_parser("validate", help="validate the task files and budget.json")
     sub.add_parser("status", help="list tasks")
     s = sub.add_parser("next", help="show tasks ready to start")
     s.add_argument("--parallel-safe", action="store_true", help="also report which ready tasks could run side by side")
     sub.add_parser("cycles", help="per-task revisions, start-to-review hours and tokens (baseline data)")
-    sub.add_parser("report", help="write 08 Reviews/HLT-<date>.md and update project-state.json")
+    sub.add_parser("report", help="write 08 Reviews/HLT-<date>.md")
+    sub.add_parser("state", help="print the project state, calculated from the task files")
+    sub.add_parser("next-id", help="print the next TASK-#### free across all branches")
     for name in ("approve", "approve-merge", "archive"):
         s = sub.add_parser(name)
         s.add_argument("id")
         s.add_argument("--by", required=True, help="name of the human approving")
     s = sub.add_parser("start"); s.add_argument("id")
-    s = sub.add_parser("request-changes", help="HUMAN: send an in_review/approved task back for fixes (counts as a revision)")
+    s = sub.add_parser("request-changes", help="HUMAN: send a review/approved task back for fixes (counts as a revision)")
     s.add_argument("id"); s.add_argument("--by", required=True); s.add_argument("--reason", required=True)
     s = sub.add_parser("unblock"); s.add_argument("id"); s.add_argument("--to", required=True); s.add_argument("--by", required=True)
     s = sub.add_parser("record-exec"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--notes", default="")
@@ -525,12 +549,18 @@ def main(argv: list[str] | None = None) -> int:
                 block = proj.budget_block_reason(t["id"])
                 print(f"{t['id']} ({t['status']}): {t['title']}" + (f"  [BLOCKED: {block}]" if block else ""))
             if not ready:
-                print("nothing ready (approve a proposed task, or finish dependencies)")
+                print("nothing ready (approve a backlog task, or finish dependencies)")
             if a.parallel_safe:
                 print(parallel_report(proj))
             return 0
         if a.cmd == "cycles":
             print(cycle_report(proj))
+            return 0
+        if a.cmd == "state":
+            print(json.dumps(proj.state(), indent=2))
+            return 0
+        if a.cmd == "next-id":
+            print(proj.next_id())
             return 0
         if a.cmd == "report":
             print(f"wrote {proj.report().relative_to(proj.root)}")
@@ -540,7 +570,6 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if a.cmd == "record-usage":
             print(json.dumps(proj.record_usage(a.id, a.kind, a.role, a.cost_usd, a.est_cost_usd, a.tokens, a.model, a.note)))
-            proj._write_state()
             return 0
         actions = {
             "approve": lambda: proj.approve(a.id, a.by),

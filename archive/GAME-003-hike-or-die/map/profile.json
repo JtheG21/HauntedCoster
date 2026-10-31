@@ -1,0 +1,74 @@
+{
+  "name": "hike_or_die_r15",
+  "source": "Stock Roblox R15. THIS IS THE DEFAULT PROFILE for the skill - a map built for a generic game, not for any one project's custom movement controller.",
+  "note": "Stock R15 movement profile used for Gate 1 route checks. Auto-step, radius and height are conservative assumptions until measured in Studio.",
+  "gravity": {
+    "value": 196.2,
+    "src": "config",
+    "note": "Workspace.Gravity default"
+  },
+  "jumpPower": {
+    "value": 50,
+    "src": "config",
+    "note": "Humanoid.JumpPower default (UseJumpPower true)"
+  },
+  "walkSpeed": {
+    "value": 16,
+    "src": "config"
+  },
+  "sprintSpeed": {
+    "value": 16,
+    "src": "config",
+    "note": "no sprint in stock Roblox"
+  },
+  "jumpApex": {
+    "value": 6.37,
+    "src": "derived",
+    "note": "jumpPower^2 / (2*gravity) = 2500/392.4"
+  },
+  "jumpAirtime": {
+    "value": 0.5097,
+    "src": "derived",
+    "note": "2*jumpPower/gravity"
+  },
+  "jumpDistance": {
+    "src": "derived",
+    "note": "speed * jumpAirtime",
+    "walk": 8.16,
+    "sprint": 8.16
+  },
+  "autoStep": {
+    "value": 2.0,
+    "src": "assumed",
+    "note": "Roblox auto-step. Stairs and slabs taller than this are unclimbable ladders - see references/movement-numbers.md"
+  },
+  "maxWalkSlope": {
+    "value": 89,
+    "src": "config",
+    "note": "Humanoid.MaxSlopeAngle default"
+  },
+  "designMaxSlope": {
+    "value": 45,
+    "src": "design",
+    "note": "what a RAMP should honour even though the engine allows more"
+  },
+  "charHeight": {
+    "value": 5.0,
+    "src": "assumed",
+    "note": "R15 standing height"
+  },
+  "charRadius": {
+    "value": 2.0,
+    "src": "assumed"
+  },
+  "eyeHeight": {
+    "value": 4.5,
+    "src": "assumed"
+  },
+  "ragdollRecovery": {
+    "value": 0.0,
+    "src": "config",
+    "note": "stock Roblox has no ragdoll"
+  },
+  "abilities": {}
+}

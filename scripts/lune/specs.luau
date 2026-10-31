@@ -1,22 +1,42 @@
 --!strict
--- Headless GAME-002 unit specs: `lune run scripts/lune/specs` (from the repo root; check.sh runs it).
+-- Headless unit specs: `lune run scripts/lune/specs` (from the repo root) runs the active game named in
+-- scripts/active-game.env; check.sh runs it. `lune run scripts/lune/specs archive` runs ARCHIVED instead.
 --
--- Studio-free twin of games/haunted/tests/TestRunner.luau. It rebuilds the slice of the Rojo tree the
--- specs touch (ReplicatedStorage.Shared and TestService.Tests, as mapped in haunted.project.json) as
--- fake instances backed by files, then loads every module with its own `script`, `game` and `require`,
--- so the source keeps Roblox's instance requires unchanged. Vector3/Color3/CFrame come from
--- @lune/roblox. Anything else Roblox-only (services, real Instances, task, physics) is absent on
--- purpose: a spec that needs it belongs in a Studio Play scenario, and fails loudly here.
+-- Studio-free twin of each game's tests/TestRunner.luau. For each game it rebuilds the slice of the
+-- Rojo tree the specs touch (ReplicatedStorage.Shared and TestService.Tests, as mapped in that game's
+-- project file) as fake instances backed by files, then loads every module with its own `script`,
+-- `game` and `require`, so the source keeps Roblox's instance requires unchanged. Vector3/Color3/CFrame
+-- come from @lune/roblox. Anything else Roblox-only (services, real Instances, task, physics) is absent
+-- on purpose: a spec that needs it belongs in a Studio Play scenario, and fails loudly here.
 
 local fs = require("@lune/fs")
 local luau = require("@lune/luau")
 local process = require("@lune/process")
 local roblox = require("@lune/roblox") :: any
 
-local MOUNTS = {
-	ReplicatedStorage = { Shared = "games/haunted/src/shared" },
-	TestService = { Tests = "games/haunted/tests" },
+local env: { [string]: string } = {}
+for line in fs.readFile("scripts/active-game.env"):gmatch("[^\n]+") do
+	local key, value = line:match("^([%w_]+)=(.*)$")
+	if key and value then
+		env[key] = value
+	end
+end
+local ARCHIVED = {
+	{
+		dataModel = "HauntedCollector",
+		shared = "archive/GAME-002-haunted-collector/src/shared",
+		tests = "archive/GAME-002-haunted-collector/tests",
+	},
 }
+local GAMES = if process.args[1] == "archive"
+	then ARCHIVED
+	else {
+		{
+			dataModel = env.ACTIVE_GAME_NAME,
+			shared = `{env.ACTIVE_GAME_ROOT}/src/shared`,
+			tests = `{env.ACTIVE_GAME_ROOT}/tests`,
+		},
+	}
 local SKIP_DIRS = { scenarios = true } -- Play scenarios need a running server
 
 type Node = {
@@ -107,13 +127,7 @@ local function mount(parent: Node, dir: string)
 	end
 end
 
-local game = newNode("HauntedCollector", "DataModel", nil, nil)
-for serviceName, children in MOUNTS do
-	local service = newNode(serviceName, serviceName, game, nil)
-	for name, dir in children do
-		mount(newNode(name, "Folder", service, nil), dir)
-	end
-end
+local game: Node = nil :: any -- reassigned per game below; requireNode reads it at call time
 function nodeMethods.GetService(self: Node, name: string): Node
 	return self._children[name] or error(`service {name} is not available headlessly`, 2)
 end
@@ -185,40 +199,55 @@ local function requireNode(node: Node): any
 end
 
 -- Same contract as TestRunner.T.
-local passed, failed = 0, 0
-local tests = game._children.TestService._children.Tests
-for _, child in nodeMethods.GetChildren(tests) do
-	if child.ClassName == "ModuleScript" and child.Name:match("%.spec$") then
-		local t = {
-			test = function(name: string, fn: () -> ())
-				local ok, err = pcall(fn)
-				if ok then
-					passed += 1
-				else
-					failed += 1
-					print(`FAIL {child.Name} > {name}: {err}`)
-				end
-			end,
-			eq = function(actual: any, expected: any, msg: string?)
-				if actual ~= expected then
-					error(`{msg or "eq"}: expected {tostring(expected)}, got {tostring(actual)}`, 2)
-				end
-			end,
-			truthy = function(value: any, msg: string?)
-				if not value then
-					error(msg or "expected truthy value", 2)
-				end
-			end,
-		}
-		local ok, err = pcall(function()
-			requireNode(child)(t)
-		end)
-		if not ok then
-			failed += 1
-			print(`FAIL {child.Name} (load): {err}`)
+local totalPassed, totalFailed = 0, 0
+for _, g in GAMES do
+	if not (fs.isDir(g.shared) and fs.isDir(g.tests)) then
+		print(`[lune specs] skipping {g.dataModel}: {g.shared} or {g.tests} not found`)
+		continue
+	end
+
+	game = newNode(g.dataModel, "DataModel", nil, nil)
+	mount(newNode("Shared", "Folder", newNode("ReplicatedStorage", "ReplicatedStorage", game, nil), nil), g.shared)
+	local testsFolder = newNode("Tests", "Folder", newNode("TestService", "TestService", game, nil), nil)
+	mount(testsFolder, g.tests)
+
+	local passed, failed = 0, 0
+	for _, child in nodeMethods.GetChildren(testsFolder) do
+		if child.ClassName == "ModuleScript" and child.Name:match("%.spec$") then
+			local t = {
+				test = function(name: string, fn: () -> ())
+					local ok, err = pcall(fn)
+					if ok then
+						passed += 1
+					else
+						failed += 1
+						print(`FAIL {g.dataModel} {child.Name} > {name}: {err}`)
+					end
+				end,
+				eq = function(actual: any, expected: any, msg: string?)
+					if actual ~= expected then
+						error(`{msg or "eq"}: expected {tostring(expected)}, got {tostring(actual)}`, 2)
+					end
+				end,
+				truthy = function(value: any, msg: string?)
+					if not value then
+						error(msg or "expected truthy value", 2)
+					end
+				end,
+			}
+			local ok, err = pcall(function()
+				requireNode(child)(t)
+			end)
+			if not ok then
+				failed += 1
+				print(`FAIL {g.dataModel} {child.Name} (load): {err}`)
+			end
 		end
 	end
+	print(`[lune specs] {g.dataModel}: {passed} passed, {failed} failed`)
+	totalPassed += passed
+	totalFailed += failed
 end
 
-print(`[lune specs] {passed} passed, {failed} failed`)
-process.exit(if failed == 0 and passed > 0 then 0 else 1)
+print(`[lune specs] {totalPassed} passed, {totalFailed} failed`)
+process.exit(if totalFailed == 0 and totalPassed > 0 then 0 else 1)

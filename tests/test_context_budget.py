@@ -48,12 +48,11 @@ class TestContextBudget(unittest.TestCase):
         # Regression: the orchestrator must come from --root, not from the script's own checkout.
         root = self.root / "other"
         (root / "scripts").mkdir(parents=True)
-        (root / "tasks").mkdir()
-        (root / "tasks" / "queue.json").write_text("{}")
+        (root / "tasks" / "items").mkdir(parents=True)
         (root / "scripts" / "orchestrator.py").write_text(
             "class Project:\n"
             "    def __init__(self, root):\n"
-            "        self.tasks = [{'id': 'TASK-0001', 'note': 'n.md'}]\n"
+            "        self.tasks = [{'id': 'TASK-0001', 'note_path': 'n.md'}]\n"
             "    def task(self, tid):\n"
             "        return self.tasks[0]\n"
             "    def build_prompt(self, t, role):\n"
@@ -62,8 +61,7 @@ class TestContextBudget(unittest.TestCase):
 
     def test_root_without_orchestrator_is_an_error(self):
         root = self.root / "bare"
-        (root / "tasks").mkdir(parents=True)
-        (root / "tasks" / "queue.json").write_text("{}")
+        (root / "tasks" / "items").mkdir(parents=True)
         with self.assertRaises(FileNotFoundError):
             cb.sample_prompt(root, "executor", None)
 

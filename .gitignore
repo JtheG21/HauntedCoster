@@ -31,11 +31,16 @@ tasks/prompts/
 .claude/skills/*/LOCAL.md
 .claude/skills/*/work/
 
-# Built place, the GAME-001 sourcemap (sourcemap.json is GAME-002) and the local build stamp (scripts/stamp.sh)
+# Built places and the local build stamp (scripts/stamp.sh). sourcemap.json above is the active game.
 /HauntedCollector.rbxl
 /HauntedCollector.rbxl.lock
-game001-sourcemap.json
-haunted-sourcemap.json
-games/haunted/src/shared/BuildStamp.txt
+/MathShow.rbxl
+/MathShow.rbxl.lock
+archive/GAME-002-haunted-collector/src/shared/BuildStamp.txt
+games/mathshow/src/shared/BuildStamp.txt
 .agents/skills/*/LOCAL.md
 .agents/skills/*/work/
+
+# Untriaged material stays local until it has been through intake/README.md
+intake/inbox/*
+!intake/inbox/.gitkeep

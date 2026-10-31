@@ -1,0 +1,67 @@
+{
+  "name": "HauntedCollector",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      }
+    },
+    "ServerStorage": {
+      "ArtData": {
+        "$path": "assets/ArtData"
+      }
+    },
+    "ServerScriptService": {
+      "Server": {
+        "$path": "src/server"
+      }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Client": {
+          "$path": "src/client"
+        }
+      }
+    },
+    "Workspace": {
+      "$properties": {
+        "FilteringEnabled": true
+      },
+      "Terrain": {
+        "$properties": {
+          "Decoration": true
+        }
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "ClockTime": 0,
+        "Brightness": 1,
+        "GlobalShadows": true,
+        "Outlines": false,
+        "Technology": "Future",
+        "Ambient": [
+          0.16,
+          0.16,
+          0.22
+        ],
+        "OutdoorAmbient": [
+          0.33,
+          0.33,
+          0.45
+        ]
+      }
+    },
+    "SoundService": {
+      "$properties": {
+        "RespectFilteringEnabled": true
+      }
+    },
+    "TestService": {
+      "Tests": {
+        "$path": "tests"
+      }
+    }
+  }
+}

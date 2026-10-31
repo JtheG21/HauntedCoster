@@ -1,0 +1,63 @@
+{
+  "id": "TASK-0088",
+  "game": "GAME-004",
+  "title": "MathShow Scaffold",
+  "status": "done",
+  "tier": "light",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [],
+  "branch": "task/TASK-0088-MathShow-Scaffold",
+  "acceptance": [
+    "mathshow.project.json syncs via Rojo without errors.",
+    "scripts/check.sh passes with zero or one trivial MathShow spec.",
+    "scripts/new-service.sh's spec template is confirmed to match (or fixed to match) how check.sh finds and runs lune specs."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0088-MathShow-Scaffold.md",
+  "risk": "low",
+  "history": [
+    {
+      "time": "2026-10-25T12:03:53",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-25T12:03:53",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-25T12:11:16",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-25T12:11:16",
+      "from": "in_review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "time": "2026-10-25T12:17:54",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-25T12:11:16",
+      "result": "pass",
+      "notes": "Scaffold complete; scripts/lune/specs.luau generalized to run any game's specs (was GAME-002-only), fixing the real check.sh gap. check.sh ALL CHECKS PASSED."
+    }
+  ],
+  "audits": [],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

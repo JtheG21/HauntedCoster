@@ -1,0 +1,32 @@
+{
+  "id": "TASK-0083",
+  "game": "GAME-002",
+  "title": "Exhibit Tier Guard Ordering",
+  "status": "archived",
+  "tier": "light",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0059"
+  ],
+  "branch": "task/TASK-0083-Exhibit-Tier-Guard-Ordering",
+  "acceptance": [
+    "setRefusal returns the documented refusal without throwing for nil, strings, tables, NaN, infinities, fractional and out-of-range houseTier values.",
+    "Valid sanitized profiles retain existing slot and owned-ghost behavior; meaningful guard specs and check.sh pass."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0083-Exhibit-Tier-Guard-Ordering.md",
+  "risk": "low",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:19",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

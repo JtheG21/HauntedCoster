@@ -1,0 +1,34 @@
+{
+  "id": "TASK-0080",
+  "game": "GAME-002",
+  "title": "Monetization And Art Studio Verification",
+  "status": "archived",
+  "tier": "deep",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0069",
+    "TASK-0067"
+  ],
+  "branch": "task/TASK-0080-Monetization-And-Art-Studio-Verification",
+  "acceptance": [
+    "Run every outstanding row of TEST-20261018-01 after preflight and module-content sync verification; record exact results and screenshots, never mark a source inference as runtime pass.",
+    "Use memory-only isolated profiles for exploit/setup shortcuts; prove rejoin separately in an explicitly approved isolated persistent test namespace, without live data writes.",
+    "FullLoop, ExploitProbe, fresh Server specs and two-client appearance/leave behavior are evidenced; phone/desktop shots, bake time and memory are recorded; real device gaps stay explicit."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0080-Monetization-And-Art-Studio-Verification.md",
+  "risk": "high",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:19",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

@@ -3,7 +3,7 @@
 
 Checks: required frontmatter, controlled statuses and types, ISO dates, filename
 patterns, folder placement, game project IDs, duplicate IDs, broken [[links]],
-and task status sync with tasks/queue.json.
+and task status sync with tasks/items/.
 
 Usage: python3 scripts/validate_vault.py [--root PATH]   (exit 1 on errors)
 """
@@ -11,12 +11,14 @@ Usage: python3 scripts/validate_vault.py [--root PATH]   (exit 1 on errors)
 from __future__ import annotations
 
 import argparse
-import json
 import re
 import sys
 from pathlib import Path
 
-STATUSES = {"inbox", "research", "proposed", "ready", "in_progress", "blocked",
+import task_store
+
+# Queue statuses (backlog, review) plus the older note vocabulary (proposed, in_review) that non-task notes keep.
+STATUSES = {"backlog", "review", "inbox", "research", "proposed", "ready", "in_progress", "blocked",
             "in_review", "changes_requested", "approved", "done", "archived"}
 TYPES = {"index", "overview", "design", "architecture", "roadmap", "task", "bug", "audit", "adr",
          "system", "playtest", "release", "review", "health", "lesson", "retro", "research",
@@ -99,6 +101,8 @@ def vault_files(root: Path) -> list[Path]:
     for p in root.rglob("*"):
         rel = p.relative_to(root)
         if rel.parts[0] in SKIP_DIRS or any(part.startswith(".") for part in rel.parts):
+            continue
+        if rel.parts[:2] == ("intake", "inbox"):  # untriaged material, not notes
             continue
         if p.is_file():
             out.append(p)
@@ -209,37 +213,35 @@ def check_links(rep, where, text, by_name):
 
 
 def check_queue(rep, root, task_notes):
-    qpath = root / "tasks" / "queue.json"
-    if not qpath.exists():
+    if not task_store.items_dir(root).is_dir():
         return
-    try:
-        tasks = json.loads(qpath.read_text()).get("tasks", [])
-    except json.JSONDecodeError as e:
-        rep.error("tasks/queue.json", f"invalid JSON ({e})")
-        return
+    items, errors = task_store.read_items(root)
+    for e in errors:
+        rep.error("tasks/items", e)
+    tasks = [task for _, task in items]
     seen = set()
     for t in tasks:
         tid = t.get("id")
         seen.add(tid)
-        note = t.get("note")
+        note = t.get("note_path")
         if not note:
-            rep.error("tasks/queue.json", f"{tid}: no 'note' path")
+            rep.error(f"tasks/items/{tid}.json", "no 'note_path'")
             continue
         if not (root / note).exists():
-            rep.error("tasks/queue.json", f"{tid}: note not found: {note}")
+            rep.error(f"tasks/items/{tid}.json", f"note not found: {note}")
             continue
         if tid not in task_notes:
             rep.error(note, f"queue task {tid} has no matching 'id' in the note")
             continue
         rel, fm = task_notes[tid]
         if str(rel) != note:
-            rep.error("tasks/queue.json", f"{tid}: note path {note} but the note is at {rel}")
+            rep.error(f"tasks/items/{tid}.json", f"note path {note} but the note is at {rel}")
         if fm.get("status") != t.get("status"):
             rep.error(str(rel), f"status mismatch: note '{fm.get('status')}' vs queue '{t.get('status')}' "
                                  "(queue is authoritative; flag, don't guess)")
     for tid, (rel, _) in task_notes.items():
         if tid not in seen:
-            rep.warn(str(rel), f"{tid} isn't in tasks/queue.json")
+            rep.warn(str(rel), f"{tid} has no file in tasks/items/")
 
 
 OVERVIEW_ROW = re.compile(r"^\|\s*\[\[(TASK-\d{4})[^\]]*\]\]\s*\|\s*([a-z_]+)")
@@ -247,13 +249,9 @@ OVERVIEW_ROW = re.compile(r"^\|\s*\[\[(TASK-\d{4})[^\]]*\]\]\s*\|\s*([a-z_]+)")
 
 def check_overview_tables(rep, root):
     """Warn when a game Overview's task table shows a status other than the queue's (AUDIT-005)."""
-    qpath = root / "tasks" / "queue.json"
-    if not qpath.exists():
+    if not task_store.items_dir(root).is_dir():
         return
-    try:
-        status = {t.get("id"): t.get("status") for t in json.loads(qpath.read_text()).get("tasks", [])}
-    except json.JSONDecodeError:
-        return  # check_queue reports it
+    status = {t.get("id"): t.get("status") for _, t in task_store.read_items(root)[0]}  # check_queue reports bad files
     for p in sorted((root / "03 Games").glob("*/00 Overview.md")):
         where = str(p.relative_to(root))
         for line in p.read_text(encoding="utf-8").splitlines():
@@ -262,7 +260,7 @@ def check_overview_tables(rep, root):
                 continue
             tid, shown = m.groups()
             if tid not in status:
-                rep.warn(where, f"task table lists {tid}, which isn't in tasks/queue.json")
+                rep.warn(where, f"task table lists {tid}, which has no file in tasks/items/")
             elif shown != status[tid]:
                 rep.warn(where, f"task table shows {tid} as '{shown}' but the queue says '{status[tid]}'")
 

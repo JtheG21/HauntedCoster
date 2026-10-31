@@ -1,0 +1,33 @@
+{
+  "id": "TASK-0082",
+  "game": "GAME-002",
+  "title": "Readonly Cosmetic Mutation Guard",
+  "status": "archived",
+  "tier": "deep",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0067"
+  ],
+  "branch": "task/TASK-0082-Readonly-Cosmetic-Mutation-Guard",
+  "acceptance": [
+    "All six cosmetic/purchase remotes reject readonly profiles including loss of lock after successful load; no debit, grant, selection, claim or placement changes and no success notification.",
+    "A clear retry/refusal reaches the UI; forged remote calls cannot bypass it; explicitly isolated memory-only Studio mode remains usable with its unsaved banner.",
+    "Behavior tests cover loading, saved, memory, newer-schema readonly and lock-loss readonly; define scope for existing EconomyService consistently with project policy; check.sh and a 2-client test pass."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0082-Readonly-Cosmetic-Mutation-Guard.md",
+  "risk": "high",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:19",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}
