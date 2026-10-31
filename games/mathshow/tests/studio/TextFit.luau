@@ -18,7 +18,7 @@ local TextFitRules = require(Shared:WaitForChild("TextFitRules"))
 
 local MARGIN = 6
 local SLACK = 1 -- px of tolerance on keep-clear zones for rotated boxes
--- TASK-0114. Tap minimum is in screen points, with no root-scale division. Other checks are in design px unless noted.
+-- TASK-0114. Tap minimum is in design px: AbsoluteSize divided by the gate scale, so the rule is the same at every viewport.
 local TAP_MIN = 44
 local REVIEW_GAP_MIN = 2 -- review rows: gap between neighbours, design px
 local CLIP_TOL = 0.5 -- ancestor overflow tolerated, design px
@@ -151,17 +151,18 @@ local function checkGui(gui: ScreenGui, state: string, rows: { Row })
 					hit = zone.name
 				end
 			end
-			local small = label.AbsoluteSize.X < TAP_MIN or label.AbsoluteSize.Y < TAP_MIN
+			local dw, dh = label.AbsoluteSize.X / scale, label.AbsoluteSize.Y / scale
+			local small = dw < TAP_MIN or dh < TAP_MIN
 			if d.Name:sub(1, 3) == "Hit" then
 				table.insert(rows, {
 					state = state,
 					element = name .. " [target]",
-					text = string.format("%dx%d", label.AbsoluteSize.X + 0.5, label.AbsoluteSize.Y + 0.5),
+					text = string.format("%dx%d", dw + 0.5, dh + 0.5),
 					margin = "-",
 					pass = hit == "" and not small,
 					why = if hit ~= ""
 						then "inside keep-clear: " .. hit
-						elseif small then "tap under 44 screen px"
+						elseif small then "tap under 44 design px"
 						else "",
 				})
 			end
@@ -326,7 +327,7 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 			local x0, y0, x1, y1 = rotatedBox(g, root, scale)
 			table.insert(interactive, { inst = g, box = { x0, y0, x1, y1 } })
 			if not (d:IsA("TextButton") and string.sub(d.Name, 1, 3) == "Hit") then
-				local sw, sh = g.AbsoluteSize.X, g.AbsoluteSize.Y
+				local sw, sh = g.AbsoluteSize.X / scale, g.AbsoluteSize.Y / scale
 				local ok = sw >= TAP_MIN and sh >= TAP_MIN
 				table.insert(rows, {
 					state = state,
@@ -334,7 +335,7 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 					text = string.format("%dx%d", sw + 0.5, sh + 0.5),
 					margin = "-",
 					pass = ok,
-					why = if ok then "" else "tap under 44 screen px",
+					why = if ok then "" else "tap under 44 design px",
 					class = d.ClassName,
 					category = "tap",
 				})
