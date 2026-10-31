@@ -3,7 +3,7 @@ id: TASK-0108
 title: Workflow Hardening
 type: task
 project: GAME-004
-status: approved
+status: done
 created: 2026-10-30
 updated: 2026-10-30
 tags:
@@ -21,4 +21,4 @@ tags:
 See `files_owned` in `tasks/queue.json`.
 
 ## Outcome
-Phases 0 to 8 are complete on `chore/workflow-hardening`, unpushed. First audit failed with two majors ([[AUD-20261030-TASK-0108-01]]); revision 1 fixed them and the delta audit passed ([[AUD-20261030-TASK-0108-02]]). jg reported the Studio checks good (2026-10-30). Waiting on jg: merge. Details: `docs/workflow/PR-workflow-hardening.md`.
+Phases 0 to 8 are complete on `chore/workflow-hardening`, unpushed. First audit failed with two majors ([[AUD-20261030-TASK-0108-01]]); revision 1 fixed them and the delta audit passed ([[AUD-20261030-TASK-0108-02]]). jg reported the Studio checks good (2026-10-30). jg approved the merge in chat (2026-10-30) after CI passed on PR 155. Details: `docs/workflow/PR-workflow-hardening.md`.

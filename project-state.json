@@ -4,16 +4,13 @@
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "mathshow.project.json",
   "dispatch_mode": "dry-run",
-  "updated": "2026-10-30T17:11:36",
+  "updated": "2026-10-30T17:15:50",
   "task_counts": {
-    "done": 74,
-    "archived": 23,
-    "approved": 1
+    "done": 75,
+    "archived": 23
   },
   "ready": [],
-  "needs_human": [
-    "TASK-0108"
-  ],
+  "needs_human": [],
   "api_spend_this_month_usd": 0.0,
   "active_game": "GAME-004",
   "conventions": "00 Studio/Obsidian Conventions.md",
