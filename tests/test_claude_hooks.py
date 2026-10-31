@@ -127,6 +127,11 @@ class TestGuardPaths(unittest.TestCase):
     def test_references_ask(self):
         self.check("ask", "Edit", "10 References/01 UI/x.md")
 
+    def test_older_checkout_without_the_env_file_stays_protected(self):
+        (self.repo / "scripts" / "active-game.env").unlink()
+        (self.repo / "AGENTS.md").write_text("")
+        self.check("block", "Write", "Agents/x.md")
+
     def test_other_repos_are_left_alone(self):
         (self.repo / "scripts" / "active-game.env").unlink()
         self.check("allow", "Write", "Agents/x.md")

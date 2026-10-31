@@ -47,6 +47,7 @@ merge gate and the revision limit depend on them. History entries keep the names
 A file may be in the `files_owned` of **at most one `in_progress` task**. That is what stops parallel agents overlapping.
 
 - Paths match themselves and everything below them; globs use `*`, `?` and `[]`, and `*` also crosses `/`.
+- Give folders a trailing `/`: without one, a name with a dot (`a/v1.2`) is read as a file.
 - Two globs overlap if their fixed prefixes overlap. That is deliberately cautious, so narrow the globs if it complains.
 - See `docs/workflow/PARALLEL.md` for how shared contracts are handled.
 
