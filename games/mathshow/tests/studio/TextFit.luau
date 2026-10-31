@@ -248,16 +248,40 @@ local function isRelated(a: Instance, b: Instance): boolean
 	return a:IsDescendantOf(b) or b:IsDescendantOf(a)
 end
 
--- The nearest ancestor named Group: a sticker and its own control, shard, glow and flash share one.
-local function groupOf(inst: Instance, root: Frame): Instance?
+-- The nearest ancestor with the given name, below root.
+local function ancestorNamed(inst: Instance, root: Frame, name: string): Instance?
 	local n: Instance? = inst.Parent
 	while n and n ~= root do
-		if n.Name == "Group" then
+		if n.Name == name then
 			return n
 		end
 		n = n.Parent
 	end
 	return nil
+end
+
+-- Where the glyphs of a text label actually sit (design px), so a long, centred label does not count as its full box.
+local function glyphBox(lab: TextLabel, root: Frame, scale: number): { number }
+	local x0, y0, x1, y1 = rotatedBox(lab, root, scale)
+	if lab.Text == "" then
+		return { x0, y0, x1, y1 }
+	end
+	local bw, bh = measure(lab, scale)
+	local lw, lh = x1 - x0, y1 - y0
+	local w, h = math.min(bw, lw), math.min(bh, lh)
+	local gx = x0
+	if lab.TextXAlignment == Enum.TextXAlignment.Center then
+		gx = x0 + (lw - w) / 2
+	elseif lab.TextXAlignment == Enum.TextXAlignment.Right then
+		gx = x1 - w
+	end
+	local gy = y0
+	if lab.TextYAlignment == Enum.TextYAlignment.Center then
+		gy = y0 + (lh - h) / 2
+	elseif lab.TextYAlignment == Enum.TextYAlignment.Bottom then
+		gy = y1 - h
+	end
+	return { gx, gy, gx + w, gy + h }
 end
 
 local function overlapBox(a: { number }, b: { number }): { number }
@@ -367,7 +391,7 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 					class = lab.ClassName,
 					category = "clip",
 				})
-				table.insert(labelBoxes, { inst = lab, box = box, owner = owner })
+				table.insert(labelBoxes, { inst = lab, box = glyphBox(lab, root, scale), owner = owner })
 			end
 		end
 	end
@@ -382,8 +406,14 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 				local decor = isImage and shapeOwner(d) ~= nil
 				if not decor then
 					local g = d :: GuiObject
-					local x0, y0, x1, y1 = rotatedBox(g, root, scale)
-					local ov = overlapBox(L.box, { x0, y0, x1, y1 })
+					local cbox
+					if isText then
+						cbox = glyphBox(d :: TextLabel, root, scale)
+					else
+						local x0, y0, x1, y1 = rotatedBox(g, root, scale)
+						cbox = { x0, y0, x1, y1 }
+					end
+					local ov = overlapBox(L.box, cbox)
 					if
 						ov[3] - ov[1] > OVERLAP_EPS
 						and ov[4] - ov[2] > OVERLAP_EPS
@@ -391,12 +421,19 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 					then
 						-- Intentional composition is passed and labelled; anything else is a collision.
 						local pl, pg = path(L.inst, root), path(g, root)
-						local gl, gg = groupOf(L.inst, root), groupOf(g, root)
+						local gl, gg = ancestorNamed(L.inst, root, "Group"), ancestorNamed(g, root, "Group")
+						local cl, cg = ancestorNamed(L.inst, root, "Card"), ancestorNamed(g, root, "Card")
 						local reason = ""
 						if string.find(pl, "Edge", 1, true) or string.find(pg, "Edge", 1, true) then
 							reason = "intentional: screen-edge decor"
 						elseif gl ~= nil and gl == gg then
 							reason = "intentional: sticker or label on its own control"
+						elseif cl ~= nil and cl == cg and L.inst.Name == "NewBest" then
+							reason = "intentional: badge on its own card"
+						elseif isText and (d :: TextLabel).Text == L.inst.Text and d.Name == L.inst.Name then
+							reason = "intentional: duplicate text layer (shadow or glow)"
+						elseif L.inst.Name == "Vs" then
+							reason = "intentional: VS badge across the panel seam"
 						end
 						table.insert(rows, {
 							state = state,
@@ -417,17 +454,19 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 	end
 
 	-- 5. Review rows: gap between neighbouring Row<n> controls, per column. Diagnostic, with a gate at REVIEW_GAP_MIN.
-	local groups: { [Instance]: { { inst: GuiObject, box: { number } } } } = {}
+	local groups: { [string]: { { inst: GuiObject, box: { number }, parent: Instance } } } = {}
 	for _, d in root:GetDescendants() do
 		if d:IsA("GuiObject") and string.match(d.Name, "^Row%d+$") and visible(d :: GuiObject) and d.Parent then
 			local x0, y0, x1, y1 = rotatedBox(d :: GuiObject, root, scale)
-			local list = groups[d.Parent] or {}
-			table.insert(list, { inst = d :: GuiObject, box = { x0, y0, x1, y1 } })
-			groups[d.Parent] = list
+			local key = tostring(d.Parent:GetFullName()) .. " @" .. string.format("%.0f", x0)
+			local list = groups[key] or {}
+			table.insert(list, { inst = d :: GuiObject, box = { x0, y0, x1, y1 }, parent = d.Parent })
+			groups[key] = list
 		end
 	end
-	for parent, list in groups do
+	for _, list in groups do
 		if #list >= 2 then
+			local parent = list[1].parent
 			table.sort(list, function(a, b)
 				return a.box[2] < b.box[2]
 			end)
