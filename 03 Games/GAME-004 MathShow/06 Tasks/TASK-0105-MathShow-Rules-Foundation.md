@@ -3,7 +3,7 @@ id: TASK-0105
 title: "MathShow Rules Foundation"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -12,7 +12,7 @@ branch: task/TASK-0105-rules-foundation
 related:
   - "[[GAME-004 MathShow/00 Overview]]"
 created: 2026-10-27
-updated: 2026-10-27
+updated: 2026-10-30
 tags:
   - workflow/task
 ---
@@ -96,4 +96,4 @@ Proposed follow-ups (not created): C2 3v3 rules + ProfileV2 proof, then the wiri
 ## Audits
 
 ## Outcome
-(pending merge)
+Merged through PR 152, approved by jg in chat (2026-10-30). Audit passed: `06 QA/AUD-20261027-TASK-0105-01.md`. Eleven pure modules and six specs; nothing is wired into gameplay yet.

@@ -154,7 +154,7 @@ Afterwards, 152 with 153 and 151 with 154 had no conflicts. Merging all four ont
 4. Merge in any order that respects the stacks, retargeting a child to `main` when its base merges. Each merge should be clean.
 
 ### Commands
-The preflight is chained because the guard hook blocks `git checkout` and `git commit` without it. Run `git status` before `git add -A`: the worktrees should hold only the merge, and anything else should be looked at first.
+The preflight is chained because the guard hook blocks `git checkout` and `git commit` without it. Stage with `git add -u` and `git add tasks/items`, not `git add -A`: these worktrees hold generated files the old `.gitignore` hid (`game001-sourcemap.json`, `game004-sourcemap.json`, `games/haunted/`), and after the merge they show as untracked. Run `git status` before committing: untracked files other than those should be looked at first. The rehearsal clones didn't have these files, so it missed this.
 
 **151:** in `/Users/jg/Desktop/Rg1-worktrees/mathshow-art-v2`
 ```bash
@@ -162,7 +162,8 @@ git fetch origin
 scripts/preflight.sh --root "$PWD" --branch chore/mathshow-art-v2-shapefit --clean && git merge --no-commit --no-ff origin/main
 scripts/preflight.sh --root "$PWD" --branch chore/mathshow-art-v2-shapefit && git checkout origin/main -- project-state.json
 python3 scripts/migrate-queue-to-items.py
-git add -A
+git add -u
+git add tasks/items
 scripts/preflight.sh --root "$PWD" --branch chore/mathshow-art-v2-shapefit && git commit -m "chore: merge main and move to task files"
 scripts/check.sh
 ```
@@ -175,7 +176,8 @@ git fetch origin
 scripts/preflight.sh --root "$PWD" --branch task/TASK-0107-menu-art-v2 --clean && git merge --no-commit --no-ff origin/chore/mathshow-art-v2-shapefit
 scripts/preflight.sh --root "$PWD" --branch task/TASK-0107-menu-art-v2 && git checkout origin/chore/mathshow-art-v2-shapefit -- project-state.json
 python3 scripts/migrate-queue-to-items.py
-git add -A
+git add -u
+git add tasks/items
 scripts/preflight.sh --root "$PWD" --branch task/TASK-0107-menu-art-v2 && git commit -m "chore: merge base and move to task files"
 scripts/check.sh
 ```
@@ -184,8 +186,10 @@ scripts/check.sh
 
 **After each `check.sh` passes, and once jg approves that branch:**
 ```bash
-scripts/preflight.sh --root "$PWD" --branch <branch> --clean && git push origin <branch>
+scripts/preflight.sh --root "$PWD" --branch <branch> && git push origin <branch>
 ```
+
+The push leaves out `--clean` because those untracked files would fail it. Check first that `git status` shows no tracked changes.
 
 ### If something differs
 - **The script says a task file differs:** the entry has changed on one side since this rehearsal, for example a status change after a merge. It writes nothing. Compare the two, then rerun with `--keep-existing` if the existing file is right. That removes `tasks/queue.json`, so the differing entry then survives only in git history.
