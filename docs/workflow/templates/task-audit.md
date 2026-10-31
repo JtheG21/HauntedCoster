@@ -18,7 +18,7 @@ From the task. Flag any changed file not listed here.
 -
 
 ## Owned files
-Must match `files_owned` for this task in `tasks/queue.json`. Flag edits outside them and edits to another task's shared contracts.
+Must match `files_owned` for this task in its `tasks/items/` file. Flag edits outside them and edits to another task's shared contracts.
 -
 
 ## Acceptance criteria and evidence

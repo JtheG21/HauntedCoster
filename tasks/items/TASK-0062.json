@@ -1,0 +1,75 @@
+{
+  "id": "TASK-0062",
+  "game": "GAME-002",
+  "title": "Ghost Skins And Auras Equipment",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0060",
+    "TASK-0061",
+    "TASK-0069"
+  ],
+  "branch": "task/TASK-0062-Ghost-Skins-And-Auras-Equipment",
+  "acceptance": [
+    "Owned skins and auras equip and remove per ghost (by UID) through a server-validated remote; compatibility is checked and explained; natural Spectral and Ashen identity is preserved.",
+    "The appearance shows on the owner's and other players' clients, previews never alter live models, and state survives rejoin.",
+    "Specs for equip, remove, incompatible target and invalid input; check.sh green; one Sonnet audit; Studio FullLoop still passes."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261018-TASK-0062-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0062-Ghost-Skins-And-Auras-Equipment.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-18T12:49:10",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-18T13:10:54",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-18T13:16:37",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-18T13:17:58",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-18T13:23:54",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-18T13:16:37",
+      "result": "pass",
+      "notes": "skins/auras equip implemented; check.sh green, 217 specs; Studio skipped by jg"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-18T13:17:58",
+      "result": "pass",
+      "report": "06 QA/AUD-20261018-TASK-0062-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

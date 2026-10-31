@@ -1,0 +1,33 @@
+{
+  "id": "TASK-0071",
+  "game": "GAME-002",
+  "title": "Stable Decoration Identity",
+  "status": "archived",
+  "tier": "deep",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0065"
+  ],
+  "branch": "task/TASK-0071-Stable-Decoration-Identity",
+  "acceptance": [
+    "jg approves any schema/migration change before implementation; legacy placements get stable unique IDs without losing ownership.",
+    "Store A then stale move B cannot edit C; duplicate store, replayed move, missing ID and reordered replies are covered by behavior tests.",
+    "Client/server protocol, saved state and editor use the same identity; check.sh and a 2-client test pass."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0071-Stable-Decoration-Identity.md",
+  "risk": "high",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:18",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

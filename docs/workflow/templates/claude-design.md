@@ -16,7 +16,7 @@ Claude Design edits no repo files. List what the integrating task will change:
 - `games/mathshow/assets/...`, `docs/design/<feature>/...`
 
 ## Owned files
-Must match `files_owned` for the integrating task in `tasks/queue.json`. Owner: `claude-design` for the package, then the integrating agent.
+Must match `files_owned` for the integrating task in its `tasks/items/` file. Owner: `claude-design` for the package, then the integrating agent.
 -
 
 ## Export formats and where outputs land

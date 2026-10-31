@@ -5,6 +5,8 @@ Renames project->game, note->note_path and acceptance_criteria->acceptance, rena
 in_review->review (mirroring them into task notes), and adds any missing schema field. Older values it can't know
 (tier, owner_agent) stay null, never guessed. history stays as written.
 
+Task files now live in tasks/items/. scripts/migrate-queue-to-items.py calls migrate_task() and sync_note() from here.
+
 Usage: python3 scripts/migrate_queue.py [--root PATH]
 """
 

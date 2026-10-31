@@ -1,0 +1,65 @@
+{
+  "id": "TASK-0105",
+  "game": "GAME-004",
+  "title": "MathShow Rules Foundation",
+  "status": "approved",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [],
+  "depends_on": [],
+  "branch": "task/TASK-0105-rules-foundation",
+  "acceptance": [
+    "New pure modules TierRules, TrackRules, AnswerRules, GroupBattleRules, BlitzRulesV2 and PracticeRulesV2 (each with a frozen Config and a spec) are added; every number lives in Config.",
+    "AnswerRules never uses load, loadstring or tonumber on unvalidated text, and a seeded 2,000-string fuzz spec shows parse never errors.",
+    "Nothing is wired into gameplay: no existing module or spec is edited and git diff --stat main shows only new files.",
+    "scripts/check.sh passes and the MathShow spec count rises above the 204 baseline."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261027-TASK-0105-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0105-MathShow-Rules-Foundation.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-27T12:01:22",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-27T12:01:22",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-27T12:06:52",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-27T12:08:32",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-27T12:06:52",
+      "result": "pass",
+      "notes": "check.sh green, MathShow 258 specs (was 204), additive files only"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-27T12:08:32",
+      "result": "pass",
+      "report": "06 QA/AUD-20261027-TASK-0105-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg"
+}

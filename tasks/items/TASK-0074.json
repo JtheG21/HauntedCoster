@@ -1,0 +1,34 @@
+{
+  "id": "TASK-0074",
+  "game": "GAME-002",
+  "title": "Decoration Editor Interaction Completion",
+  "status": "archived",
+  "tier": "standard",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0065",
+    "TASK-0071"
+  ],
+  "branch": "task/TASK-0074-Decoration-Editor-Interaction-Completion",
+  "acceptance": [
+    "Before implementation, compare the approved baseline with the handoff and confirm whether drag/direct placement is required; do not infer an approved control design.",
+    "If approved, direct placement retains grid, bounded fine adjustment, rotation, valid/invalid feedback, Confirm/Cancel/Move/Store/Exit and stable target identity.",
+    "Server validation stays authoritative; cancellation preserves previous placement; touch/controller/desktop journeys are evidenced; check.sh passes."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0074-Decoration-Editor-Interaction-Completion.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:18",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

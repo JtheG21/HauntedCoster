@@ -1,0 +1,37 @@
+{
+  "id": "TASK-0008",
+  "game": "GAME-001",
+  "title": "Prototype Telemetry",
+  "status": "archived",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0006"
+  ],
+  "branch": "task/TASK-0008-Prototype-Telemetry",
+  "acceptance": [
+    "Each match prints one structured summary line (JSON) with the listed metrics",
+    "No usernames or user ids in logs (anonymised per-match index)",
+    "Aggregation specs pass. `check.sh` passes"
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0008-Prototype-Telemetry.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-10T21:17:58",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-12T18:07:14",
+      "from": "ready",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ]
+}

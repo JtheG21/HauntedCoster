@@ -1,0 +1,74 @@
+{
+  "id": "TASK-0036",
+  "game": "GAME-002",
+  "title": "Persistence Load Failure",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0035"
+  ],
+  "branch": "task/TASK-0036-Persistence-Load-Failure",
+  "acceptance": [
+    "A pure SessionLockRules.loadFailure(err, developmentPlace) returns memory only for DataStore-unavailable errors in a development place (Studio or PlaceId 0); everything else, and every error on a live server, is retry.",
+    "PlayerDataService uses it for load errors and for GetDataStore failures: a live server never enters memory mode; after bounded retries the player is readonly (existing banner) and no default profile is ever saved over real data.",
+    "Specs cover development and live cases; a negative control (the old behaviour) fails the live spec.",
+    "Studio memory mode is unchanged: FullLoop passes in an unpublished place; scripts/check.sh passes."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261012-TASK-0036-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0036-Persistence-Load-Failure.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-12T20:32:10",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-12T20:32:10",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-12T20:36:00",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-12T20:36:45",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-12T20:37:27",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-12T20:36:00",
+      "result": "pass",
+      "notes": "check.sh pass; specs 117/0; negative control fails the live spec; FullLoop 85/85 in an unpublished place (TEST-20261012-14)"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-12T20:36:45",
+      "result": "pass",
+      "report": "06 QA/AUD-20261012-TASK-0036-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

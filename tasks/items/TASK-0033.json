@@ -1,0 +1,103 @@
+{
+  "id": "TASK-0033",
+  "game": "GAME-002",
+  "title": "Retaliation Begin Cleanup",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0032"
+  ],
+  "branch": "task/TASK-0033-Retaliation-Begin-Cleanup",
+  "acceptance": [
+    "If RetaliationService.begin errors after marking some monsters as pursuing, every monster it marked is released (pursuing cleared, Inspect enabled) and no pursuit record is left half-built.",
+    "The error still reaches CaptureService.onFled's pcall: it is warned, and the target falls back to the slipped-away removal.",
+    "The Retaliation scenario injects a failure inside begin after the first pursuer is set and checks that no monster is left pursuing and the target was removed.",
+    "Normal pursuits are unchanged: Retaliation, FullLoop and ExploitProbe pass; scripts/check.sh passes."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261012-TASK-0033-01.md",
+    "06 QA/AUD-20261012-TASK-0033-02.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0033-Retaliation-Begin-Cleanup.md",
+  "risk": "low",
+  "history": [
+    {
+      "time": "2026-10-12T13:11:00",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-12T13:11:00",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-12T13:15:09",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-12T13:16:42",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-12T13:16:46",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-12T13:23:09",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-12T13:24:15",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-12T13:24:15",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-12T13:15:09",
+      "result": "pass",
+      "notes": "check.sh pass; specs 96/0; Retaliation 35/35; FullLoop 85/85; ExploitProbe 13/13 (TEST-20261012-09)"
+    },
+    {
+      "time": "2026-10-12T13:23:09",
+      "result": "pass",
+      "notes": "revision 1: check.sh pass; specs 96/0; negative control fails 5b as expected; Retaliation 36/36; FullLoop 85/85; ExploitProbe 13/13 (TEST-20261012-09)"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-12T13:16:42",
+      "result": "fail",
+      "report": "06 QA/AUD-20261012-TASK-0033-01.md"
+    },
+    {
+      "time": "2026-10-12T13:24:15",
+      "result": "pass",
+      "report": "06 QA/AUD-20261012-TASK-0033-02.md"
+    }
+  ],
+  "revisions": 1,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}
