@@ -2,7 +2,7 @@
   "id": "TASK-0106",
   "game": "GAME-004",
   "title": "MathShow Identity UI Primitives And Cards",
-  "status": "ready",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [],
@@ -17,7 +17,9 @@
     "A Studio board harness renders the README stress fixtures at 844x390 and the text-fit gate passes every row with a 6 px margin; differences from the S-screenshots over 2 px are reported.",
     "Nothing is wired into the HUD or menu, no remote, payload or DataStore field changes, nothing is uploaded, and check.sh passes with the MathShow spec count above 258."
   ],
-  "evidence": [],
+  "evidence": [
+    "06 QA/AUD-20261030-TASK-0106-01.md"
+  ],
   "notes": "",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0106-MathShow-Identity-UI-Primitives-And-Cards.md",
   "risk": "medium",
@@ -27,10 +29,47 @@
       "from": "proposed",
       "to": "ready",
       "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-30T18:16:04",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-30T18:16:55",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-30T18:16:55",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-30T18:16:55",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
-  "executions": [],
-  "audits": [],
+  "executions": [
+    {
+      "time": "2026-10-30T18:16:55",
+      "result": "pass",
+      "notes": "check.sh green, 270 specs; Studio text-fit criterion not fully met, see note"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-30T18:16:55",
+      "result": "pass",
+      "report": "06 QA/AUD-20261030-TASK-0106-01.md"
+    }
+  ],
   "revisions": 0,
-  "approved_by": "jg"
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
 }

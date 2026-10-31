@@ -3,7 +3,7 @@ id: TASK-0106
 title: "MathShow Identity UI Primitives And Cards"
 type: task
 project: GAME-004
-status: ready
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -14,7 +14,7 @@ related:
   - "[[GAME-004 MathShow/00 Overview]]"
   - "[[TASK-0105-MathShow-Rules-Foundation]]"
 created: 2026-10-27
-updated: 2026-10-27
+updated: 2026-10-30
 tags:
   - workflow/task
 ---
@@ -108,3 +108,4 @@ Decisions: `IdentityCopy` lives in `shared/`; `Kit.assetId` resolves `AssetIds` 
 ## Audits
 
 ## Outcome
+Merged through PR 153, approved by jg in chat (2026-10-30). Modules, primitives and cards are in, and nothing is wired into the HUD or menu. **AC4 is not met:** the text-fit gate ran on one canvas, and 57 rows had no shape profile, so their 6 px margin is unchecked. Asset ids are unset because nothing is uploaded. Audit: [[AUD-20261030-TASK-0106-01]].
