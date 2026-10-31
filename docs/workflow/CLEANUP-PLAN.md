@@ -632,3 +632,70 @@ task/TASK-0104-MathShow-VS-Matchmaking-And-Flow	2a9a38f
 task/TASK-0110-studio-sync	c553954
 task/TASK-0111-identity-gate	265f8f8
 ```
+
+## Phase 3–4 Log
+
+### Approved rows
+
+| Row | Action | Result |
+|---|---|---|
+| S1 `chore/art-automation` | Removed K1 worktree (clean; `git worktree remove`, no `--force`), then `git branch -D` | Deleted. Last SHA `1887dd8`. Squash check passed earlier: PR #64 merged, scoped diff 0 lines |
+| S2 `chore/video-research-3d-models` | `git branch -D` | Deleted. Last SHA `92b86ba`. PR #50 merged, scoped diff 0 lines |
+| S3 `task/TASK-0024-FullLoop-Landmark-Flake` | `git branch -D` | Deleted. Last SHA `f701276`. PR #15 merged, scoped diff 0 lines |
+| D1 `/private/tmp/rg1-model-approval-workflow` | `rm -rf` the folder (verified 0 regular files first), then `git worktree remove` for its admin entry | Removed. Broken registration; folder held only empty directories |
+| D2 `/private/tmp/rg1-shared-model-viewer` | `rm -rf` the folder (verified 0 regular files first), then `git worktree remove` | Removed. Folder held only `tools/model-viewer/node_modules` (pnpm tree). Source remains on `chore/shared-model-viewer` |
+| U5, U6 | `.gitignore` line `02 Research/assets/wisp-pilot/user-reference-*.png`, committed as `4343b11` | Committed on the branch. Takes effect in main after merge. The two PNGs stay on disk |
+| K1 | Removed with S1 | See S1 |
+
+### A1: duplicate handoff in main
+
+- `git hash-object "98 Archive/TASK-0094-claude-code-handoff.md"` (main copy): `8240000fa7557e3892222291fbecfdec2a6b0b2b`
+- `git rev-parse 614087c:"98 Archive/TASK-0094-claude-code-handoff.md"`: `8240000fa7557e3892222291fbecfdec2a6b0b2b`
+- Hashes match. Main copy removed. The committed copy in `614087c` is unchanged.
+
+### A2: W9 (task-0110 worktree)
+
+- **Skipped.** After the user confirmed closing the terminal tab, PID 64782 (`/bin/zsh -l`) still has its cwd at `/Users/jg/Desktop/Rg1-worktrees/task-0110`. The worktree itself is clean (0 status lines), and `task/TASK-0111-identity-gate` is an ancestor of main (PR #160).
+- A second process, `com.apple` PID 72596, holds `docs/design/hud/HudSpec.json` read-only. It does not hold the cwd.
+- The worktree and branch were left untouched.
+
+### A4: prunable registrations (not pruned)
+
+`git worktree list --porcelain`, prunable entries:
+
+| Entry | HEAD | Branch | Gitdir target | Directory on disk | Advice |
+|---|---|---|---|---|---|
+| `/private/tmp/rg1-individual-media-assessments` | `4ba838a` | `chore/individual-media-assessments` | `/private/tmp/rg1-individual-media-assessments/.git` (missing) | missing | **Keep the branch** (1 commit ahead, remote exists). Prune the registration after approval |
+| `/private/tmp/rg1-orchestrator-ownership` | `7d3f36d` | `chore/orchestrator-ownership` | `/private/tmp/rg1-orchestrator-ownership/.git` (missing) | missing | **Keep the branch** (1 ahead). Prune the registration after approval |
+| `/private/tmp/rg1-repo-integration-notes` | `d399ae0` | `chore/repo-integration-notes` | `/private/tmp/rg1-repo-integration-notes/.git` (missing) | missing | **Keep the branch** (2 ahead). Prune the registration after approval |
+| `/private/tmp/rg1-video-workflow-adoption` | `1e9ee4f` | `chore/video-workflow-adoption` | `/private/tmp/rg1-video-workflow-adoption/.git` (missing) | missing | **Keep the branch** (4 ahead). Prune the registration after approval |
+
+Each gitdir target is missing, so these are broken registrations. Pruning removes only the metadata. The branches have unmerged commits and must be kept.
+
+### Studio verification (MathShow.rbxl)
+
+- Rojo 7.7.0 served `mathshow.project.json` from main (stamp `80e39b8`) on 127.0.0.1:34872 via `scripts/serve.sh`. The user confirmed the plugin was connected.
+- Play started, then waited 10 s, then console read. Verdict: **PASS**. No `require` errors and no "is not a valid member" errors.
+- Console excerpt:
+
+```
+[MathShow] phase=Intermission waiting for players
+[MathShow] server ready
+[MathShow] GetDataStore failed: You must publish this place to the web to access DataStore.
+[MathShow] DataStores unavailable (...); jg_57565 runs in memory-only mode
+[MathShow] Menu image shard-menu-title-violet-v2 has no asset id yet; showing a flat placeholder
+[MathShow] Menu image glow-menu-title-violet-v2 has no asset id yet; showing a flat placeholder
+[MathShow] client ready
+[MathShow] Hud first RoundState after 0.04s
+[MathShow] match seed=86446885
+[MathShow] phase=Intermission q=0 seed=86446885 endsAt=1793467597.63
+ContentId: rbxassetid://203785492 failed due to: Asset type does not match requested type   (x3)
+```
+
+- Non-blocking warnings: DataStore is unavailable in an unpublished place, two menu images have no asset id yet, and one asset ID (`203785492`) has the wrong type. None of these come from this cleanup. The cleanup changed no file under `games/`, `src/` or `tests/`; the only changes since `80e39b8` are the docs, `.gitignore` and `98 Archive/`.
+- Play stopped. `scripts/serve.sh` stopped. Nothing listens on 34872 and no rojo process remains.
+
+### Branch state
+
+- `git branch --no-merged main` now differs from the Phase 1 snapshot by: `chore/repo-cleanup` (added), and `chore/art-automation`, `chore/video-research-3d-models` and `task/TASK-0024-FullLoop-Landmark-Flake` (removed by S1–S3).
+- W9's branch `task/TASK-0111-identity-gate` was not removed.
