@@ -205,29 +205,27 @@ MenuTheme.Layout = {
 }
 MenuTheme.LadderOffsets = { 0, 14, 4, 18, 8 }
 
-local UNSET = "rbxassetid://0"
-
 -- Upload every PNG in assets/roblox/ and paste the ids. HUD images (shard-input, shard-button, shard-score-silver,
 -- shard-problem-blue, shard-row-*, shard-toast-*, glow-toast-*, glow-problem-blue) come from Theme.Image.
 MenuTheme.Image = {
-	-- Art v2 (TASK-0107): ids stay unset until jg approves the upload (art/menu/UPLOAD_LIST.md).
-	["shard-menu-row-indigo-v2"] = UNSET,
-	["shard-menu-row-green-v2"] = UNSET,
-	["shard-menu-toast-silver-v2"] = UNSET,
-	["shard-menu-toast-green-v2"] = UNSET,
-	["shard-menu-toast-red-v2"] = UNSET,
-	["shard-menu-banner-violet-v2"] = UNSET,
-	["shard-menu-h2h-silver-v2"] = UNSET,
-	["shard-menu-count-blue-v2"] = UNSET,
-	["shard-menu-count-red-v2"] = UNSET,
-	["shard-menu-title-violet-v2"] = UNSET,
-	["glow-menu-toast-silver-v2"] = UNSET,
-	["glow-menu-toast-green-v2"] = UNSET,
-	["glow-menu-toast-red-v2"] = UNSET,
-	["glow-menu-banner-violet-v2"] = UNSET,
-	["glow-menu-count-blue-v2"] = UNSET,
-	["glow-menu-count-red-v2"] = UNSET,
-	["glow-menu-title-violet-v2"] = UNSET,
+	-- Art v2 (TASK-0107): uploaded in TASK-0112 Phase B; ids are listed in art/menu/UPLOAD_LIST.md.
+	["shard-menu-row-indigo-v2"] = "rbxassetid://84567890529767",
+	["shard-menu-row-green-v2"] = "rbxassetid://134337234593312",
+	["shard-menu-toast-silver-v2"] = "rbxassetid://78549764461474",
+	["shard-menu-toast-green-v2"] = "rbxassetid://85006150952311",
+	["shard-menu-toast-red-v2"] = "rbxassetid://132024815467931",
+	["shard-menu-banner-violet-v2"] = "rbxassetid://138222356304051",
+	["shard-menu-h2h-silver-v2"] = "rbxassetid://134257653302051",
+	["shard-menu-count-blue-v2"] = "rbxassetid://91414722402037",
+	["shard-menu-count-red-v2"] = "rbxassetid://94136701912564",
+	["shard-menu-title-violet-v2"] = "rbxassetid://126748155048390",
+	["glow-menu-toast-silver-v2"] = "rbxassetid://135664623059862",
+	["glow-menu-toast-green-v2"] = "rbxassetid://82873594237277",
+	["glow-menu-toast-red-v2"] = "rbxassetid://90728326078835",
+	["glow-menu-banner-violet-v2"] = "rbxassetid://108614093566277",
+	["glow-menu-count-blue-v2"] = "rbxassetid://73294804648961",
+	["glow-menu-count-red-v2"] = "rbxassetid://97958822322375",
+	["glow-menu-title-violet-v2"] = "rbxassetid://89223025967740",
 	["shard-menu-title-violet"] = "rbxassetid://102403330056161",
 	["shard-menu-primary-red"] = "rbxassetid://126024347039405",
 	["shard-menu-primary-blue"] = "rbxassetid://80197953804871",
