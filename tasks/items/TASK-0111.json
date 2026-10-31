@@ -1,0 +1,63 @@
+{
+  "game": "GAME-004",
+  "owner_agent": "claude-code",
+  "depends_on": [],
+  "approved_by": "jg",
+  "revisions": 0,
+  "executions": [
+    {
+      "time": "2026-10-30T23:09:41",
+      "result": "pass",
+      "notes": "check.sh run next; Studio gate measured at three viewports with failures reported, see identity-gate.md"
+    }
+  ],
+  "audits": [],
+  "id": "TASK-0111",
+  "title": "Identity Gate Completion",
+  "status": "approved",
+  "tier": "light",
+  "risk": "low",
+  "branch": "task/TASK-0111-identity-gate",
+  "files_owned": [
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0106-MathShow-Identity-UI-Primitives-And-Cards.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0111-Identity-Gate-Completion.md",
+    "docs/workflow/evidence/TASK-0111/",
+    "games/mathshow/src/shared/ShapeProfiles.luau",
+    "games/mathshow/tests/studio/IdentityBoards.luau",
+    "scripts/shape_profiles.py",
+    "tasks/items/TASK-0111.json",
+    "tests/test_shape_profiles.py"
+  ],
+  "acceptance": [
+    "ShapeProfiles has shard-id-* rows from a generator that reproduces the existing rows.",
+    "IdentityBoards runs at 844x390, 1920x1080 and 812x375 with no_profile=0, and failures are reported.",
+    "A board screenshot is saved.",
+    "check.sh passes."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0111/identity-gate.md",
+    "docs/workflow/evidence/TASK-0111/identity-boards-844x390.jpg"
+  ],
+  "notes": "Reports gate failures; it doesn't change layouts.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0111-Identity-Gate-Completion.md",
+  "history": [
+    {
+      "time": "2026-10-30T23:09:41",
+      "from": "backlog",
+      "to": "in_progress",
+      "note": "from jg's 'keep going until youre complete' in chat"
+    },
+    {
+      "time": "2026-10-30T23:09:41",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-30T23:09:41",
+      "from": "review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    }
+  ]
+}

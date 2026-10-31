@@ -2,13 +2,15 @@
 -- Studio board harness for the identity components (TASK-0106). Studio only; never part of check.sh. Run in a fresh Play
 -- session on the CLIENT after scripts/studio-preflight.sh --game mathshow:
 --   require(game.Players.LocalPlayer.PlayerScripts.StudioTests.IdentityBoards).run()
+-- Other viewports: .run({ scale = HudRules.rootScale(w, h) }), which emulates that root UIScale. { keep = true } leaves the
+-- boards on screen for a screenshot; destroy PlayerGui.IdentityBoards afterwards.
 -- Builds the README boards (badges, chips, progress variants, six card variants, reveal, intro, results) and the rule-10
 -- stress fixtures at 844x390, then prints one row per check and a last line IDENTITY_RESULT. Checks:
 --   * text is not clipped (bounds fit the label) unless the label is marked AllowTruncate;
 --   * content stays inside its shard box;
 --   * the Group Battle rail (Placement A) and 3v3 rails (Placement B) stay out of the keep-clear zones;
---   * text-fit margin 6 via TextFitRules when a shape profile exists for the shard (new shard-id-* profiles come with the
---     audited ShapeProfiles; until then the row says "no profile").
+--   * text-fit margin 6 via TextFitRules when a shape profile exists for the shard (scripts/shape_profiles.py generates
+--     them from the PNGs); a shard without one says "no profile".
 -- Compare the boards to screenshots S1-S7 by eye; differences over 2 px are reported by the layout rows, not by pixels.
 
 local Players = game:GetService("Players")
@@ -48,14 +50,16 @@ local function owner(inst: Instance): Frame?
 	return nil
 end
 
-local function checkText(board: string, rows: { Row }, gui: ScreenGui)
+local function checkText(board: string, rows: { Row }, gui: ScreenGui, scale: number)
 	for _, d in gui:GetDescendants() do
 		if d:IsA("TextLabel") and d.Text ~= "" then
 			local params = Instance.new("GetTextBoundsParams")
 			params.Text = d.Text
 			params.Font = d.FontFace
 			params.Size = d.TextSize
-			params.Width = if d.TextWrapped then d.AbsoluteSize.X else 10000
+			-- Text bounds are in canvas px, so every absolute measure is divided back by the emulated scale.
+			local size = d.AbsoluteSize / scale
+			params.Width = if d.TextWrapped then size.X else 10000
 			local ok, bounds = pcall(function()
 				return TextService:GetTextBoundsAsync(params)
 			end)
@@ -63,22 +67,34 @@ local function checkText(board: string, rows: { Row }, gui: ScreenGui)
 			local pass = true
 			if ok then
 				local truncates = d:GetAttribute("AllowTruncate") == true
-				local fitsW = bounds.X <= d.AbsoluteSize.X + 0.5
-				local fitsH = bounds.Y <= d.AbsoluteSize.Y + 0.5
+				local fitsW = bounds.X <= size.X + 0.5
+				local fitsH = bounds.Y <= size.Y + 0.5
 				if not (fitsW and fitsH) and not truncates then
 					pass = false
-					detail ..= ` clipped: {math.ceil(bounds.X)}x{math.ceil(bounds.Y)} in {math.ceil(d.AbsoluteSize.X)}x{math.ceil(
-						d.AbsoluteSize.Y
+					detail ..= ` clipped: {math.ceil(bounds.X)}x{math.ceil(bounds.Y)} in {math.ceil(size.X)}x{math.ceil(
+						size.Y
 					)}`
 				end
 				local shard = owner(d)
 				if shard and (truncates or fitsW) then
 					local profile = TextFitRules.profile(shard:GetAttribute("ShapeKey") :: string)
 					if profile then
-						local x0 = d.AbsolutePosition.X - shard.AbsolutePosition.X
-						local y0 = d.AbsolutePosition.Y - shard.AbsolutePosition.Y
-						local w = math.min(bounds.X, d.AbsoluteSize.X)
-						local rect = { x0 = x0, y0 = y0, x1 = x0 + w, y1 = y0 + bounds.Y }
+						local x0 = (d.AbsolutePosition.X - shard.AbsolutePosition.X) / scale
+						local y0 = (d.AbsolutePosition.Y - shard.AbsolutePosition.Y) / scale
+						-- The text sits inside its label by alignment, so measure where it really is (as tests/studio/TextFit does).
+						local w = math.min(bounds.X, size.X)
+						local h = math.min(bounds.Y, size.Y)
+						if d.TextXAlignment == Enum.TextXAlignment.Center then
+							x0 += (size.X - w) / 2
+						elseif d.TextXAlignment == Enum.TextXAlignment.Right then
+							x0 += size.X - w
+						end
+						if d.TextYAlignment == Enum.TextYAlignment.Center then
+							y0 += (size.Y - h) / 2
+						elseif d.TextYAlignment == Enum.TextYAlignment.Bottom then
+							y0 += size.Y - h
+						end
+						local rect = { x0 = x0, y0 = y0, x1 = x0 + w, y1 = y0 + h }
 						if
 							not TextFitRules.rectFits(
 								profile,
@@ -89,7 +105,21 @@ local function checkText(board: string, rows: { Row }, gui: ScreenGui)
 							)
 						then
 							pass = false
-							detail ..= " text-fit margin < 6"
+							local best = 0
+							for m = 0.25, MARGIN, 0.25 do
+								if
+									TextFitRules.rectFits(
+										profile,
+										rect,
+										m,
+										shard:GetAttribute("ShapeW") :: number,
+										shard:GetAttribute("ShapeH") :: number
+									)
+								then
+									best = m
+								end
+							end
+							detail ..= ` text-fit margin {best} < {MARGIN} on {shard:GetAttribute("ShapeKey")}`
 						end
 					else
 						detail ..= " (no profile)"
@@ -139,7 +169,8 @@ local function checkRails(rows: { Row }, Theme: any)
 	end
 end
 
-function IdentityBoards.run(): boolean
+function IdentityBoards.run(options: { scale: number?, keep: boolean? }?): boolean
+	local scale = options and options.scale or 1
 	local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 	local Identity = script.Parent.Parent:WaitForChild("Client"):WaitForChild("Identity") :: Instance
 	local Theme = require(Identity:WaitForChild("IdentityTheme")) :: any
@@ -156,6 +187,9 @@ function IdentityBoards.run(): boolean
 	canvas.Size = UDim2.fromOffset(844, 390)
 	canvas.BackgroundColor3 = Color3.fromRGB(11, 10, 13)
 	canvas.Parent = gui
+	local uiScale = Instance.new("UIScale")
+	uiScale.Scale = scale
+	uiScale.Parent = canvas
 
 	local function player(name: string, tier: string, extra: { [string]: any }?): any
 		local p: { [string]: any } = { displayName = name, tier = tier, score = 1250, userId = nil, connected = true }
@@ -219,18 +253,24 @@ function IdentityBoards.run(): boolean
 		canvas,
 		{ kind = "strip", tier = "demon", mode = "demon", standing = 42, x = 440, y = y + 40 }
 	)
-	checkText("boards", rows, gui)
+	task.wait() -- let AbsoluteSize settle under the scale
+	checkText("boards", rows, gui, scale)
 	checkRails(rows, Theme)
-	gui:Destroy()
+	if not (options and options.keep) then
+		gui:Destroy()
+	end
 
-	local failed = 0
+	local failed, noProfile = 0, 0
 	for _, r in rows do
+		if string.find(r.detail, "(no profile)", 1, true) then
+			noProfile += 1
+		end
 		if not r.pass then
 			failed += 1
 			print(`FAIL [{r.board}] {r.element}: {r.detail}`)
 		end
 	end
-	print(`IDENTITY_RESULT rows={#rows} failed={failed}`)
+	print(`IDENTITY_RESULT scale={scale} rows={#rows} failed={failed} no_profile={noProfile}`)
 	return failed == 0
 end
 
