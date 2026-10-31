@@ -1,0 +1,75 @@
+{
+  "id": "TASK-0110",
+  "game": "GAME-004",
+  "title": "Studio Sync And Gates",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "tasks/items/TASK-0110.json",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0110-Studio-Sync-And-Gates.md",
+    "scripts/serve.sh",
+    "scripts/orchestrator.py",
+    "tests/test_orchestrator.py",
+    "tests/test_serve.py",
+    "games/mathshow/src/shared/HudSpec.json",
+    "docs/design/hud/HudSpec.json",
+    "docs/workflow/STUDIO-SYNC.md",
+    "docs/workflow/evidence/TASK-0110/",
+    "AGENTS.md",
+    "mathshow.project.json"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0110-studio-sync",
+  "acceptance": [
+    "The root cause is identified, with lsof/ps output and a BuildStamp comparison.",
+    "Studio receives disk changes: before/after BuildStamp and a comment-change probe.",
+    "A fresh Play on main runs with no MathShow errors: console output.",
+    "TextFit results are recorded for TASK-0106 and TASK-0107: screenshots and a table.",
+    "HudSpec.json has moved, nothing requires it, and the build stamp is clean: grep and stamp.",
+    "The override command exists and is tested, and check.sh passes."
+  ],
+  "evidence": [
+    "docs/workflow/STUDIO-SYNC.md"
+  ],
+  "notes": "Sole agent while it runs. Studio gates need a place open in Studio.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0110-Studio-Sync-And-Gates.md",
+  "risk": "low",
+  "tracking": [
+    {
+      "item": "Upload the 17 menu PNGs (games/mathshow/art/menu/UPLOAD_LIST.md) and set their ids in MenuTheme",
+      "status": "blocked",
+      "blocked_on": "human"
+    },
+    {
+      "item": "Upload the 48 identity PNGs (games/mathshow/art/identity/UPLOAD_LIST.md)",
+      "status": "backlog"
+    },
+    {
+      "item": "Studio sync fix",
+      "status": "in_progress",
+      "see": "docs/workflow/STUDIO-SYNC.md"
+    },
+    {
+      "item": "TextFit gate results for TASK-0106 and TASK-0107",
+      "status": "pending"
+    },
+    {
+      "item": "TASK-0106 Kit.luau headshot minor findings",
+      "status": "backlog",
+      "see": "task note, follow-up section"
+    }
+  ],
+  "history": [
+    {
+      "time": "2026-10-30T18:31:22",
+      "from": "backlog",
+      "to": "in_progress",
+      "note": "approved by jg in chat"
+    }
+  ],
+  "approved_by": "jg",
+  "revisions": 0,
+  "executions": [],
+  "audits": []
+}
