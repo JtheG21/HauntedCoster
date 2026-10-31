@@ -316,6 +316,8 @@ MenuTheme.Slice = {
 	["glow-menu-toast-red-v2"] = { center = Rect.new(120, 0, 664, 236), scale = 0.5 },
 }
 MenuTheme.RowHeight = 38 -- Art v2 rows are drawn 38 tall, centred in their old slots (settings rows keep their 44 px slot)
+-- TASK-0114: review rows are 36 tall; the pitch stays 38, so neighbours keep a 2 px gap (was 0).
+MenuTheme.ReviewRowHeight = 36
 
 -- Rank 0..9. Strings mirror MenuCopy.Rank; RankRules returns these by rank (see RULES_SPEC).
 local function tier(rank: number, key: string, name: string, subject: string, badge: string, rgb: Color3, pips: number)

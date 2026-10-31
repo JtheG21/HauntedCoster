@@ -2,12 +2,14 @@
   "id": "TASK-0114",
   "game": "GAME-004",
   "title": "MathShow Tap Target + Unmeasured Rows Audit",
-  "status": "backlog",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
-    "games/mathshow/tests/studio/TextFit.luau",
-    "games/mathshow/src/client/Menu/View.luau"
+    "games/mathshow/tests/studio/",
+    "games/mathshow/src/client/Menu/",
+    "docs/workflow/STUDIO-SYNC.md",
+    "06 QA/AUD-20261030-TASK-0107-01.md"
   ],
   "depends_on": [
     "TASK-0112"
@@ -22,5 +24,33 @@
   "evidence": [],
   "notes": "Created at the TASK-0112 closeout (2026-10-31) from jg's request. Not started. Standard tier: audit first, then any layout change needs its own review.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0114-MathShow-Tap-Target-Unmeasured-Rows-Audit.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-31T12:35:00",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-31T12:35:00",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-31T12:54:34",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-31T12:54:34",
+      "result": "pass",
+      "notes": "Extended TextFit gate and IdentityBoards at five viewports, build 73316be. TextFit 8,685 rows, 0 failures. IdentityBoards 109 rows x 5, 0 failed, 0 GuiButtons. Review gap min 2 px. Open decision: AbsoluteSize tap model in the Preview harness, see STUDIO-SYNC."
+    }
+  ]
 }
