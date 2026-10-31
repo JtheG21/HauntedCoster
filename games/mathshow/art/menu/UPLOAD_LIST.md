@@ -81,3 +81,27 @@ Uploaded 2026-10-26 with jg's approval (Studio MCP `upload_image`, jg's account,
 | `rank-demon-2.png` | 240x240 | `MenuTheme.Image["rank-demon-2"]` | `rbxassetid://94720484488807` |
 | `rank-demon-3.png` | 240x240 | `MenuTheme.Image["rank-demon-3"]` | `rbxassetid://130283705731751` |
 | `rank-demon-4.png` | 240x240 | `MenuTheme.Image["rank-demon-4"]` | `rbxassetid://124282519465338` |
+
+## Art v2 (TASK-0107): 17 files, not uploaded
+
+Copied unchanged from `Game-spec-UI-elementsV4.zip` (`design_handoff_mathshow_menu_v2/assets/roblox`); sizes match `ART_V2_README.md`, each side at most 1024 px. Ids are `rbxassetid://0` in `MenuTheme.Image` until jg approves the upload (total 75 + 17 = 92 images). The old shards they replace keep their ids and keys until the textured swap is verified.
+
+| file | px | key | asset id |
+|---|---|---|---|
+| `glow-menu-banner-violet-v2.png` | 828x180 | `MenuTheme.Image["glow-menu-banner-violet-v2"]` | (pending approval) |
+| `glow-menu-count-blue-v2.png` | 544x512 | `MenuTheme.Image["glow-menu-count-blue-v2"]` | (pending approval) |
+| `glow-menu-count-red-v2.png` | 544x512 | `MenuTheme.Image["glow-menu-count-red-v2"]` | (pending approval) |
+| `glow-menu-title-violet-v2.png` | 804x352 | `MenuTheme.Image["glow-menu-title-violet-v2"]` | (pending approval) |
+| `glow-menu-toast-green-v2.png` | 784x236 | `MenuTheme.Image["glow-menu-toast-green-v2"]` | (pending approval) |
+| `glow-menu-toast-red-v2.png` | 784x236 | `MenuTheme.Image["glow-menu-toast-red-v2"]` | (pending approval) |
+| `glow-menu-toast-silver-v2.png` | 784x236 | `MenuTheme.Image["glow-menu-toast-silver-v2"]` | (pending approval) |
+| `shard-menu-banner-violet-v2.png` | 960x96 | `MenuTheme.Image["shard-menu-banner-violet-v2"]` | (pending approval) |
+| `shard-menu-count-blue-v2.png` | 400x368 | `MenuTheme.Image["shard-menu-count-blue-v2"]` | (pending approval) |
+| `shard-menu-count-red-v2.png` | 400x368 | `MenuTheme.Image["shard-menu-count-red-v2"]` | (pending approval) |
+| `shard-menu-h2h-silver-v2.png` | 688x104 | `MenuTheme.Image["shard-menu-h2h-silver-v2"]` | (pending approval) |
+| `shard-menu-row-green-v2.png` | 600x76 | `MenuTheme.Image["shard-menu-row-green-v2"]` | (pending approval) |
+| `shard-menu-row-indigo-v2.png` | 600x76 | `MenuTheme.Image["shard-menu-row-indigo-v2"]` | (pending approval) |
+| `shard-menu-title-violet-v2.png` | 660x208 | `MenuTheme.Image["shard-menu-title-violet-v2"]` | (pending approval) |
+| `shard-menu-toast-green-v2.png` | 640x92 | `MenuTheme.Image["shard-menu-toast-green-v2"]` | (pending approval) |
+| `shard-menu-toast-red-v2.png` | 640x92 | `MenuTheme.Image["shard-menu-toast-red-v2"]` | (pending approval) |
+| `shard-menu-toast-silver-v2.png` | 640x92 | `MenuTheme.Image["shard-menu-toast-silver-v2"]` | (pending approval) |

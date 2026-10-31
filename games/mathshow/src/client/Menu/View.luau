@@ -692,8 +692,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			toastLayer,
 			"Toast",
 			box,
-			"shard-toast-" .. kind,
-			"glow-toast-" .. kind,
+			`shard-menu-toast-{kind}-v2`,
+			`glow-menu-toast-{kind}-v2`,
 			if kind == "silver" then "silver" elseif kind == "green" then "green" else "red"
 		)
 		local x = TO.PadX
@@ -764,13 +764,13 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		local sec = model.secondary
 		local player = model.player or { name = "Player", userId = nil, rank = nil, failed = nil }
 		topLabel("")
-		local title = newShard("Title", L.Title, "shard-menu-title-violet", "glow-menu-title-violet", "violet")
-		text(title.content, "Title", MenuCopy.Main.Title, T.Title, 30, 28, 262, 40)
+		local title = newShard("Title", L.Title, "shard-menu-title-violet-v2", "glow-menu-title-violet-v2", "violet")
+		-- Art v2: 46 px MATHSHOW (band 24,40-320,86) with the tag inside the shard (band 30,12-180,31).
+		text(title.content, "Title", MenuCopy.Main.Title, T.Title, 24, 40, 296, 46)
 		local titleTag = tag(title.content, "Tag", MenuCopy.Main.TitleTag)
 		titleTag.AnchorPoint = Vector2.new(0, 0.5)
-		titleTag.Position = UDim2.fromOffset(30, 0)
+		titleTag.Position = UDim2.fromOffset(30, 21.5)
 		titleTag.Rotation = -2
-		titleTag:SetAttribute("FitSticker", true)
 
 		local playItem = primary(
 			"Play",
@@ -925,9 +925,9 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			h = 44,
 			rot = if index % 2 == 1 then -0.5 else 0.5,
 		}
-		local shard = newShard("Row" .. key, box, "shard-row-indigo", nil, "blue")
+		local shard = newShard("Row" .. key, box, "shard-menu-row-indigo-v2", nil, "blue")
 		local item: Item = { shard = shard, name = key }
-		text(shard.content, "Label", label, T.SettingLabel, 26, 0, 168, 44)
+		text(shard.content, "Label", label, T.SettingLabel, 20, 0, 168, 44)
 		local max = MenuConfig.SettingMax
 		local function square(name: string, str: string, x: number, off: boolean, delta: number)
 			local b = make("ImageLabel", {
@@ -1026,9 +1026,9 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			h = 44,
 			rot = if index % 2 == 1 then -0.5 else 0.5,
 		}
-		local shard = newShard("Row" .. key, box, "shard-row-indigo", nil, "blue")
+		local shard = newShard("Row" .. key, box, "shard-menu-row-indigo-v2", nil, "blue")
 		local item: Item = { shard = shard, name = key }
-		text(shard.content, "Label", label, T.SettingLabel, 26, 0, 168, 44)
+		text(shard.content, "Label", label, T.SettingLabel, 20, 0, 168, 44)
 		local t = make("ImageLabel", {
 			Name = "Toggle",
 			Position = UDim2.fromOffset(L.Toggle.x, L.Toggle.y),
@@ -1260,11 +1260,12 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		local offsets = MenuTheme.LadderOffsets
 		for _, slot in RankRules.ladderLayout() do
 			local column = if slot.column == 1 then L.LadderCol1 else L.LadderCol2
+			local RH = MenuTheme.RowHeight
 			local box = {
 				x = column.x + offsets[slot.row],
-				y = column.y + (slot.row - 1) * 40,
+				y = column.y + (slot.row - 1) * 40 - (RH - column.h) / 2,
 				w = column.w,
-				h = column.h,
+				h = RH,
 				rot = if slot.row % 2 == 1 then -0.8 else 0.8,
 			}
 			local mark = RankRules.ladderMark(slot.rank, best)
@@ -1274,20 +1275,19 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			local shard = newShard(
 				"Rung" .. slot.rank,
 				box,
-				if current then "shard-row-green" else "shard-row-indigo",
+				if current then "shard-menu-row-green-v2" else "shard-menu-row-indigo-v2",
 				if current then "glow-menu-choice-green" else nil,
 				if current then "green" else "blue"
 			)
 			shard.image.ImageTransparency = dim
-			-- Audit A9: badge 22 and a 20 px left / right inset keep the content 6 px off the stretched row's cuts.
-			local badge = badgeIcon(shard.content, tier, 20, 6, 22)
+			-- Art v2 row (38 tall, 20 px content inset): badge 24 at x 20, name 15 px at x 52, subject at x 150, mark 20 px from
+			-- the right edge, YOU tag 46 px from it.
+			local badge = badgeIcon(shard.content, tier, 20, 7, MenuTheme.BadgeSizes.Row)
 			badge.ImageTransparency = dim
-			-- The row art (stretched HUD shard-row) has a deep cut at the bottom left and a notch at the top right: left of x 125
-			-- only y 10..22 clears 6 px, so rank names are 10 px here (README 15; 11 px leaves no slack for the +-0.8 degree tilt). A 38 px row would hold 15 px (Claude Design).
-			local nameLabel = text(shard.content, "Name", tier.name, T.LadderName, 50, 11, 94, 10)
+			local nameLabel = text(shard.content, "Name", tier.name, T.LadderName, 52, 11, 94, 16)
 			nameLabel.TextTransparency = dim
-			local subjectWidth = if current then 104 else 150
-			local subject = text(shard.content, "Subject", tier.subject, T.RowSubject, 146, 0, subjectWidth, 34, {
+			local subjectWidth = if current then 104 else 126
+			local subject = text(shard.content, "Subject", tier.subject, T.RowSubject, 150, 0, subjectWidth, RH, {
 				FontFace = FONT.Italic,
 				TextTruncate = Enum.TextTruncate.AtEnd,
 			})
@@ -1296,11 +1296,11 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			if current then
 				local you = tag(shard.content, "You", MenuCopy.Common.You, true)
 				you.TextSize = T.Sticker
-				you.Position = UDim2.fromOffset(254, 11)
+				you.Position = UDim2.fromOffset(254, 12)
 			end
 			local square = make("Frame", {
 				Name = "Mark",
-				Position = UDim2.fromOffset(302, 8),
+				Position = UDim2.fromOffset(302, 10),
 				Size = UDim2.fromOffset(18, 18),
 				BackgroundColor3 = C.ButtonInk,
 				BackgroundTransparency = dim,
@@ -1893,28 +1893,34 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			for slot = 1, 5 do
 				local entry = rows[(column - 1) * 5 + slot]
 				if entry then
-					local box = { x = origin.x, y = origin.y + (slot - 1) * 38, w = origin.w, h = origin.h, rot = 0 }
+					local RH = MenuTheme.RowHeight
+					local box = {
+						x = origin.x,
+						y = origin.y + (slot - 1) * 38 - (RH - origin.h) / 2,
+						w = origin.w,
+						h = RH,
+						rot = 0,
+					}
 					local shard = newShard(
 						"Row" .. ((column - 1) * 5 + slot),
 						box,
-						if entry.ok then "shard-row-green" else "shard-row-indigo",
+						if entry.ok then "shard-menu-row-green-v2" else "shard-menu-row-indigo-v2",
 						nil,
 						if entry.ok then "green" else "blue"
 					)
-					-- Audit A9 / TASK-0103: the 32 px row art leaves 10 px clear left of x 88 and 14 px right of it, so the question
-					-- number is 9 px in the left zone and the two answers are 12 px (README 13 / 16) from x 92. 38 px rows fix it.
-					text(shard.content, "Q", entry.q, 9, 44, 10.7, 40, 9, { TextTransparency = 0.3 })
+					-- Art v2 (38 px rows, 20 px content inset): question number 13 px at x 20, mark at x 46, answers 16 px from x 66.
+					text(shard.content, "Q", entry.q, T.ReviewQ, 20, 11, 26, 16, { TextTransparency = 0.3 })
 					local markSquare = make("Frame", {
 						Name = "Mark",
-						Position = UDim2.fromOffset(18, 7),
+						Position = UDim2.fromOffset(46, 10),
 						Size = UDim2.fromOffset(18, 18),
 						BackgroundColor3 = C.ButtonInk,
 						BorderSizePixel = 0,
 						ZIndex = 5,
 					}, shard.content)
 					icon(markSquare, "Icon", if entry.ok then "icon-menu-check" else "icon-menu-cross", 3, 3, 12)
-					text(shard.content, "You", entry.you, 12, 92, 10, 62, 12)
-					local ans = text(shard.content, "Answer", entry.ans, 12, 160, 10, 64, 12)
+					text(shard.content, "You", entry.you, T.ReviewValue, 70, 11, 68, 16)
+					local ans = text(shard.content, "Answer", entry.ans, T.ReviewValue, 142, 11, 72, 16)
 					ans.TextTransparency = 0.4
 					playFx("rowIn", shard.group, 0.3 + ((column - 1) * 5 + slot) * 0.05)
 				end
@@ -1983,10 +1989,10 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 				}, p.shard.content)
 				dot:SetAttribute("FitSticker", true)
 			end
-			local count = newShard("Count", L.Count, "shard-menu-count-blue", "glow-menu-count-blue", "blue")
+			local count = newShard("Count", L.Count, "shard-menu-count-blue-v2", "glow-menu-count-blue-v2", "blue")
 			tag(count.content, "Tag", MenuCopy.Search.Elapsed).Position = UDim2.fromOffset(40, 36)
 			vsCount =
-				text(count.content, "Value", CooldownRules.formatShort(vm.seconds), T.ElapsedClock, 20, 62, 160, 70, {
+				text(count.content, "Value", CooldownRules.formatShort(vm.seconds), T.ElapsedClock, 16, 60, 168, 70, {
 					TextXAlignment = Enum.TextXAlignment.Center,
 				})
 			glowLoop({ shard = count, name = "Count" }, 0.3)
@@ -2042,22 +2048,22 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	end
 
 	local function h2hShard(vm: VsModel)
-		local h = newShard("H2H", L.HeadToHead, "shard-score-silver", nil, "silver")
-		tag(h.content, "YouTag", MenuCopy.Common.You).Position = UDim2.fromOffset(24, 15)
+		local h = newShard("H2H", L.HeadToHead, "shard-menu-h2h-silver-v2", nil, "silver")
+		tag(h.content, "YouTag", MenuCopy.Common.You).Position = UDim2.fromOffset(24, 18)
 		text(
 			h.content,
 			"YouPts",
 			StandingsRules.formatNumber(vm.youPts),
-			16, -- 16 px at y 14..30: the score shard is a sliver along its top and has a cut at the bottom left
+			T.H2HPoints, -- Art v2 h2h shard (344x52): README 20 px at y 16..36
 			66,
-			14,
-			58,
 			16,
+			58,
+			20,
 			{ TextXAlignment = Enum.TextXAlignment.Right }
 		)
 		local track = make("Frame", {
 			Name = "Bar",
-			Position = UDim2.fromOffset(134, 18),
+			Position = UDim2.fromOffset(134, 22),
 			Size = UDim2.fromOffset(64, 8),
 			BackgroundColor3 = MenuTheme.Gem.violet,
 			BorderSizePixel = 0,
@@ -2075,8 +2081,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			BackgroundColor3 = C.Ink,
 			BorderSizePixel = 0,
 		}, track)
-		text(h.content, "ThemPts", StandingsRules.formatNumber(vm.themPts), 16, 210, 14, 58, 16)
-		tag(h.content, "RivalTag", MenuCopy.Common.Rival).Position = UDim2.fromOffset(272, 15)
+		text(h.content, "ThemPts", StandingsRules.formatNumber(vm.themPts), T.H2HPoints, 210, 16, 58, 20)
+		tag(h.content, "RivalTag", MenuCopy.Common.Rival).Position = UDim2.fromOffset(272, 18)
 		playFx("pop", h.group, 0.12)
 	end
 
@@ -2250,18 +2256,18 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		glowLoop(p, 0)
 		playFx("slam", p.shard.group, 0)
 		if kind == "draw" then
-			local count = newShard("Count", L.Count, "shard-menu-count-red", "glow-menu-count-red", "red")
+			local count = newShard("Count", L.Count, "shard-menu-count-red-v2", "glow-menu-count-red-v2", "red")
 			tag(count.content, "Tag", MenuCopy.Vs.SuddenDeathIn).Position = UDim2.fromOffset(30, 30)
 			vsCount = text(
 				count.content,
 				"Value",
 				tostring(math.max(vm.seconds, 0)),
-				80,
-				20,
-				48,
-				160,
-				84,
-				{ -- 80 px, not 100: the count shard clears 6 px only up to about 90
+				T.CountDraw,
+				16,
+				44,
+				168,
+				110,
+				{ -- Art v2 count shard (200x184) holds the README 100 px number; the gate decides
 					TextXAlignment = Enum.TextXAlignment.Center,
 				}
 			)
@@ -2309,10 +2315,10 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	end
 
 	local function buildWatching()
-		local shard = newShard("Banner", L.WatchBanner, "shard-menu-banner-violet", "glow-menu-banner-violet", "violet")
-		-- The banner shard (480x44) has a cut along the top right and the bottom left: only y 14..30 clears 6 px at every x, so
-		-- the label is 15 px (README 17) and centred.
-		text(shard.content, "Label", MenuCopy.Mode.Group.Watching, T.WatchBanner, 0, 0, 480, 44, {
+		local shard =
+			newShard("Banner", L.WatchBanner, "shard-menu-banner-violet-v2", "glow-menu-banner-violet-v2", "violet")
+		-- Art v2 banner (480x48, 20 px end slants): README 17 px label, centred.
+		text(shard.content, "Label", MenuCopy.Mode.Group.Watching, T.WatchBanner, 0, 0, 480, 48, {
 			TextXAlignment = Enum.TextXAlignment.Center,
 		})
 		glowLoop({ shard = shard, name = "Banner" }, 0)

@@ -1,0 +1,73 @@
+{
+  "id": "TASK-0107",
+  "game": "GAME-004",
+  "title": "MathShow Menu Art V2 Integration",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [],
+  "depends_on": [],
+  "branch": "task/TASK-0107-menu-art-v2",
+  "acceptance": [
+    "MenuTheme gains Image keys for the 17 -v2 PNGs, the README SliceCenters (rows Rect(52,0,548,76), toasts Rect(48,0,592,92), toast glow Rect(120,0,664,236)), layout numbers and restored text sizes; old keys stay until the swap is verified.",
+    "Rows and toasts use ScaleType.Slice and are drawn at the stated heights; the Title shard returns to a 46 px MATHSHOW with the tag inside, and the top-edge workaround is removed only if the gate passes.",
+    "The shared ShapeProfiles and sliced rectFits (PR 151) are included, and the Studio TextFit gate passes every row at 844x390, 1920x1080 and phone landscape, or each failing row is reported with its measured margin.",
+    "A diff table of every changed number (old -> new, gate margin) and the known 'Calculus 1, second half' truncation decision (AllowTruncate or TextScaled Min 12) are recorded.",
+    "Image ids stay rbxassetid://0, art/menu/UPLOAD_LIST.md lists the 17 new files (75 + 17), nothing is uploaded, and check.sh passes with the spec count above the baseline."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261030-TASK-0107-01.md"
+  ],
+  "notes": "Merged over a failed audit by jg's decision (2026-10-30): flat placeholder menu until the 17 PNGs are uploaded, and the Studio TextFit gate has not run.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0107-MathShow-Menu-Art-V2-Integration.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-30T18:17:07",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-30T18:17:07",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-30T18:17:07",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-30T18:17:07",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-30T18:20:56",
+      "from": "changes_requested",
+      "to": "done",
+      "note": "merge approved by jg over failed audit AUD-20261030-TASK-0107-01; jg accepts the placeholder menu and the unrun TextFit gate"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-30T18:17:07",
+      "result": "pass",
+      "notes": "check.sh green, 209 specs; Studio TextFit gate not run"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-30T18:17:07",
+      "result": "fail",
+      "report": "06 QA/AUD-20261030-TASK-0107-01.md"
+    }
+  ],
+  "revisions": 1,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}
