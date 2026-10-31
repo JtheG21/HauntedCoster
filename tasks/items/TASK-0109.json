@@ -2,7 +2,7 @@
   "id": "TASK-0109",
   "game": "GAME-004",
   "title": "Queue Sharding",
-  "status": "approved",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -64,6 +64,12 @@
       "from": "review",
       "to": "approved",
       "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-30T17:49:23",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "approved_by": "jg",
@@ -81,5 +87,6 @@
       "result": "pass",
       "report": "06 QA/AUD-20261030-TASK-0109-01.md"
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }
