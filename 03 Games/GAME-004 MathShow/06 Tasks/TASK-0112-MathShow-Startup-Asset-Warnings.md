@@ -41,3 +41,8 @@ Remove the startup asset warnings in Play: the two unset title slots (`shard-men
 ## Open decisions for jg
 1. Upload set: the two title images, or all 17 `-v2`.
 2. Route for `203785492`: move it into Rojo `.rbxmx`, or a one-time place edit.
+
+## Progress
+- **Phase A (locate):** done. No instance in the Edit DataModel or in Play's Server or Client DataModels references `203785492`. Its property and required type are still unidentified.
+- **Phase B (upload):** done 2026-10-31 for all 17 `-v2` PNGs, with jg's approval. Ids are recorded in `games/mathshow/art/menu/UPLOAD_LIST.md`. `MenuTheme.Image` still holds `rbxassetid://0`.
+- **Phase C (wire and verify):** not started. Needs jg's route decision for `203785492`.
