@@ -82,7 +82,7 @@ def sample_prompt(root: Path, role: str, task_id: str | None) -> str | None:
     if task_id:
         task = proj.task(task_id)
     else:
-        candidates = [t for t in tasks if t.get("note")]
+        candidates = [t for t in tasks if t.get("note_path")]
         if not candidates:
             return None
         task = candidates[-1]

@@ -3,7 +3,7 @@ id: TASK-0075
 title: "Cosmetic Cleanup And Placement Constants"
 type: task
 project: GAME-002
-status: proposed
+status: archived
 priority: medium
 risk: medium
 owner: executor
@@ -14,7 +14,7 @@ related:
   - "[[AUD-20261018-TASK-0069-02]]"
   - "[[SYS-Haunted-Monetization-UI]]"
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-30
 tags:
   - workflow/task
 ---

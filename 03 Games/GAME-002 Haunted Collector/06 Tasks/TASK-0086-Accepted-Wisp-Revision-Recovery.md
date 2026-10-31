@@ -3,7 +3,7 @@ id: TASK-0086
 title: "Accepted Wisp Revision Recovery"
 type: task
 project: GAME-002
-status: proposed
+status: archived
 priority: high
 risk: high
 owner: executor
@@ -14,7 +14,7 @@ related:
   - "[[TASK-0043-Creature-Models-And-Animation]]"
   - "[[TASK-0069-Art-Salvage-From-Overhaul-Branch]]"
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-30
 tags:
   - workflow/task
 ---

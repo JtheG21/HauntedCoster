@@ -16,7 +16,8 @@ import re
 import sys
 from pathlib import Path
 
-STATUSES = {"inbox", "research", "proposed", "ready", "in_progress", "blocked",
+# Queue statuses (backlog, review) plus the older note vocabulary (proposed, in_review) that non-task notes keep.
+STATUSES = {"backlog", "review", "inbox", "research", "proposed", "ready", "in_progress", "blocked",
             "in_review", "changes_requested", "approved", "done", "archived"}
 TYPES = {"index", "overview", "design", "architecture", "roadmap", "task", "bug", "audit", "adr",
          "system", "playtest", "release", "review", "health", "lesson", "retro", "research",
@@ -99,6 +100,8 @@ def vault_files(root: Path) -> list[Path]:
     for p in root.rglob("*"):
         rel = p.relative_to(root)
         if rel.parts[0] in SKIP_DIRS or any(part.startswith(".") for part in rel.parts):
+            continue
+        if rel.parts[:2] == ("intake", "inbox"):  # untriaged material, not notes
             continue
         if p.is_file():
             out.append(p)
@@ -221,9 +224,9 @@ def check_queue(rep, root, task_notes):
     for t in tasks:
         tid = t.get("id")
         seen.add(tid)
-        note = t.get("note")
+        note = t.get("note_path")
         if not note:
-            rep.error("tasks/queue.json", f"{tid}: no 'note' path")
+            rep.error("tasks/queue.json", f"{tid}: no 'note_path'")
             continue
         if not (root / note).exists():
             rep.error("tasks/queue.json", f"{tid}: note not found: {note}")

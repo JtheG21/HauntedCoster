@@ -12,11 +12,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import orchestrator as orch  # noqa: E402
 
 
-def task(tid, status="proposed", deps=None, note=None):
+def task(tid, status="backlog", deps=None, note=None):
     t = {"id": tid, "title": f"Task {tid}", "status": status, "risk": "low",
-         "depends_on": deps or [], "branch": f"task/{tid}", "acceptance_criteria": ["works"]}
+         "depends_on": deps or [], "branch": f"task/{tid}", "acceptance": ["works"]}
     if note:
-        t["note"] = note
+        t["note_path"] = note
     return t
 
 
@@ -120,7 +120,7 @@ class TestWorkflow(Base):
         p.approve("TASK-0001", "jg")
         p.start("TASK-0001")
         p.record_exec("TASK-0001", "pass", "checks ok")
-        self.assertEqual(p.task("TASK-0001")["status"], "in_review")
+        self.assertEqual(p.task("TASK-0001")["status"], "review")
 
     def test_revision_limit_blocks(self):
         p = self.proj()
@@ -220,7 +220,7 @@ class TestBudgetAndDispatch(Base):
         note.write_text("# X\n\n## Files expected to change\n- `scripts/x.py`\n- `tests/test_x.py`\n\n## Tests\nStudio scenario\n")
         self.write_queue([task("TASK-0001", note="TASK-0001-X.md")])
         p = self.proj()
-        p.queue["tasks"][0]["acceptance_criteria"] = ["first criterion", "second criterion"]
+        p.queue["tasks"][0]["acceptance"] = ["first criterion", "second criterion"]
         prompt = p.build_prompt(p.task("TASK-0001"), "executor")
         self.assertIn("- first criterion\n- second criterion", prompt)
         self.assertIn("- scripts/x.py\n- tests/test_x.py", prompt)
@@ -266,7 +266,7 @@ class TestReports(Base):
 
     def test_cycles_summarises(self):
         t = task("TASK-0001", "done")
-        t["history"] = [{"time": "2026-10-10T10:00:00", "to": "in_progress"}, {"time": "2026-10-10T11:30:00", "to": "in_review"}]
+        t["history"] = [{"time": "2026-10-10T10:00:00", "to": "in_progress"}, {"time": "2026-10-10T11:30:00", "to": "review"}]
         t["revisions"] = 1
         self.write_queue([t, task("TASK-0002")])
         code, out = self.cli("cycles")

@@ -13,8 +13,8 @@ tags:
 Start every task with [[Task Intake]] (routing, depth, proceed-or-ask). This note covers task states, gates and merges.
 
 ```
-Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, proposed) → [HUMAN: approve → ready]
-  → Implementation (in_progress) → Automated checks → Independent audit (in_review → AUD)
+Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, backlog) → [HUMAN: approve → ready]
+  → Implementation (in_progress) → Automated checks → Independent audit (review → AUD)
   → (changes_requested, ≤ 2 revisions) → approved → [HUMAN: approve merge] → done
   → Knowledge update (Outcome, SYS, Overview, LES, RETRO)
 ```
@@ -23,13 +23,13 @@ Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, proposed) → [HUMAN
 
 | State | Meaning | Next | Who moves it |
 |---|---|---|---|
-| `proposed` | Planner wrote the task | `ready` / `archived` | **Human** (`approve`) |
+| `backlog` | Planner wrote the task | `ready` / `archived` | **Human** (`approve`) |
 | `ready` | Approved, waits for its dependencies | `in_progress` | `start` |
-| `in_progress` | Executor working on `task/TASK-####-slug` | `in_review` / `changes_requested` | `record-exec` |
-| `in_review` | Auditor reviewing | `approved` / `changes_requested` | `record-audit` |
+| `in_progress` | Executor working on `task/TASK-####-slug` | `review` / `changes_requested` | `record-exec` |
+| `review` | Auditor reviewing | `approved` / `changes_requested` | `record-audit` |
 | `changes_requested` | A check or audit failed (+1 revision) | `in_progress` / `blocked` | `start` |
 | `approved` | Audit passed, merge pending | `done` | **Human** (`approve-merge`, then merge) |
-| `blocked` | Retry limit hit or a decision is needed | `ready` / `proposed` / `archived` | **Human** (`unblock`) |
+| `blocked` | Retry limit hit or a decision is needed | `ready` / `backlog` / `archived` | **Human** (`unblock`) |
 | `done` / `archived` | Terminal | | |
 
 `max_revisions` (default 2) is in `00 Studio/budget.json`. Going past it blocks the task. Nothing retries automatically.
@@ -41,7 +41,7 @@ Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, proposed) → [HUMAN
 
 ## Isolation
 - One Git branch per task, from an up-to-date `main`. Workflow and doc changes use `chore/<slug>` branches.
-- Only `src/` and `tests/luau` reach Studio, through Rojo. Playtest in a **local place file**, never the published experience.
+- Only the active game's project file (`AGENTS.md`) reaches Studio, through Rojo. Playtest in a **local place file**, never the published experience.
 
 ## Who owns what (Claude, Codex, side sessions)
 - **Before starting:** `orchestrator.py status` for `in_progress` tasks, `git worktree list`, and `orchestrator.py next --parallel-safe` for overlapping "Files expected to change". If another session's task touches the same files, stop and ask jg.

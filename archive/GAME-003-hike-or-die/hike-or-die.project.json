@@ -4,18 +4,18 @@
     "$className": "DataModel",
     "ReplicatedStorage": {
       "Shared": {
-        "$path": "games/hike-or-die/src/shared"
+        "$path": "src/shared"
       }
     },
     "ServerScriptService": {
       "Server": {
-        "$path": "games/hike-or-die/src/server"
+        "$path": "src/server"
       }
     },
     "StarterPlayer": {
       "StarterPlayerScripts": {
         "Client": {
-          "$path": "games/hike-or-die/src/client"
+          "$path": "src/client"
         }
       }
     },

@@ -5,13 +5,13 @@ type: overview
 project: GAME-004
 status: proposed
 created: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-30
 tags:
   - game/overview
 ---
 # GAME-004: MathShow
 
-**Phase:** Intake. **This is the studio's active game** (jg, 2026-10-25); GAME-003 Hike or Die is paused, GAME-002 Haunted Collector and GAME-001 Rg1 remain source material.
+**Phase:** Vertical slice built: TASK-0088 to TASK-0104 are done. Next work is listed in `tasks/queue.json` and on open PRs. **This is the studio's active game** (jg, 2026-10-25); the other games are archived (`archive/README.md`).
 
 **Pitch:** a timed math gameshow. Everyone answers the same question at once by typing a number; correct answers earn base points plus a speed bonus; difficulty ramps by question index. Full design: [[games/mathshow/DESIGN|MathShow Design]] (`games/mathshow/DESIGN.md`).
 
