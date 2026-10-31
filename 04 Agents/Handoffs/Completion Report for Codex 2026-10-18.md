@@ -10,8 +10,9 @@ updated: 2026-10-18
 
 # Completion report for Codex: workflow efficiency
 
-**Branch:** `chore/workflow-efficiency-20261018` (commit `e8c0987`), worktree `/Users/jg/Desktop/Rg1-worktrees/workflow-efficiency`
-**PR:** https://github.com/JtheG21/HauntedCoster/pull/117 (ready for review, base `main`, not merged)
+**Original branch:** `chore/workflow-efficiency-20261018` (commit `e8c0987`), worktree `/Users/jg/Desktop/Rg1-worktrees/workflow-efficiency`
+**PR:** https://github.com/JtheG21/HauntedCoster/pull/117 (merged into `main` as `1019581` by jg, 2026-10-18. The implementation is on `main`; the report commit `47c362b` was pushed after that merge and is carried on the follow-up branch below.)
+**Follow-up branch:** `chore/workflow-efficiency-followup-20261018` from `origin/main`, containing the report commit and the review fixes.
 **Scope:** shared development workflow only. No Haunted Collector gameplay, no Luau, no GAME-001 changes.
 
 ## Review focus
@@ -22,15 +23,15 @@ updated: 2026-10-18
 
 ## Measured (estimates are bytes / 4, not API usage)
 - Always loaded (`CLAUDE.md` + `AGENTS.md`): 17,630 B, ~4,400 tok.
-- Task start (Task Intake, Workflow, Executor): 13,905 B, ~3,480 tok.
+- Task start (Task Intake, Workflow, Executor): 13,975 B, ~3,490 tok (measured at `1019581`).
 - Skill bodies: 79,470 B, loaded only on invoke.
 - Repeated sentences (60+ chars) across always-loaded and start docs: 0. No root rules were cut.
-- Dispatch prompt: 472 B before, 1,605 B after. This is a cost; whether it saves reads is not measured.
+- Dispatch prompt (same sample task): 472 B before, 1,810 B after. This is a cost; whether it saves reads is not measured.
 - Usage ledger: 44 rows, 15 with no tokens, 17 with no model. Left as recorded; not backfilled.
 
 ## Checks run
-- `scripts/check.sh` in the worktree: ALL CHECKS PASSED (16 PASS lines).
-  - StyLua, Selene, typecheck, Lune specs 265 passed, Rojo builds for both project files, JSON, queue validate, vault 0/0, refs lint 0 errors, skill lint 0 errors (1 pre-existing warning on `art-import`), Python tests 163 OK.
+- `scripts/check.sh` in the follow-up worktree: ALL CHECKS PASSED (16 PASS lines, Python tests 165 OK).
+  - StyLua, Selene, typecheck, Lune specs 265 passed, Rojo builds for both project files, JSON, queue validate, vault 0/0, refs lint 0 errors, skill lint 0 errors (1 pre-existing warning on `art-import`), Python tests 165 OK.
 - One failure during the work was fixed: the new note's `type` was rejected by the vault validator. It is now `index`.
 - `scripts/preflight.sh` passed before the commit and before the push.
 

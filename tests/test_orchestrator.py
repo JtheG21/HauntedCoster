@@ -230,6 +230,9 @@ class TestBudgetAndDispatch(Base):
         prompt = p.build_prompt(p.task("TASK-0001"), "executor")
         self.assertIn("- first criterion\n- second criterion", prompt)
         self.assertIn("- scripts/x.py\n- tests/test_x.py", prompt)
+        # Widening is allowed when justified, but never as an open-ended scan.
+        self.assertIn("Open a dependency, reusable module or test outside that list only when the change needs it", prompt)
+        self.assertIn("Do not scan the whole repo.", prompt)
 
     def test_dispatch_prompt_without_note_has_no_file_list(self):
         prompt = self.proj().build_prompt(self.proj().task("TASK-0001"), "auditor")
