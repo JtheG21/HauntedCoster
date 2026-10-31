@@ -44,3 +44,7 @@ games/haunted/
 games/mathshow/src/shared/BuildStamp.txt
 .agents/skills/*/LOCAL.md
 .agents/skills/*/work/
+
+# Untriaged material stays local until it has been through intake/README.md
+intake/inbox/*
+!intake/inbox/.gitkeep
