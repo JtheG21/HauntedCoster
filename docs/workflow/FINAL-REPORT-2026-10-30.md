@@ -198,3 +198,10 @@ jg reported these good on 2026-10-30, without itemizing results, and the archive
 3. Open `MathShow.rbxl` and connect one Rojo plugin (7.7.1). Confirm `ReplicatedStorage.Shared`, `ServerScriptService.Server`, `StarterPlayer.StarterPlayerScripts.Client` and `StudioTests`, and `TestService.Tests`.
 4. Start Play in a fresh session and confirm Output has no errors from missing modules. Check that `ReplicatedStorage.Shared.BuildStamp` matches `games/mathshow/src/shared/BuildStamp.txt`.
 5. Stop the server and run `rojo build archive/GAME-002-haunted-collector/haunted.project.json -o /tmp/haunted-check.rbxl`.
+
+## Updates after this report
+This report is a record as of `b90495b`. Later on 2026-10-30:
+
+- **Manual archive run:** triggered on GitHub as run 41150194423. It gave the same results as locally: only GAME-003's StyLua, Selene and types fail.
+- **PRs 151 to 154:** updated for real, and their old-format queue conflicts are gone. TASK-0109 (PR 157) then moved all tasks to `tasks/items/` and removed `tasks/queue.json`, so this report's references to that file and to `project-state.json` describe the earlier format. See `docs/workflow/SHARDING-PLAN.md`.
+- **Leftovers:** the 7 generated files in the main checkout were deleted with jg's approval, including everything under `games/haunted/`.
