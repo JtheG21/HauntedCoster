@@ -67,9 +67,12 @@ A branch from before this format has a `tasks/queue.json`. Merging `main` report
 git merge origin/main
 git checkout origin/main -- project-state.json
 python3 scripts/migrate-queue-to-items.py
-git add -A
+git add -u
+git add tasks/items
 git commit
 scripts/check.sh
 ```
+
+Don't use `git add -A` here. Older checkouts can hold generated files the old `.gitignore` hid, such as `game001-sourcemap.json`, `game004-sourcemap.json` and `games/haunted/`. After the merge they show as untracked, and `-A` would commit them. Leave them out; they're harmless.
 
 The script upgrades old-format entries, writes the missing task files, mirrors renamed statuses into task notes and removes `queue.json`. If an existing task file differs, it stops, writes nothing and names the task. Check it, then rerun with `--keep-existing` if the existing file is right. That removes `queue.json`, so the differing entry then survives only in git history.
