@@ -5,13 +5,15 @@ type: overview
 project: GAME-001
 status: in_progress
 created: 2026-10-10
-updated: 2026-10-12
+updated: 2026-10-30
 tags:
   - game/overview
 ---
 # GAME-001: Rival Realms (working title; repo name Rg1)
 
-**Phase:** M2 planning: [[GAME-001 Rg1/03 Roadmap|03 Roadmap]] proposed, 8 tasks proposed · **Code:** `src/` (Rojo 7.7.0) · **Task status:** `tasks/queue.json`
+**Archived (paused 2026-10-11).** GAME-004 MathShow is the active game ([[AGENTS]]). Code: `archive/GAME-001-rg1/`.
+
+**Last phase:** M2 planning: [[GAME-001 Rg1/03 Roadmap|03 Roadmap]] proposed, 8 tasks proposed · **Code:** `archive/GAME-001-rg1/src/` (Rojo 7.7.0) · **Task status:** `tasks/queue.json`
 
 ## Documents
 [[GAME-001 Rg1/01 Game Design|01 Game Design]] · [[GAME-001 Rg1/02 Technical Architecture|02 Technical Architecture]] · [[GAME-001 Rg1/03 Roadmap|03 Roadmap]]

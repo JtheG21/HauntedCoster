@@ -1,6 +1,6 @@
 ---
 name: art-import
-description: Import a baked Haunted Collector art asset into Studio and keep it in the repo. Covers the 3D Importer upload (jg's approval each time), filing the parts under ServerStorage.ImportedArt, saving ImportedArt.rbxm into Rojo source, and the round-trip check. Use after an art revision passes review.sh and jg wants the textured version in game.
+description: Import a baked Haunted Collector (GAME-002, archived) art asset into Studio and keep it in the repo. Covers the 3D Importer upload (jg's approval each time), filing the parts under ServerStorage.ImportedArt, saving ImportedArt.rbxm into Rojo source, and the round-trip check. Use after an art revision passes review.sh and jg wants the textured version in game.
 argument-hint: <asset>
 ---
 # Import $ARGUMENTS into the game
@@ -9,8 +9,8 @@ Proven on the Lantern Wisp (TASK-0043 rev 1, 2026-10-16). Notes win over this li
 
 ## 0. Gates
 - **The upload goes to jg's account and needs jg's approval in chat for this import.** An earlier approval doesn't carry over to a new asset or revision.
-- Run `games/haunted/art/tools/review.sh $ARGUMENTS --glb` first and show jg the sheets. Budget: OK, or a decision recorded.
-- Run the `studio-preflight` skill. If Rojo belongs to another session, work in a separately built test place (`rojo build haunted.project.json -o ~/Roblox-Work/haunted/<Name>.rbxl`) and don't connect Rojo.
+- Run the art review for $ARGUMENTS (`archive/GAME-002-haunted-collector/art/`; `tools/review.sh` was never merged, so check its worktree first) first and show jg the sheets. Budget: OK, or a decision recorded.
+- Run the `studio-preflight` skill. If Rojo belongs to another session, work in a separately built test place (`rojo build archive/GAME-002-haunted-collector/haunted.project.json -o ~/Roblox-Work/haunted/<Name>.rbxl`) and don't connect Rojo.
 
 ## 1. Upload with the 3D Importer (computer use)
 1. `request_access` for RobloxStudio. If the background screenshot fails, use the full-screen batch tools.
@@ -37,7 +37,7 @@ Start Play, then on the Client count parts with the `Imported` attribute on the 
    return tostring(ok) .. " " .. tostring(r)
    ```
    HttpEnabled is only on for that call, and is restored.
-3. Copy the file to `games/haunted/assets/ImportedArt.rbxm` (mapped to `ServerStorage.ImportedArt` in `haunted.project.json`).
+3. Copy the file to `archive/GAME-002-haunted-collector/assets/ImportedArt.rbxm` (mapped to `ServerStorage.ImportedArt` in its `haunted.project.json`).
 4. Round trip: `rojo build` to scratch, extract `ServerStorage.ImportedArt` with Lune (`roblox.deserializePlace` → `serializeModel`), `studio_transfer.py serve` it, and in Studio `GetAsync` + `DeserializeInstancesAsync`. Compare MeshId, ColorMap, NormalMap, Size and RenderFidelity with the live parts. All must match.
 
 ## 5. Record

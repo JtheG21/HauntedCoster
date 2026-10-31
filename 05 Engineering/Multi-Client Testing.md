@@ -4,7 +4,7 @@ title: Multi-Client Testing
 type: index
 status: approved
 created: 2026-10-10
-updated: 2026-10-15
+updated: 2026-10-30
 tags:
   - engineering/testing
 related:
@@ -14,8 +14,8 @@ related:
 # Multi-client testing (Studio, up to 8 clients)
 
 ## How it works
-- `src/server/Services/StudioTestHook.luau` runs only in Studio test sessions started with test args. It requires `TestService.Tests.multiclient.<scenario>`, runs it on the server, and ends the test with the returned table.
-- Scenarios live in `tests/luau/multiclient/<Name>.luau` and return `function(args) -> { ok: boolean, ... }`.
+- `archive/GAME-001-rg1/src/server/Services/StudioTestHook.luau` runs only in Studio test sessions started with test args. It requires `TestService.Tests.multiclient.<scenario>`, runs it on the server, and ends the test with the returned table.
+- Scenarios live in `archive/GAME-001-rg1/tests/luau/multiclient/<Name>.luau` and return `function(args) -> { ok: boolean, ... }`.
 
 ## Run (Claude through Studio MCP, or you from the Studio command bar in Edit mode)
 ```lua
@@ -57,7 +57,7 @@ end)
 Run them in a **fresh Play session (Server data model)**, not Edit mode. Edit mode caches modules ([[LES-0005-Edit-Mode-Require-Cache]]).
 
 ## GAME-002 (Haunted Collector) runs through Studio MCP
-The sections above describe the GAME-001 hook. GAME-002 scenarios live in `games/haunted/tests/scenarios/`. What works on this Mac (TASK-0025 to TASK-0041):
+The sections above describe the GAME-001 hook. GAME-002 scenarios live in `archive/GAME-002-haunted-collector/tests/scenarios/`. What works on this Mac (TASK-0025 to TASK-0041):
 - Start runs in the Edit data model inside `task.spawn`, store a compact summary in `_G.scn[key]`, wait with a background sleep (60–240 s), then read it. Calling `ExecutePlayModeAsync` directly from `execute_luau` times out and drops the connection. Edit-mode `_G` persists across MCP calls; LogService in Edit keeps no Play logs.
 - `_G.scnChain({{key, name, players, args}, ...})` runs scenarios back to back. It lives only in that Studio's Edit `_G`, so re-define it after every relaunch: loop over the entries, `pcall` `ExecutePlayModeAsync(args)` or `ExecuteMultiplayerTestAsync(players, args)`, summarise `res.checks` into `_G.scn[key]`, then wait for `RunService:IsRunning()` to go false plus 4 s.
 - Args: `habitat = "<id>"` starts in a module; `rotation = {slotSeconds=30, warningSeconds=12, closingSeconds=6, startNow=true}` unpins the rotation (test runs are pinned to the Cemetery otherwise).
