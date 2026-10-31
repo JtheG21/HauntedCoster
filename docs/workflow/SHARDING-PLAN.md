@@ -154,31 +154,33 @@ Afterwards, 152 with 153 and 151 with 154 had no conflicts. Merging all four ont
 4. Merge in any order that respects the stacks, retargeting a child to `main` when its base merges. Each merge should be clean.
 
 ### Commands
+The preflight is chained because the guard hook blocks `git checkout` and `git commit` without it. Run `git status` before `git add -A`: the worktrees should hold only the merge, and anything else should be looked at first.
+
 **151:** in `/Users/jg/Desktop/Rg1-worktrees/mathshow-art-v2`
 ```bash
 git fetch origin
 scripts/preflight.sh --root "$PWD" --branch chore/mathshow-art-v2-shapefit --clean && git merge --no-commit --no-ff origin/main
-git checkout origin/main -- project-state.json
+scripts/preflight.sh --root "$PWD" --branch chore/mathshow-art-v2-shapefit && git checkout origin/main -- project-state.json
 python3 scripts/migrate-queue-to-items.py
 git add -A
 scripts/preflight.sh --root "$PWD" --branch chore/mathshow-art-v2-shapefit && git commit -m "chore: merge main and move to task files"
 scripts/check.sh
 ```
 
-**152:** the same in `/Users/jg/Desktop/Rg1-worktrees/task-0105`, with `--branch task/TASK-0105-rules-foundation`.
+**152:** the same in `/Users/jg/Desktop/Rg1-worktrees/task-0105`, with `task/TASK-0105-rules-foundation` as the branch in each preflight.
 
 **154:** in `/Users/jg/Desktop/Rg1-worktrees/task-0107`, after 151 is pushed
 ```bash
 git fetch origin
 scripts/preflight.sh --root "$PWD" --branch task/TASK-0107-menu-art-v2 --clean && git merge --no-commit --no-ff origin/chore/mathshow-art-v2-shapefit
-git checkout origin/chore/mathshow-art-v2-shapefit -- project-state.json
+scripts/preflight.sh --root "$PWD" --branch task/TASK-0107-menu-art-v2 && git checkout origin/chore/mathshow-art-v2-shapefit -- project-state.json
 python3 scripts/migrate-queue-to-items.py
 git add -A
 scripts/preflight.sh --root "$PWD" --branch task/TASK-0107-menu-art-v2 && git commit -m "chore: merge base and move to task files"
 scripts/check.sh
 ```
 
-**153:** the same as 154 in `/Users/jg/Desktop/Rg1-worktrees/task-0106`, with `--branch task/TASK-0106-identity-ui` and `origin/task/TASK-0105-rules-foundation` as the base.
+**153:** the same as 154 in `/Users/jg/Desktop/Rg1-worktrees/task-0106`, with `task/TASK-0106-identity-ui` as the branch in each preflight and `origin/task/TASK-0105-rules-foundation` as the base.
 
 **After each `check.sh` passes, and once jg approves that branch:**
 ```bash
@@ -186,6 +188,6 @@ scripts/preflight.sh --root "$PWD" --branch <branch> --clean && git push origin 
 ```
 
 ### If something differs
-- **The script says a task file differs:** the entry has changed on one side since this rehearsal, for example a status change after a merge. It writes nothing. Compare the two, then rerun with `--keep-existing` if the existing file is right.
+- **The script says a task file differs:** the entry has changed on one side since this rehearsal, for example a status change after a merge. It writes nothing. Compare the two, then rerun with `--keep-existing` if the existing file is right. That removes `tasks/queue.json`, so the differing entry then survives only in git history.
 - **Any conflict outside these two files:** stop and report it. None appeared in the rehearsal, but new commits could change that.
 - **This branch's upstream:** it was created from `origin/main`, so push it with `git push -u origin chore/queue-sharding`, not a bare `git push`.

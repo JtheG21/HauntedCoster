@@ -362,9 +362,15 @@ class Project:
         }
 
     def next_id(self) -> str:
-        """The next TASK-#### free across the task files here and every local and remote branch."""
+        """The next TASK-#### free across the task files here and every local and remote branch. Fetch first."""
         seen = {t["id"] for t in self.tasks if ID_RE.match(str(t.get("id")))}
         git = ["git", "-C", str(self.root)]
+        try:
+            inside = subprocess.run(git + ["rev-parse", "--is-inside-work-tree"], capture_output=True, text=True)
+        except OSError as e:
+            raise OrchestratorError(f"next-id needs git: {e}") from e
+        if inside.returncode != 0:
+            raise OrchestratorError(f"next-id needs a git checkout, and {self.root} isn't one")
         refs = subprocess.run(git + ["for-each-ref", "--format=%(refname)", "refs/heads", "refs/remotes"],
                               capture_output=True, text=True).stdout.split()
         for ref in refs:

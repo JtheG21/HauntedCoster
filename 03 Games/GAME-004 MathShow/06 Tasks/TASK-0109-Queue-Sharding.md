@@ -3,7 +3,7 @@ id: TASK-0109
 title: Queue Sharding
 type: task
 project: GAME-004
-status: in_progress
+status: approved
 created: 2026-10-30
 updated: 2026-10-30
 tags:

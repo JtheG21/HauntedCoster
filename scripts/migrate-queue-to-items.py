@@ -20,6 +20,14 @@ import migrate_queue  # noqa: E402
 import task_store  # noqa: E402
 
 
+def existing_task(path: Path) -> dict | None:
+    """The task in an existing file, or None if it can't be read, which counts as differing."""
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
@@ -47,7 +55,7 @@ def main(argv=None) -> int:
         path = task_store.items_dir(a.root) / f"{t['id']}.json"
         if not path.is_file():
             new.append(t)
-        elif json.loads(path.read_text(encoding="utf-8")) == t:
+        elif existing_task(path) == t:
             same += 1
         else:
             differ.append(t["id"])

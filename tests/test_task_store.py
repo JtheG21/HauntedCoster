@@ -92,6 +92,16 @@ class Migration(Base):
         self.assertEqual(json.loads(self.item("TASK-0001").read_text())["status"], "done")
         self.assertTrue(self.item("TASK-0002").exists())
 
+    def test_unreadable_task_file_counts_as_differing(self):
+        task_store.items_dir(self.root).mkdir()
+        self.item("TASK-0001").write_text("{nope")
+        self.queue(task("TASK-0001"))
+        r = self.migrate()
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("TASK-0001", r.stderr)
+        self.assertNotIn("Traceback", r.stderr)
+        self.assertTrue((self.root / "tasks" / "queue.json").exists())
+
     def test_conflict_markers_stop_it(self):
         (self.root / "tasks" / "queue.json").write_text('<<<<<<< HEAD\n{}\n')
         self.assertEqual(self.migrate().returncode, 1)
@@ -126,6 +136,10 @@ class Validator(Base):
 
 
 class NextId(Base):
+    def test_outside_a_checkout_it_fails_rather_than_guessing(self):
+        with self.assertRaises(orchestrator.OrchestratorError):
+            orchestrator.Project(self.root).next_id()
+
     def test_sees_other_branches(self):
         git = ["git", "-C", str(self.root), "-c", "user.name=t", "-c", "user.email=t@t"]
         subprocess.run(git + ["init", "-q", "-b", "main"], check=True)

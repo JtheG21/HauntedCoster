@@ -53,7 +53,7 @@ A file may be in the `files_owned` of **at most one `in_progress` task**. That i
 - See `docs/workflow/PARALLEL.md` for how shared contracts are handled.
 
 ## How to add a task
-1. Run `python3 scripts/orchestrator.py next-id`, which checks `main` and every branch.
+1. Run `git fetch origin`, then `python3 scripts/orchestrator.py next-id`, which checks every local and remote branch.
 2. Create one file, `tasks/items/TASK-####.json`, with every field above: indent 2, ASCII only, trailing newline.
 3. Create the task note and set `note_path` to it. The note's `status` must match.
 4. **Never edit another task's file.** Transitions go through the orchestrator, which writes only the file that changed.
@@ -72,4 +72,4 @@ git commit
 scripts/check.sh
 ```
 
-The script upgrades old-format entries, writes the missing task files, mirrors renamed statuses into task notes and removes `queue.json`. If an existing task file differs, it stops, writes nothing and names the task. Check it, then rerun with `--keep-existing` if the existing file is right.
+The script upgrades old-format entries, writes the missing task files, mirrors renamed statuses into task notes and removes `queue.json`. If an existing task file differs, it stops, writes nothing and names the task. Check it, then rerun with `--keep-existing` if the existing file is right. That removes `queue.json`, so the differing entry then survives only in git history.
