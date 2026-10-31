@@ -248,6 +248,18 @@ local function isRelated(a: Instance, b: Instance): boolean
 	return a:IsDescendantOf(b) or b:IsDescendantOf(a)
 end
 
+-- The nearest ancestor named Group: a sticker and its own control, shard, glow and flash share one.
+local function groupOf(inst: Instance, root: Frame): Instance?
+	local n: Instance? = inst.Parent
+	while n and n ~= root do
+		if n.Name == "Group" then
+			return n
+		end
+		n = n.Parent
+	end
+	return nil
+end
+
 local function overlapBox(a: { number }, b: { number }): { number }
 	return { math.max(a[1], b[1]), math.max(a[2], b[2]), math.min(a[3], b[3]), math.min(a[4], b[4]) }
 end
@@ -377,13 +389,24 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 						and ov[4] - ov[2] > OVERLAP_EPS
 						and (ov[3] - ov[1]) * (ov[4] - ov[2]) > 0.5
 					then
+						-- Intentional composition is passed and labelled; anything else is a collision.
+						local pl, pg = path(L.inst, root), path(g, root)
+						local gl, gg = groupOf(L.inst, root), groupOf(g, root)
+						local reason = ""
+						if string.find(pl, "Edge", 1, true) or string.find(pg, "Edge", 1, true) then
+							reason = "intentional: screen-edge decor"
+						elseif gl ~= nil and gl == gg then
+							reason = "intentional: sticker or label on its own control"
+						end
 						table.insert(rows, {
 							state = state,
-							element = path(L.inst, root) .. " x " .. path(g, root),
+							element = pl .. " x " .. pg,
 							text = fmtBox(ov),
 							margin = "-",
-							pass = false,
-							why = "sticker or off-shard label overlaps unrelated content",
+							pass = reason ~= "",
+							why = if reason ~= ""
+								then reason
+								else "sticker or off-shard label overlaps unrelated content",
 							class = L.inst.ClassName .. "/" .. d.ClassName,
 							category = "collision",
 						})

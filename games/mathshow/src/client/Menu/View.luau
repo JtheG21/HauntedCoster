@@ -1893,7 +1893,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			for slot = 1, 5 do
 				local entry = rows[(column - 1) * 5 + slot]
 				if entry then
-					local RH = MenuTheme.RowHeight
+					local RH = MenuTheme.ReviewRowHeight
 					local box = {
 						x = origin.x,
 						y = origin.y + (slot - 1) * 38 - (RH - origin.h) / 2,
