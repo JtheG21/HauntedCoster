@@ -64,6 +64,17 @@ Console: no errors from MathShow. Expected warnings: DataStores unavailable (unp
 | TASK-0107 TextFit, 844x390 / 1920x1080 / phone 812x375 | **PASS:** 953 rows each, 2,859 total, 0 failures |
 | Margins | 2,007 rows measured across 210 elements; tightest 6.5 px (`Screen_blitz/Score` Value, `Screen_vs/Back` Label) against the 6 px rule |
 | Not margin-measured | 852 rows: tap targets, stickers and labels not on a shard |
+
+### TASK-0112 re-run, 2026-10-31 (real art, build 890ac77)
+
+Fresh Play on `task/TASK-0112-startup-asset-warnings`, Rojo served from that worktree, BuildStamp `890ac77` confirmed in Edit before Play. `require(...StudioTests.TextFit).run()` on the client.
+
+| Gate | Result |
+|---|---|
+| TextFit, 844x390 / 1920x1080 / phone 812x375 | **PASS:** 953 rows each, 2,859 total, 0 failures |
+| Tightest margin | 6.5 px (`06a-blitz-question`, `Screen_blitz/Score/Group/Content/Value`), 6 px rule |
+
+This run used the uploaded menu art. The TASK-0110 run above used placeholders, so this one is the stronger evidence. The 852 rows that are not margin-measured still stand, as does the TASK-0106 IdentityBoards gap.
 | TASK-0106 IdentityBoards | 109 rows, 0 failed, **844x390 only** |
 | TASK-0106 margins | **Still incomplete:** `ShapeProfiles` has no `shard-id-*` profiles, so its text rows have no 6 px check. The harness has one canvas, so the other viewports weren't run |
 
