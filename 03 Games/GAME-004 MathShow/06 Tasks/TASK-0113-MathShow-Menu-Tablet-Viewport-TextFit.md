@@ -3,7 +3,7 @@ id: TASK-0113
 title: "MathShow Menu Tablet Viewport TextFit"
 type: task
 project: GAME-004
-status: backlog
+status: in_progress
 priority: medium
 risk: low
 owner: claude-code

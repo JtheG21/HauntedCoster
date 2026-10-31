@@ -147,7 +147,7 @@ function Primitives.TagChip(parent: Instance, props: { tag: string } & Pos): Fra
 	if text == nil then
 		return nil
 	end
-	local width = IdentityRules.tagWidth(Kit.measure(text, T.Tag.TextSize))
+	local width = IdentityRules.tagWidth(Kit.measure(text, T.Tag.TextSize)) + T.Tag.ExtraWidth
 	local shard = Kit.shard(parent, "TagChip", box(props, width, T.Tag.Height), "shard-id-tag", T.Slice.Tag)
 	local label = Kit.text(shard.content, text, T.Tag.TextSize, {
 		x = T.Tag.PadX,
@@ -182,7 +182,7 @@ function Primitives.StatusChip(parent: Instance, props: { status: string } & Pos
 		warn(`[MathShow] StatusChip: unknown status {tostring(props.status)}`)
 		return nil
 	end
-	local width = IdentityRules.statusWidth(Kit.measure(text, T.Status.TextSize))
+	local width = IdentityRules.statusWidth(Kit.measure(text, T.Status.TextSize)) + T.Status.ExtraWidth
 	local shard = Kit.shard(parent, "StatusChip", box(props, width, T.Status.Height), style.Shard, T.Slice.Status)
 	statusIcon(shard.content, style, T.Status.IconX, T.Status.IconY, T.Status.IconSize)
 	Kit.text(shard.content, text, T.Status.TextSize, {
