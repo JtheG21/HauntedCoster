@@ -3,7 +3,7 @@ id: TASK-0112
 title: "MathShow Startup Asset Warnings"
 type: task
 project: GAME-004
-status: backlog
+status: done
 priority: medium
 risk: low
 owner: claude-code

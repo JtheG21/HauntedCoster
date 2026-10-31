@@ -1,0 +1,25 @@
+{
+  "id": "TASK-0113",
+  "game": "GAME-004",
+  "title": "MathShow Menu Tablet Viewport TextFit",
+  "status": "backlog",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/tests/studio/TextFit.luau",
+    "games/mathshow/tests/studio/IdentityBoards.luau"
+  ],
+  "depends_on": [
+    "TASK-0112"
+  ],
+  "branch": "task/TASK-0113-menu-tablet-textfit",
+  "acceptance": [
+    "The TextFit gate (tests/studio/TextFit.luau) adds 1024x768 and 1180x820 to its SIZES list. A fresh Play run passes every row at both sizes, or each failing row is reported with its margin.",
+    "TASK-0106 IdentityBoards is run at 844x390, 1024x768, 1180x820, 1920x1080 and phone 812x375. Today it has one canvas, so the harness needs a per-size pass. Every row is measured or reported.",
+    "docs/workflow/STUDIO-SYNC.md records rows, failures and tightest margin for each viewport."
+  ],
+  "evidence": [],
+  "notes": "Created at the TASK-0112 closeout (2026-10-31) from jg's request. Not started. Running the gate needs a jg-run Studio session (Disconnect/Connect the Rojo plugin).",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0113-MathShow-Menu-Tablet-Viewport-TextFit.md",
+  "risk": "low"
+}
