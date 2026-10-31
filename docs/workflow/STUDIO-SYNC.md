@@ -79,3 +79,22 @@ This run used the uploaded menu art. The TASK-0110 run above used placeholders, 
 | TASK-0106 margins | **Still incomplete:** `ShapeProfiles` has no `shard-id-*` profiles, so its text rows have no 6 px check. The harness has one canvas, so the other viewports weren't run |
 
 The gate measures geometry against shape profiles. With the 17 PNGs not uploaded, the visible menu is placeholders. Evidence: `docs/workflow/evidence/TASK-0110/menu-01-main-standard.jpg`. Full per-row output went to Studio's Output, and only this summary is saved. No identity board screenshot was taken.
+
+### TASK-0113 tablet viewports, 2026-10-31 (build 9732f94)
+
+BuildStamp `9732f94` confirmed in Edit before Play, after a Rojo reconnect. Fresh Play on `task/TASK-0113-menu-tablet-textfit`.
+
+| Viewport | TextFit rows | TextFit failures | IdentityBoards rows | IdentityBoards failed |
+|---|---|---|---|---|
+| 844x390 | 953 | 0 | 109 | 0 |
+| 1920x1080 | 953 | 0 | 109 | 0 |
+| phone 812x375 | 953 | 0 | 109 | 0 |
+| 1024x768 (new) | 953 | 0 | 109 | 0 |
+| 1180x820 (new) | 953 | 0 | 109 | 0 |
+| **Total** | **4,765** | **0** | | **0** |
+
+- **Tightest TextFit margin:** 6.5 px at `844x390`, `06a-blitz-question`, `Screen_blitz/Score/Group/Content/Value`. The 6 px rule holds. Per-viewport tightest values were not recorded.
+- **IdentityBoards tightest margin:** not reported. The harness prints failures only, so a pass means no row was under 6 px.
+- **Before the fix:** the first IdentityBoards run failed at all five viewports. `FIRST CORRECT` on `shard-id-status-gold` measured 5 px, or 4.75 px at 1920x1080, and `[WWWWW]` on `shard-id-tag` measured 5.75 px. The fix is in `9732f94`: `ExtraWidth = 2` on the tag and status chips in `client/Identity/`. Text and icon positions did not change. After the fix, all five viewports passed.
+- **Baseline mismatch:** the TASK-0106 entry above records 109 rows and 0 failures at 844x390. This build failed at that viewport before the fix, so its cause is not traced beyond the two chips.
+
