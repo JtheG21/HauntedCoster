@@ -21,4 +21,4 @@ tags:
 See `files_owned` in `tasks/queue.json`.
 
 ## Outcome
-Phases 0 to 8 are complete on `chore/workflow-hardening`, unpushed. First audit failed with two majors ([[AUD-20261030-TASK-0108-01]]); revision 1 fixed them and the delta audit passed ([[AUD-20261030-TASK-0108-02]]). Waiting on jg: Studio checks, push and merge. Details: `docs/workflow/PR-workflow-hardening.md`.
+Phases 0 to 8 are complete on `chore/workflow-hardening`, unpushed. First audit failed with two majors ([[AUD-20261030-TASK-0108-01]]); revision 1 fixed them and the delta audit passed ([[AUD-20261030-TASK-0108-02]]). jg reported the Studio checks good (2026-10-30). Waiting on jg: merge. Details: `docs/workflow/PR-workflow-hardening.md`.

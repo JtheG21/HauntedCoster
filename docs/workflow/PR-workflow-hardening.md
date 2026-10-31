@@ -30,7 +30,7 @@ Makes `AGENTS.md`, `tasks/queue.json` and `scripts/active-game.env` the single s
 - `scripts/check.sh --archive` exits 1: GAME-003 fails StyLua, Selene and strict types. It was never checked before, and the brief rules out editing it.
 - CI hasn't run, because that needs a push. Paths were checked locally only.
 - `~/rokit.toml` pins Rojo 7.6.1 and `~/aftman.toml` pins 7.7.0-rc.1. They can't affect commands run inside the repo, but they can outside it. Not edited.
-- Studio isn't verified. An open problem from the 2026-10-30 handoff may affect it: Studio not receiving updated script source.
+- Studio: jg ran the checks on this branch on 2026-10-30 and reported them good. The separate problem from the 2026-10-30 handoff, Studio not receiving updated script source, wasn't investigated here.
 - PR 151 still has no task ID.
 
 ## Audit
