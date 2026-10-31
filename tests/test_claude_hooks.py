@@ -33,7 +33,8 @@ def make_checkout(parent):
     repo = Path(parent) / "repo"
     repo.mkdir()
     subprocess.run(["git", "-C", str(repo), "init", "-q"], check=True)
-    (repo / "haunted.project.json").write_text("{}")
+    (repo / "scripts").mkdir(exist_ok=True)
+    (repo / "scripts" / "active-game.env").write_text("")
     return repo
 
 
@@ -50,7 +51,7 @@ class TestGuardBash(unittest.TestCase):
         ("allow", "git branch --list"),
         ("block", "rojo serve"),
         ("block", "cd ../x && rojo serve --port 34872"),
-        ("allow", "rojo serve haunted.project.json"),
+        ("allow", "rojo serve mathshow.project.json"),
         ("allow", 'ps aux | grep "rojo serve"'),
         ("block", "cat .env"),
         ("block", "source /Users/jg/Desktop/Rg1/.env"),
@@ -126,8 +127,13 @@ class TestGuardPaths(unittest.TestCase):
     def test_references_ask(self):
         self.check("ask", "Edit", "10 References/01 UI/x.md")
 
+    def test_older_checkout_without_the_env_file_stays_protected(self):
+        (self.repo / "scripts" / "active-game.env").unlink()
+        (self.repo / "AGENTS.md").write_text("")
+        self.check("block", "Write", "Agents/x.md")
+
     def test_other_repos_are_left_alone(self):
-        (self.repo / "haunted.project.json").unlink()
+        (self.repo / "scripts" / "active-game.env").unlink()
         self.check("allow", "Write", "Agents/x.md")
 
 
@@ -136,7 +142,7 @@ class TestRefLint(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.repo = make_checkout(self.tmp.name)
-        (self.repo / "scripts").mkdir()
+        (self.repo / "scripts").mkdir(exist_ok=True)
         shutil.copy(ROOT / "scripts" / "refs.py", self.repo / "scripts" / "refs.py")
         shutil.copy(ROOT / "scripts" / "validate_vault.py", self.repo / "scripts" / "validate_vault.py")
         self.note = self.repo / "10 References" / "01 UI" / "REF-UI-001-X.md"
@@ -211,7 +217,7 @@ class TestStudioPreflightUsage(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             r = subprocess.run(["bash", str(STUDIO), "--root", d], capture_output=True, text=True)
         self.assertEqual(r.returncode, 2)
-        self.assertIn("not a Haunted Collector checkout", r.stderr)
+        self.assertIn("not a MathShow checkout", r.stderr)
 
     def test_rejects_unknown_arguments(self):
         r = subprocess.run(["bash", str(STUDIO), "--bogus"], capture_output=True, text=True)

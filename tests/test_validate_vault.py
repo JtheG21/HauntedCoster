@@ -31,7 +31,7 @@ class VaultTest(unittest.TestCase):
                                                              body="[[00 Overview]] `[[not-a-link]]`"))
         self.write("00 Studio/Notes.base", "views: []\n")
         self.write("99 Templates/T - Task.md", "---\nid: TASK-0000\ntype: task\nstatus: proposed\n---\n[[TASK-0000-...]]\n")
-        self.queue([{"id": "TASK-0001", "status": "done", "note": f"{GAME}/06 Tasks/TASK-0001-Thing.md"}])
+        self.queue([{"id": "TASK-0001", "status": "done", "note_path": f"{GAME}/06 Tasks/TASK-0001-Thing.md"}])
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -84,11 +84,11 @@ class VaultTest(unittest.TestCase):
         self.assertIn("project must be GAME-001", errs)
 
     def test_queue_status_mismatch_flagged(self):
-        self.queue([{"id": "TASK-0001", "status": "in_review", "note": f"{GAME}/06 Tasks/TASK-0001-Thing.md"}])
+        self.queue([{"id": "TASK-0001", "status": "review", "note_path": f"{GAME}/06 Tasks/TASK-0001-Thing.md"}])
         self.assertIn("status mismatch", self.errors())
 
     def test_queue_missing_note(self):
-        self.queue([{"id": "TASK-0002", "status": "proposed", "note": "nowhere.md"}])
+        self.queue([{"id": "TASK-0002", "status": "backlog", "note_path": "nowhere.md"}])
         self.assertIn("note not found", self.errors())
 
     def test_task_note_not_in_queue_warns(self):

@@ -23,4 +23,4 @@ Turn an **approved** idea into small tasks that can be implemented and tested.
 - Use template `T - Task`. Each task needs scope (in and out), dependencies, testable acceptance criteria, test requirements (automated plus a Studio playtest procedure), a risk level, and the files expected to change.
 - High risk means DataStores, Robux, data loss, security, or a live game. Mark these clearly; they need extra approval.
 - **Never silently change approved requirements.** Raise conflicts as open questions.
-- New tasks go in as `status: proposed` in **both** the note and `tasks/queue.json` (with `"note"` set to the note's path). Only a human approves them.
+- New tasks go in as `status: backlog` in **both** the note and `tasks/queue.json`, with every field in `docs/workflow/TASKS.md` (`note_path` is the note's path). Only a human approves them.

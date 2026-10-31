@@ -4,7 +4,7 @@ title: Studio Test Pads
 type: index
 status: proposed
 created: 2026-10-17
-updated: 2026-10-17
+updated: 2026-10-30
 tags:
   - engineering/testing
 related:
@@ -14,7 +14,7 @@ related:
 ---
 # Studio test pads
 
-Judge a texture, icon or effect in context instead of from a preview image. Three pads, one scenario (`games/haunted/tests/scenarios/TestPads.luau`), pure rules in `shared/Rules/PadRules.luau` (Lune-tested). Numbers are aids; jg judges the look. **Uploading a texture to Roblox is always jg's per-action decision**; the pads only reference ids you pass them.
+Judge a texture, icon or effect in context instead of from a preview image. Three pads, one scenario (`archive/GAME-002-haunted-collector/tests/scenarios/TestPads.luau`), pure rules in `shared/Rules/PadRules.luau` (Lune-tested). Numbers are aids; jg judges the look. **Uploading a texture to Roblox is always jg's per-action decision**; the pads only reference ids you pass them.
 
 | Pad | Shows | Metrics line |
 |---|---|---|

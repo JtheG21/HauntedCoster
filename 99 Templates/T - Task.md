@@ -2,8 +2,8 @@
 id: TASK-0000
 title: "{{title}}"
 type: task
-project: GAME-001
-status: proposed
+project: GAME-004
+status: backlog
 priority: medium
 risk: low
 owner: executor
