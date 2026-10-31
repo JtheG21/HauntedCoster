@@ -1,0 +1,26 @@
+{
+  "id": "TASK-0114",
+  "game": "GAME-004",
+  "title": "MathShow Tap Target + Unmeasured Rows Audit",
+  "status": "backlog",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/tests/studio/TextFit.luau",
+    "games/mathshow/src/client/Menu/View.luau"
+  ],
+  "depends_on": [
+    "TASK-0112"
+  ],
+  "branch": "task/TASK-0114-tap-target-audit",
+  "acceptance": [
+    "The 852 rows the TextFit gate does not margin-measure (tap targets, stickers, labels off a shard) are listed with element path and measured size at 844x390.",
+    "Every interactive element is at least 44x44 px at 844x390, or is reported with its size and a reason.",
+    "Stickers and labels off a shard neither clip nor overlap another element at 844x390, 1920x1080 and phone 812x375, checked by measurement, not by eye.",
+    "Any layout change comes with a diff table (old -> new, gate margin). No ids or art change."
+  ],
+  "evidence": [],
+  "notes": "Created at the TASK-0112 closeout (2026-10-31) from jg's request. Not started. Standard tier: audit first, then any layout change needs its own review.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0114-MathShow-Tap-Target-Unmeasured-Rows-Audit.md",
+  "risk": "low"
+}

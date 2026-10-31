@@ -2,7 +2,7 @@
   "id": "TASK-0112",
   "game": "GAME-004",
   "title": "MathShow Startup Asset Warnings",
-  "status": "backlog",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -19,8 +19,22 @@
     "Phase C (wire and verify): MenuTheme.luau takes the uploaded ids for the 17 -v2 slots, 203785492 is fixed by the route jg approves, and a Play log shows no asset warnings from these ids. check.sh passes.",
     "Unpublished Play still warns and runs memory-only."
   ],
-  "evidence": [],
-  "notes": "Startup warnings: shard-menu-title-violet-v2 and glow-menu-title-violet-v2 are UNSET (MenuTheme.luau:223, :230). Asset 203785492 fails with 'Asset type does not match requested type'. TASK-0107 (done) left the 17 -v2 slots UNSET until upload, so this task picks up that remaining work. Scope and route choices are open for jg.",
+  "evidence": [
+    "TextFit gate at 890ac77: 2,859 rows, 0 failures, tightest 6.5 px (docs/workflow/STUDIO-SYNC.md)",
+    "PreloadAsync (ImageLabel form): 17/17 Success",
+    "AssetTypeId 1 for all 17 ids (games/mathshow/art/menu/UPLOAD_LIST.md)",
+    "PR #164 merged as 671b3ba"
+  ],
+  "notes": "Startup warnings: shard-menu-title-violet-v2 and glow-menu-title-violet-v2 are UNSET (MenuTheme.luau:223, :230). Asset 203785492 fails with 'Asset type does not match requested type'. TASK-0107 (done) left the 17 -v2 slots UNSET until upload, so this task picks up that remaining work. Scope and route choices are open for jg. Closed 2026-10-31 at merge 671b3ba. The audit AUD-20261030-TASK-0107-01 has a resolution section; its fail verdict stands.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0112-MathShow-Startup-Asset-Warnings.md",
-  "risk": "low"
+  "risk": "low",
+  "merge_approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-31T12:10:54",
+      "from": "backlog",
+      "to": "done",
+      "note": "closed out manually: the work ran outside the orchestrator flow (no approve/start/record steps, no audit record). Merged by PR #164 (671b3ba) on jg's approval."
+    }
+  ]
 }
