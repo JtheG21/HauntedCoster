@@ -60,7 +60,7 @@
     {
       "item": "TextFit gate results for TASK-0106 and TASK-0107",
       "status": "partial",
-      "result": "TASK-0107 pass: 2859 rows, 0 failures, tightest 6.5 px. TASK-0106: 109 rows, 0 failed, 844x390 only, no shard-id profiles, so 6 px unmeasured for its text; no board screenshot."
+      "result": "TASK-0107 pass: 2859 rows, 0 failures, tightest 6.5 px. TASK-0106 now fully measured by TASK-0111 and fails: FIRST CORRECT about 1 px short, [WWWWW] 0.25 px short at two sizes."
     },
     {
       "item": "TASK-0106 Kit.luau headshot minor findings",
@@ -73,16 +73,18 @@
       "blocked_on": "human"
     },
     {
-      "item": "Finish TASK-0106's gate: shard-id-* shape profiles, other viewports and a board screenshot",
-      "status": "backlog"
+      "item": "Decide TASK-0106's FIRST CORRECT chip margin (about 1 px short) and compare boards to S1-S7 once PNGs are uploaded",
+      "status": "blocked",
+      "blocked_on": "human",
+      "see": "docs/workflow/evidence/TASK-0111/identity-gate.md"
     },
     {
       "item": "Have guard.sh ask jg before orchestrator override-merge; --by is free text",
-      "status": "backlog",
-      "see": "06 QA/AUD-20261030-TASK-0110-01.md"
+      "status": "done",
+      "see": "chore/serve-guard-followups"
     },
     {
-      "item": "serve.sh: add a test for the any-Rojo refusal, and stop --dry-run rewriting BuildStamp.txt",
+      "item": "serve.sh: the any-Rojo refusal has no automated test; a copied nc cannot listen here, so it was checked by hand",
       "status": "backlog",
       "see": "06 QA/AUD-20261030-TASK-0110-01.md"
     }

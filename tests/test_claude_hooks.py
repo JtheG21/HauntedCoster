@@ -60,6 +60,9 @@ class TestGuardBash(unittest.TestCase):
         ("ask", "gh pr merge 57 --repo JtheG21/HauntedCoster --merge"),
         ("allow", "gh pr view 57"),
         ("ask", "rojo upload --asset_id 1"),
+        ("ask", "python3 scripts/orchestrator.py override-merge TASK-0001 --by jg --reason x"),
+        ("ask", "cd x && python3 /a/scripts/orchestrator.py --root /a override-merge TASK-0001 --by jg --reason x"),
+        ("allow", "python3 scripts/orchestrator.py status"),
     ]
 
     def test_commands(self):
