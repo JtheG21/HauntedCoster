@@ -274,6 +274,13 @@ function IdentityBoards.run(options: { scale: number?, keep: boolean? }?): boole
 	task.wait() -- let AbsoluteSize settle under the scale
 	checkText("boards", rows, gui, scale)
 	checkRails(rows, Theme)
+	-- GuiButton census before the GUI is destroyed, so the count is real for this viewport.
+	local guiButtons = 0
+	for _, d in gui:GetDescendants() do
+		if d:IsA("GuiButton") then
+			guiButtons += 1
+		end
+	end
 	if not (options and options.keep) then
 		gui:Destroy()
 	end
@@ -286,12 +293,6 @@ function IdentityBoards.run(options: { scale: number?, keep: boolean? }?): boole
 		if not r.pass then
 			failed += 1
 			print(`FAIL [{r.board}] {r.element}: {r.detail}`)
-		end
-	end
-	local guiButtons = 0
-	for _, d in gui:GetDescendants() do
-		if d:IsA("GuiButton") then
-			guiButtons += 1
 		end
 	end
 	print(`IDENTITY_MIN scale={scale} margin={minTight} row={minTightRow} guiButtons={guiButtons}`)

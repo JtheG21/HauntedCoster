@@ -25,7 +25,6 @@ local CLIP_TOL = 0.5 -- ancestor overflow tolerated, design px
 local OVERLAP_EPS = 0.01 -- positive-area test for interactive overlap
 local SCREEN_MARGIN_MIN = 6 -- informational: text margin in screen px
 -- Interactive pairs allowed to overlap, by state and control name. The reason is written to the ledger.
-local ALLOW_OVERLAP_NAMES = { Hit = true, HitMinus = true, HitPlus = true, Minus = true, Plus = true }
 local SIZES: { { name: string, w: number, h: number } } = {
 	{ name = "844x390", w = 844, h = 390 },
 	{ name = "1920x1080", w = 1920, h = 1080 },
@@ -313,10 +312,87 @@ end
 
 -- TASK-0114 checks, appended to the rows from checkGui for one state (rows[from..]). Each new row has a category, so the
 -- ledger can tell it apart from the historical 284 unmeasured rows per viewport.
+-- Images on this list are decoration and are excluded from collisions. Each exclusion is counted per viewport and name.
+local DECOR_IMAGE_NAMES: { [string]: boolean } = {
+	Shard = true,
+	Flash = true,
+	Glow = true,
+	Spark1 = true,
+	Spark2 = true,
+	Spark3 = true,
+	Touch = true,
+}
+local decorTally: { [string]: { [string]: number } } = {}
+
+local function sizeOf(state: string): string
+	for _, sz in SIZES do
+		if string.sub(state, 1, #sz.name) == sz.name then
+			return sz.name
+		end
+	end
+	return "?"
+end
+
+local function countDecor(state: string, name: string)
+	local size = sizeOf(state)
+	local t = decorTally[size] or {}
+	t[name] = (t[name] or 0) + 1
+	decorTally[size] = t
+end
+
+-- Only Screen_settings/Row{music,sfx}: its Hit against the SAME row's Minus/HitMinus or Plus/HitPlus.
+local function allowedSettingsPair(pa: string, pb: string): boolean
+	for _, pair in { { pa, pb }, { pb, pa } } do
+		local hit, other = pair[1], pair[2]
+		local row = string.match(hit, "^Screen_settings/Row(%a+)/Group/Content/Hit$")
+		if row == "music" or row == "sfx" then
+			local otherRow = string.match(other, "^Screen_settings/Row(%a+)/")
+			local last = string.match(other, "([^/]+)$")
+			if otherRow == row and (last == "Minus" or last == "HitMinus" or last == "Plus" or last == "HitPlus") then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+-- Intentional composition, by name and structure. Anything not listed is a collision.
+local function exemption(a: GuiObject, b: GuiObject, root: Frame, sameText: boolean): string
+	if a.Parent == b.Parent and a.Name == b.Name and sameText then
+		return "intentional: duplicate text layer (sibling shadow or glow)"
+	end
+	if string.sub(a.Name, 1, 4) == "Edge" or string.sub(b.Name, 1, 4) == "Edge" then
+		return "intentional: screen-edge decor"
+	end
+	local ga = ancestorNamed(a, root, "Group")
+	if ga ~= nil and ga == ancestorNamed(b, root, "Group") then
+		return "intentional: sticker or label on its own control"
+	end
+	local pa, pb = path(a, root), path(b, root)
+	local screen = string.match(pa, "^(Screen_%w+)/")
+	if screen ~= nil then
+		if a.Name == "NewBest" and string.sub(pb, 1, #screen + 6) == screen .. "/Card/" then
+			return "intentional: NEW BEST badge on its card"
+		end
+		if
+			a.Name == "Vs"
+			and (
+				string.sub(pb, 1, #screen + 5) == screen .. "/You/"
+				or string.sub(pb, 1, #screen + 7) == screen .. "/Rival/"
+			)
+		then
+			return "intentional: VS badge across the panel seam"
+		end
+	end
+	if a.Name == "Glow" or b.Name == "Glow" or a.Name == "Flash" or b.Name == "Flash" then
+		return "intentional: glow or flash layer behind content"
+	end
+	return ""
+end
+
 local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: number, from: number)
 	local root = gui:FindFirstChild("Root") :: Frame
 	local interactive: { { inst: GuiObject, box: { number } } } = {}
-	local labelBoxes: { { inst: TextLabel, box: { number }, owner: Frame? } } = {}
 
 	-- 1. Tap size, every visible GuiButton plus Answer TextBoxes. checkGui already covers TextButtons named Hit*.
 	for _, d in root:GetDescendants() do
@@ -344,6 +420,7 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 	end
 
 	-- 2. Interactive overlap: positive-area intersection between unrelated controls, rotation-aware (conservative AABB).
+	-- The only allowed pairs are Screen_settings/Row{music,sfx}: its Hit against the SAME row's Minus/HitMinus or Plus/HitPlus.
 	for i = 1, #interactive do
 		for j = i + 1, #interactive do
 			local A, B = interactive[i], interactive[j]
@@ -351,11 +428,7 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 				local ov = overlapBox(A.box, B.box)
 				if ov[3] - ov[1] > OVERLAP_EPS and ov[4] - ov[2] > OVERLAP_EPS then
 					local pa, pb = path(A.inst, root), path(B.inst, root)
-					local allowed = string.find(state, "settings", 1, true) ~= nil
-						and ALLOW_OVERLAP_NAMES[A.inst.Name] == true
-						and ALLOW_OVERLAP_NAMES[B.inst.Name] == true
-						and string.find(pa, "Row", 1, true) ~= nil
-						and string.find(pb, "Row", 1, true) ~= nil
+					local allowed = allowedSettingsPair(pa, pb)
 					table.insert(rows, {
 						state = state,
 						element = pa .. " x " .. pb,
@@ -371,89 +444,90 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 		end
 	end
 
-	-- 3. Ancestor clipping for stickers and off-shard labels, plus collect them for the collision check.
+	-- 3. Clipping for stickers and off-shard labels, and for visible FitSticker frames and images (for example Dot1..3).
+	local labelBoxes: { { inst: GuiObject, box: { number }, owner: Frame? } } = {}
 	for _, d in root:GetDescendants() do
-		if (d:IsA("TextLabel") or d:IsA("TextButton")) and visible(d :: GuiObject) then
-			local lab = d :: TextLabel
-			local sticker = lab:GetAttribute("FitSticker") == true
-			local owner = shapeOwner(lab)
-			if (lab.Text ~= "" or sticker) and (owner == nil or sticker) then
-				local x0, y0, x1, y1 = rotatedBox(lab, root, scale)
-				local box = { x0, y0, x1, y1 }
-				local over, where = ancestorClip(lab, root, box, scale)
-				local ok = over <= CLIP_TOL
-				table.insert(rows, {
-					state = state,
-					element = path(lab, root),
-					text = lab.Text:gsub("\n", " / "),
-					margin = "-",
-					pass = ok,
-					why = if ok then "" else string.format("clipped %.1f px by %s", over, where),
-					class = lab.ClassName,
-					category = "clip",
-				})
-				table.insert(labelBoxes, { inst = lab, box = glyphBox(lab, root, scale), owner = owner })
-			end
+		if not (d:IsA("GuiObject") and visible(d :: GuiObject)) then
+			continue
 		end
+		local g = d :: GuiObject
+		local sticker = g:GetAttribute("FitSticker") == true
+		local isLabel = (g:IsA("TextLabel") or g:IsA("TextButton")) and (g :: TextLabel).Text ~= ""
+		if not (isLabel or sticker) then
+			continue
+		end
+		local owner = shapeOwner(g)
+		if owner ~= nil and not sticker then
+			continue
+		end
+		local x0, y0, x1, y1 = rotatedBox(g, root, scale)
+		local box = { x0, y0, x1, y1 }
+		local over, where = ancestorClip(g, root, box, scale)
+		local ok = over <= CLIP_TOL
+		table.insert(rows, {
+			state = state,
+			element = path(g, root),
+			text = if g:IsA("TextLabel") or g:IsA("TextButton")
+				then (g :: TextLabel).Text:gsub("\n", " / ")
+				else "(sticker frame)",
+			margin = "-",
+			pass = ok,
+			why = if ok then "" else string.format("clipped %.1f px by %s", over, where),
+			class = g.ClassName,
+			category = "clip",
+		})
+		table.insert(labelBoxes, {
+			inst = g,
+			box = if g:IsA("TextLabel") or g:IsA("TextButton") then glyphBox(g :: TextLabel, root, scale) else box,
+			owner = owner,
+		})
 	end
 
-	-- 4. Sticker and off-shard label collisions with unrelated visible content. Shard backgrounds (ImageLabels inside a
-	-- shard) are intentional composition and are skipped.
+	-- 4. Collisions between each sticker or off-shard label and unrelated visible content. Images are checked unless they
+	-- are on the explicit decoration list (counted per name, never silent).
 	for _, L in labelBoxes do
 		for _, d in root:GetDescendants() do
+			if d == L.inst or isRelated(L.inst, d) then
+				continue
+			end
 			local isText = (d:IsA("TextLabel") or d:IsA("TextButton")) and (d :: TextLabel).Text ~= ""
 			local isImage = d:IsA("ImageLabel") or d:IsA("ImageButton")
-			if (isText or isImage) and visible(d :: GuiObject) and not isRelated(L.inst, d) then
-				local decor = isImage and shapeOwner(d) ~= nil
-				if not decor then
-					local g = d :: GuiObject
-					local cbox
-					if isText then
-						cbox = glyphBox(d :: TextLabel, root, scale)
-					else
-						local x0, y0, x1, y1 = rotatedBox(g, root, scale)
-						cbox = { x0, y0, x1, y1 }
-					end
-					local ov = overlapBox(L.box, cbox)
-					if
-						ov[3] - ov[1] > OVERLAP_EPS
-						and ov[4] - ov[2] > OVERLAP_EPS
-						and (ov[3] - ov[1]) * (ov[4] - ov[2]) > 0.5
-					then
-						-- Intentional composition is passed and labelled; anything else is a collision.
-						local pl, pg = path(L.inst, root), path(g, root)
-						local gl, gg = ancestorNamed(L.inst, root, "Group"), ancestorNamed(g, root, "Group")
-						local cl, cg = ancestorNamed(L.inst, root, "Card"), ancestorNamed(g, root, "Card")
-						local reason = ""
-						if string.find(pl, "Edge", 1, true) or string.find(pg, "Edge", 1, true) then
-							reason = "intentional: screen-edge decor"
-						elseif gl ~= nil and gl == gg then
-							reason = "intentional: sticker or label on its own control"
-						elseif cl ~= nil and cl == cg and L.inst.Name == "NewBest" then
-							reason = "intentional: badge on its own card"
-						elseif isText and (d :: TextLabel).Text == L.inst.Text and d.Name == L.inst.Name then
-							reason = "intentional: duplicate text layer (shadow or glow)"
-						elseif L.inst.Name == "Vs" then
-							reason = "intentional: VS badge across the panel seam"
-						elseif d.Name == "Glow" or d.Name == "Flash" or L.inst.Name == "Glow" then
-							reason = "intentional: glow or flash layer behind content"
-						elseif L.inst.Name == "NewBest" then
-							reason = "intentional: NEW BEST badge across the card corner"
-						end
-						table.insert(rows, {
-							state = state,
-							element = pl .. " x " .. pg,
-							text = fmtBox(ov),
-							margin = "-",
-							pass = reason ~= "",
-							why = if reason ~= ""
-								then reason
-								else "sticker or off-shard label overlaps unrelated content",
-							class = L.inst.ClassName .. "/" .. d.ClassName,
-							category = "collision",
-						})
-					end
-				end
+			local isSticker = d:IsA("GuiObject") and (d :: GuiObject):GetAttribute("FitSticker") == true
+			if not ((isText or isImage or isSticker) and visible(d :: GuiObject)) then
+				continue
+			end
+			if isImage and DECOR_IMAGE_NAMES[d.Name] then
+				countDecor(state, d.Name)
+				continue
+			end
+			local g = d :: GuiObject
+			local cbox
+			if isText then
+				cbox = glyphBox(d :: TextLabel, root, scale)
+			else
+				local x0, y0, x1, y1 = rotatedBox(g, root, scale)
+				cbox = { x0, y0, x1, y1 }
+			end
+			local ov = overlapBox(L.box, cbox)
+			if
+				ov[3] - ov[1] > OVERLAP_EPS
+				and ov[4] - ov[2] > OVERLAP_EPS
+				and (ov[3] - ov[1]) * (ov[4] - ov[2]) > 0.5
+			then
+				local pl, pg = path(L.inst, root), path(g, root)
+				local sameText = isText and (d :: TextLabel).Text == (L.inst :: any).Text
+				local reason = exemption(L.inst, g, root, sameText)
+				table.insert(rows, {
+					state = state,
+					element = pl .. " x " .. pg,
+					text = fmtBox(ov),
+					margin = "-",
+					pass = reason ~= "",
+					why = if reason ~= "" then reason else "sticker or off-shard label overlaps unrelated content",
+					class = L.inst.ClassName .. "/" .. d.ClassName,
+					-- Images inside a shard were hidden by the old filter; they get their own category so they stay visible.
+					category = if isImage and shapeOwner(g) ~= nil then "collision-image" else "collision",
+				})
 			end
 		end
 	end
@@ -516,6 +590,9 @@ function TextFit.run(): ({ Row }, number)
 	if not RunService:IsStudio() then
 		return {}, 0
 	end
+	for size in decorTally do
+		decorTally[size] = nil
+	end
 	local Preview =
 		require(Players.LocalPlayer.PlayerScripts:WaitForChild("Client"):WaitForChild("Menu"):WaitForChild("Preview"))
 	local rows: { Row } = {}
@@ -563,6 +640,21 @@ function TextFit.run(): ({ Row }, number)
 			)
 		)
 	end
+	for _, sz in SIZES do
+		local tally: { [string]: number } = decorTally[sz.name] or {}
+		for name, n in tally do
+			table.insert(rows, {
+				state = sz.name .. " decor",
+				element = "decoration " .. name,
+				text = "count " .. tostring(n),
+				margin = "-",
+				pass = true,
+				why = "excluded: decoration",
+				category = "excluded",
+			})
+		end
+	end
+
 	-- TASK-0114 ledger summary per viewport. "unmeasured" is the historical set (checkGui rows with margin "-" or "sticker").
 	local tally: { [string]: { [string]: number } } = {}
 	local smallest: { [string]: string } = {}

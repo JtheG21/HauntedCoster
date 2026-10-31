@@ -2,7 +2,7 @@
   "id": "TASK-0114",
   "game": "GAME-004",
   "title": "MathShow Tap Target + Unmeasured Rows Audit",
-  "status": "review",
+  "status": "in_progress",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -44,6 +44,18 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-31T13:03:39",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-31T13:08:29",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
     }
   ],
   "executions": [
@@ -52,5 +64,58 @@
       "result": "pass",
       "notes": "Extended TextFit gate and IdentityBoards at five viewports, build 73316be. TextFit 8,685 rows, 0 failures. IdentityBoards 109 rows x 5, 0 failed, 0 GuiButtons. Review gap min 2 px. Open decision: AbsoluteSize tap model in the Preview harness, see STUDIO-SYNC."
     }
-  ]
+  ],
+  "audits": [
+    {
+      "time": "2026-10-31T13:03:39",
+      "result": "fail",
+      "report": "docs/workflow/STUDIO-SYNC.md",
+      "reviewer": "Codex",
+      "reviewed_commit": "94bb7826f2beead0e0492501a858b618ec3cc01d",
+      "report_kind": "inline audit; report path points to implementation evidence",
+      "findings": [
+        {
+          "severity": "P1",
+          "file": "games/mathshow/tests/studio/TextFit.luau:354",
+          "finding": "Overlap exemption accepts any named Hit/HitMinus/HitPlus pair under any Row in any settings state, including cross-row and toggle pairs. Restrict to exact same Rowmusic/Rowsfx Hit versus Minus/HitMinus or Plus/HitPlus paths. Observed 8 intended pairs per viewport, all reason gamepad selection surface."
+        },
+        {
+          "severity": "P1",
+          "file": "games/mathshow/tests/studio/TextFit.luau:407",
+          "finding": "Unlogged class/ownership heuristic skips every ImageLabel/ImageButton with a shapeOwner, including meaningful icons and controls. Replace with explicit background/decor paths and count exemptions."
+        },
+        {
+          "severity": "P2",
+          "file": "games/mathshow/tests/studio/TextFit.luau:406",
+          "finding": "No identity inequality excludes self-collisions; self rows are passed as own-control/duplicate/edge composition. Exclude L.inst == d before pair tests; identify real duplicate layers by explicit pairing."
+        },
+        {
+          "severity": "P2",
+          "file": "games/mathshow/tests/studio/TextFit.luau:376",
+          "finding": "Clipping/collision discovery excludes non-text FitSticker objects, e.g. Screen_vs/Panel/Group/Content/Dot1..3 Frames. Include visible non-text stickers."
+        },
+        {
+          "severity": "P2",
+          "file": "games/mathshow/tests/studio/IdentityBoards.luau:277",
+          "finding": "GUI is destroyed before GetDescendants button census at line 292, so default run always reports zero. Count before destruction."
+        },
+        {
+          "severity": "P3",
+          "file": "tasks/items/TASK-0114.json:66",
+          "finding": "Execution record cites 73316be screen-point rule; PR body and task note correctly cite 9ccb8eb design-unit results. Nonblocking evidence mismatch; append superseding exec evidence without erasing history."
+        }
+      ],
+      "validation": "check.sh ALL CHECKS PASSED; validate_queue 0 errors; validate_vault 0 errors/0 warnings, before audit record. No Studio run. Code diff 9ccb8eb..94bb782 is docs only. Ledger 284x5=1420 historical, new categories separate. Last saved Studio log TextFit run 2026-10-31T19:58:06Z: 8685 rows, zero failures; exact build association supported by PR/task evidence, not independently stamped in extracted log segment.",
+      "exemption_counts_per_viewport": {
+        "screen-edge decor": 205,
+        "own control": 81,
+        "glow/flash": 79,
+        "NEW BEST": 2,
+        "duplicate text": 110,
+        "VS badge": 4
+      },
+      "exemption_count_evidence": "/Users/jg/Library/Logs/Roblox/0.745.0.7451137_20261031T170459Z_Studio_60635_last.log, final complete TextFit run; identical counts all five viewports; 481 total each; >10 review flags: edge, own control, glow/flash, duplicate"
+    }
+  ],
+  "revisions": 1
 }
