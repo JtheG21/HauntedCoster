@@ -1,0 +1,33 @@
+{
+  "id": "TASK-0078",
+  "game": "GAME-002",
+  "title": "Art Loading Failure Recovery",
+  "status": "archived",
+  "tier": "standard",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0069"
+  ],
+  "branch": "task/TASK-0078-Art-Loading-Failure-Recovery",
+  "acceptance": [
+    "A timeout covers dispatch as well as completion even when all bake slots stall; expected parts and failure states prevent silent partial success.",
+    "An asset becoming ready after an initial timeout can recover through a bounded path; failures use an explicit fallback and retain gameplay.",
+    "Overlapping Dressing attaches cannot create duplicate/orphaned visuals; failed-part, delayed-bake and cancellation probes plus timing/memory evidence are recorded; check.sh passes."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0078-Art-Loading-Failure-Recovery.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:19",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

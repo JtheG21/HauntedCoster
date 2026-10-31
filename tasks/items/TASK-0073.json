@@ -1,0 +1,33 @@
+{
+  "id": "TASK-0073",
+  "game": "GAME-002",
+  "title": "Complete Mansion Theme Preview",
+  "status": "archived",
+  "tier": "standard",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0064"
+  ],
+  "branch": "task/TASK-0073-Complete-Mansion-Theme-Preview",
+  "acceptance": [
+    "Preview shows the complete supported house exterior, all tinted regions and truthful tier coverage before purchase.",
+    "Preview never mutates the owned house, profile, gameplay or live models; closing/cancel restores the previous screen and scroll.",
+    "Desktop, controller and 300\u2013520 px layouts are verified; physical-device limits remain explicit; check.sh passes."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0073-Complete-Mansion-Theme-Preview.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:18",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

@@ -1,0 +1,75 @@
+{
+  "id": "TASK-0063",
+  "game": "GAME-002",
+  "title": "Capture Effects Equipment",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0060",
+    "TASK-0061",
+    "TASK-0069"
+  ],
+  "branch": "task/TASK-0063-Capture-Effects-Equipment",
+  "acceptance": [
+    "A per-player capture effect can be equipped and removed, with a replayable preview in the item details.",
+    "Cosmetics change nothing about timing, success, the meter or retaliation; asserted by a spec and a Studio check.",
+    "check.sh green; one Sonnet audit; VFX rights for any plugin asset checked first (see TASK-0054)."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261018-TASK-0063-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0063-Capture-Effects-Equipment.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-18T12:49:10",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-18T13:25:08",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-18T13:27:29",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-18T13:28:21",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-18T13:28:59",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-18T13:27:29",
+      "result": "pass",
+      "notes": "capture effect equip/preview implemented; check.sh green, 223 specs; Studio skipped by jg"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-18T13:28:21",
+      "result": "pass",
+      "report": "06 QA/AUD-20261018-TASK-0063-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

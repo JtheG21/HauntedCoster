@@ -159,7 +159,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--sample", default=None, help="task id for the dispatch prompt sample")
     a = ap.parse_args(argv)
     root = Path(a.root).resolve()
-    sample = sample_prompt(root, a.role, a.sample) if (root / "tasks" / "queue.json").is_file() else None
+    sample = sample_prompt(root, a.role, a.sample) if (root / "tasks" / "items").is_dir() else None
     print(report(root, a.role, sample))
     return 0
 

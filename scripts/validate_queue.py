@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Validate tasks/queue.json against docs/workflow/TASKS.md (standard library only).
+"""Validate tasks/items/*.json against docs/workflow/TASKS.md (standard library only).
 
-Checks valid JSON, required fields, unique IDs, valid statuses and enums, and no files_owned overlap among
-in_progress tasks. scripts/orchestrator.py validate covers dependencies, notes and the usage ledger.
+Checks valid JSON, file name equals id, required fields, unique IDs, valid statuses and enums, and no files_owned
+overlap among in_progress tasks. Fails if there are no task files, or if a tasks/queue.json is still present. scripts/orchestrator.py validate covers dependencies, notes and the usage ledger.
 
 Usage: python3 scripts/validate_queue.py [--root PATH]   (exit 1 on errors)
 """
@@ -11,10 +11,11 @@ from __future__ import annotations
 
 import argparse
 import fnmatch
-import json
 import re
 import sys
 from pathlib import Path
+
+import task_store
 
 STATUSES = {"backlog", "ready", "in_progress", "review", "changes_requested", "approved", "blocked", "done", "archived"}
 FINISHED = {"done", "archived"}
@@ -107,18 +108,20 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
     a = ap.parse_args(argv)
-    path = a.root / "tasks" / "queue.json"
-    try:
-        queue = json.loads(path.read_text())
-    except (OSError, json.JSONDecodeError) as e:
-        print(f"ERROR {path}: {e}")
-        return 1
-    errors = validate(queue)
+    items, errors = task_store.read_items(a.root)
+    if not items and not errors:
+        errors.append(f"no task files in {task_store.ITEMS}")
+    if (a.root / task_store.LEGACY_QUEUE).exists():
+        errors.append(f"{task_store.LEGACY_QUEUE} is still present: run scripts/migrate-queue-to-items.py")
+    for path, task in items:
+        if path.stem != task.get("id"):
+            errors.append(f"{path.relative_to(a.root)}: file name must equal id '{task.get('id')}'")
+    tasks = [task for _, task in items]
+    errors += validate({"tasks": tasks})
     for e in errors:
         print("ERROR", e)
-    tasks = queue.get("tasks", [])
     active = sum(1 for t in tasks if t.get("status") == "in_progress")
-    print(f"queue: {len(tasks)} tasks, {active} in_progress, {len(errors)} errors")
+    print(f"tasks: {len(tasks)} task files, {active} in_progress, {len(errors)} errors")
     return 1 if errors else 0
 
 

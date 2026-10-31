@@ -1,0 +1,75 @@
+{
+  "id": "TASK-0044",
+  "game": "GAME-002",
+  "title": "Environment Kit and Ground",
+  "status": "archived",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0041"
+  ],
+  "branch": "task/TASK-0044-Environment-Kit-And-Ground",
+  "acceptance": [
+    "Trees (dead, pine, haunted with faces, brood), roots, rocks, graves, fences, gates, walls, candles, pumpkins, mist and the hub wall/gates/road are rebuilt to meet MIN-010/054-056/060-070 and avoid BAD-001-005.",
+    "TASK-0041 haunted trees keep their gaze behaviour, palette rules and face controls with the new trunk and face art.",
+    "Ground and paths read as terrain rather than flat discs, with collisions and walk heights unchanged.",
+    "Each habitat and the hub are captured at gameplay distance in game lighting, before and after.",
+    "scripts/check.sh passes; Reachability and HauntedTrees scenarios pass."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261013-TASK-0044-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0044-Environment-Kit-And-Ground.md",
+  "risk": "medium",
+  "stacked_on": "TASK-0043",
+  "history": [
+    {
+      "time": "2026-10-13T05:11:49",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+    },
+    {
+      "time": "2026-10-13T10:03:26",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-13T20:49:27",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-13T20:56:24",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-18T14:07:12",
+      "from": "changes_requested",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-13T20:49:27",
+      "result": "pass",
+      "notes": "check.sh pass; Reachability 4/4 habitats pass; HabitatSwap 35/35; HabitatRotation 28/28; HauntedTrees 1p live pass, 2p 23/28 latency-only under memory pressure (not counted as pass, re-run in TASK-0052)"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-13T20:56:24",
+      "result": "fail",
+      "report": "06 QA/AUD-20261013-TASK-0044-01.md"
+    }
+  ],
+  "revisions": 1,
+  "approved_by": "jg (2026-10-13 chat: overhaul authorization incl. creating scoped tasks)"
+}

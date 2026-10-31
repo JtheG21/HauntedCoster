@@ -20,11 +20,11 @@ class ActiveGame(unittest.TestCase):
         project = json.loads((ROOT / self.env["ACTIVE_GAME_PROJECT"]).read_text())
         self.assertEqual(project["name"], self.env["ACTIVE_GAME_NAME"])
 
-    def test_vscode_and_project_state_agree(self):
+    def test_vscode_agrees_and_project_state_holds_only_fixed_facts(self):
         vscode = json.loads((ROOT / ".vscode" / "settings.json").read_text())
         self.assertEqual(vscode["luau-lsp.sourcemap.rojoProjectFile"], self.env["ACTIVE_GAME_PROJECT"])
         state = json.loads((ROOT / "project-state.json").read_text())
-        self.assertEqual(state["rojo_project"], self.env["ACTIVE_GAME_PROJECT"])
+        self.assertEqual(sorted(state), ["conventions", "phase", "project"])
 
 
 if __name__ == "__main__":

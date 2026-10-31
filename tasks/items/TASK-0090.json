@@ -1,0 +1,65 @@
+{
+  "id": "TASK-0090",
+  "game": "GAME-004",
+  "title": "MathShow ScoringRules",
+  "status": "done",
+  "tier": "light",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0088"
+  ],
+  "branch": "task/TASK-0090-MathShow-ScoringRules",
+  "acceptance": [
+    "parseAnswer rejects non-integer, oversized, or non-numeric strings without erroring; returns nil.",
+    "score awards 0 for incorrect/missing answers and a monotonically decreasing speed bonus as elapsed approaches timeLimit.",
+    "Spec covers the parse-rejection and scoring-boundary cases."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0090-MathShow-ScoringRules.md",
+  "risk": "low",
+  "history": [
+    {
+      "time": "2026-10-25T14:42:54",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-25T14:42:55",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-25T14:57:34",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-25T14:57:34",
+      "from": "in_review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "time": "2026-10-25T14:57:34",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-25T14:57:34",
+      "result": "pass",
+      "notes": "check.sh green on main 17ac8e4; 14 ScoringRules specs pass"
+    }
+  ],
+  "audits": [],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

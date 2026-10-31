@@ -145,6 +145,7 @@ class TestRefLint(unittest.TestCase):
         (self.repo / "scripts").mkdir(exist_ok=True)
         shutil.copy(ROOT / "scripts" / "refs.py", self.repo / "scripts" / "refs.py")
         shutil.copy(ROOT / "scripts" / "validate_vault.py", self.repo / "scripts" / "validate_vault.py")
+        shutil.copy(ROOT / "scripts" / "task_store.py", self.repo / "scripts" / "task_store.py")
         self.note = self.repo / "10 References" / "01 UI" / "REF-UI-001-X.md"
         self.note.parent.mkdir(parents=True)
 
