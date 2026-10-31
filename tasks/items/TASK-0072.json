@@ -1,0 +1,33 @@
+{
+  "id": "TASK-0072",
+  "game": "GAME-002",
+  "title": "Cosmetic Service Behavior Tests",
+  "status": "archived",
+  "tier": "deep",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0067"
+  ],
+  "branch": "task/TASK-0072-Cosmetic-Service-Behavior-Tests",
+  "acceptance": [
+    "Exercise equipLook, equipCaptureEffect, equipTheme, claimReward, editDecoration, buy and upgrade fallback using isolated fake profiles/remotes or Studio scenarios.",
+    "Assert unchanged state on malformed/unowned/incompatible/insufficient/full/readonly refusals; test rate wrappers, repeated and stale requests, one debit and one grant.",
+    "Cover theme removal, decoration storing and notices during upgrades, and successful real wiring; check.sh and fresh-session results are recorded."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0072-Cosmetic-Service-Behavior-Tests.md",
+  "risk": "high",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:18",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

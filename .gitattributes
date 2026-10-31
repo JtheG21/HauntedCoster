@@ -1,0 +1,2 @@
+# Append-only: both sides of a merge keep their lines. orchestrator.py validate still rejects conflict markers.
+tasks/usage-ledger.jsonl merge=union

@@ -1,0 +1,74 @@
+{
+  "id": "TASK-0066",
+  "game": "GAME-002",
+  "title": "Journal Collection Rewards",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0060",
+    "TASK-0061"
+  ],
+  "branch": "task/TASK-0066-Journal-Collection-Rewards",
+  "acceptance": [
+    "The Journal shows habitat completion, rare natural-variant discoveries and Bestiary milestones with Eligible and Claimed states; a Claim action grants once on the server and cannot repeat.",
+    "Milestone definitions come from the real species and habitat roster, written into the note; a paid skin never completes a discovery.",
+    "Specs for eligibility, single grant and replay; check.sh green; one Sonnet audit."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261018-TASK-0066-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0066-Journal-Collection-Rewards.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-18T12:49:11",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-18T13:36:26",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-18T13:39:07",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-18T13:39:56",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-18T13:40:29",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-18T13:39:07",
+      "result": "pass",
+      "notes": "journal milestones + claim implemented; check.sh green, 240 specs; Studio skipped by jg"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-18T13:39:56",
+      "result": "pass",
+      "report": "06 QA/AUD-20261018-TASK-0066-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

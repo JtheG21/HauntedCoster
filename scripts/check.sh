@@ -49,8 +49,8 @@ if [ "$mode" = "active" ]; then
 	step "Luau types (strict, $ACTIVE_GAME_ID)" scripts/typecheck.sh
 	step "Unit specs (Lune, $ACTIVE_GAME_ID)" lune run scripts/lune/specs
 	step "Rojo build ($ACTIVE_GAME_PROJECT)" rojo build "$ACTIVE_GAME_PROJECT" -o "$tmp/active.rbxl"
-	step "JSON files" json_files "$ACTIVE_GAME_PROJECT" project-state.json tasks/queue.json "00 Studio/budget.json"
-	step "Queue schema (files_owned overlap)" python3 scripts/validate_queue.py
+	step "JSON files" json_files "$ACTIVE_GAME_PROJECT" project-state.json "00 Studio/budget.json"
+	step "Task files (schema, files_owned overlap)" python3 scripts/validate_queue.py
 	step "Task queue (orchestrator)" python3 scripts/orchestrator.py validate
 	step "Vault conventions" python3 scripts/validate_vault.py
 	step "Reference notes" python3 scripts/refs.py lint

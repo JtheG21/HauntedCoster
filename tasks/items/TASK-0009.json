@@ -1,0 +1,70 @@
+{
+  "id": "TASK-0009",
+  "game": "GAME-001",
+  "title": "Multi-Client Test Harness",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [],
+  "branch": "task/TASK-0009-Multi-Client-Test-Harness",
+  "acceptance": [
+    "A documented procedure that a human can run in \u22645 min, or an automated method that Claude can run",
+    "[[TEST-20261010-02]] executed with it (pass or a filed BUG)",
+    "Any tool needing install is listed for approval, not installed"
+  ],
+  "evidence": [
+    "06 QA/AUD-20261010-TASK-0009-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0009-Multi-Client-Test-Harness.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-10T16:37:54",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-10T16:41:34",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-10T16:55:42",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-10T17:00:56",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-10T17:01:50",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-10T16:55:42",
+      "result": "pass",
+      "notes": "check.sh green; CollectibleRace 2 consecutive passes (4/4, 0 dup)"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-10T17:00:56",
+      "result": "pass",
+      "report": "06 QA/AUD-20261010-TASK-0009-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
+}

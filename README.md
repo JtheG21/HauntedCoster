@@ -55,7 +55,7 @@ A failed check or audit → `changes_requested`. After 2 revisions → `blocked`
 GitHub Actions (`.github/workflows/check.yml`) runs `scripts/check.sh` on every PR with `TYPECHECK_REQUIRED=1`, so a skipped type check fails there. Static checks don't prove the gameplay is correct.
 
 ## Layout
-- **Code and tooling:** `games/mathshow/` active game code and tests (`mathshow.project.json`) · `archive/` paused games · `tests/` · `scripts/` · `tasks/` queue, ledger, generated prompts · `project-state.json`
+- **Code and tooling:** `games/mathshow/` active game code and tests (`mathshow.project.json`) · `archive/` paused games · `tests/` · `scripts/` · `tasks/` task files, ledger, generated prompts · `project-state.json`
 - **Vault:**
   - `00 Studio` config and index
   - `01 Inbox`
@@ -80,5 +80,5 @@ GitHub Actions (`.github/workflows/check.yml`) runs `scripts/check.sh` on every 
 - **`stylua`/`luau-lsp`: "Failed to find tool"**: run them from inside this folder (`rokit.toml` pins them).
 - **Rojo connect fails with `attempt to index number with 'protocolVersion'`**: the plugin and server versions differ. See [[LES-0001-Rojo-Version-Mismatch]].
 - **Studio doesn't show the scripts**: make sure `rojo serve` is running and click Connect. Check port 34872 (`lsof -i :34872`).
-- **Validator reports a status mismatch**: `tasks/queue.json` is authoritative. Find out why the note drifted; don't just edit the note.
+- **Validator reports a status mismatch**: the file in `tasks/items/` is authoritative. Find out why the note drifted; don't just edit the note.
 - **Mac feels slow (8 GB)**: close extra Studio windows. Don't run local AI models.

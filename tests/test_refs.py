@@ -213,9 +213,9 @@ class PinRightsLedgerTest(RefsTest):
 
     def test_ledger(self):
         self.assertIn("no task cites", self.run_cmd("ledger", "--refs", "REF-MAP-002")[1])
-        self.write("tasks/queue.json", json.dumps({"tasks": [{"id": "TASK-0001", "status": "done", "revisions": 1,
+        self.write("tasks/items/TASK-0001.json", json.dumps({"id": "TASK-0001", "status": "done", "revisions": 1,
             "executions": [{}, {}], "audits": [{}],
-            "history": [{"time": "2026-10-10T10:00:00", "to": "in_progress"}, {"time": "2026-10-10T12:30:00", "to": "in_review"}]}]}))
+            "history": [{"time": "2026-10-10T10:00:00", "to": "in_progress"}, {"time": "2026-10-10T12:30:00", "to": "in_review"}]}))
         self.write("tasks/usage-ledger.jsonl",
                    '{"task": "TASK-0001", "tokens": 1000}\n{"task": "TASK-0001", "tokens": 500}\n')
         p = self.root / "03 Games/GAME-001 T/06 Tasks/TASK-0001-A.md"

@@ -1,0 +1,74 @@
+{
+  "id": "TASK-0098",
+  "game": "GAME-004",
+  "title": "MathShow Menu Shell",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0097"
+  ],
+  "branch": "task/TASK-0098-MathShow-Menu-Shell",
+  "acceptance": [
+    "Main, mode select (+locked), mode confirm, settings, how-to-play, coming-soon toast and shared components are built as Shards; Group Battle JOIN SHOW dismisses the menu client-side and shows the existing HUD, with no server change.",
+    "A TextFitRules gate (pure rectFits/fitSize with specs, plus a Studio TextFit run) passes for every built state and stress fixture.",
+    "Pure logic (RankRules, CooldownRules, NameRules, ModeRules, TextFitRules) lives in shared/ with boundary specs; MathShow spec count rises above 97.",
+    "No remotes, DataStore fields or game rules change; nothing is uploaded; an upload list and a back-to-Claude-Design list are written."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261026-TASK-0098-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0098-MathShow-Menu-Shell.md",
+  "risk": "low",
+  "history": [
+    {
+      "time": "2026-10-26T16:41:27",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-26T16:41:28",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-26T17:02:10",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-26T17:05:56",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-26T19:04:46",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-26T17:02:10",
+      "result": "pass",
+      "notes": "check.sh green, MathShow 132 specs, Studio TextFit 1164 rows 0 failures, glyph sheet and behaviour checks; textured visuals blocked on upload"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-26T17:05:56",
+      "result": "pass",
+      "report": "06 QA/AUD-20261026-TASK-0098-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

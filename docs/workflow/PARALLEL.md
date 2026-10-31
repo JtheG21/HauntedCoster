@@ -9,6 +9,6 @@ jg decides when agents run side by side (AGENTS.md "Tiers"). These rules keep th
 ## Also
 - One worktree per task. The main checkout stays on `main`.
 - One assistant uses Studio and Rojo at a time, however disjoint the files are.
-- `tasks/queue.json` is the one file everyone touches. Change only your own task's entry, and keep every entry when resolving a conflict.
+- Each task has its own file in `tasks/items/`, so branches don't conflict over a shared list. Edit only your own task's file. Take IDs from `python3 scripts/orchestrator.py next-id`.
 - A remote payload change spans sender, handler and receiver, so one task owns all three.
 - Stacked PRs: name the base in `stacked_on` and retarget to `main` when the base merges.

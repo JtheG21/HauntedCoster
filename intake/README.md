@@ -26,7 +26,7 @@ Work through this for each item:
 - [ ] **Licence:** identified and recorded. For references: `python3 scripts/refs.py rights --check <ID> --use code|asset|method`. Unknown licence means method-only, or ask.
 - [ ] **Secrets:** scan before moving anything: `grep -rIEl "api[_-]?key|secret|token|password|BEGIN .*PRIVATE KEY|ROBLOSECURITY" <folder>`. Report a hit to jg by file name only; don't print or copy the value.
 - [ ] **Dependencies:** list any it needs (Wally, Rokit, pip, npm). **Ask jg before adding any.**
-- [ ] **Queue task:** one `TASK-` per integration in `tasks/queue.json`, with `files_owned`. Filing a reference with no integration needs no task.
+- [ ] **Queue task:** one `TASK-` file per integration in `tasks/items/`, with `files_owned`. Filing a reference with no integration needs no task.
 - [ ] **Rights to store:** confirm the licence lets the file live in a repository. If not, keep it outside and link to it.
 
 ## Definition of "triaged"

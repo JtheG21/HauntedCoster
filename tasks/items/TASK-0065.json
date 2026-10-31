@@ -1,0 +1,75 @@
+{
+  "id": "TASK-0065",
+  "game": "GAME-002",
+  "title": "Exterior Decoration Editor",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0060",
+    "TASK-0061",
+    "TASK-0064"
+  ],
+  "branch": "task/TASK-0065-Exterior-Decoration-Editor",
+  "acceptance": [
+    "Owned decorations are placed in plot-local coordinates with grid snap, rotation, bounded fine placement, live valid or invalid feedback, Confirm, Cancel, Move, Rotate, Store and Exit; the server validates every placement against bounds, caps and essential gameplay areas.",
+    "Reusable ownership with a per-plot cap (jg, this batch); a house upgrade stores incompatible placements with a notice and nothing is lost; state survives rejoin.",
+    "Specs for placement validation, cap and storage; Studio check on all plot orientations; check.sh green; one Opus audit (server-validated persistent state)."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261018-TASK-0065-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0065-Exterior-Decoration-Editor.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-18T12:49:11",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-18T13:41:47",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-18T13:47:59",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-18T13:49:32",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-18T13:51:00",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-18T13:47:59",
+      "result": "pass",
+      "notes": "decoration editor implemented; check.sh green, 251 specs; Studio skipped by jg; no drag placement"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-18T13:49:32",
+      "result": "pass",
+      "report": "06 QA/AUD-20261018-TASK-0065-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

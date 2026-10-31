@@ -1,0 +1,74 @@
+{
+  "id": "TASK-0006",
+  "game": "GAME-001",
+  "title": "Match Flow and Onboarding",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0002"
+  ],
+  "branch": "task/TASK-0006-Match-Flow-And-Onboarding",
+  "acceptance": [
+    "State transitions follow MatchRules only (spec-covered). An invalid transition is rejected",
+    "Players joining mid-match wait in the lobby. Players leaving don't break the round",
+    "A first-time player is sent through the trial and prompted to use their power",
+    "A match with 1 player can run end to end (solo testing)",
+    "`check.sh` passes"
+  ],
+  "evidence": [
+    "06 QA/AUD-20261010-TASK-0006-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0006-Match-Flow-And-Onboarding.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-10T19:34:24",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-10T19:34:26",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-10T19:43:03",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-10T19:45:44",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-10T19:49:03",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-10T19:43:03",
+      "result": "pass",
+      "notes": "check.sh green; specs 46/0; 2 solo loops + trial power/timeout + echo reset; MatchJoinLeave 2-client pass"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-10T19:45:44",
+      "result": "pass",
+      "report": "06 QA/AUD-20261010-TASK-0006-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
+}
