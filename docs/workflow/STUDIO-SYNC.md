@@ -98,9 +98,9 @@ BuildStamp `9732f94` confirmed in Edit before Play, after a Rojo reconnect. Fres
 - **Before the fix:** the first IdentityBoards run failed at all five viewports. `FIRST CORRECT` on `shard-id-status-gold` measured 5 px, or 4.75 px at 1920x1080, and `[WWWWW]` on `shard-id-tag` measured 5.75 px. The fix is in `9732f94`: `ExtraWidth = 2` on the tag and status chips in `client/Identity/`. Text and icon positions did not change. After the fix, all five viewports passed.
 - **Baseline mismatch:** the TASK-0106 entry above records 109 rows and 0 failures at 844x390. This build failed at that viewport before the fix, so its cause is not traced beyond the two chips.
 
-### TASK-0114 extended gate, 2026-10-31 (build 73316be)
+### TASK-0114 extended gate, 2026-10-31 (build 9ccb8eb)
 
-Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `73316be` confirmed in Edit before Play. `TextFit.run()` and `IdentityBoards.run()` at 844x390, 1920x1080, phone 812x375, 1024x768 and 1180x820.
+Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `9ccb8eb` confirmed in Edit before Play. `TextFit.run()` and `IdentityBoards.run()` at 844x390, 1920x1080, phone 812x375, 1024x768 and 1180x820.
 
 | Check | 844x390 | 1920x1080 | phone 812x375 | 1024x768 | 1180x820 |
 |---|---|---|---|---|---|
@@ -110,7 +110,7 @@ Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `73316be` co
 | Collision rows (fails; intentional passes) | 481 (0) | 481 (0) | 481 (0) | 481 (0) | 481 (0) |
 | Overlap, allow-listed | 8 | 8 | 8 | 8 | 8 |
 | Review-row gap rows (fails) | 24 (0) | 24 (0) | 24 (0) | 24 (0) | 24 (0) |
-| Tap rows (fails) | 10 (0) | 10 (0) | 10 (0) | 10 (0) | 10 (0) |
+| Tap rows (fails), design units, min 44 | 10 (0), smallest 44 | 10 (0), smallest 44 | 10 (0), smallest 44 | 10 (0), smallest 44 | 10 (0), smallest 44 |
 | Screen-px margin rows under 6 (informational) | 0 | 0 | 0 | 0 | 0 |
 | Tightest measured margin (design px) | 6.5 | 6.5 | 6.5 | 6.5 | 6.5 |
 | IdentityBoards rows / failed / tightest margin | 109 / 0 / 7.0 | 109 / 0 / 6.75 | 109 / 0 / 6.75 | 109 / 0 / 6.75 | 109 / 0 / 6.75 |
@@ -119,6 +119,6 @@ Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `73316be` co
 - **Totals:** `TextFit` 8,685 rows across the five viewports, 0 failures. `TextFit` at the original three viewports is still 953 rows each.
 - **Tightest measured margin:** 6.5 design px at `06a-blitz-question`, `Screen_blitz/Score/Group/Content/Value`. At phone scale that is 6.25 screen px, so nothing falls below 6 screen px.
 - **Review rows:** minimum gap 2 px, at `07a-blitz-review-best`, `Screen_blitzreview Row1->Row2`.
-- **Tap size:** `AbsoluteSize` reports 70 px as the smallest dimension (`01-main`, `HowToPlay/Hit`). That number does not follow a clean screen-point model across viewports in this harness, so it is not a verified device-point minimum. The design-unit smallest for the same controls is 44. This needs a decision on the measurement model.
+- **Tap size:** `AbsoluteSize` divided by the gate scale, minimum 44 design px. The smallest control is `Screen_main/HowToPlay/Group/Content/Hit`, 230x44 design px, at every viewport. It passes at exactly 44, so there is no margin on that control.
 - **Intentional composition passed and labelled:** screen-edge decor, sticker or label on its own control, glow and flash layers, NEW BEST badge across a card corner, duplicate text layer (shadow or glow), VS badge across the panel seam.
 
