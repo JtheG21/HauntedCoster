@@ -44,3 +44,6 @@ games/mathshow/src/shared/BuildStamp.txt
 # Untriaged material stays local until it has been through intake/README.md
 intake/inbox/*
 !intake/inbox/.gitkeep
+
+# User-supplied wisp reference images stay on disk, not in git
+02 Research/assets/wisp-pilot/user-reference-*.png
