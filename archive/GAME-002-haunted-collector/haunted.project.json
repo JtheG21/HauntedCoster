@@ -4,23 +4,23 @@
     "$className": "DataModel",
     "ReplicatedStorage": {
       "Shared": {
-        "$path": "games/haunted/src/shared"
+        "$path": "src/shared"
       }
     },
     "ServerStorage": {
       "ArtData": {
-        "$path": "games/haunted/assets/ArtData"
+        "$path": "assets/ArtData"
       }
     },
     "ServerScriptService": {
       "Server": {
-        "$path": "games/haunted/src/server"
+        "$path": "src/server"
       }
     },
     "StarterPlayer": {
       "StarterPlayerScripts": {
         "Client": {
-          "$path": "games/haunted/src/client"
+          "$path": "src/client"
         }
       }
     },
@@ -60,7 +60,7 @@
     },
     "TestService": {
       "Tests": {
-        "$path": "games/haunted/tests"
+        "$path": "tests"
       }
     }
   }

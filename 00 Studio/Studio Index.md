@@ -4,22 +4,25 @@ title: Studio Index
 type: index
 status: in_progress
 created: 2026-10-10
-updated: 2026-10-16
+updated: 2026-10-30
 tags:
   - studio/index
 ---
 # Roblox AI Studio: index
 
+**New here:** [[Start Here]]
 **Rules:** [[AGENTS]] · [[Obsidian Conventions]] · [[Workflow]] · budget `00 Studio/budget.json`
 **Machine state:** `tasks/queue.json` · `project-state.json` · `python3 scripts/orchestrator.py status`
 
 **Review the new reference collection:** [[Reference Review Index]] (19 notes, original media and review checklist).
 
-## Active games
+## Games
 | ID | Game | Phase | Overview |
 |---|---|---|---|
-| GAME-001 | Rival Realms (working title) | Paused, source material (2026-10-11) | [[GAME-001 Rg1/00 Overview]] |
-| GAME-002 | Haunted Collector (working title) | **Primary.** M1: MVP loop, TASK-0011 ready | [[GAME-002 Haunted Collector/00 Overview]] |
+| GAME-004 | MathShow | **Active** | [[GAME-004 MathShow/00 Overview]] |
+| GAME-003 | Hike or Die | Archived, Gate 1 state (2026-10-25) | [[GAME-003 Hike or Die/00 Overview]] |
+| GAME-002 | Haunted Collector (working title) | Archived (2026-10-25) | [[GAME-002 Haunted Collector/00 Overview]] |
+| GAME-001 | Rival Realms (working title) | Archived (2026-10-11) | [[GAME-001 Rg1/00 Overview]] |
 
 ## Folders
 - `01 Inbox/`: raw ideas, waiting to be triaged
@@ -36,9 +39,7 @@ tags:
 - `99 Templates/`: `T - *` templates (references: `T - Reference`, handoff prompts: `T - Handoff`)
 
 ## Needs human attention
-- **Approve (GAME-002):** [[GAME-002 Haunted Collector/03 Roadmap]] · TASK-0012 to TASK-0018 plans
-- **Approve:** [[GAME-001 Rg1/03 Roadmap]] (M2–M8) · M2 tasks (start with [[TASK-0002-Ability-Framework]] and [[TASK-0009-Multi-Client-Test-Harness]]) · [[EXP-0001-M2-Validation-Experiments]]
-- The 2-player test for [[TASK-0001-Collectible-Pickup]] ([[TEST-20261010-01]])
+`python3 scripts/orchestrator.py status` lists what's waiting on jg; `project-state.json` keeps the same list under `needs_human`.
 
 ## All notes
 ![[Notes.base]]

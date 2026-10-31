@@ -4,7 +4,7 @@ title: UI Workflow
 type: agent
 status: approved
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-30
 tags:
   - workflow/production
 related:
@@ -16,7 +16,7 @@ related:
 ## Gather
 - **User goals:** what the player is trying to do on this screen, and the flow in and out (open, act, confirm, close).
 - **References:** `10 References/01 UI/` ([[UI References]]) and SODT's `src/menu/` patterns ([[SODT-RC-1]]).
-- **The project's UI kit:** GAME-002 uses `games/haunted/src/client/UI/Theme.luau` for colours, fonts and constructors. Extend it rather than styling inline.
+- **The project's UI kit:** GAME-002 uses `archive/GAME-002-haunted-collector/src/client/UI/Theme.luau` for colours, fonts and constructors. Extend it rather than styling inline.
 
 ## Decide
 - **Information hierarchy:** one primary action per screen. Secondary information is dimmer or smaller.

@@ -1,6 +1,6 @@
 --!strict
--- Headless unit specs for every game listed in GAMES below: `lune run scripts/lune/specs` (from the
--- repo root; check.sh runs it).
+-- Headless unit specs: `lune run scripts/lune/specs` (from the repo root) runs the active game named in
+-- scripts/active-game.env; check.sh runs it. `lune run scripts/lune/specs archive` runs ARCHIVED instead.
 --
 -- Studio-free twin of each game's tests/TestRunner.luau. For each game it rebuilds the slice of the
 -- Rojo tree the specs touch (ReplicatedStorage.Shared and TestService.Tests, as mapped in that game's
@@ -14,10 +14,29 @@ local luau = require("@lune/luau")
 local process = require("@lune/process")
 local roblox = require("@lune/roblox") :: any
 
-local GAMES = {
-	{ dataModel = "HauntedCollector", shared = "games/haunted/src/shared", tests = "games/haunted/tests" },
-	{ dataModel = "MathShow", shared = "games/mathshow/src/shared", tests = "games/mathshow/tests" },
+local env: { [string]: string } = {}
+for line in fs.readFile("scripts/active-game.env"):gmatch("[^\n]+") do
+	local key, value = line:match("^([%w_]+)=(.*)$")
+	if key and value then
+		env[key] = value
+	end
+end
+local ARCHIVED = {
+	{
+		dataModel = "HauntedCollector",
+		shared = "archive/GAME-002-haunted-collector/src/shared",
+		tests = "archive/GAME-002-haunted-collector/tests",
+	},
 }
+local GAMES = if process.args[1] == "archive"
+	then ARCHIVED
+	else {
+		{
+			dataModel = env.ACTIVE_GAME_NAME,
+			shared = `{env.ACTIVE_GAME_ROOT}/src/shared`,
+			tests = `{env.ACTIVE_GAME_ROOT}/tests`,
+		},
+	}
 local SKIP_DIRS = { scenarios = true } -- Play scenarios need a running server
 
 type Node = {

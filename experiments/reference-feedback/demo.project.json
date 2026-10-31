@@ -8,7 +8,7 @@
           "$path": "State.luau"
         },
         "Theme": {
-          "$path": "../../games/haunted/src/client/UI/Theme.luau"
+          "$path": "../../archive/GAME-002-haunted-collector/src/client/UI/Theme.luau"
         },
         "$className": "Folder",
         "DemoTheme": {
