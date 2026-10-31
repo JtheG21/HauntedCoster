@@ -2,7 +2,7 @@
   "id": "TASK-0105",
   "game": "GAME-004",
   "title": "MathShow Rules Foundation",
-  "status": "approved",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [],
@@ -44,6 +44,12 @@
       "from": "in_review",
       "to": "approved",
       "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-30T18:13:37",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -61,5 +67,6 @@
     }
   ],
   "revisions": 0,
-  "approved_by": "jg"
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
 }
