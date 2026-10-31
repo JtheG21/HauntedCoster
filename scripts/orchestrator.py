@@ -305,7 +305,7 @@ class Project:
         lines = [
             f"You are the {role.upper()} for task {t['id']}: {t['title']}.",
             f"Follow '04 Agents/{role.capitalize()}.md' exactly. Read CLAUDE.md and '{note}'.",
-            "Read only the files listed in the spec unless blocked; do not scan the whole repo.",
+            "Start from the note and the files listed below. Open a dependency, reusable module or test outside that list only when the change needs it, and name it in your report with the reason. Do not scan the whole repo.",
         ]
         # Scope comes from fields the queue and note already hold; nothing new is stored.
         criteria = t.get("acceptance") or []
