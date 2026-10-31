@@ -72,6 +72,26 @@ return function(t: TestRunner.T)
 		t.eq(TextFitRules.rectFits(p, rect(0, 12, 296, 32), 6, 296, 44), false)
 	end)
 
+	t.test("sliced profiles keep x unscaled and measure the right edge as an inset", function()
+		local function sliced(key: string, w: number, h: number, r: TextFitRules.Rect): boolean
+			return TextFitRules.rectFits(ShapeProfiles[key], r, 6, w, h)
+		end
+		t.eq(sliced("shard-menu-row-indigo-v2", 234, 38, rect(18, 7, 216, 31)), true)
+		t.eq(sliced("shard-menu-row-indigo-v2", 520, 44, rect(18, 8.1, 502, 35.9)), true)
+		t.eq(sliced("shard-menu-row-indigo-v2", 300, 38, rect(10, 7, 282, 31)), false)
+		t.eq(sliced("shard-menu-toast-red-v2", 150, 46, rect(24, 14, 126, 32)), true)
+		t.eq(sliced("shard-menu-toast-red-v2", 150, 46, rect(14, 14, 136, 32)), false)
+		t.eq(sliced("shard-menu-h2h-silver-v2", 344, 52, rect(20, 16, 324, 36)), true)
+		t.eq(sliced("shard-menu-count-blue-v2", 200, 184, rect(16, 60, 184, 120)), true)
+		t.eq(sliced("shard-menu-title-violet-v2", 330, 104, rect(24, 40, 330, 86)), false)
+	end)
+
+	t.test("a sliced profile narrower than its caps fails closed", function()
+		local p = ShapeProfiles["shard-menu-row-indigo-v2"]
+		t.eq(TextFitRules.rectFits(p, rect(20, 12, 24, 26), 0, 51, 38), false)
+		t.eq(TextFitRules.rectFits(p, rect(20, 12, 24, 26), 0, 0, 38), false)
+	end)
+
 	t.test("profile looks up by key and misses cleanly", function()
 		t.truthy(TextFitRules.profile("shard-menu-action"))
 		t.eq(TextFitRules.profile("nope"), nil)
