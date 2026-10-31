@@ -45,4 +45,4 @@ Remove the startup asset warnings in Play: the two unset title slots (`shard-men
 ## Progress
 - **Phase A (locate):** done. No instance in the Edit DataModel or in Play's Server or Client DataModels references `203785492`. Its property and required type are still unidentified.
 - **Phase B (upload):** done 2026-10-31 for all 17 `-v2` PNGs, with jg's approval. Ids are recorded in `games/mathshow/art/menu/UPLOAD_LIST.md`. `MenuTheme.Image` still holds `rbxassetid://0`.
-- **Phase C (wire and verify):** not started. Needs jg's route decision for `203785492`.
+- **Phase C (wire and verify):** done 2026-10-31. `MenuTheme.Image` takes the 17 uploaded ids, and the unused `UNSET` local is removed. Play (Rojo served from this worktree) shows no `has no asset id yet` warnings for these slots and no require errors. `203785492` is treated as an engine-origin warning and left unchanged.
