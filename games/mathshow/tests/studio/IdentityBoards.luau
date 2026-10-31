@@ -50,6 +50,10 @@ local function owner(inst: Instance): Frame?
 	return nil
 end
 
+-- TASK-0114: tightest text-fit margin (design px) over every checked label in one run, and its path.
+local minTight = math.huge
+local minTightRow = "none"
+
 local function checkText(board: string, rows: { Row }, gui: ScreenGui, scale: number)
 	for _, d in gui:GetDescendants() do
 		if d:IsA("TextLabel") and d.Text ~= "" then
@@ -95,6 +99,19 @@ local function checkText(board: string, rows: { Row }, gui: ScreenGui, scale: nu
 							y0 += size.Y - h
 						end
 						local rect = { x0 = x0, y0 = y0, x1 = x0 + w, y1 = y0 + h }
+						local sw, sh = shard:GetAttribute("ShapeW") :: number, shard:GetAttribute("ShapeH") :: number
+						local tight = 0
+						for m = 0, 12, 0.25 do
+							if TextFitRules.rectFits(profile, rect, m, sw, sh) then
+								tight = m
+							else
+								break
+							end
+						end
+						if tight < minTight then
+							minTight = tight
+							minTightRow = `{board} "{d.Text}" {d:GetFullName()}`
+						end
 						if
 							not TextFitRules.rectFits(
 								profile,
@@ -170,6 +187,7 @@ local function checkRails(rows: { Row }, Theme: any)
 end
 
 function IdentityBoards.run(options: { scale: number?, keep: boolean? }?): boolean
+	minTight, minTightRow = math.huge, "none"
 	local scale = options and options.scale or 1
 	local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
 	local Identity = script.Parent.Parent:WaitForChild("Client"):WaitForChild("Identity") :: Instance
@@ -270,6 +288,13 @@ function IdentityBoards.run(options: { scale: number?, keep: boolean? }?): boole
 			print(`FAIL [{r.board}] {r.element}: {r.detail}`)
 		end
 	end
+	local guiButtons = 0
+	for _, d in gui:GetDescendants() do
+		if d:IsA("GuiButton") then
+			guiButtons += 1
+		end
+	end
+	print(`IDENTITY_MIN scale={scale} margin={minTight} row={minTightRow} guiButtons={guiButtons}`)
 	print(`IDENTITY_RESULT scale={scale} rows={#rows} failed={failed} no_profile={noProfile}`)
 	return failed == 0
 end
