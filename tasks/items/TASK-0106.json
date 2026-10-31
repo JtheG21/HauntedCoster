@@ -1,0 +1,75 @@
+{
+  "id": "TASK-0106",
+  "game": "GAME-004",
+  "title": "MathShow Identity UI Primitives And Cards",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0105"
+  ],
+  "branch": "task/TASK-0106-identity-ui",
+  "acceptance": [
+    "IdentityTheme, IdentityCopy and AssetIds are added from the v3 package with numbers unchanged; an unset asset id warns once and renders nothing, never errors.",
+    "RankBadge, ModeIcon, FormatIcon, TrackChip, TagChip, StatusChip, StatusSlot, DeltaPill, RankChangePill and ProgressBar are pure props-to-Instances builders; their layout numbers and the status-priority, tag and progress rules are covered by headless specs.",
+    "GameplayCard, RevealCard, IntroCard and ResultsRow take all six variants (default, YOU, bot, first-correct, disconnected, spectating) and fall back to the portrait icon after a 3 s headshot timeout without blocking the card.",
+    "A Studio board harness renders the README stress fixtures at 844x390 and the text-fit gate passes every row with a 6 px margin; differences from the S-screenshots over 2 px are reported.",
+    "Nothing is wired into the HUD or menu, no remote, payload or DataStore field changes, nothing is uploaded, and check.sh passes with the MathShow spec count above 258."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261030-TASK-0106-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0106-MathShow-Identity-UI-Primitives-And-Cards.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-27T12:19:11",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-30T18:16:04",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-30T18:16:55",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-30T18:16:55",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-30T18:16:55",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-30T18:16:55",
+      "result": "pass",
+      "notes": "check.sh green, 270 specs; Studio text-fit criterion not fully met, see note"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-30T18:16:55",
+      "result": "pass",
+      "report": "06 QA/AUD-20261030-TASK-0106-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}
