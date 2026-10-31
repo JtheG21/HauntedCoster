@@ -46,3 +46,10 @@ Remove the startup asset warnings in Play: the two unset title slots (`shard-men
 - **Phase A (locate):** done. No instance in the Edit DataModel or in Play's Server or Client DataModels references `203785492`. Its property and required type are still unidentified.
 - **Phase B (upload):** done 2026-10-31 for all 17 `-v2` PNGs, with jg's approval. Ids are recorded in `games/mathshow/art/menu/UPLOAD_LIST.md`. `MenuTheme.Image` still holds `rbxassetid://0`.
 - **Phase C (wire and verify):** done 2026-10-31. `MenuTheme.Image` takes the 17 uploaded ids, and the unused `UNSET` local is removed. Play (Rojo served from this worktree) shows no `has no asset id yet` warnings for these slots and no require errors. `203785492` is treated as an engine-origin warning and left unchanged.
+- **Phase D (verify, 2026-10-31):**
+  - **Asset identity:** 17 of 17 are `AssetTypeId = 1` (Image), with creator `jg_57565` (User). No Decal found. `game.CreatorType = User`, `game.CreatorId = 0` (unpublished place). Table in `games/mathshow/art/menu/UPLOAD_LIST.md`.
+  - **Load check (PreloadAsync):** not passed. All 17 returned `Failure`, and two known-good ids from TASK-0098 (`102403330056161`, `126024347039405`) also returned `Failure` in the same session. The load gate is therefore not valid in this Studio session, and no PASS is claimed.
+  - **Visual check:** the main menu renders the violet title and banner art, with no `has no asset id yet` warnings in Play. Capture: `scratchpad/menu-main-play-state.jpg`. Other menu states were not exercised.
+  - **Known warning:** `rbxassetid://203785492` is an engine-origin warning, not place content. Seen in GAME-002 playtest `TEST-20261018-01` (origin unconfirmed) and GAME-004 playtests. Won't fix. Not changed.
+  - **Open follow-up (not done here):** TextFit gate for the title and rows (TASK-0107 acceptance #3), and a valid load check for the 17 ids. Both need a Studio session where PreloadAsync works.
+

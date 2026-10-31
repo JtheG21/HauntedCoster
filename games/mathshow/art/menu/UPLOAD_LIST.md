@@ -105,3 +105,27 @@ Copied unchanged from `Game-spec-UI-elementsV4.zip` (`design_handoff_mathshow_me
 | `shard-menu-toast-green-v2.png` | 640x92 | `MenuTheme.Image["shard-menu-toast-green-v2"]` | rbxassetid://85006150952311 |
 | `shard-menu-toast-red-v2.png` | 640x92 | `MenuTheme.Image["shard-menu-toast-red-v2"]` | rbxassetid://132024815467931 |
 | `shard-menu-toast-silver-v2.png` | 640x92 | `MenuTheme.Image["shard-menu-toast-silver-v2"]` | rbxassetid://78549764461474 |
+
+## Art v2 status (TASK-0112 Phase D, 2026-10-31)
+
+Checked in Studio: `MarketplaceService:GetProductInfo` gives `AssetTypeId = 1` (Image) for all 17, creator `jg_57565` (User). `ContentProvider:PreloadAsync` returned Failure for all 17 and for two known-good ids (`102403330056161`, `126024347039405`), so it is not a usable load gate here; see the TASK-0112 note.
+
+| file | asset id | AssetTypeId | creator | upload | in MenuTheme |
+|---|---|---|---|---|---|
+| `glow-menu-banner-violet-v2.png` | rbxassetid://108614093566277 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `glow-menu-count-blue-v2.png` | rbxassetid://73294804648961 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `glow-menu-count-red-v2.png` | rbxassetid://97958822322375 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `glow-menu-title-violet-v2.png` | rbxassetid://89223025967740 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `glow-menu-toast-green-v2.png` | rbxassetid://82873594237277 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `glow-menu-toast-red-v2.png` | rbxassetid://90728326078835 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `glow-menu-toast-silver-v2.png` | rbxassetid://135664623059862 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `shard-menu-banner-violet-v2.png` | rbxassetid://138222356304051 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `shard-menu-count-blue-v2.png` | rbxassetid://91414722402037 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `shard-menu-count-red-v2.png` | rbxassetid://94136701912564 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `shard-menu-h2h-silver-v2.png` | rbxassetid://134257653302051 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `shard-menu-row-green-v2.png` | rbxassetid://134337234593312 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `shard-menu-row-indigo-v2.png` | rbxassetid://84567890529767 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `shard-menu-title-violet-v2.png` | rbxassetid://126748155048390 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `shard-menu-toast-green-v2.png` | rbxassetid://85006150952311 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `shard-menu-toast-red-v2.png` | rbxassetid://132024815467931 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
+| `shard-menu-toast-silver-v2.png` | rbxassetid://78549764461474 | 1 (Image) | jg_57565 (User) | uploaded 2026-10-31 (TASK-0112 B) | wired (TASK-0112 C) |
