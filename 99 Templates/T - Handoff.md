@@ -9,7 +9,7 @@ created: {{date:YYYY-MM-DD}}
 updated: {{date:YYYY-MM-DD}}
 ---
 
-*(How to use: [[Task Intake]], "Handoffs to another tool or session".
+*(How to use: [[Task Intake]], "Handoffs to another tool or session". For a task with `files_owned` in the queue, start from the matching file in `docs/workflow/templates/` instead; this template stays for short handoffs.
 - **Size it to the task.** For a **light** task keep only Objective, Inputs, Constraints, Acceptance and Report, in 15 lines or fewer. For a **mechanic** add the State and Stages sections. For a **game stage**, add the approved scope and the release criteria.
 - **Link, don't paste.** Paste text only when the receiver can't read the repo (Claude Design, chat), and then attach the images too.
 - **Where it goes:** paste the filled prompt into the receiving tool, or save it in the task note under "Handoff". It is a prompt, not a vault note.)*

@@ -3,7 +3,7 @@ id: TASK-0107
 title: "MathShow Menu Art V2 Integration"
 type: task
 project: GAME-004
-status: proposed
+status: backlog
 priority: medium
 risk: medium
 owner: executor
@@ -12,7 +12,7 @@ branch: task/TASK-0107-menu-art-v2
 related:
   - "[[GAME-004 MathShow/00 Overview]]"
 created: 2026-10-27
-updated: 2026-10-27
+updated: 2026-10-30
 tags:
   - workflow/task
 ---

@@ -1,6 +1,6 @@
 {
   "name": "HikeOrDieTrail",
-  "profile": "games/hike-or-die/map/profile.json",
+  "profile": "archive/GAME-003-hike-or-die/map/profile.json",
   "ground_is_parts": "Gate 1 blockout uses a flat part floor for reproducible route and cover tests; organic terrain is deferred.",
   "open_edges": "The compact test area is enclosed by four visible collision boundaries; the surrounding void is outside the play volume.",
   "volume": {
