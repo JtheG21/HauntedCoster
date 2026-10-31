@@ -1,0 +1,209 @@
+{
+  "Version": 1,
+  "Game": "GAME-004 MathShow",
+  "Preview": {
+    "Device": "phone-landscape",
+    "Width": 844,
+    "Height": 390
+  },
+  "Elements": [
+    {
+      "Name": "Question",
+      "ClassName": "TextLabel",
+      "Position": {
+        "X": {
+          "Scale": 0.5,
+          "Offset": 0
+        },
+        "Y": {
+          "Scale": 0.12,
+          "Offset": 0
+        }
+      },
+      "Size": {
+        "X": {
+          "Scale": 0.9,
+          "Offset": 0
+        },
+        "Y": {
+          "Scale": 0,
+          "Offset": 96
+        }
+      },
+      "AnchorPoint": {
+        "X": 0.5,
+        "Y": 0
+      },
+      "Visible": true,
+      "BackgroundColor3": "#111923",
+      "BackgroundTransparency": 1,
+      "Text": "12 × 8 = ?",
+      "TextColor3": "#ffffff",
+      "TextSize": 56,
+      "Tween": null
+    },
+    {
+      "Name": "Timer",
+      "ClassName": "Frame",
+      "Position": {
+        "X": {
+          "Scale": 0.05,
+          "Offset": 0
+        },
+        "Y": {
+          "Scale": 0.04,
+          "Offset": 0
+        }
+      },
+      "Size": {
+        "X": {
+          "Scale": 0.9,
+          "Offset": 0
+        },
+        "Y": {
+          "Scale": 0,
+          "Offset": 12
+        }
+      },
+      "AnchorPoint": {
+        "X": 0,
+        "Y": 0
+      },
+      "Visible": true,
+      "BackgroundColor3": "#67e8ce",
+      "BackgroundTransparency": 0,
+      "Text": "",
+      "TextColor3": "#dbe3ed",
+      "TextSize": 24,
+      "Tween": {
+        "Property": "Size",
+        "Target": {
+          "X": {
+            "Scale": 0,
+            "Offset": 0
+          },
+          "Y": {
+            "Scale": 0,
+            "Offset": 12
+          }
+        },
+        "Time": 10,
+        "DelayTime": 0,
+        "EasingStyle": "Linear",
+        "EasingDirection": "In"
+      }
+    },
+    {
+      "Name": "AnswerInput",
+      "ClassName": "TextBox",
+      "Position": {
+        "X": {
+          "Scale": 0.5,
+          "Offset": 0
+        },
+        "Y": {
+          "Scale": 0.45,
+          "Offset": 0
+        }
+      },
+      "Size": {
+        "X": {
+          "Scale": 0.6,
+          "Offset": 0
+        },
+        "Y": {
+          "Scale": 0,
+          "Offset": 72
+        }
+      },
+      "AnchorPoint": {
+        "X": 0.5,
+        "Y": 0
+      },
+      "Visible": true,
+      "BackgroundColor3": "#1b2732",
+      "BackgroundTransparency": 0,
+      "Text": "",
+      "TextColor3": "#dbe3ed",
+      "TextSize": 36,
+      "Tween": null
+    },
+    {
+      "Name": "Feedback",
+      "ClassName": "TextLabel",
+      "Position": {
+        "X": {
+          "Scale": 0.5,
+          "Offset": 0
+        },
+        "Y": {
+          "Scale": 0.7,
+          "Offset": 0
+        }
+      },
+      "Size": {
+        "X": {
+          "Scale": 0.8,
+          "Offset": 0
+        },
+        "Y": {
+          "Scale": 0,
+          "Offset": 40
+        }
+      },
+      "AnchorPoint": {
+        "X": 0.5,
+        "Y": 0
+      },
+      "Visible": false,
+      "BackgroundColor3": "#1c2430",
+      "BackgroundTransparency": 1,
+      "Text": "Correct!",
+      "TextColor3": "#8ee7d3",
+      "TextSize": 24,
+      "Tween": {
+        "Time": 0.5,
+        "DelayTime": 0,
+        "EasingStyle": "Quad",
+        "EasingDirection": "Out",
+        "Property": "BackgroundTransparency",
+        "Target": 1
+      }
+    },
+    {
+      "Name": "Results",
+      "ClassName": "TextLabel",
+      "Position": {
+        "X": {
+          "Scale": 0.5,
+          "Offset": 0
+        },
+        "Y": {
+          "Scale": 0.5,
+          "Offset": 0
+        }
+      },
+      "Size": {
+        "X": {
+          "Scale": 0.85,
+          "Offset": 0
+        },
+        "Y": {
+          "Scale": 0.6,
+          "Offset": 0
+        }
+      },
+      "AnchorPoint": {
+        "X": 0.5,
+        "Y": 0.5
+      },
+      "Visible": false,
+      "BackgroundColor3": "#111923",
+      "BackgroundTransparency": 0.1,
+      "Text": "Round over",
+      "TextColor3": "#dbe3ed",
+      "TextSize": 32,
+      "Tween": null
+    }
+  ]
+}

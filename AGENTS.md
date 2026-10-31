@@ -30,8 +30,8 @@ of any kind goes through `intake/README.md`. Approved in [[ADR-0009-Shared-Produ
 only; don't change them unless a task says so. Table, build commands and old-to-new path map: `archive/README.md`.
 
 ## Project map
-- **One Rojo server, matched to its place.** Check what's serving first (`ps aux | grep "rojo serve"`). Always name the project
-  (`rojo serve mathshow.project.json`). Never connect a project file to another game's place: it pulls that game's Baseplate,
+- **One Rojo server, matched to its place.** Check what's serving first (`ps aux | grep "rojo serve"`). **Always start it with
+  `scripts/serve.sh`**, which serves the active game and refuses to start beside another server. Never connect a project file to another game's place: it pulls that game's Baseplate,
   Lighting and scripts in ([[TEST-20261011-02]]). Switching branches under a running server can crash Rojo
   ([[LES-0003-Rojo-Crash-On-Branch-Switch]]); use a worktree. Disk is the source of truth: never edit scripts in Studio.
 - Machine state (authoritative for task status): `tasks/items/TASK-####.json`, one file per task (schema:
@@ -51,6 +51,7 @@ only; don't change them unless a task says so. Table, build commands and old-to-
   `scripts/check.sh --archive`: archived games, on demand.
 - `scripts/new-service.sh mathshow <Name>`: stamps Service, Config, Rules and spec. Use it instead of hand-writing boilerplate.
 - `scripts/preflight.sh --root <checkout> --branch <name> [--clean]`: before any state-changing Git operation.
+- `scripts/serve.sh [--port N] [--dry-run]`: start Rojo for the active game. Sync problems: `docs/workflow/STUDIO-SYNC.md`.
 - `scripts/studio-preflight.sh [--root <checkout>]`: Rojo, Studio windows, memory and build stamp before a Studio run.
 - `python3 scripts/orchestrator.py status|state|next|next-id|approve|start|record-exec|record-audit|approve-merge|report ...`
   (`--help`).
