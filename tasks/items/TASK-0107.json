@@ -2,7 +2,7 @@
   "id": "TASK-0107",
   "game": "GAME-004",
   "title": "MathShow Menu Art V2 Integration",
-  "status": "changes_requested",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [],
@@ -15,8 +15,10 @@
     "A diff table of every changed number (old -> new, gate margin) and the known 'Calculus 1, second half' truncation decision (AllowTruncate or TextScaled Min 12) are recorded.",
     "Image ids stay rbxassetid://0, art/menu/UPLOAD_LIST.md lists the 17 new files (75 + 17), nothing is uploaded, and check.sh passes with the spec count above the baseline."
   ],
-  "evidence": [],
-  "notes": "",
+  "evidence": [
+    "06 QA/AUD-20261030-TASK-0107-01.md"
+  ],
+  "notes": "Merged over a failed audit by jg's decision (2026-10-30): flat placeholder menu until the 17 PNGs are uploaded, and the Studio TextFit gate has not run.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0107-MathShow-Menu-Art-V2-Integration.md",
   "risk": "medium",
   "history": [
@@ -43,6 +45,12 @@
       "from": "review",
       "to": "changes_requested",
       "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-30T18:20:56",
+      "from": "changes_requested",
+      "to": "done",
+      "note": "merge approved by jg over failed audit AUD-20261030-TASK-0107-01; jg accepts the placeholder menu and the unrun TextFit gate"
     }
   ],
   "executions": [
@@ -60,5 +68,6 @@
     }
   ],
   "revisions": 1,
-  "approved_by": "jg"
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
 }

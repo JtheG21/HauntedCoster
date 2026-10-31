@@ -3,7 +3,7 @@ id: TASK-0107
 title: "MathShow Menu Art V2 Integration"
 type: task
 project: GAME-004
-status: changes_requested
+status: done
 priority: medium
 risk: medium
 owner: executor
@@ -97,3 +97,9 @@ Numbers changed (old -> new; gate margin not measured, see below):
 ## Audits
 
 ## Outcome
+**Merged through PR 154 on jg's decision, over a failed audit** ([[AUD-20261030-TASK-0107-01]]). The audit stays a fail. jg's words, 2026-10-30: "I accept the flat placeholder menu until the 17 PNGs are uploaded, and that the Studio TextFit gate hasn't run."
+
+**Open after merge:**
+- The 17 `-v2` PNGs need uploading, then their ids set in `MenuTheme` (`art/menu/UPLOAD_LIST.md`). Until then the menu shows flat placeholders.
+- AC3 is not met: the Studio TextFit gate hasn't run at any size, so every margin is unmeasured. It's blocked by Studio not receiving updated scripts.
+- AC4 is partly met: the numbers table has no gate-margin column until the gate runs.
