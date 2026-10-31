@@ -1,0 +1,71 @@
+{
+  "id": "TASK-0068",
+  "game": "GAME-002",
+  "title": "Robux Purchase Research And ADR",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [],
+  "branch": "task/TASK-0068-Robux-Purchase-Research-And-ADR",
+  "acceptance": [
+    "A research note and a draft ADR compare entitlement mechanisms (developer product vs game pass), receipt handling and grant recovery, with sources and access dates.",
+    "The ADR stays draft; no product IDs, prices, publishing or Robux spend without jg's explicit approval.",
+    "Open questions listed for jg; no code changes."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261018-TASK-0068-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0068-Robux-Purchase-Research-And-ADR.md",
+  "risk": "low",
+  "history": [
+    {
+      "time": "2026-10-18T14:02:09",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-18T14:02:09",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-18T14:03:34",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-18T14:05:16",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-18T14:05:31",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-18T14:03:34",
+      "result": "pass",
+      "notes": "research note and draft ADR-0013 written from local creator-docs; no code"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-18T14:05:16",
+      "result": "pass",
+      "report": "06 QA/AUD-20261018-TASK-0068-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

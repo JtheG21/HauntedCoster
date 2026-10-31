@@ -1,0 +1,106 @@
+{
+  "id": "TASK-0025",
+  "game": "GAME-002",
+  "title": "Clue Hunting Removal",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [],
+  "branch": "task/TASK-0025-Clue-Hunting-Removal",
+  "acceptance": [
+    "No landmark shows an Investigate prompt. Nothing writes `journal.clues` or sets `shortcut`, `bellHint` or `bellClue`. There is no server eject loop.",
+    "Crypt entry and Bell Wraith capture follow the rule jg approves in ADR-0007. The Bell Wraith spawns without any clue, is visible to everyone, and keeps `maxAlive = 1`. Ashen still rolls only in the Crypt zone.",
+    "The west shortcut is open without a flag, and the first ride gives no bell clue or toast.",
+    "Monster highlight and name markers appear for species the player has inspected (`journal.seen`).",
+    "The journal still lists species and variants. The Clues card, the landmark counter and the Grave Scholar trophy are gone.",
+    "The tutorial keeps 12 steps and none needs an investigation (step 3 explore, step 12 the rare's lair). Saved step numbers keep their meaning, and the skip-forward checks still prevent it from blocking play.",
+    "A profile containing `journal.clues` and the three old flags sanitizes without loss (spec).",
+    "The specs plus FullLoop, Reachability, ExploitProbe and CrossPlot (2 players) pass in Studio. LandmarkStart is retired.",
+    "`scripts/check.sh` passes."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261012-TASK-0025-01.md",
+    "06 QA/AUD-20261012-TASK-0025-02.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0025-Clue-Hunting-Removal.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-12T00:36:01",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-12T00:36:12",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-12T01:01:23",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-12T01:01:23",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-12T01:01:23",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-12T01:33:54",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-12T01:37:19",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-12T01:59:13",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-12T01:01:23",
+      "result": "pass",
+      "notes": "TEST-20261012-01: check.sh green; specs 63/0, FullLoop 81/81, Reachability 15/15, ExploitProbe 13/13; CrossPlot 2p: 12/13 twice (seat check; engine repro shows server Seat:Sit seats in disabled seats) plus 2 harness no-results"
+    },
+    {
+      "time": "2026-10-12T01:33:54",
+      "result": "pass",
+      "notes": "Revision 1 (TEST-20261012-01): check.sh green; specs 64/0, FullLoop 81/81, Reachability 15/15, ExploitProbe 13/13, CrossPlot 2p 13/13"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-12T01:01:23",
+      "result": "fail",
+      "report": "06 QA/AUD-20261012-TASK-0025-01.md"
+    },
+    {
+      "time": "2026-10-12T01:37:19",
+      "result": "pass",
+      "report": "06 QA/AUD-20261012-TASK-0025-02.md"
+    }
+  ],
+  "revisions": 1,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

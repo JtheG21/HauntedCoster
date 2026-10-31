@@ -1,0 +1,169 @@
+{
+  "id": "TASK-0012",
+  "game": "GAME-002",
+  "title": "Graveyard and Landmarks",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0011"
+  ],
+  "branch": "task/TASK-0012-Graveyard-And-Landmarks",
+  "acceptance": [
+    "roblox-map prover report: every zone reachable from the plots, no stuck pockets, Sealed Crypt unreachable while gated",
+    "Flashlight works on PC/mobile/gamepad without battery; paths and obstacles readable in the dark section (screenshot evidence)",
+    "Investigating a landmark (server distance check, once per player) adds its clue to the profile and a marker; repeat gives no duplicate",
+    "Sealed Crypt gate shows its requirement text and opens only when the server says the requirement is met",
+    "Shortcut unlocks from its landmark and persists",
+    "scripts/check.sh passes"
+  ],
+  "evidence": [
+    "06 QA/AUD-20261011-TASK-0012-01.md",
+    "06 QA/AUD-20261011-TASK-0012-02.md",
+    "06 QA/AUD-20261011-TASK-0012-03.md",
+    "06 QA/AUD-20261011-TASK-0012-04.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0012-Graveyard-And-Landmarks.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-11T09:24:04",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-11T16:33:02",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-11T16:33:02",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-11T16:33:02",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-11T16:33:02",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-11T16:33:02",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-11T16:33:02",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
+    },
+    {
+      "time": "2026-10-11T16:37:45",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-11T16:37:45",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-11T16:40:05",
+      "from": "in_review",
+      "to": "blocked",
+      "note": "audit failed; revision limit 2 exceeded, needs human"
+    },
+    {
+      "time": "2026-10-11T16:40:35",
+      "from": "blocked",
+      "to": "ready",
+      "note": "unblocked by jg"
+    },
+    {
+      "time": "2026-10-11T16:40:41",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-11T19:26:16",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-11T19:27:26",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-11T19:28:32",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-11T16:33:02",
+      "result": "pass",
+      "notes": "Revision-0 build merged with TASK-0011 (PR #2); see TEST-20261011-03/04"
+    },
+    {
+      "time": "2026-10-11T16:33:02",
+      "result": "pass",
+      "notes": "Revision 1 at 5878f6d"
+    },
+    {
+      "time": "2026-10-11T16:37:45",
+      "result": "pass",
+      "notes": "Revision 2: TEST-20261011-05, Reachability 14/14, FullLoop 56/56"
+    },
+    {
+      "time": "2026-10-11T19:26:16",
+      "result": "pass",
+      "notes": "Attempt 4: audit-3 nits fixed; Reachability 15/15, FullLoop 56/56"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-11T16:33:02",
+      "result": "fail",
+      "report": "06 QA/AUD-20261011-TASK-0012-01.md"
+    },
+    {
+      "time": "2026-10-11T16:33:02",
+      "result": "fail",
+      "report": "06 QA/AUD-20261011-TASK-0012-02.md"
+    },
+    {
+      "time": "2026-10-11T16:40:05",
+      "result": "fail",
+      "report": "06 QA/AUD-20261011-TASK-0012-03.md"
+    },
+    {
+      "time": "2026-10-11T19:27:26",
+      "result": "pass",
+      "report": "06 QA/AUD-20261011-TASK-0012-04.md"
+    }
+  ],
+  "revisions": 0,
+  "merge_approved_by": "jg"
+}

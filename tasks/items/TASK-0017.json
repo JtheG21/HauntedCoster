@@ -1,0 +1,135 @@
+{
+  "id": "TASK-0017",
+  "game": "GAME-002",
+  "title": "Track Editor",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0015",
+    "TASK-0016"
+  ],
+  "branch": "task/TASK-0017-Track-Editor",
+  "acceptance": [
+    "Editor only opens with the tier-1 unlock (server-checked)",
+    "Points can be added, moved and removed with mouse and touch; preview updates",
+    "Server rejects too few/many points, length out of range, out-of-plot points, self-overlap; reason shown; last valid route kept",
+    "Confirmed route rebuilds track, persists and is restored after rejoin",
+    "Route quality modifier stays within config range (spec)",
+    "scripts/check.sh passes"
+  ],
+  "evidence": [
+    "06 QA/AUD-20261011-TASK-0017-01.md",
+    "06 QA/AUD-20261011-TASK-0017-02.md",
+    "06 QA/AUD-20261011-TASK-0017-03.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0017-Track-Editor.md",
+  "risk": "medium",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-11T09:24:05",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-11T19:35:00",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-11T19:35:00",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-11T19:35:00",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-11T19:35:00",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-11T19:35:00",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-11T19:35:00",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
+    },
+    {
+      "time": "2026-10-11T19:35:01",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-11T19:42:36",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-11T19:45:47",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-11T19:46:08",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-11T19:35:00",
+      "result": "pass",
+      "notes": "Revision-0 build (17cb5ae) merged with TASK-0011"
+    },
+    {
+      "time": "2026-10-11T19:35:00",
+      "result": "pass",
+      "notes": "Revision 1 at 5878f6d; TEST-20261011-03/04"
+    },
+    {
+      "time": "2026-10-11T19:42:36",
+      "result": "pass",
+      "notes": "Revision 2: TEST-20261011-06 (specs 51/0, ExploitProbe 13/13, FullLoop 56/56)"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-11T19:35:00",
+      "result": "fail",
+      "report": "06 QA/AUD-20261011-TASK-0017-01.md"
+    },
+    {
+      "time": "2026-10-11T19:35:00",
+      "result": "fail",
+      "report": "06 QA/AUD-20261011-TASK-0017-02.md"
+    },
+    {
+      "time": "2026-10-11T19:45:47",
+      "result": "pass",
+      "report": "06 QA/AUD-20261011-TASK-0017-03.md"
+    }
+  ],
+  "revisions": 2,
+  "merge_approved_by": "jg"
+}

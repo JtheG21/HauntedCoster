@@ -1,0 +1,101 @@
+{
+  "id": "TASK-0022",
+  "game": "GAME-002",
+  "title": "M1 Polish",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [],
+  "branch": "task/TASK-0022-M1-Polish",
+  "acceptance": [
+    "Each listed item is fixed or explicitly deferred with a reason in the Implementation record",
+    "New or changed specs fail when the behaviour is removed (no specs that pass for the wrong reason)",
+    "FullLoop, CrossPlot and ExploitProbe pass",
+    "scripts/check.sh passes"
+  ],
+  "evidence": [
+    "06 QA/AUD-20261011-TASK-0022-01.md",
+    "06 QA/AUD-20261011-TASK-0022-02.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0022-M1-Polish.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-11T19:51:18",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg (M1 retro)"
+    },
+    {
+      "time": "2026-10-11T19:52:56",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-11T20:18:45",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-11T20:23:03",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-11T20:23:03",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-11T20:28:55",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-11T20:31:00",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-11T20:31:47",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-11T20:18:45",
+      "result": "pass",
+      "notes": "TEST-20261011-07: specs 53/0, FullLoop 57/57, ExploitProbe 13/13; CrossPlot not run (harness hung)"
+    },
+    {
+      "time": "2026-10-11T20:28:55",
+      "result": "pass",
+      "notes": "Revision 1: specs 53/0, FullLoop 59/59, ExploitProbe 13/13; CrossPlot deferred to TASK-0020 by jg"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-11T20:23:03",
+      "result": "fail",
+      "report": "06 QA/AUD-20261011-TASK-0022-01.md"
+    },
+    {
+      "time": "2026-10-11T20:31:00",
+      "result": "pass",
+      "report": "06 QA/AUD-20261011-TASK-0022-02.md"
+    }
+  ],
+  "revisions": 1,
+  "merge_approved_by": "jg"
+}

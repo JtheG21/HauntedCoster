@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Lightweight task orchestrator for the Rg1 workflow (standard library only).
 
-Tracks tasks in tasks/queue.json (authoritative), mirrors each task's status into
-its Obsidian note, enforces approval gates and revision limits, records a usage
-ledger, updates project-state.json and writes Markdown health reports.
+Tracks tasks in tasks/items/ (one file per task, authoritative), mirrors each task's
+status into its Obsidian note, enforces approval gates and revision limits, records a
+usage ledger and writes Markdown health reports.
 Statuses and fields follow docs/workflow/TASKS.md.
 It never calls an AI itself: `dispatch` builds the prompt and, in dry-run mode
 (the only mode currently enabled), prints what it would run.
@@ -17,8 +17,11 @@ import argparse
 import datetime as dt
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
+
+import task_store
 
 STATES = {
     "backlog", "ready", "in_progress", "blocked",
@@ -45,13 +48,15 @@ def now() -> str:
 class Project:
     def __init__(self, root: Path):
         self.root = root
-        self.queue_path = root / "tasks" / "queue.json"
         self.budget_path = root / "00 Studio" / "budget.json"
         self.state_path = root / "project-state.json"
         self.ledger_path = root / "tasks" / "usage-ledger.jsonl"
         self.reviews_dir = root / "08 Reviews"
         self.prompts_dir = root / "tasks" / "prompts"
-        self.queue = self._load(self.queue_path, {"version": 1, "tasks": []})
+        try:
+            self.queue = {"tasks": task_store.load_tasks(root)}
+        except task_store.TaskStoreError as e:
+            raise OrchestratorError(str(e)) from e
         self.budget = self._load(self.budget_path, {})
 
     @staticmethod
@@ -64,8 +69,8 @@ class Project:
             raise OrchestratorError(f"{path}: invalid JSON ({e})") from e
 
     def save(self) -> None:
-        self.queue_path.write_text(json.dumps(self.queue, indent=2) + "\n")
-        self._write_state()
+        for t in self.tasks:
+            task_store.save_task(self.root, t)
 
     # ---- lookup / validation -------------------------------------------
     @property
@@ -347,16 +352,28 @@ class Project:
             c[t["status"]] = c.get(t["status"], 0) + 1
         return c
 
-    def _write_state(self) -> None:
-        state = self._load(self.state_path, {})
-        state.update({
-            "updated": now(),
+    def state(self) -> dict:
+        """project-state.json's fixed facts plus everything calculated from the task files. Never stored."""
+        return self._load(self.state_path, {}) | {
             "task_counts": self.counts(),
             "ready": [t["id"] for t in self.ready()],
             "needs_human": [t["id"] for t in self.tasks if t["status"] in NEEDS_HUMAN],
             "api_spend_this_month_usd": self.api_spend(),
-        })
-        self.state_path.write_text(json.dumps(state, indent=2) + "\n")
+        }
+
+    def next_id(self) -> str:
+        """The next TASK-#### free across the task files here and every local and remote branch."""
+        seen = {t["id"] for t in self.tasks if ID_RE.match(str(t.get("id")))}
+        git = ["git", "-C", str(self.root)]
+        refs = subprocess.run(git + ["for-each-ref", "--format=%(refname)", "refs/heads", "refs/remotes"],
+                              capture_output=True, text=True).stdout.split()
+        for ref in refs:
+            files = subprocess.run(git + ["ls-tree", "--name-only", ref, "tasks/items/"],
+                                   capture_output=True, text=True).stdout
+            seen |= set(re.findall(r"TASK-\d{4}", files))
+            queue = subprocess.run(git + ["show", f"{ref}:tasks/queue.json"], capture_output=True, text=True).stdout
+            seen |= set(re.findall(r'"id": "(TASK-\d{4})"', queue))
+        return f"TASK-{max((int(i[5:]) for i in seen), default=0) + 1:04d}"
 
     def report(self) -> Path:
         today = dt.date.today().isoformat()
@@ -396,7 +413,6 @@ class Project:
             out.write_text(text)
         else:
             out.write_text("\n".join(header) + "\n" + block + "\n\nRelated: [[Studio Index]]\n")
-        self._write_state()
         return out
 
 
@@ -480,12 +496,14 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
     sub = p.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("validate", help="validate queue.json and budget.json")
+    sub.add_parser("validate", help="validate the task files and budget.json")
     sub.add_parser("status", help="list tasks")
     s = sub.add_parser("next", help="show tasks ready to start")
     s.add_argument("--parallel-safe", action="store_true", help="also report which ready tasks could run side by side")
     sub.add_parser("cycles", help="per-task revisions, start-to-review hours and tokens (baseline data)")
-    sub.add_parser("report", help="write 08 Reviews/HLT-<date>.md and update project-state.json")
+    sub.add_parser("report", help="write 08 Reviews/HLT-<date>.md")
+    sub.add_parser("state", help="print the project state, calculated from the task files")
+    sub.add_parser("next-id", help="print the next TASK-#### free across all branches")
     for name in ("approve", "approve-merge", "archive"):
         s = sub.add_parser(name)
         s.add_argument("id")
@@ -532,6 +550,12 @@ def main(argv: list[str] | None = None) -> int:
         if a.cmd == "cycles":
             print(cycle_report(proj))
             return 0
+        if a.cmd == "state":
+            print(json.dumps(proj.state(), indent=2))
+            return 0
+        if a.cmd == "next-id":
+            print(proj.next_id())
+            return 0
         if a.cmd == "report":
             print(f"wrote {proj.report().relative_to(proj.root)}")
             return 0
@@ -540,7 +564,6 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if a.cmd == "record-usage":
             print(json.dumps(proj.record_usage(a.id, a.kind, a.role, a.cost_usd, a.est_cost_usd, a.tokens, a.model, a.note)))
-            proj._write_state()
             return 0
         actions = {
             "approve": lambda: proj.approve(a.id, a.by),

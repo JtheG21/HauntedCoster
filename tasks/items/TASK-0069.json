@@ -1,0 +1,74 @@
+{
+  "id": "TASK-0069",
+  "game": "GAME-002",
+  "title": "Art Salvage From Overhaul Branch",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [],
+  "branch": "task/TASK-0069-Art-Salvage-From-Overhaul-Branch",
+  "acceptance": [
+    "The art from the old overhaul branch (TASK-0042 art pipeline, 0043 creatures, 0044/0045 environment and landmarks, 0046 mansion, plot and ghost train) is on main, ported commit by commit from task/TASK-0046-Mansion-Plot-And-Train-Art; its cosmetics backend (TASK-0047), cosmetic assets (0050) and UI overhaul (0048/0049/0051) are NOT ported.",
+    "Main's existing cosmetics (TASK-0060 schema 2), Shop UI (TASK-0061), ProfileRules, Net and queue are unchanged except for the minimum wiring the art needs; conflicts resolved in favour of main.",
+    "Cosmetics.luau and CosmeticRules from the branch are not imported; PlotBuilder uses only what main provides, or a small art-only config.",
+    "scripts/check.sh and all specs green, including the art specs (MeshCodec, budgets); Studio shows the new creatures, habitats, mansion tiers and train in a fresh Play session, with screenshots at desktop and phone width.",
+    "3D Model Quality Baseline compared and reference IDs recorded in the task note; jg reviews the visuals before merge.",
+    "One Opus audit (large port, server-baked art data, load-time cost)."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261018-TASK-0069-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0069-Art-Salvage-From-Overhaul-Branch.md",
+  "risk": "high",
+  "history": [
+    {
+      "time": "2026-10-18T12:57:16",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-18T12:57:16",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-18T13:00:28",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-18T13:01:56",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-18T13:04:15",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-18T13:00:28",
+      "result": "pass",
+      "notes": "art 0042-0046 ported; check.sh green, specs 206/206; Studio skipped by jg"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-18T13:01:56",
+      "result": "pass",
+      "report": "06 QA/AUD-20261018-TASK-0069-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

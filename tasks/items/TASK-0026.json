@@ -1,0 +1,78 @@
+{
+  "id": "TASK-0026",
+  "game": "GAME-002",
+  "title": "Radial Plot Layout",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0025"
+  ],
+  "branch": "task/TASK-0026-Radial-Plot-Layout",
+  "acceptance": [
+    "Six plots sit 60\u00b0 apart. Each plot's local -Z points at the hub, and the front gate opens onto the ring road.",
+    "No code adds a plot-local offset to a plot centre directly (grep). All conversions use the shared transform.",
+    "The `PlotLayout` spec proves:",
+    "Saved and starter routes build, validate, ride and pay on every plot. The editor places points where the player taps on a rotated plot (CrossPlot or FullLoop check on a non-axis-aligned plot).",
+    "Securing works only at the player's own pen, at its new world position. Plot ownership and the cross-plot checks still hold (CrossPlot 2 players).",
+    "The cemetery module stays inside its footprint. Reachability proves:",
+    "FullLoop, ExploitProbe and the specs pass. `scripts/check.sh` passes.",
+    "CrossPlot checks that a non-owner touching a parked owner seat is not seated (follow-up from AUD-20261012-TASK-0025-02 N1, added with jg's approval on 2026-10-12)"
+  ],
+  "evidence": [
+    "06 QA/AUD-20261012-TASK-0026-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0026-Radial-Plot-Layout.md",
+  "risk": "high",
+  "history": [
+    {
+      "time": "2026-10-12T00:36:01",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-12T02:00:08",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-12T09:51:55",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-12T09:57:17",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-12T09:57:39",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-12T09:51:55",
+      "result": "pass",
+      "notes": "check.sh pass; specs 78/0; FullLoop 85/85; Reachability 24/24; ExploitProbe 13/13; CrossPlot 14/14 (TEST-20261012-02)"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-12T09:57:17",
+      "result": "pass",
+      "report": "06 QA/AUD-20261012-TASK-0026-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

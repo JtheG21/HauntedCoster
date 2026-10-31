@@ -1,0 +1,34 @@
+{
+  "id": "TASK-0075",
+  "game": "GAME-002",
+  "title": "Cosmetic Cleanup And Placement Constants",
+  "status": "archived",
+  "tier": "standard",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0065",
+    "TASK-0067"
+  ],
+  "branch": "task/TASK-0075-Cosmetic-Cleanup-And-Placement-Constants",
+  "acceptance": [
+    "Consolidate duplicate banner/refusal presentation without changing user-facing refusal meanings or ownership behavior.",
+    "Replace hard-coded entrance keep-out z extents with verified layout data and constrain firstSpot scanning to usable bounds; add boundary evidence.",
+    "Remove only proven redundant dirty notifications; state updates, refusal snapshots and toasts remain correct; check.sh and Studio smoke checks pass."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0075-Cosmetic-Cleanup-And-Placement-Constants.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:18",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

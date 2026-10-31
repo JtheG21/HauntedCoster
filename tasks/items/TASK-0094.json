@@ -1,0 +1,65 @@
+{
+  "id": "TASK-0094",
+  "game": "GAME-004",
+  "title": "MathShow Scores",
+  "status": "done",
+  "tier": "light",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0092"
+  ],
+  "branch": "task/TASK-0094-MathShow-Scores",
+  "acceptance": [
+    "Each player has a visible Score leaderstat that updates after each Reveal.",
+    "The Results screen shows a ranked podium matching the server's scores at match end.",
+    "No DataStore or persistence call is introduced in this task."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0094-MathShow-Scores.md",
+  "risk": "low",
+  "history": [
+    {
+      "time": "2026-10-25T17:15:28",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-25T17:16:38",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-25T17:56:14",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-25T17:56:14",
+      "from": "in_review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "time": "2026-10-25T18:01:56",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-25T17:56:14",
+      "result": "pass",
+      "notes": "check.sh green, 75 MathShow specs, typecheck clean, TEST-20261025-03"
+    }
+  ],
+  "audits": [],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

@@ -1,0 +1,106 @@
+{
+  "id": "TASK-0029",
+  "game": "GAME-002",
+  "title": "Habitat Rotation",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0027"
+  ],
+  "branch": "task/TASK-0029-Habitat-Rotation",
+  "acceptance": [
+    "Specs show the schedule is deterministic across servers (same clock \u2192 same habitat), with correct boundaries (warning at T-60, closing at T-15, swap at T-0), wrap-around, and config changes that apply without touching test settings.",
+    "A swap while a player carries keeps the carry (same species, variant and deadline). Securing after the swap adds exactly one monster.",
+    "A swap during an open meter session cancels it cleanly. No monster is created, and no claim or prompt is left behind.",
+    "A swap during an escape chase follows the approved policy. The fleeing capture is neither duplicated nor silently deleted, and the chase or loss is reported to the player.",
+    "Players still inside are handled per policy, and nobody ends up inside new geometry (scenario check).",
+    "Capture starts are refused while closing, and normal play resumes after the swap.",
+    "FullLoop, CrossPlot and ExploitProbe pass. `scripts/check.sh` passes."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261012-TASK-0029-01.md",
+    "06 QA/AUD-20261012-TASK-0029-02.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0029-Habitat-Rotation.md",
+  "risk": "high",
+  "history": [
+    {
+      "time": "2026-10-12T00:36:02",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-12T11:43:35",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-12T12:01:29",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-12T12:05:17",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-12T12:09:41",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-12T12:09:45",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-12T12:11:33",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-12T12:11:33",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-12T12:01:29",
+      "result": "pass",
+      "notes": "check.sh pass; specs 88/0; HabitatRotation 27/27; FullLoop 85/85; ExploitProbe 13/13; CrossPlot 16/16 (TEST-20261012-05)"
+    },
+    {
+      "time": "2026-10-12T12:09:45",
+      "result": "pass",
+      "notes": "revision 1: specs 88/0; HabitatRotation 28/28; FullLoop 85/85"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-12T12:05:17",
+      "result": "fail",
+      "report": "06 QA/AUD-20261012-TASK-0029-01.md"
+    },
+    {
+      "time": "2026-10-12T12:11:33",
+      "result": "pass",
+      "report": "06 QA/AUD-20261012-TASK-0029-02.md"
+    }
+  ],
+  "revisions": 1,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}
