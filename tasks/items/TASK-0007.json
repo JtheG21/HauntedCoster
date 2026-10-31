@@ -1,0 +1,106 @@
+{
+  "id": "TASK-0007",
+  "game": "GAME-001",
+  "title": "Ring-Out Finale",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0003",
+    "TASK-0004",
+    "TASK-0006"
+  ],
+  "branch": "task/TASK-0007-Ring-Out-Finale",
+  "acceptance": [
+    "Falling below the arena, or out of bounds, eliminates a player once (server-detected)",
+    "The last remaining player wins Combat. A simultaneous last elimination is a draw (spec-covered)",
+    "Speed = first obby finisher, Teamwork = most gate contributions. Ties are handled deterministically",
+    "Knockback is applied on the server only. A client can't apply force to others",
+    "`check.sh` passes"
+  ],
+  "evidence": [
+    "06 QA/AUD-20261010-TASK-0007-01.md",
+    "06 QA/AUD-20261010-TASK-0007-02.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0007-Ring-Out-Finale.md",
+  "risk": "medium",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-10T19:49:45",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-10T19:49:53",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-10T20:30:56",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-10T20:35:55",
+      "from": "in_review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-10-10T20:35:59",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-10T21:11:18",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-10T21:16:35",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-10T21:17:07",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-10T20:30:56",
+      "result": "pass",
+      "notes": "check.sh pass; specs 57/0; solo loop + 2-client FinaleRingOut ok (TEST-20261010-11)"
+    },
+    {
+      "time": "2026-10-10T21:11:18",
+      "result": "pass",
+      "notes": "rev 1: F1 freeze + starters, F4, nit 7, start grace, server-simulated knockback; specs 58/0; FinaleRingOut 3/3 normal-join passes (TEST-20261010-11)"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-10T20:35:55",
+      "result": "fail",
+      "report": "06 QA/AUD-20261010-TASK-0007-01.md"
+    },
+    {
+      "time": "2026-10-10T21:16:35",
+      "result": "pass",
+      "report": "06 QA/AUD-20261010-TASK-0007-02.md"
+    }
+  ],
+  "revisions": 1,
+  "merge_approved_by": "jg"
+}

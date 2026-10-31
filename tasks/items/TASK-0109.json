@@ -1,0 +1,92 @@
+{
+  "id": "TASK-0109",
+  "game": "GAME-004",
+  "title": "Queue Sharding",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    ".agents/skills/task-close/",
+    "00 Studio/Obsidian Conventions.md",
+    "00 Studio/Resource Catalog.md",
+    "00 Studio/Start Here.md",
+    "00 Studio/Studio Index.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0109-Queue-Sharding.md",
+    "04 Agents/Orchestrator.md",
+    "04 Agents/Planner.md",
+    "04 Agents/Task Intake.md",
+    "06 QA/AUD-20261030-TASK-0109-01.md",
+    ".claude/skills/task-close/",
+    ".gitattributes",
+    ".gitignore",
+    "AGENTS.md",
+    "README.md",
+    "docs/workflow/",
+    "intake/README.md",
+    "project-state.json",
+    "scripts/",
+    "tasks/items/",
+    "tasks/queue.json",
+    "tests/"
+  ],
+  "depends_on": [],
+  "branch": "chore/queue-sharding",
+  "acceptance": [
+    "A two-branch merge test shows zero conflicts.",
+    "The task count is preserved and the validator passes.",
+    "scripts/check.sh and the hook tests pass.",
+    "All 5 PR 155 decisions are verified, with a proposal where needed.",
+    "CI status for PRs 151 to 154 is reported.",
+    "No games/** files changed."
+  ],
+  "evidence": [
+    "docs/workflow/SHARDING-PLAN.md",
+    "06 QA/AUD-20261030-TASK-0109-01.md"
+  ],
+  "notes": "Plan approved by jg with all seven decisions (2026-10-30).",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0109-Queue-Sharding.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-30T17:40:29",
+      "from": "backlog",
+      "to": "in_progress",
+      "note": "plan approved by jg in chat"
+    },
+    {
+      "time": "2026-10-30T17:43:59",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-30T17:45:51",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-30T17:49:23",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "approved_by": "jg",
+  "revisions": 0,
+  "executions": [
+    {
+      "time": "2026-10-30T17:43:59",
+      "result": "pass",
+      "notes": "check.sh green; two-branch merge test clean"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-30T17:45:51",
+      "result": "pass",
+      "report": "06 QA/AUD-20261030-TASK-0109-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
+}

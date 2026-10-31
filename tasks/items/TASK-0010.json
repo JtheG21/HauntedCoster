@@ -1,0 +1,38 @@
+{
+  "id": "TASK-0010",
+  "game": "GAME-001",
+  "title": "Ability and Harness Hardening",
+  "status": "archived",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [],
+  "branch": "task/TASK-0010-Ability-And-Harness-Hardening",
+  "acceptance": [
+    "AbilityProbe multi-client scenario: client 2 observes client 1's Dash displacement (closes TASK-0002 AC2)",
+    "StudioTestHook: JSONEncode wrapped in pcall; EndTest always called; scenario timeout (default 45 s); double start() guarded",
+    "CollectibleRace: touches counted per player; legit-round waitFor result checked; unknown approach rejected",
+    "AbilityService: diagnostics attribute cleared on PlayerRemoving; folder cast made sound",
+    "orchestrator request-changes: tests cover in_review start state, CLI wiring and the revision-limit-to-blocked path",
+    "Finale (AUD-0007-02 F1): survivors snapshotted at conclusion; a player leaving after the finale is decided can't change Combat",
+    "Finale (AUD-0007-02 F3): ring-out check starts once a player has been seen on the deck (capped), replacing the fixed 1 s grace",
+    "Finale (AUD-0007-01 F3): server-side position sanity check (a target can't teleport back after a knockback); character no-collide group in the arena; exploit probe recorded",
+    "Finale (AUD-0007-02 nits): ownership hand-back failure logged; contribution listeners iterated over a copy; solo finale when a rival was dead at course end resolved",
+    "Match flow (AUD-0006-01): respawn during Results, trial respawn at the trial pad, trial prompt refreshed after a rebalance, gate reset respects occupants and clone consumption, dead players in the snapshot, countdown hysteresis when MinPlayers > 1",
+    "Evidence (AUD-0007-01 F6 / AUD-0007-02 F4): a 3-client finale run; G/V Echo spends through the real remote; a mid-finale leave and respawn; root-cause note on AddPlayers sessions",
+    "Leftover minors from AUD-0003/0004/0005 reviewed at task start; each fixed or explicitly deferred with a reason",
+    "scripts/check.sh passes"
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-001 Rg1/06 Tasks/TASK-0010-Ability-And-Harness-Hardening.md",
+  "risk": "low",
+  "history": [
+    {
+      "time": "2026-10-12T18:07:14",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ]
+}

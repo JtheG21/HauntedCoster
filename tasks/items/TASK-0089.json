@@ -1,0 +1,65 @@
+{
+  "id": "TASK-0089",
+  "game": "GAME-004",
+  "title": "MathShow ProblemRules",
+  "status": "done",
+  "tier": "light",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0088"
+  ],
+  "branch": "task/TASK-0089-MathShow-ProblemRules",
+  "acceptance": [
+    "generate(seed, difficulty) is deterministic for a fixed seed/difficulty pair.",
+    "All three difficulty tiers produce integer answers only.",
+    "Spec covers add/sub/mul/div and all 3 tiers."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0089-MathShow-ProblemRules.md",
+  "risk": "low",
+  "history": [
+    {
+      "time": "2026-10-25T12:52:38",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-25T12:52:38",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-25T12:56:06",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-25T12:56:06",
+      "from": "in_review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "time": "2026-10-25T14:28:25",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-25T12:56:06",
+      "result": "pass",
+      "notes": "ProblemRules + ProblemConfig implemented; full spec (determinism, integer-only, all 4 ops x 3 tiers, non-negative sub, exact div, timeLimits, error path). check.sh ALL CHECKS PASSED."
+    }
+  ],
+  "audits": [],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

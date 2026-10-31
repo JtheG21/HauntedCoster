@@ -1,0 +1,74 @@
+{
+  "id": "TASK-0096",
+  "game": "GAME-004",
+  "title": "MathShow Loose Ends",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0093",
+    "TASK-0094"
+  ],
+  "branch": "task/TASK-0096-MathShow-Loose-Ends",
+  "acceptance": [
+    "Reveal shows who got the question right (names and points) from a new Reveal-only solvers field, with sender, handler and receiver updated together and no answer leak before Reveal.",
+    "If SubmitAnswer:FireServer throws, the Hud shows a send-failed message and lets the player retry.",
+    "scripts/stamp.sh and scripts/studio-preflight.sh support MathShow (--game mathshow) and still default to Haunted Collector."
+  ],
+  "evidence": [
+    "06 QA/AUD-20261025-TASK-0096-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0096-MathShow-Loose-Ends.md",
+  "risk": "medium",
+  "history": [
+    {
+      "time": "2026-10-25T19:07:35",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-25T19:07:35",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-25T19:12:41",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-25T19:14:10",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-25T19:14:10",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-25T19:12:41",
+      "result": "pass",
+      "notes": "check.sh green, 78 MathShow specs, typecheck clean, TEST-20261025-05"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-25T19:14:10",
+      "result": "pass",
+      "report": "06 QA/AUD-20261025-TASK-0096-01.md"
+    }
+  ],
+  "revisions": 0,
+  "approved_by": "jg",
+  "merge_approved_by": "jg"
+}

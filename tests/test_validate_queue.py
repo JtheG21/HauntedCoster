@@ -1,4 +1,4 @@
-"""Queue schema and files_owned rule (scripts/validate_queue.py), and migration (scripts/migrate_queue.py)."""
+"""Task schema and files_owned rule (scripts/validate_queue.py), and old-format upgrade (scripts/migrate_queue.py)."""
 
 import json
 import sys

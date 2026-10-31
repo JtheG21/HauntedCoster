@@ -1,0 +1,76 @@
+{
+  "id": "TASK-0021",
+  "game": "GAME-002",
+  "title": "Anti-Cheat Hardening",
+  "status": "done",
+  "tier": null,
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0019"
+  ],
+  "branch": "task/TASK-0021-Anti-Cheat-Hardening",
+  "acceptance": [
+    "An exploit scenario running at full speed while carrying, and one teleporting to the pen, both fail to secure",
+    "A secure after the deadline fails",
+    "A tier-0 player can't capture a crypt monster (the Bell Wraith) through crafted CaptureStart calls, from inside or outside the crypt (2-player scenario) [reworded with jg's approval 2026-10-12]",
+    "An escaped Ashen monster respawns only in the Sealed Crypt (spec or scenario)",
+    "A server-initiated move during a carry (habitat evacuation, test teleport) gives no carry strike (scenario) [reworded with jg's approval 2026-10-12]",
+    "scripts/check.sh passes; ExploitProbe and CrossPlot pass"
+  ],
+  "evidence": [
+    "06 QA/AUD-20261012-TASK-0021-01.md"
+  ],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0021-Anti-Cheat-Hardening.md",
+  "risk": "high",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-11T19:51:18",
+      "from": "proposed",
+      "to": "ready",
+      "note": "plan approved by jg (M1 retro)"
+    },
+    {
+      "time": "2026-10-12T14:28:43",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-12T15:53:04",
+      "from": "in_progress",
+      "to": "in_review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-12T15:54:52",
+      "from": "in_review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-12T18:03:36",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-12T15:53:04",
+      "result": "pass",
+      "notes": "check.sh 114/0; CarryGuard 21/21 (+negative control); FullLoop 85/85; ExploitProbe 13/13; CrossPlot AC3 7/7, seat control open (TEST-20261012-11)"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-12T15:54:52",
+      "result": "pass",
+      "report": "06 QA/AUD-20261012-TASK-0021-01.md"
+    }
+  ],
+  "revisions": 0,
+  "merge_approved_by": "jg"
+}

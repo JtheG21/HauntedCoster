@@ -1,0 +1,33 @@
+{
+  "id": "TASK-0076",
+  "game": "GAME-002",
+  "title": "Environment Revision Remediation",
+  "status": "archived",
+  "tier": "deep",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0069"
+  ],
+  "branch": "task/TASK-0076-Environment-Revision-Remediation",
+  "acceptance": [
+    "Reproduce and disposition every finding in AUD-20261013-TASK-0044-01 on current code before fixing; do not assume old findings still reproduce.",
+    "Verify deterministic random draw behavior, terrain cleanup/generation protection, supported paint heights and collision deviations; preserve approved walk/layout behavior.",
+    "Provide the missing hub/habitat/tree captures and reference comparison plus fresh 2-client HauntedTrees results; check.sh passes and jg judges visuals."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0076-Environment-Revision-Remediation.md",
+  "risk": "high",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:18",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

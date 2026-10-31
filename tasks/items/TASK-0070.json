@@ -1,0 +1,33 @@
+{
+  "id": "TASK-0070",
+  "game": "GAME-002",
+  "title": "Decoration Load Revalidation",
+  "status": "archived",
+  "tier": "deep",
+  "owner_agent": null,
+  "files_owned": [],
+  "depends_on": [
+    "TASK-0065"
+  ],
+  "branch": "task/TASK-0070-Decoration-Load-Revalidation",
+  "acceptance": [
+    "Saved placements in house, pen, exhibit, track, entrance or margin keep-outs are stored safely before rendering; entitlements remain owned.",
+    "Valid placements survive save/load unchanged at tiers 0\u20132 and every plot orientation; malformed and boundary data have meaningful specs.",
+    "Repairs are reported; check.sh and Studio rejoin evidence pass; schema changes, if needed, require jg approval."
+  ],
+  "evidence": [],
+  "notes": "",
+  "note_path": "03 Games/GAME-002 Haunted Collector/06 Tasks/TASK-0070-Decoration-Load-Revalidation.md",
+  "risk": "high",
+  "history": [
+    {
+      "time": "2026-10-30T16:54:18",
+      "from": "proposed",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ],
+  "executions": [],
+  "audits": [],
+  "revisions": 0
+}

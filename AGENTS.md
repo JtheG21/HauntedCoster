@@ -1,7 +1,7 @@
 # AGENTS.md: operating rules for AI agents in this studio
 
 The canonical rulebook. `CLAUDE.md` imports it and adds Claude-only notes; if another document disagrees, this file and
-`tasks/queue.json` win. Roles: `04 Agents/`. Naming and metadata: `00 Studio/Obsidian Conventions.md`. Process:
+`tasks/items/` win. Roles: `04 Agents/`. Naming and metadata: `00 Studio/Obsidian Conventions.md`. Process:
 `04 Agents/Workflow.md`. Vault entry point: `00 Studio/Start Here.md`.
 
 **Starting any task:** follow `04 Agents/Task Intake.md` (start procedure, category workflows in `04 Agents/Workflows/`,
@@ -34,9 +34,10 @@ only; don't change them unless a task says so. Table, build commands and old-to-
   (`rojo serve mathshow.project.json`). Never connect a project file to another game's place: it pulls that game's Baseplate,
   Lighting and scripts in ([[TEST-20261011-02]]). Switching branches under a running server can crash Rojo
   ([[LES-0003-Rojo-Crash-On-Branch-Switch]]); use a worktree. Disk is the source of truth: never edit scripts in Studio.
-- Machine state (authoritative for task status): `tasks/queue.json` (schema: `docs/workflow/TASKS.md`),
-  `tasks/usage-ledger.jsonl`, `project-state.json`. Policy: `00 Studio/budget.json`. Task IDs come from the queue, and from
-  open branches that add to it; never invent one.
+- Machine state (authoritative for task status): `tasks/items/TASK-####.json`, one file per task (schema:
+  `docs/workflow/TASKS.md`), and `tasks/usage-ledger.jsonl`. `project-state.json` holds fixed facts only;
+  `orchestrator.py state` calculates the rest. Policy: `00 Studio/budget.json`. Take IDs from `orchestrator.py next-id`;
+  never invent one. Add your own task file; never edit another task's file.
 - Project skills: `task-close`, `studio-preflight`, `art-import`, `codex-handoff`, `reference-brief`, `reference-review`
   in `.claude/skills/`, mirrored in `.agents/skills/` for Codex (`tests/test_claude_hooks.py` keeps them equal).
 - Roblox API reference: `~/Code/creator-docs` (refresh: `git -C ~/Code/creator-docs pull`). Unsure of an API? Grep
@@ -51,8 +52,9 @@ only; don't change them unless a task says so. Table, build commands and old-to-
 - `scripts/new-service.sh mathshow <Name>`: stamps Service, Config, Rules and spec. Use it instead of hand-writing boilerplate.
 - `scripts/preflight.sh --root <checkout> --branch <name> [--clean]`: before any state-changing Git operation.
 - `scripts/studio-preflight.sh [--root <checkout>]`: Rojo, Studio windows, memory and build stamp before a Studio run.
-- `python3 scripts/orchestrator.py status|next|approve|start|record-exec|record-audit|approve-merge|report ...` (`--help`).
-- `python3 scripts/validate_queue.py`: queue schema and `files_owned` overlap. `python3 scripts/validate_vault.py`: note
+- `python3 scripts/orchestrator.py status|state|next|next-id|approve|start|record-exec|record-audit|approve-merge|report ...`
+  (`--help`).
+- `python3 scripts/validate_queue.py`: task file schema and `files_owned` overlap. `python3 scripts/validate_vault.py`: note
   conventions, links, queue and note sync. `scripts/typecheck.sh`: strict Luau types.
 - `python3 scripts/refs.py list|brief|trace|lint|guard|new`: the `10 References/` library. `review-next|decide`: review with jg
   (`decide ... --apply` records it; dry run by default). `pin|drift|rights|ledger`: commit pins, upstream drift, the licence gate
@@ -146,6 +148,6 @@ Set `/model` at session start; jg can override. Budget detail: [[AI Context and 
   recorded human approval. Never silently change approved decisions or delete history.
 - After a task: Outcome in the task note, project state via the orchestrator, and overview/`SYS-` notes only where a fact
   changed. After a milestone: a short `RETRO-`. Promote `LES-` only with linked evidence.
-- Task status lives in `tasks/queue.json`; flag mismatches, don't guess. Keep notes short, no code dumps, no secrets.
+- Task status lives in `tasks/items/`; flag mismatches, don't guess. Keep notes short, no code dumps, no secrets.
   No new vaults or plugin changes without approval. Mark unverified conclusions as drafts.
 - End of session: list notes created, updated or left pending, and why.

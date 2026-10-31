@@ -41,6 +41,7 @@ import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import task_store  # noqa: E402
 from validate_vault import STATUSES, parse_frontmatter  # noqa: E402
 
 REF_DIR = "10 References"
@@ -50,7 +51,6 @@ TEMPLATE = "99 Templates/T - Reference.md"
 PINS = "tasks/reference-pins.jsonl"
 RIGHTS = "00 Studio/reference-rights.json"
 USAGE = "tasks/usage-ledger.jsonl"
-QUEUE = "tasks/queue.json"
 RIGHTS_CLASSES = ("permissive-verified", "permissive-claimed", "copyleft", "platform-terms", "per-item",
                   "unknown", "reference-only")
 ID_RE = re.compile(r"^REF-([A-Z]+)-(\d{3})$")
@@ -697,13 +697,13 @@ def cmd_ledger(root: Path, only: str | None) -> int:
     if not task_refs:
         print("no task cites a REF note yet (add `REF-…` IDs to the task note's **References:** line)")
         return 0
-    queue = {t["id"]: t for t in json.loads((root / QUEUE).read_text(encoding="utf-8"))["tasks"]}
+    queue = {t["id"]: t for t in task_store.load_tasks(root)}
     tokens, notes = usage_tokens(root), task_notes(root)
     print(f"{'task':10} {'status':12} {'rev':3} {'exec':4} {'aud':3} {'hours':6} {'tokens':8} floor-met (jg)   references")
     for tid in sorted(task_refs):
         t = queue.get(tid)
         if not t:
-            print(f"{tid:10} not in queue.json")
+            print(f"{tid:10} has no task file")
             continue
         c = task_cycle(t)
         floor = "-"
