@@ -1,13 +1,14 @@
 {
   "project": "Rg1",
-  "phase": "GAME-004: intake complete, slice tasks queued; no implementation started",
+  "phase": "GAME-004: vertical slice built (TASK-0088 to TASK-0104 done); paused games archived",
   "vault": "/Users/jg/Desktop/Rg1",
   "rojo_project": "mathshow.project.json",
   "dispatch_mode": "dry-run",
-  "updated": "2026-10-30T16:54:19",
+  "updated": "2026-10-30T16:59:07",
   "task_counts": {
     "done": 74,
-    "archived": 23
+    "archived": 23,
+    "in_progress": 1
   },
   "ready": [],
   "needs_human": [],
