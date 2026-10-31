@@ -3,9 +3,9 @@ id: TASK-0111
 title: Identity Gate Completion
 type: task
 project: GAME-004
-status: approved
+status: done
 created: 2026-10-30
-updated: 2026-10-30
+updated: 2026-10-31
 tags:
   - task/chore
 ---

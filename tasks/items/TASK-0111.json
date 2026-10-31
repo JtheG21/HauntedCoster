@@ -14,7 +14,7 @@
   "audits": [],
   "id": "TASK-0111",
   "title": "Identity Gate Completion",
-  "status": "approved",
+  "status": "done",
   "tier": "light",
   "risk": "low",
   "branch": "task/TASK-0111-identity-gate",
@@ -58,6 +58,13 @@
       "from": "review",
       "to": "approved",
       "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "time": "2026-10-31T09:53:50",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }
