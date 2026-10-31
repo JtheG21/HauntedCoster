@@ -699,3 +699,25 @@ ContentId: rbxassetid://203785492 failed due to: Asset type does not match reque
 
 - `git branch --no-merged main` now differs from the Phase 1 snapshot by: `chore/repo-cleanup` (added), and `chore/art-automation`, `chore/video-research-3d-models` and `task/TASK-0024-FullLoop-Landmark-Flake` (removed by S1–S3).
 - W9's branch `task/TASK-0111-identity-gate` was not removed.
+
+### Final check gate
+
+`scripts/check.sh` on commit `2889458`: exit 0. Tail of the log:
+
+```
+
+PASS  StyLua (format, GAME-004)
+PASS  Selene (lint, GAME-004)
+PASS  Luau types (strict, GAME-004)
+PASS  Unit specs (Lune, GAME-004)
+PASS  Rojo build (mathshow.project.json)
+PASS  JSON files
+PASS  Task files (schema, files_owned overlap)
+PASS  Task queue (orchestrator)
+PASS  Vault conventions
+PASS  Reference notes
+PASS  Project skills
+PASS  Python tests
+ALL CHECKS PASSED (active)
+Note: play scenarios and gameplay need Studio, see AGENTS.md "Tests". Archived games: scripts/check.sh --archive.
+```
