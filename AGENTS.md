@@ -91,6 +91,12 @@ files); DataStore schema changes.** Approval is per action and doesn't carry ove
 - Run `scripts/check.sh` before any AI review.
 - Never read, print or store credentials (`.env`, keys, cookies).
 
+## Approval Protocol
+- A user-written prompt with an "APPROVED ROWS" block is the approval for exactly those rows and their stated conditions. Do not re-confirm them.
+- A bare "approved" or "yes" approves only the single action in the immediately preceding question. If that question offered several rows with different risk levels, ask once, listing the row IDs.
+- These always need fresh explicit approval, even inside a block: bulk remote branch deletion; DataStore or schema changes; publishing; spending Robux; `git reset` or force-push; enabling any standing automation (auto-merge, scheduled tasks).
+- Merging needs approval per PR. A block grants it only when it names the PR number.
+
 ## Branches and Git safety (LES-0006, 2026-10-11)
 - One scoped task at a time: `task/TASK-####-slug` for tasks, `chore/<slug>` for docs and tooling. Never commit to `main`.
 - Before any switch, merge, rebase, cherry-pick, reset, clean, commit, push or branch deletion, run

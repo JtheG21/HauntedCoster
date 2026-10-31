@@ -721,3 +721,31 @@ PASS  Python tests
 ALL CHECKS PASSED (active)
 Note: play scenarios and gameplay need Studio, see AGENTS.md "Tests". Archived games: scripts/check.sh --archive.
 ```
+
+## Closeout
+
+### Merge and B1–B3
+
+- **PR #162 merged** as `45cbe45` (merge commit, 2026-10-31 17:34 UTC). Merged on your request. No auto-merge was enabled and the branch was not deleted by the merge.
+- **B1:** `main` fast-forwarded from `80e39b8` to `45cbe45`. `git status --short` now lists only `.codex/` and `HANDOFF-MathShow-2026-10-30.md`. The two wisp PNGs are ignored.
+- **B2:** `chore/repo-cleanup` worktree removed (clean, no `--force`). Local branch deleted with `-d` (was `a08d3b3`). GitHub had not deleted `origin/chore/repo-cleanup` on merge, so it was deleted with `git push origin --delete`.
+- **B3:** the W9 worktree at `/Users/jg/Desktop/Rg1-worktrees/task-0110` removed (clean, no `--force`). Git accepted the removal although pid 64782 still had its cwd there. Local branch `task/TASK-0111-identity-gate` deleted with `-d` (was `265f8f8`).
+
+### PR #160 head-ref check
+
+- `gh pr view 160`: `headRefName` = `task/TASK-0111-identity-gate`, state `MERGED`.
+- The B3 mismatch was between the worktree directory name (`task-0110`) and the branch checked out in it (`task/TASK-0111-identity-gate`). The branch matches PR #160.
+- `git branch --list 'task/TASK-0110*'`: no local branches. `git ls-remote --heads origin 'task/TASK-0110*' 'task/TASK-0111*'`: `origin/task/TASK-0110-studio-sync` (`c553954`, already on main) and `origin/task/TASK-0111-identity-gate` (`265f8f8`). Both remote branches were left in place.
+- Local `task/TASK-0110-studio-sync` was deleted in Phase 1 (Appendix A). Its tip was `c553954`.
+
+### Held rows (unchanged)
+
+| Row | Subject | State |
+|---|---|---|
+| W10 | `chore-mathshow-intake` worktree (`chore/mathshow-intake`) | Held. Dirty only with `.codex/` |
+| U1 | `.codex/` in main | Held. Commit only after jg confirms Codex loads repo hooks |
+| U7 | `HANDOFF-MathShow-2026-10-30.md` | Held. Stays in place |
+| K5 | `overhaul` worktree (`task/TASK-0046-Mansion-Plot-And-Train-Art`) | Held. 6 modified, 1 untracked |
+| K6 | `game-003-h01-checks` worktree (`chore/game-003-h01-checks`) | Held. 11 modified, 7 untracked |
+| R1 | 116 merged remote branches (Appendix C) | Held. Needs its own approval |
+| — | `chore/individual-media-assessments`, `chore/orchestrator-ownership`, `chore/repo-integration-notes`, `chore/video-workflow-adoption` | Local branches left by P3/P6/P9/P11. Kept. Registrations pruned |
