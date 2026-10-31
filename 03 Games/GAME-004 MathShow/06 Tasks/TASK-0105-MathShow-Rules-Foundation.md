@@ -96,4 +96,4 @@ Proposed follow-ups (not created): C2 3v3 rules + ProfileV2 proof, then the wiri
 ## Audits
 
 ## Outcome
-(pending merge)
+Merged through PR 152, approved by jg in chat (2026-10-30). Audit passed: `06 QA/AUD-20261027-TASK-0105-01.md`. Eleven pure modules and six specs; nothing is wired into gameplay yet.
