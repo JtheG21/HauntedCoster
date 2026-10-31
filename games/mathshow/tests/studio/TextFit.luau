@@ -434,6 +434,10 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 							reason = "intentional: duplicate text layer (shadow or glow)"
 						elseif L.inst.Name == "Vs" then
 							reason = "intentional: VS badge across the panel seam"
+						elseif d.Name == "Glow" or d.Name == "Flash" or L.inst.Name == "Glow" then
+							reason = "intentional: glow or flash layer behind content"
+						elseif L.inst.Name == "NewBest" then
+							reason = "intentional: NEW BEST badge across the card corner"
 						end
 						table.insert(rows, {
 							state = state,
