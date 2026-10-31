@@ -15,7 +15,7 @@ related:
 
 ## How it works
 - `archive/GAME-001-rg1/src/server/Services/StudioTestHook.luau` runs only in Studio test sessions started with test args. It requires `TestService.Tests.multiclient.<scenario>`, runs it on the server, and ends the test with the returned table.
-- Scenarios live in `archive/GAME-001-rg1/tests/luau/multiclient/<Name>.luau` and return `function(args) -> { ok: boolean, ... }`.
+- Scenarios live in `<game tests>/multiclient/<Name>.luau` (active game: `games/mathshow/tests/multiclient/`; GAME-001: `archive/GAME-001-rg1/tests/luau/multiclient/`) and return `function(args) -> { ok: boolean, ... }`.
 
 ## Run (Claude through Studio MCP, or you from the Studio command bar in Edit mode)
 ```lua

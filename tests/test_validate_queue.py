@@ -15,7 +15,7 @@ import validate_queue  # noqa: E402
 def task(tid="TASK-0001", status="in_progress", files=("a/b.luau",)):
     return {"id": tid, "game": "GAME-004", "title": "T", "status": status, "tier": "light", "owner_agent": "codex",
             "files_owned": list(files), "depends_on": [], "branch": "chore/x", "acceptance": ["works"], "evidence": [],
-            "notes": ""}
+            "notes": "", "note_path": "n.md", "risk": "low"}
 
 
 class Schema(unittest.TestCase):
@@ -63,6 +63,12 @@ class Overlap(unittest.TestCase):
             ("a/**", "b/**", False),
             ("a/b/*.luau", "a", True),
             ("a/ab", "a/a", False),
+            ("games/mathshow/*/Foo.luau", "games/mathshow/src/", True),
+            ("a/b/c*/d.py", "a/b/c1/", True),
+            ("scripts/*.py", "scripts/lib/", True),
+            ("*.md", "docs/", True),
+            ("a/b.md", "a/*.py", False),
+            ("a/*.luau", "c/", False),
         ]:
             with self.subTest(a=a, b=b):
                 self.assertEqual(self.overlap(a, b), expected)

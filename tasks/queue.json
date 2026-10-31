@@ -7103,12 +7103,19 @@
         "CLAUDE.md",
         "README.md",
         "archive/",
+        "default.project.json",
         "docs/workflow/",
         "experiments/reference-feedback/demo.project.json",
+        "games/haunted/",
+        "games/hike-or-die/",
         "games/mathshow/assets/",
+        "haunted.project.json",
+        "hike-or-die.project.json",
         "intake/",
+        "maps/",
         "project-state.json",
         "scripts/",
+        "src/",
         "tasks/queue.json",
         "tests/"
       ],
@@ -7136,12 +7143,42 @@
           "from": "backlog",
           "to": "in_progress",
           "note": "plan and all phases approved by jg in chat"
+        },
+        {
+          "time": "2026-10-30T17:09:17",
+          "from": "in_progress",
+          "to": "review",
+          "note": "execution checks passed"
+        },
+        {
+          "time": "2026-10-30T17:09:17",
+          "from": "review",
+          "to": "changes_requested",
+          "note": "audit failed; revision 1/2"
+        },
+        {
+          "time": "2026-10-30T17:09:17",
+          "from": "changes_requested",
+          "to": "in_progress",
+          "note": "started"
         }
       ],
       "approved_by": "jg",
-      "revisions": 0,
-      "executions": [],
-      "audits": []
+      "revisions": 1,
+      "executions": [
+        {
+          "time": "2026-10-30T17:09:17",
+          "result": "pass",
+          "notes": "check.sh green at ede584f"
+        }
+      ],
+      "audits": [
+        {
+          "time": "2026-10-30T17:09:17",
+          "result": "fail",
+          "report": "06 QA/AUD-20261030-TASK-0108-01.md"
+        }
+      ]
     }
   ]
 }

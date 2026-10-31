@@ -11,6 +11,7 @@ Usage: python3 scripts/migrate_queue.py [--root PATH]
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import re
 import sys
@@ -41,6 +42,7 @@ def sync_note(root: Path, t: dict) -> None:
     text = path.read_text(encoding="utf-8")
     new = re.sub(r"^status:.*$", f"status: {t['status']}", text, count=1, flags=re.M)
     if new != text:
+        new = re.sub(r"^updated:.*$", f"updated: {dt.date.today().isoformat()}", new, count=1, flags=re.M)
         path.write_text(new, encoding="utf-8")
 
 

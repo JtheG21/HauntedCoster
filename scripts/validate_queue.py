@@ -21,7 +21,8 @@ FINISHED = {"done", "archived"}
 TIERS = {"light", "standard", "deep"}
 OWNERS = {"claude-code", "codex", "claude-design", "task-audit", "human"}
 REQUIRED = ("id", "game", "title", "status", "tier", "owner_agent", "files_owned", "depends_on", "branch", "acceptance",
-            "evidence", "notes")
+            "evidence", "notes", "note_path", "risk")
+RISKS = {"low", "medium", "high"}
 ID_RE = re.compile(r"^TASK-\d{4}$")
 GAME_RE = re.compile(r"^GAME-\d{3}$")
 GLOB_RE = re.compile(r"[*?\[]")
@@ -44,9 +45,14 @@ def overlaps(a: str, b: str) -> bool:
         return _nested(_fixed_prefix(a), _fixed_prefix(b))
     if a_glob or b_glob:
         pattern, path = (a, b) if a_glob else (b, a)
-        # A plain path may be a folder holding files the glob matches, or a file the glob matches.
-        return fnmatch.fnmatchcase(path.rstrip("/"), pattern) or _nested(path, _fixed_prefix(pattern)) and (
-            _fixed_prefix(pattern).startswith(path.rstrip("/") + "/") or _fixed_prefix(pattern) == path.rstrip("/"))
+        plain, prefix = path.rstrip("/"), _fixed_prefix(pattern)
+        if fnmatch.fnmatchcase(plain, pattern):
+            return True
+        if prefix == plain or prefix.startswith(plain + "/"):
+            return True  # the plain path holds everything the glob can match
+        # A folder inside the glob's prefix may hold matches; a file there didn't match above, so it can't.
+        is_folder = path.endswith("/") or "." not in plain.rsplit("/", 1)[-1]
+        return is_folder and _nested(plain, prefix)
     return _nested(a, b)
 
 
@@ -69,6 +75,8 @@ def validate(queue: dict) -> list[str]:
         status = t.get("status")
         if status not in STATUSES:
             errors.append(f"{tid}: invalid status '{status}'")
+        if "risk" in t and t["risk"] not in RISKS:
+            errors.append(f"{tid}: invalid risk '{t['risk']}'")
         if "game" in t and not GAME_RE.match(str(t["game"])):
             errors.append(f"{tid}: game must look like GAME-001")
         for key, allowed in (("tier", TIERS), ("owner_agent", OWNERS)):

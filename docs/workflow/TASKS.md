@@ -19,8 +19,10 @@
 | `acceptance` | array of strings | At least one criterion. |
 | `evidence` | array of strings | Paths or results that prove the criteria (audit notes, test notes). |
 | `notes` | string | Free text. |
+| `note_path` | string | The task note. |
+| `risk` | `low`, `medium`, `high` | High means DataStores, Robux, data loss, security or a live game. |
 
-Fields the orchestrator also keeps: `note_path` (the task note), `risk` (`low`, `medium`, `high`), `history`, `executions`,
+Fields the orchestrator also keeps: `history`, `executions`,
 `audits`, `revisions`, `approved_by`, `merge_approved_by`, `stacked_on`, `migrated_from`.
 
 ## Statuses
@@ -44,11 +46,11 @@ merge gate and the revision limit depend on them. History entries keep the names
 ## The `files_owned` rule
 A file may be in the `files_owned` of **at most one `in_progress` task**. That is what stops parallel agents overlapping.
 
-- Paths match themselves and everything below them; globs use `*`, `?` and `[]`.
+- Paths match themselves and everything below them; globs use `*`, `?` and `[]`, and `*` also crosses `/`.
 - Two globs overlap if their fixed prefixes overlap. That is deliberately cautious, so narrow the globs if it complains.
 - See `docs/workflow/PARALLEL.md` for how shared contracts are handled.
 
 ## Adding and migrating
 - The orchestrator has no `add` command. Add entries by hand with `ensure_ascii=True` and indent 2, and create the task note.
 - `scripts/migrate_queue.py` upgrades old-format entries and their notes, and it's safe to rerun. PRs opened before this schema
-  add old-format entries: after merging one, run it and commit the result.
+  add old-format entries: after merging one, run it, set `owner_agent` by hand on any task that isn't finished (and `tier` if it's null), then commit. The validator names what's missing. Expect a text conflict in the queue: keep every entry.

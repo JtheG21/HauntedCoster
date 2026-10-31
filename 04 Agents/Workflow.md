@@ -41,7 +41,7 @@ Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, backlog) → [HUMAN:
 
 ## Isolation
 - One Git branch per task, from an up-to-date `main`. Workflow and doc changes use `chore/<slug>` branches.
-- Only `src/` and `tests/luau` reach Studio, through Rojo. Playtest in a **local place file**, never the published experience.
+- Only the active game's project file (`AGENTS.md`) reaches Studio, through Rojo. Playtest in a **local place file**, never the published experience.
 
 ## Who owns what (Claude, Codex, side sessions)
 - **Before starting:** `orchestrator.py status` for `in_progress` tasks, `git worktree list`, and `orchestrator.py next --parallel-safe` for overlapping "Files expected to change". If another session's task touches the same files, stop and ask jg.

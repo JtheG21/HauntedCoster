@@ -93,7 +93,7 @@ files); DataStore schema changes.** Approval is per action and doesn't carry ove
 - Before any switch, merge, rebase, cherry-pick, reset, clean, commit, push or branch deletion, run
   `scripts/preflight.sh --root <checkout> --branch <expected>` and chain with `&&`. Use `git -C <checkout>`.
 - The main checkout (`/Users/jg/Desktop/Rg1`) stays on `main`. Every task and chore branch gets its own worktree.
-- Push a work branch once it has a commit (draft PR is fine), unless the task says to wait.
+- Push a work branch once it has a commit (draft PR is fine).
 - If the intended checkout is missing or stale, **stop** and re-discover it. Never fall back to the current directory.
 
 ## Tiers

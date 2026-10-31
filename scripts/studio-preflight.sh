@@ -99,7 +99,7 @@ while read -r pid ppid exe sub args; do
 	fi
 done <<<"$procs"
 if [ $servers -eq 0 ]; then
-	warn "no Rojo server: Studio won't get code changes. Start one with: cd \"$root\" && rojo serve $project_file (or sync by hand and say so in the TEST note)."
+	warn "no Rojo server: Studio won't get code changes. Start one with: cd \"$root\" && rojo serve $project_path (or sync by hand and say so in the TEST note)."
 elif [ $servers -gt 1 ]; then
 	fail "$servers Rojo servers are running. Keep one, matched to its place (AGENTS.md \"One Rojo server\")."
 fi

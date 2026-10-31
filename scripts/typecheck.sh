@@ -15,6 +15,14 @@ if [ ! -f "$defs" ]; then
 	exit 0
 fi
 fail=0
+# Fails on any reported problem, and on a luau-lsp that exits non-zero without saying why.
+analyze() {
+	local raw out rc=0
+	raw="$(luau-lsp analyze "$@" 2>&1)" || rc=$?
+	out="$(grep -v '^\[INFO\]' <<<"$raw" || true)"
+	if [ -n "$out" ]; then echo "$out"; return 1; fi
+	if [ $rc -ne 0 ]; then echo "luau-lsp exited $rc with no output"; return 1; fi
+}
 if [ "${1:-}" = "--archive" ]; then
 	tmp="$(mktemp -d)"
 	trap 'rm -rf "$tmp"' EXIT
@@ -22,13 +30,12 @@ if [ "${1:-}" = "--archive" ]; then
 		game="$(basename "$dir")"
 		cd "$root/$dir"
 		rojo sourcemap ./*.project.json -o "$tmp/$game.json" >/dev/null
-		out="$(luau-lsp analyze --sourcemap="$tmp/$game.json" --definitions="$defs" --base-luaurc="$root/.luaurc" src tests 2>&1 | grep -v '^\[INFO\]' || true)"
-		if [ -n "$out" ]; then echo "$game:"; echo "$out"; fail=1; fi
+		echo "$game:"
+		analyze --sourcemap="$tmp/$game.json" --definitions="$defs" --base-luaurc="$root/.luaurc" src tests || fail=1
 	done
 else
 	rojo sourcemap "$ACTIVE_GAME_PROJECT" -o sourcemap.json >/dev/null
-	out="$(luau-lsp analyze --sourcemap=sourcemap.json --definitions="$defs" --base-luaurc=.luaurc "$ACTIVE_GAME_ROOT" 2>&1 | grep -v '^\[INFO\]' || true)"
-	if [ -n "$out" ]; then echo "$out"; fail=1; fi
+	analyze --sourcemap=sourcemap.json --definitions="$defs" --base-luaurc=.luaurc "$ACTIVE_GAME_ROOT" || fail=1
 fi
 if [ $fail -ne 0 ]; then exit 1; fi
 echo "no type errors"

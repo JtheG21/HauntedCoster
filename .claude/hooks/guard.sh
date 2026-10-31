@@ -72,7 +72,7 @@ if [ -n "$path" ]; then
 			dir="$(dirname "$dir")"
 		done
 		top="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null || true)"
-		if [ -n "$top" ] && [ -f "$top/scripts/active-game.env" ]; then
+		if [ -n "$top" ] && { [ -f "$top/scripts/active-game.env" ] || [ -f "$top/AGENTS.md" ]; }; then
 			rel="$(git -C "$dir" rev-parse --show-prefix)$rest"
 			case "$rel" in
 			Agents/* | Chats/* | .obsidian/*) block "$rel is on the do-not-edit list (AGENTS.md \"Project map\"): plugin data and settings." ;;

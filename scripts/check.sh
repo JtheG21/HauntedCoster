@@ -73,7 +73,13 @@ else
 fi
 
 printf '\n%s' "$summary"
-if [ $fail -eq 0 ]; then echo "ALL CHECKS PASSED ($mode)"; else echo "CHECKS FAILED ($mode)"; fi
+if [ $fail -ne 0 ]; then
+	echo "CHECKS FAILED ($mode)"
+elif grep -q '^SKIP' <<<"$summary"; then
+	echo "PASSED WITH SKIPS ($mode): see the SKIP lines above"
+else
+	echo "ALL CHECKS PASSED ($mode)"
+fi
 if [ "$mode" = "active" ]; then
 	echo "Note: play scenarios and gameplay need Studio, see AGENTS.md \"Tests\". Archived games: scripts/check.sh --archive."
 else
