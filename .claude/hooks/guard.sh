@@ -43,7 +43,7 @@ if [ "$tool" = "Bash" ] && [ -n "$cmd" ]; then
 		fi
 	fi
 	if grep -Eq "${start}rojo +serve( |$)" <<<"$cmd" && ! grep -q '\.project\.json' <<<"$cmd"; then
-		block "a bare 'rojo serve' has no project at the repo root. Use: rojo serve mathshow.project.json (AGENTS.md \"One Rojo server\")"
+		block "a bare 'rojo serve' has no project at the repo root. Use: scripts/serve.sh (AGENTS.md \"One Rojo server\")"
 	fi
 	if grep -Eq "(^|[[:space:]<=/'\"])\.env([[:space:];|&)'\"]|$)" <<<"$cmd" && ! grep -Eq "${git_cmd}commit( |$)" <<<"$cmd"; then
 		block "the command references .env, which holds credentials (AGENTS.md \"Safety rules\"). Use .env.example for key names; if you only mention the name, rephrase."

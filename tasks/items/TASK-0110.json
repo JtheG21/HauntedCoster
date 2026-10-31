@@ -1,0 +1,133 @@
+{
+  "id": "TASK-0110",
+  "game": "GAME-004",
+  "title": "Studio Sync And Gates",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    ".claude/hooks/guard.sh",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0106-MathShow-Identity-UI-Primitives-And-Cards.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0107-MathShow-Menu-Art-V2-Integration.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0110-Studio-Sync-And-Gates.md",
+    "06 QA/AUD-20261030-TASK-0110-01.md",
+    "AGENTS.md",
+    "docs/design/hud/HudSpec.json",
+    "docs/workflow/STUDIO-SYNC.md",
+    "docs/workflow/TASKS.md",
+    "docs/workflow/evidence/TASK-0110/",
+    "games/mathshow/src/shared/HudSpec.json",
+    "mathshow.project.json",
+    "scripts/orchestrator.py",
+    "scripts/serve.sh",
+    "tasks/items/TASK-0110.json",
+    "tests/test_orchestrator.py",
+    "tests/test_serve.py"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0110-studio-sync",
+  "acceptance": [
+    "The root cause is identified, with lsof/ps output and a BuildStamp comparison.",
+    "Studio receives disk changes: before/after BuildStamp and a comment-change probe.",
+    "A fresh Play on main runs with no MathShow errors: console output.",
+    "TextFit results are recorded for TASK-0106 and TASK-0107: screenshots and a table.",
+    "HudSpec.json has moved, nothing requires it, and the build stamp is clean: grep and stamp.",
+    "The override command exists and is tested, and check.sh passes."
+  ],
+  "evidence": [
+    "docs/workflow/STUDIO-SYNC.md",
+    "docs/workflow/evidence/TASK-0110/menu-01-main-standard.jpg"
+  ],
+  "notes": "Sole agent while it runs. Studio gates need a place open in Studio.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0110-Studio-Sync-And-Gates.md",
+  "risk": "low",
+  "tracking": [
+    {
+      "item": "Upload the 17 menu PNGs (games/mathshow/art/menu/UPLOAD_LIST.md) and set their ids in MenuTheme",
+      "status": "blocked",
+      "blocked_on": "human"
+    },
+    {
+      "item": "Upload the 48 identity PNGs (games/mathshow/art/identity/UPLOAD_LIST.md)",
+      "status": "backlog"
+    },
+    {
+      "item": "Studio sync fix",
+      "status": "done",
+      "see": "docs/workflow/STUDIO-SYNC.md",
+      "note": "Works in a clean setup; exact cause not proven, see STUDIO-SYNC.md"
+    },
+    {
+      "item": "TextFit gate results for TASK-0106 and TASK-0107",
+      "status": "partial",
+      "result": "TASK-0107 pass: 2859 rows, 0 failures, tightest 6.5 px. TASK-0106: 109 rows, 0 failed, 844x390 only, no shard-id profiles, so 6 px unmeasured for its text; no board screenshot."
+    },
+    {
+      "item": "TASK-0106 Kit.luau headshot minor findings",
+      "status": "backlog",
+      "see": "task note, follow-up section"
+    },
+    {
+      "item": "Prove the sync cause: re-enable one extra Rojo plugin in Studio and repeat the comment probe",
+      "status": "blocked",
+      "blocked_on": "human"
+    },
+    {
+      "item": "Finish TASK-0106's gate: shard-id-* shape profiles, other viewports and a board screenshot",
+      "status": "backlog"
+    },
+    {
+      "item": "Have guard.sh ask jg before orchestrator override-merge; --by is free text",
+      "status": "backlog",
+      "see": "06 QA/AUD-20261030-TASK-0110-01.md"
+    },
+    {
+      "item": "serve.sh: add a test for the any-Rojo refusal, and stop --dry-run rewriting BuildStamp.txt",
+      "status": "backlog",
+      "see": "06 QA/AUD-20261030-TASK-0110-01.md"
+    }
+  ],
+  "history": [
+    {
+      "time": "2026-10-30T18:31:22",
+      "from": "backlog",
+      "to": "in_progress",
+      "note": "approved by jg in chat"
+    },
+    {
+      "time": "2026-10-30T22:34:52",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-30T22:34:52",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-30T22:42:55",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "approved_by": "jg",
+  "revisions": 0,
+  "executions": [
+    {
+      "time": "2026-10-30T22:34:52",
+      "result": "pass",
+      "notes": "check.sh passes; Studio sync probe and gates recorded in docs/workflow/STUDIO-SYNC.md, with AC1, AC3 and AC4 gaps disclosed"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-10-30T22:34:52",
+      "result": "pass",
+      "report": "06 QA/AUD-20261030-TASK-0110-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
+}

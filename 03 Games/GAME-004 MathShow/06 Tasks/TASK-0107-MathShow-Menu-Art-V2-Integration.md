@@ -103,3 +103,5 @@ Numbers changed (old -> new; gate margin not measured, see below):
 - The 17 `-v2` PNGs need uploading, then their ids set in `MenuTheme` (`art/menu/UPLOAD_LIST.md`). Until then the menu shows flat placeholders.
 - AC3 is not met: the Studio TextFit gate hasn't run at any size, so every margin is unmeasured. It's blocked by Studio not receiving updated scripts.
 - AC4 is partly met: the numbers table has no gate-margin column until the gate runs.
+
+**Later, 2026-10-30 (TASK-0110):** the TextFit gate ran after merge and passed at 844x390, 1920x1080 and phone 812x375: 2,859 rows, 0 failures, tightest margin 6.5 px. The lines above and the audit stay as written. Results: `docs/workflow/STUDIO-SYNC.md`.

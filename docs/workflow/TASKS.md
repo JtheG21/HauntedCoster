@@ -40,6 +40,8 @@ Fields the orchestrator also keeps: `history`, `executions`,
 | `done` | Merged | terminal | |
 | `archived` | Dropped or unstarted when its game was paused | terminal | `archive` |
 
+**Merging over a failed audit** is jg's decision alone: `python3 scripts/orchestrator.py override-merge TASK-#### --by jg --reason "..."`. The verdict stays a fail, and who decided and why go on that audit record.
+
 `approved` and `changes_requested` go beyond the seven statuses first proposed. jg chose to keep them on 2026-10-30, because the
 merge gate and the revision limit depend on them. History entries keep the names they were written with, including the older
 `proposed` and `in_review`.
