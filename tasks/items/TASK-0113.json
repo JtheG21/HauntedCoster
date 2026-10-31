@@ -2,12 +2,15 @@
   "id": "TASK-0113",
   "game": "GAME-004",
   "title": "MathShow Menu Tablet Viewport TextFit",
-  "status": "backlog",
+  "status": "approved",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
     "games/mathshow/tests/studio/TextFit.luau",
-    "games/mathshow/tests/studio/IdentityBoards.luau"
+    "games/mathshow/tests/studio/IdentityBoards.luau",
+    "games/mathshow/src/client/Menu/",
+    "games/mathshow/src/client/Identity/",
+    "docs/workflow/STUDIO-SYNC.md"
   ],
   "depends_on": [
     "TASK-0112"
@@ -21,5 +24,39 @@
   "evidence": [],
   "notes": "Created at the TASK-0112 closeout (2026-10-31) from jg's request. Not started. Running the gate needs a jg-run Studio session (Disconnect/Connect the Rojo plugin).",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0113-MathShow-Menu-Tablet-Viewport-TextFit.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-10-31T12:16:14",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-10-31T12:16:14",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-10-31T12:24:04",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-10-31T12:24:04",
+      "from": "review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-10-31T12:24:04",
+      "result": "pass",
+      "notes": "TextFit 5 viewports: 4,765 rows, 0 failures (953 per viewport). IdentityBoards 5 viewports: 109 rows each, 0 failed. BuildStamp 9732f94 confirmed in Edit before Play. Fix: +2 px on identity tag and status chips (9732f94)."
+    }
+  ]
 }

@@ -77,8 +77,18 @@ local Theme = {
 		Format = { X = 220, CompactX = 66, Y = 11, Size = 16 },
 	},
 
-	Tag = { Height = 30, PadX = 10, MinWidth = 48, TextSize = 13, TextY = 7 },
-	Status = { Height = 32, IconX = 11, IconY = 9, IconSize = 14, TextX = 31, TextY = 9, TextSize = 12, PadRight = 11 },
+	Tag = { Height = 30, PadX = 10, MinWidth = 48, TextSize = 13, TextY = 7, ExtraWidth = 2 }, -- +2: text-fit margin 6 at the left inset
+	Status = {
+		Height = 32,
+		IconX = 11,
+		IconY = 9,
+		IconSize = 14,
+		TextX = 31,
+		TextY = 9,
+		TextSize = 12,
+		PadRight = 11,
+		ExtraWidth = 2,
+	}, -- +2: text-fit margin 6 at the right inset
 	StatusSlot = { Size = 20, IconSize = 14, Color = rgb(11, 10, 13) },
 	StatusStyle = {
 		SUBMITTED = { Shard = "shard-id-status-silver", Icon = "Check", Ink = rgb(255, 255, 255) },
