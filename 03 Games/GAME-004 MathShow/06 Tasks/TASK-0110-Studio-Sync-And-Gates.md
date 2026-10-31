@@ -3,7 +3,7 @@ id: TASK-0110
 title: Studio Sync And Gates
 type: task
 project: GAME-004
-status: approved
+status: done
 created: 2026-10-30
 updated: 2026-10-30
 tags:

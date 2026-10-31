@@ -2,7 +2,7 @@
   "id": "TASK-0110",
   "game": "GAME-004",
   "title": "Studio Sync And Gates",
-  "status": "approved",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -105,6 +105,12 @@
       "from": "review",
       "to": "approved",
       "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-10-30T22:42:55",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "approved_by": "jg",
@@ -122,5 +128,6 @@
       "result": "pass",
       "report": "06 QA/AUD-20261030-TASK-0110-01.md"
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }
