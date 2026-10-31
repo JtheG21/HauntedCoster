@@ -273,6 +273,19 @@ class Project:
         t["merge_approved_by"] = by
         self._move(t, "done", f"merge approved by {by}")
 
+    def override_merge(self, task_id: str, by: str, reason: str) -> None:
+        """HUMAN: merge over a failed audit. The verdict stays a fail; who decided and why go on that audit record."""
+        t = self.task(task_id)
+        self._expect(t, "changes_requested", "blocked")
+        if not reason.strip():
+            raise OrchestratorError("override-merge needs a --reason")
+        audits = t.get("audits") or []
+        if not audits or audits[-1].get("result") != "fail":
+            raise OrchestratorError(f"{task_id}: the latest audit didn't fail, so there is nothing to override")
+        audits[-1]["merge_override"] = {"by": by, "reason": reason, "time": now()}
+        t["merge_approved_by"] = by
+        self._move(t, "done", f"merge approved by {by} over failed audit: {reason}")
+
     def unblock(self, task_id: str, to: str, by: str) -> None:
         t = self.task(task_id)
         self._expect(t, "blocked")
@@ -517,6 +530,8 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("start"); s.add_argument("id")
     s = sub.add_parser("request-changes", help="HUMAN: send a review/approved task back for fixes (counts as a revision)")
     s.add_argument("id"); s.add_argument("--by", required=True); s.add_argument("--reason", required=True)
+    s = sub.add_parser("override-merge", help="HUMAN: merge over a failed audit; the verdict stays a fail")
+    s.add_argument("id"); s.add_argument("--by", required=True); s.add_argument("--reason", required=True)
     s = sub.add_parser("unblock"); s.add_argument("id"); s.add_argument("--to", required=True); s.add_argument("--by", required=True)
     s = sub.add_parser("record-exec"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--notes", default="")
     s = sub.add_parser("record-audit"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--report", required=True)
@@ -577,6 +592,7 @@ def main(argv: list[str] | None = None) -> int:
             "archive": lambda: proj.archive(a.id, a.by),
             "start": lambda: proj.start(a.id),
             "unblock": lambda: proj.unblock(a.id, a.to, a.by),
+            "override-merge": lambda: proj.override_merge(a.id, a.by, a.reason),
             "request-changes": lambda: proj.request_changes(a.id, a.by, a.reason),
             "record-exec": lambda: proj.record_exec(a.id, a.result, a.notes),
             "record-audit": lambda: proj.record_audit(a.id, a.result, a.report),

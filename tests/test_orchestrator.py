@@ -268,6 +268,30 @@ class TestBudgetAndDispatch(Base):
         self.assertIn("TASK-0001", json.loads(out)["needs_human"])
 
 
+class TestOverrideMerge(Base):
+    def failed_task(self, **extra):
+        self.write_queue([task("TASK-0001", "changes_requested") | {"audits": [{"result": "fail", "report": "a.md"}]} | extra])
+
+    def test_records_who_and_why_and_keeps_the_fail(self):
+        self.failed_task()
+        code, out = self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "placeholders accepted")
+        self.assertEqual(code, 0, out)
+        t = self.proj().task("TASK-0001")
+        self.assertEqual(t["status"], "done")
+        self.assertEqual(t["merge_approved_by"], "jg")
+        self.assertEqual(t["audits"][-1]["result"], "fail")
+        self.assertEqual(t["audits"][-1]["merge_override"]["by"], "jg")
+        self.assertEqual(t["audits"][-1]["merge_override"]["reason"], "placeholders accepted")
+        self.assertIn("over failed audit", t["history"][-1]["note"])
+
+    def test_refuses_without_a_failed_audit_or_a_reason(self):
+        self.write_queue([task("TASK-0001", "changes_requested")])
+        self.assertEqual(self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "x")[0], 2)
+        self.failed_task()
+        self.assertEqual(self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "  ")[0], 2)
+        self.assertEqual(self.proj().task("TASK-0001")["status"], "changes_requested")
+
+
 class TestReports(Base):
     def note(self, name, files, tests="- Studio playtest: join"):
         p = self.root / "03 Games" / f"{name}.md"
