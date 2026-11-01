@@ -42,3 +42,11 @@ Uploads, id or art changes, and tablet viewports (TASK-0113).
 - Full gate at five viewports: TextFit 6,335 rows, 0 failures. IdentityBoards 109 rows per viewport, 0 failures, 0 GuiButtons.
 - Exec record for this build is appended. Earlier records (73316be, 9ccb8eb) stay in history.
 
+## Narrowed scope (2026-11-01, build 025b721)
+
+- **Decision (jg):** the rule-based collision gate failed audit twice, so collision is removed from this task and rebuilt as [[TASK-0115-MathShow-Ownership-Based-Collision-Gate]]. Hit rects to 48 are [[TASK-0116-MathShow-Hit-Rect-48]].
+- **Rules check:** docs/workflow/TASKS.md lists `changes_requested` (limit 2) -> `in_progress` via `start`, and `orchestrator.py` blocks only when revisions exceed `max_revisions` (2). At 2/2 a resubmission is allowed and one more failed audit blocks the task, so this task was re-scoped and resubmitted, not replaced. PR #168 stays on this branch.
+- **Still in scope:** tap size (design units, 44), same-row interactive-overlap allow-list, sticker and label clipping, review-row gap, IdentityBoards census and margin, the 1,420-row reconciliation.
+- **Out of scope now:** all collision checks. The log prints `collision: NOT COVERED -> TASK-0115` per viewport.
+- **Gate (5 viewports):** TextFit 6,300 rows, 0 failures; header prints BuildStamp, category counts and the 669 + 284 = 953 reconciliation. IdentityBoards 109 rows, 0 failed, 0 GuiButtons per viewport. Details in `docs/workflow/STUDIO-SYNC.md`.
+- **For Codex:** re-audit the narrowed scope only (`TextFit.luau` diff 0b8c767..HEAD).

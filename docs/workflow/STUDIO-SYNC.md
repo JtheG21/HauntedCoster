@@ -180,3 +180,27 @@ The old Glow, Shard and Flash collisions are no longer checked as collisions. Th
 
 **Caveat for the auditor.** The decoration list is now the main source of exclusions. It removes most collision checks against Glow, Shard and Flash images, which is where the old collision counts came from. Please check that list.
 
+
+### TASK-0114 narrowed scope, 2026-11-01 (build 025b721)
+
+Collision checking is removed from TASK-0114 and moves to TASK-0115 (ownership-based gate), after two failed audits. Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `025b721` confirmed in Edit before Play and printed in the log header. `TextFit.run()` and `IdentityBoards.run()` at five viewports. The log now prints, before the row list: BuildStamp, per-viewport category counts (zeros included) and the reconciliation line. Each viewport also prints `collision: NOT COVERED -> TASK-0115`.
+
+| Check | 844x390 | 1920x1080 | phone 812x375 | 1024x768 | 1180x820 |
+|---|---|---|---|---|---|
+| Measured rows | 669 | 669 | 669 | 669 | 669 |
+| Unmeasured rows | 284 | 284 | 284 | 284 | 284 |
+| Reconciliation (669 + 284 = 953) | OK | OK | OK | OK | OK |
+| Clip rows (fails) | 264 (0) | 264 (0) | 264 (0) | 264 (0) | 264 (0) |
+| Tap rows, design units, min 44 (fails) | 10 (0) | 10 (0) | 10 (0) | 10 (0) | 10 (0) |
+| Overlap rows (fails) | 0 (0) | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
+| Overlap, allow-listed | 8 | 8 | 8 | 8 | 8 |
+| Review-row gap rows (fails) | 24 (0) | 24 (0) | 24 (0) | 24 (0) | 24 (0) |
+| Informational screen-px rows | 0 | 0 | 0 | 0 | 0 |
+| Collision | NOT COVERED | NOT COVERED | NOT COVERED | NOT COVERED | NOT COVERED |
+| IdentityBoards rows / failed / GuiButtons | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 |
+
+- **Totals:** `TextFit` 6,300 rows (1,260 per viewport), 0 failures. Unmeasured total 1,420 of 1,420 expected. The run fails if either reconciliation is off.
+- **Removed:** pairwise collision checks, the decoration image list, the Edge, NEW BEST, VS and duplicate-text exemptions, and the hidden-image tally.
+- **Kept:** tap size (design units, 44), the same-row settings allow-list, sticker and label clipping including FitSticker Frames, the review-row gap, the IdentityBoards census before destroy, and the 1,420-row reconciliation.
+- **Smallest tap:** `Screen_main/HowToPlay/Group/Content/Hit`, 230x44 design units, at every viewport. TASK-0116 raises hit rects to 48.
+- **Not covered by this gate:** overlap between controls, shards, labels, stickers and decoration other than the settings allow-list. TASK-0115 owns it.

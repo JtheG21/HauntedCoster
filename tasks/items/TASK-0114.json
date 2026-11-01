@@ -62,6 +62,24 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-01T12:31:58",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
+    },
+    {
+      "time": "2026-11-01T12:45:44",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-01T12:50:13",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -74,6 +92,11 @@
       "time": "2026-11-01T12:26:23",
       "result": "pass",
       "notes": "Audit fixes, build 0b8c767. Full gate at five viewports: TextFit 6,335 rows, 0 failures; IdentityBoards 109 rows per viewport, 0 failures, 0 GuiButtons per viewport (census before destroy). Tap rule design units, smallest 230x44. Decoration list counted per instance. Old exec record (73316be) kept in history."
+    },
+    {
+      "time": "2026-11-01T12:50:13",
+      "result": "pass",
+      "notes": "Narrowed scope, build 025b721. Collision removed (moves to TASK-0115); log header prints BuildStamp, per-viewport category counts and 669+284=953 reconciliation; collision NOT COVERED row per viewport. Full gate at five viewports: TextFit 6,300 rows, 0 failures; IdentityBoards 109 rows per viewport, 0 failed, 0 GuiButtons. check.sh passes. Earlier exec records kept."
     }
   ],
   "audits": [
@@ -126,7 +149,12 @@
         "VS badge": 4
       },
       "exemption_count_evidence": "/Users/jg/Library/Logs/Roblox/0.745.0.7451137_20261031T170459Z_Studio_60635_last.log, final complete TextFit run; identical counts all five viewports; 481 total each; >10 review flags: edge, own control, glow/flash, duplicate"
+    },
+    {
+      "time": "2026-11-01T12:31:58",
+      "result": "fail",
+      "report": "docs/workflow/STUDIO-SYNC.md"
     }
   ],
-  "revisions": 1
+  "revisions": 2
 }

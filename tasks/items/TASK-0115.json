@@ -1,0 +1,29 @@
+{
+  "id": "TASK-0115",
+  "game": "GAME-004",
+  "title": "MathShow Ownership-Based Collision Gate",
+  "status": "backlog",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/tests/studio/TextFit.luau",
+    "games/mathshow/tests/studio/CollisionManifest.luau",
+    "games/mathshow/tests/studio/CollisionCanary.luau",
+    "docs/workflow/STUDIO-SYNC.md"
+  ],
+  "depends_on": [
+    "TASK-0114"
+  ],
+  "branch": "task/TASK-0115-collision-gate",
+  "acceptance": [
+    "Each visible element has an owner: its nearest <Control>/Group/Content ancestor. No comparisons are made within one owner.",
+    "Every cross-owner pair is compared: shards, labels, stickers, Spark frames and visible Flash/Glow layers.",
+    "Exemptions live only in games/mathshow/tests/studio/CollisionManifest.luau as exact path pairs, each with a reason. The log prints the manifest hit count and any manifest entry that never matched.",
+    "A planted-fault canary fixture is mandatory: the gate must flag it, and a run where the canary is not flagged fails.",
+    "Full gate at five viewports (844x390, 1920x1080, phone 812x375, 1024x768, 1180x820) with 0 unexplained failures; the log replaces the 'collision: NOT COVERED' row."
+  ],
+  "evidence": [],
+  "notes": "Backlog. Replaces the heuristic collision gate removed from TASK-0114. Needs the exemption list written from measured pairs, not by name patterns.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0115-MathShow-Ownership-Based-Collision-Gate.md",
+  "risk": "low"
+}
