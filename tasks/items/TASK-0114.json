@@ -2,7 +2,7 @@
   "id": "TASK-0114",
   "game": "GAME-004",
   "title": "MathShow Tap Target + Unmeasured Rows Audit",
-  "status": "review",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -106,6 +106,18 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-01T13:02:38",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-01T13:03:56",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -185,7 +197,13 @@
       "time": "2026-11-01T12:31:58",
       "result": "fail",
       "report": "docs/workflow/STUDIO-SYNC.md"
+    },
+    {
+      "time": "2026-11-01T13:02:38",
+      "result": "pass",
+      "report": "docs/workflow/STUDIO-SYNC.md"
     }
   ],
-  "revisions": 0
+  "revisions": 0,
+  "merge_approved_by": "jg"
 }
