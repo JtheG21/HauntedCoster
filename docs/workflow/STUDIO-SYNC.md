@@ -298,3 +298,26 @@ Approved by jg: manifest rows R1 to R4 (17 entries with fixtures lists) and layo
 
 Before and after screenshots (Studio `screen_capture`, scratchpad `overlaps/`): `BEFORE-14a-skill-choice.jpg` and `AFTER-14a-skill-choice.jpg`, `BEFORE-08a-vs-question.jpg` and `AFTER-08a-vs-question.jpg`. In 14a the strip sits 8 px higher and clears the shard. In 08a the Problem shard is lower and the score bar is clear of it. The VS shard art is stretched 11% shorter (166 against 186), which shows as a flatter shard.
 
+
+### TASK-0115 audit fixes: stop report, new overlaps from property-based collection, 2026-11-01 (code build 0e21eee)
+
+Fresh Play, Rojo from `task/TASK-0115-ownership-collision`, BuildStamp `0e21eee` in Edit and in the log header. F1 to F4 are in: elements are collected by drawable property, halos by `CollisionRole = "Halo"` (set in `Menu/Shard.luau` and on `TierGlow` in `View.luau`), the R2 manifest entries are removed, the Blitz problem text is back at y 60 (VS keeps y 55), and `canary-name-is-not-role` is added.
+
+**Gate result: not green.** 27 cross-owner overlaps per viewport (135 in all), 7 unique pairs. All five viewports have identical pairs and areas. No other failure: `TEXTFIT_RESULT rows=10600 failures=135`. Manifest 14 entries, 52 hits per viewport (the 60 minus the 8 R2 pair-fixtures), 0 unused. Canaries `canary-overlap=FLAGGED canary-label-on-foreign-shard=FLAGGED canary-composition=PASS canary-name-is-not-role=FLAGGED`. Ledger 669 / 284 at 5/5. IdentityBoards 109 rows, 0 failed at 5/5. Halo rows 778 per viewport.
+
+Collected per viewport (all five identical): `TextLabel=930 TextButton=0 TextBox=0 ImageLabel=767 ImageButton=0 Frame=268 halo=115`. Spark1 to Spark3 are collected (they are Frames); only Spark3 overlaps anything.
+
+| # | Pair | Area (px2) | Fixtures | Screenshot |
+|---|---|---|---|---|
+| 1 | `Screen_blitz/TimerBar` x `Screen_blitz/TimerBar/Fill` | 5200.0 px2 | 3: 06a-blitz-question, 06b-blitz-locked, 06c-blitz-clock-max | NEW-06a-blitz-question.jpg (blitz); AFTER-08a-vs-question.jpg (vs); BEFORE-14a-skill-choice.jpg (skill) |
+| 2 | `Screen_skill/RankStrip/Misses/Slot1` x `Screen_skill/RankStrip/Misses/Slot1/Cross` | 144.0 px2 | 4: 13b-skill-typed-locked, 13c-skill-typed-reveal, 14b-skill-choice-locked, 14c-skill-choice-reveal-wrong | NEW-13c-skill-typed-reveal.jpg |
+| 3 | `Screen_skill/RankStrip/Misses/Slot2` x `Screen_skill/RankStrip/Misses/Slot2/Cross` | 144.0 px2 | 1: 13c-skill-typed-reveal | NEW-13c-skill-typed-reveal.jpg |
+| 4 | `Screen_skill/TimerBar` x `Screen_skill/TimerBar/Fill` | 5200.0 px2 | 4: 13a-skill-typed, 13b-skill-typed-locked, 14a-skill-choice, 14b-skill-choice-locked | NEW-06a-blitz-question.jpg (blitz); AFTER-08a-vs-question.jpg (vs); BEFORE-14a-skill-choice.jpg (skill) |
+| 5 | `Screen_vs/TimerBar` x `Screen_vs/TimerBar/Fill` | 5200.0 px2 | 3: 08a-vs-question, 08b-vs-question-scores, 08d-vs-sudden | NEW-06a-blitz-question.jpg (blitz); AFTER-08a-vs-question.jpg (vs); BEFORE-14a-skill-choice.jpg (skill) |
+| 6 | `Toasts/Toast/Group/Content/Label` x `Screen_main/Spark3` | 56.1 px2 | 6: 20-coming-soon [demon2], 20-coming-soon [official], 20-coming-soon [standard], 20-coming-soon [unavailable], 20-coming-soon [unranked], 20-coming-soon [wide20] | 20-coming-soon-demon2.jpg |
+| 7 | `Toasts/Toast/Group/Shard` x `Screen_main/Spark3` | 64.0 px2 | 6: 20-coming-soon [demon2], 20-coming-soon [official], 20-coming-soon [standard], 20-coming-soon [unavailable], 20-coming-soon [unranked], 20-coming-soon [wide20] | 20-coming-soon-demon2.jpg |
+
+Notes for the decision (nothing was added to the manifest and no layout changed):
+- Five of the seven pairs are a Frame against its own child: a timer track and its `Fill` (5,200 px2, blitz, skill and VS), and a misses slot and its `Cross` (144 px2). They are one component, but the owner rule only recognises `X/Group/...`, so they count as different owners. The rule gap, not a layout defect, causes them; the choices are to treat an ancestor and its own descendant as the same owner (a CollisionRules change) or to list them in the manifest.
+- Two pairs are the COMING SOON toast over `Screen_main/Spark3` (a decorative diamond, 56 and 64 px2), in all six `20-coming-soon` fixtures. This is the same transient toast overlay as manifest row R4.
+- Spark1 and Spark2 and the other new Frames and text produce no overlaps.

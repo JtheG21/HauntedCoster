@@ -61,3 +61,10 @@ Registered 2026-11-01 when TASK-0114 dropped its collision gate after two failed
 - **Known non-task failures:** none. `check.sh`, `validate_queue`, `validate_vault` pass; CI green; specs 300 passed.
 - **Unverified:** the gate ran once in Studio (Play, Client); same-owner overlaps are never compared, so a text move inside its own shard (VS text, 5 px up) is only checked by the TextFit margin and a screenshot.
 - **Report back:** verdict, findings with file:line, checks run, what is unverified.
+
+## Audit fixes, revision 1/2 (2026-11-01, code build 0e21eee)
+
+- **Done:** F1 collection by drawable property with per-class counts; F2 `CollisionRole = "Halo"` attribute in `Menu/Shard.luau` and on `TierGlow`, R2 manifest entries removed (14 entries, 52 hits, 0 unused); F3 Blitz text back at y 60 (my earlier replace had changed both builders); F4 `canary-name-is-not-role` FLAGGED with the other three canaries unchanged.
+- **Gate not green:** 27 cross-owner overlaps per viewport in 7 unique pairs: five are a Frame against its own child (timer tracks and `Fill`, miss slots and `Cross`), two are the toast over `Spark3`. Table with screenshots in `docs/workflow/STUDIO-SYNC.md`. Stopped as instructed; no manifest or layout change made.
+- **Not recorded:** `record-exec`. A fail record would be revision 2/2.
+
