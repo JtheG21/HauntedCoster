@@ -1665,6 +1665,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			BackgroundTransparency = 1,
 			ZIndex = 3,
 		}, screen :: Frame) :: ImageLabel
+		glow:SetAttribute("CollisionRole", "Halo") -- a halo, not a layout element: the collision gate lists it as informational
 		Shard.setImage(glow, glowKey, nil, nil)
 		table.insert(stops, Fx.breathe(glow, 0))
 		local newBadge = badgeIcon(screen :: Frame, tier, L.RankNew.x, L.RankNew.y, MenuTheme.BadgeSizes.Hero)
@@ -1739,8 +1740,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			UDim2.fromOffset(60, 40)
 		local shown = bm.problem .. " = ?"
 		local fit = TextFitRules.fitSize(measureWidth, shown, { 88, 76, 64, 56, 48, 40 }, 456)
-		-- y 55 (was 60): the lowered, shorter VS shard keeps the 6 px text margin at its bottom edge (TASK-0115)
-		local problemLabel = text(problem.content, "Text", shown, fit.size, 62, 55, 456, fit.size * fit.lines, {
+		local problemLabel = text(problem.content, "Text", shown, fit.size, 62, 60, 456, fit.size * fit.lines, {
 			TextWrapped = fit.lines > 1,
 			LineHeight = 1,
 		})

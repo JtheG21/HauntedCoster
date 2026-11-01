@@ -62,7 +62,7 @@ return function(t: TestRunner.T)
 	t.test("owner: in-control paths resolve to their control", function()
 		t.eq(CollisionRules.resolveOwner({ "Screen_main", "Play", "Group", "Content", "Label" }), "Screen_main/Play")
 		t.eq(CollisionRules.resolveOwner({ "Screen_main", "Play", "Group", "Shard" }), "Screen_main/Play", "shard")
-		t.eq(CollisionRules.resolveOwner({ "Screen_main", "Play", "Group", "Glow" }), "Screen_main/Play", "glow")
+		t.eq(CollisionRules.resolveOwner({ "Screen_main", "Play", "Group", "Glow" }), "Screen_main/Play", "halo image")
 	end)
 
 	t.test("owner: X/Group/Shard resolves to X, including under a screen", function()
@@ -103,9 +103,9 @@ return function(t: TestRunner.T)
 		t.eq(result.compared, 5)
 	end)
 
-	t.test("compare: a glow overlap is a halo, not an overlap; below minArea is ignored", function()
+	t.test("compare: a halo overlap is informational, not an overlap; below minArea is ignored", function()
 		local result = CollisionRules.compare({
-			el("S/A/Group/Glow", "glow", rect(0, 0, 100, 50)),
+			el("S/A/Group/Halo1", "halo", rect(0, 0, 100, 50)),
 			el("S/B/Group/Shard", "shard", rect(60, 0, 100, 50)),
 			el("S/C/Group/Shard", "shard", rect(0, 100, 10, 10)),
 		}, 0.5, "f")

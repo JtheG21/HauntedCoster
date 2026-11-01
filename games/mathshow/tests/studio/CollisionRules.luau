@@ -11,8 +11,8 @@ local CollisionRules = {}
 
 export type Rect = { cx: number, cy: number, w: number, h: number, rot: number }
 
--- `path` is the element's path below the gui root, split on "/". `kind` is "shard", "label", "sticker", "spark", "flash"
--- or "glow".
+-- `path` is the element's path below the gui root, split on "/". `kind` is "halo" for an element the source marks
+-- CollisionRole = "Halo"; any other value is an ordinary drawable element (the gate uses "text", "image" and "frame").
 export type Element = { path: { string }, kind: string, rect: Rect }
 
 -- One approved pair, in each of the listed fixtures. Order of `a` and `b` does not matter.
@@ -22,7 +22,7 @@ export type Pair = { a: string, b: string, fixture: string, area: number }
 export type CompareResult = {
 	compared: number, -- cross-owner pairs examined
 	composition: number, -- same-owner pairs that overlap (never failures)
-	halo: { Pair }, -- cross-owner overlaps involving a glow (informational)
+	halo: { Pair }, -- cross-owner overlaps involving a halo (informational)
 	overlaps: { Pair }, -- cross-owner overlaps (candidates for failure, minus the manifest)
 }
 
@@ -128,7 +128,7 @@ local function key(a: string, b: string): string
 end
 
 -- Every pair of elements: same owner overlaps count as composition; different owners are examined, and an overlap larger
--- than `minArea` is an overlap (a halo when either element is a glow). Neither input is mutated.
+-- than `minArea` is an overlap (a halo when either element is a halo). Neither input is mutated.
 function CollisionRules.compare(elements: { Element }, minArea: number, fixture: string): CompareResult
 	local result: CompareResult = { compared = 0, composition = 0, halo = {}, overlaps = {} }
 	local owners: { string } = {}
@@ -148,7 +148,7 @@ function CollisionRules.compare(elements: { Element }, minArea: number, fixture:
 				result.compared += 1
 				if ov > minArea then
 					local pair: Pair = { a = paths[i], b = paths[j], fixture = fixture, area = ov }
-					if elements[i].kind == "glow" or elements[j].kind == "glow" then
+					if elements[i].kind == "halo" or elements[j].kind == "halo" then
 						table.insert(result.halo, pair)
 					else
 						table.insert(result.overlaps, pair)

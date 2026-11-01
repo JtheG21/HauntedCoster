@@ -97,13 +97,15 @@ function Shard.new(
 	local scale = make("UIScale", {}, group) :: UIScale
 	local glow: ImageLabel? = nil
 	if glowKey then
-		glow = make("ImageLabel", {
+		local halo = make("ImageLabel", {
 			Name = "Glow",
 			Size = UDim2.fromScale(1, 1),
 			BackgroundTransparency = 1,
 			ScaleType = Enum.ScaleType.Stretch,
 			ZIndex = 1,
 		}, group) :: ImageLabel
+		halo:SetAttribute("CollisionRole", "Halo") -- a halo, not a layout element: the collision gate lists it as informational
+		glow = halo
 	end
 	local inset = { Position = UDim2.fromOffset(PAD, PAD), Size = UDim2.new(1, -PAD * 2, 1, -PAD * 2) }
 	local image = make("ImageLabel", {

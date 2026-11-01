@@ -58,24 +58,6 @@ local manifest: { CollisionRules.ManifestEntry } = {
 		reason = "staggered rank stack, intentional",
 	},
 	{
-		a = "Screen_skillresult/TierGlow",
-		b = "Screen_skillresult/Arrow",
-		fixtures = { "15a-result-up", "15d-result-up-demon" },
-		reason = "tier glow halo behind badges",
-	},
-	{
-		a = "Screen_skillresult/TierGlow",
-		b = "Screen_skillresult/OldBadge",
-		fixtures = { "15a-result-up", "15d-result-up-demon" },
-		reason = "tier glow halo behind badges",
-	},
-	{
-		a = "Screen_skillresult/TierGlow",
-		b = "Screen_skillresult/NewBadge",
-		fixtures = { "15a-result-up", "15b-result-held", "15c-result-first", "15d-result-up-demon" },
-		reason = "tier glow halo behind badges",
-	},
-	{
 		a = "Screen_blitzreview/Card/Group/Shard",
 		b = "Screen_blitzreview/NewBest",
 		fixtures = { "07a-blitz-review-best", "07b-blitz-review-perfect-first" },

@@ -319,10 +319,11 @@ type Acc = {
 	halo: number,
 	hitPairs: { CollisionRules.Pair },
 	canary: { string },
+	classes: { [string]: number }, -- collected elements by class, over every state at this viewport
 }
 
 local function newAcc(): Acc
-	return { compared = 0, composition = 0, halo = 0, hitPairs = {}, canary = {} }
+	return { compared = 0, composition = 0, halo = 0, hitPairs = {}, canary = {}, classes = {} }
 end
 
 local function elementRect(g: GuiObject, root: Frame, scale: number): CollisionRules.Rect
@@ -362,9 +363,15 @@ local function glyphRect(lab: TextLabel | TextButton, root: Frame, scale: number
 	}
 end
 
--- Every visible shard, label, sticker, spark, flash and glow under root, as pure Elements. An image counts when it renders:
--- an image that is set and not fully transparent, or a visible flat background.
-local function collectElements(root: Frame, scale: number): { CollisionRules.Element }
+-- Element classes whose count is printed per viewport (zeros included), plus the halo role.
+local COLLECT_CLASSES: { string } =
+	{ "TextLabel", "TextButton", "TextBox", "ImageLabel", "ImageButton", "Frame", "halo" }
+
+-- Every drawable GuiObject under root, as pure Elements, chosen by property and never by name: a visible text object with
+-- text and TextTransparency under 1; an image object with a non-empty Image and ImageTransparency under 1; a Frame with
+-- BackgroundTransparency under 1. Fully transparent containers drop out by property. `CollisionRole = "Halo"` (set in source
+-- where a glow is built) makes an element a halo. `classes` gets one count per ClassName, and one for halos.
+local function collectElements(root: Frame, scale: number, classes: { [string]: number }?): { CollisionRules.Element }
 	local out: { CollisionRules.Element } = {}
 	for _, d in root:GetDescendants() do
 		if not (d:IsA("GuiObject") and visible(d :: GuiObject)) then
@@ -373,31 +380,29 @@ local function collectElements(root: Frame, scale: number): { CollisionRules.Ele
 		local g = d :: GuiObject
 		local kind: string? = nil
 		local rect: CollisionRules.Rect? = nil
-		local isText = g:IsA("TextLabel") or g:IsA("TextButton")
-		local sticker = g:GetAttribute("FitSticker") == true
-		if isText and (g :: TextLabel).Text ~= "" and (g :: TextLabel).TextTransparency < 1 then
-			kind = if sticker then "sticker" else "label"
-			rect = glyphRect(g :: TextLabel, root, scale)
+		if g:IsA("TextLabel") or g:IsA("TextButton") or g:IsA("TextBox") then
+			local lab = g :: TextLabel
+			if lab.Text ~= "" and lab.TextTransparency < 1 then
+				kind, rect = "text", glyphRect(lab, root, scale)
+			end
 		elseif g:IsA("ImageLabel") or g:IsA("ImageButton") then
 			local img = g :: ImageLabel
-			local renders = (img.Image ~= "" and img.ImageTransparency < 1) or img.BackgroundTransparency < 1
-			if renders then
-				if g.Name == "Glow" then
-					kind = "glow"
-				elseif string.sub(g.Name, 1, 5) == "Spark" then
-					kind = "spark"
-				elseif g.Name == "Flash" then
-					kind = "flash"
-				else
-					kind = if sticker then "sticker" else "shard"
-				end
-				rect = elementRect(g, root, scale)
+			if img.Image ~= "" and img.ImageTransparency < 1 then
+				kind, rect = "image", elementRect(g, root, scale)
 			end
-		elseif sticker then
-			kind = "sticker"
-			rect = elementRect(g, root, scale)
+		elseif g:IsA("Frame") and g.BackgroundTransparency < 1 then
+			kind, rect = "frame", elementRect(g, root, scale)
 		end
 		if kind and rect then
+			if g:GetAttribute("CollisionRole") == "Halo" then
+				kind = "halo"
+			end
+			if classes then
+				classes[g.ClassName] = (classes[g.ClassName] or 0) + 1
+				if kind == "halo" then
+					classes.halo = (classes.halo or 0) + 1
+				end
+			end
 			table.insert(out, { path = string.split(path(g, root), "/"), kind = kind, rect = rect })
 		end
 	end
@@ -406,7 +411,7 @@ end
 
 -- One state at one viewport: all cross-owner pairs against the manifest, same-owner pairs counted as composition.
 local function collisionChecks(root: Frame, state: string, fixture: string, rows: { Row }, scale: number, acc: Acc)
-	local result = CollisionRules.compare(collectElements(root, scale), COLLISION_MIN_AREA, fixture)
+	local result = CollisionRules.compare(collectElements(root, scale, acc.classes), COLLISION_MIN_AREA, fixture)
 	local matched = CollisionRules.matchManifest(result.overlaps, CollisionManifest)
 	acc.compared += result.compared
 	acc.composition += result.composition
@@ -441,7 +446,7 @@ local function collisionChecks(root: Frame, state: string, fixture: string, rows
 			text = string.format("%.1f px2", pair.area),
 			margin = "-",
 			pass = true,
-			why = "glow halo over another control (informational)",
+			why = "halo over another control (informational)",
 			category = "halo",
 		})
 	end
@@ -752,6 +757,11 @@ function TextFit.run(): ({ Row }, number)
 				table.concat(acc.canary, " ")
 			)
 		)
+		local classParts: { string } = {}
+		for _, cls in COLLECT_CLASSES do
+			table.insert(classParts, cls .. "=" .. tostring(acc.classes[cls] or 0))
+		end
+		print("[TextFit] ELEMENTS " .. sz.name .. " | " .. table.concat(classParts, " "))
 	end
 	local reconcile = LedgerRules.reconcile(ledger, names)
 	for _, line in reconcile.lines do
