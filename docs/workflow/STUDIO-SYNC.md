@@ -229,3 +229,45 @@ Fresh Play, Rojo from `task/TASK-0115-ownership-collision`, BuildStamp `28c7561`
 | `canary-composition`: a label over its own shard | passes | PASS (0 overlaps, 2 composition) | PASS | PASS | PASS | PASS |
 
 Log excerpt: `[TextFit] CANARY 844x390 | canary-overlap=FLAGGED canary-label-on-foreign-shard=FLAGGED canary-composition=PASS`, ending `TEXTFIT_CANARY_RESULT rows=15 failures=0`. A canary that is not flagged (or a composition control that is) counts as a gate failure.
+
+### TASK-0115 real-menu run: stop report, 2026-11-01 (code build 28c7561)
+
+Fresh Play, Rojo from `task/TASK-0115-ownership-collision`, `TextFit.run()` at five viewports. The manifest is empty and no layout was changed. The gate fails: **81 cross-owner overlaps per viewport, 405 in all**, as 23 unique pairs. The pairs and areas are identical at 844x390, 1920x1080, phone 812x375 and 1024x768. At 1180x820 the only difference is `Screen_blitzreview/Card/Group/Shard x NewBest` (144.8 px2 instead of 179.7).
+
+Log header per viewport (all five identical): `compared=26757 composition=1441 halo=658 fails=81 manifest-hits=0 unused-manifest=0 canary: canary-overlap=FLAGGED canary-label-on-foreign-shard=FLAGGED canary-composition=PASS`. LedgerRules 669 / 284 passes at 5/5 and IdentityBoards is unchanged (109 rows, 0 failed). `TEXTFIT_RESULT rows=10005 failures=405`.
+
+Overlap areas are at 844x390, in design px squared. Screenshots are Studio `screen_capture` frames, saved outside the vault in `/private/tmp/claude-501/-Users-jg-Desktop-Rg1/f7bf5a2b-5feb-477f-85ca-ff8a977ada85/scratchpad/overlaps/`.
+
+| # | Pair (element A x element B) | Area | Fixtures (count) | Screenshot |
+|---|---|---|---|---|
+| 1 | `Screen_ladder/Rung4/Group/Shard` x `Screen_ladder/Rung3/Group/Shard` | 116.3 px2 | 3: 16a-rank-ladder, 16b-rank-ladder-demon, 16c-rank-ladder-unranked | 16a-rank-ladder.jpg |
+| 2 | `Screen_ladder/Rung3/Group/Shard` x `Screen_ladder/Rung2/Group/Shard` | 121.4 px2 | 3: 16a-rank-ladder, 16b-rank-ladder-demon, 16c-rank-ladder-unranked | 16a-rank-ladder.jpg |
+| 3 | `Screen_ladder/Rung2/Group/Shard` x `Screen_ladder/Rung1/Group/Shard` | 116.3 px2 | 3: 16a-rank-ladder, 16b-rank-ladder-demon, 16c-rank-ladder-unranked | 16a-rank-ladder.jpg |
+| 4 | `Screen_ladder/Rung1/Group/Shard` x `Screen_ladder/Rung0/Group/Shard` | 121.4 px2 | 3: 16a-rank-ladder, 16b-rank-ladder-demon, 16c-rank-ladder-unranked | 16a-rank-ladder.jpg |
+| 5 | `Screen_ladder/Rung9/Group/Shard` x `Screen_ladder/Rung8/Group/Shard` | 116.3 px2 | 3: 16a-rank-ladder, 16b-rank-ladder-demon, 16c-rank-ladder-unranked | 16a-rank-ladder.jpg |
+| 6 | `Screen_ladder/Rung8/Group/Shard` x `Screen_ladder/Rung7/Group/Shard` | 121.4 px2 | 3: 16a-rank-ladder, 16b-rank-ladder-demon, 16c-rank-ladder-unranked | 16a-rank-ladder.jpg |
+| 7 | `Screen_ladder/Rung7/Group/Shard` x `Screen_ladder/Rung6/Group/Shard` | 116.3 px2 | 3: 16a-rank-ladder, 16b-rank-ladder-demon, 16c-rank-ladder-unranked | 16a-rank-ladder.jpg |
+| 8 | `Screen_ladder/Rung6/Group/Shard` x `Screen_ladder/Rung5/Group/Shard` | 121.4 px2 | 3: 16a-rank-ladder, 16b-rank-ladder-demon, 16c-rank-ladder-unranked | 16a-rank-ladder.jpg |
+| 9 | `Screen_skill/RankStrip/Node8` x `Screen_skill/Problem/Group/Shard` | 18.9 px2 | 7: 13a-skill-typed, 13b-skill-typed-locked, 13c-skill-typed-reveal, 14a-skill-choice, 14b-skill-choice-locked, 14c-skill-choice-reveal-wrong, 14d-skill-choice-reveal-correct | 13a-skill-typed.jpg |
+| 10 | `Screen_skill/RankStrip/Node9` x `Screen_skill/Problem/Group/Shard` | 26.5 px2 | 7: 13a-skill-typed, 13b-skill-typed-locked, 13c-skill-typed-reveal, 14a-skill-choice, 14b-skill-choice-locked, 14c-skill-choice-reveal-wrong, 14d-skill-choice-reveal-correct | 13a-skill-typed.jpg |
+| 11 | `Screen_skill/RankStrip/Node7` x `Screen_skill/Problem/Group/Shard` | 110.4 px2 | 1: 14a-skill-choice | 14a-skill-choice.jpg |
+| 12 | `Toasts/Toast/Group/Shard` x `Screen_skill/Choice3/Group/Shard` | 2.2 px2 | 2: 14b-skill-choice-locked, 14c-skill-choice-reveal-wrong | 14b-skill-choice-locked.jpg |
+| 13 | `Screen_skill/RankStrip/Node6` x `Screen_skill/Problem/Group/Shard` | 72.4 px2 | 1: 14c-skill-choice-reveal-wrong | 14a-skill-choice.jpg |
+| 14 | `Screen_skill/RankStrip/Node5` x `Screen_skill/Problem/Group/Shard` | 34.4 px2 | 1: 14d-skill-choice-reveal-correct | 14a-skill-choice.jpg |
+| 15 | `Screen_skillresult/TierGlow` x `Screen_skillresult/NewBadge` | 14400.0 px2 | 4: 15a-result-up, 15b-result-held, 15c-result-first, 15d-result-up-demon | 15a-result-up.jpg |
+| 16 | `Screen_skillresult/TierGlow` x `Screen_skillresult/OldBadge` | 576.0 px2 | 2: 15a-result-up, 15d-result-up-demon | 15a-result-up.jpg |
+| 17 | `Screen_skillresult/TierGlow` x `Screen_skillresult/Arrow` | 576.0 px2 | 2: 15a-result-up, 15d-result-up-demon | 15a-result-up.jpg |
+| 18 | `Screen_blitzreview/Card/Group/Shard` x `Screen_blitzreview/NewBest` | 179.7 px2 | 2: 07a-blitz-review-best, 07b-blitz-review-perfect-first | 07a-blitz-review-best.jpg |
+| 19 | `Screen_vs/H2H/Group/Shard` x `Screen_vs/Problem/Group/Shard` | 2221.3 px2 | 4: 08a-vs-question, 08b-vs-question-scores, 08c-vs-reveal, 08d-vs-sudden | 08a-vs-question.jpg |
+| 20 | `Toasts/Toast/Group/Shard` x `Screen_main/Title/Group/Shard` | 787.4 px2 | 6: 20-coming-soon [demon2], 20-coming-soon [official], 20-coming-soon [standard], 20-coming-soon [unavailable], 20-coming-soon [unranked], 20-coming-soon [wide20] | 20-coming-soon-demon2.jpg |
+| 21 | `Toasts/Toast/Group/Shard` x `Screen_main/PlayerCard/Group/Shard` | 193.9 px2 | 6: 20-coming-soon [demon2], 20-coming-soon [official], 20-coming-soon [standard], 20-coming-soon [unavailable], 20-coming-soon [unranked], 20-coming-soon [wide20] | 20-coming-soon-demon2.jpg |
+| 22 | `Toasts/Toast/Group/Content/Mark` x `Screen_main/Title/Group/Shard` | 18.6 px2 | 6: 20-coming-soon [demon2], 20-coming-soon [official], 20-coming-soon [standard], 20-coming-soon [unavailable], 20-coming-soon [unranked], 20-coming-soon [wide20] | 20-coming-soon-demon2.jpg |
+| 23 | `Toasts/Toast/Group/Content/Label` x `Screen_main/Title/Group/Shard` | 2.4 px2 | 6: 20-coming-soon [demon2], 20-coming-soon [official], 20-coming-soon [standard], 20-coming-soon [unavailable], 20-coming-soon [unranked], 20-coming-soon [wide20] | 20-coming-soon-demon2.jpg |
+
+Notes for the manifest decision (no entries added):
+- Eight pairs are the rank ladder's stacked rungs (rung N over rung N-1, 116 to 121 px2). Five are the skill rank strip's nodes over the Problem shard (19 to 110 px2).
+- Three pairs are `TierGlow` on the skill result screen, a glow-like image that is not named `Glow`, so it counts as a shard, not a halo. `TierGlow` x `NewBadge` (14,400 px2) is the largest overlap.
+- Five pairs are the COMING SOON toast over main-menu and skill shards. The rest: `Card` shard x `NewBest` (blitz review) and the VS `H2H` shard x `Problem` shard (2,221 px2).
+- Halo rows (`Glow` images over another control) are informational: 658 per viewport, not failures.
+- `Screen_main/EdgeLeft` and `EdgeRight` no longer have a name exemption and produce no overlaps in this run.
+- Same-owner pairs are never compared; 1,441 per viewport overlapped and were counted as composition.
