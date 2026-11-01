@@ -65,3 +65,9 @@ Uploads, id or art changes, and tablet viewports (TASK-0113).
 - **Known non-task failures:** none. `check.sh`, `validate_queue`, `validate_vault` pass; CI green.
 - **Unverified:** nothing in motion. The gate ran once in Studio (Play, Client); the log is in `~/Library/Logs/Roblox/`.
 - **Report back:** verdict, findings with file:line, checks run, what is unverified.
+
+## Audit fixes, narrowed scope (2026-11-01, build 8114b35)
+
+- **P2 reconciliation:** now `shared/LedgerRules.luau`, pure, per viewport: measured == 669 and unmeasured == 284 individually plus 953 total; a missing or extra viewport fails. Spec `tests/LedgerRules.spec.luau`, 9 tests, including 668+285 and 670+283 failing. Specs 284 passed.
+- **P3 acceptance:** collision requirement removed; "collision: NOT COVERED, deferred to TASK-0115" added (edited in `tasks/items/TASK-0114.json`; the orchestrator has no command for that field).
+- **Gate (5 viewports):** 669/284 per viewport, TextFit 6,300 rows 0 failures, IdentityBoards 109 / 0 / 0 GuiButtons. BuildStamp `8114b35` in the log header.

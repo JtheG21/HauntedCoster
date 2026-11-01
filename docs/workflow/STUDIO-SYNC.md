@@ -204,3 +204,16 @@ Collision checking is removed from TASK-0114 and moves to TASK-0115 (ownership-b
 - **Kept:** tap size (design units, 44), the same-row settings allow-list, sticker and label clipping including FitSticker Frames, the review-row gap, the IdentityBoards census before destroy, and the 1,420-row reconciliation.
 - **Smallest tap:** `Screen_main/HowToPlay/Group/Content/Hit`, 230x44 design units, at every viewport. TASK-0116 raises hit rects to 48.
 - **Not covered by this gate:** overlap between controls, shards, labels, stickers and decoration other than the settings allow-list. TASK-0115 owns it.
+
+### TASK-0114 audit fixes for the narrowed scope, 2026-11-01 (build 8114b35)
+
+Two findings from the narrowed-scope audit. Reconciliation moved out of `TextFit.luau` into the pure `shared/LedgerRules.luau` (`reconcile(counts, viewports)`; constants `ExpectedMeasured` 669, `ExpectedUnmeasured` 284, `ExpectedPerViewport` 953 in one place). It fails per viewport on measured and unmeasured individually, then on the total, and also fails a missing or an extra viewport, naming the viewport and both counts. `tests/LedgerRules.spec.luau` has 9 tests: all-correct, 668+285 and 670+283 (each fails), both across two viewports, a wrong total, a correct total with the wrong split, a missing viewport and an extra one. Headless specs went from 275 to 284 passed. The TASK-0114 acceptance now says `collision: NOT COVERED, deferred to TASK-0115`.
+
+Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `8114b35` confirmed in Edit and printed in the log header (the code commit; later commits are docs only).
+
+| Check | 844x390 | 1920x1080 | phone 812x375 | 1024x768 | 1180x820 |
+|---|---|---|---|---|---|
+| Measured / unmeasured (expected 669 / 284) | 669 / 284 OK | 669 / 284 OK | 669 / 284 OK | 669 / 284 OK | 669 / 284 OK |
+| IdentityBoards rows / failed / GuiButtons | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 |
+
+- **TextFit:** 6,300 rows, 0 failures. Unmeasured total 1,420 of 1,420.
