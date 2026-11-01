@@ -323,6 +323,8 @@ local DECOR_IMAGE_NAMES: { [string]: boolean } = {
 	Touch = true,
 }
 local decorTally: { [string]: { [string]: number } } = {}
+-- Images inside a shard were hidden by the old filter. These count how many were checked and how many overlapped.
+local hiddenTally: { [string]: { checked: number, overlapping: number } } = {}
 
 local function sizeOf(state: string): string
 	for _, sz in SIZES do
@@ -509,11 +511,19 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 				cbox = { x0, y0, x1, y1 }
 			end
 			local ov = overlapBox(L.box, cbox)
-			if
-				ov[3] - ov[1] > OVERLAP_EPS
+			local hits = ov[3] - ov[1] > OVERLAP_EPS
 				and ov[4] - ov[2] > OVERLAP_EPS
 				and (ov[3] - ov[1]) * (ov[4] - ov[2]) > 0.5
-			then
+			if isImage and shapeOwner(g) ~= nil then
+				local size = sizeOf(state)
+				local h = hiddenTally[size] or { checked = 0, overlapping = 0 }
+				h.checked += 1
+				if hits then
+					h.overlapping += 1
+				end
+				hiddenTally[size] = h
+			end
+			if hits then
 				local pl, pg = path(L.inst, root), path(g, root)
 				local sameText = isText and (d :: TextLabel).Text == (L.inst :: any).Text
 				local reason = exemption(L.inst, g, root, sameText)
@@ -532,9 +542,6 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 		end
 	end
 
-	if string.find(state, "05a-vs-found", 1, true) then
-		print(`[TextFit] DEBUG {state} labels={#labelBoxes} rowsSoFar={#rows}`)
-	end
 	-- 5. Review rows: gap between neighbouring Row<n> controls, per column. Diagnostic, with a gate at REVIEW_GAP_MIN.
 	local groups: { [string]: { { inst: GuiObject, box: { number }, parent: Instance } } } = {}
 	for _, d in root:GetDescendants() do
@@ -595,6 +602,9 @@ function TextFit.run(): ({ Row }, number)
 	end
 	for size in decorTally do
 		decorTally[size] = nil
+	end
+	for size in hiddenTally do
+		hiddenTally[size] = nil
 	end
 	local Preview =
 		require(Players.LocalPlayer.PlayerScripts:WaitForChild("Client"):WaitForChild("Menu"):WaitForChild("Preview"))
@@ -658,6 +668,21 @@ function TextFit.run(): ({ Row }, number)
 		end
 	end
 
+	for _, sz in SIZES do
+		local h = hiddenTally[sz.name]
+		if h then
+			table.insert(rows, {
+				state = sz.name .. " hidden",
+				element = "previously hidden shard images",
+				text = string.format("checked %d, overlapping %d", h.checked, h.overlapping),
+				margin = "-",
+				pass = true,
+				why = "",
+				category = "info-hidden-images",
+			})
+		end
+	end
+
 	-- TASK-0114 ledger summary per viewport. "unmeasured" is the historical set (checkGui rows with margin "-" or "sticker").
 	local tally: { [string]: { [string]: number } } = {}
 	local smallest: { [string]: string } = {}
@@ -682,6 +707,10 @@ function TextFit.run(): ({ Row }, number)
 		end
 		local counts: { [string]: number } = tally[size]
 		counts[cat] = (counts[cat] or 0) + 1
+		if row.pass and string.sub(row.why, 1, 11) == "intentional" then
+			local key = "exempt: " .. row.why
+			counts[key] = (counts[key] or 0) + 1
+		end
 		if not row.pass then
 			local key = "FAIL " .. cat
 			counts[key] = (counts[key] or 0) + 1
