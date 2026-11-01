@@ -2,7 +2,7 @@
   "id": "TASK-0116",
   "game": "GAME-004",
   "title": "MathShow Hit Rect 48",
-  "status": "in_progress",
+  "status": "approved",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -37,6 +37,25 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-01T13:58:03",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-01T13:58:03",
+      "from": "review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-01T13:58:03",
+      "result": "pass",
+      "notes": "Hit rects at least 48 design px, build db67a56. MenuTheme.HitMin 48; interactive hit centred and enlarged, stepper and row hits 48; TextFit TAP_MIN 48; settings row pitch 54 (visible 4 px spacing change, flagged). 29 of 49 hit rects grew. Full gate at five viewports: smallest tap 230x48, 0 failures, TextFit 10,525 rows, collision 0 fails/64 hits, ledger 669/284, IdentityBoards 109/0/0 GuiButtons. Specs 304, check.sh passes."
     }
   ]
 }
