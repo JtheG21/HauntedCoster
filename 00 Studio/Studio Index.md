@@ -4,7 +4,7 @@ title: Studio Index
 type: index
 status: in_progress
 created: 2026-10-10
-updated: 2026-10-16
+updated: 2026-10-19
 tags:
   - studio/index
 ---
@@ -20,6 +20,10 @@ tags:
 |---|---|---|---|
 | GAME-001 | Rival Realms (working title) | Paused, source material (2026-10-11) | [[GAME-001 Rg1/00 Overview]] |
 | GAME-002 | Haunted Collector (working title) | **Primary.** M1: MVP loop, TASK-0011 ready | [[GAME-002 Haunted Collector/00 Overview]] |
+
+| GAME-003 | Hike or Die | Candidate; existence prototype, camera/full-loop evidence pending | [[GAME-003 Hike or Die/00 Overview]] |
+
+Shared check/preflight usage: `scripts/studio-preflight.md` (explicit project, local place and checkout; fresh source comparison).
 
 ## Folders
 - `01 Inbox/`: raw ideas, waiting to be triaged

@@ -4,7 +4,7 @@ title: Resource Catalog
 type: index
 status: approved
 created: 2026-10-12
-updated: 2026-10-17
+updated: 2026-10-19
 tags:
   - studio/catalog
 related:
@@ -49,7 +49,7 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 ### Workflow and tooling
 | Resource | Location | State | Evidence | Limits / notes |
 |---|---|---|---|---|
-| Cheap check suite | `scripts/check.sh` (CI: `.github/workflows/check.yml`) | verified | CI on every PR | Paths are per game; a new game must be added |
+| Cheap check suite | `scripts/check.sh` (CI: `.github/workflows/check.yml`) | verified | CI on every PR | GAME-001/002 plus GAME-003 source/rules/build/map; new games must be added |
 | Reference tooling | `scripts/refs.py` (`list`, `brief`, `trace`, `lint`, `guard` incl. the pack-leak check, `new`, `actions`), hook `.claude/hooks/ref-lint.sh`, check.sh step and pre-commit guard | implemented | `tests/test_refs.py`; spec [[RSH-20261017-Reference-Automation-Spec]] | Reads `REF-*` notes on demand (no registry). `guard` blocks edits to `## Intent` sections and moves to `approved` unless `REFS_JG_APPROVED=1`. Evidence tools, rights ledger and review driver are later phases |
 | Reference evidence tools | `scripts/evidence.py` (`frames`, `strip`, `beats`, `sheet`, `stats`, `series` with a `--max-transitions` gate, `audio`, `matrix`, `silhouette`); `scripts/refs.py pin`, `drift`, `rights`, `ledger`; `00 Studio/reference-rights.json`; `tasks/reference-pins.jsonl` | implemented | `tests/test_evidence.py`, `tests/test_refs.py`; run on REF-VFX-001's archived video and the 5 GitHub-sourced notes on 2026-10-17 | ffmpeg only (no `drawtext`, so `index.txt` maps frames to timestamps). Numbers are aids, not pass/fail. Rights classes are claims from each note, not legal advice. Studio test pads: see the next row |
 | Studio test pads | `games/haunted/tests/scenarios/TestPads.luau`, `shared/Rules/PadRules.luau`; [[Studio Test Pads]], [[TASK-0056-Studio-Test-Pads]] | implemented | Lune spec (rules); 2026-10-17 Studio runs in a scratch place: UI, VFX and surface pads built, captured with the Studio capture tool and removed to baseline | Numbers are aids, jg judges. The UI pad needs a client. The first capture after a camera move can be stale. Textures are referenced by id only; uploads are jg's decision |
@@ -62,7 +62,7 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | Studio play scenarios | `games/haunted/tests/scenarios/` | verified | [[TEST-20261012-17]] and earlier TEST notes | GAME-002 specific; Studio, at most 2 players ([[Multi-Client Testing]]) |
 | Note templates | `99 Templates/` | approved | [[Obsidian Conventions]] | Core Templates syntax only |
 | Claude Code guard and format hooks | `.claude/settings.json`, `.claude/hooks/` | verified | `tests/test_claude_hooks.py` | Claude Code only; Codex relies on the git pre-commit hook. Matches the common command forms, not every spelling |
-| Studio environment check | `scripts/studio-preflight.sh`, skill `studio-preflight` | implemented | Run on 2026-10-14 against live state: it caught Rojo serving another worktree | macOS process checks; the Studio-side checks go through Studio MCP |
+| Studio environment check | `scripts/studio-preflight.sh`, skill `studio-preflight` | implemented | Run on 2026-10-14 against live state: it caught Rojo serving another worktree | GAME-001/002/003; read-only process and full Source snapshot comparison; `scripts/studio-preflight.md`; offline rejection fixtures, live GAME-003 evidence pending |
 | Task close-out | skill `task-close` (`.claude/skills/`, copy in `.agents/skills/`) | implemented | Not yet used on a task | Packages AGENTS.md protocol #9 and #17 and [[Task Intake]] step 10; those notes win |
 | Audit subagent | `.claude/agents/auditor.md` | implemented | Not yet used on a task | Wraps [[Auditor]]; read-only; once per task |
 

@@ -6,6 +6,7 @@ This is the permanent instruction file. `CLAUDE.md` imports it. Role details liv
 
 ## Project map
 - **Active game: GAME-002 Haunted Collector** (`03 Games/GAME-002 Haunted Collector/`). Code: `games/haunted/src/server|shared|client` and `games/haunted/tests`, synced by **`haunted.project.json`** into the separate `HauntedCollector.rbxl` place. **Only these reach that game.**
+- **Candidate: GAME-003 Hike or Die** (`03 Games/GAME-003 Hike or Die/`), source `games/hike-or-die/`, project **`hike-or-die.project.json`**, dedicated local `HikeOrDieGate1.rbxl` place. Shared checks include its authored source, rules suite, build and reproducible map proof. This does not activate or release it.
 - Paused: GAME-001 Rg1 (`03 Games/GAME-001 Rg1/`), code in `src/` and `tests/luau`, synced by `default.project.json` into the Rg1 place. It is source material only. Don't change it unless a task says so.
 - **One Rojo server, matched to its place.** Before connecting Studio, check what is serving (`ps aux | grep "rojo serve"`). Never connect a `default.project.json` server to the Haunted Collector place or the reverse: it pulls the other game's Baseplate, Lighting and scripts into the place ([[TEST-20261011-02]]). Switching branches under a running server can crash Rojo ([[LES-0003-Rojo-Crash-On-Branch-Switch]]); use a git worktree for other branches.
 - Machine state, which is authoritative for task status: `tasks/queue.json`, `tasks/usage-ledger.jsonl`, `project-state.json`. Policy: `00 Studio/budget.json`.

@@ -1,4 +1,4 @@
-# Runs scripts/check.sh (format, lint, strict types, both Rojo builds, JSON, queue, vault, Python tests)
+# Runs scripts/check.sh (all three games, HOD rules/map reproduction, JSON, queue, vault, Python tests)
 # on every PR and on pushes to main. GAME-002 unit specs run headlessly via Lune; play scenarios still need Studio (see README).
 name: check
 
@@ -38,6 +38,9 @@ jobs:
         run: |
           curl -sSfL -o "$RUNNER_TEMP/globalTypes.PluginSecurity.d.luau" https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/1.63.0/scripts/globalTypes.PluginSecurity.d.luau
           echo "LUAU_DEFS=$RUNNER_TEMP/globalTypes.PluginSecurity.d.luau" >> "$GITHUB_ENV"
+
+      - name: Install pinned HOD map dependencies
+        run: python -m pip install --only-binary=:all: -r scripts/requirements-hod.txt
 
       - name: scripts/check.sh
         env:

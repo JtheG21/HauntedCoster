@@ -1,0 +1,4 @@
+# Map resolver/prover; Python 3.12+ (CI uses 3.12).
+numpy==2.5.4
+scipy==1.18.1
+Pillow==12.3.0

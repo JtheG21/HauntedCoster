@@ -1,15 +1,23 @@
 ---
 name: studio-preflight
-description: Check the Roblox Studio and Rojo environment before any Haunted Collector Play test, scenario run or CrossPlot. Confirms one Rojo server for haunted.project.json serving the checkout under test, the Studio windows, free memory, and that Studio runs the latest code (build stamp). Use before starting Play or a scenario through Studio MCP, and whenever a Studio run fails for no clear reason, instead of retrying.
+description: Check game-specific Roblox Studio, Rojo checkout and synced sources before any Play test or scenario. Supports GAME-001, GAME-002 (default), and GAME-003. Read-only and fail-closed; a build stamp is insufficient.
 ---
 # Studio preflight
 
-A cheap check so Studio runs don't fail for environment reasons (AGENTS.md "One Rojo server", TEST-20261011-02, LES-0005).
+Follow `scripts/studio-preflight.md` in the checkout under test. It documents
+explicit game/project/place selection, the read-only source query and the fresh
+MCP snapshot comparison required before READY. Keep the manual identity/state
+checks: launch metadata alone is insufficient after Studio opens another file.
 
-1. Run `scripts/studio-preflight.sh --root <checkout under test>`. Fix every `FAIL` line before testing; a FAIL is never a reason to retry the test. Note the `STAMP` value.
-2. With Studio MCP:
-   - `list_roblox_studios`: every window reports its name as "Game", so run `execute_luau` in Edit with `return game.Name` in each to get its place file. The window you'll test in is a Haunted Collector place, not the Rg1 place or another tool's place (e.g. AnimPipeline). Before a 2-player run it must be the only window.
-   - `get_studio_state`: Edit mode. If a Play session is still stopping, wait; a run started now returns nil.
-   - `execute_luau` in Edit: `return game.ReplicatedStorage.Shared.BuildStamp.Value` must equal the `STAMP`. If it doesn't, Rojo isn't syncing this checkout: reconnect the Rojo plugin, or sync by hand and record that in the TEST note.
-3. Run specs in a fresh Play session, in the Server data model. Edit mode caches modules (LES-0005).
-4. Report one line: the checkout, the Rojo server (project and port), the place, the mode, whether the stamp matches, and any warnings.
+1. Identify the intended local Studio instance with MCP list/state and `game.Name`
+   in Edit; confirm ownership. Never operate another assistant's place.
+2. Generate the query with `scripts/studio-preflight.sh --root <checkout> --game
+   <GAME-ID> --print-probe`. Execute it read-only in that instance and save the
+   returned JSON to a temporary snapshot. No Play/start/stop/sync in this step.
+3. Run the documented command with `--place` and `--snapshot`. Fix every FAIL.
+   Record the exact checkout/project/place, Edit state, full Source comparison
+   and warnings. Never treat a matching stamp or offline fixture as sync proof.
+4. Only when authorized, run scenarios in a fresh Play session (LES-0005).
+
+GAME-002 remains the default; an invocation with only `--root` reports missing
+evidence and fails. The script no longer writes the build stamp (LES-0009).

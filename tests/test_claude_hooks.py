@@ -210,8 +210,8 @@ class TestStudioPreflightUsage(unittest.TestCase):
     def test_rejects_a_non_checkout(self):
         with tempfile.TemporaryDirectory() as d:
             r = subprocess.run(["bash", str(STUDIO), "--root", d], capture_output=True, text=True)
-        self.assertEqual(r.returncode, 2)
-        self.assertIn("not a Haunted Collector checkout", r.stderr)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("FAIL:", r.stderr)
 
     def test_rejects_unknown_arguments(self):
         r = subprocess.run(["bash", str(STUDIO), "--bogus"], capture_output=True, text=True)
