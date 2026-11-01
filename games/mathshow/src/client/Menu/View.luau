@@ -363,12 +363,14 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	local function interactive(item: Item, onActivated: () -> (), hoverScale: number?)
 		local shard = item.shard
 		local box = shard.root.Size
+		local hitW, hitH = math.max(box.X.Offset, MenuTheme.HitMin), math.max(box.Y.Offset, MenuTheme.HitMin)
 		local hit = make("TextButton", {
 			Name = "Hit",
 			Text = "",
 			AutoButtonColor = false,
 			BackgroundTransparency = 1,
-			Size = UDim2.fromOffset(box.X.Offset, box.Y.Offset),
+			Position = UDim2.fromOffset((box.X.Offset - hitW) / 2, (box.Y.Offset - hitH) / 2),
+			Size = UDim2.fromOffset(hitW, hitH),
 			Selectable = true,
 			SelectionImageObject = selection,
 			ZIndex = 20,
@@ -920,7 +922,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	local function stepperRow(index: number, key: string, label: string, value: number): Item
 		local box = {
 			x = L.SettingRow.x,
-			y = L.SettingRow.y + (index - 1) * 50,
+			y = L.SettingRow.y + (index - 1) * MenuTheme.SettingPitch,
 			w = 520,
 			h = 44,
 			rot = if index % 2 == 1 then -0.5 else 0.5,
@@ -950,7 +952,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 				Text = "",
 				AutoButtonColor = false,
 				BackgroundTransparency = 1,
-				Size = UDim2.fromOffset(44, 44),
+				Position = UDim2.fromOffset((44 - MenuTheme.HitMin) / 2, (44 - MenuTheme.HitMin) / 2),
+				Size = UDim2.fromOffset(MenuTheme.HitMin, MenuTheme.HitMin),
 				Selectable = false,
 				ZIndex = 30,
 			}, b) :: TextButton
@@ -997,7 +1000,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			Text = "",
 			AutoButtonColor = false,
 			BackgroundTransparency = 1,
-			Size = UDim2.fromOffset(520, 44),
+			Position = UDim2.fromOffset(0, (44 - MenuTheme.HitMin) / 2),
+			Size = UDim2.fromOffset(520, MenuTheme.HitMin),
 			Selectable = true,
 			SelectionImageObject = selection,
 			ZIndex = 10,
@@ -1021,7 +1025,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	local function toggleRow(index: number, key: string, label: string, hint: string, on: boolean): Item
 		local box = {
 			x = L.SettingRow.x,
-			y = L.SettingRow.y + (index - 1) * 50,
+			y = L.SettingRow.y + (index - 1) * MenuTheme.SettingPitch,
 			w = 520,
 			h = 44,
 			rot = if index % 2 == 1 then -0.5 else 0.5,

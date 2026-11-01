@@ -343,3 +343,32 @@ Approved by jg: an element and its own descendant are one owner (`CollisionRules
 The two `Screen_main/Spark3` manifest entries (`Toasts/Toast/Group/Shard` x `Spark3` and `Toasts/Toast/Group/Content/Label` x `Spark3`, six `20-coming-soon` fixtures, reason "transient toast overlay") were added at build `34f046b` **without prior approval**. That broke the rule that no manifest entry is added before jg approves it. jg then approved them as row **R4b** on 2026-11-01 at 13:47 local, after the fact. The evidence is Codex's delta check of the manifest count: 60 pair-fixtures, minus 8 (the R2 `TierGlow` entries, removed when `TierGlow` became a halo), plus 12 (the two Spark3 pairs in six fixtures) is 64, the 64 hits per viewport in the `34f046b` run. The PASS record above is unchanged.
 
 To keep this from recurring, every `CollisionManifest` entry now carries an `approval` field (R1, R3, R4, R4b) and `tests/CollisionRules.spec.luau` fails any entry whose approval is missing or not in `APPROVED_ROWS`. The manifest pairs are unchanged, so no Studio run was needed. Headless specs 304 passed.
+
+### TASK-0116 hit rects at least 48, 2026-11-01 (code build db67a56)
+
+Fresh Play, Rojo from `task/TASK-0116-hit-rect-48`, BuildStamp `db67a56` in Edit and in the log header. `TextFit.run()` and `IdentityBoards.run()` at five viewports, one Rojo connection. `TAP_MIN` is now 48 design px. Hit areas grow, art does not: each `Hit` is centred on its control and enlarged to 48 where it was smaller.
+
+**Hit rects changed** (844x390, design px; sizes are identical at the other four viewports). 29 of the 49 hit rects grew; 20 were already 48 or more (`150x58`, `230x64`, `232x192`, `290x54`, `290x62`).
+| Old | New | Count | Examples |
+|---|---|---|---|
+| 44x44 | 48x48 | 4 | `Screen_settings/Rowmusic/.../Minus/HitMinus`, `.../Plus/HitPlus`, and the same on `Rowsfx` |
+| 112x44 | 112x48 | 10 | `Screen_confirm_blitz/Back/.../Hit`, `Screen_confirm_group/Back`, `Screen_confirm_vs/Back` |
+| 190x44 | 190x48 | 1 | `Screen_blitzreview/Menu/.../Hit` |
+| 200x44 | 200x48 | 2 | `Screen_practice/LadderLink`, `Screen_skillresult/Ladder` |
+| 220x44 | 220x48 | 3 | `Screen_practice/Drills`, `Screen_vs/Choose`, `Screen_vs/Menu` |
+| 230x44 | 230x48 | 3 | `Screen_main/HowToPlay`, `Leaderboard`, `Daily` |
+| 520x44 | 520x48 | 5 | the five `Screen_settings/Row*` hits |
+| 150x46 | 150x48 | 1 | `Screen_skill/LockIn` |
+
+| Check | 844x390 | 1920x1080 | phone 812x375 | 1024x768 | 1180x820 |
+|---|---|---|---|---|---|
+| Smallest tap target | 230x48 | 230x48 | 230x48 | 230x48 | 230x48 |
+| Tap rows (fails) | 10 (0) | 10 (0) | 10 (0) | 10 (0) | 10 (0) |
+| Overlap fails / allow-listed | 0 / 8 | 0 / 8 | 0 / 8 | 0 / 8 | 0 / 8 |
+| Collision fails / manifest hits / unused | 0 / 64 / 0 | 0 / 64 / 0 | 0 / 64 / 0 | 0 / 64 / 0 | 0 / 64 / 0 |
+| Ledger measured / unmeasured | 669 / 284 | 669 / 284 | 669 / 284 | 669 / 284 | 669 / 284 |
+| IdentityBoards rows / failed / GuiButtons | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 |
+
+`TEXTFIT_RESULT rows=10525 failures=0`. Specs 304 passed.
+
+**One visible layout change.** A 48 px hit rect on a settings row tilted 0.5 degrees needs a row pitch of 53 or more, or neighbouring rows' hit boxes overlap (the gate measures each rotated box by its bounding box). `MenuTheme.SettingPitch` is 54, was 50, so the five settings rows sit 4 px further apart each (the last row is 16 px lower). The shard art, sizes and ids are unchanged. If that spacing is not wanted, the alternative is to keep pitch 50 and cap the settings row hit at 44, which fails the 48 rule.
