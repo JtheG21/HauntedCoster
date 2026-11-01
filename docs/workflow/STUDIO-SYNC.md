@@ -321,3 +321,19 @@ Notes for the decision (nothing was added to the manifest and no layout changed)
 - Five of the seven pairs are a Frame against its own child: a timer track and its `Fill` (5,200 px2, blitz, skill and VS), and a misses slot and its `Cross` (144 px2). They are one component, but the owner rule only recognises `X/Group/...`, so they count as different owners. The rule gap, not a layout defect, causes them; the choices are to treat an ancestor and its own descendant as the same owner (a CollisionRules change) or to list them in the manifest.
 - Two pairs are the COMING SOON toast over `Screen_main/Spark3` (a decorative diamond, 56 and 64 px2), in all six `20-coming-soon` fixtures. This is the same transient toast overlay as manifest row R4.
 - Spark1 and Spark2 and the other new Frames and text produce no overlaps.
+
+### TASK-0115 final gate after the audit fixes, 2026-11-01 (code build 34f046b)
+
+Approved by jg: an element and its own descendant are one owner (`CollisionRules.related`, composition, never compared), and manifest rows for the toast over `Screen_main/Spark3` in the six `20-coming-soon` fixtures (reason "transient toast overlay"). Fresh Play, Rojo from `task/TASK-0115-ownership-collision`, BuildStamp `34f046b` in Edit and in the log header. One Rojo connection.
+
+| Check | 844x390 | 1920x1080 | phone 812x375 | 1024x768 | 1180x820 |
+|---|---|---|---|---|---|
+| Collision fails | 0 | 0 | 0 | 0 | 0 |
+| Manifest hits (52 + 12 toast x Spark3) | 64 | 64 | 64 | 64 | 64 |
+| Unused manifest entries (16 entries) | 0 | 0 | 0 | 0 | 0 |
+| Canaries (overlap / label-on-foreign / composition / name-is-not-role) | FLAGGED / FLAGGED / PASS / FLAGGED | same | same | same | same |
+| Compared / composition / halo | 36,328 / 1,670 / 778 | same | same | same | same |
+| Ledger measured / unmeasured | 669 / 284 | 669 / 284 | 669 / 284 | 669 / 284 | 669 / 284 |
+| IdentityBoards rows / failed / GuiButtons | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 |
+
+`TEXTFIT_RESULT rows=10525 failures=0`. Headless specs 302 passed (2 new: `related`, and an element over its own descendant versus a sibling's descendant).

@@ -3,7 +3,7 @@ id: TASK-0115
 title: "MathShow Ownership-Based Collision Gate"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -67,4 +67,9 @@ Registered 2026-11-01 when TASK-0114 dropped its collision gate after two failed
 - **Done:** F1 collection by drawable property with per-class counts; F2 `CollisionRole = "Halo"` attribute in `Menu/Shard.luau` and on `TierGlow`, R2 manifest entries removed (14 entries, 52 hits, 0 unused); F3 Blitz text back at y 60 (my earlier replace had changed both builders); F4 `canary-name-is-not-role` FLAGGED with the other three canaries unchanged.
 - **Gate not green:** 27 cross-owner overlaps per viewport in 7 unique pairs: five are a Frame against its own child (timer tracks and `Fill`, miss slots and `Cross`), two are the toast over `Spark3`. Table with screenshots in `docs/workflow/STUDIO-SYNC.md`. Stopped as instructed; no manifest or layout change made.
 - **Not recorded:** `record-exec`. A fail record would be revision 2/2.
+
+## Final after audit fixes (2026-11-01, code build 34f046b)
+
+- **jg decision:** an element and its own descendant are one owner (composition); manifest rows for the toast over `Spark3` (12 pair-fixtures).
+- **Gate:** 0 collision fails, 64 manifest hits and 0 unused per viewport (16 entries), four canaries as expected, ledger 669/284, IdentityBoards 109 / 0 / 0 GuiButtons at 5/5. TextFit 10,525 rows, 0 failures. Specs 302 passed.
 
