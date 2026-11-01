@@ -2,7 +2,7 @@
   "id": "TASK-0115",
   "game": "GAME-004",
   "title": "MathShow Ownership-Based Collision Gate",
-  "status": "review",
+  "status": "approved",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -68,6 +68,12 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-01T13:43:37",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
     }
   ],
   "executions": [
@@ -86,6 +92,11 @@
     {
       "time": "2026-11-01T13:30:32",
       "result": "fail",
+      "report": "docs/workflow/STUDIO-SYNC.md"
+    },
+    {
+      "time": "2026-11-01T13:43:37",
+      "result": "pass",
       "report": "docs/workflow/STUDIO-SYNC.md"
     }
   ],

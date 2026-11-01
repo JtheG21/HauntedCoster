@@ -16,8 +16,9 @@ export type Rect = { cx: number, cy: number, w: number, h: number, rot: number }
 -- CollisionRole = "Halo"; any other value is an ordinary drawable element (the gate uses "text", "image" and "frame").
 export type Element = { path: { string }, kind: string, rect: Rect }
 
--- One approved pair, in each of the listed fixtures. Order of `a` and `b` does not matter.
-export type ManifestEntry = { a: string, b: string, fixtures: { string }, reason: string }
+-- One approved pair, in each of the listed fixtures. Order of `a` and `b` does not matter. `approval` is the id of the row
+-- jg approved for it.
+export type ManifestEntry = { a: string, b: string, fixtures: { string }, reason: string, approval: string }
 export type Pair = { a: string, b: string, fixture: string, area: number }
 
 export type CompareResult = {
@@ -215,6 +216,22 @@ function CollisionRules.matchManifest(pairs: { Pair }, manifest: { ManifestEntry
 		end
 	end
 	return { hits = hits, unmatched = unmatched, unusedEntries = unusedEntries, missing = missing }
+end
+
+-- Manifest entries whose `approval` is missing or not in `approved`. The spec runs this over the real manifest, so an entry
+-- added without a recorded approval fails check.sh.
+function CollisionRules.unapprovedEntries(
+	manifest: { ManifestEntry },
+	approved: { [string]: boolean }
+): { ManifestEntry }
+	local bad: { ManifestEntry } = {}
+	for _, entry in manifest do
+		local approval = (entry :: any).approval
+		if typeof(approval) ~= "string" or not approved[approval] then
+			table.insert(bad, entry)
+		end
+	end
+	return bad
 end
 
 return CollisionRules

@@ -337,3 +337,9 @@ Approved by jg: an element and its own descendant are one owner (`CollisionRules
 | IdentityBoards rows / failed / GuiButtons | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 |
 
 `TEXTFIT_RESULT rows=10525 failures=0`. Headless specs 302 passed (2 new: `related`, and an element over its own descendant versus a sibling's descendant).
+
+### TASK-0115 manifest approval correction, 2026-11-01
+
+The two `Screen_main/Spark3` manifest entries (`Toasts/Toast/Group/Shard` x `Spark3` and `Toasts/Toast/Group/Content/Label` x `Spark3`, six `20-coming-soon` fixtures, reason "transient toast overlay") were added at build `34f046b` **without prior approval**. That broke the rule that no manifest entry is added before jg approves it. jg then approved them as row **R4b** on 2026-11-01 at 13:47 local, after the fact. The evidence is Codex's delta check of the manifest count: 60 pair-fixtures, minus 8 (the R2 `TierGlow` entries, removed when `TierGlow` became a halo), plus 12 (the two Spark3 pairs in six fixtures) is 64, the 64 hits per viewport in the `34f046b` run. The PASS record above is unchanged.
+
+To keep this from recurring, every `CollisionManifest` entry now carries an `approval` field (R1, R3, R4, R4b) and `tests/CollisionRules.spec.luau` fails any entry whose approval is missing or not in `APPROVED_ROWS`. The manifest pairs are unchanged, so no Studio run was needed. Headless specs 304 passed.

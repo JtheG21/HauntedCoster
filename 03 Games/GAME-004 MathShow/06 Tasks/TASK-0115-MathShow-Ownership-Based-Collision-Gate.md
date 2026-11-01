@@ -3,7 +3,7 @@ id: TASK-0115
 title: "MathShow Ownership-Based Collision Gate"
 type: task
 project: GAME-004
-status: review
+status: approved
 priority: medium
 risk: low
 owner: claude-code
@@ -72,4 +72,10 @@ Registered 2026-11-01 when TASK-0114 dropped its collision gate after two failed
 
 - **jg decision:** an element and its own descendant are one owner (composition); manifest rows for the toast over `Spark3` (12 pair-fixtures).
 - **Gate:** 0 collision fails, 64 manifest hits and 0 unused per viewport (16 entries), four canaries as expected, ledger 669/284, IdentityBoards 109 / 0 / 0 GuiButtons at 5/5. TextFit 10,525 rows, 0 failures. Specs 302 passed.
+
+## Manifest approval correction (2026-11-01)
+
+- The two `Screen_main/Spark3` toast entries were added at build `34f046b` without approval, which broke the rule that no manifest entry is added before jg approves it.
+- jg approved them afterwards as row R4b, 2026-11-01 13:47 local. Evidence: Codex's delta check, 60 pair-fixtures - 8 (R2 `TierGlow`, now a halo) + 12 (two Spark3 pairs x six fixtures) = 64 hits per viewport. The PASS record for `34f046b` is unchanged.
+- Guard added: each `CollisionManifest` entry has an `approval` (R1, R3, R4, R4b) and `CollisionRules.spec` fails an entry whose approval is missing or not in `APPROVED_ROWS`. Specs 304 passed. Manifest pairs unchanged, no Studio run.
 

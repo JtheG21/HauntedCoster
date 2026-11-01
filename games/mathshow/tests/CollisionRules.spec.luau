@@ -1,6 +1,10 @@
 --!strict
 local TestRunner = require(script.Parent.TestRunner)
 local CollisionRules = require(script.Parent.studio.CollisionRules)
+local CollisionManifest = require(script.Parent.studio.CollisionManifest)
+
+-- The rows jg approved for manifest entries. Add an id here only with a recorded approval (STUDIO-SYNC.md).
+local APPROVED_ROWS: { [string]: boolean } = { R1 = true, R3 = true, R4 = true, R4b = true }
 
 type Rect = CollisionRules.Rect
 
@@ -146,7 +150,13 @@ return function(t: TestRunner.T)
 			{ a = "S/C/Group/Shard", b = "S/D/Group/Shard", fixture = "01-main", area = 10 },
 		}
 		local manifest: { CollisionRules.ManifestEntry } = {
-			{ a = "S/B/Group/Shard", b = "S/A/Group/Shard", fixtures = { "01-main" }, reason = "approved" },
+			{
+				a = "S/B/Group/Shard",
+				b = "S/A/Group/Shard",
+				fixtures = { "01-main" },
+				reason = "approved",
+				approval = "R1",
+			},
 		}
 		local result = CollisionRules.matchManifest(pairs, manifest)
 		t.eq(#result.hits, 1, "reversed order hits")
@@ -162,7 +172,13 @@ return function(t: TestRunner.T)
 			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixture = "f3", area = 10 },
 		}
 		local manifest: { CollisionRules.ManifestEntry } = {
-			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixtures = { "f1", "f2" }, reason = "approved" },
+			{
+				a = "S/A/Group/Shard",
+				b = "S/B/Group/Shard",
+				fixtures = { "f1", "f2" },
+				reason = "approved",
+				approval = "R1",
+			},
 		}
 		local result = CollisionRules.matchManifest(pairs, manifest)
 		t.eq(#result.hits, 2, "f1 and f2")
@@ -177,7 +193,13 @@ return function(t: TestRunner.T)
 			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixture = "f1", area = 10 },
 		}
 		local manifest: { CollisionRules.ManifestEntry } = {
-			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixtures = { "f1", "f2" }, reason = "approved" },
+			{
+				a = "S/A/Group/Shard",
+				b = "S/B/Group/Shard",
+				fixtures = { "f1", "f2" },
+				reason = "approved",
+				approval = "R1",
+			},
 		}
 		local result = CollisionRules.matchManifest(pairs, manifest)
 		t.eq(#result.hits, 1)
@@ -191,7 +213,13 @@ return function(t: TestRunner.T)
 			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixture = "02-other", area = 10 },
 		}
 		local manifest: { CollisionRules.ManifestEntry } = {
-			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixtures = { "01-main" }, reason = "approved" },
+			{
+				a = "S/A/Group/Shard",
+				b = "S/B/Group/Shard",
+				fixtures = { "01-main" },
+				reason = "approved",
+				approval = "R1",
+			},
 		}
 		local result = CollisionRules.matchManifest(pairs, manifest)
 		t.eq(#result.hits, 0)
@@ -201,8 +229,20 @@ return function(t: TestRunner.T)
 
 	t.test("manifest: an entry that matches nothing is unused; an empty manifest hits nothing", function()
 		local manifest: { CollisionRules.ManifestEntry } = {
-			{ a = "S/X/Group/Shard", b = "S/Y/Group/Shard", fixtures = { "01-main" }, reason = "stale" },
-			{ a = "S/P/Group/Shard", b = "S/Q/Group/Shard", fixtures = {}, reason = "no fixtures listed" },
+			{
+				a = "S/X/Group/Shard",
+				b = "S/Y/Group/Shard",
+				fixtures = { "01-main" },
+				reason = "stale",
+				approval = "R1",
+			},
+			{
+				a = "S/P/Group/Shard",
+				b = "S/Q/Group/Shard",
+				fixtures = {},
+				reason = "no fixtures listed",
+				approval = "R1",
+			},
 		}
 		local result = CollisionRules.matchManifest({}, manifest)
 		t.eq(#result.unusedEntries, 2, "a stale entry and an entry with no fixtures")
@@ -210,5 +250,25 @@ return function(t: TestRunner.T)
 		local empty = CollisionRules.matchManifest({ { a = "a", b = "b", fixture = "f", area = 1 } }, {})
 		t.eq(#empty.hits, 0)
 		t.eq(#empty.unmatched, 1)
+	end)
+
+	t.test("manifest: every real entry names an approved row", function()
+		local bad = CollisionRules.unapprovedEntries(CollisionManifest, APPROVED_ROWS)
+		t.eq(#bad, 0, "entries without an approved row: " .. #bad)
+		t.eq(#CollisionManifest > 0, true, "the manifest is not empty")
+	end)
+
+	t.test("manifest: a missing or unlisted approval is flagged", function()
+		local entries: { any } = {
+			{ a = "a", b = "b", fixtures = { "f" }, reason = "ok", approval = "R1" },
+			{ a = "a", b = "c", fixtures = { "f" }, reason = "no approval" },
+			{ a = "a", b = "d", fixtures = { "f" }, reason = "not listed", approval = "R9" },
+			{ a = "a", b = "e", fixtures = { "f" }, reason = "wrong type", approval = 4 },
+		}
+		local bad = CollisionRules.unapprovedEntries(entries, APPROVED_ROWS)
+		t.eq(#bad, 3, "missing, unlisted and non-string approvals")
+		t.eq(bad[1].reason, "no approval")
+		t.eq(bad[2].reason, "not listed")
+		t.eq(bad[3].reason, "wrong type")
 	end)
 end
