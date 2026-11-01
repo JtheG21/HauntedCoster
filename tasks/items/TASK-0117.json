@@ -1,0 +1,29 @@
+{
+  "id": "TASK-0117",
+  "game": "GAME-004",
+  "title": "Codex Hook Adapter",
+  "status": "backlog",
+  "tier": "standard",
+  "owner_agent": "codex",
+  "files_owned": [
+    ".codex/hooks/adapter.sh",
+    ".codex/hooks.json",
+    ".gitignore",
+    "tests/test_claude_hooks.py"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0117-codex-hook-adapter",
+  "acceptance": [
+    "Bash payloads pass through unchanged to the single-source .claude/hooks scripts.",
+    "apply_patch command payloads are parsed for every touched file path (including additions, deletions and moves); invoke the relevant .claude/hooks scripts once per file with Claude-style tool_name and tool_input.file_path fields.",
+    "Translate permissionDecision ask into block (exit 2) and preserve the reason; never silently allow an unsupported approval decision.",
+    "Hook commands resolve the repository root portably; no machine-specific absolute paths and no duplicated .claude hook implementations.",
+    "Add Codex Bash and apply_patch payload fixtures to tests/test_claude_hooks.py, covering multiple files and ask-to-block translation.",
+    "After the user trusts the new hook definitions, a live git push --force --dry-run origin HEAD:refs/heads/__probe__ invocation is blocked by the guard before execution.",
+    "scripts/check.sh, validate_queue and validate_vault pass; no adapter implementation is part of the registration chore."
+  ],
+  "evidence": [],
+  "notes": "Registered at jg request (D6, 2026-11-01); backlog only, no implementation or plan approval. Reuse .claude/hooks/guard.sh, luau-format.sh and ref-lint.sh without modifying them. Codex uses Bash/apply_patch command payloads; the existing scripts expect Claude Edit/Write file_path payloads and emit unsupported ask decisions. Local guard-only wiring remains ignored until this task supplies an adapter.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0117-Codex-Hook-Adapter.md",
+  "risk": "medium"
+}
