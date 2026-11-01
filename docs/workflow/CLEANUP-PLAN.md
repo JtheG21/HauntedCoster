@@ -749,3 +749,32 @@ Note: play scenarios and gameplay need Studio, see AGENTS.md "Tests". Archived g
 | K6 | `game-003-h01-checks` worktree (`chore/game-003-h01-checks`) | Held. 11 modified, 7 untracked |
 | R1 | 116 merged remote branches (Appendix C) | Held. Needs its own approval |
 | — | `chore/individual-media-assessments`, `chore/orchestrator-ownership`, `chore/repo-integration-notes`, `chore/video-workflow-adoption` | Local branches left by P3/P6/P9/P11. Kept. Registrations pruned |
+
+### Kept unmerged branches (2026-11-01, input for R1 exclusion)
+
+Local branches not merged into `main` (`git branch --no-merged main`, main at `df890a8`). R1 must exclude every row, and every remote branch of the same name. Worktrees K5, K6 and the five other pending worktrees are removed; all branches are kept. "Origin" says whether `origin/<branch>` exists.
+
+| Branch | Ahead | Last commit | Origin | Note |
+|---|---|---|---|---|
+| chore/archive-task-0008 | 1 | 2026-10-11 cb960a1 | yes | Archive TASK-0008 (GAME-001) |
+| chore/creature-pipeline | 25 | 2026-10-16 121c15c | yes | Creature art pipeline; PR #66 closed unmerged |
+| chore/game-003-h01-checks | 4 | 2026-11-01 560528a | yes | Paused GAME-003 work (K6, WIP commit) |
+| chore/game-003-launch-audit | 1 | 2026-10-19 d165494 | yes | Paused GAME-003 work |
+| chore/game-003-luna-prep | 3 | 2026-10-19 fee53dc | yes | Paused GAME-003 work |
+| chore/git-safety | 1 | 2026-10-11 503746b | yes (pushed) | B1: 1 unique commit, no patch-equivalent on main or any remote branch; pushed as backup 2026-11-01, no PR. Not a deletion candidate |
+| chore/individual-media-assessments | 1 | 2026-10-15 4ba838a | yes | Left by P3 |
+| chore/model-approval-workflow | 1 | 2026-10-13 612231a | yes | Model approval pilots |
+| chore/orchestrator-ownership | 1 | 2026-10-13 7d3f36d | yes | Left by P6 |
+| chore/repo-integration-notes | 2 | 2026-10-17 d399ae0 | yes | Left by P9 |
+| chore/shared-model-viewer | 1 | 2026-10-18 4155c77 | yes (pushed) | B1: 1 unique commit, no patch-equivalent on main or any remote branch; pushed as backup 2026-11-01, no PR. Not a deletion candidate |
+| chore/vault-navigation | 2 | 2026-10-14 8d6955d | yes | Vault dashboards |
+| chore/video-workflow-adoption | 4 | 2026-10-13 1e9ee4f | yes | Left by P11; tip is the TASK-0048/49/51 UI overhaul |
+| task/TASK-0008-Prototype-Telemetry | 1 | 2026-10-10 af72448 | yes (pushed) | B1: 1 unique commit, no patch-equivalent on main or any remote branch; pushed as backup 2026-11-01, no PR. Not a deletion candidate (shares tip af72448 with the sibling branch) |
+| task/TASK-0040-Audio-Pass | 8 | 2026-10-14 b9eaed9 | yes | Worktree removed 2026-11-01 |
+| task/TASK-0043-Wisp-Revision | 24 | 2026-10-16 5ecb890 | yes | Worktree removed 2026-11-01; commits not on main |
+| task/TASK-0046-Mansion-Plot-And-Train-Art | 5 | 2026-11-01 3b740ec | yes | K5; WIP commit preserved 7 legacy edits (queue/project-state), review later |
+| worktree-agent-a43df52601336427d | 1 | 2026-10-10 af72448 | yes (pushed) | B1: 1 unique commit, no patch-equivalent on main or any remote branch; pushed as backup 2026-11-01, no PR. Not a deletion candidate (shares tip af72448 with the sibling branch) |
+
+Remote `origin` URL: `https://github.com/JtheG21/HauntedCoster.git`; `gh repo view` reports `JtheG21/HauntedCoster`, so no change was needed.
+
+B1 result: all four local-only branches had unique commits (`git cherry main` shows `+`, no patch-equivalent on any remote branch), so all four were pushed as backups. There are no deletion candidates.
