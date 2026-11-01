@@ -65,6 +65,11 @@ return function(t: TestRunner.T)
 		t.eq(CollisionRules.resolveOwner({ "Screen_main", "Play", "Group", "Glow" }), "Screen_main/Play", "glow")
 	end)
 
+	t.test("owner: X/Group/Shard resolves to X, including under a screen", function()
+		t.eq(CollisionRules.resolveOwner({ "Screen_ladder", "Rung1", "Group", "Shard" }), "Screen_ladder/Rung1")
+		t.eq(CollisionRules.resolveOwner({ "Toasts", "Toast", "Group", "Shard" }), "Toasts/Toast")
+	end)
+
 	t.test("owner: off-control paths are their own owner", function()
 		t.eq(CollisionRules.resolveOwner({ "Screen_main", "EdgeLeft" }), "Screen_main/EdgeLeft")
 		t.eq(CollisionRules.resolveOwner({ "Toasts", "Toast" }), "Toasts/Toast")
@@ -113,13 +118,13 @@ return function(t: TestRunner.T)
 		t.eq(#sliver.overlaps, 0, "0.1 px^2 sliver")
 	end)
 
-	t.test("manifest: an exact pair and fixture hits, in either order", function()
+	t.test("manifest: an exact pair and a listed fixture hits, in either order", function()
 		local pairs: { CollisionRules.Pair } = {
 			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixture = "01-main", area = 10 },
 			{ a = "S/C/Group/Shard", b = "S/D/Group/Shard", fixture = "01-main", area = 10 },
 		}
 		local manifest: { CollisionRules.ManifestEntry } = {
-			{ a = "S/B/Group/Shard", b = "S/A/Group/Shard", fixture = "01-main", reason = "approved" },
+			{ a = "S/B/Group/Shard", b = "S/A/Group/Shard", fixtures = { "01-main" }, reason = "approved" },
 		}
 		local result = CollisionRules.matchManifest(pairs, manifest)
 		t.eq(#result.hits, 1, "reversed order hits")
@@ -128,12 +133,43 @@ return function(t: TestRunner.T)
 		t.eq(#result.unusedEntries, 0)
 	end)
 
-	t.test("manifest: the fixture must match too", function()
+	t.test("manifest: a fixtures list hits each listed fixture and nothing else", function()
+		local pairs: { CollisionRules.Pair } = {
+			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixture = "f1", area = 10 },
+			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixture = "f2", area = 10 },
+			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixture = "f3", area = 10 },
+		}
+		local manifest: { CollisionRules.ManifestEntry } = {
+			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixtures = { "f1", "f2" }, reason = "approved" },
+		}
+		local result = CollisionRules.matchManifest(pairs, manifest)
+		t.eq(#result.hits, 2, "f1 and f2")
+		t.eq(#result.unmatched, 1, "f3 is not listed")
+		t.eq(result.unmatched[1].fixture, "f3")
+		t.eq(#result.unusedEntries, 0)
+		t.eq(#result.missing, 0)
+	end)
+
+	t.test("manifest: a listed fixture that lacks the pair makes the entry unused", function()
+		local pairs: { CollisionRules.Pair } = {
+			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixture = "f1", area = 10 },
+		}
+		local manifest: { CollisionRules.ManifestEntry } = {
+			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixtures = { "f1", "f2" }, reason = "approved" },
+		}
+		local result = CollisionRules.matchManifest(pairs, manifest)
+		t.eq(#result.hits, 1)
+		t.eq(#result.unusedEntries, 1, "f2 produced no pair")
+		t.eq(#result.missing, 1)
+		t.eq(result.missing[1].fixture, "f2")
+	end)
+
+	t.test("manifest: the fixture must be listed", function()
 		local pairs: { CollisionRules.Pair } = {
 			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixture = "02-other", area = 10 },
 		}
 		local manifest: { CollisionRules.ManifestEntry } = {
-			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixture = "01-main", reason = "approved" },
+			{ a = "S/A/Group/Shard", b = "S/B/Group/Shard", fixtures = { "01-main" }, reason = "approved" },
 		}
 		local result = CollisionRules.matchManifest(pairs, manifest)
 		t.eq(#result.hits, 0)
@@ -143,10 +179,11 @@ return function(t: TestRunner.T)
 
 	t.test("manifest: an entry that matches nothing is unused; an empty manifest hits nothing", function()
 		local manifest: { CollisionRules.ManifestEntry } = {
-			{ a = "S/X/Group/Shard", b = "S/Y/Group/Shard", fixture = "01-main", reason = "stale" },
+			{ a = "S/X/Group/Shard", b = "S/Y/Group/Shard", fixtures = { "01-main" }, reason = "stale" },
+			{ a = "S/P/Group/Shard", b = "S/Q/Group/Shard", fixtures = {}, reason = "no fixtures listed" },
 		}
 		local result = CollisionRules.matchManifest({}, manifest)
-		t.eq(#result.unusedEntries, 1)
+		t.eq(#result.unusedEntries, 2, "a stale entry and an entry with no fixtures")
 		t.eq(result.unusedEntries[1].reason, "stale")
 		local empty = CollisionRules.matchManifest({ { a = "a", b = "b", fixture = "f", area = 1 } }, {})
 		t.eq(#empty.hits, 0)

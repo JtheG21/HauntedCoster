@@ -15,7 +15,8 @@ export type Rect = { cx: number, cy: number, w: number, h: number, rot: number }
 -- or "glow".
 export type Element = { path: { string }, kind: string, rect: Rect }
 
-export type ManifestEntry = { a: string, b: string, fixture: string, reason: string }
+-- One approved pair, in each of the listed fixtures. Order of `a` and `b` does not matter.
+export type ManifestEntry = { a: string, b: string, fixtures: { string }, reason: string }
 export type Pair = { a: string, b: string, fixture: string, area: number }
 
 export type CompareResult = {
@@ -25,7 +26,13 @@ export type CompareResult = {
 	overlaps: { Pair }, -- cross-owner overlaps (candidates for failure, minus the manifest)
 }
 
-export type ManifestResult = { hits: { Pair }, unmatched: { Pair }, unusedEntries: { ManifestEntry } }
+export type MissingFixture = { entry: ManifestEntry, fixture: string }
+export type ManifestResult = {
+	hits: { Pair },
+	unmatched: { Pair },
+	unusedEntries: { ManifestEntry }, -- entries with at least one listed fixture that produced no matching pair
+	missing: { MissingFixture }, -- each such fixture
+}
 
 local function corners(r: Rect): { { number } }
 	local rad = math.rad(r.rot)
@@ -153,31 +160,43 @@ function CollisionRules.compare(elements: { Element }, minArea: number, fixture:
 	return result
 end
 
--- Which overlapping pairs the manifest covers (exact path pair and fixture, either order) and which entries matched nothing.
+-- Which overlapping pairs the manifest covers (exact path pair and a listed fixture, either order) and which entries are
+-- unused: an entry is unused when any fixture it lists produced no matching pair in `pairs`, so call it with every pair of
+-- the run to find stale entries.
 function CollisionRules.matchManifest(pairs: { Pair }, manifest: { ManifestEntry }): ManifestResult
 	local byKey: { [string]: number } = {}
 	for index, entry in manifest do
-		byKey[entry.fixture .. "\1" .. key(entry.a, entry.b)] = index
+		for _, fixture in entry.fixtures do
+			byKey[fixture .. "\1" .. key(entry.a, entry.b)] = index
+		end
 	end
-	local used: { [number]: boolean } = {}
+	local used: { [string]: boolean } = {}
 	local hits: { Pair } = {}
 	local unmatched: { Pair } = {}
 	for _, pair in pairs do
 		local index = byKey[pair.fixture .. "\1" .. key(pair.a, pair.b)]
 		if index then
-			used[index] = true
+			used[index .. "\1" .. pair.fixture] = true
 			table.insert(hits, pair)
 		else
 			table.insert(unmatched, pair)
 		end
 	end
 	local unusedEntries: { ManifestEntry } = {}
+	local missing: { MissingFixture } = {}
 	for index, entry in manifest do
-		if not used[index] then
+		local unused = #entry.fixtures == 0
+		for _, fixture in entry.fixtures do
+			if not used[index .. "\1" .. fixture] then
+				unused = true
+				table.insert(missing, { entry = entry, fixture = fixture })
+			end
+		end
+		if unused then
 			table.insert(unusedEntries, entry)
 		end
 	end
-	return { hits = hits, unmatched = unmatched, unusedEntries = unusedEntries }
+	return { hits = hits, unmatched = unmatched, unusedEntries = unusedEntries, missing = missing }
 end
 
 return CollisionRules

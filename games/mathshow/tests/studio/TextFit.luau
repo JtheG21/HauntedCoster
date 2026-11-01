@@ -769,20 +769,21 @@ function TextFit.run(): ({ Row }, number)
 		)
 	)
 
-	-- A manifest entry that matched nothing at any viewport is stale: the gate fails until it is removed.
-	local allHits: { CollisionRules.Pair } = {}
-	for _, acc in collisionAcc do
-		for _, pair in acc.hitPairs do
-			table.insert(allHits, pair)
+	-- A manifest entry is unused at a viewport when a fixture it lists produced no pair there: the gate fails.
+	local unusedTotal = 0
+	for _, sz in SIZES do
+		local acc = collisionAcc[sz.name]
+		local unused = CollisionRules.matchManifest(acc.hitPairs, CollisionManifest)
+		unusedTotal += #unused.unusedEntries
+		for _, m in unused.missing do
+			print(
+				`[TextFit] COLLISION FAIL unused manifest entry {sz.name} | {m.fixture} | {m.entry.a} x {m.entry.b} | {m.entry.reason}`
+			)
 		end
 	end
-	local unusedEntries = CollisionRules.matchManifest(allHits, CollisionManifest).unusedEntries
-	for _, entry in unusedEntries do
-		print(`[TextFit] COLLISION FAIL unused manifest entry {entry.fixture} | {entry.a} x {entry.b} | {entry.reason}`)
-	end
-	print(`[TextFit] COLLISION manifest entries={#CollisionManifest} unused={#unusedEntries}`)
+	print(`[TextFit] COLLISION manifest entries={#CollisionManifest} unused={unusedTotal}`)
 
-	local failures = #reconcile.failures + #unusedEntries
+	local failures = #reconcile.failures + unusedTotal
 	print("[TextFit] state | element | text | margin | result")
 	for _, row in rows do
 		if not row.pass then

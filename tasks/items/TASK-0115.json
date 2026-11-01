@@ -11,7 +11,9 @@
     "games/mathshow/tests/studio/CollisionCanary.luau",
     "docs/workflow/STUDIO-SYNC.md",
     "games/mathshow/tests/studio/CollisionRules.luau",
-    "games/mathshow/tests/CollisionRules.spec.luau"
+    "games/mathshow/tests/CollisionRules.spec.luau",
+    "games/mathshow/src/client/Menu/MenuTheme.luau",
+    "games/mathshow/src/client/Menu/View.luau"
   ],
   "depends_on": [
     "TASK-0114"

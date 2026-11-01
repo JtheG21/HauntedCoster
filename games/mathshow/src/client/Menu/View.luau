@@ -2108,7 +2108,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		end
 		h2hShard(vm)
 		local problem =
-			newShard("Problem", L.SkillProblem, "shard-menu-problem-silver", "glow-menu-problem-silver", "silver")
+			newShard("Problem", L.VsProblem, "shard-menu-problem-silver", "glow-menu-problem-silver", "silver")
 		local tagText = if vm.suddenDeath then MenuCopy.Vs.SuddenDeath else "Q" .. vm.index .. " · VS"
 		tag(problem.content, "Tag", tagText).Position = UDim2.fromOffset(60, 40)
 		local shown = vm.problem .. (if reveal and vm.answer ~= nil then " = " .. tostring(vm.answer) else " = ?")
