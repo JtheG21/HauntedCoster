@@ -108,6 +108,7 @@ files); DataStore schema changes.** Approval is per action and doesn't carry ove
   `scripts/preflight.sh --root <checkout> --branch <expected>` and chain with `&&`. Use `git -C <checkout>`.
 - The main checkout (`/Users/jg/Desktop/Rg1`) stays on `main`. Every task and chore branch gets its own worktree.
 - Push a work branch once it has a commit (draft PR is fine).
+- Game handoffs live in "03 Games/<GAME>/10 Handoffs/" (`type: handoff`); superseded ones move to "98 Archive/".
 - Before `git branch -D` or classifying a branch as squash-merged: its PR's base must be main, and every commit must be
   patch-equivalent on main (`git cherry main <branch>` shows no '+'). A diff against current main is not evidence.
 - If the intended checkout is missing or stale, **stop** and re-discover it. Never fall back to the current directory.

@@ -1,9 +1,11 @@
 ---
-id: RETRO-MathShow-Handoff-20261030
+id: HANDOFF-MathShow-20261030
 title: "Handoff: MathShow (GAME-004), state as of 2026-10-30"
-type: retro
+type: handoff
 status: proposed
 project: GAME-004
+task_id: none
+receiver: any
 created: 2026-10-30
 updated: 2026-11-01
 ---
