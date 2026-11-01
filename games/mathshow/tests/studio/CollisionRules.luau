@@ -4,8 +4,9 @@
 -- screen, y down), exactly as the gate reads them from Roblox GuiObjects.
 --
 -- Ownership: an element belongs to the nearest ancestor X whose path continues X/Group/..., which is how Menu/Shard builds a
--- control (root Frame > Group > Shard, Glow, Flash, Content). Elements of one owner compose; elements of different owners
--- must not overlap unless CollisionManifest lists the exact pair.
+-- control (root Frame > Group > Shard, Glow, Flash, Content). Elements of one owner compose, and so does an element with
+-- its own descendant (a timer track and its fill, a slot and its icon). Elements of different owners must not overlap
+-- unless CollisionManifest lists the exact pair.
 
 local CollisionRules = {}
 
@@ -120,6 +121,23 @@ function CollisionRules.resolveOwner(path: { string }): string
 	return table.concat(path, "/")
 end
 
+-- True when `a` is a proper ancestor path of `b`, or the reverse: one element and a descendant of it.
+function CollisionRules.related(a: { string }, b: { string }): boolean
+	local short, long = a, b
+	if #a > #b then
+		short, long = b, a
+	end
+	if #short == #long then
+		return false
+	end
+	for i = 1, #short do
+		if short[i] ~= long[i] then
+			return false
+		end
+	end
+	return true
+end
+
 local function key(a: string, b: string): string
 	if a <= b then
 		return a .. "\0" .. b
@@ -127,7 +145,7 @@ local function key(a: string, b: string): string
 	return b .. "\0" .. a
 end
 
--- Every pair of elements: same owner overlaps count as composition; different owners are examined, and an overlap larger
+-- Every pair of elements: same-owner and ancestor/descendant overlaps count as composition; different owners are examined, and an overlap larger
 -- than `minArea` is an overlap (a halo when either element is a halo). Neither input is mutated.
 function CollisionRules.compare(elements: { Element }, minArea: number, fixture: string): CompareResult
 	local result: CompareResult = { compared = 0, composition = 0, halo = {}, overlaps = {} }
@@ -140,7 +158,7 @@ function CollisionRules.compare(elements: { Element }, minArea: number, fixture:
 	for i = 1, #elements do
 		for j = i + 1, #elements do
 			local ov = CollisionRules.rotatedRectOverlapArea(elements[i].rect, elements[j].rect)
-			if owners[i] == owners[j] then
+			if owners[i] == owners[j] or CollisionRules.related(elements[i].path, elements[j].path) then
 				if ov > minArea then
 					result.composition += 1
 				end

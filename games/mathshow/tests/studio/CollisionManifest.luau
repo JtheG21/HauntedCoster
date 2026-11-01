@@ -121,6 +121,32 @@ local manifest: { CollisionRules.ManifestEntry } = {
 		fixtures = { "14b-skill-choice-locked", "14c-skill-choice-reveal-wrong" },
 		reason = "transient toast overlay",
 	},
+	{
+		a = "Toasts/Toast/Group/Shard",
+		b = "Screen_main/Spark3",
+		fixtures = {
+			"20-coming-soon [demon2]",
+			"20-coming-soon [official]",
+			"20-coming-soon [standard]",
+			"20-coming-soon [unavailable]",
+			"20-coming-soon [unranked]",
+			"20-coming-soon [wide20]",
+		},
+		reason = "transient toast overlay",
+	},
+	{
+		a = "Toasts/Toast/Group/Content/Label",
+		b = "Screen_main/Spark3",
+		fixtures = {
+			"20-coming-soon [demon2]",
+			"20-coming-soon [official]",
+			"20-coming-soon [standard]",
+			"20-coming-soon [unavailable]",
+			"20-coming-soon [unranked]",
+			"20-coming-soon [wide20]",
+		},
+		reason = "transient toast overlay",
+	},
 }
 
 return manifest

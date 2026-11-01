@@ -103,6 +103,28 @@ return function(t: TestRunner.T)
 		t.eq(result.compared, 5)
 	end)
 
+	t.test("related: an element and its own descendant, in either order, and nothing else", function()
+		t.eq(CollisionRules.related({ "S", "TimerBar" }, { "S", "TimerBar", "Fill" }), true)
+		t.eq(CollisionRules.related({ "S", "TimerBar", "Fill" }, { "S", "TimerBar" }), true, "reversed")
+		t.eq(CollisionRules.related({ "S", "TimerBar" }, { "S", "TimerBar" }), false, "same path is not related")
+		t.eq(
+			CollisionRules.related({ "S", "Timer" }, { "S", "TimerBar", "Fill" }),
+			false,
+			"a name prefix is not a path prefix"
+		)
+		t.eq(CollisionRules.related({ "S", "A" }, { "S", "B", "Fill" }), false, "siblings")
+	end)
+
+	t.test("compare: an element over its own descendant is composition, over a sibling's descendant is not", function()
+		local result = CollisionRules.compare({
+			el("S/TimerBar", "frame", rect(100, 100, 100, 10)),
+			el("S/TimerBar/Fill", "frame", rect(100, 100, 100, 10)),
+			el("S/Other/Fill", "frame", rect(100, 100, 40, 10)),
+		}, 0.5, "f")
+		t.eq(result.composition, 1, "TimerBar over its own Fill")
+		t.eq(#result.overlaps, 2, "Other/Fill over TimerBar and over TimerBar/Fill")
+	end)
+
 	t.test("compare: a halo overlap is informational, not an overlap; below minArea is ignored", function()
 		local result = CollisionRules.compare({
 			el("S/A/Group/Halo1", "halo", rect(0, 0, 100, 50)),
