@@ -47,3 +47,7 @@ intake/inbox/*
 
 # User-supplied wisp reference images stay on disk, not in git
 02 Research/assets/wisp-pilot/user-reference-*.png
+
+# Local Codex hook wiring pending TASK-0117 Codex Hook Adapter.
+.codex/hooks.json
+.codex/hooks/
