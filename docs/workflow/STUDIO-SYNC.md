@@ -98,3 +98,122 @@ BuildStamp `9732f94` confirmed in Edit before Play, after a Rojo reconnect. Fres
 - **Before the fix:** the first IdentityBoards run failed at all five viewports. `FIRST CORRECT` on `shard-id-status-gold` measured 5 px, or 4.75 px at 1920x1080, and `[WWWWW]` on `shard-id-tag` measured 5.75 px. The fix is in `9732f94`: `ExtraWidth = 2` on the tag and status chips in `client/Identity/`. Text and icon positions did not change. After the fix, all five viewports passed.
 - **Baseline mismatch:** the TASK-0106 entry above records 109 rows and 0 failures at 844x390. This build failed at that viewport before the fix, so its cause is not traced beyond the two chips.
 
+### TASK-0114 extended gate, 2026-10-31 (build 9ccb8eb)
+
+Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `9ccb8eb` confirmed in Edit before Play. `TextFit.run()` and `IdentityBoards.run()` at 844x390, 1920x1080, phone 812x375, 1024x768 and 1180x820.
+
+| Check | 844x390 | 1920x1080 | phone 812x375 | 1024x768 | 1180x820 |
+|---|---|---|---|---|---|
+| Historical unmeasured rows (reconciled) | 284 | 284 | 284 | 284 | 284 |
+| Measured rows | 669 | 669 | 669 | 669 | 669 |
+| Clip rows (fails) | 261 (0) | 261 (0) | 261 (0) | 261 (0) | 261 (0) |
+| Collision rows (fails; intentional passes) | 481 (0) | 481 (0) | 481 (0) | 481 (0) | 481 (0) |
+| Overlap, allow-listed | 8 | 8 | 8 | 8 | 8 |
+| Review-row gap rows (fails) | 24 (0) | 24 (0) | 24 (0) | 24 (0) | 24 (0) |
+| Tap rows (fails), design units, min 44 | 10 (0), smallest 44 | 10 (0), smallest 44 | 10 (0), smallest 44 | 10 (0), smallest 44 | 10 (0), smallest 44 |
+| Screen-px margin rows under 6 (informational) | 0 | 0 | 0 | 0 | 0 |
+| Tightest measured margin (design px) | 6.5 | 6.5 | 6.5 | 6.5 | 6.5 |
+| IdentityBoards rows / failed / tightest margin | 109 / 0 / 7.0 | 109 / 0 / 6.75 | 109 / 0 / 6.75 | 109 / 0 / 6.75 | 109 / 0 / 6.75 |
+| IdentityBoards GuiButtons | 0 | 0 | 0 | 0 | 0 |
+
+- **Totals:** `TextFit` 8,685 rows across the five viewports, 0 failures. `TextFit` at the original three viewports is still 953 rows each.
+- **Tightest measured margin:** 6.5 design px at `06a-blitz-question`, `Screen_blitz/Score/Group/Content/Value`. At phone scale that is 6.25 screen px, so nothing falls below 6 screen px.
+- **Review rows:** minimum gap 2 px, at `07a-blitz-review-best`, `Screen_blitzreview Row1->Row2`.
+- **Tap size:** `AbsoluteSize` divided by the gate scale, minimum 44 design px. The smallest control is `Screen_main/HowToPlay/Group/Content/Hit`, 230x44 design px, at every viewport. It passes at exactly 44, so there is no margin on that control.
+- **Intentional composition passed and labelled:** screen-edge decor, sticker or label on its own control, glow and flash layers, NEW BEST badge across a card corner, duplicate text layer (shadow or glow), VS badge across the panel seam.
+
+### TASK-0114 audit fixes, 2026-11-01 (build 0b8c767)
+
+Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `0b8c767` confirmed in Edit before Play. Full gate at five viewports: `TextFit.run()` and `IdentityBoards.run()`.
+
+**Fixes (file:line in `games/mathshow/tests/studio/`)**
+
+| Finding | Change | Where |
+|---|---|---|
+| P1 overlap allow-list | Only `Screen_settings/Row{music,sfx}/…/Hit` against the same row's `Minus`/`HitMinus`/`Plus`/`HitPlus` | `TextFit.luau:346` (`allowedSettingsPair`) |
+| P2 image filter | Explicit decoration list (`Shard`, `Flash`, `Glow`, `Spark1-3`, `Touch`), counted per instance and viewport. Every other image and ImageButton is checked | `TextFit.luau:316` (`DECOR_IMAGE_NAMES`), `:498` (count), `:500` |
+| P2 collision self-match | `d == L.inst` skipped | `TextFit.luau:506` |
+| P2 duplicate text | Only a sibling (same Parent, same Name, same Text) | `TextFit.luau:363` |
+| P2 sticker frames | Visible `FitSticker` Frames and ImageLabels in clip and collision checks | `TextFit.luau:456`, `:462` |
+| P2 IdentityBoards census | GuiButton count before `gui:Destroy()` | `IdentityBoards.luau:278` (count), `:285` (destroy) |
+| Edge exemption | Name prefix `Edge` only | `TextFit.luau:366` |
+| NEW BEST exemption | Counterpart must be inside the same screen's `Card` | `TextFit.luau:377` |
+| VS exemption | Counterpart must be `You` or `Rival` on the same screen | `TextFit.luau:386` |
+
+**Exemption counts per viewport** (passed rows). Old numbers are the audit's figures, which I can't reproduce against a per-viewport basis.
+
+| Category | Old (audit) | New, per viewport | New, total (5) |
+|---|---|---|---|
+| Edge | 205 | 4 | 20 |
+| Own-control | 81 | 0 | 0 |
+| Glow | 79 | 0 (now decoration) | 0 |
+| NEW BEST | 2 | 0 | 0 |
+| Dup | 110 | 0 | 0 |
+| VS | 4 | 0 | 0 |
+
+The old Glow, Shard and Flash collisions are no longer checked as collisions. They are on the decoration list instead, so the collision count dropped as a result.
+
+**Decoration exclusions** (instances, per viewport, summed across fixtures):
+
+| Name | 844×390 | 1920×1080 | phone 812×375 | 1024×768 | 1180×820 |
+|---|---|---|---|---|---|
+| Glow | 111 | 111 | 111 | 111 | 111 |
+| Shard | 341 | 341 | 341 | 341 | 341 |
+| Flash | 341 | 341 | 341 | 341 | 341 |
+
+**Previously hidden shard images** (checked by the new rule): 240 per viewport, 0 overlapping, 0 failures.
+
+**Full gate, build 0b8c767**
+
+| Check | Result |
+|---|---|
+| TextFit rows, 5 viewports | 6,335 total, 0 failures |
+| Clip | 264 rows per viewport, 0 failures |
+| Collision | 4 rows per viewport (Edge exemptions), 0 failures |
+| Overlap | 8 allow-listed pairs per viewport, 0 failures |
+| Review-row gap | 24 rows per viewport, 0 failures |
+| Tap (design px, min 44) | 10 rows per viewport, smallest 230×44 |
+| Measured margin, tightest | 6.5 design px |
+| IdentityBoards | 109 rows per viewport, 0 failures |
+| IdentityBoards tightest margin | 7.0 at 844×390, 6.75 elsewhere |
+| IdentityBoards GuiButtons (real count) | 0 at all five viewports |
+
+**Caveat for the auditor.** The decoration list is now the main source of exclusions. It removes most collision checks against Glow, Shard and Flash images, which is where the old collision counts came from. Please check that list.
+
+
+### TASK-0114 narrowed scope, 2026-11-01 (build 025b721)
+
+Collision checking is removed from TASK-0114 and moves to TASK-0115 (ownership-based gate), after two failed audits. Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `025b721` confirmed in Edit before Play and printed in the log header. `TextFit.run()` and `IdentityBoards.run()` at five viewports. The log now prints, before the row list: BuildStamp, per-viewport category counts (zeros included) and the reconciliation line. Each viewport also prints `collision: NOT COVERED -> TASK-0115`.
+
+| Check | 844x390 | 1920x1080 | phone 812x375 | 1024x768 | 1180x820 |
+|---|---|---|---|---|---|
+| Measured rows | 669 | 669 | 669 | 669 | 669 |
+| Unmeasured rows | 284 | 284 | 284 | 284 | 284 |
+| Reconciliation (669 + 284 = 953) | OK | OK | OK | OK | OK |
+| Clip rows (fails) | 264 (0) | 264 (0) | 264 (0) | 264 (0) | 264 (0) |
+| Tap rows, design units, min 44 (fails) | 10 (0) | 10 (0) | 10 (0) | 10 (0) | 10 (0) |
+| Overlap rows (fails) | 0 (0) | 0 (0) | 0 (0) | 0 (0) | 0 (0) |
+| Overlap, allow-listed | 8 | 8 | 8 | 8 | 8 |
+| Review-row gap rows (fails) | 24 (0) | 24 (0) | 24 (0) | 24 (0) | 24 (0) |
+| Informational screen-px rows | 0 | 0 | 0 | 0 | 0 |
+| Collision | NOT COVERED | NOT COVERED | NOT COVERED | NOT COVERED | NOT COVERED |
+| IdentityBoards rows / failed / GuiButtons | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 |
+
+- **Totals:** `TextFit` 6,300 rows (1,260 per viewport), 0 failures. Unmeasured total 1,420 of 1,420 expected. The run fails if either reconciliation is off.
+- **Removed:** pairwise collision checks, the decoration image list, the Edge, NEW BEST, VS and duplicate-text exemptions, and the hidden-image tally.
+- **Kept:** tap size (design units, 44), the same-row settings allow-list, sticker and label clipping including FitSticker Frames, the review-row gap, the IdentityBoards census before destroy, and the 1,420-row reconciliation.
+- **Smallest tap:** `Screen_main/HowToPlay/Group/Content/Hit`, 230x44 design units, at every viewport. TASK-0116 raises hit rects to 48.
+- **Not covered by this gate:** overlap between controls, shards, labels, stickers and decoration other than the settings allow-list. TASK-0115 owns it.
+
+### TASK-0114 audit fixes for the narrowed scope, 2026-11-01 (build 8114b35)
+
+Two findings from the narrowed-scope audit. Reconciliation moved out of `TextFit.luau` into the pure `shared/LedgerRules.luau` (`reconcile(counts, viewports)`; constants `ExpectedMeasured` 669, `ExpectedUnmeasured` 284, `ExpectedPerViewport` 953 in one place). It fails per viewport on measured and unmeasured individually, then on the total, and also fails a missing or an extra viewport, naming the viewport and both counts. `tests/LedgerRules.spec.luau` has 9 tests: all-correct, 668+285 and 670+283 (each fails), both across two viewports, a wrong total, a correct total with the wrong split, a missing viewport and an extra one. Headless specs went from 275 to 284 passed. The TASK-0114 acceptance now says `collision: NOT COVERED, deferred to TASK-0115`.
+
+Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `8114b35` confirmed in Edit and printed in the log header (the code commit; later commits are docs only).
+
+| Check | 844x390 | 1920x1080 | phone 812x375 | 1024x768 | 1180x820 |
+|---|---|---|---|---|---|
+| Measured / unmeasured (expected 669 / 284) | 669 / 284 OK | 669 / 284 OK | 669 / 284 OK | 669 / 284 OK | 669 / 284 OK |
+| IdentityBoards rows / failed / GuiButtons | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 |
+
+- **TextFit:** 6,300 rows, 0 failures. Unmeasured total 1,420 of 1,420.

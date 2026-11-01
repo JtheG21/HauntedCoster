@@ -14,10 +14,30 @@ local TextService = game:GetService("TextService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local HudRules = require(Shared:WaitForChild("HudRules"))
+local LedgerRules = require(Shared:WaitForChild("LedgerRules"))
 local TextFitRules = require(Shared:WaitForChild("TextFitRules"))
 
 local MARGIN = 6
 local SLACK = 1 -- px of tolerance on keep-clear zones for rotated boxes
+-- TASK-0114. Tap minimum is in design px: AbsoluteSize divided by the gate scale, so the rule is the same at every viewport.
+local TAP_MIN = 44
+local REVIEW_GAP_MIN = 2 -- review rows: gap between neighbours, design px
+local CLIP_TOL = 0.5 -- ancestor overflow tolerated, design px
+local OVERLAP_EPS = 0.01 -- positive-area test for interactive overlap
+local SCREEN_MARGIN_MIN = 6 -- informational: text margin in screen px
+local CATEGORIES: { string } = {
+	"measured",
+	"unmeasured",
+	"clip",
+	"tap",
+	"overlap",
+	"overlap-allow",
+	"review-gap",
+	"info-screen-px",
+	"not-covered",
+	"other",
+}
+-- Interactive pairs allowed to overlap, by state and control name. The reason is written to the ledger.
 local SIZES: { { name: string, w: number, h: number } } = {
 	{ name = "844x390", w = 844, h = 390 },
 	{ name = "1920x1080", w = 1920, h = 1080 },
@@ -33,7 +53,16 @@ local ZONES = {
 	{ name = "right inset", x0 = 800, y0 = 0, x1 = 844, y1 = 390 },
 }
 
-export type Row = { state: string, element: string, text: string, margin: string, pass: boolean, why: string }
+export type Row = {
+	state: string,
+	element: string,
+	text: string,
+	margin: string,
+	pass: boolean,
+	why: string,
+	class: string?,
+	category: string?,
+}
 
 local TextFit = {}
 
@@ -134,19 +163,19 @@ local function checkGui(gui: ScreenGui, state: string, rows: { Row })
 					hit = zone.name
 				end
 			end
-			local small = (label.AbsoluteSize.X / scale < 43.5) or (label.AbsoluteSize.Y / scale < 43.5)
+			local dw, dh = label.AbsoluteSize.X / scale, label.AbsoluteSize.Y / scale
+			local small = dw < TAP_MIN or dh < TAP_MIN
 			if d.Name:sub(1, 3) == "Hit" then
 				table.insert(rows, {
 					state = state,
 					element = name .. " [target]",
-					text = string.format(
-						"%dx%d",
-						label.AbsoluteSize.X / scale + 0.5,
-						label.AbsoluteSize.Y / scale + 0.5
-					),
+					text = string.format("%dx%d", dw + 0.5, dh + 0.5),
 					margin = "-",
 					pass = hit == "" and not small,
-					why = if hit ~= "" then "inside keep-clear: " .. hit elseif small then "target under 44x44" else "",
+					why = if hit ~= ""
+						then "inside keep-clear: " .. hit
+						elseif small then "tap under 44 design px"
+						else "",
 				})
 			end
 		end
@@ -228,6 +257,196 @@ local function checkGui(gui: ScreenGui, state: string, rows: { Row })
 	end
 end
 
+local function isRelated(a: Instance, b: Instance): boolean
+	return a:IsDescendantOf(b) or b:IsDescendantOf(a)
+end
+
+local function overlapBox(a: { number }, b: { number }): { number }
+	return { math.max(a[1], b[1]), math.max(a[2], b[2]), math.min(a[3], b[3]), math.min(a[4], b[4]) }
+end
+
+local function fmtBox(b: { number }): string
+	return string.format("(%.1f,%.1f %.1fx%.1f)", b[1], b[2], b[3] - b[1], b[4] - b[2])
+end
+
+-- Largest overflow of `box` past any ClipsDescendants ancestor, and that ancestor's path.
+local function ancestorClip(inst: GuiObject, root: Frame, box: { number }, scale: number): (number, string)
+	local worst, where = 0, ""
+	local node: Instance? = inst.Parent
+	while node and node ~= root.Parent do
+		if node:IsA("GuiObject") and node.ClipsDescendants then
+			local a0, b0, a1, b1 = rotatedBox(node, root, scale)
+			local over = math.max(a0 - box[1], box[3] - a1, b0 - box[2], box[4] - b1)
+			if over > worst then
+				worst = over
+				where = path(node, root)
+			end
+		end
+		node = node.Parent
+	end
+	return worst, where
+end
+
+-- TASK-0114 checks, appended to the rows from checkGui for one state (rows[from..]). Each new row has a category, so the
+-- ledger can tell it apart from the historical 284 unmeasured rows per viewport. Collision checks are NOT in this gate
+-- (TASK-0115); the log prints a "collision: NOT COVERED" row per viewport so the gap is visible.
+
+-- Only Screen_settings/Row{music,sfx}: its Hit against the SAME row's Minus/HitMinus or Plus/HitPlus.
+local function allowedSettingsPair(pa: string, pb: string): boolean
+	for _, pair in { { pa, pb }, { pb, pa } } do
+		local hit, other = pair[1], pair[2]
+		local row = string.match(hit, "^Screen_settings/Row(%a+)/Group/Content/Hit$")
+		if row == "music" or row == "sfx" then
+			local otherRow = string.match(other, "^Screen_settings/Row(%a+)/")
+			local last = string.match(other, "([^/]+)$")
+			if otherRow == row and (last == "Minus" or last == "HitMinus" or last == "Plus" or last == "HitPlus") then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: number, from: number)
+	local root = gui:FindFirstChild("Root") :: Frame
+	local interactive: { { inst: GuiObject, box: { number } } } = {}
+
+	-- 1. Tap size, every visible GuiButton plus Answer TextBoxes. checkGui already covers TextButtons named Hit*.
+	for _, d in root:GetDescendants() do
+		local isButton = d:IsA("GuiButton")
+		local isAnswer = d:IsA("TextBox") and string.find(d.Name, "Answer", 1, true) ~= nil
+		if (isButton or isAnswer) and visible(d :: GuiObject) then
+			local g = d :: GuiObject
+			local x0, y0, x1, y1 = rotatedBox(g, root, scale)
+			table.insert(interactive, { inst = g, box = { x0, y0, x1, y1 } })
+			if not (d:IsA("TextButton") and string.sub(d.Name, 1, 3) == "Hit") then
+				local sw, sh = g.AbsoluteSize.X / scale, g.AbsoluteSize.Y / scale
+				local ok = sw >= TAP_MIN and sh >= TAP_MIN
+				table.insert(rows, {
+					state = state,
+					element = path(g, root) .. " [tap]",
+					text = string.format("%dx%d", sw + 0.5, sh + 0.5),
+					margin = "-",
+					pass = ok,
+					why = if ok then "" else "tap under 44 design px",
+					class = d.ClassName,
+					category = "tap",
+				})
+			end
+		end
+	end
+
+	-- 2. Interactive overlap: positive-area intersection between unrelated controls, rotation-aware (conservative AABB).
+	-- The only allowed pairs are Screen_settings/Row{music,sfx}: its Hit against the SAME row's Minus/HitMinus or Plus/HitPlus.
+	for i = 1, #interactive do
+		for j = i + 1, #interactive do
+			local A, B = interactive[i], interactive[j]
+			if not isRelated(A.inst, B.inst) then
+				local ov = overlapBox(A.box, B.box)
+				if ov[3] - ov[1] > OVERLAP_EPS and ov[4] - ov[2] > OVERLAP_EPS then
+					local pa, pb = path(A.inst, root), path(B.inst, root)
+					local allowed = allowedSettingsPair(pa, pb)
+					table.insert(rows, {
+						state = state,
+						element = pa .. " x " .. pb,
+						text = fmtBox(ov),
+						margin = "-",
+						pass = allowed,
+						why = if allowed then "allow-list: gamepad selection surface" else "interactive overlap",
+						class = A.inst.ClassName .. "/" .. B.inst.ClassName,
+						category = if allowed then "overlap-allow" else "overlap",
+					})
+				end
+			end
+		end
+	end
+
+	-- 3. Clipping for stickers and off-shard labels, and for visible FitSticker frames and images (for example Dot1..3).
+	for _, d in root:GetDescendants() do
+		if not (d:IsA("GuiObject") and visible(d :: GuiObject)) then
+			continue
+		end
+		local g = d :: GuiObject
+		local sticker = g:GetAttribute("FitSticker") == true
+		local isLabel = (g:IsA("TextLabel") or g:IsA("TextButton")) and (g :: TextLabel).Text ~= ""
+		if not (isLabel or sticker) then
+			continue
+		end
+		local owner = shapeOwner(g)
+		if owner ~= nil and not sticker then
+			continue
+		end
+		local x0, y0, x1, y1 = rotatedBox(g, root, scale)
+		local box = { x0, y0, x1, y1 }
+		local over, where = ancestorClip(g, root, box, scale)
+		local ok = over <= CLIP_TOL
+		table.insert(rows, {
+			state = state,
+			element = path(g, root),
+			text = if g:IsA("TextLabel") or g:IsA("TextButton")
+				then (g :: TextLabel).Text:gsub("\n", " / ")
+				else "(sticker frame)",
+			margin = "-",
+			pass = ok,
+			why = if ok then "" else string.format("clipped %.1f px by %s", over, where),
+			class = g.ClassName,
+			category = "clip",
+		})
+	end
+
+	-- 4. Review rows: gap between neighbouring Row<n> controls, per column. Diagnostic, with a gate at REVIEW_GAP_MIN.
+	local groups: { [string]: { { inst: GuiObject, box: { number }, parent: Instance } } } = {}
+	for _, d in root:GetDescendants() do
+		if d:IsA("GuiObject") and string.match(d.Name, "^Row%d+$") and visible(d :: GuiObject) and d.Parent then
+			local x0, y0, x1, y1 = rotatedBox(d :: GuiObject, root, scale)
+			local key = tostring(d.Parent:GetFullName()) .. " @" .. string.format("%.0f", x0)
+			local list = groups[key] or {}
+			table.insert(list, { inst = d :: GuiObject, box = { x0, y0, x1, y1 }, parent = d.Parent })
+			groups[key] = list
+		end
+	end
+	for _, list in groups do
+		if #list >= 2 then
+			local parent = list[1].parent
+			table.sort(list, function(a, b)
+				return a.box[2] < b.box[2]
+			end)
+			for k = 2, #list do
+				local prev, cur = list[k - 1], list[k]
+				local gap = cur.box[2] - prev.box[4]
+				local ok = gap >= REVIEW_GAP_MIN
+				table.insert(rows, {
+					state = state,
+					element = path(parent, root) .. " " .. prev.inst.Name .. "->" .. cur.inst.Name,
+					text = string.format("gap %.1f px", gap),
+					margin = "-",
+					pass = ok,
+					why = if ok then "" else string.format("review rows touch: gap %.1f < %d", gap, REVIEW_GAP_MIN),
+					class = "Row",
+					category = "review-gap",
+				})
+			end
+		end
+	end
+
+	-- 5. Informational: text margin in screen px. Rows under SCREEN_MARGIN_MIN are listed, never failed.
+	for k = from, #rows do
+		local m = tonumber(rows[k].margin)
+		if m and m * scale < SCREEN_MARGIN_MIN then
+			table.insert(rows, {
+				state = state,
+				element = rows[k].element,
+				text = rows[k].text,
+				margin = string.format("%.1f screen px", m * scale),
+				pass = true,
+				why = "would fail under screen-px rule (informational)",
+				class = rows[k].class,
+				category = "info-screen-px",
+			})
+		end
+	end
+end
+
 -- Runs every state and fixture at each viewport scale. Returns (rows, failures).
 function TextFit.run(): ({ Row }, number)
 	if not RunService:IsStudio() then
@@ -254,13 +473,114 @@ function TextFit.run(): ({ Row }, number)
 					uiScale.Scale = HudRules.rootScale(size.w, size.h)
 					task.wait() -- let AbsoluteSize / TextBounds settle
 					local label = size.name .. " " .. state.id .. (if fixture ~= "" then " [" .. fixture .. "]" else "")
+					local from = #rows + 1
 					checkGui(view.gui, label, rows)
+					auxChecks(view.gui, label, rows, uiScale.Scale, from)
 				end
 			end
 		end
 	end
 	Preview.clear()
-	local failures = 0
+
+	-- One "not covered" row per viewport: collision is out of this gate's scope (TASK-0115).
+	for _, sz in SIZES do
+		table.insert(rows, {
+			state = sz.name .. " collision",
+			element = "collision",
+			text = "NOT COVERED -> TASK-0115",
+			margin = "-",
+			pass = true,
+			why = "",
+			category = "not-covered",
+		})
+	end
+
+	-- Per-viewport category counts, tallied before anything is printed.
+	local tally: { [string]: { [string]: number } } = {}
+	local smallest: { [string]: string } = {}
+	local smallestV: { [string]: number } = {}
+	for _, sz in SIZES do
+		local counts: { [string]: number } = {}
+		for _, cat in CATEGORIES do
+			counts[cat] = 0
+			counts["FAIL " .. cat] = 0
+		end
+		tally[sz.name] = counts
+	end
+	for _, row in rows do
+		local size = "?"
+		for _, sz in SIZES do
+			if string.sub(row.state, 1, #sz.name) == sz.name then
+				size = sz.name
+				break
+			end
+		end
+		local cat: string = row.category
+			or (
+				if tonumber(row.margin)
+					then "measured"
+					elseif row.margin == "sticker" or row.margin == "-" then "unmeasured"
+					else "other"
+			)
+		local counts: { [string]: number } = tally[size] or {}
+		tally[size] = counts
+		counts[cat] = (counts[cat] or 0) + 1
+		if not row.pass then
+			counts["FAIL " .. cat] = (counts["FAIL " .. cat] or 0) + 1
+		end
+		if cat == "tap" or string.find(row.element, "[target]", 1, true) then
+			local w, h = string.match(row.text, "(%d+)x(%d+)")
+			if w and h then
+				local v = math.min(tonumber(w) :: number, tonumber(h) :: number)
+				if smallestV[size] == nil or v < smallestV[size] then
+					smallestV[size] = v
+					smallest[size] = row.element .. " " .. row.text
+				end
+			end
+		end
+	end
+
+	-- Header: build stamp, category counts (zeros included) and the reconciliation, before the row list.
+	local stampValue = ReplicatedStorage:WaitForChild("Shared"):FindFirstChild("BuildStamp")
+	local stamp = if stampValue and stampValue:IsA("StringValue") then stampValue.Value else "MISSING"
+	print("[TextFit] BuildStamp " .. stamp)
+	local ledger: { [string]: LedgerRules.Counts } = {}
+	local names: { string } = {}
+	for _, sz in SIZES do
+		table.insert(names, sz.name)
+	end
+	for name, counts in tally do
+		ledger[name] = { measured = counts.measured or 0, unmeasured = counts.unmeasured or 0 }
+	end
+	for _, sz in SIZES do
+		local counts = tally[sz.name]
+		local parts: { string } = {}
+		for _, cat in CATEGORIES do
+			table.insert(
+				parts,
+				cat .. "=" .. tostring(counts[cat]) .. " (fail " .. tostring(counts["FAIL " .. cat]) .. ")"
+			)
+		end
+		print("[TextFit] COUNTS " .. sz.name .. " | " .. table.concat(parts, " "))
+		print("[TextFit] collision: NOT COVERED -> TASK-0115 | " .. sz.name)
+	end
+	local reconcile = LedgerRules.reconcile(ledger, names)
+	for _, line in reconcile.lines do
+		print("[TextFit] RECONCILE " .. line)
+	end
+	for _, failure in reconcile.failures do
+		print("[TextFit] RECONCILE FAIL " .. failure)
+	end
+	print(
+		string.format(
+			"[TextFit] RECONCILE total unmeasured %d, expected %d %s",
+			reconcile.unmeasuredTotal,
+			LedgerRules.ExpectedUnmeasured * #SIZES,
+			if reconcile.ok then "OK" else "MISMATCH"
+		)
+	)
+
+	local failures = #reconcile.failures
 	print("[TextFit] state | element | text | margin | result")
 	for _, row in rows do
 		if not row.pass then
@@ -277,6 +597,11 @@ function TextFit.run(): ({ Row }, number)
 				row.why
 			)
 		)
+	end
+	for _, sz in SIZES do
+		if smallest[sz.name] then
+			print("[TextFit] SMALLEST TAP " .. sz.name .. " | " .. smallest[sz.name])
+		end
 	end
 	print(`TEXTFIT_RESULT rows={#rows} failures={failures}`)
 	return rows, failures

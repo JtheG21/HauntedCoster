@@ -1,0 +1,27 @@
+{
+  "id": "TASK-0116",
+  "game": "GAME-004",
+  "title": "MathShow Hit Rect 48",
+  "status": "backlog",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/client/Menu/",
+    "games/mathshow/tests/studio/TextFit.luau",
+    "docs/workflow/STUDIO-SYNC.md"
+  ],
+  "depends_on": [
+    "TASK-0114"
+  ],
+  "branch": "task/TASK-0116-hit-rect-48",
+  "acceptance": [
+    "Every hit rect (Hit, HitMinus, HitPlus and any other interactive hit area) is at least 48x48 design units, including the 230x44 HowToPlay, Leaderboard and Daily Hit rects.",
+    "No art, ids or visible layout change. A before and after table lists each changed Hit with old and new size.",
+    "TASK-0114's tap rule is raised from 44 to 48 and the gate passes at five viewports with 0 failures.",
+    "scripts/check.sh, validate_queue and validate_vault pass."
+  ],
+  "evidence": [],
+  "notes": "Backlog. The smallest control today is Screen_main/HowToPlay/Group/Content/Hit at 230x44, which passes the 44 rule with no margin.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0116-MathShow-Hit-Rect-48.md",
+  "risk": "low"
+}
