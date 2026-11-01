@@ -65,6 +65,19 @@ class VaultTest(unittest.TestCase):
         self.assertIn("invalid status 'completed'", errs)
         self.assertIn("'updated' must be YYYY-MM-DD", errs)
 
+    def test_handoff_type(self):
+        ok = f"{GAME}/10 Handoffs/HANDOFF-Thing-20261010.md"
+        self.write(ok, note("HANDOFF-Thing-20261010", "handoff", status="proposed", project="GAME-001",
+                            task_id="none", receiver="any"))
+        self.assertEqual(self.errors(), "")
+        self.write(f"{GAME}/10 Handoffs/HANDOFF-Bare.md", note("HANDOFF-Bare", "handoff", project="GAME-001"))
+        self.write(f"{GAME}/09 Retrospectives/HANDOFF-Misplaced.md",
+                   note("HANDOFF-Misplaced", "handoff", project="GAME-001", task_id="none", receiver="any"))
+        errs = self.errors()
+        self.assertIn("missing 'task_id'", errs)
+        self.assertIn("missing 'receiver'", errs)
+        self.assertIn("handoff notes belong in", errs)
+
     def test_missing_frontmatter_and_fields(self):
         self.write("02 Research/RSH-20261010-Topic.md", "# no frontmatter\n")
         self.write("09 Knowledge/LES-0002-Y.md", "---\nid: LES-0002\ntype: lesson\n---\n")

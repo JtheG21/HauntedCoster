@@ -22,8 +22,9 @@ STATUSES = {"backlog", "review", "inbox", "research", "proposed", "ready", "in_p
             "in_review", "changes_requested", "approved", "done", "archived"}
 TYPES = {"index", "overview", "design", "architecture", "roadmap", "task", "bug", "audit", "adr",
          "system", "playtest", "release", "review", "health", "lesson", "retro", "research",
-         "experiment", "inbox", "agent"}
+         "experiment", "inbox", "agent", "handoff"}
 REQUIRED = ("id", "title", "type", "status", "created", "updated")
+EXTRA_REQUIRED = {"handoff": ("task_id", "receiver")}  # as in 99 Templates/T - Handoff.md
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 SLUG = r"[A-Za-z0-9]+(?:-[A-Za-z0-9.]+)*"
 
@@ -42,6 +43,7 @@ RULES = {
     "health": (r"HLT-\d{8}", r"08 Reviews"),
     "lesson": (rf"LES-\d{{4}}-{SLUG}", r"09 Knowledge"),
     "retro": (rf"RETRO-{SLUG}", rf"{GAME}/09 Retrospectives"),
+    "handoff": (rf"HANDOFF-{SLUG}", rf"({GAME}/10 Handoffs|98 Archive)"),
     "experiment": (rf"EXP-\d{{4}}-{SLUG}", r"07 Metrics"),
     "overview": (r"00 Overview", GAME),
     "design": (r"01 Game Design", GAME),
@@ -152,7 +154,7 @@ def validate(root: Path) -> Report:
 
 def check_note(rep, root, rel, fm, ids, task_notes):
     where = str(rel)
-    for key in REQUIRED:
+    for key in REQUIRED + EXTRA_REQUIRED.get(fm.get("type"), ()):
         if key not in fm or fm[key] in ("", []):
             rep.error(where, f"missing '{key}'")
     status, ntype, nid = fm.get("status"), fm.get("type"), fm.get("id")

@@ -647,6 +647,8 @@ task/TASK-0111-identity-gate	265f8f8
 | U5, U6 | `.gitignore` line `02 Research/assets/wisp-pilot/user-reference-*.png`, committed as `4343b11` | Committed on the branch. Takes effect in main after merge. The two PNGs stay on disk |
 | K1 | Removed with S1 | See S1 |
 
+**Correction (2026-11-01):** S1's "scoped diff 0 lines" for `chore/art-automation` was wrong. PR #64's base was `task/TASK-0043-Wisp-Revision`, not `main`, so a diff against `origin/main` was not evidence of a squash merge. The commits survive on origin, `chore/creature-pipeline` and the wisp branch. See `R1-MANIFEST.md`, row R3.
+
 ### A1: duplicate handoff in main
 
 - `git hash-object "98 Archive/TASK-0094-claude-code-handoff.md"` (main copy): `8240000fa7557e3892222291fbecfdec2a6b0b2b`
