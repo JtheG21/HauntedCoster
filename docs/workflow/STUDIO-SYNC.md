@@ -217,3 +217,15 @@ Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `8114b35` co
 | IdentityBoards rows / failed / GuiButtons | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 |
 
 - **TextFit:** 6,300 rows, 0 failures. Unmeasured total 1,420 of 1,420.
+
+### TASK-0115 red run: the collision gate fails on planted faults, 2026-11-01 (build 28c7561)
+
+Fresh Play, Rojo from `task/TASK-0115-ownership-collision`, BuildStamp `28c7561` confirmed in Edit and printed in the log. `TextFit.runCanary()` at five viewports, before the real menu was run. The canaries are built from plain Instances in `tests/studio/CollisionCanary.luau` and never touch the menu path.
+
+| Canary | Expected | 844x390 | 1920x1080 | phone 812x375 | 1024x768 | 1180x820 |
+|---|---|---|---|---|---|---|
+| `canary-overlap`: A's shard over B's shard | flagged | FLAGGED (3 overlaps) | FLAGGED (3) | FLAGGED (3) | FLAGGED (3) | FLAGGED (3) |
+| `canary-label-on-foreign-shard`: A's label over B's shard | flagged | FLAGGED (2) | FLAGGED (2) | FLAGGED (2) | FLAGGED (2) | FLAGGED (2) |
+| `canary-composition`: a label over its own shard | passes | PASS (0 overlaps, 2 composition) | PASS | PASS | PASS | PASS |
+
+Log excerpt: `[TextFit] CANARY 844x390 | canary-overlap=FLAGGED canary-label-on-foreign-shard=FLAGGED canary-composition=PASS`, ending `TEXTFIT_CANARY_RESULT rows=15 failures=0`. A canary that is not flagged (or a composition control that is) counts as a gate failure.
