@@ -82,6 +82,30 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-01T13:00:10",
+      "from": "review",
+      "to": "blocked",
+      "note": "changes requested by jg: narrowed-scope audit: reconcile per viewport, acceptance alignment; revision limit 2 exceeded, needs human"
+    },
+    {
+      "time": "2026-11-01T13:00:20",
+      "from": "blocked",
+      "to": "ready",
+      "note": "unblocked by jg"
+    },
+    {
+      "time": "2026-11-01T13:00:20",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-01T13:00:30",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -99,6 +123,11 @@
       "time": "2026-11-01T12:50:13",
       "result": "pass",
       "notes": "Narrowed scope, build 025b721. Collision removed (moves to TASK-0115); log header prints BuildStamp, per-viewport category counts and 669+284=953 reconciliation; collision NOT COVERED row per viewport. Full gate at five viewports: TextFit 6,300 rows, 0 failures; IdentityBoards 109 rows per viewport, 0 failed, 0 GuiButtons. check.sh passes. Earlier exec records kept."
+    },
+    {
+      "time": "2026-11-01T13:00:30",
+      "result": "pass",
+      "notes": "Narrowed-scope audit fixes, build 8114b35. Pure shared/LedgerRules.luau reconciles per viewport (measured 669 and unmeasured 284 individually, 953 total, missing/extra viewport fails) with 9-test spec; specs 284 passed. Acceptance aligned: collision NOT COVERED, deferred to TASK-0115. Full gate at five viewports: 669/284 per viewport, TextFit 6,300 rows 0 failures; IdentityBoards 109 rows, 0 failed, 0 GuiButtons per viewport. BuildStamp 8114b35 in log header. check.sh passes. Earlier exec records kept."
     }
   ],
   "audits": [
@@ -158,5 +187,5 @@
       "report": "docs/workflow/STUDIO-SYNC.md"
     }
   ],
-  "revisions": 2
+  "revisions": 0
 }
