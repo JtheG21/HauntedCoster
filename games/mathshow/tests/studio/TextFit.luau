@@ -24,6 +24,21 @@ local REVIEW_GAP_MIN = 2 -- review rows: gap between neighbours, design px
 local CLIP_TOL = 0.5 -- ancestor overflow tolerated, design px
 local OVERLAP_EPS = 0.01 -- positive-area test for interactive overlap
 local SCREEN_MARGIN_MIN = 6 -- informational: text margin in screen px
+-- Reconciliation with the TASK-0107 gate: 669 measured + 284 unmeasured rows per viewport.
+local EXPECT_UNMEASURED = 284
+local EXPECT_PER_VIEWPORT = 953
+local CATEGORIES: { string } = {
+	"measured",
+	"unmeasured",
+	"clip",
+	"tap",
+	"overlap",
+	"overlap-allow",
+	"review-gap",
+	"info-screen-px",
+	"not-covered",
+	"other",
+}
 -- Interactive pairs allowed to overlap, by state and control name. The reason is written to the ledger.
 local SIZES: { { name: string, w: number, h: number } } = {
 	{ name = "844x390", w = 844, h = 390 },
@@ -248,42 +263,6 @@ local function isRelated(a: Instance, b: Instance): boolean
 	return a:IsDescendantOf(b) or b:IsDescendantOf(a)
 end
 
--- The nearest ancestor with the given name, below root.
-local function ancestorNamed(inst: Instance, root: Frame, name: string): Instance?
-	local n: Instance? = inst.Parent
-	while n and n ~= root do
-		if n.Name == name then
-			return n
-		end
-		n = n.Parent
-	end
-	return nil
-end
-
--- Where the glyphs of a text label actually sit (design px), so a long, centred label does not count as its full box.
-local function glyphBox(lab: TextLabel, root: Frame, scale: number): { number }
-	local x0, y0, x1, y1 = rotatedBox(lab, root, scale)
-	if lab.Text == "" then
-		return { x0, y0, x1, y1 }
-	end
-	local bw, bh = measure(lab, scale)
-	local lw, lh = x1 - x0, y1 - y0
-	local w, h = math.min(bw, lw), math.min(bh, lh)
-	local gx = x0
-	if lab.TextXAlignment == Enum.TextXAlignment.Center then
-		gx = x0 + (lw - w) / 2
-	elseif lab.TextXAlignment == Enum.TextXAlignment.Right then
-		gx = x1 - w
-	end
-	local gy = y0
-	if lab.TextYAlignment == Enum.TextYAlignment.Center then
-		gy = y0 + (lh - h) / 2
-	elseif lab.TextYAlignment == Enum.TextYAlignment.Bottom then
-		gy = y1 - h
-	end
-	return { gx, gy, gx + w, gy + h }
-end
-
 local function overlapBox(a: { number }, b: { number }): { number }
 	return { math.max(a[1], b[1]), math.max(a[2], b[2]), math.min(a[3], b[3]), math.min(a[4], b[4]) }
 end
@@ -311,36 +290,8 @@ local function ancestorClip(inst: GuiObject, root: Frame, box: { number }, scale
 end
 
 -- TASK-0114 checks, appended to the rows from checkGui for one state (rows[from..]). Each new row has a category, so the
--- ledger can tell it apart from the historical 284 unmeasured rows per viewport.
--- Images on this list are decoration and are excluded from collisions. Each exclusion is counted per viewport and name.
-local DECOR_IMAGE_NAMES: { [string]: boolean } = {
-	Shard = true,
-	Flash = true,
-	Glow = true,
-	Spark1 = true,
-	Spark2 = true,
-	Spark3 = true,
-	Touch = true,
-}
-local decorTally: { [string]: { [string]: number } } = {}
--- Images inside a shard were hidden by the old filter. These count how many were checked and how many overlapped.
-local hiddenTally: { [string]: { checked: number, overlapping: number } } = {}
-
-local function sizeOf(state: string): string
-	for _, sz in SIZES do
-		if string.sub(state, 1, #sz.name) == sz.name then
-			return sz.name
-		end
-	end
-	return "?"
-end
-
-local function countDecor(state: string, name: string)
-	local size = sizeOf(state)
-	local t = decorTally[size] or {}
-	t[name] = (t[name] or 0) + 1
-	decorTally[size] = t
-end
+-- ledger can tell it apart from the historical 284 unmeasured rows per viewport. Collision checks are NOT in this gate
+-- (TASK-0115); the log prints a "collision: NOT COVERED" row per viewport so the gap is visible.
 
 -- Only Screen_settings/Row{music,sfx}: its Hit against the SAME row's Minus/HitMinus or Plus/HitPlus.
 local function allowedSettingsPair(pa: string, pb: string): boolean
@@ -356,40 +307,6 @@ local function allowedSettingsPair(pa: string, pb: string): boolean
 		end
 	end
 	return false
-end
-
--- Intentional composition, by name and structure. Anything not listed is a collision.
-local function exemption(a: GuiObject, b: GuiObject, root: Frame, sameText: boolean): string
-	if a.Parent == b.Parent and a.Name == b.Name and sameText then
-		return "intentional: duplicate text layer (sibling shadow or glow)"
-	end
-	if string.sub(a.Name, 1, 4) == "Edge" or string.sub(b.Name, 1, 4) == "Edge" then
-		return "intentional: screen-edge decor"
-	end
-	local ga = ancestorNamed(a, root, "Group")
-	if ga ~= nil and ga == ancestorNamed(b, root, "Group") then
-		return "intentional: sticker or label on its own control"
-	end
-	local pa, pb = path(a, root), path(b, root)
-	local screen = string.match(pa, "^(Screen_%w+)/")
-	if screen ~= nil then
-		if a.Name == "NewBest" and string.sub(pb, 1, #screen + 6) == screen .. "/Card/" then
-			return "intentional: NEW BEST badge on its card"
-		end
-		if
-			a.Name == "Vs"
-			and (
-				string.sub(pb, 1, #screen + 5) == screen .. "/You/"
-				or string.sub(pb, 1, #screen + 7) == screen .. "/Rival/"
-			)
-		then
-			return "intentional: VS badge across the panel seam"
-		end
-	end
-	if a.Name == "Glow" or b.Name == "Glow" or a.Name == "Flash" or b.Name == "Flash" then
-		return "intentional: glow or flash layer behind content"
-	end
-	return ""
 end
 
 local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: number, from: number)
@@ -447,7 +364,6 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 	end
 
 	-- 3. Clipping for stickers and off-shard labels, and for visible FitSticker frames and images (for example Dot1..3).
-	local labelBoxes: { { inst: GuiObject, box: { number }, owner: Frame? } } = {}
 	for _, d in root:GetDescendants() do
 		if not (d:IsA("GuiObject") and visible(d :: GuiObject)) then
 			continue
@@ -478,91 +394,9 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 			class = g.ClassName,
 			category = "clip",
 		})
-		table.insert(labelBoxes, {
-			inst = g,
-			box = if g:IsA("TextLabel") or g:IsA("TextButton") then glyphBox(g :: TextLabel, root, scale) else box,
-			owner = owner,
-		})
 	end
 
-	-- 4. Collisions between each sticker or off-shard label and unrelated visible content. Images are checked unless they
-	-- are on the explicit decoration list (counted per name, never silent).
-	-- Per instance, once per state: decoration images, and shard images that the old filter hid.
-	local hiddenImages: { [Instance]: boolean } = {}
-	for _, d in root:GetDescendants() do
-		if d:IsA("ImageLabel") or d:IsA("ImageButton") then
-			if not visible(d :: GuiObject) then
-				continue
-			end
-			if DECOR_IMAGE_NAMES[d.Name] then
-				countDecor(state, d.Name)
-			elseif shapeOwner(d) ~= nil then
-				hiddenImages[d] = false
-			end
-		end
-	end
-	for _, L in labelBoxes do
-		for _, d in root:GetDescendants() do
-			if d == L.inst or isRelated(L.inst, d) then
-				continue
-			end
-			local isText = (d:IsA("TextLabel") or d:IsA("TextButton")) and (d :: TextLabel).Text ~= ""
-			local isImage = d:IsA("ImageLabel") or d:IsA("ImageButton")
-			local isSticker = d:IsA("GuiObject") and (d :: GuiObject):GetAttribute("FitSticker") == true
-			if not ((isText or isImage or isSticker) and visible(d :: GuiObject)) then
-				continue
-			end
-			if isImage and DECOR_IMAGE_NAMES[d.Name] then
-				continue
-			end
-			local g = d :: GuiObject
-			local cbox
-			if isText then
-				cbox = glyphBox(d :: TextLabel, root, scale)
-			else
-				local x0, y0, x1, y1 = rotatedBox(g, root, scale)
-				cbox = { x0, y0, x1, y1 }
-			end
-			local ov = overlapBox(L.box, cbox)
-			local hits = ov[3] - ov[1] > OVERLAP_EPS
-				and ov[4] - ov[2] > OVERLAP_EPS
-				and (ov[3] - ov[1]) * (ov[4] - ov[2]) > 0.5
-			if hits and hiddenImages[g] ~= nil then
-				hiddenImages[g] = true
-			end
-			if hits then
-				local pl, pg = path(L.inst, root), path(g, root)
-				local sameText = isText and (d :: TextLabel).Text == (L.inst :: any).Text
-				local reason = exemption(L.inst, g, root, sameText)
-				table.insert(rows, {
-					state = state,
-					element = pl .. " x " .. pg,
-					text = fmtBox(ov),
-					margin = "-",
-					pass = reason ~= "",
-					why = if reason ~= "" then reason else "sticker or off-shard label overlaps unrelated content",
-					class = L.inst.ClassName .. "/" .. d.ClassName,
-					-- Images inside a shard were hidden by the old filter; they get their own category so they stay visible.
-					category = if isImage and shapeOwner(g) ~= nil then "collision-image" else "collision",
-				})
-			end
-		end
-	end
-
-	local hiddenChecked, hiddenOverlap = 0, 0
-	for _, hit in hiddenImages do
-		hiddenChecked += 1
-		if hit then
-			hiddenOverlap += 1
-		end
-	end
-	local hsize = sizeOf(state)
-	local ht = hiddenTally[hsize] or { checked = 0, overlapping = 0 }
-	ht.checked += hiddenChecked
-	ht.overlapping += hiddenOverlap
-	hiddenTally[hsize] = ht
-
-	-- 5. Review rows: gap between neighbouring Row<n> controls, per column. Diagnostic, with a gate at REVIEW_GAP_MIN.
+	-- 4. Review rows: gap between neighbouring Row<n> controls, per column. Diagnostic, with a gate at REVIEW_GAP_MIN.
 	local groups: { [string]: { { inst: GuiObject, box: { number }, parent: Instance } } } = {}
 	for _, d in root:GetDescendants() do
 		if d:IsA("GuiObject") and string.match(d.Name, "^Row%d+$") and visible(d :: GuiObject) and d.Parent then
@@ -597,7 +431,7 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 		end
 	end
 
-	-- 6. Informational: text margin in screen px. Rows under SCREEN_MARGIN_MIN are listed, never failed.
+	-- 5. Informational: text margin in screen px. Rows under SCREEN_MARGIN_MIN are listed, never failed.
 	for k = from, #rows do
 		local m = tonumber(rows[k].margin)
 		if m and m * scale < SCREEN_MARGIN_MIN then
@@ -619,12 +453,6 @@ end
 function TextFit.run(): ({ Row }, number)
 	if not RunService:IsStudio() then
 		return {}, 0
-	end
-	for size in decorTally do
-		decorTally[size] = nil
-	end
-	for size in hiddenTally do
-		hiddenTally[size] = nil
 	end
 	local Preview =
 		require(Players.LocalPlayer.PlayerScripts:WaitForChild("Client"):WaitForChild("Menu"):WaitForChild("Preview"))
@@ -655,7 +483,114 @@ function TextFit.run(): ({ Row }, number)
 		end
 	end
 	Preview.clear()
-	local failures = 0
+
+	-- One "not covered" row per viewport: collision is out of this gate's scope (TASK-0115).
+	for _, sz in SIZES do
+		table.insert(rows, {
+			state = sz.name .. " collision",
+			element = "collision",
+			text = "NOT COVERED -> TASK-0115",
+			margin = "-",
+			pass = true,
+			why = "",
+			category = "not-covered",
+		})
+	end
+
+	-- Per-viewport category counts, tallied before anything is printed.
+	local tally: { [string]: { [string]: number } } = {}
+	local smallest: { [string]: string } = {}
+	local smallestV: { [string]: number } = {}
+	for _, sz in SIZES do
+		local counts: { [string]: number } = {}
+		for _, cat in CATEGORIES do
+			counts[cat] = 0
+			counts["FAIL " .. cat] = 0
+		end
+		tally[sz.name] = counts
+	end
+	for _, row in rows do
+		local size = "?"
+		for _, sz in SIZES do
+			if string.sub(row.state, 1, #sz.name) == sz.name then
+				size = sz.name
+				break
+			end
+		end
+		local cat: string = row.category
+			or (
+				if tonumber(row.margin)
+					then "measured"
+					elseif row.margin == "sticker" or row.margin == "-" then "unmeasured"
+					else "other"
+			)
+		local counts: { [string]: number } = tally[size] or {}
+		tally[size] = counts
+		counts[cat] = (counts[cat] or 0) + 1
+		if not row.pass then
+			counts["FAIL " .. cat] = (counts["FAIL " .. cat] or 0) + 1
+		end
+		if cat == "tap" or string.find(row.element, "[target]", 1, true) then
+			local w, h = string.match(row.text, "(%d+)x(%d+)")
+			if w and h then
+				local v = math.min(tonumber(w) :: number, tonumber(h) :: number)
+				if smallestV[size] == nil or v < smallestV[size] then
+					smallestV[size] = v
+					smallest[size] = row.element .. " " .. row.text
+				end
+			end
+		end
+	end
+
+	-- Header: build stamp, category counts (zeros included) and the reconciliation, before the row list.
+	local stampValue = ReplicatedStorage:WaitForChild("Shared"):FindFirstChild("BuildStamp")
+	local stamp = if stampValue and stampValue:IsA("StringValue") then stampValue.Value else "MISSING"
+	print("[TextFit] BuildStamp " .. stamp)
+	local reconcileFail = 0
+	local unmeasuredTotal = 0
+	for _, sz in SIZES do
+		local counts = tally[sz.name]
+		local parts: { string } = {}
+		for _, cat in CATEGORIES do
+			table.insert(
+				parts,
+				cat .. "=" .. tostring(counts[cat]) .. " (fail " .. tostring(counts["FAIL " .. cat]) .. ")"
+			)
+		end
+		print("[TextFit] COUNTS " .. sz.name .. " | " .. table.concat(parts, " "))
+		unmeasuredTotal += counts.unmeasured
+		local sum = counts.measured + counts.unmeasured
+		local ok = sum == EXPECT_PER_VIEWPORT
+		if not ok then
+			reconcileFail += 1
+		end
+		print(
+			string.format(
+				"[TextFit] RECONCILE %s | measured %d + unmeasured %d = %d, expected %d %s",
+				sz.name,
+				counts.measured,
+				counts.unmeasured,
+				sum,
+				EXPECT_PER_VIEWPORT,
+				if ok then "OK" else "MISMATCH"
+			)
+		)
+		print("[TextFit] collision: NOT COVERED -> TASK-0115 | " .. sz.name)
+	end
+	local expectTotal = EXPECT_UNMEASURED * #SIZES
+	if unmeasuredTotal ~= expectTotal then
+		reconcileFail += 1
+	end
+	print(
+		string.format(
+			"[TextFit] RECONCILE total unmeasured %d, expected %d %s",
+			unmeasuredTotal,
+			expectTotal,
+			if unmeasuredTotal == expectTotal then "OK" else "MISMATCH"
+		)
+	)
+
+	local failures = reconcileFail
 	print("[TextFit] state | element | text | margin | result")
 	for _, row in rows do
 		if not row.pass then
@@ -674,90 +609,6 @@ function TextFit.run(): ({ Row }, number)
 		)
 	end
 	for _, sz in SIZES do
-		local tally: { [string]: number } = decorTally[sz.name] or {}
-		for name, n in tally do
-			table.insert(rows, {
-				state = sz.name .. " decor",
-				element = "decoration " .. name,
-				text = "count " .. tostring(n),
-				margin = "-",
-				pass = true,
-				why = "excluded: decoration",
-				category = "excluded",
-			})
-		end
-	end
-
-	for _, sz in SIZES do
-		local h = hiddenTally[sz.name]
-		if h then
-			table.insert(rows, {
-				state = sz.name .. " hidden",
-				element = "previously hidden shard images",
-				text = string.format("checked %d, overlapping %d", h.checked, h.overlapping),
-				margin = "-",
-				pass = true,
-				why = "",
-				category = "info-hidden-images",
-			})
-		end
-	end
-
-	-- TASK-0114 ledger summary per viewport. "unmeasured" is the historical set (checkGui rows with margin "-" or "sticker").
-	local tally: { [string]: { [string]: number } } = {}
-	local smallest: { [string]: string } = {}
-	local smallestV: { [string]: number } = {}
-	for _, row in rows do
-		local size = "?"
-		for _, sz in SIZES do
-			if string.sub(row.state, 1, #sz.name) == sz.name then
-				size = sz.name
-				break
-			end
-		end
-		local cat: string = row.category
-			or (
-				if tonumber(row.margin)
-					then "measured"
-					elseif row.margin == "sticker" or row.margin == "-" then "unmeasured"
-					else "other"
-			)
-		if tally[size] == nil then
-			tally[size] = {}
-		end
-		local counts: { [string]: number } = tally[size]
-		counts[cat] = (counts[cat] or 0) + 1
-		if row.pass and string.sub(row.why, 1, 11) == "intentional" then
-			local key = "exempt: " .. row.why
-			counts[key] = (counts[key] or 0) + 1
-		end
-		if not row.pass then
-			local key = "FAIL " .. cat
-			counts[key] = (counts[key] or 0) + 1
-		end
-		if cat == "tap" or string.find(row.element, "[target]", 1, true) then
-			local w, h = string.match(row.text, "(%d+)x(%d+)")
-			if w and h then
-				local v = math.min(tonumber(w) :: number, tonumber(h) :: number)
-				if smallestV[size] == nil or v < smallestV[size] then
-					smallestV[size] = v
-					smallest[size] = row.element .. " " .. row.text
-				end
-			end
-		end
-	end
-	for _, sz in SIZES do
-		local t: { [string]: number } = tally[sz.name] or {}
-		local keys: { string } = {}
-		for k in t do
-			table.insert(keys, k)
-		end
-		table.sort(keys)
-		local parts: { string } = {}
-		for _, k in keys do
-			table.insert(parts, k .. "=" .. tostring(t[k]))
-		end
-		print("[TextFit] LEDGER " .. sz.name .. " | " .. table.concat(parts, " "))
 		if smallest[sz.name] then
 			print("[TextFit] SMALLEST TAP " .. sz.name .. " | " .. smallest[sz.name])
 		end
