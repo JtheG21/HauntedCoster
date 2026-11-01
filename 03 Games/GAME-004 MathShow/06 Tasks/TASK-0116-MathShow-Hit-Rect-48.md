@@ -3,7 +3,7 @@ id: TASK-0116
 title: "MathShow Hit Rect 48"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: claude-code
