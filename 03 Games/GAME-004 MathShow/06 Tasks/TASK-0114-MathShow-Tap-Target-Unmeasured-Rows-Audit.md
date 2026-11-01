@@ -50,3 +50,18 @@ Uploads, id or art changes, and tablet viewports (TASK-0113).
 - **Out of scope now:** all collision checks. The log prints `collision: NOT COVERED -> TASK-0115` per viewport.
 - **Gate (5 viewports):** TextFit 6,300 rows, 0 failures; header prints BuildStamp, category counts and the 669 + 284 = 953 reconciliation. IdentityBoards 109 rows, 0 failed, 0 GuiButtons per viewport. Details in `docs/workflow/STUDIO-SYNC.md`.
 - **For Codex:** re-audit the narrowed scope only (`TextFit.luau` diff 0b8c767..HEAD).
+
+## Handoff (Codex review, narrowed scope, 2026-11-01)
+- **Task:** TASK-0114, final revision (2/2). Collision removed; tap, allow-list, clip, review-gap and census kept. Receiver: Codex, reviewer only, no edits.
+- **Workspace:** `/Users/jg/Desktop/Rg1-worktrees/task-0114`, branch `task/TASK-0114-tap-target-audit`, PR #168. Range `0b8c767..HEAD` (code in `025b721`, docs in `40c3165`).
+- **Inputs:** [[TASK-0115-MathShow-Ownership-Based-Collision-Gate]], [[TASK-0116-MathShow-Hit-Rect-48]], `docs/workflow/STUDIO-SYNC.md` (section "narrowed scope, build 025b721").
+- **Focus:**
+  - `games/mathshow/tests/studio/TextFit.luau`: is any collision, decoration or exemption logic left? Does `NOT COVERED` print once per viewport?
+  - `TextFit.luau` `allowedSettingsPair` and `auxChecks`: do tap, same-row allow-list, clip (incl. FitSticker Frames) and review-gap still run unchanged?
+  - `TextFit.luau` `run()`: are BuildStamp, zero-filled category counts and the 669+284=953 / 1,420 reconciliation printed before the row list, and does a mismatch fail the run?
+  - `games/mathshow/tests/studio/IdentityBoards.luau`: census before destroy (unchanged in this range; confirm).
+  - `STUDIO-SYNC.md` and the note: do the numbers match the log (6,300 rows, 264 clip, 0 failures)? Why clip rose from 261 to 264 is untraced.
+- **Constraints:** no uploads, publishing or Studio writes. Rojo is stopped; ask jg before starting it.
+- **Known non-task failures:** none. `check.sh`, `validate_queue`, `validate_vault` pass; CI green.
+- **Unverified:** nothing in motion. The gate ran once in Studio (Play, Client); the log is in `~/Library/Logs/Roblox/`.
+- **Report back:** verdict, findings with file:line, checks run, what is unverified.
