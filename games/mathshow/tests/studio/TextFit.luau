@@ -487,6 +487,20 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 
 	-- 4. Collisions between each sticker or off-shard label and unrelated visible content. Images are checked unless they
 	-- are on the explicit decoration list (counted per name, never silent).
+	-- Per instance, once per state: decoration images, and shard images that the old filter hid.
+	local hiddenImages: { [Instance]: boolean } = {}
+	for _, d in root:GetDescendants() do
+		if d:IsA("ImageLabel") or d:IsA("ImageButton") then
+			if not visible(d :: GuiObject) then
+				continue
+			end
+			if DECOR_IMAGE_NAMES[d.Name] then
+				countDecor(state, d.Name)
+			elseif shapeOwner(d) ~= nil then
+				hiddenImages[d] = false
+			end
+		end
+	end
 	for _, L in labelBoxes do
 		for _, d in root:GetDescendants() do
 			if d == L.inst or isRelated(L.inst, d) then
@@ -499,7 +513,6 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 				continue
 			end
 			if isImage and DECOR_IMAGE_NAMES[d.Name] then
-				countDecor(state, d.Name)
 				continue
 			end
 			local g = d :: GuiObject
@@ -514,14 +527,8 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 			local hits = ov[3] - ov[1] > OVERLAP_EPS
 				and ov[4] - ov[2] > OVERLAP_EPS
 				and (ov[3] - ov[1]) * (ov[4] - ov[2]) > 0.5
-			if isImage and shapeOwner(g) ~= nil then
-				local size = sizeOf(state)
-				local h = hiddenTally[size] or { checked = 0, overlapping = 0 }
-				h.checked += 1
-				if hits then
-					h.overlapping += 1
-				end
-				hiddenTally[size] = h
+			if hits and hiddenImages[g] ~= nil then
+				hiddenImages[g] = true
 			end
 			if hits then
 				local pl, pg = path(L.inst, root), path(g, root)
@@ -541,6 +548,19 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 			end
 		end
 	end
+
+	local hiddenChecked, hiddenOverlap = 0, 0
+	for _, hit in hiddenImages do
+		hiddenChecked += 1
+		if hit then
+			hiddenOverlap += 1
+		end
+	end
+	local hsize = sizeOf(state)
+	local ht = hiddenTally[hsize] or { checked = 0, overlapping = 0 }
+	ht.checked += hiddenChecked
+	ht.overlapping += hiddenOverlap
+	hiddenTally[hsize] = ht
 
 	-- 5. Review rows: gap between neighbouring Row<n> controls, per column. Diagnostic, with a gate at REVIEW_GAP_MIN.
 	local groups: { [string]: { { inst: GuiObject, box: { number }, parent: Instance } } } = {}
