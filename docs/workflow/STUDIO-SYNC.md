@@ -250,15 +250,15 @@ Overlap areas are at 844x390, in design px squared. Screenshots are Studio `scre
 | 8 | `Screen_ladder/Rung6/Group/Shard` x `Screen_ladder/Rung5/Group/Shard` | 121.4 px2 | 3: 16a-rank-ladder, 16b-rank-ladder-demon, 16c-rank-ladder-unranked | 16a-rank-ladder.jpg |
 | 9 | `Screen_skill/RankStrip/Node8` x `Screen_skill/Problem/Group/Shard` | 18.9 px2 | 7: 13a-skill-typed, 13b-skill-typed-locked, 13c-skill-typed-reveal, 14a-skill-choice, 14b-skill-choice-locked, 14c-skill-choice-reveal-wrong, 14d-skill-choice-reveal-correct | 13a-skill-typed.jpg |
 | 10 | `Screen_skill/RankStrip/Node9` x `Screen_skill/Problem/Group/Shard` | 26.5 px2 | 7: 13a-skill-typed, 13b-skill-typed-locked, 13c-skill-typed-reveal, 14a-skill-choice, 14b-skill-choice-locked, 14c-skill-choice-reveal-wrong, 14d-skill-choice-reveal-correct | 13a-skill-typed.jpg |
-| 11 | `Screen_skill/RankStrip/Node7` x `Screen_skill/Problem/Group/Shard` | 110.4 px2 | 1: 14a-skill-choice | 14a-skill-choice.jpg |
+| 11 | `Screen_skill/RankStrip/Node7` x `Screen_skill/Problem/Group/Shard` | 110.4 px2 | 1: 14a-skill-choice | BEFORE-14a-skill-choice.jpg |
 | 12 | `Toasts/Toast/Group/Shard` x `Screen_skill/Choice3/Group/Shard` | 2.2 px2 | 2: 14b-skill-choice-locked, 14c-skill-choice-reveal-wrong | 14b-skill-choice-locked.jpg |
-| 13 | `Screen_skill/RankStrip/Node6` x `Screen_skill/Problem/Group/Shard` | 72.4 px2 | 1: 14c-skill-choice-reveal-wrong | 14a-skill-choice.jpg |
-| 14 | `Screen_skill/RankStrip/Node5` x `Screen_skill/Problem/Group/Shard` | 34.4 px2 | 1: 14d-skill-choice-reveal-correct | 14a-skill-choice.jpg |
+| 13 | `Screen_skill/RankStrip/Node6` x `Screen_skill/Problem/Group/Shard` | 72.4 px2 | 1: 14c-skill-choice-reveal-wrong | BEFORE-14a-skill-choice.jpg |
+| 14 | `Screen_skill/RankStrip/Node5` x `Screen_skill/Problem/Group/Shard` | 34.4 px2 | 1: 14d-skill-choice-reveal-correct | BEFORE-14a-skill-choice.jpg |
 | 15 | `Screen_skillresult/TierGlow` x `Screen_skillresult/NewBadge` | 14400.0 px2 | 4: 15a-result-up, 15b-result-held, 15c-result-first, 15d-result-up-demon | 15a-result-up.jpg |
 | 16 | `Screen_skillresult/TierGlow` x `Screen_skillresult/OldBadge` | 576.0 px2 | 2: 15a-result-up, 15d-result-up-demon | 15a-result-up.jpg |
 | 17 | `Screen_skillresult/TierGlow` x `Screen_skillresult/Arrow` | 576.0 px2 | 2: 15a-result-up, 15d-result-up-demon | 15a-result-up.jpg |
 | 18 | `Screen_blitzreview/Card/Group/Shard` x `Screen_blitzreview/NewBest` | 179.7 px2 | 2: 07a-blitz-review-best, 07b-blitz-review-perfect-first | 07a-blitz-review-best.jpg |
-| 19 | `Screen_vs/H2H/Group/Shard` x `Screen_vs/Problem/Group/Shard` | 2221.3 px2 | 4: 08a-vs-question, 08b-vs-question-scores, 08c-vs-reveal, 08d-vs-sudden | 08a-vs-question.jpg |
+| 19 | `Screen_vs/H2H/Group/Shard` x `Screen_vs/Problem/Group/Shard` | 2221.3 px2 | 4: 08a-vs-question, 08b-vs-question-scores, 08c-vs-reveal, 08d-vs-sudden | BEFORE-08a-vs-question.jpg |
 | 20 | `Toasts/Toast/Group/Shard` x `Screen_main/Title/Group/Shard` | 787.4 px2 | 6: 20-coming-soon [demon2], 20-coming-soon [official], 20-coming-soon [standard], 20-coming-soon [unavailable], 20-coming-soon [unranked], 20-coming-soon [wide20] | 20-coming-soon-demon2.jpg |
 | 21 | `Toasts/Toast/Group/Shard` x `Screen_main/PlayerCard/Group/Shard` | 193.9 px2 | 6: 20-coming-soon [demon2], 20-coming-soon [official], 20-coming-soon [standard], 20-coming-soon [unavailable], 20-coming-soon [unranked], 20-coming-soon [wide20] | 20-coming-soon-demon2.jpg |
 | 22 | `Toasts/Toast/Group/Content/Mark` x `Screen_main/Title/Group/Shard` | 18.6 px2 | 6: 20-coming-soon [demon2], 20-coming-soon [official], 20-coming-soon [standard], 20-coming-soon [unavailable], 20-coming-soon [unranked], 20-coming-soon [wide20] | 20-coming-soon-demon2.jpg |
@@ -271,3 +271,30 @@ Notes for the manifest decision (no entries added):
 - Halo rows (`Glow` images over another control) are informational: 658 per viewport, not failures.
 - `Screen_main/EdgeLeft` and `EdgeRight` no longer have a name exemption and produce no overlaps in this run.
 - Same-owner pairs are never compared; 1,441 per viewport overlapped and were counted as composition.
+
+### TASK-0115 final gate, 2026-11-01 (code build 5b5a4ab)
+
+Approved by jg: manifest rows R1 to R4 (17 entries with fixtures lists) and layout fixes R5 and R6. Fresh Play, Rojo from `task/TASK-0115-ownership-collision`, BuildStamp `5b5a4ab` in Edit and in the log header. `TextFit.run()` and `IdentityBoards.run()` at five viewports, one Rojo connection.
+
+| Check | 844x390 | 1920x1080 | phone 812x375 | 1024x768 | 1180x820 |
+|---|---|---|---|---|---|
+| Collision fails | 0 | 0 | 0 | 0 | 0 |
+| Manifest hits (expected 60 = 8x3 + 2+2+4 + 2 + 4x6 + 2) | 60 | 60 | 60 | 60 | 60 |
+| Unused manifest entries | 0 | 0 | 0 | 0 | 0 |
+| Canaries (overlap / label-on-foreign / composition) | FLAGGED / FLAGGED / PASS | same | same | same | same |
+| Compared / composition / halo | 26,757 / 1,441 / 654 | same | same | same | same |
+| Ledger measured / unmeasured | 669 / 284 | 669 / 284 | 669 / 284 | 669 / 284 | 669 / 284 |
+| IdentityBoards rows / failed / GuiButtons | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 | 109 / 0 / 0 |
+
+`TEXTFIT_RESULT rows=9880 failures=0`. Halo rows fell from 658 to 654 with the layout fixes. Unused-manifest is evaluated per viewport: a fixture listed by an entry that produces no pair at that viewport fails the gate.
+
+**Layout fixes (client constants only, no art)**
+| Row | Change | Gate |
+|---|---|---|
+| R5 Skill rank strip | `MenuTheme.RankStrip` y 8 to 0. Nodes 5 to 9 no longer overlap the Problem shard in any skill fixture. | 0 collision fails |
+| R6 VS head-to-head | New `MenuTheme.VsProblem` = box(52, 66, 580, 166, -2): the VS Problem shard is 20 px lower with the same bottom edge, used only by `buildVsQuestion`. The H2H shard did not move: no on-screen position clears a shard that is 36 px high at its right corner, so the Problem shard moved. | 0 collision fails |
+| R6 attempt 1 | Shard change alone failed TextFit margin: `Screen_vs/Problem/.../Text` 1.5 px (under 6) at 08a, 08c, 08d, 15 rows in all. | reverted by attempt 2 |
+| R6 attempt 2 | Added a 5 px upward text offset (`View.luau`, y 60 to 55). A Studio probe of `TextFitRules.rectFits` gave margins of 12 (offset -10) and 7 (-5) for all three fixtures, and 2 at no offset. I chose -5 so the text stays clear of the Q-tag. | 0 failures |
+
+Before and after screenshots (Studio `screen_capture`, scratchpad `overlaps/`): `BEFORE-14a-skill-choice.jpg` and `AFTER-14a-skill-choice.jpg`, `BEFORE-08a-vs-question.jpg` and `AFTER-08a-vs-question.jpg`. In 14a the strip sits 8 px higher and clears the shard. In 08a the Problem shard is lower and the score bar is clear of it. The VS shard art is stretched 11% shorter (166 against 186), which shows as a flatter shard.
+

@@ -3,7 +3,7 @@ id: TASK-0115
 title: "MathShow Ownership-Based Collision Gate"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -38,4 +38,11 @@ Registered 2026-11-01 when TASK-0114 dropped its collision gate after two failed
 - **Red run:** both planted faults flagged and the composition control passed at 5/5 viewports (committed `0e48bfc`, before the real menu).
 - **Real-menu run:** 81 cross-owner overlaps per viewport (23 unique pairs), manifest empty, no layout changed. Stop report with screenshots in `docs/workflow/STUDIO-SYNC.md`. **Waiting on jg:** approve manifest entries row by row; layout fixes become a new task.
 - **Not recorded:** `record-exec`, because the gate is not green. A fail record would use a revision.
+
+## Final (2026-11-01, code build 5b5a4ab)
+
+- **Manifest:** 17 entries with `fixtures` lists for approved rows R1 to R4 (60 pair-fixtures). `matchManifest` treats a listed fixture with no pair as an unused entry; the spec covers a fixtures-list hit, a missing fixture and owner `X/Group/Shard` -> `X` (specs 300 passed).
+- **Layout (jg-approved scope extension):** R5 `RankStrip` y 8 -> 0; R6 new `VsProblem` box (y 66, h 166) plus VS problem text y 60 -> 55. R6 attempt 1 broke the TextFit margin (1.5 px) and attempt 2 fixed it. Before/after screenshots for 14a and 08a in the scratchpad.
+- **Gate:** 0 collision fails, 60 manifest hits and 0 unused per viewport, canaries FLAGGED/FLAGGED/PASS, ledger 669/284, IdentityBoards 109 / 0 / 0 GuiButtons at 5/5. TextFit 9,880 rows, 0 failures. Details in `docs/workflow/STUDIO-SYNC.md`.
+- **For Codex:** audit `CollisionRules.luau`, the manifest semantics, the canary design and the two layout constants. The VS shard art is stretched (166 against 186 tall).
 

@@ -2,7 +2,7 @@
   "id": "TASK-0115",
   "game": "GAME-004",
   "title": "MathShow Ownership-Based Collision Gate",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -43,6 +43,19 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-01T13:26:13",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-01T13:26:13",
+      "result": "pass",
+      "notes": "Ownership-based collision gate, build 5b5a4ab. Pure CollisionRules with spec (specs 300 passed); manifest fixtures lists, 17 entries for jg-approved rows R1-R4 (60 pair-fixtures); layout R5 RankStrip y 0, R6 VsProblem box and text y 55 (attempt 1 broke TextFit margin, attempt 2 fixed). Full gate at five viewports: 0 collision fails, 60 manifest hits and 0 unused per viewport, canaries FLAGGED/FLAGGED/PASS, ledger 669/284, TextFit 9,880 rows 0 failures, IdentityBoards 109/0/0 GuiButtons. check.sh passes."
     }
   ]
 }
