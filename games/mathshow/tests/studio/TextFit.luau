@@ -14,6 +14,7 @@ local TextService = game:GetService("TextService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local HudRules = require(Shared:WaitForChild("HudRules"))
+local LedgerRules = require(Shared:WaitForChild("LedgerRules"))
 local TextFitRules = require(Shared:WaitForChild("TextFitRules"))
 
 local MARGIN = 6
@@ -24,9 +25,6 @@ local REVIEW_GAP_MIN = 2 -- review rows: gap between neighbours, design px
 local CLIP_TOL = 0.5 -- ancestor overflow tolerated, design px
 local OVERLAP_EPS = 0.01 -- positive-area test for interactive overlap
 local SCREEN_MARGIN_MIN = 6 -- informational: text margin in screen px
--- Reconciliation with the TASK-0107 gate: 669 measured + 284 unmeasured rows per viewport.
-local EXPECT_UNMEASURED = 284
-local EXPECT_PER_VIEWPORT = 953
 local CATEGORIES: { string } = {
 	"measured",
 	"unmeasured",
@@ -546,8 +544,14 @@ function TextFit.run(): ({ Row }, number)
 	local stampValue = ReplicatedStorage:WaitForChild("Shared"):FindFirstChild("BuildStamp")
 	local stamp = if stampValue and stampValue:IsA("StringValue") then stampValue.Value else "MISSING"
 	print("[TextFit] BuildStamp " .. stamp)
-	local reconcileFail = 0
-	local unmeasuredTotal = 0
+	local ledger: { [string]: LedgerRules.Counts } = {}
+	local names: { string } = {}
+	for _, sz in SIZES do
+		table.insert(names, sz.name)
+	end
+	for name, counts in tally do
+		ledger[name] = { measured = counts.measured or 0, unmeasured = counts.unmeasured or 0 }
+	end
 	for _, sz in SIZES do
 		local counts = tally[sz.name]
 		local parts: { string } = {}
@@ -558,39 +562,25 @@ function TextFit.run(): ({ Row }, number)
 			)
 		end
 		print("[TextFit] COUNTS " .. sz.name .. " | " .. table.concat(parts, " "))
-		unmeasuredTotal += counts.unmeasured
-		local sum = counts.measured + counts.unmeasured
-		local ok = sum == EXPECT_PER_VIEWPORT
-		if not ok then
-			reconcileFail += 1
-		end
-		print(
-			string.format(
-				"[TextFit] RECONCILE %s | measured %d + unmeasured %d = %d, expected %d %s",
-				sz.name,
-				counts.measured,
-				counts.unmeasured,
-				sum,
-				EXPECT_PER_VIEWPORT,
-				if ok then "OK" else "MISMATCH"
-			)
-		)
 		print("[TextFit] collision: NOT COVERED -> TASK-0115 | " .. sz.name)
 	end
-	local expectTotal = EXPECT_UNMEASURED * #SIZES
-	if unmeasuredTotal ~= expectTotal then
-		reconcileFail += 1
+	local reconcile = LedgerRules.reconcile(ledger, names)
+	for _, line in reconcile.lines do
+		print("[TextFit] RECONCILE " .. line)
+	end
+	for _, failure in reconcile.failures do
+		print("[TextFit] RECONCILE FAIL " .. failure)
 	end
 	print(
 		string.format(
 			"[TextFit] RECONCILE total unmeasured %d, expected %d %s",
-			unmeasuredTotal,
-			expectTotal,
-			if unmeasuredTotal == expectTotal then "OK" else "MISMATCH"
+			reconcile.unmeasuredTotal,
+			LedgerRules.ExpectedUnmeasured * #SIZES,
+			if reconcile.ok then "OK" else "MISMATCH"
 		)
 	)
 
-	local failures = reconcileFail
+	local failures = #reconcile.failures
 	print("[TextFit] state | element | text | margin | result")
 	for _, row in rows do
 		if not row.pass then
