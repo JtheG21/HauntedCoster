@@ -3,7 +3,7 @@ id: TASK-0044
 title: "Environment Kit and Ground"
 type: task
 project: GAME-002
-status: in_review
+status: changes_requested
 priority: high
 risk: medium
 owner: executor

@@ -64,6 +64,8 @@ Part of the overhaul jg requested on 2026-10-13 (3D asset overhaul, full UI over
 - **Checks:** `scripts/check.sh` passes; specs 153/0 including `Cosmetics.spec` (10 tests: catalog has no gameplay fields and all five categories, no live products, income unchanged by cosmetics, Coin buy once, per-ghost compatible skins, receipts once, journal-only rewards claimed once, placement validation, upgrade reconcile, schema-1 migration and junk dropping). Studio scenario `tests/scenarios/Cosmetics.luau` written (buy, equip, incompatible refusal, theme tint on the house art, place/move, claim once, receipt with a TEST FIXTURE product id twice, unknown product unprocessed, tier-2 upgrade keeping the placement); **not yet run** (Studio stalled during this session).
 - **Not done / gated:** Robux products and prices (jg configures in the Creator Dashboard); the launch assortment and Coin prices (jg); rejoin persistence on a published place (Persistence scenario needs DataStores; the local file runs memory-only).
 
+- **History note:** commit `a5f0aaa` (labelled TASK-0046, 2026-10-13 21:27, made by another agent session, not this executor) holds `Config/Cosmetics.luau` and the PlotBuilder theme-tint/decoration hooks, which are TASK-0047 work; the rest of TASK-0047 is `199a82b`. History was not rewritten.
+
 ## Audits
 
 ## Outcome

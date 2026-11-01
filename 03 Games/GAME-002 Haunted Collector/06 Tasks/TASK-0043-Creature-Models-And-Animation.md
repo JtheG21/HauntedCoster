@@ -3,7 +3,7 @@ id: TASK-0043
 title: "Creature Models and Animation"
 type: task
 project: GAME-002
-status: approved
+status: in_progress
 priority: high
 risk: medium
 owner: executor
@@ -15,7 +15,7 @@ related:
   - "[[SYS-Haunted-Monetization-UI]]"
   - "[[3D Model Quality Baseline]]"
 created: 2026-10-13
-updated: 2026-10-13
+updated: 2026-10-14
 tags:
   - workflow/task
 ---
