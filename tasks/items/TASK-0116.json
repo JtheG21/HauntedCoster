@@ -2,7 +2,7 @@
   "id": "TASK-0116",
   "game": "GAME-004",
   "title": "MathShow Hit Rect 48",
-  "status": "backlog",
+  "status": "in_progress",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -23,5 +23,20 @@
   "evidence": [],
   "notes": "Backlog. The smallest control today is Screen_main/HowToPlay/Group/Content/Hit at 230x44, which passes the 44 rule with no margin.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0116-MathShow-Hit-Rect-48.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-01T13:54:47",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-01T13:54:47",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
 }

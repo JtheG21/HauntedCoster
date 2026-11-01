@@ -36,6 +36,8 @@ MenuTheme.Reference = Vector2.new(844, 390)
 MenuTheme.GlowPad = 36 -- every glow image = shard size + 36 px per side; animated CanvasGroups use the same pad
 MenuTheme.FocusScale = 1.04 -- UIScale on the focused (gamepad) element, plus SelectionImageObject brackets
 MenuTheme.PressScale = 0.95
+MenuTheme.HitMin = 48 -- smallest hit rect, design px (TASK-0116); a smaller control grows its hit area, never its art
+MenuTheme.SettingPitch = 54 -- settings row pitch, was 50: a 48 px hit rect on a 0.5 degree tilt needs 53 or more
 MenuTheme.DisabledTransparency = 0.55 -- CanvasGroup.GroupTransparency for disabled / cooldown
 MenuTheme.LockedInkTransparency = 0.4 -- locked labels are 60% white
 MenuTheme.LobbyOverlayTransparency = 0.18 -- menu root: ground #0B0A0D over the live 3D lobby (82% opaque)

@@ -22,8 +22,8 @@ local TextFitRules = require(Shared:WaitForChild("TextFitRules"))
 
 local MARGIN = 6
 local SLACK = 1 -- px of tolerance on keep-clear zones for rotated boxes
--- TASK-0114. Tap minimum is in design px: AbsoluteSize divided by the gate scale, so the rule is the same at every viewport.
-local TAP_MIN = 44
+-- TASK-0114. Tap minimum is in design px (48 since TASK-0116): AbsoluteSize divided by the gate scale, so the rule is the same at every viewport.
+local TAP_MIN = 48
 local REVIEW_GAP_MIN = 2 -- review rows: gap between neighbours, design px
 local CLIP_TOL = 0.5 -- ancestor overflow tolerated, design px
 local COLLISION_MIN_AREA = 0.5 -- cross-owner overlap area (design px squared) above which the gate fails
@@ -180,7 +180,7 @@ local function checkGui(gui: ScreenGui, state: string, rows: { Row })
 					pass = hit == "" and not small,
 					why = if hit ~= ""
 						then "inside keep-clear: " .. hit
-						elseif small then "tap under 44 design px"
+						elseif small then "tap under " .. TAP_MIN .. " design px"
 						else "",
 				})
 			end
@@ -509,7 +509,7 @@ local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: nu
 					text = string.format("%dx%d", sw + 0.5, sh + 0.5),
 					margin = "-",
 					pass = ok,
-					why = if ok then "" else "tap under 44 design px",
+					why = if ok then "" else "tap under " .. TAP_MIN .. " design px",
 					class = d.ClassName,
 					category = "tap",
 				})
