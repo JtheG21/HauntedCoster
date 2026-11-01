@@ -1739,7 +1739,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 			UDim2.fromOffset(60, 40)
 		local shown = bm.problem .. " = ?"
 		local fit = TextFitRules.fitSize(measureWidth, shown, { 88, 76, 64, 56, 48, 40 }, 456)
-		local problemLabel = text(problem.content, "Text", shown, fit.size, 62, 60, 456, fit.size * fit.lines, {
+		-- y 55 (was 60): the lowered, shorter VS shard keeps the 6 px text margin at its bottom edge (TASK-0115)
+		local problemLabel = text(problem.content, "Text", shown, fit.size, 62, 55, 456, fit.size * fit.lines, {
 			TextWrapped = fit.lines > 1,
 			LineHeight = 1,
 		})
@@ -2113,7 +2114,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		tag(problem.content, "Tag", tagText).Position = UDim2.fromOffset(60, 40)
 		local shown = vm.problem .. (if reveal and vm.answer ~= nil then " = " .. tostring(vm.answer) else " = ?")
 		local fit = TextFitRules.fitSize(measureWidth, shown, { 88, 76, 64, 56, 48, 40 }, 456)
-		local problemLabel = text(problem.content, "Text", shown, fit.size, 62, 60, 456, fit.size * fit.lines, {
+		-- y 55 (was 60): the lowered, shorter VS shard keeps the 6 px text margin at its bottom edge (TASK-0115)
+		local problemLabel = text(problem.content, "Text", shown, fit.size, 62, 55, 456, fit.size * fit.lines, {
 			TextWrapped = fit.lines > 1,
 			LineHeight = 1,
 		})
