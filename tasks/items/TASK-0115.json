@@ -2,19 +2,24 @@
   "id": "TASK-0115",
   "game": "GAME-004",
   "title": "MathShow Ownership-Based Collision Gate",
-  "status": "backlog",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
     "games/mathshow/tests/studio/TextFit.luau",
     "games/mathshow/tests/studio/CollisionManifest.luau",
     "games/mathshow/tests/studio/CollisionCanary.luau",
-    "docs/workflow/STUDIO-SYNC.md"
+    "docs/workflow/STUDIO-SYNC.md",
+    "games/mathshow/tests/studio/CollisionRules.luau",
+    "games/mathshow/tests/CollisionRules.spec.luau",
+    "games/mathshow/src/client/Menu/MenuTheme.luau",
+    "games/mathshow/src/client/Menu/View.luau",
+    "games/mathshow/src/client/Menu/Shard.luau"
   ],
   "depends_on": [
     "TASK-0114"
   ],
-  "branch": "task/TASK-0115-collision-gate",
+  "branch": "task/TASK-0115-ownership-collision",
   "acceptance": [
     "Each visible element has an owner: its nearest <Control>/Group/Content ancestor. No comparisons are made within one owner.",
     "Every cross-owner pair is compared: shards, labels, stickers, Spark frames and visible Flash/Glow layers.",
@@ -25,5 +30,82 @@
   "evidence": [],
   "notes": "Backlog. Replaces the heuristic collision gate removed from TASK-0114. Needs the exemption list written from measured pairs, not by name patterns.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0115-MathShow-Ownership-Based-Collision-Gate.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-01T13:07:22",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-01T13:07:23",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-01T13:26:13",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-01T13:30:32",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-01T13:32:13",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-01T13:41:28",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-01T13:43:37",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-01T13:48:10",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-01T13:26:13",
+      "result": "pass",
+      "notes": "Ownership-based collision gate, build 5b5a4ab. Pure CollisionRules with spec (specs 300 passed); manifest fixtures lists, 17 entries for jg-approved rows R1-R4 (60 pair-fixtures); layout R5 RankStrip y 0, R6 VsProblem box and text y 55 (attempt 1 broke TextFit margin, attempt 2 fixed). Full gate at five viewports: 0 collision fails, 60 manifest hits and 0 unused per viewport, canaries FLAGGED/FLAGGED/PASS, ledger 669/284, TextFit 9,880 rows 0 failures, IdentityBoards 109/0/0 GuiButtons. check.sh passes."
+    },
+    {
+      "time": "2026-11-01T13:41:28",
+      "result": "pass",
+      "notes": "Audit fixes revision 1, build 34f046b. Collection by drawable property, CollisionRole Halo attribute, Blitz text restored, canary-name-is-not-role; jg-approved: element and its own descendant are one owner, manifest rows for toast over Spark3. Full gate at five viewports: 0 collision fails, 64 manifest hits and 0 unused per viewport (16 entries), canaries FLAGGED/FLAGGED/PASS/FLAGGED, ledger 669/284, TextFit 10,525 rows 0 failures, IdentityBoards 109/0/0 GuiButtons. Specs 302 passed, check.sh passes."
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-01T13:30:32",
+      "result": "fail",
+      "report": "docs/workflow/STUDIO-SYNC.md"
+    },
+    {
+      "time": "2026-11-01T13:43:37",
+      "result": "pass",
+      "report": "docs/workflow/STUDIO-SYNC.md"
+    }
+  ],
+  "revisions": 1,
+  "merge_approved_by": "jg"
 }
