@@ -15,6 +15,9 @@ local TextService = game:GetService("TextService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local HudRules = require(Shared:WaitForChild("HudRules"))
 local LedgerRules = require(Shared:WaitForChild("LedgerRules"))
+local CollisionRules = require(script.Parent:WaitForChild("CollisionRules"))
+local CollisionManifest = require(script.Parent:WaitForChild("CollisionManifest"))
+local CollisionCanary = require(script.Parent:WaitForChild("CollisionCanary"))
 local TextFitRules = require(Shared:WaitForChild("TextFitRules"))
 
 local MARGIN = 6
@@ -23,6 +26,7 @@ local SLACK = 1 -- px of tolerance on keep-clear zones for rotated boxes
 local TAP_MIN = 44
 local REVIEW_GAP_MIN = 2 -- review rows: gap between neighbours, design px
 local CLIP_TOL = 0.5 -- ancestor overflow tolerated, design px
+local COLLISION_MIN_AREA = 0.5 -- cross-owner overlap area (design px squared) above which the gate fails
 local OVERLAP_EPS = 0.01 -- positive-area test for interactive overlap
 local SCREEN_MARGIN_MIN = 6 -- informational: text margin in screen px
 local CATEGORIES: { string } = {
@@ -34,7 +38,9 @@ local CATEGORIES: { string } = {
 	"overlap-allow",
 	"review-gap",
 	"info-screen-px",
-	"not-covered",
+	"collision",
+	"halo",
+	"canary",
 	"other",
 }
 -- Interactive pairs allowed to overlap, by state and control name. The reason is written to the ledger.
@@ -288,8 +294,7 @@ local function ancestorClip(inst: GuiObject, root: Frame, box: { number }, scale
 end
 
 -- TASK-0114 checks, appended to the rows from checkGui for one state (rows[from..]). Each new row has a category, so the
--- ledger can tell it apart from the historical 284 unmeasured rows per viewport. Collision checks are NOT in this gate
--- (TASK-0115); the log prints a "collision: NOT COVERED" row per viewport so the gap is visible.
+-- ledger can tell it apart from the historical 284 unmeasured rows per viewport.
 
 -- Only Screen_settings/Row{music,sfx}: its Hit against the SAME row's Minus/HitMinus or Plus/HitPlus.
 local function allowedSettingsPair(pa: string, pb: string): boolean
@@ -305,6 +310,177 @@ local function allowedSettingsPair(pa: string, pb: string): boolean
 		end
 	end
 	return false
+end
+
+-- TASK-0115 ownership-based collision gate. The rules are pure (CollisionRules); this part reads Instances into Elements.
+type Acc = {
+	compared: number,
+	composition: number,
+	halo: number,
+	hitPairs: { CollisionRules.Pair },
+	canary: { string },
+}
+
+local function newAcc(): Acc
+	return { compared = 0, composition = 0, halo = 0, hitPairs = {}, canary = {} }
+end
+
+local function elementRect(g: GuiObject, root: Frame, scale: number): CollisionRules.Rect
+	local center = (g.AbsolutePosition + g.AbsoluteSize / 2 - root.AbsolutePosition) / scale
+	return {
+		cx = center.X,
+		cy = center.Y,
+		w = g.AbsoluteSize.X / scale,
+		h = g.AbsoluteSize.Y / scale,
+		rot = g.AbsoluteRotation,
+	}
+end
+
+-- Where the glyphs of a text label sit, in the label's own rotated frame, so a long centred label is not its full box.
+local function glyphRect(lab: TextLabel | TextButton, root: Frame, scale: number): CollisionRules.Rect
+	local base = elementRect(lab, root, scale)
+	local bw, bh = measure(lab, scale)
+	local w, h = math.min(bw, base.w), math.min(bh, base.h)
+	local dx, dy = 0, 0
+	if lab.TextXAlignment == Enum.TextXAlignment.Left then
+		dx = -(base.w - w) / 2
+	elseif lab.TextXAlignment == Enum.TextXAlignment.Right then
+		dx = (base.w - w) / 2
+	end
+	if lab.TextYAlignment == Enum.TextYAlignment.Top then
+		dy = -(base.h - h) / 2
+	elseif lab.TextYAlignment == Enum.TextYAlignment.Bottom then
+		dy = (base.h - h) / 2
+	end
+	local rad = math.rad(base.rot)
+	return {
+		cx = base.cx + dx * math.cos(rad) - dy * math.sin(rad),
+		cy = base.cy + dx * math.sin(rad) + dy * math.cos(rad),
+		w = w,
+		h = h,
+		rot = base.rot,
+	}
+end
+
+-- Every visible shard, label, sticker, spark, flash and glow under root, as pure Elements. An image counts when it renders:
+-- an image that is set and not fully transparent, or a visible flat background.
+local function collectElements(root: Frame, scale: number): { CollisionRules.Element }
+	local out: { CollisionRules.Element } = {}
+	for _, d in root:GetDescendants() do
+		if not (d:IsA("GuiObject") and visible(d :: GuiObject)) then
+			continue
+		end
+		local g = d :: GuiObject
+		local kind: string? = nil
+		local rect: CollisionRules.Rect? = nil
+		local isText = g:IsA("TextLabel") or g:IsA("TextButton")
+		local sticker = g:GetAttribute("FitSticker") == true
+		if isText and (g :: TextLabel).Text ~= "" and (g :: TextLabel).TextTransparency < 1 then
+			kind = if sticker then "sticker" else "label"
+			rect = glyphRect(g :: TextLabel, root, scale)
+		elseif g:IsA("ImageLabel") or g:IsA("ImageButton") then
+			local img = g :: ImageLabel
+			local renders = (img.Image ~= "" and img.ImageTransparency < 1) or img.BackgroundTransparency < 1
+			if renders then
+				if g.Name == "Glow" then
+					kind = "glow"
+				elseif string.sub(g.Name, 1, 5) == "Spark" then
+					kind = "spark"
+				elseif g.Name == "Flash" then
+					kind = "flash"
+				else
+					kind = if sticker then "sticker" else "shard"
+				end
+				rect = elementRect(g, root, scale)
+			end
+		elseif sticker then
+			kind = "sticker"
+			rect = elementRect(g, root, scale)
+		end
+		if kind and rect then
+			table.insert(out, { path = string.split(path(g, root), "/"), kind = kind, rect = rect })
+		end
+	end
+	return out
+end
+
+-- One state at one viewport: all cross-owner pairs against the manifest, same-owner pairs counted as composition.
+local function collisionChecks(root: Frame, state: string, fixture: string, rows: { Row }, scale: number, acc: Acc)
+	local result = CollisionRules.compare(collectElements(root, scale), COLLISION_MIN_AREA, fixture)
+	local matched = CollisionRules.matchManifest(result.overlaps, CollisionManifest)
+	acc.compared += result.compared
+	acc.composition += result.composition
+	acc.halo += #result.halo
+	for _, pair in matched.hits do
+		table.insert(acc.hitPairs, pair)
+		table.insert(rows, {
+			state = state,
+			element = pair.a .. " x " .. pair.b,
+			text = string.format("%.1f px2", pair.area),
+			margin = "-",
+			pass = true,
+			why = "approved in CollisionManifest",
+			category = "collision",
+		})
+	end
+	for _, pair in matched.unmatched do
+		table.insert(rows, {
+			state = state,
+			element = pair.a .. " x " .. pair.b,
+			text = string.format("%.1f px2", pair.area),
+			margin = "-",
+			pass = false,
+			why = "cross-owner overlap",
+			category = "collision",
+		})
+	end
+	for _, pair in result.halo do
+		table.insert(rows, {
+			state = state,
+			element = pair.a .. " x " .. pair.b,
+			text = string.format("%.1f px2", pair.area),
+			margin = "-",
+			pass = true,
+			why = "glow halo over another control (informational)",
+			category = "halo",
+		})
+	end
+end
+
+-- The gate must prove it can fail: two planted faults must be flagged and the composition control must pass.
+local function runCanaries(sz: { name: string, w: number, h: number }, rows: { Row }, acc: Acc)
+	local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+	for _, fx in CollisionCanary.fixtures do
+		local gui = CollisionCanary.build(fx.id, playerGui)
+		local root = gui:FindFirstChild("Root") :: Frame
+		local uiScale = root:FindFirstChildOfClass("UIScale") :: UIScale
+		uiScale.Scale = HudRules.rootScale(sz.w, sz.h)
+		task.wait()
+		local result = CollisionRules.compare(collectElements(root, uiScale.Scale), COLLISION_MIN_AREA, fx.id)
+		local flagged = #result.overlaps > 0
+		local ok = flagged == fx.expectFail
+		table.insert(rows, {
+			state = sz.name .. " " .. fx.id,
+			element = "canary",
+			text = string.format(
+				"overlaps=%d composition=%d compared=%d",
+				#result.overlaps,
+				result.composition,
+				result.compared
+			),
+			margin = "-",
+			pass = ok,
+			why = if ok
+				then (if fx.expectFail then "flagged as planted: " else "passed as composition: ") .. fx.why
+				else "CANARY NOT DETECTED: " .. fx.why,
+			category = "canary",
+		})
+		table.insert(
+			acc.canary,
+			fx.id .. "=" .. (if flagged then "FLAGGED" else "PASS") .. (if ok then "" else " WRONG")
+		)
+		gui:Destroy()
+	end
 end
 
 local function auxChecks(gui: ScreenGui, state: string, rows: { Row }, scale: number, from: number)
@@ -455,7 +631,11 @@ function TextFit.run(): ({ Row }, number)
 	local Preview =
 		require(Players.LocalPlayer.PlayerScripts:WaitForChild("Client"):WaitForChild("Menu"):WaitForChild("Preview"))
 	local rows: { Row } = {}
+	local collisionAcc: { [string]: Acc } = {}
 	for _, size in SIZES do
+		local acc = newAcc()
+		collisionAcc[size.name] = acc
+		runCanaries(size, rows, acc)
 		for _, state in Preview.States do
 			local fixtures: { string } = { "" } -- "" = the state's own model
 			if state.screen == "main" then
@@ -476,24 +656,19 @@ function TextFit.run(): ({ Row }, number)
 					local from = #rows + 1
 					checkGui(view.gui, label, rows)
 					auxChecks(view.gui, label, rows, uiScale.Scale, from)
+					collisionChecks(
+						view.root,
+						label,
+						state.id .. (if fixture ~= "" then " [" .. fixture .. "]" else ""),
+						rows,
+						uiScale.Scale,
+						acc
+					)
 				end
 			end
 		end
 	end
 	Preview.clear()
-
-	-- One "not covered" row per viewport: collision is out of this gate's scope (TASK-0115).
-	for _, sz in SIZES do
-		table.insert(rows, {
-			state = sz.name .. " collision",
-			element = "collision",
-			text = "NOT COVERED -> TASK-0115",
-			margin = "-",
-			pass = true,
-			why = "",
-			category = "not-covered",
-		})
-	end
 
 	-- Per-viewport category counts, tallied before anything is printed.
 	local tally: { [string]: { [string]: number } } = {}
@@ -562,7 +737,21 @@ function TextFit.run(): ({ Row }, number)
 			)
 		end
 		print("[TextFit] COUNTS " .. sz.name .. " | " .. table.concat(parts, " "))
-		print("[TextFit] collision: NOT COVERED -> TASK-0115 | " .. sz.name)
+		local acc = collisionAcc[sz.name]
+		local unusedHere = #CollisionRules.matchManifest(acc.hitPairs, CollisionManifest).unusedEntries
+		print(
+			string.format(
+				"[TextFit] COLLISION %s | compared=%d composition=%d halo=%d fails=%d manifest-hits=%d unused-manifest=%d canary: %s",
+				sz.name,
+				acc.compared,
+				acc.composition,
+				acc.halo,
+				counts["FAIL collision"],
+				#acc.hitPairs,
+				unusedHere,
+				table.concat(acc.canary, " ")
+			)
+		)
 	end
 	local reconcile = LedgerRules.reconcile(ledger, names)
 	for _, line in reconcile.lines do
@@ -580,7 +769,20 @@ function TextFit.run(): ({ Row }, number)
 		)
 	)
 
-	local failures = #reconcile.failures
+	-- A manifest entry that matched nothing at any viewport is stale: the gate fails until it is removed.
+	local allHits: { CollisionRules.Pair } = {}
+	for _, acc in collisionAcc do
+		for _, pair in acc.hitPairs do
+			table.insert(allHits, pair)
+		end
+	end
+	local unusedEntries = CollisionRules.matchManifest(allHits, CollisionManifest).unusedEntries
+	for _, entry in unusedEntries do
+		print(`[TextFit] COLLISION FAIL unused manifest entry {entry.fixture} | {entry.a} x {entry.b} | {entry.reason}`)
+	end
+	print(`[TextFit] COLLISION manifest entries={#CollisionManifest} unused={#unusedEntries}`)
+
+	local failures = #reconcile.failures + #unusedEntries
 	print("[TextFit] state | element | text | margin | result")
 	for _, row in rows do
 		if not row.pass then
@@ -604,6 +806,44 @@ function TextFit.run(): ({ Row }, number)
 		end
 	end
 	print(`TEXTFIT_RESULT rows={#rows} failures={failures}`)
+	return rows, failures
+end
+
+-- Canaries only, at every viewport (no menu states): the red run that shows the collision gate can fail.
+function TextFit.runCanary(): ({ Row }, number)
+	if not RunService:IsStudio() then
+		return {}, 0
+	end
+	local rows: { Row } = {}
+	local stampValue = ReplicatedStorage:WaitForChild("Shared"):FindFirstChild("BuildStamp")
+	print(
+		"[TextFit] BuildStamp "
+			.. (if stampValue and stampValue:IsA("StringValue") then stampValue.Value else "MISSING")
+	)
+	local failures = 0
+	for _, sz in SIZES do
+		local acc = newAcc()
+		local from = #rows + 1
+		runCanaries(sz, rows, acc)
+		for k = from, #rows do
+			local row = rows[k]
+			if not row.pass then
+				failures += 1
+			end
+			print(
+				string.format(
+					"[TextFit] CANARY %s | %s | %s | %s %s",
+					row.state,
+					row.element,
+					row.text,
+					row.pass and "PASS" or "FAIL",
+					row.why
+				)
+			)
+		end
+		print("[TextFit] CANARY " .. sz.name .. " | " .. table.concat(acc.canary, " "))
+	end
+	print(`TEXTFIT_CANARY_RESULT rows={#rows} failures={failures}`)
 	return rows, failures
 end
 

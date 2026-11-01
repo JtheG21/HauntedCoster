@@ -3,13 +3,13 @@ id: TASK-0115
 title: "MathShow Ownership-Based Collision Gate"
 type: task
 project: GAME-004
-status: backlog
+status: in_progress
 priority: medium
 risk: low
 owner: claude-code
 depends_on:
   - TASK-0114
-branch: task/TASK-0115-collision-gate
+branch: task/TASK-0115-ownership-collision
 created: 2026-11-01
 updated: 2026-11-01
 tags:
