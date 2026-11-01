@@ -2,7 +2,7 @@
   "id": "TASK-0114",
   "game": "GAME-004",
   "title": "MathShow Tap Target + Unmeasured Rows Audit",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -56,6 +56,12 @@
       "from": "changes_requested",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-01T12:26:23",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -63,6 +69,11 @@
       "time": "2026-10-31T12:54:34",
       "result": "pass",
       "notes": "Extended TextFit gate and IdentityBoards at five viewports, build 73316be. TextFit 8,685 rows, 0 failures. IdentityBoards 109 rows x 5, 0 failed, 0 GuiButtons. Review gap min 2 px. Open decision: AbsoluteSize tap model in the Preview harness, see STUDIO-SYNC."
+    },
+    {
+      "time": "2026-11-01T12:26:23",
+      "result": "pass",
+      "notes": "Audit fixes, build 0b8c767. Full gate at five viewports: TextFit 6,335 rows, 0 failures; IdentityBoards 109 rows per viewport, 0 failures, 0 GuiButtons per viewport (census before destroy). Tap rule design units, smallest 230x44. Decoration list counted per instance. Old exec record (73316be) kept in history."
     }
   ],
   "audits": [

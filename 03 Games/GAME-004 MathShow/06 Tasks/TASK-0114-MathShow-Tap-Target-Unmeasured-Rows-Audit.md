@@ -11,7 +11,7 @@ depends_on:
   - TASK-0112
 branch: task/TASK-0114-tap-target-audit
 created: 2026-10-31
-updated: 2026-10-31
+updated: 2026-11-01
 tags:
   - workflow/task
 ---
@@ -35,4 +35,10 @@ Uploads, id or art changes, and tablet viewports (TASK-0113).
 - **IdentityBoards:** 109 rows and 0 failures per viewport, 0 GuiButtons, tightest margin 6.75 design px (`[WWWWW]` tag; 7.0 at 844x390).
 - **Tap rule:** design units (`AbsoluteSize` divided by the gate scale), minimum 44. The smallest control is 230x44 at every viewport, so it passes with no margin. This replaces the earlier screen-point rule, which did not follow a clean model in the Preview harness.
 - **Status:** orchestrator record-exec pass. record-audit is for Codex.
+
+## Audit fixes (2026-11-01, build 0b8c767)
+
+- The audit findings are fixed: a tight settings allow-list, an explicit decoration list with per-instance counts, the sibling-only duplicate exemption, sticker frames in clip and collision, the GuiButton census before destroy, and tighter Edge, NEW BEST and VS exemptions. File:line table in `docs/workflow/STUDIO-SYNC.md`.
+- Full gate at five viewports: TextFit 6,335 rows, 0 failures. IdentityBoards 109 rows per viewport, 0 failures, 0 GuiButtons.
+- Exec record for this build is appended. Earlier records (73316be, 9ccb8eb) stay in history.
 

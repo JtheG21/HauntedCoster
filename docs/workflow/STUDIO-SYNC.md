@@ -122,3 +122,61 @@ Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `9ccb8eb` co
 - **Tap size:** `AbsoluteSize` divided by the gate scale, minimum 44 design px. The smallest control is `Screen_main/HowToPlay/Group/Content/Hit`, 230x44 design px, at every viewport. It passes at exactly 44, so there is no margin on that control.
 - **Intentional composition passed and labelled:** screen-edge decor, sticker or label on its own control, glow and flash layers, NEW BEST badge across a card corner, duplicate text layer (shadow or glow), VS badge across the panel seam.
 
+### TASK-0114 audit fixes, 2026-11-01 (build 0b8c767)
+
+Fresh Play, Rojo from `task/TASK-0114-tap-target-audit`, BuildStamp `0b8c767` confirmed in Edit before Play. Full gate at five viewports: `TextFit.run()` and `IdentityBoards.run()`.
+
+**Fixes (file:line in `games/mathshow/tests/studio/`)**
+
+| Finding | Change | Where |
+|---|---|---|
+| P1 overlap allow-list | Only `Screen_settings/Row{music,sfx}/…/Hit` against the same row's `Minus`/`HitMinus`/`Plus`/`HitPlus` | `TextFit.luau:346` (`allowedSettingsPair`) |
+| P2 image filter | Explicit decoration list (`Shard`, `Flash`, `Glow`, `Spark1-3`, `Touch`), counted per instance and viewport. Every other image and ImageButton is checked | `TextFit.luau:316` (`DECOR_IMAGE_NAMES`), `:498` (count), `:500` |
+| P2 collision self-match | `d == L.inst` skipped | `TextFit.luau:506` |
+| P2 duplicate text | Only a sibling (same Parent, same Name, same Text) | `TextFit.luau:363` |
+| P2 sticker frames | Visible `FitSticker` Frames and ImageLabels in clip and collision checks | `TextFit.luau:456`, `:462` |
+| P2 IdentityBoards census | GuiButton count before `gui:Destroy()` | `IdentityBoards.luau:278` (count), `:285` (destroy) |
+| Edge exemption | Name prefix `Edge` only | `TextFit.luau:366` |
+| NEW BEST exemption | Counterpart must be inside the same screen's `Card` | `TextFit.luau:377` |
+| VS exemption | Counterpart must be `You` or `Rival` on the same screen | `TextFit.luau:386` |
+
+**Exemption counts per viewport** (passed rows). Old numbers are the audit's figures, which I can't reproduce against a per-viewport basis.
+
+| Category | Old (audit) | New, per viewport | New, total (5) |
+|---|---|---|---|
+| Edge | 205 | 4 | 20 |
+| Own-control | 81 | 0 | 0 |
+| Glow | 79 | 0 (now decoration) | 0 |
+| NEW BEST | 2 | 0 | 0 |
+| Dup | 110 | 0 | 0 |
+| VS | 4 | 0 | 0 |
+
+The old Glow, Shard and Flash collisions are no longer checked as collisions. They are on the decoration list instead, so the collision count dropped as a result.
+
+**Decoration exclusions** (instances, per viewport, summed across fixtures):
+
+| Name | 844×390 | 1920×1080 | phone 812×375 | 1024×768 | 1180×820 |
+|---|---|---|---|---|---|
+| Glow | 111 | 111 | 111 | 111 | 111 |
+| Shard | 341 | 341 | 341 | 341 | 341 |
+| Flash | 341 | 341 | 341 | 341 | 341 |
+
+**Previously hidden shard images** (checked by the new rule): 240 per viewport, 0 overlapping, 0 failures.
+
+**Full gate, build 0b8c767**
+
+| Check | Result |
+|---|---|
+| TextFit rows, 5 viewports | 6,335 total, 0 failures |
+| Clip | 264 rows per viewport, 0 failures |
+| Collision | 4 rows per viewport (Edge exemptions), 0 failures |
+| Overlap | 8 allow-listed pairs per viewport, 0 failures |
+| Review-row gap | 24 rows per viewport, 0 failures |
+| Tap (design px, min 44) | 10 rows per viewport, smallest 230×44 |
+| Measured margin, tightest | 6.5 design px |
+| IdentityBoards | 109 rows per viewport, 0 failures |
+| IdentityBoards tightest margin | 7.0 at 844×390, 6.75 elsewhere |
+| IdentityBoards GuiButtons (real count) | 0 at all five viewports |
+
+**Caveat for the auditor.** The decoration list is now the main source of exclusions. It removes most collision checks against Glow, Shard and Flash images, which is where the old collision counts came from. Please check that list.
+
