@@ -196,7 +196,7 @@ Drawn only from M and S. Each is approved separately, with a limit of 40 branche
 | B-R1-2 | 40 | M | chore/reference-tooling … task/TASK-0028-Cemetery-Vignette-And-Atmosphere |
 | B-R1-3 | 35 | M | task/TASK-0029-Habitat-Rotation … task/TASK-0111-identity-gate |
 | B-R1-4 | 1 | M | task/TASK-0110-studio-sync |
-| B-R1-5 | 1 | S | chore/video-research-3d-models |
+| B-R1-5 | 1 | S | chore/video-research-3d-models. **Held, not deleted** |
 
 Cross-check: 117 names, no duplicates, and none is in class U, class X or the 18-row Closeout table.
 
@@ -337,6 +337,8 @@ task/TASK-0110-studio-sync
 ```
 
 ### B-R1-5
+
+**Held by jg's row R2.** kept: tip 92b86ba not on any other ref
 
 ```text
 chore/video-research-3d-models
@@ -494,3 +496,26 @@ git push origin c5539549e50be80a8a1faec1ea1dc6c7065da027:refs/heads/task/TASK-01
 git push origin 265f8f8a12a7ce578d7c67b3437a15eeb8bb3784:refs/heads/task/TASK-0111-identity-gate
 git push origin af7244822d071f38ed8e80204453a52aad69f244:refs/heads/worktree-agent-a43df52601336427d
 ```
+
+## Results
+
+Executed 2026-11-01 under jg's approved rows for PR #174. Before each batch, each tip was re-checked against this manifest and against `origin/main` ancestry. After each batch, `git ls-remote --heads origin` was re-read.
+
+| Batch | Listed | Deleted | Skipped | Heads after |
+|---|---|---|---|---|
+| B-R1-1 | 40 | 40 | 0 | 100 |
+| B-R1-2 | 40 | 40 | 0 | 60 |
+| B-R1-3 | 35 | 35 | 0 | 25 |
+| B-R1-4 | 1 | 1 | 0 | 24 |
+| B-R1-5 | 1 | 0 | Held | 24 |
+
+Totals: 116 deleted, 0 skipped, 1 held. Origin has 24 heads as this is written; removing `chore/r1-remote-sweep` after merge leaves 23: `main`, 18 X, 3 U and the held branch.
+
+## U/S disagreement (row R3)
+
+Phase 3 recorded "PR merged, scoped diff 0 lines" for both branches below and force-deleted them locally. This manifest classed both as U. Both origin tips equal the deleted local SHAs (`1887dd8`, `f701276`), so the branches did not move. The results differ, and the log records no command, so the Phase 3 check cannot be replayed.
+
+- **`chore/art-automation`: U is correct, and the Phase 3 entry is wrong.** PR #64 merged into `task/TASK-0043-Wisp-Revision`, not `main`, and its merge commit `d484019` is not on `main`. None of its 22 commits has a patch-equivalent on `main`, and the PR's 3 files are absent from `main`. The commits survive on this branch, `chore/creature-pipeline` and `task/TASK-0043-Wisp-Revision`. The S rule here does not check a PR's base, but the non-empty diff still failed it.
+- **`task/TASK-0024-FullLoop-Landmark-Flake`: the work is on `main`, and U is a strict-rule result.** PR #15 merged head `484b5c9`. The tip `f701276` came one commit later, and `git cherry` finds it patch-equivalent to `24f4142` on `main`. The scoped diff is non-empty only because `main` moved on: `project-state.json` and the Overview note changed later, and `tasks/queue.json` was later removed. The S rule compares with current `main`, so later edits count against a branch; a patch-equivalence check does not.
+
+Both remote branches are kept.
