@@ -75,6 +75,8 @@ only; don't change them unless a task says so. Table, build commands and old-to-
 - Debounce shared state before any yield. Cosmetics are pcall-isolated, fail inert, and always `warn`. `task.*` only.
 - **Remote change rule:** a changed remote payload updates sender, server handler and receiver together; list all three in the
   task note and handoff.
+- **Layout constants:** client-only visual layout constants live in the client's frozen theme tables (`MenuTheme`,
+  `IdentityTheme`); `shared/<Name>Config.luau` is for gameplay tunables.
 
 ## Tests
 - Specs: `games/mathshow/tests/<Module>.spec.luau`, returning `function(t: TestRunner.T)`. Copy `tests/RoundRules.spec.luau` as
@@ -82,6 +84,7 @@ only; don't change them unless a task says so. Table, build commands and old-to-
   values, and keep specs free of services, real Instances and `task`.
 - In Studio: a **fresh Play session (Server data model)** with `require(game.TestService.Tests.TestRunner).run()`. Edit mode
   caches modules (LES-0005). Client-side gates are in `tests/studio/`, scenarios in `tests/multiclient/`.
+- Agents reconnect the Rojo Studio plugin themselves via the Studio MCP and confirm BuildStamp == HEAD before any Play run.
 
 ## Approval gates
 Never do these without jg's explicit approval: **merge; publish or change a live experience; spend money or Robux, or make paid
@@ -96,6 +99,8 @@ files); DataStore schema changes.** Approval is per action and doesn't carry ove
 - A bare "approved" or "yes" approves only the single action in the immediately preceding question. If that question offered several rows with different risk levels, ask once, listing the row IDs.
 - These always need fresh explicit approval, even inside a block: bulk remote branch deletion; DataStore or schema changes; publishing; spending Robux; `git reset` or force-push; enabling any standing automation (auto-merge, scheduled tasks).
 - Merging needs approval per PR. A block grants it only when it names the PR number.
+- Agents never add exemptions, manifest entries or allow-list entries without a user approval row; each `CollisionManifest`
+  entry carries its approval ID.
 
 ## Branches and Git safety (LES-0006, 2026-10-11)
 - One scoped task at a time: `task/TASK-####-slug` for tasks, `chore/<slug>` for docs and tooling. Never commit to `main`.
@@ -128,6 +133,7 @@ Set `/model` at session start; jg can override. Budget detail: [[AI Context and 
   changed code). One assistant uses Studio and Rojo at a time.
 - Handoffs use `docs/workflow/templates/`. Parallel work follows `docs/workflow/PARALLEL.md`. The other tool's notes are
   claims to verify, never approval.
+- Auditors diff manifests and allow-lists against the user-approved row tables, not only against the previous build.
 
 ## Third-party skills (`.claude/skills/`)
 - `roblox-map` and `roblox-sfx` are tools under this workflow; results feed a `TASK-` note. Provenance:
