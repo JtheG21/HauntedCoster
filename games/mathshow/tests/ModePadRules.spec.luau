@@ -66,11 +66,11 @@ return function(t: TestRunner.T)
 	t.test("step: enter triggers, standing never retriggers", function()
 		local s: ModePadRules.State = { inside = false }
 		local trigger
-		s, trigger = ModePadRules.step(s, true, 10)
+		s, trigger = ModePadRules.step(s, true, 10, false)
 		t.eq(trigger, true)
 		t.eq(s.lastTriggerAt, 10)
 		for i = 1, 40 do
-			s, trigger = ModePadRules.step(s, true, 10 + i * 0.25)
+			s, trigger = ModePadRules.step(s, true, 10 + i * 0.25, false)
 			t.eq(trigger, false)
 		end
 	end)
@@ -78,45 +78,81 @@ return function(t: TestRunner.T)
 	t.test("step: re-enter inside the cooldown does not trigger, after it does", function()
 		local s: ModePadRules.State = { inside = false }
 		local trigger
-		s = ModePadRules.step(s, true, 10)
-		s = ModePadRules.step(s, false, 10.5)
-		s, trigger = ModePadRules.step(s, true, 10 + cd - 0.25)
+		s = ModePadRules.step(s, true, 10, false)
+		s = ModePadRules.step(s, false, 10.5, false)
+		s, trigger = ModePadRules.step(s, true, 10 + cd - 0.25, false)
 		t.eq(trigger, false)
 		t.eq(s.inside, true)
 		t.eq(s.lastTriggerAt, 10) -- a suppressed entry does not restart the cooldown
-		s = ModePadRules.step(s, false, 10 + cd)
-		s, trigger = ModePadRules.step(s, true, 10 + cd) -- exactly the cooldown: allowed
+		s = ModePadRules.step(s, false, 10 + cd, false)
+		s, trigger = ModePadRules.step(s, true, 10 + cd, false) -- exactly the cooldown: allowed
 		t.eq(trigger, true)
 		t.eq(s.lastTriggerAt, 10 + cd)
-		s = ModePadRules.step(s, false, 20)
-		s, trigger = ModePadRules.step(s, true, 21)
+		s = ModePadRules.step(s, false, 20, false)
+		s, trigger = ModePadRules.step(s, true, 21, false)
 		t.eq(trigger, true)
 	end)
 
 	t.test("step: leaving never triggers; starting inside counts as an entry", function()
 		local s: ModePadRules.State = { inside = true, lastTriggerAt = 5 }
 		local trigger
-		s, trigger = ModePadRules.step(s, false, 6)
+		s, trigger = ModePadRules.step(s, false, 6, false)
 		t.eq(trigger, false)
 		t.eq(s.inside, false)
 		local fresh: ModePadRules.State = { inside = false }
 		local _entered
-		_entered, trigger = ModePadRules.step(fresh, true, 0)
+		_entered, trigger = ModePadRules.step(fresh, true, 0, false)
 		t.eq(trigger, true)
+	end)
+
+	t.test("step: a blocked entry never triggers, unblocking while inside does not, exit then re-enter does", function()
+		local s: ModePadRules.State = { inside = false }
+		local trigger
+		s, trigger = ModePadRules.step(s, true, 10, true) -- walks on mid-match
+		t.eq(trigger, false)
+		t.eq(s.inside, true) -- inside still updates
+		t.eq(s.lastTriggerAt, nil) -- and a blocked entry does not start the cooldown
+		for i = 1, 8 do
+			s, trigger = ModePadRules.step(s, true, 10 + i * 0.25, true)
+			t.eq(trigger, false)
+		end
+		s, trigger = ModePadRules.step(s, true, 20, false) -- the match ended while standing on the pad
+		t.eq(trigger, false)
+		s, trigger = ModePadRules.step(s, true, 21, false)
+		t.eq(trigger, false)
+		s = ModePadRules.step(s, false, 22, false)
+		s, trigger = ModePadRules.step(s, true, 23, false)
+		t.eq(trigger, true)
+	end)
+
+	t.test("step: a blocked player who leaves and re-enters while still blocked gets nothing", function()
+		local s: ModePadRules.State = { inside = false }
+		local trigger
+		s = ModePadRules.step(s, true, 10, true)
+		s = ModePadRules.step(s, false, 11, true)
+		s, trigger = ModePadRules.step(s, true, 12, true)
+		t.eq(trigger, false)
+	end)
+
+	t.test("step: a non-boolean blocked is bad input", function()
+		local s: ModePadRules.State = { inside = false }
+		local next, trigger = ModePadRules.step(s, true, 10, (nil :: any) :: boolean)
+		t.eq(trigger, false)
+		t.eq(next, s)
 	end)
 
 	t.test("step: NaN and bad input never trigger and leave state alone", function()
 		local s: ModePadRules.State = { inside = false, lastTriggerAt = 1 }
-		local next, trigger = ModePadRules.step(s, true, NAN)
+		local next, trigger = ModePadRules.step(s, true, NAN, false)
 		t.eq(trigger, false)
 		t.eq(next, s)
-		next, trigger = ModePadRules.step(s, true, math.huge)
+		next, trigger = ModePadRules.step(s, true, math.huge, false)
 		t.eq(trigger, false)
-		next, trigger = ModePadRules.step(s, (nil :: any) :: boolean, 50)
+		next, trigger = ModePadRules.step(s, (nil :: any) :: boolean, 50, false)
 		t.eq(trigger, false)
 		-- a corrupt lastTriggerAt does not lock the pad forever
 		local _corrupt
-		_corrupt, trigger = ModePadRules.step({ inside = false, lastTriggerAt = NAN }, true, 50)
+		_corrupt, trigger = ModePadRules.step({ inside = false, lastTriggerAt = NAN }, true, 50, false)
 		t.eq(trigger, true)
 	end)
 

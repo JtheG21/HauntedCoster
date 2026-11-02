@@ -15,6 +15,10 @@ local ModePadConfig = require(Shared:WaitForChild("ModePadConfig"))
 local ModePadRules = require(Shared:WaitForChild("ModePadRules"))
 
 local Remotes = require(script.Parent.Parent.Remotes)
+local BlitzService = require(script.Parent.BlitzService)
+local RoundService = require(script.Parent.RoundService)
+local SkillTestService = require(script.Parent.SkillTestService)
+local VsService = require(script.Parent.VsService)
 
 local TAG = "ModePad"
 
@@ -68,6 +72,15 @@ local function readPads(hub: Instance): { PadRecord }
 	return records
 end
 
+-- A player in the current match (RoundService: ShowState.participant), in the VS queue or a VS match, or in a Blitz or Skill
+-- Test run is busy: pads stay quiet for them. Each service holds its own server-side state; these are read-only queries.
+local function isBusy(player: Player): boolean
+	return RoundService.isParticipant(player)
+		or VsService.isBusy(player)
+		or BlitzService.isRunning(player)
+		or SkillTestService.isRunning(player)
+end
+
 -- No yields in here: the only wait in the loop is the one after it.
 local function poll()
 	local now = os.clock()
@@ -89,9 +102,10 @@ local function poll()
 			playerState = { character = character :: Model, pads = {} }
 			states[player] = playerState
 		end
+		local blocked = isBusy(player)
 		for index, record in pads do
 			local prev = playerState.pads[index] or { inside = false }
-			local nextState, trigger = ModePadRules.step(prev, ModePadRules.isInside(record.pad, pos), now)
+			local nextState, trigger = ModePadRules.step(prev, ModePadRules.isInside(record.pad, pos), now, blocked)
 			playerState.pads[index] = nextState
 			if trigger then
 				Remotes.ModePadOpen:FireClient(player, { screen = record.screen })

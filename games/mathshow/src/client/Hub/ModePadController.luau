@@ -27,6 +27,7 @@ local OPENABLE: { [string]: boolean } = {
 }
 
 local started = false
+local inMatch = false -- ShowState.participant: the HUD is in-match. Second layer only; the server already blocks pads then.
 local toastView: View.View? = nil
 
 local function noop() end
@@ -79,6 +80,9 @@ local function onOpen(payload: any)
 		return
 	end
 	local screen: string = payload.screen
+	if inMatch then
+		return
+	end
 	if Menu.isOpen() then
 		return -- a screen is already up: no stacking
 	end
@@ -99,6 +103,19 @@ function ModePadController.start()
 	end
 	started = true
 	buildToast()
+	task.spawn(function()
+		local folder = ReplicatedStorage:WaitForChild("Remotes", CONNECT_TIMEOUT)
+		local remote = if folder then folder:WaitForChild(Net.ShowState, CONNECT_TIMEOUT) else nil
+		if not remote or not remote:IsA("RemoteEvent") then
+			warn("[MathShow] ModePadController: ShowState remote not found; the client match check is off")
+			return
+		end
+		remote.OnClientEvent:Connect(function(payload: any)
+			if typeof(payload) == "table" and typeof(payload.participant) == "boolean" then
+				inMatch = payload.participant
+			end
+		end)
+	end)
 	task.spawn(function()
 		local folder = ReplicatedStorage:WaitForChild("Remotes", CONNECT_TIMEOUT)
 		local remote = if folder then folder:WaitForChild(Net.ModePadOpen, CONNECT_TIMEOUT) else nil

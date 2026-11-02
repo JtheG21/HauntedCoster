@@ -237,6 +237,11 @@ local function onAnswer(player: Player, raw: any)
 	resolve(player, session, correct)
 end
 
+-- True while this player has a Skill Test run going. Read-only; ModePadService blocks pads on it.
+function SkillTestService.isRunning(player: Player): boolean
+	return sessions[player] ~= nil
+end
+
 function SkillTestService.start(): ()
 	if started then
 		return

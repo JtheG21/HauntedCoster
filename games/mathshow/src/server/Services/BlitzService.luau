@@ -184,6 +184,11 @@ local function onAnswer(player: Player, raw: any)
 	end)
 end
 
+-- True while this player has a Blitz run going. Read-only; ModePadService blocks pads on it.
+function BlitzService.isRunning(player: Player): boolean
+	return sessions[player] ~= nil
+end
+
 function BlitzService.start(): ()
 	if started then
 		return

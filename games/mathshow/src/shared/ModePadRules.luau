@@ -45,9 +45,11 @@ function ModePadRules.isInside(pad: Pad, pos: Pos): boolean
 end
 
 -- One poll for one player and pad. Triggers only on an outside -> inside transition once CooldownSeconds have passed
--- since the last trigger; standing still never retriggers. Bad input returns prev unchanged and no trigger.
-function ModePadRules.step(prev: State, insideNow: boolean, now: number): (State, boolean)
-	if typeof(insideNow) ~= "boolean" or not finite(now) or typeof(prev) ~= "table" then
+-- since the last trigger; standing still never retriggers. blocked (in a match, a run or the VS queue) suppresses the trigger
+-- but `inside` still updates, so unblocking while still on the pad does not fire: the player has to leave and re-enter.
+-- Bad input returns prev unchanged and no trigger.
+function ModePadRules.step(prev: State, insideNow: boolean, now: number, blocked: boolean): (State, boolean)
+	if typeof(insideNow) ~= "boolean" or typeof(blocked) ~= "boolean" or not finite(now) or typeof(prev) ~= "table" then
 		return prev, false
 	end
 	local last = prev.lastTriggerAt
@@ -56,7 +58,7 @@ function ModePadRules.step(prev: State, insideNow: boolean, now: number): (State
 	end
 	local entered = insideNow and not prev.inside
 	local ready = last == nil or now - last >= ModePadConfig.CooldownSeconds
-	local trigger = entered and ready
+	local trigger = entered and ready and not blocked
 	return { inside = insideNow, lastTriggerAt = if trigger then now else last }, trigger
 end
 

@@ -17,7 +17,11 @@
     "games/mathshow/src/client/Menu/init.luau",
     "games/mathshow/tests/ModePadRules.spec.luau",
     "docs/workflow/evidence/TASK-0122/",
-    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0122-MathShow-Hub-Mode-Pads.md"
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0122-MathShow-Hub-Mode-Pads.md",
+    "games/mathshow/src/server/Services/RoundService.luau",
+    "games/mathshow/src/server/Services/VsService.luau",
+    "games/mathshow/src/server/Services/BlitzService.luau",
+    "games/mathshow/src/server/Services/SkillTestService.luau"
   ],
   "depends_on": [],
   "branch": "task/TASK-0122-mode-pads",
@@ -27,7 +31,7 @@
     "check.sh and validators green; PR open, CI green, not merged."
   ],
   "evidence": [],
-  "notes": "Approved rows P1 and P2 (jg, 2026-11-02). Out of scope: art, lamps, Leaderboard hall, Daily Challenge, matchmaking, DataStore, publishing, merging. Remote ModePadOpen: sender ModePadService, receiver ModePadController; no client to server remote.",
+  "notes": "Approved rows P1 and P2 (jg, 2026-11-02). Out of scope: art, lamps, Leaderboard hall, Daily Challenge, matchmaking, DataStore, publishing, merging. Remote ModePadOpen: sender ModePadService, receiver ModePadController; no client to server remote. Revision 2 (jg rows S0-S5): merged origin/main after #179; pads blocked while in a match, a run or the VS queue. Deviation from the FILES list: four read-only accessors (RoundService.isParticipant, VsService.isBusy, BlitzService.isRunning, SkillTestService.isRunning) were added because no existing export exposes server participation state.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0122-MathShow-Hub-Mode-Pads.md",
   "risk": "low",
   "approved_by": "jg",
