@@ -1,0 +1,25 @@
+{
+  "id": "TASK-0119",
+  "game": "GAME-004",
+  "title": "MathShow Glyph Rules",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "codex",
+  "files_owned": [
+    "games/mathshow/src/shared/GlyphConfig.luau",
+    "games/mathshow/src/shared/GlyphRules.luau",
+    "games/mathshow/tests/GlyphRules.spec.luau"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0119-glyph-rules",
+  "acceptance": [
+    "GlyphRules specs pass headlessly",
+    "scripts/check.sh exits 0",
+    "PR open, CI green, not merged"
+  ],
+  "evidence": [],
+  "notes": "Approved rows R1/R2. Reuse existing MathShow pure rules and typed TestRunner pattern; no matching glyph reference implementation. No runtime wiring. Rolling rate window (now-1, now]; collect timestamps use monotonic caller time. Spawns are unique id/position/rarity records. applyCollect requires prior successful validation; tickRespawns makes expired glyphs available. jg explicitly approved only this task note and its audit record.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0119-MathShow-Glyph-Rules.md",
+  "risk": "low",
+  "approved_by": "jg (R1/R2)"
+}
