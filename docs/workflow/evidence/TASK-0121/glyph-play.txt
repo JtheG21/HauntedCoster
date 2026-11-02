@@ -67,3 +67,24 @@ does not match requested type" x3, a known place-only asset already recorded in 
 PASS
 
 Play stopped, Rojo stopped, place not saved.
+
+## Revision 1 (H2/H4): counter hidden while the menu is open (2026-11-02)
+# measured git HEAD: 4362e83 (fix(mathshow): TASK-0121 hide glyph counter while a menu screen is open)
+# applies_to: Measured at 4362e83. Applies to later commits whose diff from 4362e83 does not touch games/mathshow/src/**, games/mathshow/map/**, scripts/build_hub.py or mathshow.project.json. Supersedes the 3cee8c4 section above for GlyphController.
+# Studio: same MathShow.rbxl, fresh Play (single client). BuildStamp "4362e83 2026-11-02T21:25:54Z" (clean, no +dirty).
+# SYNC NOT VIA ROJO: the screen capture needed to drive the Rojo plugin failed, so GlyphController.Source was patched
+#   through execute_luau (three hunks) and verified against disk: length 10553 = 10553, byte checksum 114709897 = 114709897.
+#   BuildStamp StringValue set to the value serve.sh wrote to BuildStamp.txt. Rojo was serving the checkout meanwhile.
+# VIEWPORT: the Studio client viewport was 1336x669, NOT 844x390 (no MCP way to emulate a device size). The counter is
+#   anchored top-right with fixed offsets (AnchorPoint 1,0; Position -16,64; 150x36), so only the x origin differs.
+# Menu "closed" was set as MathShowMenu.Enabled = false from the Client data model (the exact state Menu.hide sets);
+#   JOIN SHOW was not clicked, to avoid starting a match.
+
+menu open (MathShowMenu en=true do=10):   GlyphHud Enabled=false DisplayOrder=4   -> counter not visible  (hud-menu-open.jpg)
+menu closed (Enabled=false):              GlyphHud Enabled=true, text "Glyphs 0", AbsolutePosition 1170,64 -> visible (hud-menu-closed.jpg)
+collect (server PivotTo Glyph_C_E1):      GlyphHud Enabled=true, text "Glyphs 1" -> visible and updated (hud-menu-closed-collected.jpg)
+menu re-opened then closed again:         Enabled=false, then true; count stays "Glyphs 1"
+console: no errors from glyph code; only the known DataStore and ContentId 203785492 warnings.
+PASS (with the viewport and sync deviations above)
+
+Play stopped, Rojo stopped, place not saved.

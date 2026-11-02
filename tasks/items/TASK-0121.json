@@ -2,7 +2,7 @@
   "id": "TASK-0121",
   "game": "GAME-004",
   "title": "MathShow Glyph Service",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -66,6 +66,12 @@
       "from": "changes_requested",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-02T13:28:24",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -73,6 +79,11 @@
       "time": "2026-11-02T13:16:52",
       "result": "pass",
       "notes": "326 headless specs pass (9 new GlyphRules); check.sh green; Studio steps 1-6 pass at 3cee8c4 (docs/workflow/evidence/TASK-0121/glyph-play.txt)"
+    },
+    {
+      "time": "2026-11-02T13:28:24",
+      "result": "pass",
+      "notes": "Revision 1 at 4362e83: glyph counter hidden while the menu is open (GlyphController watches MathShowMenu.Enabled, DisplayOrder 4); Studio open/closed/collect pass (viewport 1336x669, script synced via execute_luau, verified); findings (a)(b) documented"
     }
   ],
   "revisions": 1

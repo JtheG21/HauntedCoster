@@ -3,7 +3,7 @@ id: TASK-0121
 title: "MathShow Glyph Service"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -59,6 +59,8 @@ Make the 34 hub glyphs collectable: a server service owns per-player glyph state
 
 ## Risks / notes
 - Client-sent ids are untrusted: type → known id → range (server HRP position) → collected → rate, after a raw per-player throttle.
+- **Accepted finding (a), jg 2026-11-02:** glyphs that stream out stay rendered from their cached positions. By design (positions are learnt once and kept); revisit past about 150 spawns.
+- **Accepted finding (b), jg 2026-11-02:** the server's stats counters increment outside Studio too, but only Studio publishes them as attributes.
 
 ---
 ## Implementation record
@@ -67,7 +69,9 @@ Make the 34 hub glyphs collectable: a server service owns per-player glyph state
 - **Client:** `GlyphController`. The place has StreamingEnabled, so spawns are learnt from the GlyphSpawn added signal and kept, not read once (fix in 3cee8c4, found before the first Play run). The symbol index is the id's position in the first GlyphState. One RenderStepped connection runs spin, bob and the reach check. HUD counter "Glyphs N". Pickup burst plus the built-in `rbxasset://sounds/electronicpingshort.wav`, pcall-isolated. Layout constants are in a frozen local `GlyphTheme` table.
 - **Studio round (one):** steps 1–6 pass, see the evidence file. Burst of 20: 10 accepted, 10 throttled. Common respawn measured at 90.26 s.
 
+- **Revision 1 (rows H1-H5, jg 2026-11-02):** the counter hides while the menu is open. `GlyphController` watches the `MathShowMenu` ScreenGui's `Enabled` (the menu's existing state, no menu change, no remote) and sets the counter ScreenGui `DisplayOrder = 4` (below the menu's 10). Studio at 4362e83: open → hidden, closed → visible, collect → "Glyphs 1" (evidence file, "Revision 1"). Deviations recorded there: viewport 1336x669 not 844x390, and the script was synced through `execute_luau` (verified length and checksum), not Rojo.
+
 ## Audits
 
 ## Outcome
-Implemented and verified in one Studio round at 3cee8c4. The task is in review, waiting for the Codex audit. PR #179 is a draft and not merged. No persistence: glyph state resets on rejoin, as scoped.
+Implemented and verified in one Studio round at 3cee8c4, then revised once (counter hidden under the menu, rechecked at 4362e83). The task goes back to review for the Codex audit. PR #179 is a draft and not merged. No persistence: glyph state resets on rejoin, as scoped.
