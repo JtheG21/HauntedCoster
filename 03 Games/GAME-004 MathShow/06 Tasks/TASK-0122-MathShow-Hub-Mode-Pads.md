@@ -3,7 +3,7 @@ id: TASK-0122
 title: "MathShow Hub Mode Pads"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -54,6 +54,7 @@ Remote change rule: ModePadOpen sender ModePadService.luau, handler none (server
 - Menu change: the input binding moved into `bindInput` so `Menu.open` can rebind after `Menu.hide`; Back from a pad-opened screen closes the menu (identity check on the stack table) instead of showing the main menu.
 - The Daily toast uses a small overlay View (same pattern as Watching) because the menu ScreenGui is disabled when closed.
 - Remote change rule: ModePadOpen sender ModePadService, receiver ModePadController; no handler, no client to server remote.
+- Revision 1 (jg, after [[AUD-20261102-TASK-0122-01]]): pad state is keyed by character, so a respawn between two polls counts as an entry. Studio recheck at 0eca0d9: Blitz regression and respawn-onto-pad both pass. The mid-match pad (second minor) is left as is: no criterion, needs jg's intent.
 - Evidence: `docs/workflow/evidence/TASK-0122/mode-pads.txt`. check.sh green at bb28ee8.
 
 ## Audits
