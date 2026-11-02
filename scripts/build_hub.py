@@ -7,7 +7,7 @@ The .rbxmx is the source of truth for the map; this script is how it is tuned. R
     python3 scripts/build_hub.py --stats    # also print part counts and distances
 
 Axes: plaza centre is (0, 0, 0), north is -Z, east is +X, ground top is y = 0. Graybox only: plain parts, colours are
-zone identity placeholders (swap PALETTE when the A4 palette lands).
+zone identity only (A4 palette, Direction A).
 """
 
 from __future__ import annotations
@@ -21,21 +21,21 @@ from pathlib import Path
 OUT = Path(__file__).resolve().parent.parent / "games" / "mathshow" / "map" / "Hub.rbxmx"
 
 PALETTE = {
-	"ground": (34, 36, 52),
-	"plaza_a": (58, 62, 88),
-	"plaza_b": (74, 80, 112),
-	"plaza_c": (92, 98, 134),
-	"plinth": (150, 140, 200),
-	"slot": (120, 126, 170),
-	"seat": (96, 90, 120),
-	"path": (70, 72, 90),
-	"daily": (240, 190, 60),
-	"competitive": (220, 60, 150),
-	"training": (50, 200, 220),
-	"ranks": (140, 90, 230),
-	"lake": (40, 110, 200),
-	"promenade": (110, 120, 150),
-	"tier": (52, 58, 78),
+	"ground": (30, 61, 69),  # Slate Teal #1E3D45
+	"plaza_a": (86, 98, 110),  # Plaza Stone #56626E
+	"plaza_b": (72, 84, 96),
+	"plaza_c": (58, 70, 82),
+	"plinth": (138, 77, 255),  # Menu Violet #8A4DFF
+	"slot": (34, 48, 63),  # Basalt Blue #22303F
+	"seat": (34, 48, 63),
+	"path": (86, 98, 110),
+	"daily": (255, 181, 71),  # Lamp Amber #FFB547
+	"competitive": (138, 77, 255),  # Menu Violet
+	"training": (62, 224, 240),  # Holo Cyan #3FE0F0
+	"ranks": (138, 77, 255),  # rank emblem = Menu Violet
+	"lake": (15, 42, 74),  # Lake Ink #0F2A4A
+	"promenade": (86, 98, 110),
+	"tier": (30, 61, 69),
 	"glyph": (255, 255, 255),
 }
 

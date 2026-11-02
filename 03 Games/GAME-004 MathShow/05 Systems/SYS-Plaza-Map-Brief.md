@@ -9,8 +9,9 @@ source: []
 related:
   - "[[REF-MAP-003-Night-festival-plaza-mood]]"
   - "[[TASK-0118-MathShow-Plaza-Map-Brief]]"
+  - "[[TASK-0120-MathShow-Hub-Graybox]]"
 created: 2026-11-01
-updated: 2026-11-01
+updated: 2026-11-02
 tags:
   - game/system
 ---
@@ -34,5 +35,13 @@ Decision table for the hub map. Mood reference: [[REF-MAP-003-Night-festival-pla
 | Scale | 16-20 players. |
 | Platform | Balanced (desktop-designed, phone-verified). |
 | Mood | Cool world / warm light sources; violet+cyan galaxy sky; bunting; bloom+haze; flower-lined paths; shooting stars (cosmetic, pcall-isolated). |
-| Directions | A Neon math city · B Cozy campus park · C Rank districts: all share the mood; they differ in architecture and accents. |
+| Directions | **A Neon math city: locked (jg, 2026-11-02).** B Cozy campus park and C Rank districts are dropped. |
 | IP rule | Mood only: no Nintendo characters, mushroom-cap houses, castle copies, star pickups or power-star motifs. Original motifs: math symbols, menu violet shards, rank colours. |
+
+## Direction A (locked)
+
+Mockups: [[Map Mockups/README]]. Palette (A4): Night Navy #0B1433, Slate Teal #1E3D45 (terraces, ground), Basalt Blue #22303F (buildings), Plaza Stone #56626E (paths, plaza), Menu Violet #8A4DFF (competitive, rank), Holo Cyan #3FE0F0 (training, observatory), Lamp Amber #FFB547 (lamps, Blitz, Daily), Lake Ink #0F2A4A (lake). Lighting: Technology Future, Bloom 1.0/36/0.9, Atmosphere density 0.32, haze 1.8, ColorCorrection +0.15 sat/+0.10 contrast. Graybox built in [[TASK-0120-MathShow-Hub-Graybox]].
+
+## Glyph rules
+
+Pending: jg has not yet supplied the Glyph rules table. Graybox markers only (`GlyphSpawn`, attribute `Rarity` common or rare); no Glyph system.
