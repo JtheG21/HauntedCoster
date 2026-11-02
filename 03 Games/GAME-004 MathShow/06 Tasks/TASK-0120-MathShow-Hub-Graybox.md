@@ -58,7 +58,7 @@ Studio-side measurements only; no gameplay wiring.
 - Numbering: TASK-0120, because `next-id` returned TASK-0119 but that ID is held by the uncommitted glyph-rules worktree.
 
 ### Measurements (Studio, WalkSpeed 16, JumpHeight 7.2, R15)
-Path length from PathfindingService (agent radius 2, height 5, can jump), time = length / 16. Centre is (0, 3, 0), spawn is (0, 3.6, 47).
+Path length from PathfindingService (agent radius 2, height 5, can jump), time = length / 16. Centre is (0, 3, 0) and spawn is (0, 3.6, 47), both character (root part) heights; the SpawnLocation part sits at (0, 0.4, 47).
 
 | Pad | Centre to pad | Spawn to pad |
 |---|---|---|
@@ -77,12 +77,12 @@ Performance (Play, 1047x669 viewport, new geometry): 60.2 fps average (vsync-cap
 
 ### Not done
 - Lighting A/B (Technology Future vs ShadowMap): `Lighting.Technology` can not be read or written from execute_luau (RobloxScript capability) and this Studio build does not show it in the Properties panel, so it could not be switched. No A/B numbers and no recommendation yet.
-- 844x390 and 1920x1080 emulation: not run; the 59.6 fps figure is vsync-capped at the pane size.
-- Mockups, brief note update and Glyph rules table: waiting for jg's files.
-- Screenshots (A1 spawn, A2 competitive entrance, A3 aerial) are in `~/Roblox-Work/evidence/TASK-0120/`, outside the vault. Studio's place Atmosphere and depth of field were switched off in the session for the shots.
+- 844x390 and 1920x1080 emulation: not run; the 60.2 fps figure is vsync-capped at the pane size.
+- Glyph rules table: not supplied by jg; the brief records the graybox rules from the task prompt instead.
+- Screenshots at the A1-A3 framings: not taken yet (Studio could not be driven: the Mac screen was locked). Older screenshots of the first build are in `~/Roblox-Work/evidence/TASK-0120/`, outside the vault, so the screenshot criterion is only partly met. Studio's place Atmosphere and depth of field were switched off in the session for the shots.
 
 ## Audits
-Pending.
+One Sonnet audit ([[AUD-20261102-TASK-0120-01]]): pass, no blocker or major finding; minor notes fixed in this note. The Ranks hall (SW) stays as geometry only; the `ranks` palette key colours it. `Hub.rbxmx` is generated: edit `scripts/build_hub.py`, never the file in Studio.
 
 ## Outcome
 Backlog.
