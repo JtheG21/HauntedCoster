@@ -64,6 +64,24 @@
       "from": "approved",
       "to": "review",
       "note": "reopened for independent audit; executor record-audit -01 was not independent (approved by jg)"
+    },
+    {
+      "time": "2026-11-02T12:48:23",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-02T12:52:55",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T12:53:57",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -71,6 +89,11 @@
       "time": "2026-11-02T10:33:12",
       "result": "pass",
       "notes": "check.sh green; Studio walk times, reachability, A/B and screenshots done"
+    },
+    {
+      "time": "2026-11-02T12:53:57",
+      "result": "pass",
+      "notes": "Evidence-only revision after AUD-02 (rows V1-V6): Lighting readback 14/14 at clean 8437157, applies_to lines on both evidence CSVs, AGENTS.md evidence rule; no code or map change"
     }
   ],
   "audits": [
@@ -78,6 +101,12 @@
       "time": "2026-11-02T10:33:12",
       "result": "pass",
       "report": "06 QA/AUD-20261102-TASK-0120-01.md"
+    },
+    {
+      "time": "2026-11-02T12:48:23",
+      "result": "fail",
+      "report": "06 QA/AUD-20261102-TASK-0120-02.md"
     }
-  ]
+  ],
+  "revisions": 1
 }

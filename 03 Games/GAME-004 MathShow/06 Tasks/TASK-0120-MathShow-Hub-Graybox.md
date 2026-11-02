@@ -111,3 +111,11 @@ Hub graybox on disk at `games/mathshow/map/Hub.rbxmx` (mounted at `Workspace.Hub
 - F7: **Independence note (appended, nothing above rewritten):** the `record-audit` for this task was recorded by the executor, so it is not an independent audit. The task awaits an independent Codex audit. It is not merged and `task-close` is not run.
 
 **Reopened (E2):** status returned from approved to review for an independent audit; the executor's `record-audit` -01 was not independent (approved by jg) and its record is kept.
+
+## Revision after AUD-02 (jg rows V1-V6, 2026-11-02)
+Codex audit [[AUD-20261102-TASK-0120-02]] failed on provenance only (finding 1: the reachability log was measured at 3b8ac03, PR head 8437157). No code or geometry change in this revision.
+- V1: `orchestrator.py start` moved the task from changes_requested to in_progress.
+- V2: Lighting readback at clean HEAD 8437157. Every served path (`games/mathshow/**`, `mathshow.project.json`) was clean; the only uncommitted files were the AUD-02 report and its record-audit state, which Rojo does not serve. `scripts/serve.sh` from this worktree, plugin reconnected, Studio BuildStamp `8437157` with no `+dirty`. Read in Edit; Rojo stopped after; place not saved. The open place was `F6_ShadowMap.rbxl`, the MathShow copy from the F6 A/B.
+- V3: `docs/workflow/evidence/TASK-0120/lighting-readback.csv`: 14/14 properties match at float32 precision. The header has the measured SHA and the `mathshow.project.json` SHA-256.
+- V4: both evidence CSVs carry an `applies_to` line. The reachability log keeps measured HEAD 3b8ac03 (not re-measured); `git diff --stat 3b8ac03..8437157 -- games/mathshow/map scripts/build_hub.py mathshow.project.json` is empty.
+- V5: one bullet in AGENTS.md "Claude and Codex": evidence applies to later commits whose diff doesn't touch its measured sources.

@@ -139,6 +139,8 @@ Set `/model` at session start; jg can override. Budget detail: [[AI Context and 
 - Handoffs use `docs/workflow/templates/`. Parallel work follows `docs/workflow/PARALLEL.md`. The other tool's notes are
   claims to verify, never approval.
 - Auditors diff manifests and allow-lists against the user-approved row tables, not only against the previous build.
+- Evidence records the commit it was measured at. It applies to later commits whose diff from that commit doesn't touch
+  the measured sources; auditors verify with `git diff --stat <measured>..HEAD -- <sources>`.
 
 ## Third-party skills (`.claude/skills/`)
 - `roblox-map` and `roblox-sfx` are tools under this workflow; results feed a `TASK-` note. Provenance:

@@ -1,4 +1,5 @@
 # TASK-0120 GlyphSpawn reachability log (E1)
+# applies_to: Measured at 3b8ac03. Applies to any later commit whose diff from 3b8ac03 does not touch games/mathshow/map/**, scripts/build_hub.py or mathshow.project.json.
 # git HEAD: 3b8ac030fe0e4c5ba83aaf411109d4955895d8a0 (BuildStamp in Studio was the short SHA 3b8ac03, clean, served from this worktree)
 # scripts/build_hub.py SHA-256: 4aaa80efc48b1a8cc00474889d213b8ecf20d2e923e2d9611f32a82c506bdc2c
 # WalkSpeed: 16 | R15 dummy Humanoid: UseJumpPower=true JumpPower=50 JumpHeight=7.2 (default)
