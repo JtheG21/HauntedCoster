@@ -3,7 +3,7 @@ id: TASK-0122
 title: "MathShow Hub Mode Pads"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -38,7 +38,7 @@ See `files_owned` in `tasks/items/TASK-0122.json`.
 
 ## Acceptance criteria
 - [x] AC1 Spec passes headless (326 passed, also in Studio Play).
-- [~] AC2 Studio steps 1-6 recorded in `docs/workflow/evidence/TASK-0122/mode-pads.txt`: 1-4 and 6 pass; step 5 (two players) unverified; Glyph collection not exercised (no Glyph service on this base); screenshots at 1336x669 for 2 of 6 pads, not 844x390.
+- [ ] AC2 (partly proven) Studio steps 1-6 recorded in `docs/workflow/evidence/TASK-0122/mode-pads.txt`: 1-4 and 6 pass; step 5 (two players) unverified; Glyph collection not exercised (no Glyph service on this base); screenshots at 1336x669 for 2 of 6 pads, not 844x390.
 - [ ] AC3 check.sh and validators green; PR open, CI green, not merged.
 
 ## Tests

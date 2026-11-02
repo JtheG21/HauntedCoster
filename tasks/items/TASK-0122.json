@@ -2,7 +2,7 @@
   "id": "TASK-0122",
   "game": "GAME-004",
   "title": "MathShow Hub Mode Pads",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -43,6 +43,19 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-02T14:06:02",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T14:06:02",
+      "result": "pass",
+      "notes": "check.sh green; Studio steps 1-4 and 6 pass at bb28ee8; step 5 (two players) unverified; Glyph collection not exercised (no service on base)"
     }
   ]
 }
