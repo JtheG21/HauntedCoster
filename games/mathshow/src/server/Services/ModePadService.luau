@@ -28,8 +28,9 @@ local ModePadService = {}
 
 local started = false
 local pads: { PadRecord } = {}
--- player -> pad index -> step state
-local states: { [Player]: { [number]: ModePadRules.State } } = {}
+-- player -> the character the states belong to, and pad index -> step state
+type PlayerState = { character: Model, pads: { [number]: ModePadRules.State } }
+local states: { [Player]: PlayerState } = {}
 
 local function readPads(hub: Instance): { PadRecord }
 	local records: { PadRecord } = {}
@@ -74,20 +75,24 @@ local function poll()
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		if not root or not root:IsA("BasePart") then
-			states[player] = nil -- dead or loading: a respawn on a pad counts as an entry
+			states[player] = nil -- loading: nothing to track
 			continue
 		end
 		local position = root.Position
 		local pos: ModePadRules.Pos = { x = position.X, y = position.Y, z = position.Z }
-		local playerStates = states[player]
-		if not playerStates then
-			playerStates = {}
-			states[player] = playerStates
+		-- Keyed by character: a respawn between two polls is a new character, so spawning onto a pad counts as an entry.
+		local existing = states[player]
+		local playerState: PlayerState
+		if existing and existing.character == character then
+			playerState = existing
+		else
+			playerState = { character = character :: Model, pads = {} }
+			states[player] = playerState
 		end
 		for index, record in pads do
-			local prev = playerStates[index] or { inside = false }
+			local prev = playerState.pads[index] or { inside = false }
 			local nextState, trigger = ModePadRules.step(prev, ModePadRules.isInside(record.pad, pos), now)
-			playerStates[index] = nextState
+			playerState.pads[index] = nextState
 			if trigger then
 				Remotes.ModePadOpen:FireClient(player, { screen = record.screen })
 			end
