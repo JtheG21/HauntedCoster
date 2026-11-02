@@ -3,7 +3,7 @@ id: TASK-0121
 title: "MathShow Glyph Service"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -70,6 +70,7 @@ Make the 34 hub glyphs collectable: a server service owns per-player glyph state
 - **Studio round (one):** steps 1–6 pass, see the evidence file. Burst of 20: 10 accepted, 10 throttled. Common respawn measured at 90.26 s.
 
 - **Revision 1 (rows H1-H5, jg 2026-11-02):** the counter hides while the menu is open. `GlyphController` watches the `MathShowMenu` ScreenGui's `Enabled` (the menu's existing state, no menu change, no remote) and sets the counter ScreenGui `DisplayOrder = 4` (below the menu's 10). Studio at 4362e83: open → hidden, closed → visible, collect → "Glyphs 1" (evidence file, "Revision 1"). Deviations recorded there: viewport 1336x669 not 844x390, and the script was synced through `execute_luau` (verified length and checksum), not Rojo.
+- **Revision 2 (rows R1-R4, jg 2026-11-02; audit AUD-20261102-TASK-0121-01 P2, GlyphController:232):** a rejected request no longer ends the glyph's chances. `GlyphConfig.RetryAfterSeconds = 1.0`, pure `GlyphRules.shouldRequest(lastRequestAt, now, inRange, available)` (true only if available and in range and never asked or at least RetryAfterSeconds ago; non-finite `now` is false), and the controller keeps `lastRequestAt` per rendered glyph (os.clock, local cadence only), which resets when the id leaves and returns. Spec: 3 new cases (329 pass). Studio at b7d61be: first request throttled, retry 1.01 s later collected; a rejected in-range glyph sent 1 request per about 1.0 s. Same deviation as revision 1: script sync through `execute_luau`, verified by length and checksum (accepted by jg).
 
 ## Audits
 

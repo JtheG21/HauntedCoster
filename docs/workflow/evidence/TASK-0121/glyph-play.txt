@@ -88,3 +88,36 @@ console: no errors from glyph code; only the known DataStore and ContentId 20378
 PASS (with the viewport and sync deviations above)
 
 Play stopped, Rojo stopped, place not saved.
+
+## Revision 2 (R2/R3): retry cadence replaces the permanent `requested` flag (2026-11-02)
+# measured git HEAD: b7d61be (style(mathshow): TASK-0121 reflow GlyphController header comment; code change in 5164a25)
+# applies_to: Measured at b7d61be. Applies to later commits whose diff from b7d61be does not touch games/mathshow/src/**, games/mathshow/map/**, scripts/build_hub.py or mathshow.project.json. Supersedes the 4362e83 section for GlyphController, GlyphRules, GlyphConfig.
+# Studio: same MathShow.rbxl, fresh Play, single client. BuildStamp "b7d61be 2026-11-02T21:48:06Z" (clean, no +dirty).
+# SYNC NOT VIA ROJO (as in revision 1, accepted by jg): GlyphConfig, GlyphRules and GlyphController patched through
+#   execute_luau; each checked against disk by length and byte checksum: GlyphConfig 587/5660109, GlyphRules 5410/59311287,
+#   GlyphController 10783/117563528, all equal. Rojo was serving the checkout meanwhile.
+# Server-side numbers: a server-DM logger sampled GlyphService's Studio-only attributes every 0.05 s (acc = RawAccepted,
+#   thr = RawThrottled, col = Collected) and logged each change with seconds since it started. Client count from PlayerGui.
+
+## R3a/b: throttle exhausted, then into range; first request rejected, retry ~1 s later succeeds
+Client execute_luau: 10 x GlyphCollect:FireServer("junk"), then PivotTo(75, 3.5, 0) (Glyph_C_E1) in the same call.
+t=0.11 acc=10 thr=0 col=0   (10 junk accepted by the raw throttle; the 11th request is the first over the limit)
+t=0.18 acc=10 thr=1 col=0   first controller request for C_E1: THROTTLED (server HRP still 88 studs away, throttle is checked first)
+t=0.34..0.66                the character replicates into range (dist 61.6 -> 0.5), no further request
+t=1.19 acc=11 thr=1 col=1   retry 1.01 s after the rejected one: accepted and collected
+server console: "GlyphCollect from jg_57565 rejected: unknown_id (junk)" and "rejected: throttled (over 10/1s)"
+client after: hud="Glyphs 1", Workspace.Glyphs has no Glyph_C_E1 (33 rendered of 34)
+PASS (player never left range or reconnected between the rejection and the success)
+
+## R3c: a glyph in range sends at most 1 request per second while being rejected
+Forcing a rejection: server HRP anchored 25.2 studs from Glyph_C_E2 (server says out_of_range), client character moved
+client-locally into range (100, 3.5, 3); the client sees itself in range, the server does not. Requests = RawAccepted steps.
+request times (s after logger start): 0.19, 1.26, 2.33, 3.38, 4.39, 5.40, 6.39, 7.44, 8.46, 9.51, 10.58, 11.66
+gaps: 1.07 1.07 1.05 1.01 1.01 0.99 1.05 1.02 1.05 1.07 1.08 s
+Over the first 5 s after the first request (0.19..5.19): 5 requests. Over 12 s: 12 requests. No gap is below 0.99 s (client os.clock
+cadence plus 0.05 s sampling; RetryAfterSeconds = 1.0). Glyph_C_E2 was never collected (col stays 1).
+server console: "GlyphCollect from jg_57565 rejected: out_of_range (Glyph_C_E2)" (the server warns once per reason per 5 s).
+PASS
+
+console: no errors from glyph code; only the known DataStore and ContentId 203785492 warnings.
+Play stopped, Rojo stopped, place not saved.

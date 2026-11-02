@@ -2,7 +2,7 @@
   "id": "TASK-0121",
   "game": "GAME-004",
   "title": "MathShow Glyph Service",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -84,6 +84,12 @@
       "from": "changes_requested",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-02T13:50:02",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -96,6 +102,11 @@
       "time": "2026-11-02T13:28:24",
       "result": "pass",
       "notes": "Revision 1 at 4362e83: glyph counter hidden while the menu is open (GlyphController watches MathShowMenu.Enabled, DisplayOrder 4); Studio open/closed/collect pass (viewport 1336x669, script synced via execute_luau, verified); findings (a)(b) documented"
+    },
+    {
+      "time": "2026-11-02T13:50:02",
+      "result": "pass",
+      "notes": "Revision 2 at b7d61be: GlyphRules.shouldRequest + RetryAfterSeconds replace the permanent requested flag; 329 specs pass; Studio R3a/b/c pass (throttled first request, retry at 1.01 s collects, rejected glyph asked once per ~1 s)"
     }
   ],
   "revisions": 2,
