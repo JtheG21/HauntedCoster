@@ -1,8 +1,9 @@
 --!strict
 -- GlyphController (TASK-0121): renders the hub glyphs this player can collect and asks the server for them.
 -- Driven only by GlyphState: a glyph appears when its id is in `available` and goes when it leaves, and the counter shows
--- `count`. Standing within CollectRadius of an available glyph sends GlyphCollect for it, at most once per RetryAfterSeconds
--- (GlyphRules.shouldRequest; the timer clears when the glyph leaves or returns); the client never changes its own count. Positions come from the same GlyphSpawn attachments the server reads, learnt as they stream in
+-- `count`. Standing within CollectRadius of an available glyph sends GlyphCollect for it, at most once per
+-- RetryAfterSeconds (GlyphRules.shouldRequest; the timer clears when the glyph leaves or returns); the client never
+-- changes its own count. Positions come from the same GlyphSpawn attachments the server reads, learnt as they stream in
 -- (the place uses StreamingEnabled), and kept once known. The symbol index is the id's place in the first GlyphState,
 -- which the server sends with every glyph available and sorted by id. The pickup burst is cosmetic: pcall-isolated,
 -- fails inert and warns, and never touches collection.
