@@ -1,0 +1,46 @@
+{
+  "id": "TASK-0125",
+  "game": "GAME-004",
+  "title": "MathShow Hub Art Pilot: AI Mesh Pipeline",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "scripts/check.sh",
+    "games/mathshow/map/Hub.rbxmx",
+    "games/mathshow/map/props/",
+    "games/mathshow/src/server/Services/ModePadService.luau",
+    "AGENTS.md",
+    "docs/workflow/evidence/TASK-0125/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0125-MathShow-Hub-Art-Pilot.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0125-art-pilot",
+  "acceptance": [
+    "LampPost.rbxmx round-trips: rojo build renders identically to the Studio original (side-by-side screenshot).",
+    "The drift guard catches an edited prop file without a regeneration (fail shown, then pass).",
+    "Perf table before and after the lamps, ShadowMap vs Future, 844x390 and 1920x1080.",
+    "Collision verified; walk times unchanged (spawn to Blitz spot-check).",
+    "Asset ids recorded in manifest.json with 'created by jg_57565 via Studio generate_mesh, pilot TASK-0125'."
+  ],
+  "evidence": [],
+  "notes": "Approved rows A0-A7 (jg, 2026-11-02). Asset creation approved for this pilot only: up to 3 generate_mesh candidates in a scratch place; stop and ask on any Robux cost. Out of scope: other props, buildings, signs, skybox, holo symbols, Glyph visuals, audio, saving the place, Lighting.Technology on the real place, uploads beyond A1, merging. Max 2 attempts on the export/inline approach.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0125-MathShow-Hub-Art-Pilot.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T15:13:16",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T15:13:16",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}

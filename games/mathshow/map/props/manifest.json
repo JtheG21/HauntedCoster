@@ -1,0 +1,26 @@
+{
+  "props": [
+    {
+      "name": "LampPost",
+      "file": "LampPost.rbxmx",
+      "pivot": "base centre; the model's pivot is the origin and the base sits at y = 0",
+      "light": {
+        "attachment_offset": [0, 3.1, 0],
+        "color": "#FFB547",
+        "range": 16,
+        "brightness": 2.5,
+        "shadows": false
+      },
+      "assets": {
+        "mesh_id": "rbxassetid://105914018615825",
+        "texture_id": "rbxassetid://112557367926447"
+      },
+      "size": [1.9985, 8.1416, 2.0],
+      "triangles": 1486,
+      "collision_fidelity": "Box",
+      "collision_note": "Hull of a base-pole-globe shape is almost the same 2 x 8.1 x 2 box, so Box is the cheapest collider that fits.",
+      "provenance": "created by jg_57565 via Studio generate_mesh, pilot TASK-0125",
+      "prompt": "Minimal chunky low-poly modern park lamp, dark slate-black cylindrical pole, hexagonal base plinth, large round glowing amber ball light (#FFB547) at the top held by a short curved arm. Simple, bold, toy-like."
+    }
+  ]
+}
