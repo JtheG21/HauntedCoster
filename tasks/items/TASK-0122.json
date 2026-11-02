@@ -2,7 +2,7 @@
   "id": "TASK-0122",
   "game": "GAME-004",
   "title": "MathShow Hub Mode Pads",
-  "status": "blocked",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -114,6 +114,12 @@
       "from": "blocked",
       "to": "blocked",
       "note": "jg decision (option A): Two-client live verification (S4d) is deferred as an accepted risk by jg. Cause: Studio multi-client test did not join a second client twice, likely memory pressure on an 8 GB Mac. Per-player delivery is to be proven statically by the independent audit. Live verification moves to the multiplayer playtest task (TASK-0123)."
+    },
+    {
+      "time": "2026-11-02T14:54:55",
+      "from": "blocked",
+      "to": "review",
+      "note": "jg-approved re-scope (option A); independent PASS in AUD-20261102-TASK-0122-04. hand transition approved by jg; orchestrator lacks blocked\u2192review"
     }
   ],
   "executions": [
