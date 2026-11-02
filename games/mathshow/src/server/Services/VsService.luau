@@ -550,6 +550,11 @@ local function onLeaving(player: Player)
 	release(match)
 end
 
+-- True while this player is searching in the VS queue or inside a VS match. Read-only; ModePadService blocks pads on it.
+function VsService.isBusy(player: Player): boolean
+	return queue[player] ~= nil or playerMatch[player] ~= nil
+end
+
 function VsService.start(): ()
 	if started then
 		return

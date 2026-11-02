@@ -1,0 +1,178 @@
+{
+  "id": "TASK-0122",
+  "game": "GAME-004",
+  "title": "MathShow Hub Mode Pads",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/shared/ModePadConfig.luau",
+    "games/mathshow/src/shared/ModePadRules.luau",
+    "games/mathshow/src/shared/Net.luau",
+    "games/mathshow/src/server/Services/ModePadService.luau",
+    "games/mathshow/src/server/Remotes.luau",
+    "games/mathshow/src/server/init.server.luau",
+    "games/mathshow/src/client/Hub/",
+    "games/mathshow/src/client/init.client.luau",
+    "games/mathshow/src/client/Menu/init.luau",
+    "games/mathshow/tests/ModePadRules.spec.luau",
+    "docs/workflow/evidence/TASK-0122/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0122-MathShow-Hub-Mode-Pads.md",
+    "games/mathshow/src/server/Services/RoundService.luau",
+    "games/mathshow/src/server/Services/VsService.luau",
+    "games/mathshow/src/server/Services/BlitzService.luau",
+    "games/mathshow/src/server/Services/SkillTestService.luau"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0122-mode-pads",
+  "acceptance": [
+    "ModePadRules.spec passes headless (inside/edge/outside, rotated pad, vertical tolerance, cooldown, NaN, unknown mode).",
+    "Studio: each of the 6 pads opens the right screen (Daily shows the locked toast); no retrigger while standing; 2 s cooldown; ignored while a menu screen is open; no console errors; glyph collection unaffected.",
+    "Static proof that ModePadOpen is only sent with FireClient(<triggering player>) and that the pad state is keyed per player; live two-client check deferred to TASK-0123.",
+    "check.sh and validators green; PR open, CI green, not merged."
+  ],
+  "evidence": [],
+  "notes": "Approved rows P1 and P2 (jg, 2026-11-02). Out of scope: art, lamps, Leaderboard hall, Daily Challenge, matchmaking, DataStore, publishing, merging. Remote ModePadOpen: sender ModePadService, receiver ModePadController; no client to server remote. Revision 2 (jg rows S0-S5): merged origin/main after #179; pads blocked while in a match, a run or the VS queue. Deviation from the FILES list: four read-only accessors (RoundService.isParticipant, VsService.isBusy, BlitzService.isRunning, SkillTestService.isRunning) were added because no existing export exposes server participation state. jg decision (option A, 2026-11-02): S4d two-client live verification deferred to TASK-0123 as an accepted risk; per-player delivery to be proven statically by the independent audit.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0122-MathShow-Hub-Mode-Pads.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T13:57:08",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T13:57:08",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T14:06:02",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T14:07:58",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T14:11:08",
+      "from": "approved",
+      "to": "changes_requested",
+      "note": "changes requested by jg: jg asked to fix AUD-01 respawn minor (key pad state by character); revision 1/2"
+    },
+    {
+      "time": "2026-11-02T14:11:09",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T14:13:11",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T14:15:04",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T14:17:58",
+      "from": "approved",
+      "to": "changes_requested",
+      "note": "changes requested by jg: Revision 2 rows S0-S5: mid-match guard, sync with main; revision 2/2"
+    },
+    {
+      "time": "2026-11-02T14:17:58",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T14:32:31",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T14:44:39",
+      "from": "review",
+      "to": "blocked",
+      "note": "audit failed; revision limit 2 exceeded, needs human"
+    },
+    {
+      "time": "2026-11-02T14:47:40",
+      "from": "blocked",
+      "to": "blocked",
+      "note": "jg decision (option A): Two-client live verification (S4d) is deferred as an accepted risk by jg. Cause: Studio multi-client test did not join a second client twice, likely memory pressure on an 8 GB Mac. Per-player delivery is to be proven statically by the independent audit. Live verification moves to the multiplayer playtest task (TASK-0123)."
+    },
+    {
+      "time": "2026-11-02T14:54:55",
+      "from": "blocked",
+      "to": "review",
+      "note": "jg-approved re-scope (option A); independent PASS in AUD-20261102-TASK-0122-04. hand transition approved by jg; orchestrator lacks blocked\u2192review"
+    },
+    {
+      "time": "2026-11-02T14:58:19",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T15:01:01",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T14:06:02",
+      "result": "pass",
+      "notes": "check.sh green; Studio steps 1-4 and 6 pass at bb28ee8; step 5 (two players) unverified; Glyph collection not exercised (no service on base)"
+    },
+    {
+      "time": "2026-11-02T14:13:11",
+      "result": "pass",
+      "notes": "Revision 1: pad state keyed by character (AUD-01 respawn minor); check.sh green; Studio recheck at 0eca0d9 pass"
+    },
+    {
+      "time": "2026-11-02T14:32:31",
+      "result": "pass",
+      "notes": "Revision 2: merged main after #179; pads blocked in match/run/queue (server accessors + rules blocked input + client layer); check.sh green; Studio at 7443516: a,b,c,e pass; d (two players) NOT verified, second test client never joined"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-02T14:07:58",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0122-01.md"
+    },
+    {
+      "time": "2026-11-02T14:15:04",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0122-02.md"
+    },
+    {
+      "time": "2026-11-02T14:44:39",
+      "result": "fail",
+      "report": "06 QA/AUD-20261102-TASK-0122-03.md"
+    },
+    {
+      "time": "2026-11-02T14:58:19",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0122-04.md"
+    }
+  ],
+  "revisions": 3,
+  "merge_approved_by": "jg"
+}

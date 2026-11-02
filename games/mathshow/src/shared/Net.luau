@@ -21,6 +21,7 @@
 --   VsAnswer     client -> server        { questionIndex, answer } (VsRules.parseAnswerPayload)
 --   VsState      server -> one client    VsStatePayload (the opponent's answer is never sent)
 --   VsResult     server -> one client    VsResultPayload
+--   ModePadOpen  server -> one client    ModePadOpenPayload (walked onto a hub mode pad; ModePadService -> ModePadController)
 --   MenuRequest  client -> server (RemoteFunction)  { kind: "profile" } -> MenuProfileReply
 --   SettingsSave client -> server        SettingsPayload (validated by ProfileRules.sanitizeSettings)
 --   GlyphCollect client -> server        (id: string; GlyphRules.validateCollect, TASK-0121)
@@ -52,6 +53,11 @@ export type AnswerResultPayload = {
 	accepted: boolean,
 	correct: boolean?,
 	points: number?,
+}
+
+-- screen is a ModePadConfig.Modes value: a menu screen id, or "locked:<name>" for a mode that is not open yet.
+export type ModePadOpenPayload = {
+	screen: string,
 }
 
 -- MenuRequest reply. ok = false means no usable profile: the menu shows RANK UNAVAILABLE and keeps local settings.
@@ -169,6 +175,7 @@ local Net = table.freeze({
 	SkillResult = "SkillResult",
 	JoinShow = "JoinShow",
 	ShowState = "ShowState",
+	ModePadOpen = "ModePadOpen",
 	MenuRequest = "MenuRequest",
 	SettingsSave = "SettingsSave",
 	GlyphCollect = "GlyphCollect",

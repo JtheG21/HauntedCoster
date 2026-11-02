@@ -338,6 +338,12 @@ local function onJoin(player: Player, raw: any)
 	sendState(player) -- the HUD gets the current phase at once, not at the next broadcast
 end
 
+-- True while this player is in the current match (ShowState.participant). Read-only; ModePadService blocks pads on it.
+function RoundService.isParticipant(player: Player): boolean
+	local state = states[player]
+	return state ~= nil and state.participant
+end
+
 function RoundService.start(): ()
 	if started then
 		return

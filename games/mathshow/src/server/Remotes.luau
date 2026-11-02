@@ -73,6 +73,7 @@ return table.freeze({
 	SkillResult = event(Net.SkillResult),
 	JoinShow = event(Net.JoinShow),
 	ShowState = event(Net.ShowState),
+	ModePadOpen = event(Net.ModePadOpen),
 	MenuRequest = remoteFunction(Net.MenuRequest),
 	SettingsSave = event(Net.SettingsSave),
 	GlyphCollect = event(Net.GlyphCollect),

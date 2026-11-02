@@ -1,0 +1,68 @@
+---
+id: TASK-0122
+title: "MathShow Hub Mode Pads"
+type: task
+project: GAME-004
+status: done
+priority: medium
+risk: low
+owner: claude-code
+depends_on: []
+branch: task/TASK-0122-mode-pads
+related:
+  - "[[TASK-0120-MathShow-Hub-Graybox]]"
+created: 2026-11-02
+updated: 2026-11-02
+tags:
+  - workflow/task
+---
+
+# MathShow Hub Mode Pads
+
+## Goal
+Walking onto a ModePad in Workspace.Hub opens that mode's menu screen on the client, once per entry, with no retrigger while standing.
+
+## Scope
+- **In:** ModePadConfig, ModePadRules (pure), ModePadService (server poll), ModePadOpen remote, ModePadController (client), a minimal client-only `Menu.open(screen)`.
+- **Out (non-goals):** art, lamps, Leaderboard hall interior, Daily Challenge feature, matchmaking changes, DataStore, publishing, merging.
+- **Keep unchanged:** `shared/Glyph*`, the map (`games/mathshow/map/`).
+
+## Intake
+- **Category, depth:** systems, standard.
+- **References:** none relevant in `10 References/` (server poll plus pure rules follows the repo service pattern).
+- **Reuse:** adapt the existing service shape (`start()` idempotent, frozen Config, pure Rules plus spec) and the menu's `go()` screens.
+- **Decision (jg, 2026-11-02):** valid modes come only from the ModePadConfig Modes map; "locked:" screens show the existing coming-soon toast.
+
+## Files expected to change
+See `files_owned` in `tasks/items/TASK-0122.json`.
+
+## Acceptance criteria
+- [x] AC1 Spec passes headless (326 passed, also in Studio Play).
+- [ ] AC2 (partly proven; the two-player part moved to AC2b) Studio steps 1-6 recorded in `docs/workflow/evidence/TASK-0122/mode-pads.txt`: 1-4 and 6 pass; step 5 (two players) unverified; Glyph collection not exercised (no Glyph service on this base); screenshots at 1336x669 for 2 of 6 pads, not 844x390.
+- [ ] AC2b Static proof that ModePadOpen is only sent with FireClient(<triggering player>) and that the pad state is keyed per player; live two-client check deferred to [[TASK-0123-MathShow-Multiplayer-Playtest]].
+- [ ] AC3 check.sh and validators green; PR open, CI green, not merged.
+
+## Tests
+- **Automated:** `scripts/check.sh`, `ModePadRules.spec`.
+- **Studio:** one round, steps 1-6 from the approved rows.
+
+## Risks / notes
+Remote change rule: ModePadOpen sender ModePadService.luau, handler none (server to client), receiver ModePadController.luau.
+
+---
+## Implementation record
+- Added `ModePadConfig`, `ModePadRules` (+ spec), `ModePadService` (one 0.25 s poll, pcall-wrapped, no yields in the body), the `ModePadOpen` remote (Net, Remotes), `client/Hub/ModePadController` and `Menu.open(screen)` / `Menu.isOpen()`.
+- Menu change: the input binding moved into `bindInput` so `Menu.open` can rebind after `Menu.hide`; Back from a pad-opened screen closes the menu (identity check on the stack table) instead of showing the main menu.
+- The Daily toast uses a small overlay View (same pattern as Watching) because the menu ScreenGui is disabled when closed.
+- Remote change rule: ModePadOpen sender ModePadService, receiver ModePadController; no handler, no client to server remote.
+- Revision 1 (jg, after [[AUD-20261102-TASK-0122-01]]): pad state is keyed by character, so a respawn between two polls counts as an entry. Studio recheck at 0eca0d9: Blitz regression and respawn-onto-pad both pass. The mid-match pad (second minor) is left as is: no criterion, needs jg's intent.
+- Revision 2 (jg rows S0-S5): #179 was merged, so origin/main was merged in (conflicts only in the two bootstraps, both features kept). Pads are blocked server-side while a player is in the match (RoundService.isParticipant), the VS queue or match (VsService.isBusy), or a Blitz or Skill run; `ModePadRules.step` takes `blocked`, which suppresses the trigger but still updates `inside`. The client ignores ModePadOpen while ShowState.participant is true. Four read-only accessors were added to RoundService, VsService, BlitzService and SkillTestService (no existing export exposed participation); this goes beyond the row's FILES list and `files_owned` was extended.
+- Revision 2 Studio round at 7443516: a, b, c, e pass; d (two players) NOT verified, the second test client never joined. record-exec was recorded with step d unverified (jg's call).
+- Evidence: `docs/workflow/evidence/TASK-0122/mode-pads.txt`. check.sh green at bb28ee8.
+
+## Audits
+
+## Decision (jg, 2026-11-02, option A)
+Two-client live verification (S4d) is deferred as an accepted risk by jg. Cause: Studio multi-client test did not join a second client twice, likely memory pressure on an 8 GB Mac. Per-player delivery is to be proven statically by the independent audit. Live verification moves to the multiplayer playtest task, [[TASK-0123-MathShow-Multiplayer-Playtest]]. Audits -01 to -03 are unchanged history.
+
+## Outcome

@@ -4,6 +4,7 @@
 local Hud = require(script.Hud)
 local Menu = require(script.Menu)
 local Watching = require(script.Menu.Watching)
+local ModePadController = require(script.Hub.ModePadController)
 local GlyphController = require(script.Glyphs.GlyphController)
 
 Hud.start()
@@ -17,5 +18,6 @@ Menu.start({
 		Hud.setVisible(true)
 	end,
 })
+ModePadController.start()
 GlyphController.start() -- hub glyphs and their counter (TASK-0121)
 print("[MathShow] client ready")

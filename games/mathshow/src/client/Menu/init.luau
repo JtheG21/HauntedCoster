@@ -35,6 +35,8 @@ local stack: { string } = {}
 local settings: View.Settings = table.clone(MenuConfig.SettingsDefaults)
 local inputConnection: RBXScriptConnection? = nil
 local options: Options? = nil
+local rebindInput: (() -> ())? = nil -- set by Menu.start; Menu.open uses it after Menu.hide unbound the input
+local padStack: { string }? = nil -- the stack Menu.open made; Back from its screen closes the menu (see back())
 
 -- What the server said about this player (TASK-0099). loaded = the MenuRequest finished; ok = it returned a profile.
 local profile: {
@@ -430,6 +432,12 @@ local function go(id: string)
 end
 
 local function back()
+	if padStack and stack == padStack and #stack == 2 then
+		padStack = nil
+		stack = { "main" }
+		Menu.hide() -- a pad opened this screen from the plaza: Back returns there, not to the main menu
+		return
+	end
 	if stack[#stack] == "skill" or stack[#stack] == "blitz" then
 		return -- no leaving a Skill Test or Blitz question: the run ends on its own
 	end
@@ -977,36 +985,66 @@ function Menu.start(opts: Options)
 	task.spawn(connectBlitzRemotes)
 	task.spawn(connectVsRemotes)
 
-	ContextActionService:BindAction(BACK_ACTION, function(_name, state)
-		if state == Enum.UserInputState.Begin and #stack > 1 then
-			back()
-			return Enum.ContextActionResult.Sink
+	-- Back (B / Esc) and the stepper keys. Menu.hide unbinds them; Menu.open binds them again through rebindInput.
+	local function bindInput()
+		unbindBack()
+		if inputConnection then
+			inputConnection:Disconnect()
 		end
-		return Enum.ContextActionResult.Pass
-	end, false, Enum.KeyCode.ButtonB, Enum.KeyCode.Escape)
-
-	-- D-pad / shoulder buttons / arrows change the focused stepper row (A does nothing on it).
-	inputConnection = UserInputService.InputBegan:Connect(function(input: InputObject)
-		local selected = GuiService.SelectedObject
-		if not selected or selected:GetAttribute("Kind") ~= "stepper" then
-			return
-		end
-		local code = input.KeyCode
-		local delta = 0
-		if code == Enum.KeyCode.DPadLeft or code == Enum.KeyCode.ButtonL1 or code == Enum.KeyCode.Left then
-			delta = -1
-		elseif code == Enum.KeyCode.DPadRight or code == Enum.KeyCode.ButtonR1 or code == Enum.KeyCode.Right then
-			delta = 1
-		end
-		if delta ~= 0 then
-			local key = selected:GetAttribute("Setting") :: string
-			local value = selected:GetAttribute("Value") :: number
-			local nextValue = math.clamp(value + delta, 0, MenuConfig.SettingMax)
-			if nextValue ~= value then
-				handlers.setting(key, nextValue)
+		ContextActionService:BindAction(BACK_ACTION, function(_name, state)
+			if state == Enum.UserInputState.Begin and #stack > 1 then
+				back()
+				return Enum.ContextActionResult.Sink
 			end
-		end
-	end)
+			return Enum.ContextActionResult.Pass
+		end, false, Enum.KeyCode.ButtonB, Enum.KeyCode.Escape)
+
+		-- D-pad / shoulder buttons / arrows change the focused stepper row (A does nothing on it).
+		inputConnection = UserInputService.InputBegan:Connect(function(input: InputObject)
+			local selected = GuiService.SelectedObject
+			if not selected or selected:GetAttribute("Kind") ~= "stepper" then
+				return
+			end
+			local code = input.KeyCode
+			local delta = 0
+			if code == Enum.KeyCode.DPadLeft or code == Enum.KeyCode.ButtonL1 or code == Enum.KeyCode.Left then
+				delta = -1
+			elseif code == Enum.KeyCode.DPadRight or code == Enum.KeyCode.ButtonR1 or code == Enum.KeyCode.Right then
+				delta = 1
+			end
+			if delta ~= 0 then
+				local key = selected:GetAttribute("Setting") :: string
+				local value = selected:GetAttribute("Value") :: number
+				local nextValue = math.clamp(value + delta, 0, MenuConfig.SettingMax)
+				if nextValue ~= value then
+					handlers.setting(key, nextValue)
+				end
+			end
+		end)
+	end
+	rebindInput = bindInput
+	bindInput()
+end
+
+-- True while the menu is on screen (the first menu, or one a mode pad opened).
+function Menu.isOpen(): boolean
+	return view ~= nil and view.gui.Enabled
+end
+
+-- Opens one screen over the plaza (a hub mode pad, TASK-0122). Client-only: it sends nothing. Does nothing if the menu is
+-- not built or already open. Back from that screen closes the menu instead of walking up to the main menu.
+function Menu.open(id: string): boolean
+	local v = view
+	local rebind = rebindInput
+	if not v or not rebind or v.gui.Enabled then
+		return false
+	end
+	stack = { "main", id }
+	padStack = stack
+	v.gui.Enabled = true
+	rebind()
+	show(id)
+	return true
 end
 
 function Menu.hide()
