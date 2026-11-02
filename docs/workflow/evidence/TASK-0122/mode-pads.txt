@@ -1,0 +1,31 @@
+# TASK-0122 mode pads: Studio verification (one round, 2026-11-02)
+# measured git HEAD: bb28ee8 (BuildStamp in Studio: "bb28ee8 2026-11-02T22:00:07Z", no +dirty; served by scripts/serve.sh from the
+#   TASK-0122 worktree; Rojo plugin 7.7.0 reconnected via the Connect prompt; fresh Play session; place not saved)
+# applies_to: Measured at bb28ee8. Applies to any later commit whose diff from bb28ee8 does not touch games/mathshow/src/**,
+#   games/mathshow/tests/ModePadRules.spec.luau or games/mathshow/map/**.
+# Method: the client moved its own character with PivotTo (dummy-walk blocked by the open menu), 2.6 s outside every pad between
+#   tries; the server poll (0.25 s) decided entry. The client counted ModePadOpen events on the remote and read the menu ScreenGui.
+#   A test-side require of the Menu module is a separate instance, so "menu open" was read from MathShowMenu.Enabled.
+# Viewport: 1336x669 (Studio default), NOT 844x390. The 844x390 screenshots were not taken.
+
+Headless spec: lune 326 passed, 0 failed. In Studio Play (Server): TestRunner 326 passed, 0 failed.
+
+1. Each of the 6 pads, menu closed -> screen (PASS)
+   Blitz     menuOpen=true  Screen_confirm_blitz
+   Group     menuOpen=true  Screen_confirm_group
+   Practice  menuOpen=true  Screen_practice
+   Skill     menuOpen=true  Screen_skillintro
+   VS        menuOpen=true  Screen_confirm_vs
+   Daily     menuOpen=false; MathShowModePadToast gui enabled with a "COMING SOON" label; no menu screen opened
+   Screenshots (1336x669, outside the repo): ~/Roblox-Work/evidence/TASK-0122/pad-blitz.jpg, pad-vs.jpg (Blitz and VS only; the
+   other four are confirmed by the screen names above).
+2. Stand 5 s after closing the screen (PASS): entered Blitz, events=1; screen closed; after 5 s still on the pad events=1, menuOpen=false.
+3. Re-enter (PASS): first entry on VS at t0; re-entry at +1.22 s -> no new event (1 total); re-entry at +2.85 s -> trigger (2 total).
+4. Menu open while on a pad (PASS): Screen_confirm_vs open, entered Skill pad: the server fired 1 event, the client ignored it:
+   screens before=1 (Screen_confirm_vs), after=1 (Screen_confirm_vs), no stacking.
+5. Two players: UNVERIFIED. Not run. A multi-client scenario would be a new file under tests/multiclient, outside this task's
+   files. By construction the server uses FireClient(player, ...) from per-player state in a table keyed by Player.
+6. Console (PASS): no errors. Warnings seen: DataStores unavailable (unpublished place) and the known
+   "ContentId rbxassetid://203785492 ... Asset type does not match" placeholder warning (already in STUDIO-SYNC.md).
+   Glyph collection: NOT exercised. There is no Glyph service on this base (TASK-0121 is an unmerged branch); GlyphSpawn markers
+   are untouched and the walks to all six pads were unobstructed.

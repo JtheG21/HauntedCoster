@@ -37,8 +37,8 @@ Walking onto a ModePad in Workspace.Hub opens that mode's menu screen on the cli
 See `files_owned` in `tasks/items/TASK-0122.json`.
 
 ## Acceptance criteria
-- [ ] AC1 Spec passes headless.
-- [ ] AC2 Studio steps 1-6 recorded in `docs/workflow/evidence/TASK-0122/mode-pads.txt`.
+- [x] AC1 Spec passes headless (326 passed, also in Studio Play).
+- [~] AC2 Studio steps 1-6 recorded in `docs/workflow/evidence/TASK-0122/mode-pads.txt`: 1-4 and 6 pass; step 5 (two players) unverified; Glyph collection not exercised (no Glyph service on this base); screenshots at 1336x669 for 2 of 6 pads, not 844x390.
 - [ ] AC3 check.sh and validators green; PR open, CI green, not merged.
 
 ## Tests
@@ -50,6 +50,11 @@ Remote change rule: ModePadOpen sender ModePadService.luau, handler none (server
 
 ---
 ## Implementation record
+- Added `ModePadConfig`, `ModePadRules` (+ spec), `ModePadService` (one 0.25 s poll, pcall-wrapped, no yields in the body), the `ModePadOpen` remote (Net, Remotes), `client/Hub/ModePadController` and `Menu.open(screen)` / `Menu.isOpen()`.
+- Menu change: the input binding moved into `bindInput` so `Menu.open` can rebind after `Menu.hide`; Back from a pad-opened screen closes the menu (identity check on the stack table) instead of showing the main menu.
+- The Daily toast uses a small overlay View (same pattern as Watching) because the menu ScreenGui is disabled when closed.
+- Remote change rule: ModePadOpen sender ModePadService, receiver ModePadController; no handler, no client to server remote.
+- Evidence: `docs/workflow/evidence/TASK-0122/mode-pads.txt`. check.sh green at bb28ee8.
 
 ## Audits
 
