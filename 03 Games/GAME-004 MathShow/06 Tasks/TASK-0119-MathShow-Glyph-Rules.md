@@ -3,7 +3,7 @@ id: TASK-0119
 title: MathShow Glyph Rules
 type: task
 project: GAME-004
-status: in_progress
+status: approved
 priority: medium
 risk: low
 owner: codex
@@ -34,15 +34,18 @@ jg approved rows R1/R2: standard task, isolated branch from main, frozen GlyphCo
 
 ## Acceptance criteria
 - [x] Headless specs pass: 317 total, 13 glyph tests, 0 failures.
-- [ ] scripts/check.sh exits 0.
-- [ ] Independent audit passes.
-- [ ] PR open with green CI; not merged.
+- [x] scripts/check.sh exits 0; all 12 steps pass.
+- [x] Independent audit passes: [[AUD-20261101-TASK-0119-01]], no findings.
+- [x] PR #177 open and unmerged; CI run 41400170840 succeeded for cf65e34. Administrative commit CI checked separately before final report.
 
 ## Implementation record
 Frozen nested tunables; exported Position, Rarity, Spawn, GlyphState, PlayerState types. First failure reasons: invalid_type, unknown_id, out_of_range, already_collected, rate_limited; success is ok. applyCollect and tickRespawns clone all state containers and glyph records. applyCollect prunes expired rate timestamps. Tests cover both rarities, each distance axis, translated 3D positions, validation precedence, exact respawn/window boundaries, independent state, frozen inputs, and no spawns.
 
 ## Audits
-Pending independent audit after check.sh passes.
+[[AUD-20261101-TASK-0119-01]]: pass; independent check.sh rerun exits 0 with all 12 steps passing.
 
 ## Outcome
-Implemented; headless tests passed. Full gate, audit and PR pending. No merge authorization requested.
+Implemented and tested: 317 headless tests pass; all check.sh gates pass locally and in the independent audit. PR #177 is open and unmerged; implementation CI passed. Approved status means waiting for jg merge decision, not merged. No runtime wiring or other game/vault changes.
+
+## Handoff
+TASK-0119; checkout `/Users/jg/Desktop/Rg1-glyph-rules`, branch `task/TASK-0119-glyph-rules`, PR #177. Plain-value API and assumptions are recorded above; three Luau files are ready for later service integration. Merge is out of scope. Only this task note and its audit record were created; all other vault notes remain untouched.
