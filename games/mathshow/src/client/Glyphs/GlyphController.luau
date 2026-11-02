@@ -2,8 +2,10 @@
 -- GlyphController (TASK-0121): renders the hub glyphs this player can collect and asks the server for them.
 -- Driven only by GlyphState: a glyph appears when its id is in `available` and goes when it leaves, and the counter shows
 -- `count`. Walking within CollectRadius of a glyph sends one GlyphCollect for it per rendered lifetime; the client never
--- changes its own count. Positions come from the same GlyphSpawn attachments the server reads. The pickup burst is
--- cosmetic: pcall-isolated, fails inert and warns, and never touches collection.
+-- changes its own count. Positions come from the same GlyphSpawn attachments the server reads, learnt as they stream in
+-- (the place uses StreamingEnabled), and kept once known. The symbol index is the id's place in the first GlyphState,
+-- which the server sends with every glyph available and sorted by id. The pickup burst is cosmetic: pcall-isolated,
+-- fails inert and warns, and never touches collection.
 
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
@@ -49,38 +51,38 @@ local GlyphController = {}
 local started = false
 local spawnById: { [string]: GlyphRules.Spawn } = {}
 local indexById: { [string]: number } = {}
+local indexCount = 0
+local wanted: { [string]: boolean } = {} -- the last GlyphState's available ids
 local rendered: { [string]: Rendered } = {}
 local folder: Folder? = nil
 local counter: TextLabel? = nil
 local collectRemote: RemoteEvent? = nil
 
-local function readSpawns()
-	local hub = Workspace:WaitForChild("Hub", 30)
-	if not hub then
-		warn("[MathShow] GlyphController: Workspace.Hub never arrived; no glyphs")
-		return
+local function learnSpawn(tagged: Instance): string?
+	local hub = Workspace:FindFirstChild("Hub")
+	local parent = tagged.Parent
+	if not hub or not parent or not tagged:IsA("Attachment") or not tagged:IsDescendantOf(hub) then
+		return nil
 	end
-	local records: { GlyphRules.SpawnRecord } = {}
-	for _, tagged in CollectionService:GetTagged("GlyphSpawn") do
-		if tagged:IsA("Attachment") and tagged:IsDescendantOf(hub) and tagged.Parent then
-			local position = tagged.WorldPosition
-			table.insert(records, {
-				id = tagged.Parent.Name,
-				rarity = tostring(tagged:GetAttribute("Rarity")),
-				x = position.X,
-				y = position.Y,
-				z = position.Z,
-			})
-		end
+	if spawnById[parent.Name] then
+		return nil
 	end
-	table.sort(records, function(a, b)
-		return a.id < b.id
-	end)
-	local spawns = GlyphRules.parseSpawns(records)
-	for index, spawn in spawns do
-		spawnById[spawn.id] = spawn
-		indexById[spawn.id] = index
+	local position = tagged.WorldPosition
+	local parsed = GlyphRules.parseSpawns({
+		{
+			id = parent.Name,
+			rarity = tostring(tagged:GetAttribute("Rarity")),
+			x = position.X,
+			y = position.Y,
+			z = position.Z,
+		},
+	})
+	local spawn = parsed[1]
+	if not spawn then
+		return nil
 	end
+	spawnById[spawn.id] = spawn
+	return spawn.id
 end
 
 local function symbolFor(id: string): string
@@ -144,24 +146,12 @@ local function playPickup(position: Vector3, rarity: GlyphRules.Rarity)
 	Debris:AddItem(burst, GlyphTheme.BurstSeconds + 1)
 end
 
-local function onState(raw: unknown)
-	if type(raw) ~= "table" then
-		return
-	end
-	local data = raw :: { [string]: unknown }
-	local available, count = data.available, data.count
-	if type(available) ~= "table" or type(count) ~= "number" then
-		return
-	end
+-- Brings the rendered glyphs in line with `wanted`: removes the ones that left (with the pickup burst for ones we asked
+-- for) and adds the wanted ones whose position is known.
+local function refresh()
 	local parent = folder
 	if not parent then
 		return
-	end
-	local wanted: { [string]: boolean } = {}
-	for _, id in available :: { unknown } do
-		if type(id) == "string" and spawnById[id] then
-			wanted[id] = true
-		end
 	end
 	for id, glyph in rendered do
 		if not wanted[id] then
@@ -180,12 +170,43 @@ local function onState(raw: unknown)
 		end
 	end
 	for id in wanted do
-		if not rendered[id] then
-			rendered[id] = makeGlyph(id, spawnById[id], parent)
+		local spawn = spawnById[id]
+		if spawn and not rendered[id] then
+			rendered[id] = makeGlyph(id, spawn, parent)
 		end
 	end
+end
+
+local function onState(raw: unknown)
+	if type(raw) ~= "table" then
+		return
+	end
+	local data = raw :: { [string]: unknown }
+	local available, count = data.available, data.count
+	if type(available) ~= "table" or type(count) ~= "number" then
+		return
+	end
+	local nextWanted: { [string]: boolean } = {}
+	for _, id in available :: { unknown } do
+		if type(id) == "string" then
+			nextWanted[id] = true
+			if not indexById[id] then
+				indexCount += 1
+				indexById[id] = indexCount
+			end
+		end
+	end
+	wanted = nextWanted
+	refresh()
 	if counter then
 		counter.Text = `Glyphs {count}`
+	end
+end
+
+local function onSpawnAdded(tagged: Instance)
+	local id = learnSpawn(tagged)
+	if id and wanted[id] then
+		refresh()
 	end
 end
 
@@ -243,12 +264,15 @@ function GlyphController.start(): ()
 		local remotes = ReplicatedStorage:WaitForChild("Remotes")
 		local stateRemote = remotes:WaitForChild(Net.GlyphState) :: RemoteEvent
 		collectRemote = remotes:WaitForChild(Net.GlyphCollect) :: RemoteEvent
-		readSpawns()
 		local container = Instance.new("Folder")
 		container.Name = "Glyphs"
 		container.Parent = Workspace
 		folder = container
 		makeCounter()
+		for _, tagged in CollectionService:GetTagged("GlyphSpawn") do
+			learnSpawn(tagged)
+		end
+		CollectionService:GetInstanceAddedSignal("GlyphSpawn"):Connect(onSpawnAdded)
 		stateRemote.OnClientEvent:Connect(onState)
 		RunService.RenderStepped:Connect(onRender)
 	end)
