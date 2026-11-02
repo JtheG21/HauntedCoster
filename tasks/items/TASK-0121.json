@@ -2,7 +2,7 @@
   "id": "TASK-0121",
   "game": "GAME-004",
   "title": "MathShow Glyph Service",
-  "status": "review",
+  "status": "in_progress",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -54,6 +54,18 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T13:25:19",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "changes requested by jg: H1 (jg): hide Glyph HUD counter while a menu screen is open; document accepted findings; Studio recheck; revision 1/2"
+    },
+    {
+      "time": "2026-11-02T13:25:27",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
     }
   ],
   "executions": [
@@ -62,5 +74,6 @@
       "result": "pass",
       "notes": "326 headless specs pass (9 new GlyphRules); check.sh green; Studio steps 1-6 pass at 3cee8c4 (docs/workflow/evidence/TASK-0121/glyph-play.txt)"
     }
-  ]
+  ],
+  "revisions": 1
 }

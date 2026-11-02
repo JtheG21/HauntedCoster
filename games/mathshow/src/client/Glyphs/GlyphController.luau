@@ -35,6 +35,8 @@ local GlyphTheme = table.freeze({
 	CounterSize = UDim2.fromOffset(150, 36),
 	CounterPosition = UDim2.new(1, -16, 0, 64),
 	CounterTextSize = 22,
+	CounterDisplayOrder = 4, -- above the HUD (0), below the watching banner (5) and the menu (10)
+	MenuGuiName = "MathShowMenu",
 	CounterFont = Font.new("rbxasset://fonts/families/Merriweather.json", Enum.FontWeight.Bold),
 })
 
@@ -233,9 +235,40 @@ local function onRender()
 	end
 end
 
+-- The counter shows only while no menu screen is open. The menu's own ScreenGui is the open/close state: Menu.start builds
+-- it enabled and Menu.hide disables it; a missing or destroyed gui counts as closed. Collection is unaffected.
+local function watchMenu(counterGui: ScreenGui, playerGui: PlayerGui)
+	local menuConnection: RBXScriptConnection? = nil
+	local function apply(menu: ScreenGui?)
+		counterGui.Enabled = not (menu ~= nil and menu.Enabled)
+	end
+	local function attach(menu: ScreenGui)
+		if menuConnection then
+			menuConnection:Disconnect()
+		end
+		menuConnection = menu:GetPropertyChangedSignal("Enabled"):Connect(function()
+			apply(menu)
+		end)
+		apply(menu)
+		menu.Destroying:Connect(function()
+			apply(nil)
+		end)
+	end
+	local existing = playerGui:FindFirstChild(GlyphTheme.MenuGuiName)
+	if existing and existing:IsA("ScreenGui") then
+		attach(existing)
+	end
+	playerGui.ChildAdded:Connect(function(child)
+		if child.Name == GlyphTheme.MenuGuiName and child:IsA("ScreenGui") then
+			attach(child)
+		end
+	end)
+end
+
 local function makeCounter()
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "GlyphHud"
+	gui.DisplayOrder = GlyphTheme.CounterDisplayOrder
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = false
 	local label = Instance.new("TextLabel")
@@ -251,8 +284,10 @@ local function makeCounter()
 	label.FontFace = GlyphTheme.CounterFont
 	label.Text = "Glyphs 0"
 	label.Parent = gui
-	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+	local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui") :: PlayerGui
+	gui.Parent = playerGui
 	counter = label
+	watchMenu(gui, playerGui)
 end
 
 function GlyphController.start(): ()
