@@ -3,7 +3,7 @@ id: TASK-0120
 title: "MathShow Hub Graybox"
 type: task
 project: GAME-004
-status: in_progress
+status: approved
 priority: medium
 risk: low
 owner: claude-code
@@ -37,12 +37,12 @@ A plain-parts hub (plaza, four paths, entrance pads, lake, terraced boundary, Gl
 - brief note, Map Mockups folder, this note, `tasks/items/TASK-0120.json`
 
 ## Acceptance criteria
-- [ ] Map geometry on disk, served by Rojo, survives a reconnect.
-- [ ] Walk time centre to each pad 8-12 s, or outliers listed with a fix.
-- [ ] 100% of GlyphSpawn markers reachable.
-- [ ] Lighting A/B numbers plus recommendation.
-- [ ] Screenshots: spawn, aerial, Competitive entrance.
-- [ ] check.sh, validate_queue, validate_vault pass; PR open, not merged.
+- [x] Map geometry on disk, served by Rojo, survives a reconnect.
+- [x] Walk time centre to each pad 8-12 s, or outliers listed with a fix.
+- [x] 100% of GlyphSpawn markers reachable.
+- [x] Lighting A/B numbers plus recommendation.
+- [x] Screenshots: spawn, aerial, Competitive entrance.
+- [x] check.sh, validate_queue, validate_vault pass; PR open, not merged.
 
 ## Tests
 check.sh; Studio character_navigation runs; lighting A/B in Studio.
@@ -75,14 +75,27 @@ Reachability: pathfinding found a route from spawn to all 34 GlyphSpawn markers 
 
 Performance (Play, 1047x669 viewport, new geometry): 60.2 fps average (vsync-capped), worst frame 33.9 ms, 0 lights, 426 hub BaseParts.
 
+### Lighting A/B (A4 values, same camera, 8 s average, Play)
+`Lighting.Technology` cannot be read or set from script or the Properties panel in this Studio build, so two scratch copies of the place were made from `MathShow.rbxl` with Lune (Technology set to Future, the original is ShadowMap), the Hub synced in through Rojo, and the A4 lighting applied by script (ClockTime 0, ambient, bloom 1.0/36/0.9, atmosphere 0.32/0.10/1.8/0.3, colour correction +0.15/+0.10). The scratch files live outside the repo and were not saved. Emulated devices: iPhone 13 (844x390; the client reports a 749x388 viewport) and a 1920x1080 desktop. fps was capped at 60 by vsync in every run, so the GPU time (Stats PerformanceStats.GPU) is the number to compare. This is a Mac, not a phone.
+
+| Technology | 844x390 GPU | 1920x1080 GPU | fps |
+|---|---|---|---|
+| ShadowMap | 1.80 ms | 6.59 ms | 60 |
+| Future | 2.31 ms | 8.05 ms | 60 |
+
+Scene: 426 hub BaseParts, 343 visible (332 block, 10 cylinder, 1 ball), 0 lights, about 6k triangles (estimate from shape counts).
+
+**Recommendation: Future.** It costs about 0.5 ms at phone size and 1.5 ms at 1080p, far inside the 16.7 ms budget, and A4 specifies Future. Caveats: the graybox has no light objects, so Future's lighting cost (lamp PointLights, shadows) is not exercised yet; re-measure on a real phone once the lamps and neon lights exist (A4 has a PointLight every 15 studs on paths).
+
+### Screenshots
+Taken in the Future scratch place at the A1-A3 framings, in `~/Roblox-Work/evidence/TASK-0120/v2/` (outside the vault): `A1_spawn_view.jpg`, `A2_competitive_entrance.jpg`, `A3_aerial_overview.jpg`. The graybox has no lights or art, so it is much darker and plainer than the mockups. The aerial used raised ambient and no atmosphere haze, because A4's haze hides the far hub from the air.
+
 ### Not done
-- Lighting A/B (Technology Future vs ShadowMap): `Lighting.Technology` can not be read or written from execute_luau (RobloxScript capability) and this Studio build does not show it in the Properties panel, so it could not be switched. No A/B numbers and no recommendation yet.
-- 844x390 and 1920x1080 emulation: not run; the 60.2 fps figure is vsync-capped at the pane size.
 - Glyph rules table: not supplied by jg; the brief records the graybox rules from the task prompt instead.
-- Screenshots at the A1-A3 framings: not taken yet (Studio could not be driven: the Mac screen was locked). Older screenshots of the first build are in `~/Roblox-Work/evidence/TASK-0120/`, outside the vault, so the screenshot criterion is only partly met. Studio's place Atmosphere and depth of field were switched off in the session for the shots.
+- Real-device performance.
 
 ## Audits
 One Sonnet audit ([[AUD-20261102-TASK-0120-01]]): pass, no blocker or major finding; minor notes fixed in this note. The Ranks hall (SW) stays as geometry only; the `ranks` palette key colours it. `Hub.rbxmx` is generated: edit `scripts/build_hub.py`, never the file in Studio.
 
 ## Outcome
-Backlog.
+Hub graybox on disk at `games/mathshow/map/Hub.rbxmx` (mounted at `Workspace.Hub`), following jg's layout plan and the A4 palette: 6 mode pads, 34 glyph markers, terraced N approach. Every pad is 9.4-11.2 s from the plaza centre; all 34 markers reachable. Future recommended over ShadowMap (see A/B). Open for jg: Glyph rules table; spawn to Daily is 14.2 s. PR #178 is a draft and is not merged.

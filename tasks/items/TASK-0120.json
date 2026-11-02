@@ -2,7 +2,7 @@
   "id": "TASK-0120",
   "game": "GAME-004",
   "title": "MathShow Hub Graybox",
-  "status": "in_progress",
+  "status": "approved",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -21,7 +21,11 @@
     "Screenshots: spawn view, aerial, Competitive entrance.",
     "scripts/check.sh, validate_queue and validate_vault pass; PR open, CI green, not merged."
   ],
-  "evidence": [],
+  "evidence": [
+    "~/Roblox-Work/evidence/TASK-0120/v2/A1_spawn_view.jpg",
+    "~/Roblox-Work/evidence/TASK-0120/v2/A2_competitive_entrance.jpg",
+    "~/Roblox-Work/evidence/TASK-0120/v2/A3_aerial_overview.jpg"
+  ],
   "notes": "Approved rows G1 and G2 plus map-source proposal (jg, 2026-11-01). Out of scope: art, meshes, VFX, Glyph system, mode-pad logic, remotes, DataStore, publishing, merging. Numbered 0120 because TASK-0119 is claimed by the uncommitted glyph-rules worktree.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0120-MathShow-Hub-Graybox.md",
   "risk": "low",
@@ -38,6 +42,32 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-02T10:33:12",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T10:33:12",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T10:33:12",
+      "result": "pass",
+      "notes": "check.sh green; Studio walk times, reachability, A/B and screenshots done"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-02T10:33:12",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0120-01.md"
     }
   ]
 }
