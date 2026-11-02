@@ -44,4 +44,4 @@ Mockups: [[Map Mockups/README]]. Palette (A4): Night Navy #0B1433, Slate Teal #1
 
 ## Glyph rules
 
-Pending: jg has not yet supplied the Glyph rules table. Graybox markers only (`GlyphSpawn`, attribute `Rarity` common or rare); no Glyph system.
+jg's Glyph rules table has not arrived; these are the graybox rules from the TASK-0120 prompt and replace nothing. 30-40 `GlyphSpawn` attachments, attribute `Rarity` = `common` on paths and `rare` on terraces, roofs, tiers and the lake edge. Every rare spot must be reachable with the default jump. Markers only: no Glyph system. Current build: 34 markers, 21 common and 13 rare.
