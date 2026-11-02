@@ -3,7 +3,7 @@ id: TASK-0120
 title: "MathShow Hub Graybox"
 type: task
 project: GAME-004
-status: approved
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -71,7 +71,7 @@ Path length from PathfindingService (agent radius 2, height 5, can jump), time =
 
 All six pads are inside 8-12 s from the plaza centre and from spawn (revision 2, F5: the N ramps and terraces were pulled in, the Daily pad moved from 172 to 130 studs out, so spawn to Daily went from 14.2 s to 11.6 s; the Observatory is still on the highest terrace, +32). These replace the earlier tables. Measured with the Server data model in a fresh Play session, BuildStamp `8b01959+dirty` (HEAD plus the then-uncommitted revision).
 
-Reachability: pathfinding found a route from spawn to all 34 GlyphSpawn markers (21 common, 13 rare), 0 unreachable. A walking test (an R15 dummy following the path, jumping on jump waypoints) reached the three terrace markers and the Daily pad, ending 1.1, 1.2, 1.1 and 3.6 studs from the targets.
+Reachability: see the per-marker log `docs/workflow/evidence/TASK-0120/glyph-reachability.csv` (34 rows, 21 common and 13 rare, re-run at head 3b8ac03: pathfinding Success 34/34, dummy walk ok 34/34, three needed a second attempt). Earlier summary: pathfinding found a route from spawn to all 34 GlyphSpawn markers (21 common, 13 rare), 0 unreachable. A walking test (an R15 dummy following the path, jumping on jump waypoints) reached the three terrace markers and the Daily pad, ending 1.1, 1.2, 1.1 and 3.6 studs from the targets.
 
 Performance (Play, 1047x669 viewport, new geometry): 60.2 fps average (vsync-capped), worst frame 33.9 ms, 0 lights, 426 hub BaseParts.
 
@@ -109,3 +109,5 @@ Hub graybox on disk at `games/mathshow/map/Hub.rbxmx` (mounted at `Workspace.Hub
 - F5: see the measurements above.
 - F6: see [[STUDIO-SYNC]] "Lighting.Technology". The A4 Lighting, Atmosphere, Bloom and ColorCorrection values are in `mathshow.project.json` and synced live (read back in Edit: ClockTime 0, ambient 0.102/0.129/0.251, bloom size 36, haze 1.8, contrast 0.10, BuildStamp `8b01959+dirty`). `Technology` cannot be set or read by the plugin (RobloxScript capability) so it is not in the project file.
 - F7: **Independence note (appended, nothing above rewritten):** the `record-audit` for this task was recorded by the executor, so it is not an independent audit. The task awaits an independent Codex audit. It is not merged and `task-close` is not run.
+
+**Reopened (E2):** status returned from approved to review for an independent audit; the executor's `record-audit` -01 was not independent (approved by jg) and its record is kept.

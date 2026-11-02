@@ -2,7 +2,7 @@
   "id": "TASK-0120",
   "game": "GAME-004",
   "title": "MathShow Hub Graybox",
-  "status": "approved",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -58,6 +58,12 @@
       "from": "review",
       "to": "approved",
       "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T12:45:35",
+      "from": "approved",
+      "to": "review",
+      "note": "reopened for independent audit; executor record-audit -01 was not independent (approved by jg)"
     }
   ],
   "executions": [
