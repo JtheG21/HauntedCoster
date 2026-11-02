@@ -24,6 +24,8 @@
 --   ModePadOpen  server -> one client    ModePadOpenPayload (walked onto a hub mode pad; ModePadService -> ModePadController)
 --   MenuRequest  client -> server (RemoteFunction)  { kind: "profile" } -> MenuProfileReply
 --   SettingsSave client -> server        SettingsPayload (validated by ProfileRules.sanitizeSettings)
+--   GlyphCollect client -> server        (id: string; GlyphRules.validateCollect, TASK-0121)
+--   GlyphState   server -> one client    GlyphStatePayload
 
 local ProfileRules = require(script.Parent.ProfileRules)
 local RoundRules = require(script.Parent.RoundRules)
@@ -144,6 +146,12 @@ export type VsResultPayload = {
 	them: number,
 }
 
+-- available: the ids of the glyphs this player can collect now, sorted; count: the session total (GlyphConfig.Value).
+export type GlyphStatePayload = {
+	available: { string },
+	count: number,
+}
+
 local Net = table.freeze({
 	RoundState = "RoundState",
 	SubmitAnswer = "SubmitAnswer",
@@ -170,6 +178,8 @@ local Net = table.freeze({
 	ModePadOpen = "ModePadOpen",
 	MenuRequest = "MenuRequest",
 	SettingsSave = "SettingsSave",
+	GlyphCollect = "GlyphCollect",
+	GlyphState = "GlyphState",
 })
 
 return Net
