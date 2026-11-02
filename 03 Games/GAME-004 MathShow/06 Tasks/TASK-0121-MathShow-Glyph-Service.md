@@ -51,7 +51,7 @@ Make the 34 hub glyphs collectable: a server service owns per-player glyph state
 - [x] AC2 Studio steps 1–6 with console excerpts. Evidence: `docs/workflow/evidence/TASK-0121/glyph-play.txt`, measured at 3cee8c4.
 - [x] AC3 No leaks. Evidence: after a kick, the service's player count went 1 → 0 (glyph-play.txt "No leaks").
 - [x] AC4 No yield before the throttle: `GlyphService.luau:122-135`, throttle at lines 128-129.
-- [ ] AC5 record-exec done; PR #179 open, not merged; Play/Rojo stopped, place unsaved. CI result: see Outcome.
+- [x] AC5 record-exec done (status review); PR #179 open as a draft, not merged; Play and Rojo stopped, place unsaved. CI: run 41526984535 passed on b60eda0.
 
 ## Tests
 - **Automated:** `scripts/check.sh` (headless GlyphRules spec).
@@ -70,3 +70,4 @@ Make the 34 hub glyphs collectable: a server service owns per-player glyph state
 ## Audits
 
 ## Outcome
+Implemented and verified in one Studio round at 3cee8c4. The task is in review, waiting for the Codex audit. PR #179 is a draft and not merged. No persistence: glyph state resets on rejoin, as scoped.
