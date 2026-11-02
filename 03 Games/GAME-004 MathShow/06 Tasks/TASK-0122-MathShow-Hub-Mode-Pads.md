@@ -3,7 +3,7 @@ id: TASK-0122
 title: "MathShow Hub Mode Pads"
 type: task
 project: GAME-004
-status: review
+status: blocked
 priority: medium
 risk: low
 owner: claude-code
@@ -38,7 +38,8 @@ See `files_owned` in `tasks/items/TASK-0122.json`.
 
 ## Acceptance criteria
 - [x] AC1 Spec passes headless (326 passed, also in Studio Play).
-- [ ] AC2 (partly proven) Studio steps 1-6 recorded in `docs/workflow/evidence/TASK-0122/mode-pads.txt`: 1-4 and 6 pass; step 5 (two players) unverified; Glyph collection not exercised (no Glyph service on this base); screenshots at 1336x669 for 2 of 6 pads, not 844x390.
+- [ ] AC2 (partly proven; the two-player part moved to AC2b) Studio steps 1-6 recorded in `docs/workflow/evidence/TASK-0122/mode-pads.txt`: 1-4 and 6 pass; step 5 (two players) unverified; Glyph collection not exercised (no Glyph service on this base); screenshots at 1336x669 for 2 of 6 pads, not 844x390.
+- [ ] AC2b Static proof that ModePadOpen is only sent with FireClient(<triggering player>) and that the pad state is keyed per player; live two-client check deferred to [[TASK-0123-MathShow-Multiplayer-Playtest]].
 - [ ] AC3 check.sh and validators green; PR open, CI green, not merged.
 
 ## Tests
@@ -60,5 +61,8 @@ Remote change rule: ModePadOpen sender ModePadService.luau, handler none (server
 - Evidence: `docs/workflow/evidence/TASK-0122/mode-pads.txt`. check.sh green at bb28ee8.
 
 ## Audits
+
+## Decision (jg, 2026-11-02, option A)
+Two-client live verification (S4d) is deferred as an accepted risk by jg. Cause: Studio multi-client test did not join a second client twice, likely memory pressure on an 8 GB Mac. Per-player delivery is to be proven statically by the independent audit. Live verification moves to the multiplayer playtest task, [[TASK-0123-MathShow-Multiplayer-Playtest]]. Audits -01 to -03 are unchanged history.
 
 ## Outcome
