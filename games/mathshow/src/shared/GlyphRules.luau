@@ -127,6 +127,15 @@ function GlyphRules.applyCollect(state: PlayerState, glyphId: string, now: numbe
 	return nextState
 end
 
+-- Client cadence: ask for a glyph that is available and in reach, at most once per RetryAfterSeconds. Local timing only;
+-- the server stays authoritative. A non-finite `now` never asks.
+function GlyphRules.shouldRequest(lastRequestAt: number?, now: number, inRange: boolean, available: boolean): boolean
+	if not finite(now) or not (available and inRange) then
+		return false
+	end
+	return lastRequestAt == nil or now - lastRequestAt >= GlyphConfig.RetryAfterSeconds
+end
+
 function GlyphRules.tickRespawns(state: PlayerState, now: number): PlayerState
 	local nextState = copyState(state)
 	for _, glyph in nextState.glyphs do

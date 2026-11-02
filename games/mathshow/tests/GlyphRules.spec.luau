@@ -286,6 +286,33 @@ return function(t: TestRunner.T)
 		end
 	end)
 
+	t.test("shouldRequest asks once, then retries only after RetryAfterSeconds", function()
+		local retry = Config.RetryAfterSeconds
+		t.eq(Config.RetryAfterSeconds, 1.0)
+		t.eq(Rules.shouldRequest(nil, 100, true, true), true)
+		t.eq(Rules.shouldRequest(100, 100 + retry - 0.000001, true, true), false)
+		t.eq(Rules.shouldRequest(100, 100 + retry, true, true), true)
+		t.eq(Rules.shouldRequest(100, 100 + retry + 5, true, true), true)
+	end)
+
+	t.test("shouldRequest never asks out of range, unavailable or on a non-finite now", function()
+		t.eq(Rules.shouldRequest(nil, 100, false, true), false)
+		t.eq(Rules.shouldRequest(nil, 100, true, false), false)
+		t.eq(Rules.shouldRequest(nil, 100, false, false), false)
+		for _, now in { 0 / 0, math.huge, -math.huge } do
+			t.eq(Rules.shouldRequest(nil, now, true, true), false)
+			t.eq(Rules.shouldRequest(100, now, true, true), false)
+		end
+	end)
+
+	t.test("shouldRequest asks again at once after collect then respawn (lastRequestAt cleared)", function()
+		local last: number? = 100
+		t.eq(Rules.shouldRequest(last, 100.2, true, true), false)
+		t.eq(Rules.shouldRequest(last, 100.2, true, false), false) -- collected: not available
+		last = nil -- the controller clears it when the id leaves and re-enters
+		t.eq(Rules.shouldRequest(last, 100.3, true, true), true)
+	end)
+
 	t.test("out_of_range beats rate_limited", function()
 		local state = Rules.newPlayerState(spawns)
 		local stamps: { number } = {}

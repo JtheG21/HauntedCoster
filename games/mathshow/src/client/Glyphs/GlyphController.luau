@@ -1,8 +1,8 @@
 --!strict
 -- GlyphController (TASK-0121): renders the hub glyphs this player can collect and asks the server for them.
 -- Driven only by GlyphState: a glyph appears when its id is in `available` and goes when it leaves, and the counter shows
--- `count`. Walking within CollectRadius of a glyph sends one GlyphCollect for it per rendered lifetime; the client never
--- changes its own count. Positions come from the same GlyphSpawn attachments the server reads, learnt as they stream in
+-- `count`. Standing within CollectRadius of an available glyph sends GlyphCollect for it, at most once per RetryAfterSeconds
+-- (GlyphRules.shouldRequest; the timer clears when the glyph leaves or returns); the client never changes its own count. Positions come from the same GlyphSpawn attachments the server reads, learnt as they stream in
 -- (the place uses StreamingEnabled), and kept once known. The symbol index is the id's place in the first GlyphState,
 -- which the server sends with every glyph available and sorted by id. The pickup burst is cosmetic: pcall-isolated,
 -- fails inert and warns, and never touches collection.
@@ -45,7 +45,7 @@ type Rendered = {
 	base: Vector3,
 	rarity: GlyphRules.Rarity,
 	phase: number,
-	requested: boolean, -- GlyphCollect already sent for this lifetime
+	lastRequestAt: number?, -- os.clock() of the last GlyphCollect sent; nil on a new lifetime (respawn clears it)
 }
 
 local GlyphController = {}
@@ -120,7 +120,7 @@ local function makeGlyph(id: string, spawn: GlyphRules.Spawn, parent: Instance):
 	label.FontFace = GlyphTheme.CounterFont
 	label.Parent = billboard
 	part.Parent = parent
-	return { part = part, base = base, rarity = spawn.rarity, phase = (indexById[id] or 0) * 0.7, requested = false }
+	return { part = part, base = base, rarity = spawn.rarity, phase = (indexById[id] or 0) * 0.7, lastRequestAt = nil }
 end
 
 local function playPickup(position: Vector3, rarity: GlyphRules.Rarity)
@@ -158,7 +158,7 @@ local function refresh()
 	for id, glyph in rendered do
 		if not wanted[id] then
 			rendered[id] = nil
-			local position, requested = glyph.part.Position, glyph.requested
+			local position, requested = glyph.part.Position, glyph.lastRequestAt ~= nil
 			local rarity: GlyphRules.Rarity = glyph.rarity
 			glyph.part:Destroy()
 			if requested then
@@ -223,13 +223,9 @@ local function onRender()
 		local bob = math.sin(now * bobRate + glyph.phase) * GlyphTheme.BobStuds
 		glyph.part.CFrame = CFrame.new(glyph.base + Vector3.new(0, bob, 0))
 			* CFrame.Angles(0, now * GlyphTheme.SpinRadiansPerSecond + glyph.phase, 0)
-		if
-			rootPosition
-			and not glyph.requested
-			and (rootPosition - glyph.base).Magnitude <= GlyphConfig.CollectRadius
-			and collectRemote
-		then
-			glyph.requested = true
+		local inRange = rootPosition ~= nil and (rootPosition - glyph.base).Magnitude <= GlyphConfig.CollectRadius
+		if collectRemote and GlyphRules.shouldRequest(glyph.lastRequestAt, now, inRange, wanted[id] == true) then
+			glyph.lastRequestAt = now
 			collectRemote:FireServer(id)
 		end
 	end
