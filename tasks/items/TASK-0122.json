@@ -2,7 +2,7 @@
   "id": "TASK-0122",
   "game": "GAME-004",
   "title": "MathShow Hub Mode Pads",
-  "status": "approved",
+  "status": "in_progress",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -79,6 +79,18 @@
       "from": "review",
       "to": "approved",
       "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T14:17:58",
+      "from": "approved",
+      "to": "changes_requested",
+      "note": "changes requested by jg: Revision 2 rows S0-S5: mid-match guard, sync with main; revision 2/2"
+    },
+    {
+      "time": "2026-11-02T14:17:58",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
     }
   ],
   "executions": [
@@ -105,5 +117,5 @@
       "report": "06 QA/AUD-20261102-TASK-0122-02.md"
     }
   ],
-  "revisions": 1
+  "revisions": 2
 }
