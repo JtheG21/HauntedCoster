@@ -3,7 +3,7 @@ id: TASK-0120
 title: "MathShow Hub Graybox"
 type: task
 project: GAME-004
-status: review
+status: approved
 priority: medium
 risk: low
 owner: claude-code
