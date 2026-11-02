@@ -2,7 +2,7 @@
   "id": "TASK-0122",
   "game": "GAME-004",
   "title": "MathShow Hub Mode Pads",
-  "status": "review",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -120,6 +120,18 @@
       "from": "blocked",
       "to": "review",
       "note": "jg-approved re-scope (option A); independent PASS in AUD-20261102-TASK-0122-04. hand transition approved by jg; orchestrator lacks blocked\u2192review"
+    },
+    {
+      "time": "2026-11-02T14:58:19",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T15:01:01",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -154,7 +166,13 @@
       "time": "2026-11-02T14:44:39",
       "result": "fail",
       "report": "06 QA/AUD-20261102-TASK-0122-03.md"
+    },
+    {
+      "time": "2026-11-02T14:58:19",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0122-04.md"
     }
   ],
-  "revisions": 3
+  "revisions": 3,
+  "merge_approved_by": "jg"
 }
