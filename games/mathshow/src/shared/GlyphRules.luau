@@ -10,8 +10,39 @@ export type PlayerState = {
 	sessionCount: number,
 	collectTimes: { number },
 }
+export type SpawnRecord = { id: string, rarity: string, x: number, y: number, z: number }
 
 local GlyphRules = {}
+
+local function finite(value: unknown): boolean
+	return type(value) == "number" and value == value and value ~= math.huge and value ~= -math.huge
+end
+
+-- Turns raw spawn records (read from the map) into trusted spawns, in input order. A record with an unknown rarity, an
+-- id already seen or a non-finite coordinate is dropped with one warning each; the first record with an id wins.
+function GlyphRules.parseSpawns(records: { SpawnRecord }): ({ Spawn }, { string })
+	local spawns: { Spawn } = {}
+	local warnings: { string } = {}
+	local seen: { [string]: boolean } = {}
+	for index, record in records do
+		local id = record.id
+		if type(id) ~= "string" or id == "" then
+			table.insert(warnings, `record {index}: missing id`)
+		elseif seen[id] then
+			table.insert(warnings, `{id}: duplicate id`)
+		elseif not table.find(GlyphConfig.Rarity, record.rarity) then
+			table.insert(warnings, `{id}: unknown rarity {tostring(record.rarity)}`)
+		elseif not (finite(record.x) and finite(record.y) and finite(record.z)) then
+			table.insert(warnings, `{id}: non-finite position`)
+		else
+			seen[id] = true
+			local rarity: Rarity = (record.rarity :: any) :: Rarity -- checked against GlyphConfig.Rarity above
+			local spawn: Spawn = { id = id, position = { x = record.x, y = record.y, z = record.z }, rarity = rarity }
+			table.insert(spawns, spawn)
+		end
+	end
+	return spawns, warnings
+end
 
 -- Spawns are trusted configuration with unique ids. State belongs to one player.
 function GlyphRules.newPlayerState(spawns: { Spawn }): PlayerState
@@ -30,8 +61,8 @@ local function copyState(state: PlayerState): PlayerState
 	return { glyphs = glyphs, sessionCount = state.sessionCount, collectTimes = table.clone(state.collectTimes) }
 end
 
--- First failing reason wins. Expiration is applied explicitly by tickRespawns.
--- Callers supply finite positions and monotonically increasing finite timestamps.
+-- First failing reason wins; a non-finite `now` is "bad_time". Expiration is applied explicitly by tickRespawns.
+-- Callers supply finite positions and monotonically increasing timestamps.
 function GlyphRules.validateCollect(
 	state: PlayerState,
 	glyphId: unknown,
@@ -39,6 +70,9 @@ function GlyphRules.validateCollect(
 	now: number,
 	spawns: { Spawn }
 ): (boolean, string)
+	if not finite(now) then
+		return false, "bad_time"
+	end
 	if type(glyphId) ~= "string" then
 		return false, "invalid_type"
 	end
@@ -64,7 +98,7 @@ function GlyphRules.validateCollect(
 	end
 	local count = 0
 	for _, collectedAt in state.collectTimes do
-		if collectedAt > now - 1 then
+		if collectedAt > now - GlyphConfig.RateWindowSeconds then
 			count += 1
 		end
 	end
@@ -84,13 +118,22 @@ function GlyphRules.applyCollect(state: PlayerState, glyphId: string, now: numbe
 	nextState.sessionCount += GlyphConfig.Value[glyph.rarity]
 	local recent: { number } = {}
 	for _, collectedAt in state.collectTimes do
-		if collectedAt > now - 1 then
+		if collectedAt > now - GlyphConfig.RateWindowSeconds then
 			table.insert(recent, collectedAt)
 		end
 	end
 	table.insert(recent, now)
 	nextState.collectTimes = recent
 	return nextState
+end
+
+-- Client cadence: ask for a glyph that is available and in reach, at most once per RetryAfterSeconds. Local timing only;
+-- the server stays authoritative. A non-finite `now` never asks.
+function GlyphRules.shouldRequest(lastRequestAt: number?, now: number, inRange: boolean, available: boolean): boolean
+	if not finite(now) or not (available and inRange) then
+		return false
+	end
+	return lastRequestAt == nil or now - lastRequestAt >= GlyphConfig.RetryAfterSeconds
 end
 
 function GlyphRules.tickRespawns(state: PlayerState, now: number): PlayerState

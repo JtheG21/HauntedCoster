@@ -1,0 +1,123 @@
+# TASK-0121 Glyph service Studio verification (one round, 2026-11-02)
+# applies_to: Measured at 3cee8c4. Applies to any later commit whose diff from 3cee8c4 does not touch games/mathshow/src/**, games/mathshow/map/**, scripts/build_hub.py or mathshow.project.json.
+# measured git HEAD: 3cee8c4 (fix(mathshow): TASK-0121 glyph controller learns spawns as they stream in)
+# Studio: MathShow.rbxl (main checkout's place file), Rojo 7.7.0 served by scripts/serve.sh from the TASK-0121 worktree,
+#   plugin reconnected, Edit BuildStamp "3cee8c4 2026-11-02T21:11:14Z" (no +dirty); GlyphController.Source length 9274 = disk.
+# Place: Workspace.StreamingEnabled = true; 34 GlyphSpawn tags (21 common, 13 rare). Place not saved. Single Play client.
+# Server-side numbers come from Studio-only attributes GlyphService publishes on its ModuleScript
+#   (Players, Spawns, RawAccepted, RawThrottled, Collected). Character moves are server-side PivotTo (no menu interaction).
+
+## Step 1: join
+server attrs: Collected=0 Players=1 RawAccepted=0 RawThrottled=0 Spawns=34
+client:       rendered=34 hud="Glyphs 0" first=Glyph_C_E1 last=Glyph_R_Tier5
+console:      [MathShow] GlyphService: 34 glyph spawns
+PASS
+
+## Step 2: collect one common, then one rare
+PivotTo 2 studs from Glyph_C_E1 (75, 2.7, 0)      -> server Collected=1 RawAccepted=1; client hud="Glyphs 1", rendered=33, Glyph_C_E1 gone
+PivotTo 2 studs from Glyph_R_Lake2 (76.6, 2.7, 76.6) -> server Collected=2 RawAccepted=2; client hud="Glyphs 6", rendered=32, both gone
+PASS (count 1 then 6; both removed on the client; client never set the count itself)
+
+## Step 3: spoofing from a client execute_luau (1.2 s between groups)
+before: Collected=2 RawAccepted=2 RawThrottled=0
+FireServer("Glyph_C_W1")              (far away, -75, 2.7, 0)   hud "Glyphs 6"
+FireServer(123); FireServer({...})    (non-string)               hud "Glyphs 6"
+FireServer("Glyph_DOES_NOT_EXIST")    (unknown id)               hud "Glyphs 6"
+20 x FireServer("Glyph_DOES_NOT_EXIST") in one frame             hud "Glyphs 6"
+after:  Collected=2 RawAccepted=16 RawThrottled=10
+  (16 - 2 = 14 accepted raw requests: 1 far + 2 non-string + 1 unknown + 10 of the burst; the other 10 throttled = RawRequestLimit)
+console (one warn per reason per player per 5 s; the table payload and the burst's unknown ids were suppressed):
+  [MathShow] GlyphCollect from jg_57565 rejected: out_of_range (Glyph_C_W1)
+  [MathShow] GlyphCollect from jg_57565 rejected: invalid_type (number)
+  [MathShow] GlyphCollect from jg_57565 rejected: unknown_id (Glyph_DOES_NOT_EXIST)
+  [MathShow] GlyphCollect from jg_57565 rejected: throttled (over 10/1s)
+PASS
+
+## Step 4: respawn
+First pass: Glyph_C_E1 reappeared on the client while Glyph_R_Lake2 stayed collected (collect time not timestamped).
+Timed pass: a client GlyphState listener stamped workspace:GetServerTimeNow(); Glyph_C_E1 collected again (Collected=3), character
+moved back to spawn so it would not re-collect.
+  C_E1 left available at 1793654032.53, back at 1793654122.79 -> 90.26 s (RespawnSeconds.common = 90; respawn loop ticks every 1 s)
+  At that moment Glyph_R_Lake2 was still not available (rare respawn 300 s); client rendered C_E1=true R_Lake2=false hud="Glyphs 7"
+PASS
+
+## No leaks (player leave while the server keeps running)
+player:Kick("TASK-0121 leak check") -> before Players=1 | after leave: Players attr=0, game players=0
+console: Server Kick Message: TASK-0121 leak check
+Per-player state is the entries[player] record (state, rawStamps, warnStamps), removed on PlayerRemoving
+(GlyphService.luau:201-204). GlyphService holds no per-player connections; its only connections are service-level
+(GlyphCollect.OnServerEvent, PlayerAdded, PlayerRemoving) plus one respawn loop. The client controller makes 3 connections
+(GlyphState, GlyphSpawn added signal, one RenderStepped) that live with the client session.
+PASS
+
+## No yield before the throttle
+GlyphService.luau:122-135: onCollect reads entries[player], stamps the raw throttle with RateRules.allow (line 128-129) and
+returns on throttle before anything else. Nothing in onCollect yields (no task.wait, WaitForChild or remote invoke); validate,
+apply and FireClient run in the same resumption.
+
+## Step 5: rejoin (Play stopped and started)
+server attrs: STAMP=3cee8c4 Collected=0 Players=1 RawAccepted=0 RawThrottled=0 Spawns=34
+client:       rendered=34 hud="Glyphs 0" C_E1=true R_Lake2=true
+PASS (state resets; in memory only, as scoped)
+
+## Step 6: console
+Both sessions: no errors from glyph code and no "glyph pickup effect failed" warn (the pickup burst ran on both collects).
+Only other warnings: DataStore unavailable in an unpublished place, and "ContentId: rbxassetid://203785492 failed due to: Asset type
+does not match requested type" x3, a known place-only asset already recorded in TASK-0112, not from this task.
+PASS
+
+Play stopped, Rojo stopped, place not saved.
+
+## Revision 1 (H2/H4): counter hidden while the menu is open (2026-11-02)
+# measured git HEAD: 4362e83 (fix(mathshow): TASK-0121 hide glyph counter while a menu screen is open)
+# applies_to: Measured at 4362e83. Applies to later commits whose diff from 4362e83 does not touch games/mathshow/src/**, games/mathshow/map/**, scripts/build_hub.py or mathshow.project.json. Supersedes the 3cee8c4 section above for GlyphController.
+# Studio: same MathShow.rbxl, fresh Play (single client). BuildStamp "4362e83 2026-11-02T21:25:54Z" (clean, no +dirty).
+# SYNC NOT VIA ROJO: the screen capture needed to drive the Rojo plugin failed, so GlyphController.Source was patched
+#   through execute_luau (three hunks) and verified against disk: length 10553 = 10553, byte checksum 114709897 = 114709897.
+#   BuildStamp StringValue set to the value serve.sh wrote to BuildStamp.txt. Rojo was serving the checkout meanwhile.
+# VIEWPORT: the Studio client viewport was 1336x669, NOT 844x390 (no MCP way to emulate a device size). The counter is
+#   anchored top-right with fixed offsets (AnchorPoint 1,0; Position -16,64; 150x36), so only the x origin differs.
+# Menu "closed" was set as MathShowMenu.Enabled = false from the Client data model (the exact state Menu.hide sets);
+#   JOIN SHOW was not clicked, to avoid starting a match.
+
+menu open (MathShowMenu en=true do=10):   GlyphHud Enabled=false DisplayOrder=4   -> counter not visible  (hud-menu-open.jpg)
+menu closed (Enabled=false):              GlyphHud Enabled=true, text "Glyphs 0", AbsolutePosition 1170,64 -> visible (hud-menu-closed.jpg)
+collect (server PivotTo Glyph_C_E1):      GlyphHud Enabled=true, text "Glyphs 1" -> visible and updated (hud-menu-closed-collected.jpg)
+menu re-opened then closed again:         Enabled=false, then true; count stays "Glyphs 1"
+console: no errors from glyph code; only the known DataStore and ContentId 203785492 warnings.
+PASS (with the viewport and sync deviations above)
+
+Play stopped, Rojo stopped, place not saved.
+
+## Revision 2 (R2/R3): retry cadence replaces the permanent `requested` flag (2026-11-02)
+# measured git HEAD: b7d61be (style(mathshow): TASK-0121 reflow GlyphController header comment; code change in 5164a25)
+# applies_to: Measured at b7d61be. Applies to later commits whose diff from b7d61be does not touch games/mathshow/src/**, games/mathshow/map/**, scripts/build_hub.py or mathshow.project.json. Supersedes the 4362e83 section for GlyphController, GlyphRules, GlyphConfig.
+# Studio: same MathShow.rbxl, fresh Play, single client. BuildStamp "b7d61be 2026-11-02T21:48:06Z" (clean, no +dirty).
+# SYNC NOT VIA ROJO (as in revision 1, accepted by jg): GlyphConfig, GlyphRules and GlyphController patched through
+#   execute_luau; each checked against disk by length and byte checksum: GlyphConfig 587/5660109, GlyphRules 5410/59311287,
+#   GlyphController 10783/117563528, all equal. Rojo was serving the checkout meanwhile.
+# Server-side numbers: a server-DM logger sampled GlyphService's Studio-only attributes every 0.05 s (acc = RawAccepted,
+#   thr = RawThrottled, col = Collected) and logged each change with seconds since it started. Client count from PlayerGui.
+
+## R3a/b: throttle exhausted, then into range; first request rejected, retry ~1 s later succeeds
+Client execute_luau: 10 x GlyphCollect:FireServer("junk"), then PivotTo(75, 3.5, 0) (Glyph_C_E1) in the same call.
+t=0.11 acc=10 thr=0 col=0   (10 junk accepted by the raw throttle; the 11th request is the first over the limit)
+t=0.18 acc=10 thr=1 col=0   first controller request for C_E1: THROTTLED (server HRP still 88 studs away, throttle is checked first)
+t=0.34..0.66                the character replicates into range (dist 61.6 -> 0.5), no further request
+t=1.19 acc=11 thr=1 col=1   retry 1.01 s after the rejected one: accepted and collected
+server console: "GlyphCollect from jg_57565 rejected: unknown_id (junk)" and "rejected: throttled (over 10/1s)"
+client after: hud="Glyphs 1", Workspace.Glyphs has no Glyph_C_E1 (33 rendered of 34)
+PASS (player never left range or reconnected between the rejection and the success)
+
+## R3c: a glyph in range sends at most 1 request per second while being rejected
+Forcing a rejection: server HRP anchored 25.2 studs from Glyph_C_E2 (server says out_of_range), client character moved
+client-locally into range (100, 3.5, 3); the client sees itself in range, the server does not. Requests = RawAccepted steps.
+request times (s after logger start): 0.19, 1.26, 2.33, 3.38, 4.39, 5.40, 6.39, 7.44, 8.46, 9.51, 10.58, 11.66
+gaps: 1.07 1.07 1.05 1.01 1.01 0.99 1.05 1.02 1.05 1.07 1.08 s
+Over the first 5 s after the first request (0.19..5.19): 5 requests. Over 12 s: 12 requests. No gap is below 0.99 s (client os.clock
+cadence plus 0.05 s sampling; RetryAfterSeconds = 1.0). Glyph_C_E2 was never collected (col stays 1).
+server console: "GlyphCollect from jg_57565 rejected: out_of_range (Glyph_C_E2)" (the server warns once per reason per 5 s).
+PASS
+
+console: no errors from glyph code; only the known DataStore and ContentId 203785492 warnings.
+Play stopped, Rojo stopped, place not saved.

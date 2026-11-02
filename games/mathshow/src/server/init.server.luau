@@ -9,6 +9,7 @@ local BlitzService = require(Services.BlitzService)
 local VsService = require(Services.VsService)
 local SkillTestService = require(Services.SkillTestService)
 local RoundService = require(Services.RoundService)
+local GlyphService = require(Services.GlyphService)
 
 LeaderstatsService.start()
 ProfileService.start()
@@ -16,6 +17,7 @@ SkillTestService.start()
 BlitzService.start()
 VsService.start()
 RoundService.start()
+GlyphService.start()
 
 StudioTestHook.start() -- Studio multi-client test scenarios only (tests/multiclient); inert otherwise
 
