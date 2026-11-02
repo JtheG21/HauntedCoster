@@ -40,3 +40,37 @@ R2. Respawn onto a pad: standing on Blitz (events=1, 3 s later), server LoadChar
     respawn faster than the poll and suppress this entry.
 R3. Console: no errors (same DataStore and ContentId 203785492 warnings as above).
 Not rerun: steps 2-5 of the first round (the changed code is only the per-player state key; spec 326 passed, check.sh green).
+
+# Revision 2 round (rows S3/S4), 2026-11-02
+# measured git HEAD: 7443516 (BuildStamp in Studio "7443516 2026-11-02T22:19:39Z", no +dirty; served by scripts/serve.sh from the
+#   TASK-0122 worktree; Rojo reconnected; Edit check: ModePadService and GlyphService both present, isBusy in the synced source)
+# applies_to: Measured at 7443516. Applies to any later commit whose diff from 7443516 does not touch games/mathshow/src/**,
+#   games/mathshow/tests/ModePadRules.spec.luau or games/mathshow/map/**.
+# Place not saved. Device emulator: iPhone 13 (844x390 landscape). Client viewport reads 749x388 inside the device frame.
+# Screenshots (outside the repo): ~/Roblox-Work/evidence/TASK-0122/844x390/pad-{blitz,vs,group,practice,skill}.jpg, pad-daily-toast.jpg
+# Server source of truth for "busy": RoundService.isParticipant (RoundService.luau, ShowState.participant: set at question 1,
+#   cleared in resetMatch), VsService.isBusy (queue / playerMatch), BlitzService.isRunning and SkillTestService.isRunning (sessions).
+#   These four read-only accessors are the only edits outside the row's FILES list.
+
+a) All 6 pads at 844x390 (PASS, menu closed, character moved onto each pad):
+   Blitz  Screen_confirm_blitz (reached by character_navigation walking east along the path)
+   VS     Screen_confirm_vs      Group    Screen_confirm_group
+   Practice Screen_practice      Skill    Screen_skillintro
+   Daily  menu stays closed, "COMING SOON" toast (screenshot shows it)
+b) Glyph collection on the walk to the pads (PASS): counter "Glyphs 0" before; walking east at normal speed along z=0 from x=55
+   to x=140 gave "Glyphs 1" (Glyph_C_E1 collected). A first pass at 3x speed collected nothing: the server rejected the requests
+   as out_of_range (server position lags a fast client), so collection needs normal walking speed. That is TASK-0121 behaviour.
+c) Mid-match (PASS), one continuous run:
+   [  2.6s] JoinShow sent, menu closed       [  4.2s] ShowState participant=true
+   [  7.2s] on the Blitz pad for 3 s mid-match: ModePadOpen events=0, menuOpen=false
+   [109.9s] match over for us: participant=false (resetMatch)
+   [112.9s] still standing on the pad 3 s later: events=0, menuOpen=false
+   [116.1s] exit to the plaza and re-enter: ModePadOpen confirm_blitz received, menuOpen=true
+d) Two players: NOT VERIFIED. A temporary Studio-only scenario (ModePadTwoClients, not committed, removed afterwards) was run with
+   StudioTestService:ExecuteMultiplayerTestAsync(2, ...) from Edit. After 120 s it returned {"ok":false,"infra":true,
+   "checks":{"twoPlayers":false}}: the second client never joined. A second Studio window (home screen) was open, which
+   05 Engineering/Multi-Client Testing.md names as a cause, and a macOS crash-report dialog appeared afterwards. Not retried.
+   No client console was captured and no per-player result exists. The client-side second layer (ShowState) was exercised only
+   by the single-player run above.
+e) Console (PASS): no errors. Warnings: DataStores unavailable, ContentId 203785492 placeholder (known), and
+   "GlyphCollect ... rejected: out_of_range" from the 3x-speed walk in (b).
