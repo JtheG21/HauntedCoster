@@ -3,7 +3,7 @@ id: TASK-0121
 title: "MathShow Glyph Service"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -47,11 +47,11 @@ Make the 34 hub glyphs collectable: a server service owns per-player glyph state
 - `docs/workflow/evidence/TASK-0121/glyph-play.txt`, this note, `tasks/items/TASK-0121.json`
 
 ## Acceptance criteria
-- [ ] AC1 Spec passes headless (new cases); `scripts/check.sh` green.
-- [ ] AC2 Studio steps 1–6 with console excerpts in `docs/workflow/evidence/TASK-0121/glyph-play.txt` (measured SHA, applies_to).
-- [ ] AC3 No leaks: state and connections cleared on leave (table size shown).
-- [ ] AC4 No yield before the throttle in the handler (file:line).
-- [ ] AC5 record-exec done; PR open, CI green, not merged; Play/Rojo stopped, place unsaved.
+- [x] AC1 Spec passes headless (new cases); `scripts/check.sh` green. Evidence: 326 specs pass (9 new GlyphRules cases); check.sh ALL CHECKS PASSED.
+- [x] AC2 Studio steps 1–6 with console excerpts. Evidence: `docs/workflow/evidence/TASK-0121/glyph-play.txt`, measured at 3cee8c4.
+- [x] AC3 No leaks. Evidence: after a kick, the service's player count went 1 → 0 (glyph-play.txt "No leaks").
+- [x] AC4 No yield before the throttle: `GlyphService.luau:122-135`, throttle at lines 128-129.
+- [ ] AC5 record-exec done; PR #179 open, not merged; Play/Rojo stopped, place unsaved. CI result: see Outcome.
 
 ## Tests
 - **Automated:** `scripts/check.sh` (headless GlyphRules spec).
@@ -62,6 +62,10 @@ Make the 34 hub glyphs collectable: a server service owns per-player glyph state
 
 ---
 ## Implementation record
+- **Shared:** GlyphConfig gains RateWindowSeconds, RawRequestLimit, Symbols. GlyphRules gains `parseSpawns` (unknown rarity against `GlyphConfig.Rarity`, duplicate id with the first kept, non-finite coordinates, empty id: dropped, one warning each) and `bad_time` for a non-finite `now` (checked first). The window uses RateWindowSeconds. Spec: 9 new cases.
+- **Server:** `GlyphService` reads the tags under `Workspace.Hub`, sorted by id, and passes them through `parseSpawns`. Per-player state lives in memory and is cleared on PlayerRemoving. Handler order: raw throttle (RateRules) → HumanoidRootPart → validateCollect (`os.clock()`) → applyCollect → GlyphState. Rejections are silent; the server warns once per reason per player per 5 s. One respawn loop sends GlyphState only on change. **Addition:** in Studio only, it publishes counters as attributes on its ModuleScript (Players, Spawns, RawAccepted, RawThrottled, Collected), so Play-mode checks can read them.
+- **Client:** `GlyphController`. The place has StreamingEnabled, so spawns are learnt from the GlyphSpawn added signal and kept, not read once (fix in 3cee8c4, found before the first Play run). The symbol index is the id's position in the first GlyphState. One RenderStepped connection runs spin, bob and the reach check. HUD counter "Glyphs N". Pickup burst plus the built-in `rbxasset://sounds/electronicpingshort.wav`, pcall-isolated. Layout constants are in a frozen local `GlyphTheme` table.
+- **Studio round (one):** steps 1–6 pass, see the evidence file. Burst of 20: 10 accepted, 10 throttled. Common respawn measured at 90.26 s.
 
 ## Audits
 

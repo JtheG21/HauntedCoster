@@ -2,7 +2,7 @@
   "id": "TASK-0121",
   "game": "GAME-004",
   "title": "MathShow Glyph Service",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -27,7 +27,11 @@
     "No yield before the raw throttle in the GlyphCollect handler (file:line cited).",
     "record-exec done; PR open, CI green, not merged; Play and Rojo stopped, place unsaved."
   ],
-  "evidence": [],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0121/glyph-play.txt",
+    "lune run scripts/lune/specs: 326 passed, 0 failed (9 new GlyphRules cases)",
+    "https://github.com/JtheG21/HauntedCoster/pull/179"
+  ],
   "notes": "Approved rows P1/P2 (jg, 2026-11-02). Wires TASK-0119's GlyphRules into a server service, two remotes and a client controller. Out of scope: DataStore/persistence, quests/XP, art meshes, lamps, Lighting.Technology, mode-pad logic, publishing, merging. Codex audits.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0121-MathShow-Glyph-Service.md",
   "risk": "low",
@@ -44,6 +48,19 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-02T13:16:52",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T13:16:52",
+      "result": "pass",
+      "notes": "326 headless specs pass (9 new GlyphRules); check.sh green; Studio steps 1-6 pass at 3cee8c4 (docs/workflow/evidence/TASK-0121/glyph-play.txt)"
     }
   ]
 }
