@@ -2,7 +2,7 @@
   "id": "TASK-0121",
   "game": "GAME-004",
   "title": "MathShow Glyph Service",
-  "status": "review",
+  "status": "approved",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -90,6 +90,12 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T13:52:38",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
     }
   ],
   "executions": [
@@ -115,6 +121,11 @@
       "time": "2026-11-02T13:45:16",
       "result": "fail",
       "report": "06 QA/AUD-20261102-TASK-0121-01.md"
+    },
+    {
+      "time": "2026-11-02T13:52:38",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0121-02.md"
     }
   ]
 }
