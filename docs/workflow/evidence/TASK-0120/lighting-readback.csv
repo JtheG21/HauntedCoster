@@ -1,0 +1,23 @@
+# TASK-0120 Lighting readback (V2/V3)
+# applies_to: Measured at 8437157. Applies to any later commit whose diff from 8437157 does not touch games/mathshow/map/**, scripts/build_hub.py or mathshow.project.json.
+# measured git HEAD: 8437157de6c67e4a77a65ae8e1e0a24669e8e93b (BuildStamp in Studio: 8437157, no +dirty; served by scripts/serve.sh from the TASK-0120 worktree; Rojo plugin 7.7.0 reconnected)
+# mathshow.project.json SHA-256: c654118694725c1ca5c132576b0c1e10e9892ed0a3c1c8f004b526106b7b9992
+# Method: Edit data model, read after the Rojo sync; read-back values printed with %.17g. Place not saved.
+# Studio place: F6_ShadowMap.rbxl (MathShow copy from the F6 lighting A/B). Every property mathshow.project.json sets under Lighting is listed; each named child (Bloom, Atmosphere, ColorCorrection) existed exactly once with the expected class.
+# match: y when every component equals the project.json value rounded to float32 (Roblox stores these properties as 32-bit floats).
+# Result: 14/14 match.
+instance,property,project_json_value,readback_value,match
+Lighting,ClockTime,0,0,y
+Lighting,Ambient,0.102|0.1294|0.251,0.10199999809265137|0.12939999997615814|0.25099998712539673,y
+Lighting,OutdoorAmbient,0.2039|0.251|0.4784,0.20389999449253082|0.25099998712539673|0.47839999198913574,y
+Bloom,Intensity,1.0,1,y
+Bloom,Size,36,36,y
+Bloom,Threshold,0.9,0.89999997615814209,y
+Atmosphere,Density,0.32,0.31999999284744263,y
+Atmosphere,Offset,0.1,0.10000000149011612,y
+Atmosphere,Haze,1.8,1.7999999523162842,y
+Atmosphere,Glare,0.3,0.30000001192092896,y
+Atmosphere,Color,0.2275|0.2471|0.5412,0.22750000655651093|0.24709999561309814|0.54119998216629028,y
+Atmosphere,Decay,0.1059|0.1647|0.2902,0.10589999705553055|0.16470000147819519|0.29019999504089355,y
+ColorCorrection,Saturation,0.15,0.15000000596046448,y
+ColorCorrection,Contrast,0.1,0.10000000149011612,y

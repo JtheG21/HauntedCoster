@@ -1,0 +1,123 @@
+{
+  "id": "TASK-0120",
+  "game": "GAME-004",
+  "title": "MathShow Hub Graybox",
+  "status": "approved",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/map/",
+    "mathshow.project.json",
+    "scripts/build_hub.py",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0120-MathShow-Hub-Graybox.md",
+    "scripts/check.sh",
+    "AGENTS.md",
+    "docs/workflow/STUDIO-SYNC.md",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0120-hub-graybox",
+  "acceptance": [
+    "Map geometry is on disk (games/mathshow/map/Hub.rbxmx), mounted at Workspace.Hub by mathshow.project.json, and survives a Rojo reconnect.",
+    "Walk time plaza centre to each mode pad is 8-12 s at WalkSpeed 16, or outliers are listed with a proposed fix.",
+    "Every GlyphSpawn marker is reachable with the default jump.",
+    "Lighting A/B (Technology Future vs ShadowMap) numbers plus a recommendation.",
+    "Screenshots: spawn view, aerial, Competitive entrance.",
+    "scripts/check.sh, validate_queue and validate_vault pass; PR open, CI green, not merged."
+  ],
+  "evidence": [
+    "~/Roblox-Work/evidence/TASK-0120/v2/A1_spawn_view.jpg",
+    "~/Roblox-Work/evidence/TASK-0120/v2/A2_competitive_entrance.jpg",
+    "~/Roblox-Work/evidence/TASK-0120/v2/A3_aerial_overview.jpg"
+  ],
+  "notes": "Approved rows G1 and G2 plus map-source proposal (jg, 2026-11-01). Out of scope: art, meshes, VFX, Glyph system, mode-pad logic, remotes, DataStore, publishing, merging. Numbered 0120 because TASK-0119 is claimed by the uncommitted glyph-rules worktree. Revision 2 (jg rows F1-F8): drift guard in scripts/check.sh, Lighting values in the project file, Daily walk time tuned. Awaiting an independent Codex audit: the record-audit entry was recorded by the executor and is not independent.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0120-MathShow-Hub-Graybox.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-01T22:28:04",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-01T22:28:04",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T10:33:12",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T10:33:12",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T12:45:35",
+      "from": "approved",
+      "to": "review",
+      "note": "reopened for independent audit; executor record-audit -01 was not independent (approved by jg)"
+    },
+    {
+      "time": "2026-11-02T12:48:23",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-02T12:52:55",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T12:53:57",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T12:57:38",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T10:33:12",
+      "result": "pass",
+      "notes": "check.sh green; Studio walk times, reachability, A/B and screenshots done"
+    },
+    {
+      "time": "2026-11-02T12:53:57",
+      "result": "pass",
+      "notes": "Evidence-only revision after AUD-02 (rows V1-V6): Lighting readback 14/14 at clean 8437157, applies_to lines on both evidence CSVs, AGENTS.md evidence rule; no code or map change"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-02T10:33:12",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0120-01.md"
+    },
+    {
+      "time": "2026-11-02T12:48:23",
+      "result": "fail",
+      "report": "06 QA/AUD-20261102-TASK-0120-02.md"
+    },
+    {
+      "time": "2026-11-02T12:57:38",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0120-03.md"
+    }
+  ],
+  "revisions": 1
+}

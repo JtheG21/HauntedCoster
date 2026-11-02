@@ -114,6 +114,7 @@ Checked on 2026-10-12 against the repo; the evidence is linked.
 | ActorCore free motions | [[REF-MISC-006-ActorCore-Free-Motions]] | captured | Needs experimentation; free only (jg, 2026-10-16); compare existing animation library and retargeting effort; rights/Roblox compatibility unverified. Review 2026-10-17: investigate a specific gap. |
 | Awesome Learn Gamedev research directory | [[REF-CODE-008-Awesome-Learn-Gamedev]] | captured | Free only (jg, 2026-10-16); discovery across production disciplines; linked resources unreviewed and require individual evaluation; later review. Review 2026-10-17: keep as reference. |
 | Check-UI Clean Roblox | [[REF-UI-003-Check-UI-Clean-Roblox]] | captured | Needs experimentation; selected Luau source inspected, no runtime/visual validation; style only where game-appropriate |
+| Night festival plaza mood | [[REF-MAP-003-Night-festival-plaza-mood]] | proposed | 2026-11-01: mood only; source screenshots not in repo; no characters, buildings or motifs |
 
 ### Prompts folder source references (2026-10-17)
 | Resource | Location | State | Limits / evidence |

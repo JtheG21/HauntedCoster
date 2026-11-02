@@ -43,12 +43,28 @@ json_files() {
 	return $bad
 }
 
+# The map is generated: regenerate it to a temp file and fail if the committed file differs (hand edit or stale output).
+map_drift() {
+	local f
+	for f in scripts/build_*.py; do
+		[ -e "$f" ] || continue
+		local name out
+		name="$(basename "$f" .py)"
+		name="${name#build_}"
+		out="$(find "$ACTIVE_GAME_ROOT/map" -iname "${name}.rbxmx" 2>/dev/null | head -1)"
+		[ -n "$out" ] || continue
+		python3 "$f" --out "$tmp/${name}.rbxmx" >/dev/null || return 1
+		cmp -s "$tmp/${name}.rbxmx" "$out" || { echo "$out differs from its generator: run python3 $f and commit the result"; diff "$out" "$tmp/${name}.rbxmx" | head -10; return 1; }
+	done
+}
+
 if [ "$mode" = "active" ]; then
 	step "StyLua (format, $ACTIVE_GAME_ID)" stylua --check "$ACTIVE_GAME_ROOT"
 	step "Selene (lint, $ACTIVE_GAME_ID)" selene "$ACTIVE_GAME_ROOT"
 	step "Luau types (strict, $ACTIVE_GAME_ID)" scripts/typecheck.sh
 	step "Unit specs (Lune, $ACTIVE_GAME_ID)" lune run scripts/lune/specs
 	step "Rojo build ($ACTIVE_GAME_PROJECT)" rojo build "$ACTIVE_GAME_PROJECT" -o "$tmp/active.rbxl"
+	step "Map drift (generated .rbxmx)" map_drift
 	step "JSON files" json_files "$ACTIVE_GAME_PROJECT" project-state.json "00 Studio/budget.json"
 	step "Task files (schema, files_owned overlap)" python3 scripts/validate_queue.py
 	step "Task queue (orchestrator)" python3 scripts/orchestrator.py validate
