@@ -1,0 +1,26 @@
+{
+  "id": "TASK-0118",
+  "game": "GAME-004",
+  "title": "MathShow Plaza Map: Brief + Mockup Intake",
+  "status": "backlog",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "03 Games/GAME-004 MathShow/05 Systems/",
+    "10 References/02 Map/",
+    "00 Studio/Resource Catalog.md",
+    "00 Studio/Reference Review Index.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0118-MathShow-Plaza-Map-Brief.md",
+    "00 Studio/reference-rights.json"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0118-plaza-brief",
+  "acceptance": [
+    "Brief, REF note and mockups README exist and pass validate_vault.py and refs.py lint.",
+    "scripts/check.sh passes."
+  ],
+  "evidence": [],
+  "notes": "Registered at jg request (B1-B5, 2026-11-01). Brief is a system note because no design-notes type fits the validator (jg chose this). Nothing under games/.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0118-MathShow-Plaza-Map-Brief.md",
+  "risk": "low"
+}

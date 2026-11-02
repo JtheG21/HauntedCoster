@@ -102,3 +102,4 @@ Archive grouping and complete new queue: [[Reference Review 2026-10-17]]. Entrie
 | Reviewed with jg | Reference | Evaluation |
 |---|---|---|
 | [ ] | [[REF-UI-004-Illustrated-Halloween-Shop]] — Illustrated Halloween Shop | Selected as demo visual target; resulting UI awaits visual acceptance |
+| [ ] | [[REF-MAP-003-Night-festival-plaza-mood]] — Night festival plaza mood | Mood only; source images not in repo |
