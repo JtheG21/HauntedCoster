@@ -2,7 +2,7 @@
   "id": "TASK-0122",
   "game": "GAME-004",
   "title": "MathShow Hub Mode Pads",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -95,6 +95,12 @@
       "from": "changes_requested",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-02T14:32:31",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -107,6 +113,11 @@
       "time": "2026-11-02T14:13:11",
       "result": "pass",
       "notes": "Revision 1: pad state keyed by character (AUD-01 respawn minor); check.sh green; Studio recheck at 0eca0d9 pass"
+    },
+    {
+      "time": "2026-11-02T14:32:31",
+      "result": "pass",
+      "notes": "Revision 2: merged main after #179; pads blocked in match/run/queue (server accessors + rules blocked input + client layer); check.sh green; Studio at 7443516: a,b,c,e pass; d (two players) NOT verified, second test client never joined"
     }
   ],
   "audits": [

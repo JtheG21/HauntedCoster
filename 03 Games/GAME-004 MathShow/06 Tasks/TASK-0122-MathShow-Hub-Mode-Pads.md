@@ -3,7 +3,7 @@ id: TASK-0122
 title: "MathShow Hub Mode Pads"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -56,7 +56,7 @@ Remote change rule: ModePadOpen sender ModePadService.luau, handler none (server
 - Remote change rule: ModePadOpen sender ModePadService, receiver ModePadController; no handler, no client to server remote.
 - Revision 1 (jg, after [[AUD-20261102-TASK-0122-01]]): pad state is keyed by character, so a respawn between two polls counts as an entry. Studio recheck at 0eca0d9: Blitz regression and respawn-onto-pad both pass. The mid-match pad (second minor) is left as is: no criterion, needs jg's intent.
 - Revision 2 (jg rows S0-S5): #179 was merged, so origin/main was merged in (conflicts only in the two bootstraps, both features kept). Pads are blocked server-side while a player is in the match (RoundService.isParticipant), the VS queue or match (VsService.isBusy), or a Blitz or Skill run; `ModePadRules.step` takes `blocked`, which suppresses the trigger but still updates `inside`. The client ignores ModePadOpen while ShowState.participant is true. Four read-only accessors were added to RoundService, VsService, BlitzService and SkillTestService (no existing export exposed participation); this goes beyond the row's FILES list and `files_owned` was extended.
-- Revision 2 Studio round at 7443516: a, b, c, e pass; d (two players) NOT verified, the second test client never joined. record-exec for this head is not recorded yet (see the evidence log).
+- Revision 2 Studio round at 7443516: a, b, c, e pass; d (two players) NOT verified, the second test client never joined. record-exec was recorded with step d unverified (jg's call).
 - Evidence: `docs/workflow/evidence/TASK-0122/mode-pads.txt`. check.sh green at bb28ee8.
 
 ## Audits
