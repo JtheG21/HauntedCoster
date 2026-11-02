@@ -259,26 +259,36 @@ def build() -> Node:
 		glyphs.add(part)
 		GLYPHS.append({"name": name, "rarity": rarity, "x": wx, "y": y, "z": wz})
 
-	# N: Observatory / Daily on the highest terrace, reached by a ramp.
+	# N: Observatory / Daily. Three terraces (+8, +18, +32) stepped by ramps; tower on the top one (layout plan).
 	n_fr = Frame(dirs["N"])
-	rise_top, ramp_a0, ramp_a1 = 16.0, PLAZA_R + 1, 135.0
-	run = ramp_a1 - ramp_a0
-	phi = math.atan2(rise_top - PATH_TOP, run)
-	length = math.hypot(run, rise_top - PATH_TOP)
-	thick = 1.0
 	rf = Frame(dirs["N"])
-	mid_a, mid_y = (ramp_a0 + ramp_a1) / 2, (PATH_TOP + rise_top) / 2
-	normal_y = math.cos(phi)
-	cx = rf.out[0] * mid_a + rf.out[0] * math.sin(phi) * thick / 2
-	cz = rf.out[1] * mid_a + rf.out[1] * math.sin(phi) * thick / 2
-	cy = mid_y - normal_y * thick / 2
-	ramp = make_part("Path_N_Ramp", (PATH_W, thick, length), (cx, cy, cz), rf.rot(phi), PALETTE["path"])
-	paths.add(ramp)
-	zones.add(n_fr.block("Terrace_Observatory", 167.5, 0, rise_top / 2, (70, rise_top, 65), PALETTE["daily"], material="Concrete"))
-	zones.add(cylinder("Observatory_Tower", *n_fr.world(185, 0)[:1], 36, n_fr.world(185, 0)[1], 40, 16, PALETTE["daily"]))
-	zones.add(make_part("Observatory_Dome", (22, 22, 22), (n_fr.world(185, 0)[0], 62, n_fr.world(185, 0)[1]), IDENT,
-		PALETTE["daily"], shape="Ball"))
-	pad(n_fr, "Daily", 160, 0, rise_top, PALETTE["daily"])
+	thick = 1.0
+	N_RAMPS = ((PLAZA_R + 1, PATH_TOP, 105.0, 8.0), (108.0, 8.0, 126.0, 18.0), (135.0, 18.0, 157.0, 32.0))
+	rise_top = 32.0
+
+	def ramp(name, a0, y0, a1, y1):
+		run = a1 - a0
+		phi = math.atan2(y1 - y0, run)
+		length = math.hypot(run, y1 - y0)
+		mid_a, mid_y = (a0 + a1) / 2, (y0 + y1) / 2
+		cx = rf.out[0] * mid_a + rf.out[0] * math.sin(phi) * thick / 2
+		cz = rf.out[1] * mid_a + rf.out[1] * math.sin(phi) * thick / 2
+		cy = mid_y - math.cos(phi) * thick / 2
+		paths.add(make_part(name, (PATH_W, thick, length), (cx, cy, cz), rf.rot(phi), PALETTE["path"]))
+
+	for i, r in enumerate(N_RAMPS):
+		ramp("Path_N_Ramp" + str(i + 1), *r)
+	for name, a, rad, top, color in (
+		("Terrace_1", 175, 70, 8.0, PALETTE["tier"]),
+		("Terrace_2", 175, 55, 18.0, PALETTE["ground"]),
+		("Terrace_3", 185, 28, 32.0, PALETTE["daily"]),
+	):
+		tx, tz = n_fr.world(a, 0)
+		zones.add(cylinder(name, tx, top / 2, tz, top, rad * 2, color, material="Concrete"))
+	tx, tz = n_fr.world(190, 0)
+	zones.add(cylinder("Observatory_Tower", tx, rise_top + 20, tz, 40, 16, PALETTE["daily"]))
+	zones.add(make_part("Observatory_Dome", (22, 22, 22), (tx, rise_top + 46, tz), IDENT, PALETTE["daily"], shape="Ball"))
+	pad(n_fr, "Daily", 172, 0, rise_top, PALETTE["daily"])
 
 	# E: Competitive entrance with three arches.
 	e_fr = add_path("E", PLAZA_R + 1, 126)
@@ -302,7 +312,6 @@ def build() -> Node:
 	# SW: Ranks hall (walls, roof, stairs up to the roof).
 	sw_fr = add_path("SW", PLAZA_R + 1, 126)
 	zones.add(sw_fr.block("Hall_Floor", 158, 0, 0, (56, 0.4, 66), PALETTE["path"]))
-	pad(sw_fr, "Ranks", 150, 0, PATH_TOP, PALETTE["ranks"])
 	zones.add(sw_fr.block("Hall_BackWall", 188, 0, 7, (54, 14, 2), PALETTE["ranks"]))
 	for side in (-1, 1):
 		zones.add(sw_fr.block(f"Hall_SideWall{side}", 158, side * 26, 7, (2, 14, 62), PALETTE["ranks"]))
@@ -344,11 +353,14 @@ def build() -> Node:
 
 	# ---- glyph spawns (30-40; common on paths, rare on terraces / roofs / lake edge) ----
 	def ramp_y(a):
-		return PATH_TOP + (a - ramp_a0) / run * (rise_top - PATH_TOP)
+		for a0, y0, a1, y1 in N_RAMPS:
+			if a0 <= a <= a1:
+				return y0 + (a - a0) / (a1 - a0) * (y1 - y0)
+		return 8.0 if a < 108 else 18.0
 
 	for i, a in enumerate((65, 90, 115)):
 		glyph(n_fr, f"C_N{i + 1}", a, -3 if i % 2 == 0 else 3, ramp_y(a), "common")
-	glyph(n_fr, "C_N4", 145, 0, rise_top, "common")
+	glyph(n_fr, "C_N4", 145, 0, ramp_y(145), "common")
 	for i, (a, b) in enumerate(((75, 0), (100, -3), (120, 3), (140, -13), (140, 13), (175, 0))):
 		glyph(e_fr, f"C_E{i + 1}", a, b, PATH_TOP, "common")
 	for i, (a, b) in enumerate(((75, 0), (100, 3), (120, -3), (140, -9), (165, 0))):
@@ -358,8 +370,8 @@ def build() -> Node:
 	for i, a in enumerate((70, 92)):
 		glyph(se_fr, f"C_SE{i + 1}", a, 0, PATH_TOP, "common")
 
-	for i, (a, b) in enumerate(((150, -30), (150, 30), (195, 28))):
-		glyph(n_fr, f"R_Terrace{i + 1}", a, b, rise_top, "rare")
+	for i, (a, b, y) in enumerate(((150, -45, 8.0), (195, -38, 18.0), (200, 12, rise_top))):
+		glyph(n_fr, f"R_Terrace{i + 1}", a, b, y, "rare")
 	for i, (deg, tier) in enumerate(((20, 2), (100, 2), (205, 2), (300, 2), (150, 4))):
 		ang = math.radians(deg)
 		fr = Frame((math.cos(ang), math.sin(ang)))
