@@ -31,6 +31,55 @@
       "Hub": {
         "$path": "games/mathshow/map/Hub.rbxmx"
       }
+    },
+    "Lighting": {
+      "$properties": {
+        "ClockTime": 0,
+        "Ambient": [
+          0.102,
+          0.1294,
+          0.251
+        ],
+        "OutdoorAmbient": [
+          0.2039,
+          0.251,
+          0.4784
+        ]
+      },
+      "Bloom": {
+        "$className": "BloomEffect",
+        "$properties": {
+          "Intensity": 1.0,
+          "Size": 36,
+          "Threshold": 0.9
+        }
+      },
+      "Atmosphere": {
+        "$className": "Atmosphere",
+        "$properties": {
+          "Density": 0.32,
+          "Offset": 0.1,
+          "Haze": 1.8,
+          "Glare": 0.3,
+          "Color": [
+            0.2275,
+            0.2471,
+            0.5412
+          ],
+          "Decay": [
+            0.1059,
+            0.1647,
+            0.2902
+          ]
+        }
+      },
+      "ColorCorrection": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Saturation": 0.15,
+          "Contrast": 0.1
+        }
+      }
     }
   }
 }

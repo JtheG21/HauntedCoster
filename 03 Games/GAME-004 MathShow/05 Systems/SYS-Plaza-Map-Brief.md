@@ -42,6 +42,16 @@ Decision table for the hub map. Mood reference: [[REF-MAP-003-Night-festival-pla
 
 Mockups: [[Map Mockups/README]]. Palette (A4): Night Navy #0B1433, Slate Teal #1E3D45 (terraces, ground), Basalt Blue #22303F (buildings), Plaza Stone #56626E (paths, plaza), Menu Violet #8A4DFF (competitive, rank), Holo Cyan #3FE0F0 (training, observatory), Lamp Amber #FFB547 (lamps, Blitz, Daily), Lake Ink #0F2A4A (lake). Lighting: Technology Future, Bloom 1.0/36/0.9, Atmosphere density 0.32, haze 1.8, ColorCorrection +0.15 sat/+0.10 contrast. Graybox built in [[TASK-0120-MathShow-Hub-Graybox]].
 
-## Glyph rules
+## Glyph rules v1
 
-jg's Glyph rules table has not arrived; these are the graybox rules from the TASK-0120 prompt and replace nothing. 30-40 `GlyphSpawn` attachments, attribute `Rarity` = `common` on paths and `rare` on terraces, roofs, tiers and the lake edge. Every rare spot must be reachable with the default jump. Markers only: no Glyph system. Current build: 34 markers, 21 common and 13 rare.
+- **Purpose:** just for fun now (session counter + pickup effect); built to hook into daily quests and XP later.
+- **Spawning:** per player. The server owns each player's glyph state; the client renders only its own glyphs.
+- **Placement:** fixed authored `GlyphSpawn` markers. common = along paths; rare = terraces, rooftops, lake edge. All reachable with a default jump.
+- **Collect:** client sends `GlyphCollect(id)`. Server validates type → known id → within `CollectRadius` of the character → not already collected → rate limit, debouncing synchronously before any yield. Server then sends `GlyphState` to that player only.
+- **Respawn:** per player, on a timer (common faster than rare).
+- **Visual:** collectible glyphs float at chest height, spin and sparkle. Decorative holo symbols stay high and out of reach, so the two are never confused.
+- **Persistence:** in memory only until jg approves row G-DS (lifetime total, one versioned profile field).
+- **Naming/IP:** called "Glyphs". Math-symbol shapes only; no star shapes, no "star bits".
+
+Graybox status: 34 `GlyphSpawn` markers (21 common, 13 rare) with attribute `Rarity`; markers only, no Glyph system (see [[TASK-0120-MathShow-Hub-Graybox]]).
+

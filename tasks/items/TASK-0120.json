@@ -9,7 +9,11 @@
     "games/mathshow/map/",
     "mathshow.project.json",
     "scripts/build_hub.py",
-    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0120-MathShow-Hub-Graybox.md"
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0120-MathShow-Hub-Graybox.md",
+    "scripts/check.sh",
+    "AGENTS.md",
+    "docs/workflow/STUDIO-SYNC.md",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md"
   ],
   "depends_on": [],
   "branch": "task/TASK-0120-hub-graybox",
@@ -26,7 +30,7 @@
     "~/Roblox-Work/evidence/TASK-0120/v2/A2_competitive_entrance.jpg",
     "~/Roblox-Work/evidence/TASK-0120/v2/A3_aerial_overview.jpg"
   ],
-  "notes": "Approved rows G1 and G2 plus map-source proposal (jg, 2026-11-01). Out of scope: art, meshes, VFX, Glyph system, mode-pad logic, remotes, DataStore, publishing, merging. Numbered 0120 because TASK-0119 is claimed by the uncommitted glyph-rules worktree.",
+  "notes": "Approved rows G1 and G2 plus map-source proposal (jg, 2026-11-01). Out of scope: art, meshes, VFX, Glyph system, mode-pad logic, remotes, DataStore, publishing, merging. Numbered 0120 because TASK-0119 is claimed by the uncommitted glyph-rules worktree. Revision 2 (jg rows F1-F8): drift guard in scripts/check.sh, Lighting values in the project file, Daily walk time tuned. Awaiting an independent Codex audit: the record-audit entry was recorded by the executor and is not independent.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0120-MathShow-Hub-Graybox.md",
   "risk": "low",
   "approved_by": "jg",

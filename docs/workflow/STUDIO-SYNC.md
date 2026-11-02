@@ -372,3 +372,14 @@ Fresh Play, Rojo from `task/TASK-0116-hit-rect-48`, BuildStamp `db67a56` in Edit
 `TEXTFIT_RESULT rows=10525 failures=0`. Specs 304 passed.
 
 **One visible layout change.** A 48 px hit rect on a settings row tilted 0.5 degrees needs a row pitch of 53 or more, or neighbouring rows' hit boxes overlap (the gate measures each rotated box by its bounding box). `MenuTheme.SettingPitch` is 54, was 50, so the five settings rows sit 4 px further apart each (the last row is 16 px lower). The shard art, sizes and ids are unchanged. If that spacing is not wanted, the alternative is to keep pitch 50 and cap the settings row hit at 44, which fails the 48 rule.
+
+## Lighting.Technology (TASK-0120, 2026-11-02)
+Rojo 7.7.0 builds `Lighting` properties from `"$properties"` in `mathshow.project.json`, and the live plugin syncs them: ClockTime, Ambient, OutdoorAmbient and the Atmosphere, Bloom and ColorCorrection children were applied and read back in Edit. **`Technology` is the exception.**
+
+| Check | Result |
+|---|---|
+| `rojo build` with `"Technology": "Future"`, read back with Lune | Future, so a built file can carry it |
+| Live plugin sync, then read in Edit | **Cannot be read or verified**: `Lighting.Technology` is RobloxScript-capability (read and write), and the plugin runs without it. A script write fails with `lacking capability RobloxScript`. The property is also deprecated and absent from the Properties panel |
+| Scriptable replacements | `LightingStyle` and `PrioritizeLightingQuality` read fine in Edit (Soft, true here). Not tested through Rojo, and the mapping to Future or ShadowMap is not documented |
+
+Decision: `Technology` stays out of the project file; the other values are in it. Treat Technology as a **one-time place setting** that comes with the place file (`MathShow.rbxl` is ShadowMap today), not something Rojo manages. To make a test copy with another Technology, edit a copy of the .rbxl with Lune (`roblox.Enum.Technology[...]`, run inside the repo) and never save over the real place. The Studio place was not saved.
