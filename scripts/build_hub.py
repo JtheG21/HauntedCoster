@@ -1,0 +1,392 @@
+#!/usr/bin/env python3
+"""Generate games/mathshow/map/Hub.rbxmx, the MathShow hub graybox (TASK-0120).
+
+The .rbxmx is the source of truth for the map; this script is how it is tuned. Re-run it after editing the numbers:
+
+    python3 scripts/build_hub.py            # write the file
+    python3 scripts/build_hub.py --stats    # also print part counts and distances
+
+Axes: plaza centre is (0, 0, 0), north is -Z, east is +X, ground top is y = 0. Graybox only: plain parts, colours are
+zone identity placeholders (swap PALETTE when the A4 palette lands).
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import math
+import struct
+from pathlib import Path
+
+OUT = Path(__file__).resolve().parent.parent / "games" / "mathshow" / "map" / "Hub.rbxmx"
+
+PALETTE = {
+	"ground": (34, 36, 52),
+	"plaza_a": (58, 62, 88),
+	"plaza_b": (74, 80, 112),
+	"plaza_c": (92, 98, 134),
+	"plinth": (150, 140, 200),
+	"slot": (120, 126, 170),
+	"seat": (96, 90, 120),
+	"path": (70, 72, 90),
+	"daily": (240, 190, 60),
+	"competitive": (220, 60, 150),
+	"training": (50, 200, 220),
+	"ranks": (140, 90, 230),
+	"lake": (40, 110, 200),
+	"promenade": (110, 120, 150),
+	"tier": (52, 58, 78),
+	"glyph": (255, 255, 255),
+}
+
+MATERIAL = {"SmoothPlastic": 272, "Concrete": 816, "Slate": 800, "Neon": 288, "Glass": 1568, "Plastic": 256}
+SHAPE = {"Ball": 0, "Block": 1, "Cylinder": 2}
+
+PLAZA_R = 55.0
+PATH_W = 14.0
+PATH_TOP = 0.2
+TIER_COUNT = 4
+TIER_RING = 48
+WALL_R = 290.0
+LAKE_C = (112.0, 112.0)
+LAKE_R = 44.0
+
+# --- instance model -----------------------------------------------------------------------------------------------
+
+_ref = [0]
+
+
+class Node:
+	def __init__(self, cls: str, name: str):
+		self.cls = cls
+		self.name = name
+		self.props: list[str] = []
+		self.children: list["Node"] = []
+		self.tags: list[str] = []
+		self.attrs: dict[str, str] = {}
+
+	def add(self, child: "Node") -> "Node":
+		self.children.append(child)
+		return child
+
+	def xml(self, depth: int = 0) -> str:
+		_ref[0] += 1
+		pad = "\t" * depth
+		lines = [f'{pad}<Item class="{self.cls}" referent="RBX{_ref[0]:06d}">', f"{pad}\t<Properties>"]
+		lines.append(f'{pad}\t\t<string name="Name">{self.name}</string>')
+		lines.extend(f"{pad}\t\t{p}" for p in self.props)
+		if self.tags:
+			raw = "\0".join(self.tags).encode()
+			lines.append(f'{pad}\t\t<BinaryString name="Tags">{base64.b64encode(raw).decode()}</BinaryString>')
+		if self.attrs:
+			blob = struct.pack("<I", len(self.attrs))
+			for key, value in self.attrs.items():
+				kb, vb = key.encode(), value.encode()
+				blob += struct.pack("<I", len(kb)) + kb + b"\x02" + struct.pack("<I", len(vb)) + vb
+			lines.append(f'{pad}\t\t<BinaryString name="AttributesSerialize">{base64.b64encode(blob).decode()}</BinaryString>')
+		lines.append(f"{pad}\t</Properties>")
+		lines.extend(c.xml(depth + 1) for c in self.children)
+		lines.append(f"{pad}</Item>")
+		return "\n".join(lines)
+
+
+def f(x: float) -> str:
+	return f"{x:.4f}".rstrip("0").rstrip(".") if "." in f"{x:.4f}" else f"{x:.4f}"
+
+
+def cframe(pos, r) -> str:
+	vals = ["X", "Y", "Z", "R00", "R01", "R02", "R10", "R11", "R12", "R20", "R21", "R22"]
+	nums = [pos[0], pos[1], pos[2], r[0][0], r[0][1], r[0][2], r[1][0], r[1][1], r[1][2], r[2][0], r[2][1], r[2][2]]
+	inner = "".join(f"<{k}>{f(v)}</{k}>" for k, v in zip(vals, nums))
+	return f'<CoordinateFrame name="CFrame">{inner}</CoordinateFrame>'
+
+
+def color_int(c) -> int:
+	return 0xFF000000 | (c[0] << 16) | (c[1] << 8) | c[2]
+
+
+IDENT = ((1, 0, 0), (0, 1, 0), (0, 0, 1))
+
+
+def from_columns(x, y, z):
+	return ((x[0], y[0], z[0]), (x[1], y[1], z[1]), (x[2], y[2], z[2]))
+
+
+def make_part(name, size, pos, rot, color, material="SmoothPlastic", shape="Block", transparency=0.0, collide=True,
+		query=True, cls="Part") -> Node:
+	n = Node(cls, name)
+	n.props += [
+		"<bool name=\"Anchored\">true</bool>",
+		f"<bool name=\"CanCollide\">{str(collide).lower()}</bool>",
+		f"<bool name=\"CanQuery\">{str(query).lower()}</bool>",
+		f"<bool name=\"CanTouch\">{str(collide).lower()}</bool>",
+		"<bool name=\"CastShadow\">true</bool>",
+		cframe(pos, rot),
+		f'<Color3uint8 name="Color3uint8">{color_int(color)}</Color3uint8>',
+		f'<token name="Material">{MATERIAL[material]}</token>',
+		f'<Vector3 name="Size"><X>{f(size[0])}</X><Y>{f(size[1])}</Y><Z>{f(size[2])}</Z></Vector3>',
+		f'<float name="Transparency">{f(transparency)}</float>',
+		'<token name="TopSurface">0</token>',
+		'<token name="BottomSurface">0</token>',
+	]
+	if cls == "Part":
+		n.props.append(f'<token name="shape">{SHAPE[shape]}</token>')
+	return n
+
+
+class Frame:
+	"""Local frame: a = outward from `origin` along `out`, b = lateral, y = world height. Block size is (lateral, height, along)."""
+
+	def __init__(self, out, origin=(0.0, 0.0)):
+		length = math.hypot(*out)
+		self.out = (out[0] / length, out[1] / length)
+		self.side = (self.out[1], -self.out[0])
+		self.origin = origin
+
+	def world(self, a, b):
+		return (
+			self.origin[0] + self.out[0] * a + self.side[0] * b,
+			self.origin[1] + self.out[1] * a + self.side[1] * b,
+		)
+
+	def rot(self, pitch=0.0):
+		s, c = math.sin(pitch), math.cos(pitch)
+		x = (self.side[0], 0.0, self.side[1])
+		y = (-self.out[0] * s, c, -self.out[1] * s)
+		z = (self.out[0] * c, s, self.out[1] * c)
+		return from_columns(x, y, z)
+
+	def block(self, name, a, b, y, size, color, **kw) -> Node:
+		wx, wz = self.world(a, b)
+		return make_part(name, size, (wx, y, wz), self.rot(), color, **kw)
+
+
+def cylinder(name, x, y, z, height, diameter, color, **kw) -> Node:
+	rot = from_columns((0, 1, 0), (1, 0, 0), (0, 0, -1))
+	return make_part(name, (height, diameter, diameter), (x, y, z), rot, color, shape="Cylinder", **kw)
+
+
+def folder(name: str) -> Node:
+	return Node("Folder", name)
+
+
+# --- build --------------------------------------------------------------------------------------------------------
+
+PADS: list[dict] = []
+GLYPHS: list[dict] = []
+
+
+def build() -> Node:
+	hub = folder("Hub")
+	plaza = hub.add(folder("Plaza"))
+	paths = hub.add(folder("Paths"))
+	zones = hub.add(folder("Zones"))
+	lake = hub.add(folder("Lake"))
+	boundary = hub.add(folder("Boundary"))
+	pads = hub.add(folder("ModePads"))
+	glyphs = hub.add(folder("GlyphSpawns"))
+
+	ground = cylinder("Ground", 0, -1, 0, 2, 600, PALETTE["ground"], material="Concrete")
+	hub.add(ground)
+
+	# Plaza: three stacked bands (outer, middle, inner) + centre plinth.
+	plaza.add(cylinder("Ring_Outer", 0, 0.1, 0, 0.2, PLAZA_R * 2, PALETTE["plaza_a"]))
+	plaza.add(cylinder("Ring_Middle", 0, 0.2, 0, 0.4, 90, PALETTE["plaza_b"]))
+	plaza.add(cylinder("Ring_Inner", 0, 0.3, 0, 0.6, 66, PALETTE["plaza_c"]))
+	plaza.add(cylinder("Plinth", 0, 0.6, 0, 1.2, 12, PALETTE["plinth"]))
+
+	spawn = make_part("Spawn", (8, 0.4, 8), (0, 0.4, 47), IDENT, PALETTE["daily"], cls="SpawnLocation")
+	spawn.props += ['<bool name="Neutral">true</bool>', '<int name="Duration">0</int>']
+	plaza.add(spawn)
+
+	tiles = plaza.add(folder("TileSlots"))
+	for radius, count, top in ((48, 24, 0.2), (39, 18, 0.4), (22, 12, 0.6)):
+		for i in range(count):
+			ang = 2 * math.pi * (i + 0.5) / count
+			x, z = radius * math.cos(ang), radius * math.sin(ang)
+			if math.hypot(x - 0, z - 47) < 7:
+				continue
+			t = make_part(f"Slot_{radius}_{i:02d}", (4, 0.1, 4), (x, top + 0.05, z), from_columns((math.cos(ang), 0, math.sin(ang)),
+				(0, 1, 0), (-math.sin(ang), 0, math.cos(ang))), PALETTE["slot"])
+			t.tags.append("TileSlot")
+			tiles.add(t)
+
+	seats = plaza.add(folder("Seating"))
+	path_angles = [0, 45, 90, 135, 180, 270]
+	for k in range(48):
+		deg = k * 7.5
+		if any(min(abs(deg - p), 360 - abs(deg - p)) <= 11 for p in path_angles):
+			continue
+		ang = math.radians(deg)
+		fr = Frame((math.cos(ang), math.sin(ang)))
+		seats.add(fr.block(f"Seat_{k:02d}", 53, 0, 0.8, (6, 1.2, 2.6), PALETTE["seat"]))
+
+	# ---- paths and zones ----
+	dirs = {
+		"N": (0, -1),
+		"E": (1, 0),
+		"W": (-1, 0),
+		"SW": (-0.7071067, 0.7071067),
+		"SE": (0.7071067, 0.7071067),
+	}
+
+	def add_path(label, a0, a1, color=PALETTE["path"]):
+		fr = Frame(dirs[label])
+		paths.add(fr.block(f"Path_{label}", (a0 + a1) / 2, 0, PATH_TOP - 0.2, (PATH_W, 0.4, a1 - a0), color))
+		return fr
+
+	def pad(zone_fr, mode, a, b, y, color):
+		p = zone_fr.block(f"Pad_{mode}", a, b, y + 0.25, (10, 0.5, 10), color)
+		p.tags.append("ModePad")
+		p.attrs["Mode"] = mode
+		pads.add(p)
+		wx, wz = zone_fr.world(a, b)
+		PADS.append({"mode": mode, "x": wx, "y": y + 0.5, "z": wz})
+
+	def glyph(fr, name, a, b, surface_y, rarity, origin_override=None):
+		if origin_override is not None:
+			wx, wz = origin_override
+		else:
+			wx, wz = fr.world(a, b)
+		y = surface_y + 2.5
+		part = make_part(f"Glyph_{name}", (0.6, 0.6, 0.6), (wx, y, wz), IDENT, PALETTE["glyph"], transparency=1.0,
+			collide=False, query=False)
+		att = Node("Attachment", "GlyphSpawn")
+		att.props += ['<bool name="Visible">false</bool>', cframe((0, 0, 0), IDENT)]
+		att.tags.append("GlyphSpawn")
+		att.attrs["Rarity"] = rarity
+		part.add(att)
+		glyphs.add(part)
+		GLYPHS.append({"name": name, "rarity": rarity, "x": wx, "y": y, "z": wz})
+
+	# N: Observatory / Daily on the highest terrace, reached by a ramp.
+	n_fr = Frame(dirs["N"])
+	rise_top, ramp_a0, ramp_a1 = 16.0, PLAZA_R + 1, 135.0
+	run = ramp_a1 - ramp_a0
+	phi = math.atan2(rise_top - PATH_TOP, run)
+	length = math.hypot(run, rise_top - PATH_TOP)
+	thick = 1.0
+	rf = Frame(dirs["N"])
+	mid_a, mid_y = (ramp_a0 + ramp_a1) / 2, (PATH_TOP + rise_top) / 2
+	normal_y = math.cos(phi)
+	cx = rf.out[0] * mid_a + rf.out[0] * math.sin(phi) * thick / 2
+	cz = rf.out[1] * mid_a + rf.out[1] * math.sin(phi) * thick / 2
+	cy = mid_y - normal_y * thick / 2
+	ramp = make_part("Path_N_Ramp", (PATH_W, thick, length), (cx, cy, cz), rf.rot(phi), PALETTE["path"])
+	paths.add(ramp)
+	zones.add(n_fr.block("Terrace_Observatory", 167.5, 0, rise_top / 2, (70, rise_top, 65), PALETTE["daily"], material="Concrete"))
+	zones.add(cylinder("Observatory_Tower", *n_fr.world(185, 0)[:1], 36, n_fr.world(185, 0)[1], 40, 16, PALETTE["daily"]))
+	zones.add(make_part("Observatory_Dome", (22, 22, 22), (n_fr.world(185, 0)[0], 62, n_fr.world(185, 0)[1]), IDENT,
+		PALETTE["daily"], shape="Ball"))
+	pad(n_fr, "Daily", 160, 0, rise_top, PALETTE["daily"])
+
+	# E: Competitive entrance with three arches.
+	e_fr = add_path("E", PLAZA_R + 1, 126)
+	zones.add(e_fr.block("Court_Competitive", 158, 0, 0, (84, 0.4, 66), PALETTE["path"]))
+	for mode, b in (("VS", -26), ("Blitz", 0), ("Group", 26)):
+		pad(e_fr, mode, 150, b, PATH_TOP, PALETTE["competitive"])
+		for side in (-1, 1):
+			zones.add(e_fr.block(f"Arch_{mode}_Post{side}", 150, b + side * 7.5, 7, (2, 14, 2), PALETTE["competitive"]))
+		zones.add(e_fr.block(f"Arch_{mode}_Lintel", 150, b, 14.5, (18, 2.5, 3), PALETTE["competitive"]))
+
+	# W: Training, two pads and a ladder display.
+	w_fr = add_path("W", PLAZA_R + 1, 126)
+	zones.add(w_fr.block("Court_Training", 158, 0, 0, (60, 0.4, 66), PALETTE["path"]))
+	for mode, b in (("Practice", -18), ("Skill", 18)):
+		pad(w_fr, mode, 150, b, PATH_TOP, PALETTE["training"])
+	zones.add(w_fr.block("Ladder_Board", 188, 0, 9, (36, 14, 1.5), PALETTE["training"]))
+	for i in range(5):
+		h = 1.5 * (i + 1)
+		zones.add(w_fr.block(f"Ladder_Step{i + 1}", 178, -16 + 8 * i, h / 2, (6, h, 4), PALETTE["training"]))
+
+	# SW: Ranks hall (walls, roof, stairs up to the roof).
+	sw_fr = add_path("SW", PLAZA_R + 1, 126)
+	zones.add(sw_fr.block("Hall_Floor", 158, 0, 0, (56, 0.4, 66), PALETTE["path"]))
+	pad(sw_fr, "Ranks", 150, 0, PATH_TOP, PALETTE["ranks"])
+	zones.add(sw_fr.block("Hall_BackWall", 188, 0, 7, (54, 14, 2), PALETTE["ranks"]))
+	for side in (-1, 1):
+		zones.add(sw_fr.block(f"Hall_SideWall{side}", 158, side * 26, 7, (2, 14, 62), PALETTE["ranks"]))
+	zones.add(sw_fr.block("Hall_Roof", 158, 0, 14, (56, 1.5, 64), PALETTE["ranks"]))
+	steps = 6
+	for i in range(steps):
+		h = 14.75 / steps * (i + 1)
+		zones.add(sw_fr.block(f"Hall_Stair{i + 1}", 132 + 3.0 * i, -31, h / 2, (6, h, 3), PALETTE["ranks"]))
+
+	# SE: promenade path and lake.
+	se_fr = add_path("SE", PLAZA_R + 1, 106)
+	lake.add(cylinder("Water", LAKE_C[0], 0.15, LAKE_C[1], 0.3, LAKE_R * 2, PALETTE["lake"], material="Glass", transparency=0.35,
+		collide=False))
+	lake.add(cylinder("Blocker", LAKE_C[0], 10, LAKE_C[1], 20, LAKE_R * 2 - 2, PALETTE["lake"], transparency=1.0, query=False))
+	ring_seg = 16
+	for k in range(ring_seg):
+		deg = 135 + 180 * (k + 0.5) / ring_seg
+		ang = math.radians(deg)
+		ff = Frame((math.cos(ang), math.sin(ang)), LAKE_C)
+		chord = 2 * 50 * math.tan(math.pi / 2 / ring_seg) + 1.0
+		lake.add(ff.block(f"Promenade_{k:02d}", 50, 0, 0, (chord, 0.4, 12), PALETTE["promenade"]))
+
+	# ---- boundary: stepped terraces + invisible walls ----
+	tiers = boundary.add(folder("Terraces"))
+	for t in range(TIER_COUNT):
+		radius = 254 + 8 * t
+		height = 3.0 * (t + 1)
+		for k in range(TIER_RING):
+			ang = 2 * math.pi * k / TIER_RING
+			fr = Frame((math.cos(ang), math.sin(ang)))
+			chord = 2 * radius * math.tan(math.pi / TIER_RING) + 1.5
+			tiers.add(fr.block(f"Tier{t + 1}_{k:02d}", radius, 0, height / 2, (chord, height, 8), PALETTE["tier"], material="Concrete"))
+	walls = boundary.add(folder("Walls"))
+	for k in range(TIER_RING):
+		ang = 2 * math.pi * k / TIER_RING
+		fr = Frame((math.cos(ang), math.sin(ang)))
+		chord = 2 * WALL_R * math.tan(math.pi / TIER_RING) + 3
+		walls.add(fr.block(f"Wall_{k:02d}", WALL_R, 0, 40, (chord, 80, 1), PALETTE["tier"], transparency=1.0, query=False))
+
+	# ---- glyph spawns (30-40; common on paths, rare on terraces / roofs / lake edge) ----
+	def ramp_y(a):
+		return PATH_TOP + (a - ramp_a0) / run * (rise_top - PATH_TOP)
+
+	for i, a in enumerate((65, 90, 115)):
+		glyph(n_fr, f"C_N{i + 1}", a, -3 if i % 2 == 0 else 3, ramp_y(a), "common")
+	glyph(n_fr, "C_N4", 145, 0, rise_top, "common")
+	for i, (a, b) in enumerate(((75, 0), (100, -3), (120, 3), (140, -13), (140, 13), (175, 0))):
+		glyph(e_fr, f"C_E{i + 1}", a, b, PATH_TOP, "common")
+	for i, (a, b) in enumerate(((75, 0), (100, 3), (120, -3), (140, -9), (165, 0))):
+		glyph(w_fr, f"C_W{i + 1}", a, b, PATH_TOP, "common")
+	for i, (a, b) in enumerate(((75, 0), (100, -3), (120, 3), (172, 0))):
+		glyph(sw_fr, f"C_SW{i + 1}", a, b, PATH_TOP, "common")
+	for i, a in enumerate((70, 92)):
+		glyph(se_fr, f"C_SE{i + 1}", a, 0, PATH_TOP, "common")
+
+	for i, (a, b) in enumerate(((150, -30), (150, 30), (195, 28))):
+		glyph(n_fr, f"R_Terrace{i + 1}", a, b, rise_top, "rare")
+	for i, (deg, tier) in enumerate(((20, 2), (100, 2), (205, 2), (300, 2), (150, 4))):
+		ang = math.radians(deg)
+		fr = Frame((math.cos(ang), math.sin(ang)))
+		glyph(fr, f"R_Tier{i + 1}", 254 + 8 * (tier - 1), 0, 3.0 * tier, "rare")
+	for i, b in enumerate((-12, 12)):
+		glyph(sw_fr, f"R_Roof{i + 1}", 165, b, 14.75, "rare")
+	for i, deg in enumerate((195, 225, 255)):
+		ang = math.radians(deg)
+		glyph(None, f"R_Lake{i + 1}", 0, 0, PATH_TOP, "rare",
+			origin_override=(LAKE_C[0] + 50 * math.cos(ang), LAKE_C[1] + 50 * math.sin(ang)))
+	return hub
+
+
+def main() -> None:
+	ap = argparse.ArgumentParser()
+	ap.add_argument("--stats", action="store_true")
+	args = ap.parse_args()
+	hub = build()
+	OUT.parent.mkdir(parents=True, exist_ok=True)
+	body = hub.xml(1)
+	OUT.write_text('<roblox version="4">\n' + body + "\n</roblox>\n", encoding="ascii")
+	print(f"wrote {OUT}")
+	if args.stats:
+		print(f"parts: {_ref[0]}, pads: {len(PADS)}, glyphs: {len(GLYPHS)}")
+		for p in PADS:
+			print(f"  pad {p['mode']:<9} dist {math.hypot(p['x'], p['z']):6.1f}  ({p['x']:.1f}, {p['y']:.1f}, {p['z']:.1f})")
+
+
+if __name__ == "__main__":
+	main()

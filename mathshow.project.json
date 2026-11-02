@@ -26,6 +26,11 @@
       "Tests": {
         "$path": "games/mathshow/tests"
       }
+    },
+    "Workspace": {
+      "Hub": {
+        "$path": "games/mathshow/map/Hub.rbxmx"
+      }
     }
   }
 }

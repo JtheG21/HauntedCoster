@@ -1,0 +1,43 @@
+{
+  "id": "TASK-0120",
+  "game": "GAME-004",
+  "title": "MathShow Hub Graybox",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/map/",
+    "mathshow.project.json",
+    "scripts/build_hub.py",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0120-MathShow-Hub-Graybox.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0120-hub-graybox",
+  "acceptance": [
+    "Map geometry is on disk (games/mathshow/map/Hub.rbxmx), mounted at Workspace.Hub by mathshow.project.json, and survives a Rojo reconnect.",
+    "Walk time plaza centre to each mode pad is 8-12 s at WalkSpeed 16, or outliers are listed with a proposed fix.",
+    "Every GlyphSpawn marker is reachable with the default jump.",
+    "Lighting A/B (Technology Future vs ShadowMap) numbers plus a recommendation.",
+    "Screenshots: spawn view, aerial, Competitive entrance.",
+    "scripts/check.sh, validate_queue and validate_vault pass; PR open, CI green, not merged."
+  ],
+  "evidence": [],
+  "notes": "Approved rows G1 and G2 plus map-source proposal (jg, 2026-11-01). Out of scope: art, meshes, VFX, Glyph system, mode-pad logic, remotes, DataStore, publishing, merging. Numbered 0120 because TASK-0119 is claimed by the uncommitted glyph-rules worktree.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0120-MathShow-Hub-Graybox.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-01T22:28:04",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-01T22:28:04",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}
