@@ -4,6 +4,7 @@
 local Hud = require(script.Hud)
 local Menu = require(script.Menu)
 local Watching = require(script.Menu.Watching)
+local ModePadController = require(script.Hub.ModePadController)
 
 Hud.start()
 -- The menu opens first. JOIN SHOW tells the server (JoinShow remote; it decides who is in the match) and reveals the HUD;
@@ -16,4 +17,5 @@ Menu.start({
 		Hud.setVisible(true)
 	end,
 })
+ModePadController.start()
 print("[MathShow] client ready")

@@ -1,0 +1,132 @@
+--!strict
+-- ModePadService (TASK-0122): tells a client when its character walks onto a hub mode pad. Pads are the ModePad-tagged
+-- parts under Workspace.Hub (Mode attribute -> ModePadConfig.Modes). One poll loop every PollSeconds checks each player's
+-- HumanoidRootPart against each pad (ModePadRules.isInside), steps the per-player state (ModePadRules.step: enter only,
+-- with a cooldown) and fires ModePadOpen to that player alone. The client only ever opens a screen; it asks the server
+-- for nothing, so there is no client -> server remote here.
+
+local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local ModePadConfig = require(Shared:WaitForChild("ModePadConfig"))
+local ModePadRules = require(Shared:WaitForChild("ModePadRules"))
+
+local Remotes = require(script.Parent.Parent.Remotes)
+
+local TAG = "ModePad"
+
+type PadRecord = {
+	name: string,
+	screen: string,
+	pad: ModePadRules.Pad,
+}
+
+local ModePadService = {}
+
+local started = false
+local pads: { PadRecord } = {}
+-- player -> pad index -> step state
+local states: { [Player]: { [number]: ModePadRules.State } } = {}
+
+local function readPads(hub: Instance): { PadRecord }
+	local records: { PadRecord } = {}
+	for _, part in CollectionService:GetTagged(TAG) do
+		if not part:IsDescendantOf(hub) then
+			continue
+		end
+		if not part:IsA("BasePart") then
+			warn(`[MathShow] ModePad {part:GetFullName()} is not a part; skipped`)
+			continue
+		end
+		local mode = part:GetAttribute("Mode")
+		local screen = ModePadRules.screenFor(mode)
+		if screen == nil then
+			warn(`[MathShow] ModePad {part:GetFullName()} has unknown Mode {tostring(mode)}; skipped`)
+			continue
+		end
+		local cf, size = part.CFrame, part.Size
+		-- Yaw from the right vector (right = cos, 0, -sin), so a little pitch or roll cannot skew it.
+		local right = cf.RightVector
+		table.insert(records, {
+			name = part.Name,
+			screen = screen,
+			pad = {
+				cx = cf.Position.X,
+				cy = cf.Position.Y,
+				cz = cf.Position.Z,
+				sx = size.X,
+				sy = size.Y,
+				sz = size.Z,
+				yaw = math.atan2(-right.Z, right.X),
+			},
+		})
+	end
+	return records
+end
+
+-- No yields in here: the only wait in the loop is the one after it.
+local function poll()
+	local now = os.clock()
+	for _, player in Players:GetPlayers() do
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if not root or not root:IsA("BasePart") then
+			states[player] = nil -- dead or loading: a respawn on a pad counts as an entry
+			continue
+		end
+		local position = root.Position
+		local pos: ModePadRules.Pos = { x = position.X, y = position.Y, z = position.Z }
+		local playerStates = states[player]
+		if not playerStates then
+			playerStates = {}
+			states[player] = playerStates
+		end
+		for index, record in pads do
+			local prev = playerStates[index] or { inside = false }
+			local nextState, trigger = ModePadRules.step(prev, ModePadRules.isInside(record.pad, pos), now)
+			playerStates[index] = nextState
+			if trigger then
+				Remotes.ModePadOpen:FireClient(player, { screen = record.screen })
+			end
+		end
+	end
+end
+
+function ModePadService.start()
+	if started then
+		return
+	end
+	started = true
+
+	Players.PlayerRemoving:Connect(function(player: Player)
+		states[player] = nil
+	end)
+
+	local hub = Workspace:FindFirstChild("Hub")
+	if not hub then
+		warn("[MathShow] ModePadService: Workspace.Hub not found; no mode pads")
+		return
+	end
+	pads = readPads(hub)
+	if #pads == 0 then
+		warn("[MathShow] ModePadService: no ModePad parts under Workspace.Hub")
+		return
+	end
+
+	task.spawn(function()
+		while true do
+			local ok, err = pcall(function()
+				poll()
+			end)
+			if not ok then
+				warn(`[MathShow] ModePadService poll failed: {err}`)
+			end
+			task.wait(ModePadConfig.PollSeconds)
+		end
+	end)
+end
+
+return ModePadService

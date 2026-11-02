@@ -1,0 +1,48 @@
+{
+  "id": "TASK-0122",
+  "game": "GAME-004",
+  "title": "MathShow Hub Mode Pads",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/shared/ModePadConfig.luau",
+    "games/mathshow/src/shared/ModePadRules.luau",
+    "games/mathshow/src/shared/Net.luau",
+    "games/mathshow/src/server/Services/ModePadService.luau",
+    "games/mathshow/src/server/Remotes.luau",
+    "games/mathshow/src/server/init.server.luau",
+    "games/mathshow/src/client/Hub/",
+    "games/mathshow/src/client/init.client.luau",
+    "games/mathshow/src/client/Menu/init.luau",
+    "games/mathshow/tests/ModePadRules.spec.luau",
+    "docs/workflow/evidence/TASK-0122/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0122-MathShow-Hub-Mode-Pads.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0122-mode-pads",
+  "acceptance": [
+    "ModePadRules.spec passes headless (inside/edge/outside, rotated pad, vertical tolerance, cooldown, NaN, unknown mode).",
+    "Studio: each of the 6 pads opens the right screen (Daily shows the locked toast); no retrigger while standing; 2 s cooldown; ignored while a menu screen is open; per-player delivery; no console errors; glyph collection unaffected.",
+    "check.sh and validators green; PR open, CI green, not merged."
+  ],
+  "evidence": [],
+  "notes": "Approved rows P1 and P2 (jg, 2026-11-02). Out of scope: art, lamps, Leaderboard hall, Daily Challenge, matchmaking, DataStore, publishing, merging. Remote ModePadOpen: sender ModePadService, receiver ModePadController; no client to server remote.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0122-MathShow-Hub-Mode-Pads.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T13:57:08",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T13:57:08",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}
