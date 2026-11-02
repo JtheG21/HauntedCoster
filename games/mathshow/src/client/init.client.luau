@@ -4,6 +4,7 @@
 local Hud = require(script.Hud)
 local Menu = require(script.Menu)
 local Watching = require(script.Menu.Watching)
+local GlyphController = require(script.Glyphs.GlyphController)
 
 Hud.start()
 -- The menu opens first. JOIN SHOW tells the server (JoinShow remote; it decides who is in the match) and reveals the HUD;
@@ -16,4 +17,5 @@ Menu.start({
 		Hud.setVisible(true)
 	end,
 })
+GlyphController.start() -- hub glyphs and their counter (TASK-0121)
 print("[MathShow] client ready")

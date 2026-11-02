@@ -36,7 +36,10 @@ return function(t: TestRunner.T)
 		t.eq(Config.Value.rare, 5)
 		t.eq(Config.Rarity[1], "common")
 		t.eq(Config.Rarity[2], "rare")
-		local tables: { any } = { Config, Config.RespawnSeconds, Config.Value, Config.Rarity }
+		t.eq(Config.RateWindowSeconds, 1)
+		t.eq(Config.RawRequestLimit, 10)
+		t.eq(#Config.Symbols, 7)
+		local tables: { any } = { Config, Config.RespawnSeconds, Config.Value, Config.Rarity, Config.Symbols }
 		for _, value in tables do
 			t.truthy(table.isfrozen(value))
 		end
@@ -187,5 +190,110 @@ return function(t: TestRunner.T)
 		t.eq(ok, false)
 		t.eq(reason, "unknown_id")
 		t.eq(next(Rules.tickRespawns(freezeState(state), 100).glyphs), nil)
+	end)
+
+	local function record(id: string, rarity: string, x: number, y: number, z: number): Rules.SpawnRecord
+		return { id = id, rarity = rarity, x = x, y = y, z = z }
+	end
+
+	t.test("parseSpawns keeps valid records in order with their rarity and position", function()
+		local parsed, warnings = Rules.parseSpawns({ record("a", "common", 1, 2, 3), record("b", "rare", -4, 5, 6) })
+		t.eq(#parsed, 2)
+		t.eq(#warnings, 0)
+		t.eq(parsed[1].id, "a")
+		t.eq(parsed[1].rarity, "common")
+		t.eq(parsed[1].position.z, 3)
+		t.eq(parsed[2].id, "b")
+		t.eq(parsed[2].rarity, "rare")
+		t.eq(parsed[2].position.x, -4)
+	end)
+
+	t.test("parseSpawns drops unknown rarities with a warning; valid rarities come from GlyphConfig.Rarity", function()
+		local records: { Rules.SpawnRecord } = { record("x", "epic", 0, 0, 0), record("y", "Common", 0, 0, 0) }
+		for index, rarity in Config.Rarity do
+			table.insert(records, record(`ok{index}`, rarity, 0, 0, 0))
+		end
+		local parsed, warnings = Rules.parseSpawns(records)
+		t.eq(#parsed, #Config.Rarity)
+		t.eq(#warnings, 2)
+		t.truthy(string.find(warnings[1], "x", 1, true) ~= nil)
+		t.truthy(string.find(warnings[1], "rarity", 1, true) ~= nil)
+	end)
+
+	t.test("parseSpawns keeps the first of a duplicate id and warns once per duplicate", function()
+		local parsed, warnings = Rules.parseSpawns({
+			record("a", "common", 1, 0, 0),
+			record("a", "rare", 2, 0, 0),
+			record("a", "common", 3, 0, 0),
+		})
+		t.eq(#parsed, 1)
+		t.eq(parsed[1].rarity, "common")
+		t.eq(parsed[1].position.x, 1)
+		t.eq(#warnings, 2)
+		t.truthy(string.find(warnings[1], "duplicate", 1, true) ~= nil)
+	end)
+
+	t.test("parseSpawns drops NaN and infinite coordinates on any axis, and an empty id", function()
+		local nan = 0 / 0
+		local parsed, warnings = Rules.parseSpawns({
+			record("nx", "common", nan, 0, 0),
+			record("ny", "common", 0, math.huge, 0),
+			record("nz", "common", 0, 0, -math.huge),
+			record("", "common", 0, 0, 0),
+			record("ok", "common", 0, 0, 0),
+		})
+		t.eq(#parsed, 1)
+		t.eq(parsed[1].id, "ok")
+		t.eq(#warnings, 4)
+		t.truthy(string.find(warnings[1], "non-finite", 1, true) ~= nil)
+	end)
+
+	t.test("parseSpawns of an empty list returns no spawns and no warnings", function()
+		local parsed, warnings = Rules.parseSpawns({})
+		t.eq(#parsed, 0)
+		t.eq(#warnings, 0)
+	end)
+
+	t.test("a dropped duplicate does not hide a later valid id", function()
+		local parsed = Rules.parseSpawns({
+			record("a", "common", 0, 0, 0),
+			record("a", "rare", 0, 0, 0),
+			record("b", "rare", 0, 0, 0),
+		})
+		t.eq(#parsed, 2)
+		t.eq(parsed[2].id, "b")
+	end)
+
+	t.test("the rate window is RateWindowSeconds wide: exactly that old falls out, just inside still counts", function()
+		local state = Rules.newPlayerState(spawns)
+		local window = Config.RateWindowSeconds
+		local stamps: { number } = {}
+		for _ = 1, Config.RateLimit do
+			table.insert(stamps, 10)
+		end
+		state.collectTimes = stamps
+		expect(state, "a", origin, 10 + window - 0.000001, "rate_limited")
+		expect(state, "a", origin, 10 + window, "ok")
+		local nextState = Rules.applyCollect(state, "a", 10 + window)
+		t.eq(#nextState.collectTimes, 1)
+	end)
+
+	t.test("a non-finite now is rejected as bad_time before anything else", function()
+		local state = Rules.newPlayerState(spawns)
+		for _, now in { 0 / 0, math.huge, -math.huge } do
+			expect(state, "a", origin, now, "bad_time")
+			expect(state, 42, origin, now, "bad_time")
+		end
+	end)
+
+	t.test("out_of_range beats rate_limited", function()
+		local state = Rules.newPlayerState(spawns)
+		local stamps: { number } = {}
+		for _ = 1, Config.RateLimit do
+			table.insert(stamps, 5)
+		end
+		state.collectTimes = stamps
+		expect(state, "a", origin, 5, "rate_limited")
+		expect(state, "a", { x = Config.CollectRadius + 1, y = 0, z = 0 }, 5, "out_of_range")
 	end)
 end

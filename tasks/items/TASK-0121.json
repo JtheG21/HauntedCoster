@@ -1,0 +1,49 @@
+{
+  "id": "TASK-0121",
+  "game": "GAME-004",
+  "title": "MathShow Glyph Service",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/shared/GlyphConfig.luau",
+    "games/mathshow/src/shared/GlyphRules.luau",
+    "games/mathshow/tests/GlyphRules.spec.luau",
+    "games/mathshow/src/shared/Net.luau",
+    "games/mathshow/src/server/Remotes.luau",
+    "games/mathshow/src/server/init.server.luau",
+    "games/mathshow/src/server/Services/GlyphService.luau",
+    "games/mathshow/src/client/init.client.luau",
+    "games/mathshow/src/client/Glyphs/",
+    "docs/workflow/evidence/TASK-0121/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0121-MathShow-Glyph-Service.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0121-glyph-service",
+  "acceptance": [
+    "GlyphRules spec passes headless with the new parseSpawns, RateWindowSeconds boundary, NaN now and out_of_range-before-rate_limited cases; scripts/check.sh green.",
+    "Studio steps 1-6 recorded with console excerpts in docs/workflow/evidence/TASK-0121/glyph-play.txt, with the measured SHA and an applies_to line.",
+    "No leaks: player state and connections cleared on leave (table size shown after leaving).",
+    "No yield before the raw throttle in the GlyphCollect handler (file:line cited).",
+    "record-exec done; PR open, CI green, not merged; Play and Rojo stopped, place unsaved."
+  ],
+  "evidence": [],
+  "notes": "Approved rows P1/P2 (jg, 2026-11-02). Wires TASK-0119's GlyphRules into a server service, two remotes and a client controller. Out of scope: DataStore/persistence, quests/XP, art meshes, lamps, Lighting.Technology, mode-pad logic, publishing, merging. Codex audits.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0121-MathShow-Glyph-Service.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T13:04:09",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T13:04:09",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}
