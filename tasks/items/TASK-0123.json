@@ -2,7 +2,7 @@
   "id": "TASK-0123",
   "game": "GAME-004",
   "title": "MathShow Multiplayer Playtest",
-  "status": "in_progress",
+  "status": "changes_requested",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -37,6 +37,20 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-03T13:38:15",
+      "from": "in_progress",
+      "to": "changes_requested",
+      "note": "execution checks failed; revision 1/2"
     }
-  ]
+  ],
+  "executions": [
+    {
+      "time": "2026-11-03T13:38:15",
+      "result": "fail",
+      "notes": "Partial: private test published, per-player Glyph (P4) passed; P2, P3, P5 and console capture not done. See docs/workflow/evidence/TASK-0123/playtest.txt."
+    }
+  ],
+  "revisions": 1
 }

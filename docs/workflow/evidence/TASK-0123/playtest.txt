@@ -1,0 +1,60 @@
+TASK-0123 private multiplayer playtest: evidence log (partial; see "Not done")
+Recorded 2026-11-03 by Claude Code with jg. Times are UTC.
+
+MEASURED
+  Run 1 build: main a3bc341df1b3adbbe37073465a2abdd3cdf71440, BuildStamp "a3bc341 2026-11-03T20:37:13Z"
+               applies_to: no later commit touches games/mathshow/src (task JSON only).
+  Run 2 build: branch task/TASK-0134-menu-exit @ 81d21fc45e490028c2f62b1ed2d9a9cf28bb8318 (draft PR 196, NOT merged),
+               BuildStamp "81d21fc 2026-11-03T21:15:27Z". Run 2 is the build under test for P1 and P4 below.
+               applies_to: main plus the TASK-0134 diff only (menu exit; JoinRules/RoundService/Remotes/Net/MenuCopy).
+  Scratch builds (outside the repo): ~/Roblox-Work/scratch/MathShowPrivateTest.rbxl, MathShowPrivateTest-0134.rbxl.
+  Studio publish dialogs also showed the "Lighting Technology Migration" notice (Compatibility -> Voxel); Continue was clicked.
+
+EXPERIENCE
+  Name: MathShow Private Test (new experience, owner jg_57565). Universe 10774566206, place 93701543861123.
+  Published 2026-11-03T20:53Z (create), republished 2026-11-03T21:18:34Z (same place, overwrite, jg approved in chat).
+  Data Sharing turned OFF in the publish dialog; Team Create left on (default). No Robux, no paid features.
+  Profiles persist in THIS test experience only; the live MathShow experience was not touched.
+
+SETTINGS READBACK (Creator Dashboard)
+  2026-11-03T20:5xZ: Game access Private; Audience reach Private; Manage audience "Only available to you, your
+  collaborators, and early testers. Playtesters under 16 won't have access."; Early testers: jg_574 (1/10, a friend of
+  jg_57565, persisted after reload); Collaborators: none.
+  2026-11-03T21:18Z and 2026-11-03T21:36Z: Game access Private; Audience reach Private (read back again, still private).
+  Content rating questionnaire: Not Started, label Unknown. NOT filled in: the iPad account joined without it.
+
+DEVICES
+  Mac: jg_57565 (main) in Roblox Player (not Studio), Mac OS 26.5.1. iPad: jg_574; model and iPadOS version NOT recorded.
+
+FINDINGS (build a3bc341)
+  F1  The main menu opens on join and has no exit: Back/Esc does nothing on the main screen (Menu/init.luau back());
+      only Group Battle > JOIN SHOW hides it.
+  F2  Joining mid-match gives "WATCHING - YOU JOIN NEXT MATCH" under a full-screen show HUD. iPad: could not move or tap
+      (two attempts, one after leaving and rejoining).
+  F3  Mac reproduced it: the show HUD (question, results, "GET READY 10" lobby) covers the plaza in every phase; no way
+      back to the plaza while joined. Matches: ~13 s/question, 6 questions, then lobby 10 s, then the next match.
+      Two-attempt rule reached for P1/P2/P4 on this build. jg asked for a close-menu button -> TASK-0134 (PR 196).
+FINDING (build 81d21fc)
+  F4  Mac avatar walked off the Daily ramp onto the grass beside the wall, then stuck against the wall with the camera
+      inside the avatar; Respawn from the Roblox menu recovered it. Not investigated (may be my key-driven movement).
+
+RESULTS (build 81d21fc unless noted)
+  U4  21:21:36 Mac joined the same server as the iPad (toast "You've joined jg_574"). The new CLOSE button on the main
+      menu returned to the plaza on the Mac (screenshot 02). jg: "the fix worked" on the iPad.
+  P1  (iPad, reported by jg) every pad opened its corresponding screen as expected; everything functionally normal; the
+      Glyph counter stays on screen in the plaza outside menus. NOT reported: Daily toast, rare Glyph, HUD behind menu.
+      Pad screens were not independently screenshotted by Claude.
+  P4  Mac (B, idle, then driven): counter 0, no menu opened while A used pads and Glyphs; the path Glyph orbs A had
+      collected were still visible to B up the ramp; B collected on the path and the counter went 0 -> 1 -> 2 (later 5);
+      jg confirmed A's count and view were unchanged (21:3xZ). PASS for per-player GlyphState independence.
+      Screenshots 01-03 in ~/Roblox-Work/evidence/TASK-0123/.
+
+NOT DONE (do not read these as passes)
+  P2  mid-match pad block with two clients: not run.
+  P3  iPad FPS / frame ms / memory / triangle count / MicroProfiler at spawn, plaza centre, Observatory: not captured
+      (jg asked to keep the iPad for the multiplayer check only).
+  P5  Mac perf: Performance Stats toggled in the in-game Settings but no overlay appeared in screenshots, and the Mac client
+      repeatedly lost keyboard focus and ran very sluggishly (low system resources). No FPS numbers. 4,332 triangle gap
+      not compared.
+  Per-client console capture was not done. The "no errors in either console" acceptance line is unverified.
+  ModePadOpen per-player check beyond jg's report (B's menu never opened) was observed only on the Mac.

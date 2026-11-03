@@ -3,13 +3,13 @@ id: TASK-0123
 title: "MathShow Multiplayer Playtest"
 type: task
 project: GAME-004
-status: in_progress
+status: changes_requested
 priority: medium
 risk: low
 owner: claude-code
 depends_on:
   - TASK-0122
-branch: task/TASK-0123-multiplayer-playtest
+branch: task/TASK-0123-private-playtest
 related:
   - "[[TASK-0122-MathShow-Hub-Mode-Pads]]"
 created: 2026-11-02
@@ -52,7 +52,10 @@ Needs jg's approval to publish a test place.
 
 ---
 ## Implementation record
+Private test experience "MathShow Private Test" (universe 10774566206, place 93701543861123), published on jg's approval, kept Private (early tester jg_574). Run 1 on main a3bc341 exposed a menu dead end (F1-F3); jg approved a republish of the TASK-0134 build (81d21fc, PR 196, not merged), and run 2 used that. Per-player Glyph independence passed (P4). P2, P3, P5 and console capture were not done. Detail: `docs/workflow/evidence/TASK-0123/playtest.txt`.
 
 ## Audits
 
 ## Outcome
+
+Partial. Acceptance items on mid-match block (P2), real-device perf (P3, P5) and console capture are open; see the evidence log. Draft; no audit.
