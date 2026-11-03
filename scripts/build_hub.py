@@ -68,7 +68,7 @@ LAKE_WATER_REFLECTANCE = 0.1
 LAKE_BED = (30, 70, 130)
 # TASK-0133 Q2: Menu Violet #8A4DFF reads magenta in captures once it is Neon (bloom pushes red up). Every Neon map part that asks
 # for the violet takes this value instead; the menu UI palette (MenuTheme, IdentityTheme) is untouched.
-MAP_NEON_VIOLET = (88, 85, 255)  # renders about (119, 63, 255), hue 258 vs the swatch's 261 (the old value rendered hue 278)
+MAP_NEON_VIOLET = (96, 82, 255)  # the Neon arch and trim capture as about (130, 75, 255), hue 258, against the swatch's (138, 77, 255), hue 261 (the old value read hue 278)
 PLAZA_R = 55.0
 SPAWN_Z = 47.0  # the SpawnLocation and the SpawnHex plate sit at (0, SPAWN_Z), the plaza's south edge
 PATH_W = 14.0
