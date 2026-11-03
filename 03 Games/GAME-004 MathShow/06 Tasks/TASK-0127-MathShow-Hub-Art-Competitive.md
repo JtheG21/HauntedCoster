@@ -3,7 +3,7 @@ id: TASK-0127
 title: "MathShow Hub Art-1 Batch 2: Competitive"
 type: task
 project: GAME-004
-status: changes_requested
+status: in_progress
 priority: medium
 risk: low
 owner: claude-code
@@ -50,6 +50,15 @@ Build the Competitive zone (VS / Blitz / Group pads) to match `A2_competitive_en
 - Cost found: VS walk +1.1 s because the front wall closes the court-corner diagonal.
 - Checks: `scripts/check.sh` all pass; Studio checks in the evidence file. Not recorded or self-audited (row C6).
 
+### Revision 1 (audit AUD-20261102-TASK-0127-01, rows G0-G7, jg 2026-11-02)
+- F1 (P2): arches scaled x2.14 so the legs and their colliders sit outside the pad trigger footprint (1.12 studs clear); new guard `tests/test_build_hub.py` (failed on the pre-fix geometry, passes now); zone dimensions followed (walls, masses, signs, light range).
+- F2 (P2): all 7 generate_mesh calls recorded in `props/manifest.json` (`generation_history`) with picked / discarded / failed; cap of 3 exceeded and acknowledged by jg (G1); AGENTS.md prop rule has the cap line. Mesh ids of the first two discarded attempts were not captured; stated, not invented.
+- F3 (P3): absolute totals 34,334 -> 38,258 (+3,924) at d21894f, method in the evidence; revision state 38,666 (+4,332).
+- Flaky Python test: name not retained by the auditor; three full `check.sh` runs all passed, no chore registered.
+- Studio at 1181b5e: 9/9 pad entries (front and both side edges), walk times 9.9-11.9 s, 34/34 reachable. Evidence appended to `docs/workflow/evidence/TASK-0127/art-competitive.txt`.
+- Not recorded or self-audited. PR 187 (TASK-0128) is stacked on the old geometry and needs this revision merged into its branch.
+
 ## Audits
+- [[AUD-20261102-TASK-0127-01]]: fail, changes requested (F1 P2, F2 P2, F3 P3); addressed in revision 1.
 
 ## Outcome
