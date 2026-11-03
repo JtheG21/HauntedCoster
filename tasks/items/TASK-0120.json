@@ -2,7 +2,7 @@
   "id": "TASK-0120",
   "game": "GAME-004",
   "title": "MathShow Hub Graybox",
-  "status": "approved",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -88,6 +88,12 @@
       "from": "review",
       "to": "approved",
       "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T17:27:07",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -119,5 +125,6 @@
       "report": "06 QA/AUD-20261102-TASK-0120-03.md"
     }
   ],
-  "revisions": 1
+  "revisions": 1,
+  "merge_approved_by": "jg"
 }

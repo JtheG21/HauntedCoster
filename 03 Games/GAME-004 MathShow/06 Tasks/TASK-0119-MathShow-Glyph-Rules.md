@@ -3,7 +3,7 @@ id: TASK-0119
 title: MathShow Glyph Rules
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: codex
@@ -11,7 +11,7 @@ depends_on: []
 branch: task/TASK-0119-glyph-rules
 related: []
 created: 2026-11-01
-updated: 2026-11-01
+updated: 2026-11-02
 tags:
   - workflow/task
 ---
