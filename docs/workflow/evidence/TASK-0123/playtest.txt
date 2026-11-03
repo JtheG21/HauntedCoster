@@ -17,7 +17,7 @@ EXPERIENCE
   Profiles persist in THIS test experience only; the live MathShow experience was not touched.
 
 SETTINGS READBACK (Creator Dashboard)
-  2026-11-03T20:5xZ: Game access Private; Audience reach Private; Manage audience "Only available to you, your
+  2026-11-03 between 20:53Z and 20:59Z (exact time not logged): Game access Private; Audience reach Private; Manage audience "Only available to you, your
   collaborators, and early testers. Playtesters under 16 won't have access."; Early testers: jg_574 (1/10, a friend of
   jg_57565, persisted after reload); Collaborators: none.
   2026-11-03T21:18Z, 21:36Z and ~22:36Z (final): Game access Private; Audience reach Private (still private after both publishes and all joins).
@@ -46,7 +46,7 @@ RESULTS (build 81d21fc unless noted)
       Pad screens were not independently screenshotted by Claude.
   P4  Mac (B, idle, then driven): counter 0, no menu opened while A used pads and Glyphs; the path Glyph orbs A had
       collected were still visible to B up the ramp; B collected on the path and the counter went 0 -> 1 -> 2 (later 5);
-      jg confirmed A's count and view were unchanged (21:3xZ). PASS for per-player GlyphState independence.
+      jg confirmed A's count and view were unchanged (after 21:31:47Z; exact time not logged). PASS for per-player GlyphState independence.
       Screenshots 01-03 in ~/Roblox-Work/evidence/TASK-0123/.
 
 SOLO FOLLOW-UP (jg stopped the two-player test at ~22:25Z: "handle the rest solo"; build 81d21fc, Mac only)
