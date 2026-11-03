@@ -67,3 +67,6 @@ Prove the prop pipeline end to end with one prop: generate a lamp post mesh in a
 ## Audits
 
 ## Outcome
+*(Filled after merge. Follow-ups recorded so far:)*
+- **Art follow-up (jg, 2026-11-02): lamp pole height kept as is.** Pole C is 5.06 studs tall, under the 7.2-stud jump height, so a jump or auto-jump clears it (walking into it is blocked). Revisit in the Art pass if lamps should be solid obstacles: a taller collider or pole. Evidence: `docs/workflow/evidence/TASK-0125/art-pilot.txt`, revision 1b.
+- Desktop perf at 1080p is deferred to Art-3 (real client + MicroProfiler); 1080p rows in the evidence log are invalid.
