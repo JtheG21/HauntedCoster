@@ -3,7 +3,7 @@ id: TASK-0135
 title: "MathShow Deterministic Lighting Technology"
 type: task
 project: GAME-004
-status: in_progress
+status: approved
 priority: medium
 risk: low
 owner: claude-code
@@ -38,3 +38,11 @@ See the task file; checked off in the Outcome once measured.
 
 ---
 ## Implementation record
+
+## Outcome (2026-11-03)
+- Added `"Technology": "ShadowMap"` to Lighting `$properties` in `mathshow.project.json`.
+- **Lune read of the built .rbxl:** ShadowMap (the build without the line reads Voxel).
+- **Studio 0.745 open of both builds:** the build without the line showed the **Lighting Technology Migration** dialog; the new build opened with **no dialog**.
+- **Live sync (D3c):** `scripts/serve.sh` plus the Rojo plugin (Connect, Accept) into the old scratch build completed; BuildStamp `d24b35a` equal to HEAD, ClockTime 0 from the project file, console clean (no Technology error). Done in a scratch copy, not `MathShow.rbxl` (mtime unchanged, 12:42); no fallback build step needed.
+- Both scratch windows closed with Don't Save; nothing published.
+- [[STUDIO-SYNC]] section "Lighting.Technology" updated.
