@@ -3,7 +3,7 @@ id: TASK-0118
 title: "MathShow Plaza Map: Brief + Mockup Intake"
 type: task
 project: GAME-004
-status: archived
+status: done
 priority: low
 risk: low
 owner: claude-code
