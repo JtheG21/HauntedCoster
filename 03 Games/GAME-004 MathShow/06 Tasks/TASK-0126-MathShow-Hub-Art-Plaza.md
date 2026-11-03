@@ -63,5 +63,12 @@ Dress the central plaza in the locked Direction A look (A1 spawn view, A4 palett
 - **Known non-task:** the `ContentId: rbxassetid://203785492` console warning; no 844x390 screenshots (capture tool has no size option); no real-device perf (TASK-0123).
 - **Report back:** verdict, findings with file:line, checks run, what is unverified.
 
+## Audits
+- 2026-11-02, Codex review of rev 0 (reported by jg; not an orchestrator record-audit): **needs revision for acceptance evidence, no functional code defect found.**
+  - P2: the 22,704-triangle figure (art-plaza.txt line 14) is a one-camera rendered count with selected additions removed; it does not establish the geometry delta against the parent revision. Asked for a geometry inventory or a comparable baseline measurement.
+  - P2: AC5 is marked complete without 844x390 captures (task note line 40). Asked for the captures or an explicit acceptance exception.
+  - Verified by Codex: check.sh passes; PR 184 open with green CI; +294 instances, +8 PointLights, 112 flags, 24 bulbs; mesh and texture ids match the picks; measured sources unchanged since 12c1b4f. Studio behaviour and generation approvals were reviewed from the recorded evidence, not reproduced. Visual acceptance stays with jg.
+  - Status: not addressed yet. A revision needs jg's request-changes row.
+
 ## Outcome
 Plaza art batch 1 is built and verified at 12c1b4f. Open items: screenshots are not 844x390; no real-device performance (TASK-0123); jg's visual judgement and the Codex audit are pending. The SpawnHex is an 8-sided plate.
