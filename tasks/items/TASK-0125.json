@@ -65,6 +65,24 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T16:40:30",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
+    },
+    {
+      "time": "2026-11-02T16:42:18",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T16:58:29",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -77,7 +95,19 @@
       "time": "2026-11-02T16:24:45",
       "result": "pass",
       "notes": "Revision 1 (L0-L5): pole-only candidates generated, none picked (jg picks); shadowless pole + Neon Globe structure on the current mesh; 844x390 re-measure at 5f0d07e; 1080p rows invalid."
+    },
+    {
+      "time": "2026-11-02T16:58:29",
+      "result": "pass",
+      "notes": "Revision 2 (C1-C4): pole C perf at 844x390, four configs at 9f3692e; Future label unverified in Studio (see evidence). No code or map changes."
     }
   ],
-  "revisions": 1
+  "revisions": 2,
+  "audits": [
+    {
+      "time": "2026-11-02T16:40:30",
+      "result": "fail",
+      "report": "06 QA/AUD-20261102-TASK-0125-01.md"
+    }
+  ]
 }

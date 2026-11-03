@@ -38,7 +38,7 @@ Prove the prop pipeline end to end with one prop: generate a lamp post mesh in a
 ## Acceptance criteria
 - [x] AC1 LampPost.rbxmx round-trips: the hub lamp and a Studio-built lamp from the same ids render identically (side by side, 844x390). Evidence: `docs/workflow/evidence/TASK-0125/art-pilot.txt` (the rebuilt comparison object, not the literal first instance).
 - [x] AC2 Drift guard fails on an edited prop file, then passes. Evidence: `docs/workflow/evidence/TASK-0125/drift-guard.txt`.
-- [x] AC3 Perf table before/after, both technologies. Revision 1 (844x390, commit 5f0d07e) replaces the first table; 1080p rows are invalid (emulation saturates this Mac; deferred to Art-3). Evidence: art-pilot.txt.
+- [x] AC3 Perf table before/after for the picked pole C, 844x390, ShadowMap and Future (revision 2, measured at 9f3692e): no measurable GPU cost per lamp (+0.09 ms ShadowMap, -0.03 ms Future, inside noise); +1032 scene triangles and 0 shadow triangles per lamp. Earlier tables are superseded (pre-pick mesh). 1080p rows invalid (deferred to Art-3). Caveat: Studio could not confirm that the Future window rendered with Future lighting. Evidence: art-pilot.txt, revision 2.
 - [x] AC4 Collision verified (stopped at x=61.41 against the pole); pads and glyphs still work; spawn to Blitz 164.6 -> 167.1 studs (10.3 -> 10.4 s), centre to Blitz unchanged. Walk times changed by +0.1 s, not zero.
 - [x] AC5 Asset ids in `games/mathshow/map/props/manifest.json` with "created by jg_57565 via Studio generate_mesh, pilot TASK-0125".
 
@@ -63,6 +63,10 @@ Prove the prop pipeline end to end with one prop: generate a lamp post mesh in a
 - L4: 844x390 re-measure at 5f0d07e (ShadowMap and Future, before/after): no measurable GPU cost, lamps add 9578 scene triangles and no shadow triangles. 1080p rows invalid.
 
 - Pick C applied (commit 3be51e5): LampPost.rbxmx rebuilt from candidate C's asset ids (the generated model was gone from the scratch window), shadowless Box pole, Globe offset (0, 6.0588, 0). Walking into the pole is blocked, but the pole is 5.06 studs tall so a jump or auto-jump clears it. The Neon Globe rendered lemon yellow; fixed in c9b7859 by tuning only the Globe colour to #FA7D12 (light stays #FFB547). Details in the evidence log.
+
+### Revision 2 (jg rows C1-C4, 2026-11-02)
+- Trigger: Codex audit `[[AUD-20261102-TASK-0125-01]]` (fail, one P2 finding): no comparable pole C perf table.
+- Four configs measured at 9f3692e (ShadowMap and Future, with and without the east-path lamps; the "without" variant is a scratch-only regeneration with LAMP_COUNT 0). Table, per-lamp cost, method and the Future-label caveat are in the evidence log. No code or map changes.
 
 ## Audits
 
