@@ -1,0 +1,35 @@
+{
+  "id": "TASK-0132",
+  "game": "GAME-004",
+  "title": "MathShow Hub Art-1 Batch 5: Lake, Terraces, Holo, Glyph Visuals",
+  "status": "backlog",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "games/mathshow/map/Hub.rbxmx",
+    "games/mathshow/map/props/PineTree.rbxmx",
+    "games/mathshow/map/props/manifest.json",
+    "games/mathshow/src/client/Hub/HubCosmetics.luau",
+    "games/mathshow/src/client/Glyphs/GlyphController.luau",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md",
+    "docs/workflow/evidence/TASK-0132/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0132-MathShow-Hub-Art-Lake.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0132-art-lake",
+  "acceptance": [
+    "PineTree (<=150 tris, untextured, ~14 studs) generated with at most 3 generate_mesh calls, every asset id in manifest.json, candidates screenshotted at 844x390 and picked by jg; exported from a Studio scratch place.",
+    "Lake: flat Glass Part (Lake Ink, Reflectance ~0.6, CanCollide false) over a collidable lakebed below the water; promenade railing with Lamp Amber Neon top rail; up to 2 reused LampPosts.",
+    "Terraces and boundary: Slate Teal walls with SmoothPlastic grass-top slabs, <=60 PineTree instances; boundary walls stay collidable and gap-free (collider guard and wall-overlap check pass).",
+    "Holo symbols: BillboardGui TextLabels (pi, sigma, root, plus, minus, times, divide), LightInfluence 0, >=25 studs above any walkable surface, <=8 visible from any spawn-area view, bob/spin through HubCosmetics (pcall-isolated, one RenderStepped connection); no GlyphSpawn tags.",
+    "Glyph visuals (client cosmetic only): chest-height Neon math-symbol billboard with a soft sparkle ParticleEmitter (default texture), distinct from the holos; pickup burst pcall-isolated; no change to collection, retry, server or remotes.",
+    "Budgets: <=4 new PointLights (hub <=27), <=700 new instances, <=25k new triangles, ParticleEmitters <=34 with Rate <=6.",
+    "Regression at a clean BuildStamp: walk times 8-12 s, 34/34 reachable, 6 pads, mid-match block, Glyph collect (common and rare), reject-retry, respawn, HUD, console clean, cannot stand in the lake or leave the map.",
+    "Evidence in docs/workflow/evidence/TASK-0132/art-lake.txt (measured SHA, applies_to); A1-framing and aerial screenshots; brief light total updated."
+  ],
+  "evidence": [],
+  "notes": "Approved rows L0-L8 (jg, 2026-11-02). Out of scope: skybox, polish items (violet hue, A2 portal frame, A3 L-hall, telescope tip), audio, Lighting.Technology, saving the place, merging. Do not record-audit or self-audit.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0132-MathShow-Hub-Art-Lake.md",
+  "risk": "low"
+}
