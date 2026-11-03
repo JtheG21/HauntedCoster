@@ -3,7 +3,7 @@ id: TASK-0130
 title: MathShow Hub Walk-Length Test
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: codex
@@ -216,3 +216,6 @@ CALIBRATION FAIL
 
 ## Outcome
 Implemented and tested as INFORMATIONAL per A4. Calibration failed twice; Studio fresh-Play remains the gate. PR #192 open, source CI green; no merge. No further model work authorised. Task note and STUDIO-SYNC.md updated; no other notes created or changed this stage.
+
+## Opt-in change (jg row M11, 2026-11-02, PR 192)
+The route estimate made `check.sh` take about 77 s (main: about 22 s). `tests/test_hub_walk.py` now skips `test_routes` unless `HUB_WALK=1`; `scripts/walk-check.sh` sets it (`--calibrate` runs the historical calibration). The three quick unit tests stay in the default run. Default `check.sh` measured at 22.0 s afterwards. The earlier lines saying check.sh discovers the test as a route check no longer apply. Informational; calibration failed twice (TASK-0130); Studio fresh-Play is the gate.

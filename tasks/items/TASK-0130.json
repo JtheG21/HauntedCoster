@@ -2,7 +2,7 @@
   "id": "TASK-0130",
   "game": "GAME-004",
   "title": "MathShow Hub Walk-Length Test",
-  "status": "approved",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "codex",
   "files_owned": [
@@ -10,7 +10,8 @@
     "tests/test_hub_walk.py",
     "docs/workflow/STUDIO-SYNC.md",
     "tasks/items/TASK-0130.json",
-    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0130-MathShow-Hub-Walk-Length-Test.md"
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0130-MathShow-Hub-Walk-Length-Test.md",
+    "scripts/walk-check.sh"
   ],
   "depends_on": [],
   "branch": "task/TASK-0130-walk-length",
@@ -65,6 +66,12 @@
       "from": "review",
       "to": "approved",
       "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T22:30:47",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -86,5 +93,6 @@
       "result": "pass",
       "report": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0130-MathShow-Hub-Walk-Length-Test.md"
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }

@@ -1,4 +1,7 @@
-"""Hub walk estimates, discovered by check.sh's existing unittest discovery.
+"""Hub walk estimates: informational; calibration failed twice (TASK-0130); Studio fresh-Play is the gate.
+
+The slow route estimate (test_routes) runs only when HUB_WALK=1, through scripts/walk-check.sh; the default check.sh
+unittest discovery skips it and keeps only the quick unit tests of the tolerance, clearance and edge rules.
 
 A3 tolerance: abs(grid-Studio) <= max(0.10*Studio, 10 studs), per route.
 TASK-0127/art-competitive.txt:70 records unchanged west geometry giving Practice
@@ -18,6 +21,7 @@ import argparse
 import csv
 import io
 import math
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -93,6 +97,7 @@ def calibrate():
 
 
 class HubWalkTest(unittest.TestCase):
+    @unittest.skipUnless(os.environ.get('HUB_WALK') == '1', 'opt-in: scripts/walk-check.sh (informational)')
     def test_routes(self):
         started = time.perf_counter()
         try:
