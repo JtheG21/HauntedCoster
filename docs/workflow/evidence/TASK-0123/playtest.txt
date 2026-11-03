@@ -20,7 +20,7 @@ SETTINGS READBACK (Creator Dashboard)
   2026-11-03T20:5xZ: Game access Private; Audience reach Private; Manage audience "Only available to you, your
   collaborators, and early testers. Playtesters under 16 won't have access."; Early testers: jg_574 (1/10, a friend of
   jg_57565, persisted after reload); Collaborators: none.
-  2026-11-03T21:18Z and 2026-11-03T21:36Z: Game access Private; Audience reach Private (read back again, still private).
+  2026-11-03T21:18Z, 21:36Z and ~22:36Z (final): Game access Private; Audience reach Private (still private after both publishes and all joins).
   Content rating questionnaire: Not Started, label Unknown. NOT filled in: the iPad account joined without it.
 
 DEVICES
@@ -49,12 +49,23 @@ RESULTS (build 81d21fc unless noted)
       jg confirmed A's count and view were unchanged (21:3xZ). PASS for per-player GlyphState independence.
       Screenshots 01-03 in ~/Roblox-Work/evidence/TASK-0123/.
 
+SOLO FOLLOW-UP (jg stopped the two-player test at ~22:25Z: "handle the rest solo"; build 81d21fc, Mac only)
+  22:20Z  Mac was disconnected for idle 20 min (error 278); reconnected. 22:22:57Z Blitz pad opened the Blitz screen
+          (matches jg's iPad report; screenshot 04). Mac client then stalled near the Group pad (low memory).
+  22:27:59Z Mac Roblox Player killed and relaunched for a clean client.
+  22:28Z  PLAY > Group Battle > JOIN SHOW: joined mid-match, "WATCHING - YOU JOIN NEXT MATCH" banner now has a LEAVE
+          button next to it (TASK-0134). Next match started with the Mac as a participant (TYPE ANSWER / LOCK IN).
+  Console (Developer Console, Mac, ~22:31Z): Client tab: 0 errors, 0 warnings; log only "[MathShow] client ready" and
+          "Hud first RoundState". Server tab: 0 errors, 0 warnings; "ModePadService: 6 pads", "GlyphService: 34 glyph
+          spawns", "server ready", round phases looping normally (screenshot 05).
+  Memory (Mac client, 22:31Z): Client Memory Usage 1514-1530 MB total, CoreMemory 676.7 MB; avg data ping 104-166 ms
+          (screenshot 06). Roblox's own note: memory category counters need MicroProfiler on to be exact.
+  Mac at that moment was heavily memory-starved (free pages ~60 MB), so these are not clean perf numbers.
+
 NOT DONE (do not read these as passes)
-  P2  mid-match pad block with two clients: not run.
-  P3  iPad FPS / frame ms / memory / triangle count / MicroProfiler at spawn, plaza centre, Observatory: not captured
-      (jg asked to keep the iPad for the multiplayer check only).
-  P5  Mac perf: Performance Stats toggled in the in-game Settings but no overlay appeared in screenshots, and the Mac client
-      repeatedly lost keyboard focus and ran very sluggishly (low system resources). No FPS numbers. 4,332 triangle gap
-      not compared.
-  Per-client console capture was not done. The "no errors in either console" acceptance line is unverified.
-  ModePadOpen per-player check beyond jg's report (B's menu never opened) was observed only on the Mac.
+  P2  mid-match pad block: a blind walk toward the Daily pad while a participant in a running match opened nothing, but the
+      avatar's position could not be seen (the show HUD covers the plaza), so this is INCONCLUSIVE, not a pass.
+  P3  iPad FPS / frame ms / memory / triangle count / MicroProfiler: jg could not read the stats; model and iPadOS not recorded.
+  P5  Mac FPS / frame ms: the in-game Performance Stats overlay never appeared (toggled twice); no FPS, frame ms or
+      triangle numbers. The 4,332 triangle gap was not compared. Only memory above was captured.
+  iPad console was not captured (acceptance "no errors in either console" holds for the Mac client and server only).

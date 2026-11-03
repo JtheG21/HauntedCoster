@@ -52,10 +52,10 @@ Needs jg's approval to publish a test place.
 
 ---
 ## Implementation record
-Private test experience "MathShow Private Test" (universe 10774566206, place 93701543861123), published on jg's approval, kept Private (early tester jg_574). Run 1 on main a3bc341 exposed a menu dead end (F1-F3); jg approved a republish of the TASK-0134 build (81d21fc, PR 196, not merged), and run 2 used that. Per-player Glyph independence passed (P4). P2, P3, P5 and console capture were not done. Detail: `docs/workflow/evidence/TASK-0123/playtest.txt`.
+Private test experience "MathShow Private Test" (universe 10774566206, place 93701543861123), published on jg's approval, kept Private (early tester jg_574). Run 1 on main a3bc341 exposed a menu dead end (F1-F3); jg approved a republish of the TASK-0134 build (81d21fc, PR 196, not merged), and run 2 used that. Per-player Glyph independence passed (P4). Mac client and server consoles were clean; P2 (inconclusive), P3 and P5 (FPS) were not completed. Detail: `docs/workflow/evidence/TASK-0123/playtest.txt`.
 
 ## Audits
 
 ## Outcome
 
-Partial. Acceptance items on mid-match block (P2), real-device perf (P3, P5) and console capture are open; see the evidence log. Draft; no audit.
+Partial. Acceptance items on mid-match block (P2) and real-device FPS (P3, P5) are open, iPad console not captured; see the evidence log. Draft; no audit.
