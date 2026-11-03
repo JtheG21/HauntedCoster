@@ -44,6 +44,7 @@ only; don't change them unless a task says so. Table, build commands and old-to-
   Never author map geometry in Studio; edit the script and regenerate. `scripts/check.sh` fails if the file drifts from its generator.
 - **Props:** generate in a scratch place copy (never `MathShow.rbxl`), export the model as `.rbxmx` under `games/mathshow/map/props/`
   with a `manifest.json` entry; `build_hub.py` inlines it at each placement. Never place props in Studio or clone them at runtime.
+  Every `generate_mesh` call counts toward the approved candidate cap, including discarded attempts; stop and ask before exceeding it.
 - Roblox API reference: `~/Code/creator-docs` (refresh: `git -C ~/Code/creator-docs pull`). Unsure of an API? Grep
   `content/en-us/reference/engine/{classes,datatypes,enums}/<Name>.yaml`. If the clone is missing, say so; don't guess.
 - Lessons: `09 Knowledge/` (`LES-`; `ls` it and read the ones for your area). Research: [[Video Research Index]].
