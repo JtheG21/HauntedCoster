@@ -3,7 +3,7 @@ id: TASK-0133
 title: "MathShow Hub Art-1 Polish"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: claude-code
