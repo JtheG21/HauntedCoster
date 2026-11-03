@@ -34,13 +34,17 @@ Fields the orchestrator also keeps: `history`, `executions`,
 | `ready` | Approved, dependencies may be pending | `in_progress` | `start` |
 | `in_progress` | Being implemented | `review`, `changes_requested` | `record-exec` |
 | `review` | Being audited | `approved`, `changes_requested` | `record-audit` |
-| `changes_requested` | Needs a revision (limit 2) | `in_progress`, `blocked` | `start` |
-| `approved` | Audit passed, waiting for the merge decision | `done`, `changes_requested` | **jg** (`approve-merge`) |
-| `blocked` | Limit hit or a decision is needed | `ready`, `backlog`, `archived` | **jg** (`unblock`) |
+| `changes_requested` | Needs a revision (limit 2) | `in_progress`, `blocked`, `review` | `start`; **jg** (`reopen`) |
+| `approved` | Audit passed, waiting for the merge decision | `done`, `changes_requested`, `review` | **jg** (`approve-merge`, `reopen`) |
+| `blocked` | Limit hit or a decision is needed | `ready`, `backlog`, `archived`, `review` | **jg** (`unblock`, `reopen`) |
 | `done` | Merged | terminal | |
 | `archived` | Dropped or unstarted when its game was paused | terminal | `archive` |
 
 **Merging over a failed audit** is jg's decision alone: `python3 scripts/orchestrator.py override-merge TASK-#### --by jg --reason "..."`. The verdict stays a fail, and who decided and why go on that audit record.
+
+**Reopening an approved re-scope:** use `python3 scripts/orchestrator.py reopen TASK-#### --to review --reason "..." [--by jg]` instead of hand-editing status.
+Only `blocked`, `changes_requested` and `approved` may reopen; only `review` is supported. The reason must be non-empty; `--by` defaults to `jg`.
+The command appends `{from, to, reason, by, at}` to history, preserves earlier history/audits/revision counts, and syncs the task-note status.
 
 `approved` and `changes_requested` go beyond the seven statuses first proposed. jg chose to keep them on 2026-10-30, because the
 merge gate and the revision limit depend on them. History entries keep the names they were written with, including the older

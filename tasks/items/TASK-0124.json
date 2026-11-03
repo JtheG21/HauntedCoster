@@ -2,23 +2,63 @@
   "id": "TASK-0124",
   "game": "GAME-004",
   "title": "Orchestrator reopen transition",
-  "status": "backlog",
+  "status": "approved",
   "tier": "light",
-  "owner_agent": "claude-code",
+  "owner_agent": "codex",
   "files_owned": [
     "scripts/orchestrator.py",
-    "tests/",
+    "tests/test_orchestrator.py",
+    "docs/workflow/TASKS.md",
+    "tasks/items/TASK-0124.json",
     "03 Games/GAME-004 MathShow/06 Tasks/TASK-0124-Orchestrator-Reopen-Transition.md"
   ],
   "depends_on": [],
-  "branch": "chore/orchestrator-reopen",
+  "branch": "task/TASK-0124-orchestrator-reopen",
   "acceptance": [
     "`orchestrator.py reopen <id> --to review --reason <text>` exists, is allowed from blocked, changes_requested and approved, and appends a history entry with the reason.",
     "Other source states are refused with a clear error.",
     "Covered by tests in the orchestrator's test suite; docs/workflow/TASKS.md lists the command."
   ],
-  "evidence": [],
-  "notes": "Raised on TASK-0122: after an approved re-scope the orchestrator had no blocked to review transition, so jg approved a hand edit (history entry records it). Replaces that hand edit.",
+  "evidence": [
+    "python3 -m unittest discover -s tests -p test_orchestrator.py -v: 38 passed (6 new tests)",
+    "scripts/check.sh: all 13 steps PASS",
+    "validate_queue.py and validate_vault.py: no errors or warnings"
+  ],
+  "notes": "Raised on TASK-0122: after an approved re-scope the orchestrator had no blocked to review transition, so jg approved a hand edit (history entry records it). Replaces that hand edit. Approved rows O1-O5 (jg, 2026-11-02): Codex implementation on the dedicated task branch; light tier, no audit record.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0124-Orchestrator-Reopen-Transition.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T17:41:30",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T17:41:30",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T17:42:56",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T17:42:56",
+      "from": "review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T17:42:56",
+      "result": "pass",
+      "notes": "38 orchestrator tests pass (6 new); all 13 check.sh steps PASS; queue and vault validators pass; light tier, no audit."
+    }
+  ]
 }
