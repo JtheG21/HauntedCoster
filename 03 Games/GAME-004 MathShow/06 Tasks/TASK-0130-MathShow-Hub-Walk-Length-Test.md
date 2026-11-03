@@ -37,7 +37,7 @@ scripts/hub_nav.py, tests/test_hub_walk.py, docs/workflow/STUDIO-SYNC.md, own JS
 - [x] A3: tolerance max(10 percent, 10 studs) with documented variance in test docstring.
 - [x] A4: calibrated both measured map commits; calibration failed twice, route test is INFORMATIONAL, Studio fresh-Play remains gate. TASK-0131 not merged at calibration (origin/main 725d2a4).
 - [x] A5 local: scripts/check.sh, specs and validators pass; no game files touched.
-- [ ] A5 delivery: independent audit, push, PR, green CI; no merge.
+- [x] A5 delivery: independent audit pass, pushed, PR #192 open, source-commit CI green (run 41588212501, 1m46s); no merge.
 
 ## Tests
 - Fact: `python3 -m unittest discover -s tests -p test_hub_walk.py -v`: 1 test passed in 27.069 s (measured route runtime 27.031 s); all 12 pad routes within 8-12 s, all 34 glyphs reachable on the fa0bdea map. This does not satisfy calibration.
@@ -207,3 +207,12 @@ CALIBRATION FAIL
 - Checkout: /Users/jg/Desktop/Rg1-worktrees/TASK-0130, branch task/TASK-0130-walk-length. W5 is the final two lines of docs/workflow/STUDIO-SYNC.md. Test already participates in check.sh via unittest discovery, so no check.sh edit.
 - Status after audit: approved for merge consideration, not merged; jg retains the merge decision. PR/CI delivery is completed below.
 - Notes created this task: TASK-0130 note. Notes updated this stage: this note and STUDIO-SYNC.md; own task JSON updated via orchestrator. No game notes or Resource Catalog edits (outside approved file scope). Usage/context start reading unavailable; no tokens estimated or ledger written.
+
+## Delivery
+- PR: https://github.com/JtheG21/HauntedCoster/pull/192 (open, unmerged).
+- Navigation/test sources committed in b9e1e6c; reported tests/calibration ran on the matching working-tree bytes before that commit. Subsequent delivery-note changes do not touch measured sources (scripts/hub_nav.py, tests/test_hub_walk.py, historical map snapshots).
+- CI: https://github.com/JtheG21/HauntedCoster/actions/runs/41588212501 (source commit b9e1e6c): PASS, 1m46s. This delivery-only revision leaves the measured sources identical.
+- Handoff: estimates remain INFORMATIONAL; Studio fresh-Play is the walk-time/reachability gate. Calibration failed twice; no third model attempt. Merge requires jg's approval per PR.
+
+## Outcome
+Implemented and tested as INFORMATIONAL per A4. Calibration failed twice; Studio fresh-Play remains the gate. PR #192 open, source CI green; no merge. No further model work authorised. Task note and STUDIO-SYNC.md updated; no other notes created or changed this stage.

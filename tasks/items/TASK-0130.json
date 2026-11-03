@@ -21,7 +21,9 @@
     "Checks, specs and validators pass; push and open an unmerged PR with green CI."
   ],
   "evidence": [
-    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0130-MathShow-Hub-Walk-Length-Test.md (attempt-2 full calibration tables, check results and independent audit)"
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0130-MathShow-Hub-Walk-Length-Test.md (attempt-2 full calibration tables, check results and independent audit)",
+    "https://github.com/JtheG21/HauntedCoster/pull/192",
+    "https://github.com/JtheG21/HauntedCoster/actions/runs/41588212501 (PASS on b9e1e6c; measured sources unchanged by delivery notes)"
   ],
   "notes": "jg approved W1-W6 on 2026-11-02. Only listed files; no games changes. W4 requires stopping on calibration mismatch. jg approved A1-A5 for attempt 2: radius clearance and horizontal jump cost only; max(10 percent, 10 studs) calibration; failed calibration makes route test informational. No third model change.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0130-MathShow-Hub-Walk-Length-Test.md",
