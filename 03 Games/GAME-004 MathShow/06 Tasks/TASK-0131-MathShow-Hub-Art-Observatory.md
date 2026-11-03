@@ -3,7 +3,7 @@ id: TASK-0131
 title: "MathShow Hub Art-1 Batch 4: Observatory + Ranks"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -34,15 +34,16 @@ Build the Observatory hero landmark (north, highest terrace, houses the Daily pa
 `scripts/build_hub.py`, `games/mathshow/map/Hub.rbxmx`, `props/{ObservatoryDome,Telescope}.rbxmx`, `props/manifest.json`, evidence, this note, `tasks/items/TASK-0131.json`.
 
 ## Acceptance criteria
-- [ ] AC1 Props generated within the call cap and picked by jg.
-- [ ] AC2 Observatory built.
-- [ ] AC3 Ranks hall built.
-- [ ] AC4 Budgets met.
-- [ ] AC5 Regression at a clean BuildStamp.
-- [ ] AC6 Evidence written.
+- [x] AC1 Props generated within the call cap (3 + 3) and picked by jg (Dome C2, Telescope C1). Evidence: `docs/workflow/evidence/TASK-0131/art-observatory.txt` (O1).
+- [x] AC2 Observatory built (tower, dome with one PointLight, telescope, DAILY sign; Daily pad unchanged).
+- [x] AC3 Ranks hall dressed (Basalt Blue, amber trim, RANKS sign, nine tier podiums).
+- [x] AC4 Budgets met: +3 lights (hub 23), +213 instances, +6574 triangles.
+- [x] AC5 Regression at 246b967: walk times 10.4-11.6 s, 34/34 glyphs, pads, Daily COMING SOON toast, mid-match block, HUD, console clean.
+- [x] AC6 Evidence written with measured SHA and applies_to; A1-framing screenshot beside A1_spawn_view.png.
 
 ---
 ## Implementation record
+Generator plus two props: `build_observatory`, `build_ranks`, `ObservatoryDome` and `Telescope` (manifest `dome_light`). Dome material is ForceField (Neon bloomed solid). The Ranks hall shell is kept because its roof carries two rare glyphs. ID: `next-id` gave TASK-0130, already used by Codex's walk-length worktree, so TASK-0131. Not recorded as audited or self-audited (row O6).
 
 ## Audits
 

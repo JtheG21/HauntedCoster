@@ -1,0 +1,41 @@
+# TASK-0131 Observatory + Ranks hall art (rows O0-O6, jg 2026-11-02)
+# measured git HEAD: 246b967 (BuildStamp "246b967 2026-11-03T05:47:38Z", clean; scripts/serve.sh from the TASK-0131 worktree; Rojo plugin reconnected with the Connect prompt; fresh Play, single player; place not saved)
+# applies_to: Measured at 246b967. Applies to any later commit whose diff from 246b967 does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json or games/mathshow/src/**.
+# Screenshots (outside the repo): ~/Roblox-Work/evidence/TASK-0131/ (A1_framing_observatory_from_spawn_844x390.jpg, observatory_vs_A1_mockup.jpg = A1_spawn_view.png left, this build right, observatory_close_844x390.jpg, ranks_entrance_844x390.jpg, candidates/)
+# ID note: next-id returned TASK-0130, which Codex's walk-length worktree already uses (uncommitted task file), so this task is TASK-0131.
+
+## O1 Assets (generate_mesh, cap 3 per prop; all 6 calls logged in props/manifest.json generation_history_task_0131)
+ObservatoryDome: 3 calls (800, 800, 778 tris). Picked C2 (ribbed hemisphere, rbxassetid://70374810362156, 800 tris, untextured use). C1 (76393790341028) timed out but the model appeared; C3 (123126442969465).
+Telescope: 3 calls (398, 400, 400 tris). Picked C1 (tripod and tube, rbxassetid://117401431585216, 398 tris). C2 (138312757426924), C3 (119337289181586).
+Triangle counts are EditableMesh face counts. No call failed, no Robux cost appeared. The scratch place (TASK-0127-scratch.rbxl) was not saved. The .rbxmx files are derived from ModeArch.rbxmx (same untextured MeshPart template) with the new mesh id and size; the generated textures are not used.
+
+## O2 Observatory (scripts/build_hub.py build_observatory, props via add_props)
+Hub.Zones.Observatory on the highest terrace (tower centre a = 150): Basalt Blue plinth, octagonal tower (apothem 8.5, 34.8 high; 8 slabs plus a core), Holo Cyan Neon corner strips and three bands, Neon window blocks (Holo Cyan with some Lamp Amber, no lights) on the seven faces that are not the front, a Night Navy door with an amber Neon frame, a DAILY SurfaceGui sign (16 x 5, Lamp Amber text) over it, and a gallery ring (apothem 11, Neon edge strips). Hub.Props.ObservatoryDome sits on the gallery: ObservatoryDome prop x1.4 (21.8 x 15.4 x 22.0), Holo Cyan, ForceField (A4 allows ForceField or Neon; Neon bloomed into a solid blob that hid the lattice), CastShadow false, CanCollide false, ONE PointLight "DomeLight" (Holo Cyan 0.24/0.88/0.94, Range 45, Brightness 1.5, Shadows false). Hub.Props.Telescope x1.7 (6.3 x 17 x 11.4), Lamp Amber SmoothPlastic, stands inside the dome (visible through the ForceField, tube tip pokes through the top from some angles).
+Daily pad read back unchanged: Pad_Daily size 10, 0.5, 10, ModePad tag, Mode Daily, position (0, 32.25, -130). The old Observatory_Tower and Observatory_Dome graybox parts are replaced.
+
+## O3 Ranks hall (build_ranks; hall shell kept: its roof and stairs carry two rare glyphs)
+Hall walls, roof and stairs recoloured from Menu Violet to Basalt Blue. Hub.Zones.Ranks: Lamp Amber Neon trim (roof front and sides, door posts, wall lines), Neon window blocks on the outer side walls, a RANKS SurfaceGui sign (30 x 7) on two posts over the entrance, nine tier podiums (Basalt cylinder + Neon cap, decorative, CanCollide false) inside the entrance at a = 142, Plastic to Demon in the IdentityTheme.luau Tier.<id>.Rgb colours (games/mathshow/src/client/Identity/IdentityTheme.luau, RANK_RGB in build_hub.py, same values as TASK-0129: plastic 235,230,215; bronze 230,150,90; copper 214,112,70; silver 220,228,240; gold 255,200,60; emerald 40,214,140; platinum 190,240,255; diamond 110,210,255; demon 255,60,40). Two LampPost_SW lamps flank the path before the hall.
+
+## O4 Inventory (budget metric of M6: Block 12, Wedge 10, Cylinder 96, Ball 432 + prop manifest triangles; base = main 725d2a4)
+                 base      new     delta
+instances        1047     1260       213
+PointLights        20       23         3
+triangles       41894    48468      6574
+  Block          9820    11932      2112
+  Cylinder       1824     3456      1632
+  Ball          18576    19008       432
+  Mesh          11674    14072      2398
+Budgets: new PointLights 3 <= 8 (hub total 23 <= 28); +213 instances <= 600; +6574 triangles <= 20000. Read back in Studio: 23 PointLights in the workspace. Collider guard (tests/test_build_hub.py, 4 tests) passes: the tower and gallery front sit at a = 141.5 and 139 against the Daily pad's 125..135.
+
+## O5 Regression (fresh Play, 246b967)
+- Walk times (PathfindingService radius 2, height 5, can jump, from (0,5,47) to pad centre + 3 studs, length / 16; informational, the walk-length test is unmerged): Blitz 165.8 studs 10.4 s, Daily 185.9 11.6 s, Group 174.3 10.9 s, Practice 184.7 11.5 s, Skill 175.5 11.0 s, VS 174.3 10.9 s. All inside 8-12 s. Daily is unchanged from the TASK-0129 post-merge run (185.9).
+- Reachability: 34/34 GlyphSpawn Success (same pathfinding; includes R_Roof1/2 on the Ranks hall roof).
+- Pads (server moves the character onto each pad after 2.8 s off the pads; MathShowMenu closed; ModePadOpen counted on the client): Practice -> practice, Skill -> skillintro, VS -> confirm_vs, Blitz -> confirm_blitz, Group -> confirm_group, one event each.
+- Daily (menu closed): one ModePadOpen "locked:daily", the toast "COMING SOON" shows, MathShowMenu stays closed.
+- Mid-match: JoinShow, ShowState participant=true after 40.4 s; Practice, Skill, Blitz and Daily pads each held 3 s: 0 events, menu closed, no toast.
+- HUD: GlyphHud.Enabled false with the menu open, true when closed.
+- Console: no errors; known DataStore lines and "ContentId: rbxassetid://203785492" only.
+- Not exercised: after-match re-entry, live walks, two players, real-device perf (TASK-0123), the Lighting.Technology Future/ShadowMap difference.
+
+## A1 framing
+A1_framing_observatory_from_spawn_844x390.jpg: Studio screen_capture, Edit mode, camera (0, 10, 52) looking at (0, 50, -150), resized to 844x390; observatory_vs_A1_mockup.jpg puts A1_spawn_view.png next to it. The Observatory reads as the landmark above the north terraces from the spawn. Differences from A1 stated plainly: no holo symbols, no skybox change, the terraces are still the graybox (out of scope), Edit-mode lighting, and the dome is a translucent ForceField so the telescope shows through.
