@@ -3,7 +3,7 @@ id: TASK-0123
 title: "MathShow Multiplayer Playtest"
 type: task
 project: GAME-004
-status: backlog
+status: in_progress
 priority: medium
 risk: low
 owner: claude-code
@@ -13,7 +13,7 @@ branch: task/TASK-0123-multiplayer-playtest
 related:
   - "[[TASK-0122-MathShow-Hub-Mode-Pads]]"
 created: 2026-11-02
-updated: 2026-11-02
+updated: 2026-11-03
 tags:
   - workflow/task
 ---

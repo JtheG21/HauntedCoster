@@ -2,7 +2,7 @@
   "id": "TASK-0123",
   "game": "GAME-004",
   "title": "MathShow Multiplayer Playtest",
-  "status": "backlog",
+  "status": "in_progress",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -12,7 +12,7 @@
   "depends_on": [
     "TASK-0122"
   ],
-  "branch": "task/TASK-0123-multiplayer-playtest",
+  "branch": "task/TASK-0123-private-playtest",
   "acceptance": [
     "Two real clients on a private test place show per-player GlyphState (each client's collected glyphs and counter independent).",
     "Two real clients show per-player ModePadOpen: the player on a pad gets it, the other gets nothing; both client consoles captured.",
@@ -23,5 +23,20 @@
   "evidence": [],
   "notes": "Created by jg's option A decision on TASK-0122 (S4d deferred as an accepted risk; the Studio multi-client test failed to join a second client twice, likely memory pressure on an 8 GB Mac). Publishing the private test place needs jg's explicit approval; do not publish without it. Out of scope: code changes beyond test scaffolding, DataStore, merging. Scope extended by jg on 2026-11-02 (TASK-0125 re-scope): real-device FPS/MicroProfiler capture on phone + desktop for the hub (ShadowMap).",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0123-MathShow-Multiplayer-Playtest.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-03T12:36:47",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-03T12:36:47",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
 }
