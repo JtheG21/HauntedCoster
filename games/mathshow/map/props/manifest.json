@@ -111,10 +111,10 @@
       "file": "ModeArch.rbxmx",
       "pivot": "base centre; the model's pivot is the origin and the base sits at y = 0. The opening faces local Z; the generator yaws it onto the path axis.",
       "arch_light": {
-        "range": 14,
+        "range": 26,
         "brightness": 1.5,
         "shadows": false,
-        "note": "colour comes from the placement (the arch colour); one light per arch, on the mesh centre inside the opening"
+        "note": "colour comes from the placement (the arch colour); one light per arch, on the mesh centre inside the opening. Range 26 because the instance is scaled x2.14 (TASK-0127 revision 1)"
       },
       "assets": {
         "mesh_id": "rbxassetid://87495739867220",
@@ -127,17 +127,81 @@
       ],
       "triangles": 300,
       "collision_fidelity": "Default",
-      "collision_note": "The mesh is CanCollide false (a hull would fill the opening and block the pad). The generator adds two transparent leg colliders per arch.",
+      "collision_note": "The mesh is CanCollide false (a hull would fill the opening and block the pad). The generator adds two transparent leg colliders per arch, scaled with the instance, outside the pad trigger footprint (tests/test_build_hub.py).",
       "legs": {
         "inner_half_width": 2.86,
         "outer_half_width": 6.0,
         "collider_height": 7.0,
-        "collider_depth": 5.2
+        "collider_depth": 5.2,
+        "note": "prop-space (scale 1) leg collider: inner and outer lateral half-width, height and depth; the generator multiplies by the instance scale"
       },
       "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0127 (candidate A, picked by jg 2026-11-02; maxTriangles 300, untextured)",
       "prompt": "Chunky low-poly rounded gateway arch, hollow centre you can walk through, two thick square legs joined by a semicircular top, simple readable shapes, plain untextured single-colour surface.",
       "arch": {
         "cast_shadow": false
+      },
+      "generation_history": {
+        "note": "Every generate_mesh call during TASK-0127 (7 calls, 6 outputs seen or published). The approved cap was 3 candidates; it was exceeded and acknowledged retroactively by jg (G1, 2026-11-02). Asset ids that were not captured before the scratch models were deleted are marked so; nothing was invented.",
+        "calls": [
+          {
+            "n": 1,
+            "prompt": "rounded gateway arch, no maxTriangles",
+            "result": "discarded",
+            "triangles": 1756,
+            "mesh_ids": "not captured (two parts, legs_geom and top_geom)",
+            "texture_ids": [
+              "rbxassetid://104095277699073",
+              "rbxassetid://78319502504840"
+            ]
+          },
+          {
+            "n": 2,
+            "prompt": "pointed-dome gateway arch, no maxTriangles",
+            "result": "discarded",
+            "triangles": 5208,
+            "mesh_ids": "not captured (two parts, pillars_geom and top_geom)",
+            "texture_ids": [
+              "rbxassetid://90635903473734",
+              "rbxassetid://92836944046176"
+            ]
+          },
+          {
+            "n": 3,
+            "prompt": "horseshoe gateway arch, no maxTriangles",
+            "result": "unknown: the call timed out and no model appeared in the scratch place; treated as discarded",
+            "ids": "none captured"
+          },
+          {
+            "n": 4,
+            "prompt": "rounded arch, maxTriangles 300 (candidate A)",
+            "result": "picked",
+            "triangles": 300,
+            "mesh_id": "rbxassetid://87495739867220",
+            "published_asset_id": "119034450548855"
+          },
+          {
+            "n": 5,
+            "prompt": "pointed-dome arch, maxTriangles 300",
+            "result": "failed: Too Many Requests, no asset",
+            "ids": "none"
+          },
+          {
+            "n": 6,
+            "prompt": "horseshoe arch, maxTriangles 300 (candidate C)",
+            "result": "discarded",
+            "triangles": 300,
+            "mesh_id": "rbxassetid://102687084361201",
+            "published_asset_id": "80487432297325"
+          },
+          {
+            "n": 7,
+            "prompt": "pointed-dome arch, maxTriangles 300, retry of 5 (candidate B)",
+            "result": "discarded",
+            "triangles": 298,
+            "mesh_id": "rbxassetid://84920700418305",
+            "published_asset_id": "92325738492622"
+          }
+        ]
       }
     }
   ]

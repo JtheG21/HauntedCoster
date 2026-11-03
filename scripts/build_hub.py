@@ -292,16 +292,16 @@ class Prop:
 		]
 		return [light]
 
-	def place(self, name: str, pos, yaw: float = 0.0, color=None, material=None) -> "PlacedProp":
-		return PlacedProp(self, name, pos, yaw, color, material)
+	def place(self, name: str, pos, yaw: float = 0.0, color=None, material=None, scale: float = 1.0) -> "PlacedProp":
+		return PlacedProp(self, name, pos, yaw, color, material, scale)
 
 
 class PlacedProp(Node):
 	"""The prop's XML at a new CFrame: root renamed, CFrames moved, referents renumbered, lights added to each MeshPart."""
 
-	def __init__(self, prop: Prop, name: str, pos, yaw: float, color=None, material=None):
+	def __init__(self, prop: Prop, name: str, pos, yaw: float, color=None, material=None, scale: float = 1.0):
 		super().__init__("Model", name)
-		self.prop, self.pos, self.yaw = prop, pos, yaw
+		self.prop, self.pos, self.yaw, self.scale = prop, pos, yaw, scale  # scale: uniform, about the prop's pivot
 		self.color, self.material = color, material  # per-instance colour and material of an untextured mesh (ModeArch)
 
 	def xml(self, depth: int = 0) -> str:
@@ -311,11 +311,19 @@ class PlacedProp(Node):
 
 		def move(m: re.Match) -> str:
 			vals = [float(v) for v in re.findall(r">([-0-9.eE]+)<", m.group(2))]
-			pos, rot = _mul(local, _cf_to_matrix(vals))
+			if self.scale == 1.0:
+				pos, rot = _mul(local, _cf_to_matrix(vals))
+			else:
+				rel_pos, rel_rot = _mul(_inverse(self.prop.pivot), _cf_to_matrix(vals))
+				pos, rot = _mul(placement, (tuple(self.scale * v for v in rel_pos), rel_rot))
 			flat = [pos[0], pos[1], pos[2]] + [rot[i][j] for i in range(3) for j in range(3)]
 			return m.group(1) + "".join(f"<{k}>{f(v)}</{k}>" for k, v in zip(_CF_KEYS, flat)) + m.group(3)
 
 		text = _CF_BLOCK.sub(move, self.prop.text)
+		if self.scale != 1.0:
+			text = re.sub(r'(<Vector3 name="size">\s*)<X>([^<]+)</X>(\s*)<Y>([^<]+)</Y>(\s*)<Z>([^<]+)</Z>',
+				lambda m: f"{m.group(1)}<X>{f(self.scale * float(m.group(2)))}</X>{m.group(3)}<Y>{f(self.scale * float(m.group(4)))}</Y>"
+					f"{m.group(5)}<Z>{f(self.scale * float(m.group(6)))}</Z>", text)
 		if self.color is not None:
 			text = re.sub(r'(<Color3uint8 name="Color3uint8">)\d+(</Color3uint8>)', lambda m: f"{m.group(1)}{color_int(self.color)}{m.group(2)}", text)
 		if self.material is not None:
@@ -353,24 +361,28 @@ NEON_AMBER = PALETTE["amber_neon"]
 ARCH_COLOR = {"VS": PALETTE["competitive"], "Blitz": NEON_AMBER, "Group": PALETTE["training"]}
 SIGN_TEXT = {"VS": (190, 150, 255), "Blitz": (255, 181, 71), "Group": PALETTE["training"]}
 SIGN_SIZE = (16.0, 6.0, 0.6)
-SIGN_Y = 17.2  # plate centre; the arch crown is at PATH_TOP + 13.95
+ARCH_SCALE = 2.14  # uniform scale of each ModeArch instance (prop is 12 x 13.95 x 5.72): the legs' inner edges then sit 6.12 studs
+# either side of the pad centre, 1.12 studs outside the 10-wide pad's trigger footprint (TASK-0127 audit F1)
+ARCH_HEIGHT = 13.9533 * ARCH_SCALE  # the prop's height from the manifest, scaled
+SIGN_Y = PATH_TOP + ARCH_HEIGHT + 2.9  # plate centre: its 6-stud plate rests on the arch crown
 TRIM = 0.4
 WALL_H = 2.4
 WALL_T = 1.2
-COURT_A0, COURT_HALF = 116.0, 33.0  # Court_Competitive: a from 116 to 200, b within +-33
+COURT_A0, COURT_HALF = 116.0, 42.0  # wall line: Court_Competitive is a 125..191 by +-42 slab; the scaled arches reach +-38.8
 WALL_GAP = 10.0  # half-width of the opening in the front wall (the path is 14 wide)
 MASSES = (  # name, a0, depth, b0, b1, height, edge trim on the front corners too
-	("Mass_W", 180.0, 14.0, -33.0, -11.0, 18.0, False),
-	("Mass_C", 183.0, 12.0, -11.0, 11.0, 26.0, True),
-	("Mass_E", 180.0, 14.0, 11.0, 33.0, 21.0, False),
-	("Annex_W", 168.0, 16.0, -52.0, -36.0, 10.0, False),
-	("Annex_E", 168.0, 16.0, 36.0, 52.0, 12.0, False),
+	("Mass_W", 180.0, 14.0, -42.0, -14.0, 26.0, False),
+	("Mass_C", 183.0, 12.0, -14.0, 14.0, 36.0, True),
+	("Mass_E", 180.0, 14.0, 14.0, 42.0, 30.0, False),
+	("Annex_W", 168.0, 16.0, -62.0, -46.0, 14.0, False),
+	("Annex_E", 168.0, 16.0, 46.0, 62.0, 16.0, False),
 )
 NEW_LAMPS = ((130.0, -9.0), (130.0, 9.0))  # a, b: flank the court entrance, outside the 14-wide path
 
 
 def build_competitive(zones: Node, e_fr: Frame) -> None:
 	comp = zones.add(folder("Competitive"))
+	leg = next(p for p in json.loads((PROPS_DIR / "manifest.json").read_text(encoding="utf-8"))["props"] if p["name"] == "ModeArch")["legs"]
 	basalt, violet = PALETTE["slot"], PALETTE["competitive"]
 	deco = dict(collide=False, query=False, cast_shadow=False)
 
@@ -441,8 +453,10 @@ def build_competitive(zones: Node, e_fr: Frame) -> None:
 		]
 		# Collision: the arch mesh is CanCollide false so the opening stays walkable; the legs are two transparent boxes.
 		for side in (-1, 1):
-			comp.add(e_fr.block(f"Arch_{mode}_Leg{side}", ARCH_A, b + side * 4.43, PATH_TOP + 3.5, (3.14, 7.0, 5.2), basalt,
-				transparency=1.0, cast_shadow=False, query=False))
+			comp.add(e_fr.block(f"Arch_{mode}_Leg{side}", ARCH_A, b + side * (leg["inner_half_width"] + leg["outer_half_width"]) / 2 * ARCH_SCALE,
+				PATH_TOP + leg["collider_height"] * ARCH_SCALE / 2,
+				((leg["outer_half_width"] - leg["inner_half_width"]) * ARCH_SCALE, leg["collider_height"] * ARCH_SCALE,
+					leg["collider_depth"] * ARCH_SCALE), basalt, transparency=1.0, cast_shadow=False, query=False))
 
 
 
@@ -760,7 +774,8 @@ def add_props(hub: Node, e_fr: Frame, plaza: Node) -> None:
 	for mode, b in ARCHES:
 		wx, wz = e_fr.world(ARCH_A, b)
 		# yaw pi/2 turns the arch's width (local X) across the court and its opening (local Z) along the path
-		folder_node.add(arch.place(f"ModeArch_{mode}", (wx, PATH_TOP, wz), math.pi / 2, color=ARCH_COLOR[mode], material="Neon"))
+		folder_node.add(arch.place(f"ModeArch_{mode}", (wx, PATH_TOP, wz), math.pi / 2, color=ARCH_COLOR[mode], material="Neon",
+			scale=ARCH_SCALE))
 	for i, deg in enumerate(RIM_LAMP_DEGREES):
 		ang = math.radians(deg)
 		x, z = RIM_LAMP_R * math.cos(ang), RIM_LAMP_R * math.sin(ang)
