@@ -3,7 +3,7 @@ id: TASK-0131
 title: "MathShow Hub Art-1 Batch 4: Observatory + Ranks"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -44,6 +44,9 @@ Build the Observatory hero landmark (north, highest terrace, houses the Daily pa
 ---
 ## Implementation record
 Generator plus two props: `build_observatory`, `build_ranks`, `ObservatoryDome` and `Telescope` (manifest `dome_light`). Dome material is ForceField (Neon bloomed solid). The Ranks hall shell is kept because its roof carries two rare glyphs. ID: `next-id` gave TASK-0130, already used by Codex's walk-length worktree, so TASK-0131. Not recorded as audited or self-audited (row O6).
+
+### Revision 1 (rows P0-P6)
+Props re-exported from a Studio scratch place (real mesh/size/Box collision data, ModeArch-derived copies removed), brief light total 23 of 40, AGENTS.md ID rule. Rendering identical to rev0, regression repeated at 6ce3ca8. Evidence: `art-observatory.txt` REVISION 1. Not recorded as audited or self-audited.
 
 ## Audits
 

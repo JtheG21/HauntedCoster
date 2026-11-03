@@ -2,7 +2,7 @@
   "id": "TASK-0131",
   "game": "GAME-004",
   "title": "MathShow Hub Art-1 Batch 4: Observatory + Ranks",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -63,6 +63,12 @@
       "from": "changes_requested",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-02T22:07:38",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -70,6 +76,11 @@
       "time": "2026-11-02T21:53:11",
       "result": "pass",
       "notes": "Observatory and Ranks hall built at 246b967; evidence docs/workflow/evidence/TASK-0131/art-observatory.txt. +3 lights (hub 23), +213 instances, +6574 tris. Walk times 10.4-11.6 s, 34/34 glyphs, pads/Daily toast/mid-match/HUD ok. Dome C2 and Telescope C1 picked by jg."
+    },
+    {
+      "time": "2026-11-02T22:07:38",
+      "result": "pass",
+      "notes": "Rev 1: props re-exported from Studio scratch place at 6ce3ca8; picks Dome C2, Telescope C1; before/after render identical; regression repeated (walk 9.7-11.6 s, 34/34 glyphs, pads, Daily toast, mid-match, HUD, console clean); brief 23 of 40; AGENTS.md ID rule."
     }
   ],
   "revisions": 1
