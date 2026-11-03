@@ -204,5 +204,99 @@
         ]
       }
     }
-  ]
+  ],
+  "task_0131_generation_log": {
+    "note": "Every generate_mesh call in TASK-0131 (cap 3 per prop), logged as made.",
+    "calls": [
+      {
+        "prop": "ObservatoryDome",
+        "n": 1,
+        "prompt": "geodesic lattice half-sphere dome with rim ring and slit, maxTriangles 800, untextured, size 22x12x22",
+        "result": "candidate C1 (call timed out, model appeared in scratch)",
+        "triangles": 800,
+        "mesh_id": "rbxassetid://76393790341028",
+        "texture_id": "rbxassetid://87807482904109",
+        "size": [
+          11.97,
+          12.0,
+          11.98
+        ]
+      },
+      {
+        "prop": "ObservatoryDome",
+        "n": 2,
+        "prompt": "hemisphere of faceted triangular lattice panels with raised diagonal ribs, flat base ring, maxTriangles 800, untextured, size 22x11x22",
+        "result": "candidate C2",
+        "triangles": 800,
+        "mesh_id": "rbxassetid://70374810362156",
+        "texture_id": "rbxassetid://107660586510939",
+        "published_asset_id": "121097388843099",
+        "size": [
+          15.61,
+          11.0,
+          15.69
+        ]
+      },
+      {
+        "prop": "Telescope",
+        "n": 1,
+        "prompt": "tapered tube on tripod stand with pivot yoke, maxTriangles 400, untextured, size 5x10x10",
+        "result": "candidate C1",
+        "triangles": 398,
+        "mesh_id": "rbxassetid://117401431585216",
+        "texture_id": "rbxassetid://120110412525868",
+        "published_asset_id": "87870432759576",
+        "size": [
+          3.68,
+          10.0,
+          6.72
+        ]
+      },
+      {
+        "prop": "ObservatoryDome",
+        "n": 3,
+        "prompt": "wide flattened hemisphere, thick crossing arc ribs lattice, heavy base ring, small hub on top, maxTriangles 800, untextured, size 22x11x22",
+        "result": "candidate C3",
+        "triangles": 778,
+        "mesh_id": "rbxassetid://123126442969465",
+        "texture_id": "rbxassetid://84310065344070",
+        "published_asset_id": "80067263775861",
+        "size": [
+          12.57,
+          11.0,
+          12.56
+        ]
+      },
+      {
+        "prop": "Telescope",
+        "n": 2,
+        "prompt": "refracting telescope, fat tube with lens-hood ring, Y cradle on short pedestal, tilted 45 deg, maxTriangles 400, untextured, size 5x10x10",
+        "result": "candidate C2",
+        "triangles": 400,
+        "mesh_id": "rbxassetid://138312757426924",
+        "texture_id": "rbxassetid://119477990060783",
+        "published_asset_id": "105538073379683",
+        "size": [
+          4.76,
+          9.29,
+          10.0
+        ]
+      },
+      {
+        "prop": "Telescope",
+        "n": 3,
+        "prompt": "reflector telescope, stubby barrel tube on heavy box base with pivot axle, tilted steeply, maxTriangles 400, untextured, size 5x10x10",
+        "result": "candidate C3",
+        "triangles": 400,
+        "mesh_id": "rbxassetid://119337289181586",
+        "texture_id": "rbxassetid://97569696452074",
+        "published_asset_id": "77781338205521",
+        "size": [
+          4.11,
+          10.0,
+          9.91
+        ]
+      }
+    ]
+  }
 }
