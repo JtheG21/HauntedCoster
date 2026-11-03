@@ -2,7 +2,7 @@
   "id": "TASK-0127",
   "game": "GAME-004",
   "title": "MathShow Hub Art-1 Batch 2: Competitive",
-  "status": "review",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -80,6 +80,18 @@
       "from": "changes_requested",
       "to": "review",
       "note": "hand transition approved by jg; re-scope after 2/2; orchestrator lacks the transition (TASK-0124)"
+    },
+    {
+      "time": "2026-11-02T20:47:01",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T21:05:10",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -104,7 +116,13 @@
       "time": "2026-11-02T20:34:15",
       "result": "fail",
       "report": "06 QA/AUD-20261102-TASK-0127-02.md"
+    },
+    {
+      "time": "2026-11-02T20:47:01",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0127-03.md"
     }
   ],
-  "revisions": 2
+  "revisions": 2,
+  "merge_approved_by": "jg"
 }
