@@ -3,7 +3,7 @@ id: TASK-0127
 title: "MathShow Hub Art-1 Batch 2: Competitive"
 type: task
 project: GAME-004
-status: review
+status: done
 priority: medium
 risk: low
 owner: claude-code
