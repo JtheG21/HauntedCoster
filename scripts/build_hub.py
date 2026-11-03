@@ -44,12 +44,18 @@ PALETTE = {
 	"promenade": (86, 98, 110),
 	"tier": (30, 61, 69),
 	"glyph": (255, 255, 255),
+	"cyan": (62, 224, 240),  # Holo Cyan
+	"violet": (138, 77, 255),  # Menu Violet
+	"amber": (255, 181, 71),  # Lamp Amber (unlit parts)
+	"amber_neon": (250, 125, 18),  # Lamp Amber tuned for Neon + Bloom: #FFB547 renders lemon yellow (TASK-0125 lamp Globe)
+	"bunting_line": (86, 98, 110),
 }
 
 MATERIAL = {"SmoothPlastic": 272, "Concrete": 816, "Slate": 800, "Neon": 288, "Glass": 1568, "Plastic": 256}
 SHAPE = {"Ball": 0, "Block": 1, "Cylinder": 2}
 
 PLAZA_R = 55.0
+SPAWN_Z = 47.0  # the SpawnLocation and the SpawnHex plate sit at (0, SPAWN_Z), the plaza's south edge
 PATH_W = 14.0
 PATH_TOP = 0.2
 TIER_COUNT = 4
@@ -224,6 +230,36 @@ class Prop:
 		assert first, f"{entry['file']}: root has no WorldPivotData"
 		self.pivot = _cf_to_matrix([float(v) for v in re.findall(r">([-0-9.eE]+)<", first.group(2))])
 
+	def extra_nodes(self, placement) -> list[Node]:
+		"""Generator-side children of the prop's MeshPart: the lamp Globe, the crystal's Neon core, the spawn plate's rim."""
+		if "light" in self.entry:
+			return self.globe_nodes(placement)
+		if "core" in self.entry:
+			return self.core_nodes(placement)
+		if "rim" in self.entry:
+			return self.rim_nodes(placement)
+		return []
+
+	def core_nodes(self, placement) -> list[Node]:
+		c = self.entry["core"]
+		pos, _ = _mul(placement, (tuple(c["offset"]), IDENT))
+		return [make_part("Core", (c["size"],) * 3, pos, IDENT, _hex(c["color"]), material=c["material"], shape="Ball",
+			collide=c["can_collide"], query=False, cast_shadow=c["cast_shadow"])]
+
+	def rim_nodes(self, placement) -> list[Node]:
+		"""Eight Neon bars on the octagonal plate's flats (flats face the axes; yaw is the placement's)."""
+		r, top = self.entry["rim"], self.entry["size"][1]
+		length = 2 * r["apothem"] * math.tan(math.pi / 8) - 0.5
+		bars = []
+		for k in range(8):
+			ang = k * math.pi / 4
+			c, sn = math.cos(ang), math.sin(ang)
+			pos, rot = _mul(placement, ((r["apothem"] * c, top + r["height"] / 2, r["apothem"] * sn),
+				from_columns((c, 0, sn), (0, 1, 0), (-sn, 0, c))))
+			bars.append(make_part(f"RimBar_{k}", (r["width"], r["height"], length), pos, rot, _hex(r["color"]),
+				material=r["material"], collide=False, query=False, cast_shadow=False))
+		return bars
+
 	def globe_nodes(self, placement) -> list[Node]:
 		"""The Neon Globe sphere (a child of the pole MeshPart) that carries the PointLight. Offsets are pole-local, from the pivot."""
 		g, cfg = self.entry["globe"], self.entry["light"]
@@ -277,7 +313,7 @@ class PlacedProp(Node):
 				line = f'<Item class="{m.group(1)}" referent="RBX{_ref[0]:06d}">'
 			elif line == "</Item>":
 				if stack.pop() == "MeshPart":
-					for n in self.prop.globe_nodes(placement):
+					for n in self.prop.extra_nodes(placement):
 						out.extend("\t" * (depth + rel + 1) + ln for ln in n.xml(0).splitlines())
 			elif not named and line.startswith('<string name="Name">'):
 				line, named = f'<string name="Name">{self.name}</string>', True
@@ -303,25 +339,39 @@ def build() -> Node:
 	ground = cylinder("Ground", 0, -1, 0, 2, 600, PALETTE["ground"], material="Concrete")
 	hub.add(ground)
 
-	# Plaza: three stacked bands (outer, middle, inner) + centre plinth.
-	plaza.add(cylinder("Ring_Outer", 0, 0.1, 0, 0.2, PLAZA_R * 2, PALETTE["plaza_a"]))
-	plaza.add(cylinder("Ring_Middle", 0, 0.2, 0, 0.4, 90, PALETTE["plaza_b"]))
-	plaza.add(cylinder("Ring_Inner", 0, 0.3, 0, 0.6, 66, PALETTE["plaza_c"]))
-	plaza.add(cylinder("Plinth", 0, 0.6, 0, 1.2, 12, PALETTE["plinth"]))
+	# Plaza (TASK-0126): Concrete bands, an amber rim strip, the plinth, the spawn plate, tiles and seating.
+	plaza.add(cylinder("Ring_Outer", 0, 0.1, 0, 0.2, PLAZA_R * 2, PALETTE["plaza_a"], material="Concrete"))
+	plaza.add(cylinder("Ring_Middle", 0, 0.2, 0, 0.4, 90, PALETTE["plaza_b"], material="Concrete"))
+	plaza.add(cylinder("Ring_Inner", 0, 0.3, 0, 0.6, 66, PALETTE["plaza_c"], material="Concrete"))
+	# The rim strip: a Neon disc just below the outer band's top, so 0.6 stud of it shows past the edge (paths cover it).
+	plaza.add(cylinder("Rim_Strip", 0, 0.09, 0, 0.18, PLAZA_R * 2 + 1.2, PALETTE["amber_neon"], material="Neon", collide=False,
+		query=False, cast_shadow=False))
+	plaza.add(cylinder("Plinth", 0, 0.6, 0, 1.2, 12, PALETTE["slot"]))
+	plaza.add(cylinder("Plinth_Trim", 0, 0.9, 0, 0.3, 12.4, PALETTE["violet"], material="Neon", collide=False, query=False,
+		cast_shadow=False))
+	plaza.add(cylinder("Plinth_Cap", 0, 1.5, 0, 0.6, 8, PALETTE["slot"]))
+	plaza.add(cylinder("Plinth_CapTrim", 0, 1.45, 0, 0.2, 8.4, PALETTE["violet"], material="Neon", collide=False, query=False,
+		cast_shadow=False))
 
-	spawn = make_part("Spawn", (8, 0.4, 8), (0, 0.4, 47), IDENT, PALETTE["daily"], cls="SpawnLocation")
+	# Spawn: the SpawnLocation keeps its place and footprint; the SpawnHex plate (a prop) sits under it, top at y = 0.5.
+	spawn = make_part("Spawn", (8, 0.4, 8), (0, 0.3, SPAWN_Z), IDENT, PALETTE["daily"], cls="SpawnLocation", transparency=1.0,
+		cast_shadow=False)
 	spawn.props += ['<bool name="Neutral">true</bool>', '<int name="Duration">0</int>']
 	plaza.add(spawn)
 
 	tiles = plaza.add(folder("TileSlots"))
-	for radius, count, top in ((48, 24, 0.2), (39, 18, 0.4), (22, 12, 0.6)):
+	# Puzzle tiles, decorative only (no logic): a Concrete centre on a Neon base, so 0.4 stud of colour frames each tile.
+	for radius, count, top, glow in ((48, 24, 0.2, "cyan"), (39, 18, 0.4, "violet"), (22, 12, 0.6, "amber_neon")):
 		for i in range(count):
 			ang = 2 * math.pi * (i + 0.5) / count
 			x, z = radius * math.cos(ang), radius * math.sin(ang)
-			if math.hypot(x - 0, z - 47) < 7:
+			if math.hypot(x - 0, z - SPAWN_Z) < 7:
 				continue
-			t = make_part(f"Slot_{radius}_{i:02d}", (4, 0.1, 4), (x, top + 0.05, z), from_columns((math.cos(ang), 0, math.sin(ang)),
-				(0, 1, 0), (-math.sin(ang), 0, math.cos(ang))), PALETTE["slot"])
+			rot = from_columns((math.cos(ang), 0, math.sin(ang)), (0, 1, 0), (-math.sin(ang), 0, math.cos(ang)))
+			tiles.add(make_part(f"Inset_{radius}_{i:02d}", (4, 0.08, 4), (x, top + 0.04, z), rot, PALETTE[glow], material="Neon",
+				collide=False, query=False, cast_shadow=False))
+			t = make_part(f"Slot_{radius}_{i:02d}", (3.2, 0.12, 3.2), (x, top + 0.06, z), rot, PALETTE["slot"], material="Concrete",
+				collide=False, query=False, cast_shadow=False)
 			t.tags.append("TileSlot")
 			tiles.add(t)
 
@@ -333,7 +383,7 @@ def build() -> Node:
 			continue
 		ang = math.radians(deg)
 		fr = Frame((math.cos(ang), math.sin(ang)))
-		seats.add(fr.block(f"Seat_{k:02d}", 53, 0, 0.8, (6, 1.2, 2.6), PALETTE["seat"]))
+		seats.add(fr.block(f"Seat_{k:02d}", 53, 0, 0.85, (6.4, 1.3, 2.8), PALETTE["seat"], cast_shadow=False))
 
 	# ---- paths and zones ----
 	dirs = {
@@ -500,7 +550,7 @@ def build() -> Node:
 		ang = math.radians(deg)
 		glyph(None, f"R_Lake{i + 1}", 0, 0, PATH_TOP, "rare",
 			origin_override=(LAKE_C[0] + 50 * math.cos(ang), LAKE_C[1] + 50 * math.sin(ang)))
-	add_props(hub, e_fr)
+	add_props(hub, e_fr, plaza)
 	return hub
 
 
@@ -512,7 +562,67 @@ LAMP_SIDE = 6.0
 LAMPS: list[dict] = []
 
 
-def add_props(hub: Node, e_fr: Frame) -> None:
+# Rim lamps (TASK-0126): eight more LampPosts just outside the plaza edge, clear of the paths, the spawn plate and the seats.
+RIM_LAMP_DEGREES = (22, 67, 112, 158, 202, 248, 292, 338)
+RIM_LAMP_R = 57.5
+# Bunting: four lines run from rim lamp posts toward the centre to slim masts, with a flag and a bulb string on each.
+BUNTING_FROM = (22, 112, 202, 292)  # degrees; each must be in RIM_LAMP_DEGREES
+BUNTING_MAST_R = 27.0
+BUNTING_START_Y = 5.0  # the pole top (LampPost size y 5.0588)
+BUNTING_MAST_Y = 9.0
+BUNTING_SAG = 1.8
+BUNTING_SEGMENTS = 10
+BUNTING_FLAGS = 28  # per line: 4 x 28 = 112 flags (cap 160)
+BUNTING_BULBS = 6  # per line: 4 x 6 = 24 bulbs (cap 120), Neon, no lights. A Neon Ball costs ~430 triangles, so the 25k budget sets this
+FLAG_SIZE = (0.08, 1.2, 0.9)  # thickness, drop, width along the line
+FLAG_COLORS = ("violet", "cyan", "amber")
+NEON_COLORS = ("violet", "cyan", "amber_neon")  # the same three for the Neon bulbs
+RIM_LAMPS: list[dict] = []
+BUNTING_STATS = {"flags": 0, "bulbs": 0, "segments": 0}
+
+
+def add_bunting(hub: Node) -> None:
+	folder_node = hub.add(folder("Bunting"))
+	for deg in BUNTING_FROM:
+		assert deg in RIM_LAMP_DEGREES
+		ang = math.radians(deg)
+		start = (RIM_LAMP_R * math.cos(ang), RIM_LAMP_R * math.sin(ang))
+		fr = Frame((-math.cos(ang), -math.sin(ang)), start)  # a = studs from the lamp toward the centre
+		length = RIM_LAMP_R - BUNTING_MAST_R
+		line = folder_node.add(folder(f"Line_{deg:03d}"))
+		mx, mz = fr.world(length, 0)
+		line.add(cylinder(f"Mast_{deg:03d}", mx, 0.4 + (BUNTING_MAST_Y - 0.4) / 2, mz, BUNTING_MAST_Y - 0.4, 0.5, PALETTE["slot"],
+			collide=False, query=False, cast_shadow=False))
+
+		def line_y(t: float) -> float:
+			return BUNTING_START_Y + (BUNTING_MAST_Y - BUNTING_START_Y) * t - BUNTING_SAG * 4 * t * (1 - t)
+
+		for k in range(BUNTING_SEGMENTS):
+			t0, t1 = k / BUNTING_SEGMENTS, (k + 1) / BUNTING_SEGMENTS
+			a0, a1, y0, y1 = t0 * length, t1 * length, line_y(t0), line_y(t1)
+			seg = math.hypot(a1 - a0, y1 - y0)
+			wx, wz = fr.world((a0 + a1) / 2, 0)
+			line.add(make_part(f"Cord_{k:02d}", (0.12, 0.12, seg + 0.05), (wx, (y0 + y1) / 2, wz), fr.rot(math.atan2(y1 - y0, a1 - a0)),
+				PALETTE["bunting_line"], collide=False, query=False, cast_shadow=False))
+			BUNTING_STATS["segments"] += 1
+		# A flag hangs from the cord: a WedgePart turned upside down so its right-angle corner is at the bottom.
+		flip = from_columns((fr.side[0], 0, fr.side[1]), (0, -1, 0), (-fr.out[0], 0, -fr.out[1]))
+		for i in range(BUNTING_FLAGS):
+			t = (i + 0.5) / BUNTING_FLAGS
+			wx, wz = fr.world(t * length, 0)
+			rot = flip if i % 2 == 0 else from_columns((-fr.side[0], 0, -fr.side[1]), (0, -1, 0), (fr.out[0], 0, fr.out[1]))
+			line.add(make_part(f"Flag_{i:02d}", FLAG_SIZE, (wx, line_y(t) - FLAG_SIZE[1] / 2 - 0.06, wz), rot,
+				PALETTE[FLAG_COLORS[i % 3]], cls="WedgePart", collide=False, query=False, cast_shadow=False))
+			BUNTING_STATS["flags"] += 1
+		for i in range(BUNTING_BULBS):
+			t = (i + 0.5) / BUNTING_BULBS
+			wx, wz = fr.world(t * length, 0.18)
+			line.add(make_part(f"Bulb_{i:02d}", (0.45, 0.45, 0.45), (wx, line_y(t) - 0.05, wz), IDENT, PALETTE[NEON_COLORS[(i + 1) % 3]],
+				material="Neon", shape="Ball", collide=False, query=False, cast_shadow=False))
+			BUNTING_STATS["bulbs"] += 1
+
+
+def add_props(hub: Node, e_fr: Frame, plaza: Node) -> None:
 	manifest = json.loads((PROPS_DIR / "manifest.json").read_text(encoding="utf-8"))
 	props = {entry["name"]: Prop(entry) for entry in manifest["props"]}
 	folder_node = hub.add(folder("Props"))
@@ -523,6 +633,15 @@ def add_props(hub: Node, e_fr: Frame) -> None:
 		wx, wz = e_fr.world(a, b)
 		folder_node.add(lamp.place(f"LampPost_E{i + 1:02d}", (wx, PATH_TOP, wz)))
 		LAMPS.append({"name": f"LampPost_E{i + 1:02d}", "x": wx, "z": wz})
+	for i, deg in enumerate(RIM_LAMP_DEGREES):
+		ang = math.radians(deg)
+		x, z = RIM_LAMP_R * math.cos(ang), RIM_LAMP_R * math.sin(ang)
+		folder_node.add(lamp.place(f"LampPost_R{i + 1:02d}", (x, 0.0, z)))
+		RIM_LAMPS.append({"name": f"LampPost_R{i + 1:02d}", "x": x, "z": z})
+	# Plaza props: the crystal floats above the plinth cap (top y = 1.8); the hex plate sits at the spawn, top at y = 0.5.
+	plaza.add(props["RankCrystal"].place("RankCrystal", (0.0, 3.2, 0.0)))
+	plaza.add(props["SpawnHex"].place("SpawnHex", (0.0, -0.5, SPAWN_Z)))
+	add_bunting(hub)
 
 
 def main() -> None:
@@ -539,7 +658,7 @@ def main() -> None:
 	out.write_text('<roblox version="4">\n' + HEADER + body + "\n" + tail + "</roblox>\n", encoding="utf-8")
 	print(f"wrote {out}")
 	if args.stats:
-		print(f"parts: {_ref[0]}, pads: {len(PADS)}, glyphs: {len(GLYPHS)}, lamps: {len(LAMPS)}")
+		print(f"parts: {_ref[0]}, pads: {len(PADS)}, glyphs: {len(GLYPHS)}, lamps: {len(LAMPS)} + {len(RIM_LAMPS)} rim, bunting: {BUNTING_STATS}")
 		for p in PADS:
 			print(f"  pad {p['mode']:<9} dist {math.hypot(p['x'], p['z']):6.1f}  ({p['x']:.1f}, {p['y']:.1f}, {p['z']:.1f})")
 
