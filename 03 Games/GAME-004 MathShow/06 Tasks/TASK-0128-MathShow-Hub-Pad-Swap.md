@@ -31,11 +31,12 @@ From the path, VS is on the left and Group on the right, as in A2. Today it is r
 `scripts/build_hub.py`, `games/mathshow/map/Hub.rbxmx`, evidence, this note, `tasks/items/TASK-0128.json`.
 
 ## Acceptance criteria
-- [ ] AC1 VS left, Group right from the path; Blitz unchanged.
-- [ ] AC2 Walk times 8-12 s, 34/34 glyphs, three pads open their confirm screens.
+- [x] AC1 VS left, Group right from the path; Blitz unchanged. Evidence: `docs/workflow/evidence/TASK-0128/pad-swap.txt`.
+- [x] AC2 Walk times 9.9-11.9 s, 34/34 glyphs, three pads open their confirm screens. Same evidence file.
 
 ---
 ## Implementation record
+One constant changed (`ARCHES` lateral values); `Hub.rbxmx` regenerated; `scripts/check.sh` green. Not recorded or self-audited.
 
 ## Audits
 
