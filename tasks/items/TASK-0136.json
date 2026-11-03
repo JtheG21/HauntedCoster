@@ -1,0 +1,44 @@
+{
+  "id": "TASK-0136",
+  "game": "GAME-004",
+  "title": "MathShow Daily Ramp Reachability",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "games/mathshow/map/Hub.rbxmx",
+    "tests/test_hub_routes.py",
+    "scripts/check.sh",
+    "docs/workflow/evidence/TASK-0136/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0136-MathShow-Daily-Ramp-Reachability.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0136-daily-ramp",
+  "acceptance": [
+    "R1: every vertical rise on the spawn-to-Daily-pad route listed with location, height and causing part(s); the dark wall the Mac avatar stopped at is named.",
+    "R2: build_hub.py route from the plaza to the Daily pad is walkable without jumping: no single rise above 1.0 stud, >= 12 studs wide, no collidable part narrowing it; Observatory stays on the highest terrace; Daily ModePad tag/attributes/size unchanged; collider guard and drift check pass.",
+    "R3: tests/test_hub_routes.py (stdlib, run by check.sh) asserts no collidable rise > 1.0 stud and corridor width >= 12 studs for the plaza-to-pad corridors of all 6 pads; shown failing on current main, passing after the fix.",
+    "R4: Humanoid driven by MoveTo only (no jump) arrives at each of the 6 pads from spawn and fires its screen/toast, times logged; fresh-Play regression (8-12 s, 34/34 Glyphs, mid-match block, HUD, console clean); evidence docs/workflow/evidence/TASK-0136/daily-ramp.txt with measured SHA and applies_to.",
+    "R5: record-exec; check.sh, specs, validators green; PR open, CI green, not merged."
+  ],
+  "evidence": [],
+  "notes": "Approved rows R0-R5 (jg, 2026-11-03). Out of scope: art beyond ramp/path geometry, pad logic, Glyph logic, menu, publishing, iPad, merging. Do not record-audit or self-audit. Not the TASK-0123 evidence files.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0136-MathShow-Daily-Ramp-Reachability.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-03T15:52:13",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-03T15:52:13",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}
