@@ -36,14 +36,19 @@ Build the Competitive zone (VS / Blitz / Group pads) to match `A2_competitive_en
 `scripts/build_hub.py`, `games/mathshow/map/Hub.rbxmx`, `games/mathshow/map/props/{ModeArch.rbxmx,manifest.json}`, evidence logs, this note, `tasks/items/TASK-0127.json`.
 
 ## Acceptance criteria
-- [ ] AC1 ModeArch candidates generated; jg picks one.
-- [ ] AC2 Zone built by the generator; pad volumes and tags unchanged.
-- [ ] AC3 Budgets met.
-- [ ] AC4 Regression (walk times, 34 GlyphSpawn markers, pad confirm screens, blocked mid-match, HUD behind menu).
-- [ ] AC5 Evidence at a clean BuildStamp.
+- [x] AC1 ModeArch candidates generated (3, <=300 tris); jg picked A (2026-11-02). Evidence: `docs/workflow/evidence/TASK-0127/art-competitive.txt` (C1).
+- [x] AC2 Zone built by the generator only; pad volumes, tags and pad() calls unchanged. Evidence: same file (C2), `scripts/check.sh` drift step.
+- [x] AC3 Budgets: +5 PointLights (hub total 18), +106 instances, +3924 triangles (inventory metric). Evidence: same file (C3).
+- [x] AC4 Regression at d21894f: walk times 9.9-11.9 s, 34/34 GlyphSpawn reachable, pad screens, blocked mid-match, HUD behind menu. Evidence: same file (C4), `glyph-reachability.csv`.
+- [x] AC5 Evidence at a clean BuildStamp d21894f: A2-framing screenshot beside the mockup, inventory, light total, console clean. Deviations from A2 are listed (VS/Group sides, magenta-looking violet).
 
 ---
 ## Implementation record
+- Branch from `main`, then merged `main` (TASK-0126 plaza art, budget metric) before building; `Hub.rbxmx` regenerated after the merge.
+- Candidates generated in a scratch place (never saved); jg picked A. `ModeArch.rbxmx` + manifest entry (`arch_light` key, colour per placement); `build_hub.py` gained per-placement colour/material and `build_competitive`.
+- Decisions: mesh CanCollide false plus two transparent leg colliders per arch (a hull would fill the opening); pads left where they are, so VS is on the viewer's right (A2 has it left); wall gap 10 studs either side; `Font.GothamBlack`, SurfaceGui PixelsPerStud 12 (SizingMode 1).
+- Cost found: VS walk +1.1 s because the front wall closes the court-corner diagonal.
+- Checks: `scripts/check.sh` all pass; Studio checks in the evidence file. Not recorded or self-audited (row C6).
 
 ## Audits
 

@@ -1,0 +1,49 @@
+# TASK-0127 Competitive zone art (rows C0-C6, jg 2026-11-02)
+# measured git HEAD: d21894f (BuildStamp in Studio "d21894f 2026-11-03T03:39:47Z", clean, served by scripts/serve.sh from the TASK-0127 worktree; Rojo plugin reconnected through the Connect prompt; fresh Play session; place not saved: MathShow.rbxl mtime stays Oct 31)
+# applies_to: Measured at d21894f. Applies to any later commit whose diff from d21894f does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json or games/mathshow/src/**.
+# Screenshots (outside the repo): ~/Roblox-Work/evidence/TASK-0127/ (candidates/, competitive_a2_framing_844x390.jpg, competitive_vs_A2.jpg = A2 mockup left, this build right)
+
+## C1 ModeArch candidates
+3 candidates via generate_mesh (maxTriangles 300, size 12x14x3, one piece, untextured prompt), scratch place TASK-0127-scratch.rbxl (an empty baseplate built with rojo; never saved). No Robux cost or quota was shown; one job failed with "Too Many Requests" and was retried. A first attempt without maxTriangles ignored the prompt's limit (1756 and 5208 triangles) and was discarded. Triangles (EditableMesh faces): A 300, B 298, C 300. Native sizes 6.30x7.32x3, 5.57x7.53x3, 7.72x8.29x3, so each is scaled up at use. Shown at ~/Roblox-Work/evidence/TASK-0127/candidates/candidates_A_B_C.jpg (844x390). jg picked A (rounded) on 2026-11-02: mesh rbxassetid://87495739867220, scaled x1.905 to 12.0 x 13.95 x 5.72, TextureID cleared. The generated model also carried a texture; it is not used.
+Export: Model ModeArch > MeshPart arch_geom (Anchored, CanCollide false, CastShadow false) -> SerializationService + scripts/studio_transfer.py -> rojo build -> props/ModeArch.rbxmx. manifest.json entry has the ids, size, 300 triangles and "created by jg_57565 via Studio generate_mesh, TASK-0127".
+
+## C2 What the generator builds (scripts/build_hub.py, build_competitive and add_props)
+- Hub.Zones.Competitive: 5 Basalt Blue SmoothPlastic masses (Mass_W 18 high, Mass_C 26, Mass_E 21, Annex_W 10, Annex_E 12) with a 0.4-stud Menu Violet Neon roof strip, vertical edge strips on Mass_C, and Neon window blocks (Lamp Amber tuned #FA7D12 / Holo Cyan / Menu Violet; fixed pattern; no light objects).
+- Hub.Props: ModeArch_VS (Menu Violet), ModeArch_Blitz (Lamp Amber #FA7D12), ModeArch_Group (Holo Cyan), Neon, over the existing pads at 150 along the east path. Yaw is pi/2 so the opening faces the path. Each has one shadowless PointLight (range 14, brightness 1.5, arch colour) on the mesh centre. Two transparent leg colliders per arch (3.14 x 7 x 5.2, CanCollide true); the mesh itself is CanCollide false so the opening stays walkable (a hull would fill it).
+- Signs: Sign_VS / Sign_Blitz / Sign_Group plates (16 x 6 x 0.6, Basalt) with 0.4-stud Neon frames, a SurfaceGui (Face Front = toward the plaza, LightInfluence 0, PixelsPerStud 12) and a TextLabel "VS" / "BLITZ" / "GROUP" in Enum.Font.GothamBlack (maps to Montserrat Heavy), TextScaled, no uploaded images.
+- Wall: Wall_FrontW/FrontE (10-stud gap each side of the path centre), Wall_SideW/SideE, Basalt, 2.4 high, each with a Menu Violet Neon top strip.
+- Lamps: LampPost_E06, E07 (the existing LampPost prop) flanking the court entrance at (130, +-9).
+- The old graybox Arch_*_Post/Lintel parts are removed. Pads (pad() calls), ModePad tags, Mode attributes and pad sizes are unchanged.
+- All new decoration: CastShadow false, CanQuery false, CanCollide false; CanCollide true only on masses, walls and the arch leg colliders.
+- Sizing gotcha found on the way: SurfaceGuiSizingMode FixedSize = 0 and PixelsPerStud = 1, so token 0 stretched the default 800 x 600 canvas; the file now sets 1.
+
+## C3 / C5 Inventory (budget metric of M6: Block 12, Wedge 10, Cylinder 96, Ball 432 + prop manifest triangles; counted from Hub.rbxmx and manifest.json, base = main at 5a4b4ff)
+                 base      new     delta
+instances         792      898       106
+PointLights        13       18         5
+triangles       33214    37138      3924
+  Block         6168     7128       960
+  Cylinder      1824     1824         0
+  Ball         16848    17712       864
+  Mesh          8374    10474      2100
+Budgets: new PointLights 5 <= 8 (3 arches + 2 lamps); running hub total 18 <= 40; new instances +106 <= 600; new triangles +3924 <= 20000. Method script: the committed sources parsed with xml.etree (a throwaway script, not committed).
+
+## C5 Framing
+competitive_a2_framing_844x390.jpg: Studio screen_capture, camera (84, 8, 0) looking at (150, 11, 0), Edit mode, resized to 844x390 (aspect equal; the pane's capture was 1210x558). Next to A2_competitive_entrance.png in competitive_vs_A2.jpg.
+Differences from A2, stated plainly: (1) the existing pad layout puts VS at z=+26, so a viewer on the path sees GROUP left, BLITZ middle, VS right; A2 has VS left. Moving the pads is out of scope (pad logic). (2) Violet Neon renders magenta-pink in the capture; the part colour is exactly Menu Violet. (3) A2's central portal frame and the sky/lighting are not part of this batch; the capture is Edit-mode lighting. (4) Sign legibility: from the path start (58, 6, 0) "GROUP / BLITZ / VS" read at 1210 px wide (checked); at 844 px they are about 30% smaller, so a screenshot from the very start of the path is legible but small.
+
+## C4 Regression (fresh Play, Server and Client data models)
+- Walk times, PathfindingService (radius 2, height 5, can jump) from (0,5,47), length / 16: Daily 189.9 studs 11.9 s, VS 176.6 11.0 s, Blitz 173.6 10.8 s, Group 183.8 11.5 s, Practice 173.7 10.9 s, Skill 158.6 9.9 s. All inside 8-12 s. TASK-0126 baseline: VS 158.2 (9.9 s), Blitz 173.6, Group 182.5, Daily 189.9, Practice 173.7, Skill 158.6. VS is +18.4 studs (+1.1 s): the new front wall closes the diagonal across the court corner, so the route goes through the gap. Group +1.3 studs. Others unchanged.
+- Reachability: 34/34 GlyphSpawn markers Success (glyph-reachability.csv, new measured SHA d21894f). Dummy walks of all 34 were not repeated (pathfinding only).
+- Pads (client moved its own character with PivotTo, 2.6 s off every pad between tries, menu closed): Blitz -> Screen_confirm_blitz, Group -> Screen_confirm_group, VS -> Screen_confirm_vs, Practice -> Screen_practice, Skill -> Screen_skillintro, Daily -> toast only ("locked:daily"; menu stays closed). One ModePadOpen event each. The pad parts, tags and trigger volumes are unchanged, so this also confirms the arch colliders do not interfere.
+- Mid-match: JoinShow sent, ShowState participant=true (Question q=1). Standing 3 s on Blitz, VS and Group pads: events 0, menu stays closed. After the match (participant=false) stepping onto Blitz: confirm screen opens (menuEnabled true).
+- HUD: GlyphHud.Enabled false while MathShowMenu.Enabled is true, true when closed, false again when reopened (and false while a pad screen is open).
+- Not exercised: a live walk collecting glyphs; two players; real-device perf (TASK-0123). Note: a server-side require of RoundService.isParticipant read false while the client's ShowState said participant=true (the require is probably another module instance); the client's ShowState and the pad behaviour were used instead.
+
+## Console
+Fresh Play: no errors from MathShow. Lines seen: ModePadService: 6 pads, GlyphService: 34 glyph spawns, DataStores unavailable (unpublished place) and the known "ContentId: rbxassetid://203785492 failed due to: Asset type does not match requested type" (also in TASK-0120, 0125 and 0126). No warnings from the new SurfaceGuis or meshes.
+
+## Not done / caveats
+- No perf measurement (non-gating for this task; real-device perf is TASK-0123).
+- Collision of the arch legs was not walked into; the colliders are generator-defined boxes.
+- Studio Edit capture, not a Play-camera capture, is the framing evidence.
