@@ -12,23 +12,23 @@
         "parent": "Globe"
       },
       "assets": {
-        "mesh_id": "rbxassetid://105914018615825",
-        "texture_id": "rbxassetid://112557367926447"
+        "mesh_id": "rbxassetid://87757774517450",
+        "texture_id": "rbxassetid://81930988606011"
       },
       "size": [
-        1.9985,
-        8.1416,
-        2.0
+        2.0,
+        5.0588,
+        1.9765
       ],
-      "triangles": 1486,
+      "triangles": 600,
       "collision_fidelity": "Box",
-      "collision_note": "Hull of a base-pole-globe shape is almost the same 2 x 8.1 x 2 box, so Box is the cheapest collider that fits.",
-      "provenance": "created by jg_57565 via Studio generate_mesh, pilot TASK-0125",
-      "prompt": "Minimal chunky low-poly modern park lamp, dark slate-black cylindrical pole, hexagonal base plinth, large round glowing amber ball light (#FFB547) at the top held by a short curved arm. Simple, bold, toy-like.",
+      "collision_note": "Pole only: Box is the cheapest collider and the claw top is no wider than the base, so the box is close to the real shape.",
+      "provenance": "created by jg_57565 via Studio generate_mesh, pilot TASK-0125 (revision 1, candidate C, picked by jg 2026-11-02)",
+      "prompt": "Chunky low-poly fantasy lamp post pole only, no globe: dark wrought-iron pole with a flared bell-shaped base, a twisted mid section, and a four-pronged claw holder at the top that can hold a glowing ball. Dark metal, simple readable shapes, game-ready.",
       "globe": {
         "offset": [
           0,
-          7.2,
+          6.0588,
           0
         ],
         "size": 2,
@@ -36,7 +36,7 @@
         "material": "Neon",
         "can_collide": false,
         "cast_shadow": false,
-        "note": "Placeholder offset for the current mesh, whose baked globe sits at about y 7.2; set it to the pole top plus 1 stud once the pole is picked (revision 1)."
+        "note": "Pole top (5.0588) + 1 stud: the 2-stud Globe sits in the claw."
       },
       "pole": {
         "cast_shadow": false

@@ -2,22 +2,22 @@
   <Item class="Model" referent="0">
     <Properties>
       <string name="Name">LampPost</string>
-      <BinaryString name="AttributesSerialize">BAAAABAAAABSQlhfQUlfR0VORVJBVEVEAwEUAAAAUkJYX0FJX0dFTkVSQVRJT05fSUQCJAAAADllMzY4NjQ3LTE1MmYtNGEwZi05ZDlmLTAzM2E2OTcwODUwZhYAAABSQlhfQUlfR0VORVJBVElPTl9UWVBFAgwAAABHZW5lcmF0ZU1lc2gRAAAAUkJYX0FJX01PREVMX0ZMT1cCBAAAAG1lc2g=</BinaryString>
+      <BinaryString name="AttributesSerialize"></BinaryString>
       <SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
       <token name="LevelOfDetail">0</token>
       <CoordinateFrame name="ModelMeshCFrame">
-        <X>-0.23132324</X>
-        <Y>0.00000047683716</Y>
-        <Z>1.0288086</Z>
-        <R00>-0.7061509</R00>
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+        <R00>1</R00>
         <R01>0</R01>
-        <R02>0.7080614</R02>
+        <R02>0</R02>
         <R10>0</R10>
-        <R11>0.9999999</R11>
+        <R11>1</R11>
         <R12>0</R12>
-        <R20>-0.70806134</R20>
+        <R20>0</R20>
         <R21>0</R21>
-        <R22>-0.7061508</R22>
+        <R22>1</R22>
       </CoordinateFrame>
       <SharedString name="ModelMeshData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
       <Vector3 name="ModelMeshSize">
@@ -33,7 +33,7 @@
       </BinaryString>
       <SharedString name="SlimHash">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
       <int64 name="SourceAssetId">-1</int64>
-      <BinaryString name="Tags">QXNzaXN0YW50LTAxYjc2MGZhLTA0NjItNGEwYy1iYjczLWRkOWEwYzZkYzY3MQBBc3Npc3RhbnRBSUdlbmVyYXRlZEFzc2V0</BinaryString>
+      <BinaryString name="Tags"></BinaryString>
       <OptionalCoordinateFrame name="WorldPivotData">
         <CFrame>
           <X>0</X>
@@ -88,20 +88,6 @@
         <int64 name="SourceAssetId">-1</int64>
         <BinaryString name="Tags"></BinaryString>
         <OptionalCoordinateFrame name="WorldPivotData">
-          <CFrame>
-            <X>0</X>
-            <Y>4.0810795</Y>
-            <Z>0</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0.000000009167341</R02>
-            <R10>0</R10>
-            <R11>0.99999976</R11>
-            <R12>0</R12>
-            <R20>0.000000009167341</R20>
-            <R21>0</R21>
-            <R22>0.9999999</R22>
-          </CFrame>
         </OptionalCoordinateFrame>
       </Properties>
       <Item class="MeshPart" referent="2">
@@ -120,18 +106,18 @@
           <token name="BottomSurface">0</token>
           <token name="BottomSurfaceInput">0</token>
           <CoordinateFrame name="CFrame">
-            <X>0.008779943</X>
-            <Y>4.0707893</Y>
-            <Z>0.008395553</Z>
+            <X>0</X>
+            <Y>2.529416</Y>
+            <Z>0</Z>
             <R00>1</R00>
             <R01>0</R01>
-            <R02>0.000000009167341</R02>
+            <R02>0</R02>
             <R10>0</R10>
-            <R11>0.99999976</R11>
+            <R11>1</R11>
             <R12>0</R12>
-            <R20>0.000000009167341</R20>
+            <R20>0</R20>
             <R21>0</R21>
-            <R22>0.9999999</R22>
+            <R22>1</R22>
           </CoordinateFrame>
           <bool name="CanCollide">true</bool>
           <bool name="CanQuery">true</bool>
@@ -155,9 +141,9 @@
           <bool name="HasSkinnedMesh">false</bool>
           <bool name="InertiaMigrated">false</bool>
           <Vector3 name="InitialSize">
-            <X>1.9985286</X>
-            <Y>8.141579</Y>
-            <Z>2</Z>
+            <X>2</X>
+            <Y>5.058832</Y>
+            <Z>1.9765444</Z>
           </Vector3>
           <Vector3 name="JointOffset">
             <X>0</X>
@@ -173,7 +159,7 @@
           <token name="Material">256</token>
           <string name="MaterialVariantSerialized"></string>
           <Content name="MeshContent">
-            <uri>rbxassetid://105914018615825</uri>
+            <uri>rbxassetid://87757774517450</uri>
           </Content>
           <SharedString name="PhysicalConfigData">jMO+3ujG8WZbCV+FbCLE5Q==</SharedString>
           <BinaryString name="PhysicsData">
@@ -208,14 +194,14 @@
           <BinaryString name="SerializedOverrides">
           </BinaryString>
           <Vector3 name="size">
-            <X>1.9985286</X>
-            <Y>8.141579</Y>
-            <Z>2</Z>
+            <X>2</X>
+            <Y>5.058832</Y>
+            <Z>1.9765444</Z>
           </Vector3>
           <int64 name="SourceAssetId">-1</int64>
           <BinaryString name="Tags"></BinaryString>
           <Content name="TextureContent">
-            <uri>rbxassetid://112557367926447</uri>
+            <uri>rbxassetid://81930988606011</uri>
           </Content>
           <float name="TopParamA">-0.5</float>
           <float name="TopParamB">0.5</float>
@@ -223,21 +209,21 @@
           <token name="TopSurfaceInput">0</token>
           <float name="Transparency">0</float>
           <Vector3 name="UnscaledCofm">
-            <X>-0.00004445068</X>
-            <Y>0.89816934</Y>
-            <Z>0.00011705051</Z>
+            <X>0.0003879504</X>
+            <Y>-0.14713289</Y>
+            <Z>0.0006858765</Z>
           </Vector3>
           <Vector3 name="UnscaledVolInertiaDiags">
-            <X>61.694202</X>
-            <Y>2.2876067</Y>
-            <Z>61.69179</Z>
+            <X>9.835859</X>
+            <Y>0.65323645</Y>
+            <Z>9.836845</Z>
           </Vector3>
           <Vector3 name="UnscaledVolInertiaOffDiags">
-            <X>-0.000883019</X>
-            <Y>-0.0019929393</Y>
-            <Z>-0.0018115175</Z>
+            <X>-0.0041299015</X>
+            <Y>-0.0001563053</Y>
+            <Z>-0.0063972306</Z>
           </Vector3>
-          <float name="UnscaledVolume">7.162599</float>
+          <float name="UnscaledVolume">2.7140083</float>
           <Vector3 name="Velocity">
             <X>0</X>
             <Y>0</Y>
