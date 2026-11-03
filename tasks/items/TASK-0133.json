@@ -1,0 +1,49 @@
+{
+  "id": "TASK-0133",
+  "game": "GAME-004",
+  "title": "MathShow Hub Art-1 Polish",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "games/mathshow/map/Hub.rbxmx",
+    "games/mathshow/map/props/manifest.json",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md",
+    "docs/workflow/evidence/TASK-0133/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0133-MathShow-Hub-Art-Polish.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0133-art-polish",
+  "acceptance": [
+    "Lake reads as Lake Ink (not near-black) at night via Part Reflectance/Color tuning plus a thin Holo Cyan Neon waterline strip along the promenade (no light objects); before/after screenshots at 844x390.",
+    "One generator constant for map Neon violet, tuned so captures read as A4 #8A4DFF; applied to map Neon parts only; MenuTheme/IdentityTheme untouched; chosen value recorded with the A4 swatch next to a capture.",
+    "A2 central portal frame around the Blitz arch (parts, violet Neon edges via the constant); collider guard passes; no contact with any pad trigger volume.",
+    "A3 L-shaped Training hall beside the Practice/Skill pads; pads, rings, signs, rank ladder and every GlyphSpawn keep positions, tags and attributes.",
+    "Telescope no longer pokes through the dome from 4 orbit views.",
+    "Budgets: <=2 new PointLights (hub <=40), <=300 new instances, <=8k new triangles.",
+    "Regression at a clean BuildStamp: walk 8-12 s, 34/34 reachable, 6 pads, mid-match, Glyph collect/retry/respawn, HUD, console clean; evidence docs/workflow/evidence/TASK-0133/art-polish.txt with measured SHA and applies_to; final A1, A2 and aerial screenshots next to A1/A2/A3.",
+    "Brief running light total updated; record-exec; check.sh, specs, validators green; PR open, CI green, not merged."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0133/art-polish.txt"
+  ],
+  "notes": "Approved rows Q0-Q8 (jg, 2026-11-02). Out of scope: new meshes (no generate_mesh), skybox, audio, Lighting.Technology, gameplay/pad/Glyph logic, saving the place, merging. Do not record-audit or self-audit.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0133-MathShow-Hub-Art-Polish.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T23:53:08",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T23:53:08",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}
