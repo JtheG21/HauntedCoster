@@ -1,0 +1,46 @@
+{
+  "id": "TASK-0126",
+  "game": "GAME-004",
+  "title": "MathShow Hub Art-1 Batch 1: Plaza",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "games/mathshow/map/Hub.rbxmx",
+    "games/mathshow/map/props/",
+    "games/mathshow/src/client/Hub/HubCosmetics.luau",
+    "games/mathshow/src/client/init.client.luau",
+    "docs/workflow/evidence/TASK-0126/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0126-MathShow-Hub-Art-Plaza.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0126-art-plaza",
+  "acceptance": [
+    "RankCrystal and SpawnHex candidates (up to 3 each) screenshotted side by side at 844x390; jg picks before export.",
+    "Plaza built by the generator only: stone floor, 3 rings of puzzle tiles, plinth + RankCrystal, seating, amber rim strip, lamp posts, bunting (<=160 flags, <=120 bulbs, no lights), SpawnHex at the south edge.",
+    "Budgets reported: <=12 PointLights, <=700 new instances, <=25k new triangles, no textures uploaded.",
+    "Regression: walk times spawn to each pad 8-12 s; all 34 GlyphSpawn markers reachable (new measured SHA); mode pads and Glyphs work; HUD counter hides behind the menu.",
+    "Studio evidence at a clean BuildStamp: A1-framing screenshot beside A1_spawn_view.png, aerial, counts, console clean, cosmetic controller survives a forced error.",
+    "check.sh and validators green; PR open, CI green, not merged."
+  ],
+  "evidence": [],
+  "notes": "Approved rows B0-B6 (jg, 2026-11-02). Asset creation approved for RankCrystal and SpawnHex only, up to 3 candidates each via generate_mesh in a scratch place; stop and ask on any Robux cost; stop for jg's pick before export. Out of scope: other zones, signs, skybox, decorative holo symbols, Glyph visuals, puzzle-tile logic, audio, Lighting.Technology, saving the place, merging. No record-audit or self-audit (Codex audits).",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0126-MathShow-Hub-Art-Plaza.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T17:40:56",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T17:40:56",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}

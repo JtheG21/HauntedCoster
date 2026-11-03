@@ -41,6 +41,70 @@
       "pole": {
         "cast_shadow": false
       }
+    },
+    {
+      "name": "RankCrystal",
+      "file": "RankCrystal.rbxmx",
+      "pivot": "base centre; the model's pivot is the origin and the base sits at y = 0",
+      "assets": {
+        "mesh_id": "rbxassetid://86836773049913",
+        "texture_id": "rbxassetid://116312177366724"
+      },
+      "size": [
+        6.0905,
+        8.0,
+        5.342
+      ],
+      "triangles": 396,
+      "collision_fidelity": "none (CanCollide false, decoration)",
+      "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0126 (candidate A of 3, picked by jg 2026-11-02)",
+      "prompt": "Chunky low-poly faceted violet crystal rank emblem: a tall octahedron gem with crisp flat facets, glowing violet (#8A4DFF), game-ready, single piece, no base.",
+      "core": {
+        "offset": [
+          0,
+          4.0,
+          0
+        ],
+        "size": 2.6,
+        "color": "#8A4DFF",
+        "material": "Neon",
+        "can_collide": false,
+        "cast_shadow": false,
+        "note": "Neon Ball inside the translucent mesh so the crystal glows under Bloom; child of the mesh, so it moves with the model."
+      },
+      "pole": {
+        "cast_shadow": false
+      }
+    },
+    {
+      "name": "SpawnHex",
+      "file": "SpawnHex.rbxmx",
+      "pivot": "base centre; the model's pivot is the origin and the base sits at y = 0",
+      "assets": {
+        "mesh_id": "rbxassetid://111612084578305",
+        "texture_id": "rbxassetid://79171445884970"
+      },
+      "size": [
+        14.0,
+        1.0,
+        14.0
+      ],
+      "triangles": 178,
+      "collision_fidelity": "none (CanCollide false; the SpawnLocation part carries the collision)",
+      "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0126 (candidate C of 3, picked by jg 2026-11-02)",
+      "prompt": "Chunky hexagonal stone spawn slab with a stepped double hexagon top and a glowing violet outer ring, stylised low-poly game prop, single piece.",
+      "shape_note": "The generator returned an 8-sided plate (flats face the axes, apothem 7 at 14 across), not a hexagon; jg picked it as is.",
+      "rim": {
+        "apothem": 6.55,
+        "width": 0.4,
+        "height": 0.12,
+        "color": "#8A4DFF",
+        "material": "Neon",
+        "note": "Eight Neon bars along the octagon's flats, lying on the plate top (Menu Violet rim)."
+      },
+      "pole": {
+        "cast_shadow": false
+      }
     }
   ]
 }
