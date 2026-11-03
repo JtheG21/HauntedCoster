@@ -373,6 +373,9 @@ class PlacedProp(Node):
 
 PADS: list[dict] = []
 GLYPHS: list[dict] = []
+ROUTES: list[dict] = []  # TASK-0136: walking corridors, plaza edge to each pad; written to Hub.routes.json for tests/test_hub_routes.py
+ROUTE_WIDTH = 12.0  # every corridor must be at least this wide with no rise above ROUTE_STEP (a Humanoid walks it without jumping)
+ROUTE_STEP = 1.0
 
 # --- Competitive zone (TASK-0127): masses, trim, windows, signs, wall around the three ModeArch pads --------------------
 
@@ -580,6 +583,15 @@ def build() -> Node:
 		wx, wz = zone_fr.world(a, b)
 		PADS.append({"mode": mode, "x": wx, "y": y + 0.5, "z": wz})
 
+	def route(zone_fr, mode, *ab):
+		"""A corridor polyline in the zone frame's (a, b) from the plaza edge to the pad centre, stored in world x, z."""
+		points: list[list[float]] = []
+		for a, b in ab:
+			pt = [round(v, 3) for v in zone_fr.world(a, b)]
+			if not points or pt != points[-1]:
+				points.append(pt)
+		ROUTES.append({"mode": mode, "width": ROUTE_WIDTH, "points": points})
+
 	def glyph(fr, name, a, b, surface_y, rarity, origin_override=None):
 		if origin_override is not None:
 			wx, wz = origin_override
@@ -600,7 +612,17 @@ def build() -> Node:
 	n_fr = Frame(dirs["N"])
 	rf = Frame(dirs["N"])
 	thick = 1.0
-	N_RAMPS = ((PLAZA_R + 1, PATH_TOP, 74.0, 8.0), (80.0, 8.0, 98.0, 18.0), (104.0, 18.0, 122.0, 32.0))
+	# TASK-0136: each ramp reaches the near rim of the next terrace (centre a - radius) at that terrace's top + N_LIP, and a landing block
+	# under the first N_LAND studs of the terrace carries the walking surface across the corners the circular rim leaves open. The old
+	# ramps ended 2-4 studs inside the rims, so the top of ramp 3 met a 3.1-stud wall and ramp 2 left a gap at its sides.
+	N_LIP = 0.05  # the landing top stands this far over the terrace top, so the two never z-fight
+	N_LAND = 2.0
+	N_TERR = (("Terrace_1", 118, 46, 8.0, PALETTE["tier"]), ("Terrace_2", 122, 24, 18.0, PALETTE["ground"]), ("Terrace_3", 140, 22, 32.0, PALETTE["ground"]))
+	N_RAMPS = (
+		(PLAZA_R + 1, PATH_TOP, 118 - 46, 8.0 + N_LIP),
+		(80.0, 8.0 + N_LIP, 122 - 24, 18.0 + N_LIP),
+		(122 - 24 + N_LAND, 18.0 + N_LIP, 140 - 22, 32.0 + N_LIP),
+	)
 	rise_top = 32.0
 
 	def ramp(name, a0, y0, a1, y1):
@@ -615,11 +637,10 @@ def build() -> Node:
 
 	for i, r in enumerate(N_RAMPS):
 		ramp("Path_N_Ramp" + str(i + 1), *r)
-	for name, a, rad, top, color in (
-		("Terrace_1", 118, 46, 8.0, PALETTE["tier"]),
-		("Terrace_2", 122, 24, 18.0, PALETTE["ground"]),
-		("Terrace_3", 140, 22, 32.0, PALETTE["ground"]),
-	):
+	for (name, a, rad, top, color), ramp_end in zip(N_TERR, N_RAMPS):
+		land_top = ramp_end[3]
+		landing = rf.block(name + "_Landing", ramp_end[2] + N_LAND / 2, 0, land_top / 2, (PATH_W, land_top, N_LAND), PALETTE["path"])
+		paths.add(landing)
 		tx, tz = n_fr.world(a, 0)
 		zones.add(cylinder(name, tx, top / 2, tz, top, rad * 2, color, material="Concrete"))
 		# Grass top (TASK-0132): a thin decorative disc just above the walking surface, so nothing about the collision changes.
@@ -627,12 +648,14 @@ def build() -> Node:
 			cast_shadow=False))
 	build_observatory(zones, n_fr, rise_top)
 	pad(n_fr, "Daily", 130, 0, rise_top, PALETTE["daily"])
+	route(n_fr, "Daily", (PLAZA_R - 4, 0), (130, 0))
 
 	# E: Competitive entrance with three arches.
 	e_fr = add_path("E", PLAZA_R + 1, 126)
 	zones.add(e_fr.block("Court_Competitive", 158, 0, 0, (84, 0.4, 66), PALETTE["path"]))
 	for mode, b in ARCHES:
 		pad(e_fr, mode, ARCH_A, b, PATH_TOP, PALETTE["competitive"])
+		route(e_fr, mode, (PLAZA_R - 4, 0), (137.7, 0), (137.7, b), (ARCH_A, b))
 	build_competitive(zones, e_fr)
 
 	# W: Training, two pads and a ladder display.
@@ -640,6 +663,7 @@ def build() -> Node:
 	zones.add(w_fr.block("Court_Training", 158, 0, 0, (60, 0.4, 66), PALETTE["path"]))
 	for mode, b in (("Practice", -18), ("Skill", 18)):
 		pad(w_fr, mode, 150, b, PATH_TOP, PALETTE["training"])
+		route(w_fr, mode, (PLAZA_R - 4, 0), (138, 0), (138, b), (150, b))
 	build_training(zones, w_fr)
 
 	# SW: Ranks hall (walls, roof, stairs up to the roof); TASK-0131 dresses it in build_ranks.
@@ -1124,7 +1148,7 @@ def add_holos(hub: Node) -> None:
 LAMP_START = 63.0
 LAMP_SPACING = 15.0
 LAMP_COUNT = 5
-LAMP_SIDE = 6.0
+LAMP_SIDE = 8.2  # TASK-0136: just outside the 14-wide path (edge 7.0, post half-width 1.0); at 6.0 the posts stood in the walking corridor
 LAMPS: list[dict] = []
 
 
@@ -1259,7 +1283,9 @@ def main() -> None:
 	shared = "".join(f'\t<SharedString md5="{md5}">{payload}</SharedString>\n' for md5, payload in sorted(SHARED_STRINGS.items()))
 	tail = f"<SharedStrings>\n{shared}</SharedStrings>\n" if shared else ""
 	out.write_text('<roblox version="4">\n' + HEADER + body + "\n" + tail + "</roblox>\n", encoding="utf-8")
-	print(f"wrote {out}")
+	routes = out.with_name(out.stem + ".routes.json")
+	routes.write_text(json.dumps({"min_width": ROUTE_WIDTH, "step_up": ROUTE_STEP, "routes": ROUTES}, indent="\t") + "\n", encoding="utf-8")
+	print(f"wrote {out} and {routes.name}")
 	if args.stats:
 		print(f"parts: {_ref[0]}, pads: {len(PADS)}, glyphs: {len(GLYPHS)}, lamps: {len(LAMPS)} + {len(RIM_LAMPS)} rim, bunting: {BUNTING_STATS}")
 		for p in PADS:
