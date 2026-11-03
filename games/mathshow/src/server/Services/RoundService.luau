@@ -345,8 +345,7 @@ local function onLeave(player: Player, raw: any)
 	if not state or not JoinRules.validLeave(raw) or not JoinRules.leaveChanges(state.joined, state.participant) then
 		return
 	end
-	state.joined = false
-	state.participant = false
+	state.joined, state.participant = JoinRules.afterLeave()
 	sendShow(player)
 end
 

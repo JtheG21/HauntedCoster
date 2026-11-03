@@ -82,4 +82,46 @@ return function(t: TestRunner.T)
 		t.eq(JoinRules.isWatching(false, false, "Question"), false)
 		t.eq(JoinRules.participantAt(false, 1, false), false)
 	end)
+
+	t.test("afterLeave clears both flags", function()
+		local joined, participant = JoinRules.afterLeave()
+		t.eq(joined, false)
+		t.eq(participant, false)
+	end)
+
+	t.test("leave then rejoin: no scoring this match, admitted at the next question 1", function()
+		-- A participant mid-match presses LEAVE.
+		local joined, participant = true, true
+		t.eq(JoinRules.leaveChanges(joined, participant), true)
+		joined, participant = JoinRules.afterLeave()
+		t.eq(joined, false)
+		t.eq(participant, false)
+		-- A repeated LEAVE changes nothing.
+		t.eq(JoinRules.leaveChanges(joined, participant), false)
+		-- Still not admitted at any later question while left.
+		for question = 2, 6 do
+			t.eq(JoinRules.participantAt(joined, question, participant), false, "left, q" .. question)
+		end
+		-- Rejoining during the current match: joined only, watching, never a participant for questions 2 to 6.
+		joined = true
+		for question = 2, 6 do
+			participant = JoinRules.participantAt(joined, question, participant)
+			t.eq(participant, false, "rejoined mid-match, q" .. question)
+			t.eq(JoinRules.isWatching(joined, participant, "Question"), true, "watching, q" .. question)
+		end
+		-- The next match starts at question 1: admitted as a participant.
+		participant = JoinRules.participantAt(joined, 1, participant)
+		t.eq(participant, true)
+		t.eq(JoinRules.isWatching(joined, participant, "Question"), false)
+	end)
+
+	t.test(
+		"forgetting to clear participant would be caught: a left player is not a participant at any question",
+		function()
+			local _joined, participant = JoinRules.afterLeave()
+			for question = 1, 6 do
+				t.eq(JoinRules.participantAt(false, question, participant), false, "q" .. question)
+			end
+		end
+	)
 end

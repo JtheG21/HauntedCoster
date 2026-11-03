@@ -2,7 +2,7 @@
   "id": "TASK-0134",
   "game": "GAME-004",
   "title": "MathShow Menu Exit And Leave Watching",
-  "status": "in_progress",
+  "status": "changes_requested",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -38,6 +38,33 @@
       "from": "backlog",
       "to": "in_progress",
       "note": "started by jg's request via parent session"
+    },
+    {
+      "time": "2026-11-03T15:14:57",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-03T15:14:57",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
     }
-  ]
+  ],
+  "executions": [
+    {
+      "time": "2026-11-03T15:14:57",
+      "result": "pass",
+      "notes": "User authorised execution-to-review transition in chat. Audited head 81d21fc: check.sh passes, 344 specs pass, validators and CI green. This records execution checks only; independent audit has major findings and will be recorded as fail."
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-03T15:14:57",
+      "result": "fail",
+      "report": "06 QA/AUD-20261103-TASK-0134-01.md"
+    }
+  ],
+  "revisions": 1
 }
