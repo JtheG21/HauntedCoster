@@ -46,7 +46,8 @@ PALETTE = {
 	"glyph": (255, 255, 255),
 	"cyan": (62, 224, 240),  # Holo Cyan
 	"violet": (138, 77, 255),  # Menu Violet
-	"amber": (255, 181, 71),  # Lamp Amber
+	"amber": (255, 181, 71),  # Lamp Amber (unlit parts)
+	"amber_neon": (250, 125, 18),  # Lamp Amber tuned for Neon + Bloom: #FFB547 renders lemon yellow (TASK-0125 lamp Globe)
 	"bunting_line": (86, 98, 110),
 }
 
@@ -343,7 +344,7 @@ def build() -> Node:
 	plaza.add(cylinder("Ring_Middle", 0, 0.2, 0, 0.4, 90, PALETTE["plaza_b"], material="Concrete"))
 	plaza.add(cylinder("Ring_Inner", 0, 0.3, 0, 0.6, 66, PALETTE["plaza_c"], material="Concrete"))
 	# The rim strip: a Neon disc just below the outer band's top, so 0.6 stud of it shows past the edge (paths cover it).
-	plaza.add(cylinder("Rim_Strip", 0, 0.09, 0, 0.18, PLAZA_R * 2 + 1.2, PALETTE["amber"], material="Neon", collide=False,
+	plaza.add(cylinder("Rim_Strip", 0, 0.09, 0, 0.18, PLAZA_R * 2 + 1.2, PALETTE["amber_neon"], material="Neon", collide=False,
 		query=False, cast_shadow=False))
 	plaza.add(cylinder("Plinth", 0, 0.6, 0, 1.2, 12, PALETTE["slot"]))
 	plaza.add(cylinder("Plinth_Trim", 0, 0.9, 0, 0.3, 12.4, PALETTE["violet"], material="Neon", collide=False, query=False,
@@ -360,7 +361,7 @@ def build() -> Node:
 
 	tiles = plaza.add(folder("TileSlots"))
 	# Puzzle tiles, decorative only (no logic): a Concrete centre on a Neon base, so 0.4 stud of colour frames each tile.
-	for radius, count, top, glow in ((48, 24, 0.2, "cyan"), (39, 18, 0.4, "violet"), (22, 12, 0.6, "amber")):
+	for radius, count, top, glow in ((48, 24, 0.2, "cyan"), (39, 18, 0.4, "violet"), (22, 12, 0.6, "amber_neon")):
 		for i in range(count):
 			ang = 2 * math.pi * (i + 0.5) / count
 			x, z = radius * math.cos(ang), radius * math.sin(ang)
@@ -561,8 +562,8 @@ LAMP_SIDE = 6.0
 LAMPS: list[dict] = []
 
 
-# Rim lamps (TASK-0126): ten more LampPosts just outside the plaza edge, clear of the paths, the spawn plate and the seats.
-RIM_LAMP_DEGREES = (22, 67, 112, 158, 202, 225, 248, 292, 315, 338)
+# Rim lamps (TASK-0126): eight more LampPosts just outside the plaza edge, clear of the paths, the spawn plate and the seats.
+RIM_LAMP_DEGREES = (22, 67, 112, 158, 202, 248, 292, 338)
 RIM_LAMP_R = 57.5
 # Bunting: four lines run from rim lamp posts toward the centre to slim masts, with a flag and a bulb string on each.
 BUNTING_FROM = (22, 112, 202, 292)  # degrees; each must be in RIM_LAMP_DEGREES
@@ -572,9 +573,10 @@ BUNTING_MAST_Y = 9.0
 BUNTING_SAG = 1.8
 BUNTING_SEGMENTS = 10
 BUNTING_FLAGS = 28  # per line: 4 x 28 = 112 flags (cap 160)
-BUNTING_BULBS = 16  # per line: 4 x 16 = 64 bulbs (cap 120), Neon, no lights
+BUNTING_BULBS = 6  # per line: 4 x 6 = 24 bulbs (cap 120), Neon, no lights. A Neon Ball costs ~430 triangles, so the 25k budget sets this
 FLAG_SIZE = (0.08, 1.2, 0.9)  # thickness, drop, width along the line
 FLAG_COLORS = ("violet", "cyan", "amber")
+NEON_COLORS = ("violet", "cyan", "amber_neon")  # the same three for the Neon bulbs
 RIM_LAMPS: list[dict] = []
 BUNTING_STATS = {"flags": 0, "bulbs": 0, "segments": 0}
 
@@ -615,7 +617,7 @@ def add_bunting(hub: Node) -> None:
 		for i in range(BUNTING_BULBS):
 			t = (i + 0.5) / BUNTING_BULBS
 			wx, wz = fr.world(t * length, 0.18)
-			line.add(make_part(f"Bulb_{i:02d}", (0.45, 0.45, 0.45), (wx, line_y(t) - 0.05, wz), IDENT, PALETTE[FLAG_COLORS[(i + 1) % 3]],
+			line.add(make_part(f"Bulb_{i:02d}", (0.45, 0.45, 0.45), (wx, line_y(t) - 0.05, wz), IDENT, PALETTE[NEON_COLORS[(i + 1) % 3]],
 				material="Neon", shape="Ball", collide=False, query=False, cast_shadow=False))
 			BUNTING_STATS["bulbs"] += 1
 
