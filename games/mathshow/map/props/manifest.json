@@ -253,6 +253,28 @@
         "cast_shadow": false
       },
       "collision_note": "Real Box collision data exported from Studio; the part never collides (decorative, above the terrace)."
+    },
+    {
+      "name": "PineTree",
+      "file": "PineTree.rbxmx",
+      "pivot": "base centre; the model's pivot is the origin and the base sits at y = 0",
+      "assets": {
+        "mesh_id": "rbxassetid://78289118787590",
+        "texture_id": null
+      },
+      "size": [
+        6.0,
+        11.0623,
+        5.8762
+      ],
+      "triangles": 150,
+      "collision_fidelity": "Box (CanCollide false, decoration)",
+      "collision_note": "Real Box collision data exported from Studio; the tree never collides (decorative, placed on terrace tops).",
+      "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0132 (candidate C2 of 3, picked by jg 2026-11-02; maxTriangles 150, untextured). Exported from Studio scratch place, TASK-0132: a MeshPart from the existing mesh id (AssetService:CreateMeshPartAsync, native size), CanCollide false, CastShadow false, CollisionFidelity Box, serialized with SerializationService and converted with rojo build.",
+      "prompt": "Tall slim low-poly pine tree: a thin trunk and four narrow stacked faceted cone layers forming a tall spire silhouette, simple chunky shapes, plain untextured single-colour surface.",
+      "tree": {
+        "cast_shadow": false
+      }
     }
   ],
   "generation_history_task_0131": {
@@ -350,6 +372,59 @@
           4.11,
           10.0,
           9.91
+        ],
+        "outcome": "discarded"
+      }
+    ]
+  },
+  "generation_history_task_0132": {
+    "note": "Every generate_mesh call in TASK-0132: 3 calls (the approved cap), none failed, no Robux cost seen. Calls 2 and 3 timed out while waited on once; the jobs then completed and each call is counted once. Triangle counts are EditableMesh face counts. Candidate screenshot (844x390) is outside the repo in ~/Roblox-Work/evidence/TASK-0132/candidates/.",
+    "calls": [
+      {
+        "prop": "PineTree",
+        "n": 1,
+        "prompt": "low-poly stylized pine: short thick trunk, three stacked cone tiers, maxTriangles 150, untextured, size 7x14x7",
+        "result": "candidate C1",
+        "triangles": 150,
+        "mesh_id": "rbxassetid://114287420201657",
+        "texture_id": "rbxassetid://131975851261070",
+        "published_asset_id": "116978071750912",
+        "size": [
+          7.0,
+          9.3067,
+          6.9134
+        ],
+        "outcome": "discarded"
+      },
+      {
+        "prop": "PineTree",
+        "n": 2,
+        "prompt": "tall slim pine, thin trunk, four narrow stacked cone layers, maxTriangles 150, untextured, size 6x14x6",
+        "result": "candidate C2 (the wait call timed out once; the job then completed)",
+        "triangles": 150,
+        "mesh_id": "rbxassetid://78289118787590",
+        "texture_id": "rbxassetid://117975338138930",
+        "published_asset_id": "78692269947190",
+        "size": [
+          6.0,
+          11.0623,
+          5.8762
+        ],
+        "outcome": "picked"
+      },
+      {
+        "prop": "PineTree",
+        "n": 3,
+        "prompt": "chunky rounded fir, stout trunk, two wide drooping cone skirts, maxTriangles 150, untextured, size 8x14x8",
+        "result": "candidate C3 (the wait call timed out once; the job then completed)",
+        "triangles": 150,
+        "mesh_id": "rbxassetid://137965429455162",
+        "texture_id": "rbxassetid://90790202080445",
+        "published_asset_id": "107317985998451",
+        "size": [
+          7.9833,
+          12.4161,
+          8.0
         ],
         "outcome": "discarded"
       }
