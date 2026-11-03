@@ -88,5 +88,7 @@ Dress the central plaza in the locked Direction A look (A1 spawn view, A4 palett
   - Verified by Codex: check.sh passes; PR 184 open with green CI; +294 instances, +8 PointLights, 112 flags, 24 bulbs; mesh and texture ids match the picks; measured sources unchanged since 12c1b4f. Studio behaviour and generation approvals were reviewed from the recorded evidence, not reproduced. Visual acceptance stays with jg.
   - Status: not addressed yet. A revision needs jg's request-changes row.
 
+- 2026-11-02, Codex delta review of rev 1 (reported by jg; not an orchestrator record-audit): **pass.** No new findings; both rev 0 P2s resolved. Codex reproduced 22,718 new triangles from the XML class counts and stated costs (below 25,000), confirmed the screenshot-size exception is recorded, that code, map and manifest sources are unchanged, and that check.sh passes with PR 184 open and CI green. Not independently repeated: the Studio measurements. The 4,332-triangle gap between the rendered delta and the inventory stays unexplained; the inventory alone supports the budget.
+
 ## Outcome
 Plaza art batch 1 is built and verified at 12c1b4f. Open items: screenshots are not 844x390; no real-device performance (TASK-0123); jg's visual judgement and the Codex audit are pending. The SpawnHex is an 8-sided plate.
