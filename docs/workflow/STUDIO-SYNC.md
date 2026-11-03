@@ -382,7 +382,15 @@ Rojo 7.7.0 builds `Lighting` properties from `"$properties"` in `mathshow.projec
 | Live plugin sync, then read in Edit | **Cannot be read or verified**: `Lighting.Technology` is RobloxScript-capability (read and write), and the plugin runs without it. A script write fails with `lacking capability RobloxScript`. The property is also deprecated and absent from the Properties panel |
 | Scriptable replacements | `LightingStyle` and `PrioritizeLightingQuality` read fine in Edit (Soft, true here). Not tested through Rojo, and the mapping to Future or ShadowMap is not documented |
 
-Decision: `Technology` stays out of the project file; the other values are in it. Treat Technology as a **one-time place setting** that comes with the place file (`MathShow.rbxl` is ShadowMap today), not something Rojo manages. To make a test copy with another Technology, edit a copy of the .rbxl with Lune (`roblox.Enum.Technology[...]`, run inside the repo) and never save over the real place. The Studio place was not saved.
+**Superseded by TASK-0135 (2026-11-03).** `"Technology": "ShadowMap"` is now in the project file's Lighting `$properties`, so every `rojo build` carries it. The earlier "leave it out" decision caused a **Lighting Technology Migration** dialog (Compatibility to Voxel) each time a built `.rbxl` was opened, and the published place then differed from the build (seen in the TASK-0123 private playtest).
+
+| Check (TASK-0135) | Result |
+|---|---|
+| `rojo build`, read back with Lune | `ShadowMap` (without the line: `Voxel`, the unset default) |
+| Open the built `.rbxl` in Studio 0.745 | **No migration dialog**. The build from before the line showed it |
+| Live `scripts/serve.sh` and plugin Connect and Accept into the old build | Sync completed, BuildStamp equal to HEAD, ClockTime from the project file, console clean (no Technology error) |
+
+Technology is set by the project file for **built and published places**. The live plugin **cannot** set or read it (RobloxScript capability), so a live sync never changes it; a place file that already carries it keeps it. To make a test copy with another Technology, edit a copy of the .rbxl with Lune (`roblox.Enum.Technology[...]`, run inside the repo) and never save over the real place. The Studio place was not saved. To make a test copy with another Technology, edit a copy of the .rbxl with Lune (`roblox.Enum.Technology[...]`, run inside the repo) and never save over the real place. The Studio place was not saved.
 
 Hub walk lengths/reachability: Studio fresh-Play remains the gate (TASK-0130 calibration failed twice).
 `tests/test_hub_walk.py` prints informational estimates and never fails the gate on route results. Its slow route estimate is opt-in (`scripts/walk-check.sh`); the default `check.sh` skips it (about 22 s again, jg row M11).
