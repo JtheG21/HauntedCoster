@@ -267,6 +267,19 @@ class Project:
         self._expect(t, "review", "approved")
         self._fail(t, f"changes requested by {by}: {reason}")
 
+    def reopen(self, task_id: str, to: str, reason: str, by: str = "jg") -> None:
+        """Return an approved re-scope to review without erasing audits or revision history."""
+        t = self.task(task_id)
+        self._expect(t, "blocked", "changes_requested", "approved")
+        if to != "review":
+            raise OrchestratorError("reopen target must be review")
+        if not reason.strip():
+            raise OrchestratorError("reopen needs a non-empty --reason")
+        old = t["status"]
+        t["status"] = to
+        t.setdefault("history", []).append({"from": old, "to": to, "reason": reason, "by": by, "at": now()})
+        self._sync_note(t)
+
     def approve_merge(self, task_id: str, by: str) -> None:
         t = self.task(task_id)
         self._expect(t, "approved")
@@ -533,6 +546,9 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("override-merge", help="HUMAN: merge over a failed audit; the verdict stays a fail")
     s.add_argument("id"); s.add_argument("--by", required=True); s.add_argument("--reason", required=True)
     s = sub.add_parser("unblock"); s.add_argument("id"); s.add_argument("--to", required=True); s.add_argument("--by", required=True)
+    s = sub.add_parser("reopen", help="HUMAN: return an approved re-scope to review, preserving history and audits")
+    s.add_argument("id"); s.add_argument("--to", choices=["review"], required=True)
+    s.add_argument("--reason", required=True); s.add_argument("--by", default="jg")
     s = sub.add_parser("record-exec"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--notes", default="")
     s = sub.add_parser("record-audit"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--report", required=True)
     s = sub.add_parser("record-usage"); s.add_argument("id"); s.add_argument("--kind", choices=sorted(USAGE_KINDS), required=True)
@@ -592,6 +608,7 @@ def main(argv: list[str] | None = None) -> int:
             "archive": lambda: proj.archive(a.id, a.by),
             "start": lambda: proj.start(a.id),
             "unblock": lambda: proj.unblock(a.id, a.to, a.by),
+            "reopen": lambda: proj.reopen(a.id, a.to, a.reason, a.by),
             "override-merge": lambda: proj.override_merge(a.id, a.by, a.reason),
             "request-changes": lambda: proj.request_changes(a.id, a.by, a.reason),
             "record-exec": lambda: proj.record_exec(a.id, a.result, a.notes),

@@ -168,6 +168,93 @@ class TestWorkflow(Base):
         self.assertEqual((t["status"], t["revisions"]), ("ready", 0))
 
 
+class TestReopen(Base):
+    def test_each_allowed_state_reopens_and_syncs_note(self):
+        for status in ("blocked", "changes_requested", "approved"):
+            with self.subTest(status=status):
+                note = self.root / "TASK-0001-X.md"
+                note.write_text(f"---\nstatus: {status}\nupdated: 2000-01-01\n---\n# Body\n")
+                self.write_queue([task("TASK-0001", status, note=note.name)])
+                code, out = self.cli("reopen", "TASK-0001", "--to", "review", "--reason", "scope accepted")
+                self.assertEqual(code, 0, out)
+                t = self.proj().task("TASK-0001")
+                self.assertEqual(t["status"], "review")
+                self.assertEqual(t["history"][-1], {
+                    "from": status, "to": "review", "reason": "scope accepted", "by": "jg",
+                    "at": t["history"][-1]["at"],
+                })
+                self.assertIsNotNone(orch.dt.datetime.fromisoformat(t["history"][-1]["at"]))
+                self.assertIn("status: review", note.read_text())
+                self.assertNotIn("2000-01-01", note.read_text())
+                self.assertTrue(note.read_text().endswith("# Body\n"))
+                self.assertEqual(self.cli("validate")[0], 0)
+
+    def test_each_other_state_is_refused_without_writing(self):
+        for status in ("backlog", "ready", "in_progress", "review", "done", "archived"):
+            with self.subTest(status=status):
+                self.write_queue([task("TASK-0001", status)])
+                path = self.root / "tasks/items/TASK-0001.json"
+                before = path.read_bytes()
+                code, out = self.cli("reopen", "TASK-0001", "--to", "review", "--reason", "scope accepted")
+                self.assertEqual(code, 2)
+                self.assertIn(f"is '{status}'", out)
+                self.assertIn("expected one of", out)
+                self.assertEqual(path.read_bytes(), before)
+
+    def test_missing_reason_is_required_by_cli(self):
+        self.write_queue([task("TASK-0001", "blocked")])
+        path = self.root / "tasks/items/TASK-0001.json"
+        before = path.read_bytes()
+        with self.assertRaises(SystemExit) as cm:
+            self.cli("reopen", "TASK-0001", "--to", "review")
+        self.assertEqual(cm.exception.code, 2)
+        self.assertEqual(path.read_bytes(), before)
+
+    def test_empty_or_whitespace_reason_is_refused(self):
+        for reason in ("", " \t\n"):
+            with self.subTest(reason=reason):
+                self.write_queue([task("TASK-0001", "blocked")])
+                path = self.root / "tasks/items/TASK-0001.json"
+                before = path.read_bytes()
+                code, out = self.cli("reopen", "TASK-0001", "--to", "review", "--reason", reason)
+                self.assertEqual(code, 2)
+                self.assertIn("non-empty --reason", out)
+                self.assertEqual(path.read_bytes(), before)
+
+    def test_target_must_be_review(self):
+        self.write_queue([task("TASK-0001", "blocked")])
+        for target in ("ready", "approved", "done"):
+            with self.subTest(target=target), self.assertRaises(SystemExit) as cm:
+                self.cli("reopen", "TASK-0001", "--to", target, "--reason", "scope accepted")
+            self.assertEqual(cm.exception.code, 2)
+        p = self.proj()
+        with self.assertRaisesRegex(orch.OrchestratorError, "target must be review"):
+            p.reopen("TASK-0001", "ready", "scope accepted")
+        self.assertEqual(p.task("TASK-0001")["status"], "blocked")
+
+    def test_appends_without_changing_history_audits_or_revisions(self):
+        history = [{"time": "2026-10-10T10:00:00", "from": "review", "to": "blocked", "note": "audit failed"},
+                   {"from": "blocked", "to": "blocked", "reason": "keep this", "by": "jg", "at": "2026-10-10T11:00:00"}]
+        audits = [{"result": "fail", "report": "06 QA/a0.md", "time": "2026-10-10T10:00:00"},
+                  {"result": "pass", "report": "06 QA/a1.md"}]
+        t = task("TASK-0001", "blocked") | {"history": history, "audits": audits, "revisions": 3}
+        self.write_queue([t])
+        # Canonicalize with the same writer as production, then compare the original serialized entries verbatim.
+        self.proj().save()
+        history_bytes = [json.dumps(entry, indent=2).encode() for entry in history]
+        audit_bytes = json.dumps(audits, indent=2).encode()
+        reports = {path: path.read_bytes() for path in (self.root / "06 QA").glob("*.md")}
+        code, out = self.cli("reopen", "TASK-0001", "--to", "review", "--reason", "scope accepted", "--by", "reviewer")
+        self.assertEqual(code, 0, out)
+        reopened = self.proj().task("TASK-0001")
+        self.assertEqual(len(reopened["history"]), len(history) + 1)
+        self.assertEqual([json.dumps(entry, indent=2).encode() for entry in reopened["history"][:-1]], history_bytes)
+        self.assertEqual(json.dumps(reopened["audits"], indent=2).encode(), audit_bytes)
+        self.assertEqual({path: path.read_bytes() for path in reports}, reports)
+        self.assertEqual(reopened["revisions"], 3)
+        self.assertEqual(reopened["history"][-1]["by"], "reviewer")
+
+
 class TestNoteSync(Base):
     def setUp(self):
         super().setUp()
