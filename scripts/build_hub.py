@@ -241,16 +241,30 @@ class Prop:
 		globe.add(light)
 		return [globe]
 
-	def place(self, name: str, pos, yaw: float = 0.0) -> "PlacedProp":
-		return PlacedProp(self, name, pos, yaw)
+	def arch_nodes(self, light_color) -> list[Node]:
+		"""A PointLight for a prop whose manifest light sits on its own mesh (ModeArch); the colour is the placement's."""
+		cfg = self.entry["light"]
+		r, g, b = (c / 255 for c in light_color)
+		light = Node("PointLight", "ArchLight")
+		light.props += [
+			f'<Color3 name="Color"><R>{f(r)}</R><G>{f(g)}</G><B>{f(b)}</B></Color3>',
+			f'<float name="Brightness">{f(cfg["brightness"])}</float>',
+			f'<float name="Range">{f(cfg["range"])}</float>',
+			f'<bool name="Shadows">{str(cfg["shadows"]).lower()}</bool>',
+		]
+		return [light]
+
+	def place(self, name: str, pos, yaw: float = 0.0, color=None, material=None) -> "PlacedProp":
+		return PlacedProp(self, name, pos, yaw, color, material)
 
 
 class PlacedProp(Node):
 	"""The prop's XML at a new CFrame: root renamed, CFrames moved, referents renumbered, lights added to each MeshPart."""
 
-	def __init__(self, prop: Prop, name: str, pos, yaw: float):
+	def __init__(self, prop: Prop, name: str, pos, yaw: float, color=None, material=None):
 		super().__init__("Model", name)
 		self.prop, self.pos, self.yaw = prop, pos, yaw
+		self.color, self.material = color, material  # per-instance overrides of the untextured mesh's colour and material
 
 	def xml(self, depth: int = 0) -> str:
 		c, s = math.cos(self.yaw), math.sin(self.yaw)
@@ -264,6 +278,10 @@ class PlacedProp(Node):
 			return m.group(1) + "".join(f"<{k}>{f(v)}</{k}>" for k, v in zip(_CF_KEYS, flat)) + m.group(3)
 
 		text = _CF_BLOCK.sub(move, self.prop.text)
+		if self.color is not None:
+			text = re.sub(r'(<Color3uint8 name="Color3uint8">)\d+(</Color3uint8>)', lambda m: f"{m.group(1)}{color_int(self.color)}{m.group(2)}", text)
+		if self.material is not None:
+			text = re.sub(r'(<token name="Material">)\d+(</token>)', lambda m: f"{m.group(1)}{MATERIAL[self.material]}{m.group(2)}", text)
 		out: list[str] = []
 		stack: list[str] = []
 		named = False
@@ -277,7 +295,7 @@ class PlacedProp(Node):
 				line = f'<Item class="{m.group(1)}" referent="RBX{_ref[0]:06d}">'
 			elif line == "</Item>":
 				if stack.pop() == "MeshPart":
-					for n in self.prop.globe_nodes(placement):
+					for n in (self.prop.globe_nodes(placement) if "globe" in self.prop.entry else self.prop.arch_nodes(self.color)):
 						out.extend("\t" * (depth + rel + 1) + ln for ln in n.xml(0).splitlines())
 			elif not named and line.startswith('<string name="Name">'):
 				line, named = f'<string name="Name">{self.name}</string>', True
@@ -288,6 +306,104 @@ class PlacedProp(Node):
 
 PADS: list[dict] = []
 GLYPHS: list[dict] = []
+
+# --- Competitive zone (TASK-0127): masses, trim, windows, signs, wall around the three ModeArch pads --------------------
+
+ARCH_A = 150.0  # pads and arches sit this far along the east path
+ARCHES = (("VS", -26), ("Blitz", 0), ("Group", 26))
+NEON_AMBER = (250, 125, 18)  # Lamp Amber tuned for Neon + Bloom: #FFB547 renders lemon yellow (TASK-0125)
+ARCH_COLOR = {"VS": PALETTE["competitive"], "Blitz": NEON_AMBER, "Group": PALETTE["training"]}
+SIGN_TEXT = {"VS": (190, 150, 255), "Blitz": (255, 181, 71), "Group": PALETTE["training"]}
+SIGN_SIZE = (16.0, 6.0, 0.6)
+SIGN_Y = 17.2  # plate centre; the arch crown is at PATH_TOP + 13.95
+TRIM = 0.4
+WALL_H = 2.4
+WALL_T = 1.2
+COURT_A0, COURT_HALF = 116.0, 33.0  # Court_Competitive: a from 116 to 200, b within +-33
+WALL_GAP = 10.0  # half-width of the opening in the front wall (the path is 14 wide)
+MASSES = (  # name, a0, depth, b0, b1, height, edge trim on the front corners too
+	("Mass_W", 180.0, 14.0, -33.0, -11.0, 18.0, False),
+	("Mass_C", 183.0, 12.0, -11.0, 11.0, 26.0, True),
+	("Mass_E", 180.0, 14.0, 11.0, 33.0, 21.0, False),
+	("Annex_W", 168.0, 16.0, -52.0, -36.0, 10.0, False),
+	("Annex_E", 168.0, 16.0, 36.0, 52.0, 12.0, False),
+)
+NEW_LAMPS = ((130.0, -9.0), (130.0, 9.0))  # a, b: flank the court entrance, outside the 14-wide path
+
+
+def build_competitive(zones: Node, e_fr: Frame) -> None:
+	comp = zones.add(folder("Competitive"))
+	basalt, violet = PALETTE["slot"], PALETTE["competitive"]
+	deco = dict(collide=False, query=False, cast_shadow=False)
+
+	def lit(i: int, j: int):
+		"""Window colour from the grid cell, or None for an unlit cell (a fixed pattern, so the file is reproducible)."""
+		k = (i * 7 + j * 3) % 7
+		if (i + 2 * j) % 5 == 0:
+			return None
+		return PALETTE["training"] if k in (1, 4) else violet if k == 6 else NEON_AMBER
+
+	for name, a0, depth, b0, b1, h, edges in MASSES:
+		bc, w = (b0 + b1) / 2, b1 - b0
+		comp.add(e_fr.block(name, a0 + depth / 2, bc, h / 2, (w, h, depth), basalt, cast_shadow=False))
+		comp.add(e_fr.block(f"{name}_RoofTrim", a0 - TRIM / 2, bc, h - TRIM / 2, (w, TRIM, TRIM), violet, material="Neon", **deco))
+		if edges:
+			for side in (-1, 1):
+				comp.add(e_fr.block(f"{name}_EdgeTrim{side}", a0 - TRIM / 2, bc + side * (w / 2 - TRIM / 2), h / 2, (TRIM, h, TRIM),
+					violet, material="Neon", **deco))
+		cols, rows = max(2, int(w // 5)), max(2, int((h - 3) // 4.5))
+		for i in range(cols):
+			for j in range(rows):
+				colour = lit(i, j)
+				if colour is None:
+					continue
+				b = bc + (i - (cols - 1) / 2) * (w - 4) / max(cols - 1, 1)
+				comp.add(e_fr.block(f"{name}_Win{i}{j}", a0 - 0.05, b, 4.0 + j * 4.5, (1.8, 1.8, 0.3), colour, material="Neon", **deco))
+
+	# Low perimeter wall with a Menu Violet Neon top strip: the front (with the path gap) and both sides up to the masses.
+	back = MASSES[0][1]
+	front_len = COURT_HALF - WALL_GAP
+	walls = (
+		("Wall_FrontW", COURT_A0 + 1, -(COURT_HALF + WALL_GAP) / 2, (front_len, WALL_H, WALL_T)),
+		("Wall_FrontE", COURT_A0 + 1, (COURT_HALF + WALL_GAP) / 2, (front_len, WALL_H, WALL_T)),
+		("Wall_SideW", (COURT_A0 + 1 + back) / 2, -COURT_HALF, (WALL_T, WALL_H, back - COURT_A0 - 1)),
+		("Wall_SideE", (COURT_A0 + 1 + back) / 2, COURT_HALF, (WALL_T, WALL_H, back - COURT_A0 - 1)),
+	)
+	for name, a, b, size in walls:
+		comp.add(e_fr.block(name, a, b, WALL_H / 2, size, basalt, cast_shadow=False))
+		comp.add(e_fr.block(name + "_Strip", a, b, WALL_H + TRIM / 2, (size[0], TRIM, size[2]), violet, material="Neon", **deco))
+
+	# Signs above each arch; the part's Front face looks back along the path, toward the plaza.
+	for mode, b in ARCHES:
+		sx, sy, sz = SIGN_SIZE
+		colour = ARCH_COLOR[mode]
+		plate = comp.add(e_fr.block(f"Sign_{mode}", ARCH_A, b, SIGN_Y, SIGN_SIZE, basalt, **deco))
+		for name, bb, y, size in (
+			("Top", 0, SIGN_Y + sy / 2 - TRIM / 2, (sx, TRIM, sz + 0.1)),
+			("Bottom", 0, SIGN_Y - sy / 2 + TRIM / 2, (sx, TRIM, sz + 0.1)),
+			("Left", -(sx / 2 - TRIM / 2), SIGN_Y, (TRIM, sy - 2 * TRIM, sz + 0.1)),
+			("Right", sx / 2 - TRIM / 2, SIGN_Y, (TRIM, sy - 2 * TRIM, sz + 0.1)),
+		):
+			comp.add(e_fr.block(f"Sign_{mode}_{name}", ARCH_A, b + bb, y, size, colour, material="Neon", **deco))
+		gui = plate.add(Node("SurfaceGui", "SignGui"))
+		gui.props += ['<token name="Face">5</token>', '<float name="LightInfluence">0</float>', '<bool name="AlwaysOnTop">false</bool>']
+		label = gui.add(Node("TextLabel", "Label"))
+		tr, tg, tb = (c / 255 for c in SIGN_TEXT[mode])
+		label.props += [
+			f'<string name="Text">{mode.upper()}</string>',
+			'<token name="Font">20</token>',  # GothamBlack
+			'<bool name="TextScaled">true</bool>',
+			f'<Color3 name="TextColor3"><R>{f(tr)}</R><G>{f(tg)}</G><B>{f(tb)}</B></Color3>',
+			'<float name="BackgroundTransparency">1</float>',
+			'<int name="BorderSizePixel">0</int>',
+			'<UDim2 name="Size"><XS>0.92</XS><XO>0</XO><YS>0.82</YS><YO>0</YO></UDim2>',
+			'<UDim2 name="Position"><XS>0.04</XS><XO>0</XO><YS>0.09</YS><YO>0</YO></UDim2>',
+		]
+		# Collision: the arch mesh is CanCollide false so the opening stays walkable; the legs are two transparent boxes.
+		for side in (-1, 1):
+			comp.add(e_fr.block(f"Arch_{mode}_Leg{side}", ARCH_A, b + side * 4.43, PATH_TOP + 3.5, (3.14, 7.0, 5.2), basalt,
+				transparency=1.0, cast_shadow=False, query=False))
+
 
 
 def build() -> Node:
@@ -407,11 +523,9 @@ def build() -> Node:
 	# E: Competitive entrance with three arches.
 	e_fr = add_path("E", PLAZA_R + 1, 126)
 	zones.add(e_fr.block("Court_Competitive", 158, 0, 0, (84, 0.4, 66), PALETTE["path"]))
-	for mode, b in (("VS", -26), ("Blitz", 0), ("Group", 26)):
-		pad(e_fr, mode, 150, b, PATH_TOP, PALETTE["competitive"])
-		for side in (-1, 1):
-			zones.add(e_fr.block(f"Arch_{mode}_Post{side}", 150, b + side * 7.5, 7, (2, 14, 2), PALETTE["competitive"]))
-		zones.add(e_fr.block(f"Arch_{mode}_Lintel", 150, b, 14.5, (18, 2.5, 3), PALETTE["competitive"]))
+	for mode, b in ARCHES:
+		pad(e_fr, mode, ARCH_A, b, PATH_TOP, PALETTE["competitive"])
+	build_competitive(zones, e_fr)
 
 	# W: Training, two pads and a ladder display.
 	w_fr = add_path("W", PLAZA_R + 1, 126)
@@ -523,6 +637,16 @@ def add_props(hub: Node, e_fr: Frame) -> None:
 		wx, wz = e_fr.world(a, b)
 		folder_node.add(lamp.place(f"LampPost_E{i + 1:02d}", (wx, PATH_TOP, wz)))
 		LAMPS.append({"name": f"LampPost_E{i + 1:02d}", "x": wx, "z": wz})
+	for i, (a, b) in enumerate(NEW_LAMPS):
+		wx, wz = e_fr.world(a, b)
+		name = f"LampPost_E{LAMP_COUNT + i + 1:02d}"
+		folder_node.add(lamp.place(name, (wx, PATH_TOP, wz)))
+		LAMPS.append({"name": name, "x": wx, "z": wz})
+	arch = props["ModeArch"]
+	for mode, b in ARCHES:
+		wx, wz = e_fr.world(ARCH_A, b)
+		# yaw pi/2 turns the arch's width (local X) across the court and its opening (local Z) along the path
+		folder_node.add(arch.place(f"ModeArch_{mode}", (wx, PATH_TOP, wz), math.pi / 2, color=ARCH_COLOR[mode], material="Neon"))
 
 
 def main() -> None:

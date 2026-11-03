@@ -41,6 +41,41 @@
       "pole": {
         "cast_shadow": false
       }
+    },
+    {
+      "name": "ModeArch",
+      "file": "ModeArch.rbxmx",
+      "pivot": "base centre; the model's pivot is the origin and the base sits at y = 0. The opening faces local Z; the generator yaws it onto the path axis.",
+      "light": {
+        "range": 14,
+        "brightness": 1.5,
+        "shadows": false,
+        "parent": "arch_geom",
+        "note": "colour comes from the placement (the arch colour); one light per arch, at the mesh centre inside the opening"
+      },
+      "assets": {
+        "mesh_id": "rbxassetid://87495739867220",
+        "texture_id": null
+      },
+      "size": [
+        12.0,
+        13.9533,
+        5.7155
+      ],
+      "triangles": 300,
+      "collision_fidelity": "Default",
+      "collision_note": "The mesh itself is CanCollide false (a hull would fill the opening and block the pad). The generator adds two transparent leg colliders per arch.",
+      "legs": {
+        "inner_half_width": 2.86,
+        "outer_half_width": 6.0,
+        "collider_height": 7.0,
+        "collider_depth": 5.2
+      },
+      "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0127 (candidate A, picked by jg 2026-11-02; maxTriangles 300, untextured)",
+      "prompt": "Chunky low-poly rounded gateway arch, hollow centre you can walk through, two thick square legs joined by a semicircular top, simple readable shapes, plain untextured single-colour surface.",
+      "arch": {
+        "cast_shadow": false
+      }
     }
   ]
 }
