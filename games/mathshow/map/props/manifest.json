@@ -253,6 +253,28 @@
         "cast_shadow": false
       },
       "collision_note": "Real Box collision data exported from Studio; the part never collides (decorative, above the terrace)."
+    },
+    {
+      "name": "PineTree",
+      "file": "PineTree.rbxmx",
+      "pivot": "base centre; the model's pivot is the origin and the base sits at y = 0",
+      "assets": {
+        "mesh_id": "rbxassetid://78289118787590",
+        "texture_id": null
+      },
+      "size": [
+        6.0,
+        11.0623,
+        5.8762
+      ],
+      "triangles": 150,
+      "collision_fidelity": "Box (CanCollide false, decoration)",
+      "collision_note": "Real Box collision data exported from Studio; the tree never collides (decorative, placed on terrace tops).",
+      "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0132 (candidate C2 of 3, picked by jg 2026-11-02; maxTriangles 150, untextured). Exported from Studio scratch place, TASK-0132: a MeshPart from the existing mesh id (AssetService:CreateMeshPartAsync, native size), CanCollide false, CastShadow false, CollisionFidelity Box, serialized with SerializationService and converted with rojo build.",
+      "prompt": "Tall slim low-poly pine tree: a thin trunk and four narrow stacked faceted cone layers forming a tall spire silhouette, simple chunky shapes, plain untextured single-colour surface.",
+      "tree": {
+        "cast_shadow": false
+      }
     }
   ],
   "generation_history_task_0131": {
@@ -355,8 +377,8 @@
       }
     ]
   },
-  "task_0132_generation_log": {
-    "note": "Every generate_mesh call in TASK-0132 (cap 3, one prop: PineTree), logged as made.",
+  "generation_history_task_0132": {
+    "note": "Every generate_mesh call in TASK-0132: 3 calls (the approved cap), none failed, no Robux cost seen. Calls 2 and 3 timed out while waited on once; the jobs then completed and each call is counted once. Triangle counts are EditableMesh face counts. Candidate screenshot (844x390) is outside the repo in ~/Roblox-Work/evidence/TASK-0132/candidates/.",
     "calls": [
       {
         "prop": "PineTree",
@@ -371,7 +393,8 @@
           7.0,
           9.3067,
           6.9134
-        ]
+        ],
+        "outcome": "discarded"
       },
       {
         "prop": "PineTree",
@@ -386,7 +409,8 @@
           6.0,
           11.0623,
           5.8762
-        ]
+        ],
+        "outcome": "picked"
       },
       {
         "prop": "PineTree",
@@ -401,7 +425,8 @@
           7.9833,
           12.4161,
           8.0
-        ]
+        ],
+        "outcome": "discarded"
       }
     ]
   }

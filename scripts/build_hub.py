@@ -50,11 +50,15 @@ PALETTE = {
 	"amber_neon": (250, 125, 18),  # Lamp Amber tuned for Neon + Bloom: #FFB547 renders lemon yellow (TASK-0125 lamp Globe)
 	"bunting_line": (86, 98, 110),
 	"night": (11, 20, 51),  # Night Navy #0B1433
+	"grass": (52, 120, 82),  # terrace grass tops
+	"pine": (38, 98, 78),  # PineTree colour
+	"lakebed": (8, 26, 48),
 }
 
 MATERIAL = {"SmoothPlastic": 272, "Concrete": 816, "Slate": 800, "Neon": 288, "Glass": 1568, "Plastic": 256, "ForceField": 1584}
 SHAPE = {"Ball": 0, "Block": 1, "Cylinder": 2}
 
+LAKE_REFLECTANCE = 0.6
 PLAZA_R = 55.0
 SPAWN_Z = 47.0  # the SpawnLocation and the SpawnHex plate sit at (0, SPAWN_Z), the plaza's south edge
 PATH_W = 14.0
@@ -127,7 +131,7 @@ def from_columns(x, y, z):
 
 
 def make_part(name, size, pos, rot, color, material="SmoothPlastic", shape="Block", transparency=0.0, collide=True,
-		query=True, cls="Part", cast_shadow=True) -> Node:
+		query=True, cls="Part", cast_shadow=True, reflectance=0.0) -> Node:
 	n = Node(cls, name)
 	n.props += [
 		"<bool name=\"Anchored\">true</bool>",
@@ -140,6 +144,7 @@ def make_part(name, size, pos, rot, color, material="SmoothPlastic", shape="Bloc
 		f'<token name="Material">{MATERIAL[material]}</token>',
 		f'<Vector3 name="Size"><X>{f(size[0])}</X><Y>{f(size[1])}</Y><Z>{f(size[2])}</Z></Vector3>',
 		f'<float name="Transparency">{f(transparency)}</float>',
+		f'<float name="Reflectance">{f(reflectance)}</float>',
 		'<token name="TopSurface">0</token>',
 		'<token name="BottomSurface">0</token>',
 	]
@@ -582,10 +587,13 @@ def build() -> Node:
 	for name, a, rad, top, color in (
 		("Terrace_1", 118, 46, 8.0, PALETTE["tier"]),
 		("Terrace_2", 122, 24, 18.0, PALETTE["ground"]),
-		("Terrace_3", 140, 22, 32.0, PALETTE["daily"]),
+		("Terrace_3", 140, 22, 32.0, PALETTE["ground"]),
 	):
 		tx, tz = n_fr.world(a, 0)
 		zones.add(cylinder(name, tx, top / 2, tz, top, rad * 2, color, material="Concrete"))
+		# Grass top (TASK-0132): a thin decorative disc just above the walking surface, so nothing about the collision changes.
+		zones.add(cylinder(name + "_Grass", tx, top + 0.05, tz, 0.1, rad * 2 - 1.0, PALETTE["grass"], collide=False, query=False,
+			cast_shadow=False))
 	build_observatory(zones, n_fr, rise_top)
 	pad(n_fr, "Daily", 130, 0, rise_top, PALETTE["daily"])
 
@@ -619,8 +627,12 @@ def build() -> Node:
 
 	# SE: promenade path and lake.
 	se_fr = add_path("SE", PLAZA_R + 1, 106)
+	# TASK-0132: the water is a flat Glass Part (not Terrain) over a collidable lakebed, Reflectance 0.6 per A4. The invisible
+	# Blocker below keeps players out of the water; the lakebed is the floor under it, so nothing can fall out of the world.
+	lake.add(cylinder("Lakebed", LAKE_C[0], -0.05, LAKE_C[1], 0.3, LAKE_R * 2, PALETTE["lakebed"], material="Concrete", query=False,
+		cast_shadow=False))
 	lake.add(cylinder("Water", LAKE_C[0], 0.15, LAKE_C[1], 0.3, LAKE_R * 2, PALETTE["lake"], material="Glass", transparency=0.35,
-		collide=False))
+		collide=False, query=False, cast_shadow=False, reflectance=LAKE_REFLECTANCE))
 	lake.add(cylinder("Blocker", LAKE_C[0], 10, LAKE_C[1], 20, LAKE_R * 2 - 2, PALETTE["lake"], transparency=1.0, query=False))
 	ring_seg = 16
 	for k in range(ring_seg):
@@ -629,6 +641,7 @@ def build() -> Node:
 		ff = Frame((math.cos(ang), math.sin(ang)), LAKE_C)
 		chord = 2 * 50 * math.tan(math.pi / 2 / ring_seg) + 1.0
 		lake.add(ff.block(f"Promenade_{k:02d}", 50, 0, 0, (chord, 0.4, 12), PALETTE["promenade"]))
+	add_railing(lake, ring_seg)
 
 	# ---- boundary: stepped terraces + invisible walls ----
 	tiers = boundary.add(folder("Terraces"))
@@ -640,6 +653,8 @@ def build() -> Node:
 			fr = Frame((math.cos(ang), math.sin(ang)))
 			chord = 2 * radius * math.tan(math.pi / TIER_RING) + 1.5
 			tiers.add(fr.block(f"Tier{t + 1}_{k:02d}", radius, 0, height / 2, (chord, height, 8), PALETTE["tier"], material="Concrete"))
+			tiers.add(fr.block(f"Grass{t + 1}_{k:02d}", radius, 0, height + 0.05, (chord - 0.5, 0.1, 7.6), PALETTE["grass"], collide=False,
+				query=False, cast_shadow=False))
 	walls = boundary.add(folder("Walls"))
 	for k in range(TIER_RING):
 		ang = 2 * math.pi * k / TIER_RING
@@ -683,6 +698,7 @@ def build() -> Node:
 		glyph(None, f"R_Lake{i + 1}", 0, 0, PATH_TOP, "rare",
 			origin_override=(LAKE_C[0] + 50 * math.cos(ang), LAKE_C[1] + 50 * math.sin(ang)))
 	add_props(hub, e_fr, plaza)
+	add_holos(hub)
 	return hub
 
 
@@ -964,6 +980,88 @@ def build_ranks(zones: Node, sw_fr: Frame) -> None:
 		zone.add(cylinder(f"Podium_{i + 1}_{tier}_Cap", wx, 0.2 + h + 0.1, wz, 0.2, 3.0, rgb, material="Neon", **deco))
 
 
+# --- Lake railing, trees and holo symbols (TASK-0132) ------------------------------------------------------------------------
+RAIL_R = 44.7  # just outside the water edge (LAKE_R = 44), on the lake side of the 12-wide promenade
+RAIL_TOP_Y, RAIL_MID_Y, RAIL_POST_H = PATH_TOP + 1.5, PATH_TOP + 0.8, 1.9
+LAKE_LAMP_DEGREES, LAKE_LAMP_R = (210, 240), 53.0  # on the promenade, between the R_Lake glyph spots (195, 225, 255)
+TREE_SCALE = 1.27  # PineTree is 11.06 high: ~14 studs
+BOUNDARY_TREES = 40  # on tiers 1..3 of the boundary terraces; the tier tops are the only place the 4 terraces are walkable
+TREE_AVOID_DEGREES = (20, 100, 150, 205, 300)  # the R_Tier glyph spots (a tree is decoration, but keep the spots clear)
+# N terraces: (a, b, top y) on the north path's frame; a, b match Terrace_1..3 (centres 118, 122, 140 along the path)
+N_TREES = ((100, 36, 8.0), (100, -36, 8.0), (118, 41, 8.0), (118, -41, 8.0), (136, 36, 8.0), (136, -36, 8.0), (152, 28, 8.0),
+	(152, -28, 8.0), (118, 19, 18.0), (118, -19, 18.0), (140, -17, 32.0), (158, -14, 32.0))
+HOLO_SYMBOLS = ("\u03c0", "\u03a3", "\u221a", "+", "\u2212", "\u00d7", "\u00f7")  # pi, sigma, root, plus, minus, times, divide
+HOLO_SIZE = 9.0  # studs: the BillboardGui is sized in studs
+# (angle in degrees, radius, y): >= 25 studs above every walkable surface under it (the plaza and paths are at ~0.6; the north
+# terraces rise to 32 but the ring skips the north sector, and the two centre ones float over the plaza).
+HOLO_SITES = ((0, 112, 52), (45, 120, 56), (90, 105, 50), (135, 112, 54), (180, 116, 52), (225, 120, 58), (315, 110, 56),
+	(20, 38, 46), (140, 40, 50), (260, 36, 48))
+HOLO_COLOURS = ("cyan", "violet", "amber")
+
+
+def add_railing(lake: Node, ring_seg: int) -> None:
+	"""Posts, a Basalt mid rail and a Lamp Amber Neon top rail along the promenade's lake edge (decorative, no collision)."""
+	rail = lake.add(folder("Railing"))
+	deco = dict(collide=False, query=False, cast_shadow=False)
+	for k in range(ring_seg + 1):
+		deg = 135 + 180 * k / ring_seg
+		ang = math.radians(deg)
+		ff = Frame((math.cos(ang), math.sin(ang)), LAKE_C)
+		rail.add(ff.block(f"Post_{k:02d}", RAIL_R, 0, PATH_TOP + RAIL_POST_H / 2, (0.5, RAIL_POST_H, 0.5), PALETTE["slot"], **deco))
+	for k in range(ring_seg):
+		ang = math.radians(135 + 180 * (k + 0.5) / ring_seg)
+		ff = Frame((math.cos(ang), math.sin(ang)), LAKE_C)
+		chord = 2 * RAIL_R * math.tan(math.pi / 2 / ring_seg) + 0.1
+		rail.add(ff.block(f"MidRail_{k:02d}", RAIL_R, 0, RAIL_MID_Y, (chord, 0.2, 0.2), PALETTE["slot"], **deco))
+		rail.add(ff.block(f"TopRail_{k:02d}", RAIL_R, 0, RAIL_TOP_Y, (chord, 0.25, 0.3), PALETTE["amber_neon"], material="Neon", **deco))
+
+
+def tree_sites() -> list[tuple[float, float, float, float, float]]:
+	"""PineTree placements (x, y, z, yaw, scale): boundary tier tops, then the north terraces. At most 60."""
+	sites = []
+	n_fr = Frame((0, -1))
+	for k in range(BOUNDARY_TREES):
+		deg = (k * 9 + 4.5) % 360
+		if any(min(abs(deg - g), 360 - abs(deg - g)) < 5 for g in TREE_AVOID_DEGREES):
+			continue
+		tier = k % 3 + 1
+		radius, top = 254 + 8 * (tier - 1), 3.0 * tier
+		ang = math.radians(deg)
+		sites.append((radius * math.cos(ang), top, radius * math.sin(ang), (k * 2.399) % (2 * math.pi), TREE_SCALE * (0.9 + 0.2 * ((k * 7) % 5) / 4)))
+	for i, (a, b, top) in enumerate(N_TREES):
+		wx, wz = n_fr.world(a, b)
+		sites.append((wx, top, wz, (i * 2.399) % (2 * math.pi), TREE_SCALE * (0.9 + 0.2 * ((i * 3) % 5) / 4)))
+	assert len(sites) <= 60
+	return sites
+
+
+def add_holos(hub: Node) -> None:
+	"""Decorative holo symbols: an invisible anchored Part with a BillboardGui TextLabel each, tagged HubHolo so HubCosmetics bobs them.
+	They float far above anything walkable and carry no GlyphSpawn tag; the Glyph pickups are lower, Neon and sparkling."""
+	holos = hub.add(folder("Holo"))
+	for i, (deg, radius, y) in enumerate(HOLO_SITES):
+		ang = math.radians(deg)
+		part = make_part(f"Holo_{i + 1:02d}", (1, 1, 1), (radius * math.cos(ang), y, radius * math.sin(ang)), IDENT, PALETTE["cyan"],
+			transparency=1.0, collide=False, query=False, cast_shadow=False)
+		part.tags.append("HubHolo")
+		gui = part.add(Node("BillboardGui", "HoloGui"))
+		gui.props += [f'<UDim2 name="Size"><XS>{f(HOLO_SIZE)}</XS><XO>0</XO><YS>{f(HOLO_SIZE)}</YS><YO>0</YO></UDim2>',
+			'<float name="LightInfluence">0</float>', '<bool name="AlwaysOnTop">false</bool>', '<float name="MaxDistance">500</float>']
+		label = gui.add(Node("TextLabel", "Symbol"))
+		tr, tg, tb = (c / 255 for c in PALETTE[HOLO_COLOURS[i % 3]])
+		label.props += [
+			f'<string name="Text">{HOLO_SYMBOLS[i % len(HOLO_SYMBOLS)]}</string>',
+			'<token name="Font">20</token>',  # GothamBlack
+			'<bool name="TextScaled">true</bool>',
+			f'<Color3 name="TextColor3"><R>{f(tr)}</R><G>{f(tg)}</G><B>{f(tb)}</B></Color3>',
+			'<float name="TextTransparency">0.25</float>',
+			'<float name="BackgroundTransparency">1</float>',
+			'<int name="BorderSizePixel">0</int>',
+			'<UDim2 name="Size"><XS>1</XS><XO>0</XO><YS>1</YS><YO>0</YO></UDim2>',
+		]
+		holos.add(part)
+
+
 # Lamp placements along the east path, one every LAMP_SPACING studs, alternating sides just inside the path edge (TASK-0125).
 LAMP_START = 63.0
 LAMP_SPACING = 15.0
@@ -1079,6 +1177,15 @@ def add_props(hub: Node, e_fr: Frame, plaza: Node) -> None:
 		material="ForceField", scale=OBS_DOME_SCALE))
 	folder_node.add(props["Telescope"].place("Telescope", (OBS_PLACE["x"] + tel["side"], dome_y + tel.get("lift", 0.0), OBS_PLACE["z"] + tel["forward"]),
 		tel["yaw"], color=PALETTE["amber"], material="SmoothPlastic", scale=tel["scale"]))
+	for i, deg in enumerate(LAKE_LAMP_DEGREES):
+		ang = math.radians(deg)
+		name = f"LampPost_L{i + 1:02d}"
+		wx, wz = LAKE_C[0] + LAKE_LAMP_R * math.cos(ang), LAKE_C[1] + LAKE_LAMP_R * math.sin(ang)
+		folder_node.add(lamp.place(name, (wx, PATH_TOP, wz)))
+		LAMPS.append({"name": name, "x": wx, "z": wz})
+	pine = props["PineTree"]
+	for i, (wx, top, wz, yaw, scale) in enumerate(tree_sites()):
+		folder_node.add(pine.place(f"PineTree_{i + 1:02d}", (wx, top, wz), yaw, color=PALETTE["pine"], material="SmoothPlastic", scale=scale))
 	add_bunting(hub)
 
 

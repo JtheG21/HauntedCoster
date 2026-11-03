@@ -5,8 +5,10 @@
 -- RetryAfterSeconds (GlyphRules.shouldRequest; the timer clears when the glyph leaves or returns); the client never
 -- changes its own count. Positions come from the same GlyphSpawn attachments the server reads, learnt as they stream in
 -- (the place uses StreamingEnabled), and kept once known. The symbol index is the id's place in the first GlyphState,
--- which the server sends with every glyph available and sorted by id. The pickup burst is cosmetic: pcall-isolated,
--- fails inert and warns, and never touches collection.
+-- which the server sends with every glyph available and sorted by id. The look (TASK-0132) is a spinning Neon gem at chest
+-- height with a bright symbol billboard and a soft sparkle ParticleEmitter (the default texture, one per glyph, a few
+-- particles a second): lower, brighter and faster than the decorative hub holos. The pickup burst is cosmetic:
+-- pcall-isolated, fails inert and warns, and never touches collection.
 
 local CollectionService = game:GetService("CollectionService")
 local Debris = game:GetService("Debris")
@@ -26,10 +28,18 @@ local GlyphTheme = table.freeze({
 	PartSize = 1.2,
 	Colour = table.freeze({ common = Color3.fromRGB(110, 220, 255), rare = Color3.fromRGB(255, 205, 90) }),
 	SymbolColour = Color3.fromRGB(255, 255, 255),
-	BillboardStuds = 2.4,
+	SymbolStroke = Color3.fromRGB(10, 20, 50),
+	BillboardStuds = 3.2,
 	BobStuds = 0.3,
 	BobSeconds = 2.4,
-	SpinRadiansPerSecond = 1.2,
+	SpinRadiansPerSecond = 3.2, -- the holos only sway slowly; the glyphs spin
+	Tilt = math.rad(30), -- the gem is turned on its corner so the spin reads
+	SparkleRate = 5, -- particles a second per glyph (the budget is 6)
+	SparkleLifetime = NumberRange.new(0.8, 1.4),
+	SparkleSpeed = NumberRange.new(0.6, 1.6),
+	SparkleSize = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.5), NumberSequenceKeypoint.new(1, 0) }),
+	SparkleSpread = 180,
+	BurstCount = 14,
 	BurstSeconds = 0.35,
 	BurstScale = 4,
 	PickupSound = "rbxasset://sounds/electronicpingshort.wav",
@@ -118,8 +128,25 @@ local function makeGlyph(id: string, spawn: GlyphRules.Spawn, parent: Instance):
 	label.Text = symbolFor(id)
 	label.TextScaled = true
 	label.TextColor3 = GlyphTheme.SymbolColour
+	label.TextStrokeColor3 = GlyphTheme.SymbolStroke
+	label.TextStrokeTransparency = 0.3
 	label.FontFace = GlyphTheme.CounterFont
 	label.Parent = billboard
+	local ok, err = pcall(function()
+		local sparkle = Instance.new("ParticleEmitter")
+		sparkle.Name = "Sparkle"
+		sparkle.Color = ColorSequence.new(GlyphTheme.Colour[spawn.rarity])
+		sparkle.LightEmission = 1
+		sparkle.Rate = GlyphTheme.SparkleRate
+		sparkle.Lifetime = GlyphTheme.SparkleLifetime
+		sparkle.Speed = GlyphTheme.SparkleSpeed
+		sparkle.Size = GlyphTheme.SparkleSize
+		sparkle.SpreadAngle = Vector2.new(GlyphTheme.SparkleSpread, GlyphTheme.SparkleSpread)
+		sparkle.Parent = part
+	end)
+	if not ok then
+		warn(`[MathShow] glyph sparkle failed: {err}`)
+	end
 	part.Parent = parent
 	return { part = part, base = base, rarity = spawn.rarity, phase = (indexById[id] or 0) * 0.7, lastRequestAt = nil }
 end
@@ -142,6 +169,17 @@ local function playPickup(position: Vector3, rarity: GlyphRules.Rarity)
 	sound.SoundId = GlyphTheme.PickupSound
 	sound.Parent = burst
 	sound:Play()
+	local emitter = Instance.new("ParticleEmitter") -- replaces the glyph's own emitter, which left with its part
+	emitter.Name = "Burst"
+	emitter.Color = ColorSequence.new(GlyphTheme.Colour[rarity])
+	emitter.LightEmission = 1
+	emitter.Rate = 0
+	emitter.Lifetime = GlyphTheme.SparkleLifetime
+	emitter.Speed = NumberRange.new(6, 12)
+	emitter.Size = GlyphTheme.SparkleSize
+	emitter.SpreadAngle = Vector2.new(GlyphTheme.SparkleSpread, GlyphTheme.SparkleSpread)
+	emitter.Parent = burst
+	emitter:Emit(GlyphTheme.BurstCount)
 	TweenService:Create(burst, TweenInfo.new(GlyphTheme.BurstSeconds), {
 		Size = Vector3.one * GlyphTheme.PartSize * GlyphTheme.BurstScale,
 		Transparency = 1,
@@ -224,6 +262,7 @@ local function onRender()
 		local bob = math.sin(now * bobRate + glyph.phase) * GlyphTheme.BobStuds
 		glyph.part.CFrame = CFrame.new(glyph.base + Vector3.new(0, bob, 0))
 			* CFrame.Angles(0, now * GlyphTheme.SpinRadiansPerSecond + glyph.phase, 0)
+			* CFrame.Angles(GlyphTheme.Tilt, 0, GlyphTheme.Tilt)
 		local inRange = rootPosition ~= nil and (rootPosition - glyph.base).Magnitude <= GlyphConfig.CollectRadius
 		if collectRemote and GlyphRules.shouldRequest(glyph.lastRequestAt, now, inRange, wanted[id] == true) then
 			glyph.lastRequestAt = now
