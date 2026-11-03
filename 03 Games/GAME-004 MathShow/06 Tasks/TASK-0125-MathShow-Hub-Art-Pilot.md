@@ -62,7 +62,7 @@ Prove the prop pipeline end to end with one prop: generate a lamp post mesh in a
 - L3: shadowless Box pole + Neon `Globe` child with the PointLight, in the generator and manifest; prepared on the current mesh, Globe offset is a placeholder until the pick.
 - L4: 844x390 re-measure at 5f0d07e (ShadowMap and Future, before/after): no measurable GPU cost, lamps add 9578 scene triangles and no shadow triangles. 1080p rows invalid.
 
-- Pick C applied (commit 3be51e5): LampPost.rbxmx rebuilt from candidate C's asset ids (the generated model was gone from the scratch window), shadowless Box pole, Globe offset (0, 6.0588, 0). Walking into the pole is blocked, but the pole is 5.06 studs tall so a jump or auto-jump clears it. The Neon Globe renders lemon yellow rather than amber. Details in the evidence log.
+- Pick C applied (commit 3be51e5): LampPost.rbxmx rebuilt from candidate C's asset ids (the generated model was gone from the scratch window), shadowless Box pole, Globe offset (0, 6.0588, 0). Walking into the pole is blocked, but the pole is 5.06 studs tall so a jump or auto-jump clears it. The Neon Globe rendered lemon yellow; fixed in c9b7859 by tuning only the Globe colour to #FA7D12 (light stays #FFB547). Details in the evidence log.
 
 ## Audits
 
