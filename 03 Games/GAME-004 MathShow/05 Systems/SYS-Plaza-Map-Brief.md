@@ -46,6 +46,8 @@ Mockups: [[Map Mockups/README]]. Palette (A4): Night Navy #0B1433, Slate Teal #1
 - **Lighting.Technology = ShadowMap**, the place's current setting; no place save. This replaces "Technology Future" in the Direction A line above.
 - Glow comes from **Neon + Bloom** per A4 (the lamp Globe uses a Neon colour tuned for Bloom 1.0).
 - **Art-1 light budget:** at most **40 PointLights** in the hub; **CastShadow false** on all props.
+- **Art budget metric (jg, 2026-11-02, M6):** triangles = the deterministic geometry inventory from the committed sources (class counts x stated costs + prop manifest triangle counts). Studio rendered counts are informational. The rendered/inventory gap (4,332 in [[TASK-0126-MathShow-Hub-Art-Plaza]]) is to be explained in [[TASK-0123-MathShow-Multiplayer-Playtest]]'s real-device perf run. Stated costs per primitive (TASK-0126, measured in Play): Block 12, Wedge 10, Cylinder 96, Ball 432.
+- **Running hub PointLight total: 13 of 40** (5 east-path pilot lamps from [[TASK-0125-MathShow-Hub-Art-Pilot]] + 8 plaza rim lamps from Batch 1, [[TASK-0126-MathShow-Hub-Art-Plaza]]; counted from `Hub.rbxmx` at 46644e7). Update this line with each batch.
 - Basis: in-Studio lighting perf on this Mac is non-gating (renderer identity unverifiable, method not reproducible); real-device perf is in [[TASK-0123-MathShow-Multiplayer-Playtest]]. Source: [[TASK-0125-MathShow-Hub-Art-Pilot]].
 
 ## Glyph rules v1
