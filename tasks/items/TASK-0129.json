@@ -2,7 +2,7 @@
   "id": "TASK-0129",
   "game": "GAME-004",
   "title": "MathShow Hub Art-1 Batch 3: Training",
-  "status": "review",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -45,6 +45,18 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T21:16:12",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T21:18:14",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -53,5 +65,13 @@
       "result": "pass",
       "notes": "Training zone built at 7f71497; evidence docs/workflow/evidence/TASK-0129/art-training.txt. +2 lights (hub 15), +115 instances, +3240 tris. Walk times 9.9-11.9 s, 34/34 glyphs, pads/HUD/blocked ok."
     }
-  ]
+  ],
+  "audits": [
+    {
+      "time": "2026-11-02T21:16:12",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0129-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
 }

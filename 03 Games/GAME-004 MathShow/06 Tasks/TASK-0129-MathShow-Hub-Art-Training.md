@@ -3,7 +3,7 @@ id: TASK-0129
 title: "MathShow Hub Art-1 Batch 3: Training"
 type: task
 project: GAME-004
-status: review
+status: done
 priority: medium
 risk: low
 owner: claude-code
