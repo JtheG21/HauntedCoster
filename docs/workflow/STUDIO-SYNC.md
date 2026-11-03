@@ -383,3 +383,6 @@ Rojo 7.7.0 builds `Lighting` properties from `"$properties"` in `mathshow.projec
 | Scriptable replacements | `LightingStyle` and `PrioritizeLightingQuality` read fine in Edit (Soft, true here). Not tested through Rojo, and the mapping to Future or ShadowMap is not documented |
 
 Decision: `Technology` stays out of the project file; the other values are in it. Treat Technology as a **one-time place setting** that comes with the place file (`MathShow.rbxl` is ShadowMap today), not something Rojo manages. To make a test copy with another Technology, edit a copy of the .rbxl with Lune (`roblox.Enum.Technology[...]`, run inside the repo) and never save over the real place. The Studio place was not saved.
+
+Hub walk lengths/reachability: Studio fresh-Play remains the gate (TASK-0130 calibration failed twice).
+`tests/test_hub_walk.py`, discovered by `check.sh`, prints informational estimates and never fails the gate on route results.

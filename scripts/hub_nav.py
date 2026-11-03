@@ -5,7 +5,10 @@ https://create.roblox.com/docs/reference/engine/classes/Humanoid . JumpHeight
 applies with UseJumpPower=false; the engine normally defaults to JumpPower mode.
 STEP_UP=1 is an explicit modelling assumption: Roblox's public Humanoid API does
 not document a fixed automatic step-up limit. Never fit it to Studio lengths.
-Point-agent grid: no avatar radius, jump flight time or airborne gap traversal.
+Blocking footprints are dilated on the 1-stud grid by AgentRadius=2 (a disk),
+from creator-docs/content/en-us/characters/pathfinding.md:231-234 and
+reference/engine/classes/PathfindingService.yaml:157-162. No jump flight time
+or airborne gap traversal is modelled. Jump-up edges cost horizontal distance.
 Overlapping floors retain separate elevations; 5 studs of headroom are required.
 Mesh collision hulls are unavailable in XML; oriented bounds approximate them.
 """
@@ -24,6 +27,7 @@ WALK_SPEED = 16.0
 STEP_UP = 1.0
 JUMP_UP = 7.2
 HEADROOM = 5.0
+AGENT_RADIUS = 2.0
 HUB = Path(__file__).resolve().parents[1] / 'games/mathshow/map/Hub.rbxmx'
 EPS = 1e-7
 
@@ -101,7 +105,7 @@ class Heightfield:
     def __init__(self, parts):
         self.parts = parts
         columns = {}
-        for p in parts:
+        for part_id, p in enumerate(parts):
             if not p.collide:
                 continue
             rx = sum(abs(p.rotation[0][i])*p.size[i]/2 for i in range(3))
@@ -110,18 +114,38 @@ class Heightfield:
                 for z in range(math.ceil(p.centre[2]-rz), math.floor(p.centre[2]+rz)+1):
                     interval = p.interval(x, z)
                     if interval is not None:
-                        columns.setdefault((x,z), []).append(interval)
+                        columns.setdefault((x,z), []).append((*interval, part_id))
+        # Dilate blockers, not supporting floors: an avatar may stand on a ramp
+        # without treating that same inclined part as an obstacle to its feet.
+        offsets = [(dx, dz) for dx in range(-2, 3) for dz in range(-2, 3)
+                   if dx*dx+dz*dz <= AGENT_RADIUS**2]
         self.floors = {}
         for cell, spans in columns.items():
             spans.sort()
             merged = []
-            for lo, hi in spans:
+            for lo, hi, part_id in spans:
                 if merged and lo <= merged[-1][1]+EPS:
-                    merged[-1] = (merged[-1][0], max(hi, merged[-1][1]))
+                    old_lo, old_hi, support = merged[-1]
+                    if hi > old_hi+EPS:
+                        support = {part_id}
+                    elif abs(hi-old_hi) <= EPS:
+                        support = support | {part_id}
+                    merged[-1] = (old_lo, max(hi, old_hi), support)
                 else:
-                    merged.append((lo,hi))
-            self.floors[cell] = tuple(hi for i, (_,hi) in enumerate(merged)
-                                      if i+1 == len(merged) or merged[i+1][0]-hi >= HEADROOM-EPS)
+                    merged.append((lo,hi,{part_id}))
+            floors = []
+            for i, (_, hi, support) in enumerate(merged):
+                if i+1 < len(merged) and merged[i+1][0]-hi < HEADROOM-EPS:
+                    continue
+                # Any part that rises above step height into the avatar's body
+                # blocks this floor within the radius. Leave its own top usable.
+                blocked = any(top > hi+STEP_UP+EPS and bottom < hi+HEADROOM-EPS
+                              and owner not in support
+                              for dx, dz in offsets
+                              for bottom, top, owner in columns.get((cell[0]+dx,cell[1]+dz), ()))
+                if not blocked:
+                    floors.append(hi)
+            self.floors[cell] = tuple(floors)
 
     def node(self, position):
         x, y, z = position
@@ -151,12 +175,24 @@ class Heightfield:
                                                for cy in self.floors.get((cx,cz), ()))
                                      for cx,cz in ((x+dx,z),(x,z+dz))):
                     continue
-                yield b, math.sqrt(dx*dx+dz*dz+(y-h)**2)
+                yield b, self.edge_cost(a, b)
+
+    @staticmethod
+    def edge_cost(a, b):
+        horizontal = math.hypot(b[0]-a[0], b[1]-a[1])
+        # A2: no fitted jump penalty or vertical jump distance.
+        if b[2]-a[2] > STEP_UP+EPS:
+            return horizontal
+        return math.hypot(horizontal, b[2]-a[2])
 
     def route(self, start, target):
-        a, goal = self.node(start), self.node(target)
+        try:
+            a, goal = self.node(start), self.node(target)
+        except ValueError:
+            return math.inf, []
         def heuristic(n):
-            return math.dist(n,goal)
+            # Jump edges omit vertical cost; a 3D heuristic would overestimate.
+            return math.hypot(n[0]-goal[0], n[1]-goal[1])
         queue = [(heuristic(a),0.0,a)]
         costs, previous = {a:0.0}, {}
         while queue:
