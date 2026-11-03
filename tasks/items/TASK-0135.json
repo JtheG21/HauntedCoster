@@ -1,0 +1,28 @@
+{
+  "id": "TASK-0135",
+  "game": "GAME-004",
+  "title": "MathShow Deterministic Lighting Technology",
+  "status": "in_progress",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "mathshow.project.json",
+    "docs/workflow/STUDIO-SYNC.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0135-MathShow-Deterministic-Lighting-Technology.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0135-lighting-technology",
+  "acceptance": [
+    "Lighting Technology set to ShadowMap in mathshow.project.json; rojo build read with Lune shows Technology == ShadowMap.",
+    "Opening the built .rbxl in Studio shows no Lighting Technology Migration dialog.",
+    "Live rojo serve + plugin sync still works (BuildStamp == HEAD, console captured); else revert to a documented build-time step.",
+    "STUDIO-SYNC.md documents that the project file sets Technology and the live plugin cannot.",
+    "check.sh and validators green; PR open, CI green, not merged."
+  ],
+  "evidence": [],
+  "notes": "Approved rows D1-D5 (jg, 2026-11-03). Light tier, no audit. No publishing; never save MathShow.rbxl.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0135-MathShow-Deterministic-Lighting-Technology.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": []
+}
