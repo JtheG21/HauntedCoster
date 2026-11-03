@@ -58,9 +58,11 @@ Prove the prop pipeline end to end with one prop: generate a lamp post mesh in a
 ### Revision 1 (jg rows L0-L5, 2026-11-02)
 - L0: MathShow.rbxl mtime 2026-10-31 10:04:29, never saved; the Edit-view prop deletion was in the MathShow.rbxl window (details in the evidence log). A lighting leak between the two Studio windows was found, restored and the affected runs redone.
 - L1: generate_mesh showed nothing about cost or quota; 3 candidates in revision 0, one screenshot of all three (`~/Roblox-Work/evidence/TASK-0125/candidates_1_2_3.jpg`).
-- L2: 3 pole-only candidates generated, saved with screenshots and triangle counts in `~/Roblox-Work/evidence/TASK-0125/candidates/` (A 554 with a lantern head, B 552, C 600). **No pick made: waiting for jg.**
+- L2: 3 pole-only candidates generated, saved with screenshots and triangle counts in `~/Roblox-Work/evidence/TASK-0125/candidates/` (A 554 with a lantern head, B 552, C 600). **jg picked C (claw holder, 600 tris) on 2026-11-02.**
 - L3: shadowless Box pole + Neon `Globe` child with the PointLight, in the generator and manifest; prepared on the current mesh, Globe offset is a placeholder until the pick.
 - L4: 844x390 re-measure at 5f0d07e (ShadowMap and Future, before/after): no measurable GPU cost, lamps add 9578 scene triangles and no shadow triangles. 1080p rows invalid.
+
+- Pick C applied (commit 3be51e5): LampPost.rbxmx rebuilt from candidate C's asset ids (the generated model was gone from the scratch window), shadowless Box pole, Globe offset (0, 6.0588, 0). Walking into the pole is blocked, but the pole is 5.06 studs tall so a jump or auto-jump clears it. The Neon Globe renders lemon yellow rather than amber. Details in the evidence log.
 
 ## Audits
 
