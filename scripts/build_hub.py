@@ -49,6 +49,7 @@ PALETTE = {
 	"amber": (255, 181, 71),  # Lamp Amber (unlit parts)
 	"amber_neon": (250, 125, 18),  # Lamp Amber tuned for Neon + Bloom: #FFB547 renders lemon yellow (TASK-0125 lamp Globe)
 	"bunting_line": (86, 98, 110),
+	"night": (11, 20, 51),  # Night Navy #0B1433
 }
 
 MATERIAL = {"SmoothPlastic": 272, "Concrete": 816, "Slate": 800, "Neon": 288, "Glass": 1568, "Plastic": 256}
@@ -234,6 +235,8 @@ class Prop:
 		"""Generator-side children of the prop's MeshPart: the lamp Globe, the crystal's Neon core, the spawn plate's rim, an arch's light."""
 		if "arch_light" in self.entry:
 			return self.arch_nodes(color)
+		if "dome_light" in self.entry:
+			return self.arch_nodes(color, "dome_light", "DomeLight")
 		if "light" in self.entry:
 			return self.globe_nodes(placement)
 		if "core" in self.entry:
@@ -279,11 +282,11 @@ class Prop:
 		globe.add(light)
 		return [globe]
 
-	def arch_nodes(self, light_color) -> list[Node]:
-		"""A PointLight on the mesh itself (ModeArch, centre of the opening); the colour is the placement's."""
-		cfg = self.entry["arch_light"]
+	def arch_nodes(self, light_color, key: str = "arch_light", name: str = "ArchLight") -> list[Node]:
+		"""A PointLight on the mesh itself (ModeArch, centre of the opening; ObservatoryDome, its centre); the colour is the placement's."""
+		cfg = self.entry[key]
 		r, g, b = (c / 255 for c in light_color)
-		light = Node("PointLight", "ArchLight")
+		light = Node("PointLight", name)
 		light.props += [
 			f'<Color3 name="Color"><R>{f(r)}</R><G>{f(g)}</G><B>{f(b)}</B></Color3>',
 			f'<float name="Brightness">{f(cfg["brightness"])}</float>',
@@ -583,9 +586,7 @@ def build() -> Node:
 	):
 		tx, tz = n_fr.world(a, 0)
 		zones.add(cylinder(name, tx, top / 2, tz, top, rad * 2, color, material="Concrete"))
-	tx, tz = n_fr.world(150, 0)
-	zones.add(cylinder("Observatory_Tower", tx, rise_top + 20, tz, 40, 16, PALETTE["daily"]))
-	zones.add(make_part("Observatory_Dome", (22, 22, 22), (tx, rise_top + 46, tz), IDENT, PALETTE["daily"], shape="Ball"))
+	build_observatory(zones, n_fr, rise_top)
 	pad(n_fr, "Daily", 130, 0, rise_top, PALETTE["daily"])
 
 	# E: Competitive entrance with three arches.
@@ -602,17 +603,19 @@ def build() -> Node:
 		pad(w_fr, mode, 150, b, PATH_TOP, PALETTE["training"])
 	build_training(zones, w_fr)
 
-	# SW: Ranks hall (walls, roof, stairs up to the roof).
+	# SW: Ranks hall (walls, roof, stairs up to the roof); TASK-0131 dresses it in build_ranks.
 	sw_fr = add_path("SW", PLAZA_R + 1, 126)
 	zones.add(sw_fr.block("Hall_Floor", 158, 0, 0, (56, 0.4, 66), PALETTE["path"]))
-	zones.add(sw_fr.block("Hall_BackWall", 188, 0, 7, (54, 14, 2), PALETTE["ranks"]))
+	zones.add(sw_fr.block("Hall_BackWall", 188, 0, 7, (54, 14, 2), PALETTE["slot"]))
 	for side in (-1, 1):
-		zones.add(sw_fr.block(f"Hall_SideWall{side}", 158, side * 26, 7, (2, 14, 62), PALETTE["ranks"]))
-	zones.add(sw_fr.block("Hall_Roof", 158, 0, 14, (56, 1.5, 64), PALETTE["ranks"]))
+		zones.add(sw_fr.block(f"Hall_SideWall{side}", 158, side * 26, 7, (2, 14, 62), PALETTE["slot"]))
+	zones.add(sw_fr.block("Hall_Roof", 158, 0, 14, (56, 1.5, 64), PALETTE["slot"]))
 	steps = 6
 	for i in range(steps):
 		h = 14.75 / steps * (i + 1)
-		zones.add(sw_fr.block(f"Hall_Stair{i + 1}", 132 + 3.0 * i, -31, h / 2, (6, h, 3), PALETTE["ranks"]))
+		zones.add(sw_fr.block(f"Hall_Stair{i + 1}", 132 + 3.0 * i, -31, h / 2, (6, h, 3), PALETTE["slot"]))
+
+	build_ranks(zones, sw_fr)
 
 	# SE: promenade path and lake.
 	se_fr = add_path("SE", PLAZA_R + 1, 106)
@@ -823,6 +826,144 @@ def build_training(zones: Node, w_fr: Frame) -> None:
 		zone.add(w_fr.block(f"Ladder_{i + 1}_{tier}_Cap", HALL_A0 - 2.5, b, h + 0.2, (bar_w, 0.4, bar_depth), rgb, material="Neon", **deco))
 
 
+# --- Observatory and Ranks hall (TASK-0131) ---------------------------------------------------------------------------------
+# Observatory: an octagonal Basalt Blue tower on the top terrace (centre a = 150 on the north path), a wider gallery ring, the
+# ObservatoryDome prop and the Telescope prop. The Daily pad (a = 130) is untouched; the gallery front sits at a = 139.
+
+OBS_A = 150.0  # tower centre along the north path
+OBS_PLINTH_R, OBS_PLINTH_H = 11.5, 1.2  # apothems
+OBS_TOWER_R, OBS_TOWER_H = 8.5, 34.8
+OBS_GALLERY_R, OBS_GALLERY_H, OBS_GALLERY_T = 11.0, 3.0, 2.5
+OBS_DOME_SCALE = 1.4  # the prop is 15.6 across: ~22 studs
+OBS_TRIM = 0.5
+TAN_8 = math.tan(math.pi / 8)
+OBS_WIN_ROWS = (40.0, 44.5, 49.0, 57.0, 61.5)
+OBS_BAND_Y = (37.0, 53.0, 66.5)
+OBS_TELESCOPE = {"scale": 1.5, "forward": 0.0, "side": 0.0, "yaw": 0.0}  # tuned against screenshots
+
+
+def octagon_faces(cx: float, cz: float):
+	"""The eight faces of an octagon with flats at multiples of 45 degrees: (index, angle, Frame facing out of the face)."""
+	for k in range(8):
+		ang = k * math.pi / 4
+		yield k, ang, Frame((math.cos(ang), math.sin(ang)), (cx, cz))
+
+
+def build_observatory(zones: Node, n_fr: Frame, top: float) -> None:
+	zone = zones.add(folder("Observatory"))
+	cx, cz = n_fr.world(OBS_A, 0)
+	basalt, cyan, amber, night = PALETTE["slot"], PALETTE["training"], PALETTE["amber_neon"], PALETTE["night"]
+	deco = dict(collide=False, query=False, cast_shadow=False)
+
+	def window(i: int, j: int):
+		if (i + 2 * j) % 5 == 0:
+			return None
+		return amber if (i * 7 + j * 3) % 7 in (2, 5) else cyan
+
+	def ring(name: str, apothem: float, y0: float, h: float, thick: float, colour, material="SmoothPlastic", **kw) -> None:
+		"""Eight slabs closing an octagonal ring of the given outer apothem."""
+		width = 2 * apothem * TAN_8 + 0.1
+		for k, _, ff in octagon_faces(cx, cz):
+			zone.add(ff.block(f"{name}_{k}", apothem - thick / 2, 0, y0 + h / 2, (width, h, thick), colour, material=material, **kw))
+
+	y = top
+	ring("Plinth", OBS_PLINTH_R, y, OBS_PLINTH_H, OBS_PLINTH_R, basalt, cast_shadow=False)  # solid: thickness = apothem
+	y += OBS_PLINTH_H
+	ring("Tower", OBS_TOWER_R, y, OBS_TOWER_H, 2.0, basalt, cast_shadow=False)
+	zone.add(Frame((0, 1), (cx, cz)).block("Tower_Core", 0, 0, y + OBS_TOWER_H / 2, (2 * OBS_TOWER_R - 3.0, OBS_TOWER_H, 2 * OBS_TOWER_R - 3.0), basalt, cast_shadow=False))
+	tower_top = y + OBS_TOWER_H
+
+	# Neon: corner strips, three bands, windows on the seven faces that are not the front (k = 2 faces +Z, toward the plaza).
+	corner_r = OBS_TOWER_R / math.cos(math.pi / 8)
+	for k in range(8):
+		ang = k * math.pi / 4 + math.pi / 8
+		zone.add(make_part(f"Tower_Corner_{k}", (OBS_TRIM, OBS_TOWER_H, OBS_TRIM),
+			(cx + corner_r * math.cos(ang), y + OBS_TOWER_H / 2, cz + corner_r * math.sin(ang)),
+			from_columns((-math.sin(ang), 0, math.cos(ang)), (0, 1, 0), (math.cos(ang), 0, math.sin(ang))), cyan, material="Neon", **deco))
+	width = 2 * OBS_TOWER_R * TAN_8
+	for k, _, ff in octagon_faces(cx, cz):
+		for bi, by in enumerate(OBS_BAND_Y):
+			zone.add(ff.block(f"Tower_Band{bi}_{k}", OBS_TOWER_R + 0.1, 0, by, (width, OBS_TRIM, OBS_TRIM), cyan, material="Neon", **deco))
+		if k == 2:
+			continue
+		for i in range(2):
+			for j, wy in enumerate(OBS_WIN_ROWS):
+				colour = window(i + 2 * k, j)
+				if colour is None:
+					continue
+				zone.add(ff.block(f"Tower_Win{k}_{i}{j}", OBS_TOWER_R + 0.1, (i - 0.5) * 3.4, wy, (1.8, 1.8, 0.3), colour, material="Neon", **deco))
+
+	# Entrance on the front face: a Night Navy door with an amber Neon frame, and the DAILY sign over it.
+	front = Frame((0, 1), (cx, cz))
+	door_w, door_h = 5.0, 9.0
+	zone.add(front.block("Door", OBS_TOWER_R + 0.15, 0, y + door_h / 2, (door_w, door_h, 0.3), night, **deco))
+	for tag, bb, yy, size in (
+		("Top", 0, y + door_h + 0.2, (door_w + 1.0, 0.4, 0.5)),
+		("Left", -(door_w / 2 + 0.3), y + door_h / 2, (0.4, door_h, 0.5)),
+		("Right", door_w / 2 + 0.3, y + door_h / 2, (0.4, door_h, 0.5)),
+	):
+		zone.add(front.block(f"Door_{tag}", OBS_TOWER_R + 0.2, bb, yy, size, amber, material="Neon", **deco))
+	sign_a = OBS_A - OBS_TOWER_R - 0.5  # n_fr (out = -Z): the plate's Front face looks +Z, toward the plaza and the spawn
+	sign_plate(zone, n_fr, "Sign_Daily", sign_a, 0.0, y + door_h + 4.2, (16.0, 5.0, 0.6), "DAILY", amber, PALETTE["amber"])
+
+	# Gallery ring under the dome, with Holo Cyan Neon edge strips.
+	ring("Gallery", OBS_GALLERY_R, tower_top, OBS_GALLERY_H, OBS_GALLERY_T, basalt, cast_shadow=False)
+	gal_w = 2 * OBS_GALLERY_R * TAN_8
+	for k, _, ff in octagon_faces(cx, cz):
+		zone.add(ff.block(f"Gallery_Top_{k}", OBS_GALLERY_R + 0.1, 0, tower_top + OBS_GALLERY_H - OBS_TRIM / 2, (gal_w, OBS_TRIM, OBS_TRIM), cyan, material="Neon", **deco))
+		zone.add(ff.block(f"Gallery_Low_{k}", OBS_GALLERY_R + 0.1, 0, tower_top + OBS_TRIM / 2, (gal_w, OBS_TRIM, OBS_TRIM), cyan, material="Neon", **deco))
+	zone.add(Frame((0, 1), (cx, cz)).block("Gallery_Floor", 0, 0, tower_top + OBS_GALLERY_H - 0.2, (2 * OBS_GALLERY_R - 3.0, 0.4, 2 * OBS_GALLERY_R - 3.0), basalt, cast_shadow=False))
+	OBS_PLACE.update({"x": cx, "z": cz, "dome_y": tower_top + OBS_GALLERY_H})
+
+
+OBS_PLACE: dict = {}  # filled by build_observatory for add_props: tower centre and the dome base height
+
+
+# Ranks hall (south-west): the graybox shell stays (its roof and stairs carry two rare glyphs) and is dressed here.
+RANKS_SIGN_SIZE = (30.0, 7.0, 0.6)
+RANKS_SIGN_Y = 19.5
+RANK_PODIUM_A = 142.0  # inside the entrance (the hall's front edge is a = 126)
+RANK_PODIUM_STEP = 5.0
+RANKS_LAMPS = ((120.0, -9.0), (120.0, 9.0))  # a, b: flank the path just before the hall, outside the 14-wide path
+
+
+def build_ranks(zones: Node, sw_fr: Frame) -> None:
+	zone = zones.add(folder("Ranks"))
+	amber, amber_plain, slot, cyan = PALETTE["amber_neon"], PALETTE["amber"], PALETTE["slot"], PALETTE["training"]
+	deco = dict(collide=False, query=False, cast_shadow=False)
+	t = 0.4
+
+	# Amber Neon trim: roof front and side edges, door-post lines, the base of each side wall.
+	zone.add(sw_fr.block("Trim_RoofFront", 125.8, 0, 13.3, (56.0, t, t), amber, material="Neon", **deco))
+	for side in (-1, 1):
+		zone.add(sw_fr.block(f"Trim_RoofSide{side}", 158.0, side * 27.8, 13.3, (t, t, 64.0), amber, material="Neon", **deco))
+		zone.add(sw_fr.block(f"Trim_Post{side}", 126.4, side * 24.0, 6.5, (t, 13.0, t), amber, material="Neon", **deco))
+		zone.add(sw_fr.block(f"Trim_Wall{side}", 158.0, side * 27.1, 11.5, (t, t, 62.0), amber, material="Neon", **deco))
+
+	# Windows on the outer faces of both side walls (the south-east stair runs along the first 15 studs of the -b side).
+	for side in (-1, 1):
+		for i in range(7):
+			for j in range(2):
+				if (i + 2 * j + (side > 0)) % 5 == 0:
+					continue
+				colour = amber if (i * 7 + j * 3 + side) % 7 in (2, 5) else cyan
+				zone.add(sw_fr.block(f"Win{side}_{i}{j}", 152.0 + i * 5.0, side * 27.15, 4.5 + j * 4.5, (0.3, 1.8, 1.8), colour, material="Neon", **deco))
+
+	# RANKS sign over the entrance, on two posts.
+	sx, sy, sz = RANKS_SIGN_SIZE
+	for side in (-1, 1):
+		zone.add(sw_fr.block(f"Sign_Ranks_Post{side}", 125.8, side * (sx / 2 - 1.5), (RANKS_SIGN_Y - sy / 2 + 14.75) / 2, (0.6, RANKS_SIGN_Y - sy / 2 - 14.75, 0.6), slot, **deco))
+	sign_plate(zone, sw_fr, "Sign_Ranks", 125.8, 0.0, RANKS_SIGN_Y, RANKS_SIGN_SIZE, "RANKS", amber, amber_plain)
+
+	# Nine tier podiums inside the entrance, Plastic to Demon (IdentityTheme.luau Tier.<id>.Rgb, see RANK_RGB), decorative.
+	for i, (tier, rgb) in enumerate(RANK_RGB):
+		b = (i - 4) * RANK_PODIUM_STEP
+		h = 0.8 + 0.35 * i
+		wx, wz = sw_fr.world(RANK_PODIUM_A, b)
+		zone.add(cylinder(f"Podium_{i + 1}_{tier}", wx, 0.2 + h / 2, wz, h, 3.6, slot, **deco))
+		zone.add(cylinder(f"Podium_{i + 1}_{tier}_Cap", wx, 0.2 + h + 0.1, wz, 0.2, 3.0, rgb, material="Neon", **deco))
+
+
 # Lamp placements along the east path, one every LAMP_SPACING studs, alternating sides just inside the path edge (TASK-0125).
 LAMP_START = 63.0
 LAMP_SPACING = 15.0
@@ -926,6 +1067,18 @@ def add_props(hub: Node, e_fr: Frame, plaza: Node) -> None:
 	# Plaza props: the crystal floats above the plinth cap (top y = 1.8); the hex plate sits at the spawn, top at y = 0.5.
 	plaza.add(props["RankCrystal"].place("RankCrystal", (0.0, 3.2, 0.0)))
 	plaza.add(props["SpawnHex"].place("SpawnHex", (0.0, -0.5, SPAWN_Z)))
+	sw_fr = Frame((-0.7071067, 0.7071067))
+	for i, (a, b) in enumerate(RANKS_LAMPS):
+		wx, wz = sw_fr.world(a, b)
+		folder_node.add(lamp.place(f"LampPost_SW{i + 1:02d}", (wx, PATH_TOP, wz)))
+		LAMPS.append({"name": f"LampPost_SW{i + 1:02d}", "x": wx, "z": wz})
+	# Observatory props: the dome sits on the gallery ring; the telescope stands inside it (scale and pose tuned against screenshots).
+	dome_y = OBS_PLACE["dome_y"]
+	cyan, tel = PALETTE["training"], OBS_TELESCOPE
+	folder_node.add(props["ObservatoryDome"].place("ObservatoryDome", (OBS_PLACE["x"], dome_y, OBS_PLACE["z"]), 0.0, color=cyan,
+		material="Neon", scale=OBS_DOME_SCALE))
+	folder_node.add(props["Telescope"].place("Telescope", (OBS_PLACE["x"] + tel["side"], dome_y + tel.get("lift", 0.0), OBS_PLACE["z"] + tel["forward"]),
+		tel["yaw"], color=PALETTE["amber"], material="SmoothPlastic", scale=tel["scale"]))
 	add_bunting(hub)
 
 
