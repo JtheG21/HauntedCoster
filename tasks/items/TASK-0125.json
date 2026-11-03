@@ -2,7 +2,7 @@
   "id": "TASK-0125",
   "game": "GAME-004",
   "title": "MathShow Hub Art Pilot: AI Mesh Pipeline",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -59,6 +59,12 @@
       "from": "changes_requested",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-02T16:24:45",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -66,6 +72,11 @@
       "time": "2026-11-02T16:10:16",
       "result": "pass",
       "notes": "Lamp pipeline built; Studio checks at a1a77f3 in docs/workflow/evidence/TASK-0125/art-pilot.txt. Gaps: no 1920x1080 screenshot; 1080p GPU numbers saturated on this Mac; walk time spawn to Blitz +0.1 s."
+    },
+    {
+      "time": "2026-11-02T16:24:45",
+      "result": "pass",
+      "notes": "Revision 1 (L0-L5): pole-only candidates generated, none picked (jg picks); shadowless pole + Neon Globe structure on the current mesh; 844x390 re-measure at 5f0d07e; 1080p rows invalid."
     }
   ],
   "revisions": 1
