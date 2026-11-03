@@ -32,13 +32,16 @@ Prove the prop pipeline end to end with one prop: generate a lamp post mesh in a
 - **Category, depth:** map/asset pipeline, standard.
 - **Decisions:** asset creation approved by jg for this pilot only (rows A0-A7, 2026-11-02). Lamp light: `#FFB547`, Range 16, Brightness 2.5, every 15 studs along the east path.
 
+- **Re-scope (jg, 2026-11-02):** Re-scoped by jg to pipeline-only. In-Studio lighting perf on this Mac is non-gating: the renderer identity is unverifiable (Lighting.Technology isn't script-readable) and the method isn't reproducible. Existing perf tables are kept as informational. Real-device perf moves to TASK-0123.
+- **Decision record (jg, 2026-11-02):** Lighting.Technology = ShadowMap (the place's current setting; no place save). Glow comes from Neon + Bloom per A4. Art-1 light budget: at most 40 PointLights in the hub; CastShadow false on all props. Also recorded in [[SYS-Plaza-Map-Brief]].
+
 ## Files expected to change
 `scripts/build_hub.py`, `games/mathshow/map/Hub.rbxmx` (generated), `games/mathshow/map/props/`, `scripts/check.sh` (only if needed), `ModePadService.luau` (log line), `AGENTS.md`, evidence log, this note, `tasks/items/TASK-0125.json`.
 
 ## Acceptance criteria
 - [x] AC1 LampPost.rbxmx round-trips: the hub lamp and a Studio-built lamp from the same ids render identically (side by side, 844x390). Evidence: `docs/workflow/evidence/TASK-0125/art-pilot.txt` (the rebuilt comparison object, not the literal first instance).
 - [x] AC2 Drift guard fails on an edited prop file, then passes. Evidence: `docs/workflow/evidence/TASK-0125/drift-guard.txt`.
-- [x] AC3 Perf table before/after for the picked pole C, 844x390, ShadowMap and Future (revision 2, measured at 9f3692e): no measurable GPU cost per lamp (+0.09 ms ShadowMap, -0.03 ms Future, inside noise); +1032 scene triangles and 0 shadow triangles per lamp. Earlier tables are superseded (pre-pick mesh). 1080p rows invalid (deferred to Art-3). Caveat: Studio could not confirm that the Future window rendered with Future lighting. Evidence: art-pilot.txt, revision 2.
+- [x] AC3 Perf tables for the picked pole C (ShadowMap and Future, 844x390, lamps vs none): **informational; non-gating** (re-scope below). Kept as measured at 9f3692e: no measurable GPU cost per lamp inside the noise; +1032 scene triangles and 0 shadow triangles per lamp; the Future label is unproven in Studio. Earlier tables are superseded (pre-pick mesh); 1080p rows invalid. Evidence: art-pilot.txt, revision 2.
 - [x] AC4 Collision verified (stopped at x=61.41 against the pole); pads and glyphs still work; spawn to Blitz 164.6 -> 167.1 studs (10.3 -> 10.4 s), centre to Blitz unchanged. Walk times changed by +0.1 s, not zero.
 - [x] AC5 Asset ids in `games/mathshow/map/props/manifest.json` with "created by jg_57565 via Studio generate_mesh, pilot TASK-0125".
 
@@ -67,6 +70,13 @@ Prove the prop pipeline end to end with one prop: generate a lamp post mesh in a
 ### Revision 2 (jg rows C1-C4, 2026-11-02)
 - Trigger: Codex audit `[[AUD-20261102-TASK-0125-01]]` (fail, one P2 finding): no comparable pole C perf table.
 - Four configs measured at 9f3692e (ShadowMap and Future, with and without the east-path lamps; the "without" variant is a scratch-only regeneration with LAMP_COUNT 0). Table, per-lamp cost, method and the Future-label caveat are in the evidence log. No code or map changes.
+
+### Re-scope and hand transition (jg, 2026-11-02)
+- Audits [[AUD-20261102-TASK-0125-01]] and [[AUD-20261102-TASK-0125-02]] both failed on perf evidence only; revision 2/2 failed and the orchestrator blocked the task. No implementation defect was asserted in either.
+- Re-scoped by jg to pipeline-only. In-Studio lighting perf on this Mac is non-gating: the renderer identity is unverifiable (Lighting.Technology isn't script-readable) and the method isn't reproducible. Existing perf tables are kept as informational. Real-device perf moves to TASK-0123.
+- Decision record (jg, 2026-11-02): Lighting.Technology = ShadowMap (the place's current setting; no place save). Glow comes from Neon + Bloom per A4. Art-1 light budget: at most 40 PointLights in the hub; CastShadow false on all props.
+- TASK-0123 scope gained "real-device FPS/MicroProfiler capture on phone + desktop for the hub (ShadowMap)"; the brief's Technology line now says ShadowMap.
+- Status moved blocked -> review by hand edit of `tasks/items/TASK-0125.json` with a history entry "hand transition approved by jg; re-scope; orchestrator lacks blocked→review (see TASK-0124)". The -01 and -02 audit notes were not edited. No code or map changes.
 
 ## Audits
 

@@ -20,12 +20,12 @@
   "acceptance": [
     "LampPost.rbxmx round-trips: rojo build renders identically to the Studio original (side-by-side screenshot).",
     "The drift guard catches an edited prop file without a regeneration (fail shown, then pass).",
-    "Perf table before and after the lamps, ShadowMap vs Future, 844x390 and 1920x1080.",
+    "Perf tables (ShadowMap and Future, 844x390, lamps vs none): informational; non-gating. Real-device perf is in TASK-0123.",
     "Collision verified; walk times unchanged (spawn to Blitz spot-check).",
     "Asset ids recorded in manifest.json with 'created by jg_57565 via Studio generate_mesh, pilot TASK-0125'."
   ],
   "evidence": [],
-  "notes": "Approved rows A0-A7 (jg, 2026-11-02). Asset creation approved for this pilot only: up to 3 generate_mesh candidates in a scratch place; stop and ask on any Robux cost. Out of scope: other props, buildings, signs, skybox, holo symbols, Glyph visuals, audio, saving the place, Lighting.Technology on the real place, uploads beyond A1, merging. Max 2 attempts on the export/inline approach.",
+  "notes": "Approved rows A0-A7 (jg, 2026-11-02). Asset creation approved for this pilot only: up to 3 generate_mesh candidates in a scratch place; stop and ask on any Robux cost. Out of scope: other props, buildings, signs, skybox, holo symbols, Glyph visuals, audio, saving the place, Lighting.Technology on the real place, uploads beyond A1, merging. Max 2 attempts on the export/inline approach. Decision record (jg, 2026-11-02): Lighting.Technology = ShadowMap (the place's current setting; no place save). Glow comes from Neon + Bloom per A4. Art-1 light budget: at most 40 PointLights in the hub; CastShadow false on all props. Re-scoped by jg to pipeline-only. In-Studio lighting perf on this Mac is non-gating: the renderer identity is unverifiable (Lighting.Technology isn't script-readable) and the method isn't reproducible. Existing perf tables are kept as informational. Real-device perf moves to TASK-0123.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0125-MathShow-Hub-Art-Pilot.md",
   "risk": "low",
   "approved_by": "jg",
@@ -83,6 +83,24 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T17:03:17",
+      "from": "review",
+      "to": "blocked",
+      "note": "audit failed; revision limit 2 exceeded, needs human"
+    },
+    {
+      "time": "2026-11-02T17:05:10",
+      "from": "blocked",
+      "to": "blocked",
+      "note": "Re-scoped by jg to pipeline-only. In-Studio lighting perf on this Mac is non-gating: the renderer identity is unverifiable (Lighting.Technology isn't script-readable) and the method isn't reproducible. Existing perf tables are kept as informational. Real-device perf moves to TASK-0123."
+    },
+    {
+      "time": "2026-11-02T17:05:10",
+      "from": "blocked",
+      "to": "review",
+      "note": "hand transition approved by jg; re-scope; orchestrator lacks blocked→review (see TASK-0124)"
     }
   ],
   "executions": [
@@ -102,12 +120,17 @@
       "notes": "Revision 2 (C1-C4): pole C perf at 844x390, four configs at 9f3692e; Future label unverified in Studio (see evidence). No code or map changes."
     }
   ],
-  "revisions": 2,
+  "revisions": 3,
   "audits": [
     {
       "time": "2026-11-02T16:40:30",
       "result": "fail",
       "report": "06 QA/AUD-20261102-TASK-0125-01.md"
+    },
+    {
+      "time": "2026-11-02T17:03:17",
+      "result": "fail",
+      "report": "06 QA/AUD-20261102-TASK-0125-02.md"
     }
   ]
 }

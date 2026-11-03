@@ -40,7 +40,13 @@ Decision table for the hub map. Mood reference: [[REF-MAP-003-Night-festival-pla
 
 ## Direction A (locked)
 
-Mockups: [[Map Mockups/README]]. Palette (A4): Night Navy #0B1433, Slate Teal #1E3D45 (terraces, ground), Basalt Blue #22303F (buildings), Plaza Stone #56626E (paths, plaza), Menu Violet #8A4DFF (competitive, rank), Holo Cyan #3FE0F0 (training, observatory), Lamp Amber #FFB547 (lamps, Blitz, Daily), Lake Ink #0F2A4A (lake). Lighting: Technology Future, Bloom 1.0/36/0.9, Atmosphere density 0.32, haze 1.8, ColorCorrection +0.15 sat/+0.10 contrast. Graybox built in [[TASK-0120-MathShow-Hub-Graybox]].
+Mockups: [[Map Mockups/README]]. Palette (A4): Night Navy #0B1433, Slate Teal #1E3D45 (terraces, ground), Basalt Blue #22303F (buildings), Plaza Stone #56626E (paths, plaza), Menu Violet #8A4DFF (competitive, rank), Holo Cyan #3FE0F0 (training, observatory), Lamp Amber #FFB547 (lamps, Blitz, Daily), Lake Ink #0F2A4A (lake). Lighting: Technology ShadowMap (decision of 2026-11-02, see Decision record below; was Future), Bloom 1.0/36/0.9, Atmosphere density 0.32, haze 1.8, ColorCorrection +0.15 sat/+0.10 contrast. Graybox built in [[TASK-0120-MathShow-Hub-Graybox]].
+
+## Decision record: lighting and light budget (jg, 2026-11-02, TASK-0125 re-scope)
+- **Lighting.Technology = ShadowMap**, the place's current setting; no place save. This replaces "Technology Future" in the Direction A line above.
+- Glow comes from **Neon + Bloom** per A4 (the lamp Globe uses a Neon colour tuned for Bloom 1.0).
+- **Art-1 light budget:** at most **40 PointLights** in the hub; **CastShadow false** on all props.
+- Basis: in-Studio lighting perf on this Mac is non-gating (renderer identity unverifiable, method not reproducible); real-device perf is in [[TASK-0123-MathShow-Multiplayer-Playtest]]. Source: [[TASK-0125-MathShow-Hub-Art-Pilot]].
 
 ## Glyph rules v1
 
