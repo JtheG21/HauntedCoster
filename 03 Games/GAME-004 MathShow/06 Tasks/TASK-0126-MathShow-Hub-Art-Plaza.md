@@ -68,6 +68,19 @@ Dress the central plaza in the locked Direction A look (A1 spawn view, A4 palett
 - **Known non-task:** the `ContentId: rbxassetid://203785492` console warning; no 844x390 screenshots (capture tool has no size option); no real-device perf (TASK-0123).
 - **Report back:** verdict, findings with file:line, checks run, what is unverified.
 
+## Handoff (Codex review, rev 1 delta, 2026-11-02)
+- **Task:** TASK-0126 revision 1, delta re-review of your two P2 findings. Receiver: Codex, reviewer only, no edits. Evidence-only revision: no code, map or manifest change.
+- **Workspace:** `/Users/jg/Desktop/Rg1-worktrees/TASK-0126`, branch `task/TASK-0126-art-plaza`, delta `38267c0..7a9773f` (1 commit; PR 184).
+- **Inputs:** `docs/workflow/evidence/TASK-0126/art-plaza.txt` ("Revision 1" section), this note's Revision 1 and Audits entries.
+- **Review focus:**
+  - art-plaza.txt "Geometry inventory": do the class counts (main vs HEAD) match `Hub.rbxmx`, and do per-class costs (12/10/96/432) and mesh tris (8 x 600 + 396 + 178) give 22,718?
+  - "Baseline measurement": is parent 18,500 vs HEAD 36,886 (streaming off) a fair same-camera delta? The 4,332 gap to the inventory is unexplained (mesh LOD is a guess); is the inventory acceptable as the budget evidence?
+  - Task note AC3 and AC5: does the wording match the evidence, and is jg's screenshot exception (2026-11-02) recorded plainly?
+  - Confirm `git diff --stat 38267c0..HEAD -- games scripts mathshow.project.json` is empty (measured sources unchanged).
+- **Constraints:** no uploads, publishing, Studio writes or place saves; Rojo is held by Claude.
+- **Known non-task:** `ContentId: rbxassetid://203785492` warning; no real-device perf (TASK-0123).
+- **Report back:** verdict, findings with file:line, checks run, what is unverified.
+
 ## Audits
 - 2026-11-02, Codex review of rev 0 (reported by jg; not an orchestrator record-audit): **needs revision for acceptance evidence, no functional code defect found.**
   - P2: the 22,704-triangle figure (art-plaza.txt line 14) is a one-camera rendered count with selected additions removed; it does not establish the geometry delta against the parent revision. Asked for a geometry inventory or a comparable baseline measurement.
