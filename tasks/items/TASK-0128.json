@@ -1,0 +1,40 @@
+{
+  "id": "TASK-0128",
+  "game": "GAME-004",
+  "title": "MathShow Hub: swap VS and Group pad sides to match A2",
+  "status": "in_progress",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "games/mathshow/map/Hub.rbxmx",
+    "docs/workflow/evidence/TASK-0128/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0128-MathShow-Hub-Pad-Swap.md"
+  ],
+  "depends_on": [],
+  "stacked_on": "TASK-0127",
+  "branch": "task/TASK-0128-pad-swap",
+  "acceptance": [
+    "VS pad and arch on the viewer's left, Group on the right, as in A2_competitive_entrance.png; Blitz unchanged.",
+    "Pad parts, tags, Mode attributes and sizes unchanged apart from position; walk times 8-12 s; 34/34 GlyphSpawn reachable; the three pads still open their confirm screens."
+  ],
+  "evidence": [],
+  "notes": "Row requested by jg 2026-11-02: 'Swap the VS and Group pad sides to match A2, as a separate row.' Stacked on TASK-0127 (same generator lines); retarget to main when 0127 merges. Out of scope: any other change, merging.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0128-MathShow-Hub-Pad-Swap.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T19:57:29",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T19:57:29",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}

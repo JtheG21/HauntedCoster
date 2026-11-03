@@ -4627,7 +4627,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">false</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>-26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
 						<token name="Material">272</token>
 						<Vector3 name="Size"><X>16</X><Y>6</Y><Z>0.6</Z></Vector3>
@@ -4668,7 +4668,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">false</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>20</Y><Z>26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>20</Y><Z>-26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4287254015</Color3uint8>
 						<token name="Material">288</token>
 						<Vector3 name="Size"><X>16</X><Y>0.4</Y><Z>0.7</Z></Vector3>
@@ -4686,7 +4686,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">false</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>14.4</Y><Z>26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>14.4</Y><Z>-26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4287254015</Color3uint8>
 						<token name="Material">288</token>
 						<Vector3 name="Size"><X>16</X><Y>0.4</Y><Z>0.7</Z></Vector3>
@@ -4704,7 +4704,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">false</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>33.8</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>-18.2</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4287254015</Color3uint8>
 						<token name="Material">288</token>
 						<Vector3 name="Size"><X>0.4</X><Y>5.2</Y><Z>0.7</Z></Vector3>
@@ -4722,7 +4722,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">false</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>18.2</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>-33.8</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4287254015</Color3uint8>
 						<token name="Material">288</token>
 						<Vector3 name="Size"><X>0.4</X><Y>5.2</Y><Z>0.7</Z></Vector3>
@@ -4740,7 +4740,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">true</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>3.7</Y><Z>30.43</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>3.7</Y><Z>-21.57</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
 						<token name="Material">272</token>
 						<Vector3 name="Size"><X>3.14</X><Y>7</Y><Z>5.2</Z></Vector3>
@@ -4758,7 +4758,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">true</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>3.7</Y><Z>21.57</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>3.7</Y><Z>-30.43</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
 						<token name="Material">272</token>
 						<Vector3 name="Size"><X>3.14</X><Y>7</Y><Z>5.2</Z></Vector3>
@@ -4925,7 +4925,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">false</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>-26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
 						<token name="Material">272</token>
 						<Vector3 name="Size"><X>16</X><Y>6</Y><Z>0.6</Z></Vector3>
@@ -4966,7 +4966,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">false</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>20</Y><Z>-26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>20</Y><Z>26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4282310896</Color3uint8>
 						<token name="Material">288</token>
 						<Vector3 name="Size"><X>16</X><Y>0.4</Y><Z>0.7</Z></Vector3>
@@ -4984,7 +4984,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">false</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>14.4</Y><Z>-26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>14.4</Y><Z>26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4282310896</Color3uint8>
 						<token name="Material">288</token>
 						<Vector3 name="Size"><X>16</X><Y>0.4</Y><Z>0.7</Z></Vector3>
@@ -5002,7 +5002,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">false</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>-18.2</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>33.8</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4282310896</Color3uint8>
 						<token name="Material">288</token>
 						<Vector3 name="Size"><X>0.4</X><Y>5.2</Y><Z>0.7</Z></Vector3>
@@ -5020,7 +5020,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">false</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>-33.8</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>17.2</Y><Z>18.2</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4282310896</Color3uint8>
 						<token name="Material">288</token>
 						<Vector3 name="Size"><X>0.4</X><Y>5.2</Y><Z>0.7</Z></Vector3>
@@ -5038,7 +5038,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">true</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>3.7</Y><Z>-21.57</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>3.7</Y><Z>30.43</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
 						<token name="Material">272</token>
 						<Vector3 name="Size"><X>3.14</X><Y>7</Y><Z>5.2</Z></Vector3>
@@ -5056,7 +5056,7 @@
 						<bool name="CanQuery">false</bool>
 						<bool name="CanTouch">true</bool>
 						<bool name="CastShadow">false</bool>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>3.7</Y><Z>-30.43</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>3.7</Y><Z>21.57</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 						<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
 						<token name="Material">272</token>
 						<Vector3 name="Size"><X>3.14</X><Y>7</Y><Z>5.2</Z></Vector3>
@@ -10088,7 +10088,7 @@
 					<bool name="CanQuery">true</bool>
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">true</bool>
-					<CoordinateFrame name="CFrame"><X>150</X><Y>0.45</Y><Z>26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+					<CoordinateFrame name="CFrame"><X>150</X><Y>0.45</Y><Z>-26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 					<Color3uint8 name="Color3uint8">4287254015</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>10</X><Y>0.5</Y><Z>10</Z></Vector3>
@@ -10128,7 +10128,7 @@
 					<bool name="CanQuery">true</bool>
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">true</bool>
-					<CoordinateFrame name="CFrame"><X>150</X><Y>0.45</Y><Z>-26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
+					<CoordinateFrame name="CFrame"><X>150</X><Y>0.45</Y><Z>26</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 					<Color3uint8 name="Color3uint8">4287254015</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>10</X><Y>0.5</Y><Z>10</Z></Vector3>
@@ -12815,7 +12815,7 @@
 					<int64 name="SourceAssetId">-1</int64>
 					<BinaryString name="Tags"></BinaryString>
 					<OptionalCoordinateFrame name="WorldPivotData">
-						<CFrame><X>150</X><Y>0.2</Y><Z>26</Z><R00>0</R00><R01>0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>0</R22></CFrame>
+						<CFrame><X>150</X><Y>0.2</Y><Z>-26</Z><R00>0</R00><R01>0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>0</R22></CFrame>
 					</OptionalCoordinateFrame>
 				</Properties>
 				<Item class="MeshPart" referent="RBX000666">
@@ -12833,7 +12833,7 @@
 						<float name="BottomParamB">0.5</float>
 						<token name="BottomSurface">0</token>
 						<token name="BottomSurfaceInput">0</token>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>7.1767</Y><Z>26</Z><R00>0</R00><R01>0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>7.1767</Y><Z>-26</Z><R00>0</R00><R01>0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>0</R22></CoordinateFrame>
 						<bool name="CanCollide">false</bool>
 						<bool name="CanQuery">true</bool>
 						<bool name="CanTouch">true</bool>
@@ -13175,7 +13175,7 @@
 					<int64 name="SourceAssetId">-1</int64>
 					<BinaryString name="Tags"></BinaryString>
 					<OptionalCoordinateFrame name="WorldPivotData">
-						<CFrame><X>150</X><Y>0.2</Y><Z>-26</Z><R00>0</R00><R01>0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>0</R22></CFrame>
+						<CFrame><X>150</X><Y>0.2</Y><Z>26</Z><R00>0</R00><R01>0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>0</R22></CFrame>
 					</OptionalCoordinateFrame>
 				</Properties>
 				<Item class="MeshPart" referent="RBX000672">
@@ -13193,7 +13193,7 @@
 						<float name="BottomParamB">0.5</float>
 						<token name="BottomSurface">0</token>
 						<token name="BottomSurfaceInput">0</token>
-						<CoordinateFrame name="CFrame"><X>150</X><Y>7.1767</Y><Z>-26</Z><R00>0</R00><R01>0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>0</R22></CoordinateFrame>
+						<CoordinateFrame name="CFrame"><X>150</X><Y>7.1767</Y><Z>26</Z><R00>0</R00><R01>0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>0</R22></CoordinateFrame>
 						<bool name="CanCollide">false</bool>
 						<bool name="CanQuery">true</bool>
 						<bool name="CanTouch">true</bool>
