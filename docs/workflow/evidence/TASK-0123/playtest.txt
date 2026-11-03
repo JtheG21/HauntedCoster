@@ -62,10 +62,29 @@ SOLO FOLLOW-UP (jg stopped the two-player test at ~22:25Z: "handle the rest solo
           (screenshot 06). Roblox's own note: memory category counters need MicroProfiler on to be exact.
   Mac at that moment was heavily memory-starved (free pages ~60 MB), so these are not clean perf numbers.
 
+CLEAN-MAC FOLLOW-UP (jg quit Chrome, VS Code and ChatGPT; I quit the idle Studio launcher; build 81d21fc, Mac only, 23:21-23:33Z)
+  P5  In-game Performance Stats (Settings > Performance Stats On; it only showed once the right row was toggled) read as
+      numbers on a clean client, 60 FPS cap (Maximum Frame Rate "Default (60 FPS)"), Graphics Mode Manual, Quality 6/10:
+        spawn (23:22Z):        CPU 15.64 / 16.86 / 17.27 / 15.98 ms, GPU 3.82 / 3.06 / 3.99 / 4.21 ms, Mem 1624-1627 MB
+        foot of the N ramp (23:23Z): CPU 16.57 / 16.74 / 16.70 ms, GPU 3.29 / 3.57 / 3.50 ms, Mem 1624.6 MB
+        top of the N ramp, Daily gallery in view (23:24Z): CPU 16.79 / 16.50 / 16.28 ms, GPU 3.89 / 3.98 / 3.94 ms, Mem 1623.7 MB
+      Network ping 29-90 ms. CPU sits at the 60 FPS frame budget (~16.7 ms) with GPU at 3-4 ms, so the client holds the
+      cap; FPS itself was not shown as a number (inferred from frame ms). Plaza centre was walked through, not isolated.
+      The Observatory (Daily gallery) was seen only from the ramp top. Triangle count is not available in these stats, so the
+      4,332 gap was not compared. Screenshots 07 (spawn) and 08 (ramp top).
+  P2  Joined from the Group pad (23:28Z, watcher at Q3), became a participant at the next match (TYPE ANSWER / LOCK IN),
+      then strafed left ~800 key presses along the arch fronts through Q2-Q6: no pad screen opened. The control failed:
+      after leaving and rejoining I could not retrace the same line (route differs run to run), so I cannot show that
+      Blitz/VS pads were actually crossed. Outside a show, the Group pad (23:27Z) and Blitz pad opened their screens.
+      Result: consistent with the block, NOT conclusive.
+  F5 (unconfirmed, Mac key-driven only): at the top of the N ramp the avatar stopped in front of a dark wall below the Daily
+      gallery lip; walking plus three jump attempts did not reach the Daily pad. The map script has stepped terraces
+      (ramps to a=74, 98, 122), so this may be my input, not the map. jg reported all pads worked on the iPad (Daily not
+      named). Screenshot 08.
+  Glyph counter persisted across a Respawn (7 stayed 7) on the Mac.
+
 NOT DONE (do not read these as passes)
-  P2  mid-match pad block: a blind walk toward the Daily pad while a participant in a running match opened nothing, but the
-      avatar's position could not be seen (the show HUD covers the plaza), so this is INCONCLUSIVE, not a pass.
+  P2  not conclusive (see above).
   P3  iPad FPS / frame ms / memory / triangle count / MicroProfiler: jg could not read the stats; model and iPadOS not recorded.
-  P5  Mac FPS / frame ms: the in-game Performance Stats overlay never appeared (toggled twice); no FPS, frame ms or
-      triangle numbers. The 4,332 triangle gap was not compared. Only memory above was captured.
+  P5  no triangle count; FPS inferred from frame ms, not read as a number.
   iPad console was not captured (acceptance "no errors in either console" holds for the Mac client and server only).
