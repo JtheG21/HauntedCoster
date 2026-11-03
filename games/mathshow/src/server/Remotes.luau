@@ -72,6 +72,7 @@ return table.freeze({
 	SkillState = event(Net.SkillState),
 	SkillResult = event(Net.SkillResult),
 	JoinShow = event(Net.JoinShow),
+	LeaveShow = event(Net.LeaveShow),
 	ShowState = event(Net.ShowState),
 	ModePadOpen = event(Net.ModePadOpen),
 	MenuRequest = remoteFunction(Net.MenuRequest),

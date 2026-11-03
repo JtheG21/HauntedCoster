@@ -519,8 +519,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		return item
 	end
 
-	local function backButton(label: string): Item
-		local shard = newShard("Back", L.Back, "shard-menu-secondary-silver", nil, "silver")
+	local function backButton(label: string, at: MenuTheme.Box?): Item
+		local shard = newShard("Back", at or L.Back, "shard-menu-secondary-silver", nil, "silver")
 		local item: Item = { shard = shard, name = "Back" }
 		icon(shard.content, "Icon", "icon-menu-back", 22, 15, 14)
 		text(shard.content, "Label", label, T.Secondary, 44, 0, 60, 44)
@@ -800,6 +800,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		end, 1.02)
 
 		local card = playerCard(L.PlayerCard, player)
+		-- CLOSE: leaves the menu for the plaza without joining (handlers.back; Esc / B does the same on this screen).
+		backButton(MenuCopy.Common.Close, L.Close)
 		local howLocked = ModeRules.secondaryState("howto", sec) == "locked"
 		local how = secondary("HowToPlay", L.HowToPlay, MenuCopy.Main.HowToPlay, howLocked, 15)
 		if howLocked then
@@ -2329,6 +2331,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		})
 		glowLoop({ shard = shard, name = "Banner" }, 0)
 		playFx("rise", shard.group, 0.3)
+		-- LEAVE: stops watching and returns to the plaza (handlers.back is the watching leave handler).
+		backButton(MenuCopy.Common.Leave, L.WatchLeave)
 	end
 
 	local function render(id: string, model: Model)

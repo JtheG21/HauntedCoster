@@ -39,7 +39,12 @@ See `tasks/items/TASK-0134.json`.
 
 ---
 ## Implementation record
+- Client: `View.backButton` takes an optional box; CLOSE (`Layout.Close`, top right of main) and LEAVE (`Layout.WatchLeave`, beside the banner) reuse it and `handlers.back`. `Menu.back()` closes the menu on main; Esc/B now works on main. `Menu.leaveShow()` fires `LeaveShow`, hides the menu, `onLeave` hides HUD and banner. `Watching.start({onLeave})`.
+- Shared/server: `Net.LeaveShow`, `Remotes.LeaveShow`, `JoinRules.validLeave/leaveChanges` (specs in `JoinRules.spec.luau`), `RoundService.onLeave`. No rate limit on purpose: a repeat leave is a no-op and a dropped leave would admit an invisible player.
+- Not run in Studio or on device (TASK-0123 playtest owns Studio). Layout positions come from the 844x390 grid; the top-right CLOSE (x 688-800, y 6-50) and the LEAVE slot (x 604-716, y 276-320) need a visual check on the iPad.
 
 ## Audits
 
 ## Outcome
+- [x] `scripts/check.sh` green (341+ specs).
+- [ ] Visual and touch check in Studio/iPad (pending, needs Studio free).

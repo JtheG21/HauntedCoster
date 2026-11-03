@@ -45,6 +45,8 @@ local MenuCopy = {
 	},
 	Common = {
 		Back = "BACK",
+		Close = "CLOSE",
+		Leave = "LEAVE",
 		Cancel = "CANCEL",
 		Menu = "MENU",
 		Retry = "RETRY",

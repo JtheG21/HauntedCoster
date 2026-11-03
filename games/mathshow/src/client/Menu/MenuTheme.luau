@@ -138,6 +138,7 @@ MenuTheme.Layout = {
 	TopLabel = box(0, 14, 844, 16, 0), -- centered; VS and Skill Test use LeftTopLabel
 	LeftTopLabel = box(170, 14, 630, 16, 0),
 	Back = box(44, 332, 112, 44, -1), -- shard-menu-secondary-silver, icon-menu-back 14x14
+	Close = box(688, 6, 112, 44, 0), -- main menu exit: top right, inside the 44 px inset, clear of the player card (y 56)
 	ToastTop = box(422, 8, 0, 40, -1), -- AnchorPoint (0.5, 0); width = text + 60
 	ToastBottom = box(110, 338, 0, 46, -1), -- in-match, same as HUD Feedback
 	-- 01 main
@@ -179,6 +180,7 @@ MenuTheme.Layout = {
 	BlitzClock = box(650, 84, 154, 80, 0), -- "1:42" at 60 px over "LEFT" tag
 	HeadToHead = box(456, 2, 344, 52, 1.5), -- Art v2 h2h shard (fixed width, 344x52)
 	WatchBanner = box(110, 274, 480, 48, 1), -- Art v2 banner is 48 tall
+	WatchLeave = box(604, 276, 112, 44, 0), -- LEAVE beside the banner (TASK-0134)
 	RankStrip = box(300, 0, 500, 36, 0), -- 10 nodes 24 px (current 32), gap 10; MISSES + 2 slots 18x18. y 0 (was 8): clears the Problem shard (TASK-0115)
 	ChoiceProblem = box(52, 46, 580, 150, -2), -- shard-menu-problem-silver, padding 30 top
 	ChoiceTimerBar = box(92, 204, 520, 10, -1),

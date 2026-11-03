@@ -13,14 +13,14 @@ local view: View.View? = nil
 
 local function noop() end
 
-function Watching.start()
+function Watching.start(opts: { onLeave: () -> () })
 	if view then
 		return
 	end
 	local ok, err = pcall(function()
 		local handlers: View.Handlers = {
 			go = noop,
-			back = noop,
+			back = opts.onLeave, -- the LEAVE button
 			locked = function(_what: string) end,
 			join = noop,
 			retry = noop,

@@ -5,6 +5,7 @@
 --   SubmitAnswer client -> server        (raw: string)
 --   AnswerResult server -> one client    AnswerResultPayload
 --   JoinShow     client -> server        (no payload; validated by JoinRules.validJoin)
+--   LeaveShow    client -> server        (no payload; validated by JoinRules.validLeave; clears joined and participant)
 --   ShowState    server -> one client    ShowStatePayload (is this player in the match, or watching)
 --   SkillStart   client -> server        (no payload; SkillRules.validStart)
 --   SkillAnswer  client -> server        { attempt, answer } (SkillRules.parseAnswerPayload)
@@ -174,6 +175,7 @@ local Net = table.freeze({
 	SkillState = "SkillState",
 	SkillResult = "SkillResult",
 	JoinShow = "JoinShow",
+	LeaveShow = "LeaveShow",
 	ShowState = "ShowState",
 	ModePadOpen = "ModePadOpen",
 	MenuRequest = "MenuRequest",
