@@ -32,3 +32,17 @@ training_path_start_844x390.jpg: Studio screen_capture, camera (-58, 6, 0) looki
 - HUD: GlyphHud.Enabled false while the menu is open, true when closed, false while a pad screen is open.
 - Console: no errors; only the known DataStore warnings and "ContentId: rbxassetid://203785492" (as in TASK-0120 to 0126).
 - Not exercised: after-match re-entry, live walks, two players, real-device perf (TASK-0123).
+
+## Post-merge (origin/main with TASK-0127 and TASK-0128 merged into this branch; jg row K4, 2026-11-02)
+# measured git HEAD: ff44060 (BuildStamp "ff44060 2026-11-03T04:58:09Z", clean; scripts/serve.sh from the TASK-0129 worktree, Rojo plugin reconnected by hand; fresh Play, single player; place not saved)
+# applies_to: Measured at ff44060. Applies to any later commit whose diff from ff44060 does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json or games/mathshow/src/**.
+# The T3/T4/T5 figures above were measured on the pre-merge map and no longer apply to this build.
+Merge: origin/main (PR 186 merge 769f6bb, PR 187 merge b2396b9) into task/TASK-0129-art-training; the only conflict was the generated Hub.rbxmx, regenerated with scripts/build_hub.py. tests/test_build_hub.py (collider guard) 4 tests OK; scripts/check.sh all pass, map drift included.
+T4 regression (fresh Play):
+- Walk times (PathfindingService radius 2, height 5, can jump, from (0,5,47) to pad centre + 3 studs, length / 16): Blitz 169.6 studs 10.6 s, Daily 185.9 11.6 s, Group 174.3 10.9 s, Practice 173.9 10.9 s, Skill 154.7 9.7 s, VS 178.5 11.2 s. All inside 8-12 s. The target height differs from the pre-merge run, so absolute lengths are not comparable with it.
+- Reachability: 34/34 GlyphSpawn Success (same pathfinding). No dummy walks.
+- Pads (client character CFrame onto each pad after 2.6 s off the pads, MathShowMenu closed by Enabled=false; ModePadOpen counted): Practice -> Screen_practice, Skill -> Screen_skillintro, VS -> Screen_confirm_vs, Blitz -> Screen_confirm_blitz, Group -> Screen_confirm_group, one event each.
+- Mid-match: JoinShow, ShowState participant=true after 28.9 s; Practice, Skill and Blitz pads each held 3 s: events 0, menu closed.
+- HUD: GlyphHud.Enabled false with the menu open, true when closed, false when reopened.
+- Console: no errors; known DataStore and ContentId 203785492 lines only. One "GlyphCollect rejected: out_of_range (Glyph_C_E2)" from the test's own teleport.
+- Not exercised: after-match re-entry, live walks, two players, real-device perf (TASK-0123).
