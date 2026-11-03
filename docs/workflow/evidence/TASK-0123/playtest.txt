@@ -1,6 +1,14 @@
 TASK-0123 private multiplayer playtest: evidence log (partial; see "Not done")
 Recorded 2026-11-03 by Claude Code with jg. Times are UTC.
 
+SUMMARY (added 2026-11-03 at close-out; the sections below are unchanged)
+  What happened: a private test experience (universe 10774566206, place 93701543861123) was published twice (main a3bc341, then
+  the TASK-0134 build 81d21fc) and stayed Private. Run 1 hit a menu dead end (F1-F3); TASK-0134 (PR 196) added CLOSE/LEAVE and run 2
+  worked. Passed: per-player Glyph independence (P4), pads opening their screens, Mac client and server consoles clean, Mac
+  frame times on a clean client (CPU ~16.7 ms at the 60 FPS cap, GPU 3-4 ms, ~1.6 GB). Not conclusive or not done: P2 live
+  attempt, P3 (iPad perf), iPad console, triangle count. jg's decisions on those are appended at the end.
+
+
 MEASURED
   Run 1 build: main a3bc341df1b3adbbe37073465a2abdd3cdf71440, BuildStamp "a3bc341 2026-11-03T20:37:13Z"
                applies_to: no later commit touches games/mathshow/src (task JSON only).
@@ -88,3 +96,20 @@ NOT DONE (do not read these as passes)
   P3  iPad FPS / frame ms / memory / triangle count / MicroProfiler: jg could not read the stats; model and iPadOS not recorded.
   P5  no triangle count; FPS inferred from frame ms, not read as a number.
   iPad console was not captured (acceptance "no errors in either console" holds for the Mac client and server only).
+
+DECISIONS (jg, 2026-11-03; appended at close-out, append-only)
+  - jg will no longer test on the iPad (2026-11-03).
+  - P3 iPad performance: DEFERRED, risk accepted by jg. Mitigations in place: Lighting Technology ShadowMap, now set by the
+    project file (TASK-0135, PR 198, merged 2026-11-03T23:15Z, merge commit 4a9fe32); PointLights <= 40 (current hub total
+    25, Hub.rbxmx read 2026-11-03; TASK-0133 evidence also records 25 of 40); CastShadow off on props and the inventory
+    budgets (both named by jg; not re-verified in this task). Mac P5 numbers are recorded above. Re-measure whenever a
+    mobile device is available.
+  - P2 (mid-match pad block): accepted by jg as covered by the ModePadRules spec (games/mathshow/tests/ModePadRules.spec.luau)
+    and TASK-0122 Studio S4c (real participation blocking; cited in AUD-20261102-TASK-0122-03). The live attempt in this task
+    stays inconclusive.
+  - P1 leftovers: rare Glyph and HUD hiding are covered by TASK-0121 Studio evidence (docs/workflow/evidence/TASK-0121:
+    glyph-play.txt step 2 collects a rare Glyph, hud-menu-open/closed images). CLOSE/LEAVE were confirmed by jg on the iPad
+    on build 81d21fc. Note: the Codex audit of PR 196 (AUD-20261103-TASK-0134-01, attempt 1) is FAIL at 81d21fc (LEAVE overlaps the
+    mobile jump keep-clear zone, TextFit ledger not updated, evidence missing, one spec gap); this log does not change that.
+  - F5 (Daily ramp): treated as a real bug; it goes to the fix task (separate prompt). Not fixed here.
+  - The test experience 10774566206 stays Private and untouched; no further publishes planned.

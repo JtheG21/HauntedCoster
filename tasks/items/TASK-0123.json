@@ -2,7 +2,7 @@
   "id": "TASK-0123",
   "game": "GAME-004",
   "title": "MathShow Multiplayer Playtest",
-  "status": "changes_requested",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -43,6 +43,18 @@
       "from": "in_progress",
       "to": "changes_requested",
       "note": "execution checks failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-03T15:52:03",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-03T15:52:03",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -50,6 +62,11 @@
       "time": "2026-11-03T13:38:15",
       "result": "fail",
       "notes": "Partial: private test published, per-player Glyph (P4) passed; P2, P3, P5 and console capture not done. See docs/workflow/evidence/TASK-0123/playtest.txt."
+    },
+    {
+      "time": "2026-11-03T15:52:03",
+      "result": "pass",
+      "notes": "Close-out: jg accepted P3 (iPad perf) as deferred risk and P2 as covered by ModePadRules spec + TASK-0122 S4c; P4 and Mac P5 recorded; F5 goes to a fix task. See docs/workflow/evidence/TASK-0123/playtest.txt DECISIONS."
     }
   ],
   "revisions": 1
