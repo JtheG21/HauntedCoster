@@ -2,7 +2,7 @@
   "id": "TASK-0125",
   "game": "GAME-004",
   "title": "MathShow Hub Art Pilot: AI Mesh Pipeline",
-  "status": "review",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -100,7 +100,19 @@
       "time": "2026-11-02T17:05:10",
       "from": "blocked",
       "to": "review",
-      "note": "hand transition approved by jg; re-scope; orchestrator lacks blocked→review (see TASK-0124)"
+      "note": "hand transition approved by jg; re-scope; orchestrator lacks blocked\u2192review (see TASK-0124)"
+    },
+    {
+      "time": "2026-11-02T17:07:54",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T17:15:32",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -131,6 +143,12 @@
       "time": "2026-11-02T17:03:17",
       "result": "fail",
       "report": "06 QA/AUD-20261102-TASK-0125-02.md"
+    },
+    {
+      "time": "2026-11-02T17:07:54",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0125-03.md"
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }
