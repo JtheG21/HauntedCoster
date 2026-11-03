@@ -2,7 +2,7 @@
   "id": "TASK-0126",
   "game": "GAME-004",
   "title": "MathShow Hub Art-1 Batch 1: Plaza",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -41,6 +41,19 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-02T18:32:07",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T18:32:07",
+      "result": "pass",
+      "notes": "Plaza batch built and checked at 12c1b4f (evidence docs/workflow/evidence/TASK-0126/art-plaza.txt): 8 new lights, 294 new instances, 22,704 new triangles; walk times 9.9-11.9 s; 34/34 markers reachable; forced controller error survived. Screenshots ~1210x558, not 844x390."
     }
   ]
 }

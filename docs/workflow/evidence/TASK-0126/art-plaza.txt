@@ -1,0 +1,41 @@
+# TASK-0126 Plaza art batch 1: Studio checks
+# measured git HEAD: 12c1b4f (BuildStamp in Studio "12c1b4f 2026-11-03T02:26:46Z", no +dirty; Rojo 7.7.0 served by scripts/serve.sh from the TASK-0126 worktree; MathShow.rbxl, place NOT saved, mtime unchanged 2026-10-31)
+# applies_to: any later commit whose diff from 12c1b4f does not touch games/mathshow/map/**, games/mathshow/src/client/**, scripts/build_hub.py or mathshow.project.json.
+# Screenshots (outside the vault): ~/Roblox-Work/evidence/TASK-0126/ ; candidates in .../candidates/ (candidates.txt has asset ids and triangles).
+
+## Assets (B1)
+RankCrystal: candidate A, mesh 86836773049913, texture 116312177366724, 396 tris, 6.09 x 8 x 5.34. SpawnHex: candidate C, mesh 111612084578305, texture 79171445884970, 178 tris, 14 x 1 x 14, 8-sided (the generator returned an octagon, not a hexagon; jg picked it as is).
+generate_mesh showed no Robux cost or quota. Generated in a scratch copy of the place (never saved, closed with Don't Save). Pick: jg, 2026-11-02 ("crystal a, hex c").
+Export: SerializationService -> studio_transfer.py -> .rbxm. rojo 7.7.0 rejected the AI-generated models ("MeshPart.Tags should be SharedString"), so both were rebuilt from the asset ids with AssetService:CreateMeshPartAsync (clean MeshPart, no generation tags) and the .rbxm was converted to .rbxmx with Lune (roblox.serializeModel(model, true)). Same two ids, same sizes.
+
+## Budgets (B3), actuals
+- New PointLights: 8 (13 in the hub, 5 before). Limit 12.
+- New instances: 294 (Hub.rbxmx items 498 -> 792). Limit 700.
+- New triangles: 22,704 (limit 25,000). Method: Play client, camera (0,150,60) looking at the origin, FOV 70, Stats.SceneTriangleCount: 41,632 with everything; then, client-side only, removed Bunting (-12,352), rim lamps (-8,256), crystal+hex (-1,088), tile insets + rim strip + plinth trim/cap (-1,008): 18,928. A Neon Ball part costs about 430 triangles, so a first pass with 10 rim lamps and 64 bulbs measured 42,062 and was cut to 8 lamps and 24 bulbs.
+- Flags 112 (cap 160), bulbs 24 (cap 120, no light objects), textures uploaded: none.
+
+## Screenshots (B5)
+844x390 not available: screen_capture takes no size and returned ~1210x558. The Edit-view capture is used (Play captures drop the MCP connection, TASK-0125 note).
+- plaza_vs_A1_mockup.jpg: A1_spawn_view.png (left) next to the Studio capture from (0,24,84) looking at (0,7,-20) (right). Same framing; the mockup has a Sky, Atmosphere and holo symbols that are out of scope.
+- plaza_aerial.jpg: from (0,150,60) looking at the origin.
+- Neon amber: #FFB547 renders lemon yellow under Bloom, so Neon parts use #FA7D12 (as the lamp Globe did in TASK-0125); unlit flags keep #FFB547.
+
+## Regression (B4)
+- Walk times, PathfindingService (radius 2, height 5, can jump) from (0,5,47), length / 16: Daily 189.9 studs 11.9 s, VS 158.2 9.9 s, Blitz 173.6 10.8 s, Group 182.5 11.4 s, Practice 173.7 10.9 s, Skill 158.6 9.9 s. All inside 8-12 s. Daily is close to the limit; no baseline for it in the repo. Blitz was 164.5 studs (10.2 s) at TASK-0120 and 167.1 (10.4 s) with the TASK-0125 lamps, so this batch adds about 6 studs (+0.4 s).
+- Reachability: 34/34 GlyphSpawn markers Success (glyph-reachability.csv, new measured SHA 12c1b4f).
+- Live walk (Server data model, real character, WalkSpeed 16): spawn to the Blitz pad followed the path, ended 3.3 studs from the pad centre, and 3 glyphs were collected on the way (HUD "Glyphs 3"). A second walk from (60,4,0) east to the pad opened Screen_confirm_blitz (pads work). A teleport next to Glyph_C_W1 took the counter 3 -> 4 (Glyphs work). The wall-clock time of the walk (21 s) is Studio's MoveTo pacing and is not comparable to length / 16.
+- HUD counter: GlyphHud.Enabled false while MathShowMenu.Enabled is true, true when it is closed, false again when reopened.
+- Crystal cosmetic: pivot changed between two reads 1 s apart (y 3.301 -> 2.913, yaw changed): spin and bob run.
+
+## Console (B5)
+Fresh Play: no errors from MathShow. Lines seen: ModePadService: 6 pads, GlyphService: 34 glyph spawns, DataStores unavailable (unpublished place), the known "ContentId: rbxassetid://203785492 failed due to: Asset type does not match requested type" (also in TASK-0120 and TASK-0125) and "GlyphCollect ... rejected: out_of_range" warns from the server-side teleport and walk (the existing rate-limited warn, TASK-0121).
+
+## Forced error (B5)
+A scratch edit added error("FORCED TEST ERROR (TASK-0126 scratch)") inside the pcall in HubCosmetics.luau (synced by Rojo, Edit Source read back with the string). Fresh Play: the console showed exactly one line,
+  [MathShow] HubCosmetics stopped: Players.jg_57565.PlayerScripts.Client.Hub.HubCosmetics:45: FORCED TEST ERROR (TASK-0126 scratch)
+the crystal stopped moving (pivot unchanged over 1 s), and gameplay continued: "[MathShow] client ready", match phases kept advancing, and a teleport to Glyph_C_W1 took the counter to "Glyphs 1". The edit was reverted from a saved copy before any commit: git status and git diff clean, the string absent from the Studio source (length 2907 = disk). The BuildStamp stayed 12c1b4f during the run because the stamp only changes on commit.
+
+## Not done / caveats
+- No 844x390 screenshots (see above); no real-device performance (TASK-0123).
+- The plate is an octagon. SpawnLocation top is 0.5 (was 0.6) and the part is now invisible; the plate has no collision.
+- Dummy walks of all 34 markers were not repeated (pathfinding only).
