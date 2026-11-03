@@ -81,6 +81,8 @@ Prove the prop pipeline end to end with one prop: generate a lamp post mesh in a
 ## Audits
 
 ## Outcome
-*(Filled after merge. Follow-ups recorded so far:)*
-- **Art follow-up (jg, 2026-11-02): lamp pole height kept as is.** Pole C is 5.06 studs tall, under the 7.2-stud jump height, so a jump or auto-jump clears it (walking into it is blocked). Revisit in the Art pass if lamps should be solid obstacles: a taller collider or pole. Evidence: `docs/workflow/evidence/TASK-0125/art-pilot.txt`, revision 1b.
-- Desktop perf at 1080p is deferred to Art-3 (real client + MicroProfiler); 1080p rows in the evidence log are invalid.
+Merged as PR 181 (merge approved by jg, 2026-11-02; audit [[AUD-20261102-TASK-0125-03]] passed under the pipeline-only re-scope after -01 and -02 failed on perf evidence).
+- **Shipped:** the prop pipeline (scratch place -> `.rbxmx` under `games/mathshow/map/props/` + `manifest.json` -> inlined by `scripts/build_hub.py`, drift-guarded by `check.sh`), pole C (claw holder, 600 triangles, Box collision, shadowless) with a Neon `Globe` (#FA7D12) holding the PointLight, five east-path lamps, the `ModePadService: N pads` start log and the AGENTS.md prop rule.
+- **Decisions:** Lighting.Technology = ShadowMap, at most 40 PointLights in the hub, CastShadow false on all props ([[SYS-Plaza-Map-Brief]]).
+- **Follow-ups (not blocking):** the 5.06-stud pole can be jumped (art pass); real-device FPS/MicroProfiler capture moved to [[TASK-0123-MathShow-Multiplayer-Playtest]]; the in-Studio perf tables are informational and the Future label is unproven; the orchestrator lacks a blocked->review transition ([[TASK-0124-Orchestrator-Reopen-Transition]]).
+- **Lessons:** a raw `rojo build` place is not the real place (missing Sky, GlobalShadows, Brightness); Studio property reads of CollisionFidelity lag one write behind; `generate_mesh` states no cost or quota.
