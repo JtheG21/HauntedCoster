@@ -59,6 +59,16 @@ MATERIAL = {"SmoothPlastic": 272, "Concrete": 816, "Slate": 800, "Neon": 288, "G
 SHAPE = {"Ball": 0, "Block": 1, "Cylinder": 2}
 
 LAKE_REFLECTANCE = 0.6
+# TASK-0133 Q1: Lake Ink #0F2A4A reads near-black at night, so the Water part takes a lighter step of the same hue (Lake Ink family);
+# the lakebed is lifted with it, because the Glass shows it through. Reflectance darkens at night (0.6 and 1.0 read pure black: the sky it
+# reflects is dark), so it drops to 0.1.
+LAKE_WATER = (40, 100, 180)
+LAKE_WATER_TRANSPARENCY = 0.2
+LAKE_WATER_REFLECTANCE = 0.1
+LAKE_BED = (30, 70, 130)
+# TASK-0133 Q2: Menu Violet #8A4DFF reads magenta in captures once it is Neon (bloom pushes red up). Every Neon map part that asks
+# for the violet takes this value instead; the menu UI palette (MenuTheme, IdentityTheme) is untouched.
+MAP_NEON_VIOLET = (96, 82, 255)  # the Neon arch and trim capture as about (130, 75, 255), hue 258, against the swatch's (138, 77, 255), hue 261 (the old value read hue 278)
 PLAZA_R = 55.0
 SPAWN_Z = 47.0  # the SpawnLocation and the SpawnHex plate sit at (0, SPAWN_Z), the plaza's south edge
 PATH_W = 14.0
@@ -133,6 +143,8 @@ def from_columns(x, y, z):
 def make_part(name, size, pos, rot, color, material="SmoothPlastic", shape="Block", transparency=0.0, collide=True,
 		query=True, cls="Part", cast_shadow=True, reflectance=0.0) -> Node:
 	n = Node(cls, name)
+	if material == "Neon" and tuple(color) == PALETTE["violet"]:
+		color = MAP_NEON_VIOLET
 	n.props += [
 		"<bool name=\"Anchored\">true</bool>",
 		f"<bool name=\"CanCollide\">{str(collide).lower()}</bool>",
@@ -333,7 +345,8 @@ class PlacedProp(Node):
 				lambda m: f"{m.group(1)}<X>{f(self.scale * float(m.group(2)))}</X>{m.group(3)}<Y>{f(self.scale * float(m.group(4)))}</Y>"
 					f"{m.group(5)}<Z>{f(self.scale * float(m.group(6)))}</Z>", text)
 		if self.color is not None:
-			text = re.sub(r'(<Color3uint8 name="Color3uint8">)\d+(</Color3uint8>)', lambda m: f"{m.group(1)}{color_int(self.color)}{m.group(2)}", text)
+			mesh_color = MAP_NEON_VIOLET if self.material == "Neon" and tuple(self.color) == PALETTE["violet"] else self.color
+			text = re.sub(r'(<Color3uint8 name="Color3uint8">)\d+(</Color3uint8>)', lambda m: f"{m.group(1)}{color_int(mesh_color)}{m.group(2)}", text)
 		if self.material is not None:
 			text = re.sub(r'(<token name="Material">)\d+(</token>)', lambda m: f"{m.group(1)}{MATERIAL[self.material]}{m.group(2)}", text)
 		out: list[str] = []
@@ -386,6 +399,11 @@ MASSES = (  # name, a0, depth, b0, b1, height, edge trim on the front corners to
 	("Annex_E", 168.0, 16.0, 46.0, 62.0, 16.0, False),
 )
 NEW_LAMPS = ((130.0, -9.0), (130.0, 9.0))  # a, b: flank the court entrance, outside the 14-wide path
+# TASK-0133 Q3 (A2): a portal frame around the Blitz arch and the centre mass: two Basalt posts and a lintel, outlined in Menu Violet Neon.
+# It stands 4 studs in front of Mass_C (front face a = 183) and 28 behind the pads (a = 150), so no pad trigger volume is near it.
+FRAME_A, FRAME_HALF, FRAME_POST, FRAME_H = 178.5, 16.0, 2.4, 46.0  # a of the frame plane, post centre b, post width, top y
+FRAME_BEAM_H = 3.0
+FRAME_TRIM = 0.9  # the Neon outline is bolder than the 0.4 trim: it has to read from the path start, 90 studs away
 
 
 def build_competitive(zones: Node, e_fr: Frame) -> None:
@@ -417,6 +435,19 @@ def build_competitive(zones: Node, e_fr: Frame) -> None:
 					continue
 				b = bc + (i - (cols - 1) / 2) * (w - 4) / max(cols - 1, 1)
 				comp.add(e_fr.block(f"{name}_Win{i}{j}", a0 - 0.05, b, 4.0 + j * 4.5, (1.8, 1.8, 0.3), colour, material="Neon", **deco))
+
+	# Portal frame: the posts are solid like the masses (clear of the 14-wide path gap and of every pad), the lintel is decoration.
+	inner = FRAME_HALF - FRAME_POST / 2
+	for side in (-1, 1):
+		comp.add(e_fr.block(f"Frame_Post{side}", FRAME_A, side * FRAME_HALF, FRAME_H / 2, (FRAME_POST, FRAME_H, FRAME_POST), basalt,
+			cast_shadow=False))
+		comp.add(e_fr.block(f"Frame_PostEdge{side}", FRAME_A - FRAME_POST / 2 - 0.1, side * inner, FRAME_H / 2, (FRAME_TRIM, FRAME_H, 0.4), violet,
+			material="Neon", **deco))
+	comp.add(e_fr.block("Frame_Lintel", FRAME_A, 0, FRAME_H - FRAME_BEAM_H / 2, (2 * FRAME_HALF + FRAME_POST, FRAME_BEAM_H, FRAME_POST), basalt,
+		**deco))
+	for tag, y in (("Top", FRAME_H + FRAME_TRIM / 2), ("Under", FRAME_H - FRAME_BEAM_H + FRAME_TRIM / 2)):
+		comp.add(e_fr.block(f"Frame_Lintel{tag}", FRAME_A - 0.1, 0, y, (2 * FRAME_HALF + FRAME_POST, FRAME_TRIM, FRAME_POST + 0.2), violet, material="Neon",
+			**deco))
 
 	# Low perimeter wall with a Menu Violet Neon top strip: the front (with the path gap) and both sides up to the masses.
 	back = MASSES[0][1]
@@ -629,10 +660,10 @@ def build() -> Node:
 	se_fr = add_path("SE", PLAZA_R + 1, 106)
 	# TASK-0132: the water is a flat Glass Part (not Terrain) over a collidable lakebed, Reflectance 0.6 per A4. The invisible
 	# Blocker below keeps players out of the water; the lakebed is the floor under it, so nothing can fall out of the world.
-	lake.add(cylinder("Lakebed", LAKE_C[0], -0.05, LAKE_C[1], 0.3, LAKE_R * 2, PALETTE["lakebed"], material="Concrete", query=False,
+	lake.add(cylinder("Lakebed", LAKE_C[0], -0.05, LAKE_C[1], 0.3, LAKE_R * 2, LAKE_BED, material="Concrete", query=False,
 		cast_shadow=False))
-	lake.add(cylinder("Water", LAKE_C[0], 0.15, LAKE_C[1], 0.3, LAKE_R * 2, PALETTE["lake"], material="Glass", transparency=0.35,
-		collide=False, query=False, cast_shadow=False, reflectance=LAKE_REFLECTANCE))
+	lake.add(cylinder("Water", LAKE_C[0], 0.15, LAKE_C[1], 0.3, LAKE_R * 2, LAKE_WATER, material="Glass", transparency=LAKE_WATER_TRANSPARENCY,
+		collide=False, query=False, cast_shadow=False, reflectance=LAKE_WATER_REFLECTANCE))
 	lake.add(cylinder("Blocker", LAKE_C[0], 10, LAKE_C[1], 20, LAKE_R * 2 - 2, PALETTE["lake"], transparency=1.0, query=False))
 	ring_seg = 16
 	for k in range(ring_seg):
@@ -642,6 +673,7 @@ def build() -> Node:
 		chord = 2 * 50 * math.tan(math.pi / 2 / ring_seg) + 1.0
 		lake.add(ff.block(f"Promenade_{k:02d}", 50, 0, 0, (chord, 0.4, 12), PALETTE["promenade"]))
 	add_railing(lake, ring_seg)
+	add_waterline(lake, ring_seg)
 
 	# ---- boundary: stepped terraces + invisible walls ----
 	tiers = boundary.add(folder("Terraces"))
@@ -712,6 +744,8 @@ TRAIN_WALL_H, TRAIN_WALL_T = 2.4, 1.2
 TRAIN_WALL_GAP = 10.0  # half-width of the opening in the front wall (the path is 14 wide)
 HALL_GAP = 12.0  # half-width of the entrance
 HALL_HALF = 30.0
+HALL_S_END = -52.0  # TASK-0133 Q4 (A3): the south wing runs on to b = -52, the long arm of the L
+LEG_B0, LEG_B1, LEG_A0, LEG_A1, LEG_H = 31.0, 45.0, 138.0, 192.0, 12.0  # the short arm: north of the court wall, a 138..192
 LINTEL_Y0 = 10.0  # the entrance is 10 high
 RING_R, RING_W, RING_H, RING_SEGS = 6.6, 0.35, 0.15, 16
 PAD_SIGN_SIZE = (12.0, 3.0, 0.5)
@@ -729,10 +763,6 @@ RANK_RGB = (
 	("platinum", (190, 240, 255)),
 	("diamond", (110, 210, 255)),
 	("demon", (255, 60, 40)),
-)
-TRAIN_ANNEXES = (  # name, a0, depth, b0, b1, height
-	("Annex_N", 170.0, 14.0, 36.0, 50.0, 9.0),
-	("Annex_S", 172.0, 14.0, -50.0, -36.0, 11.0),
 )
 TRAIN_LAMPS = ((130.0, -9.0), (130.0, 9.0))  # a, b: flank the court entrance, outside the 14-wide path
 
@@ -793,16 +823,31 @@ def build_training(zones: Node, w_fr: Frame) -> None:
 
 	# Hall: two wings, a lintel over the 24-wide entrance, a back wall closing the alcove.
 	mass("Hall_WingN", HALL_A0, HALL_DEPTH, HALL_GAP, HALL_HALF, 0.0, HALL_H, windows_to=LINTEL_Y0 + 4)
-	mass("Hall_WingS", HALL_A0, HALL_DEPTH, -HALL_HALF, -HALL_GAP, 0.0, HALL_H)
+	mass("Hall_WingS", HALL_A0, HALL_DEPTH, HALL_S_END, -HALL_GAP, 0.0, HALL_H)
 	zone.add(w_fr.block("Hall_Lintel", HALL_A0 + HALL_DEPTH / 2, 0, (LINTEL_Y0 + HALL_H) / 2, (2 * HALL_GAP, HALL_H - LINTEL_Y0, HALL_DEPTH),
 		basalt, cast_shadow=False))
 	zone.add(w_fr.block("Hall_LintelTrim", HALL_A0 - TRAIN_TRIM / 2, 0, LINTEL_Y0 + TRAIN_TRIM / 2, (2 * HALL_GAP, TRAIN_TRIM, TRAIN_TRIM), cyan, material="Neon", **deco))
 	for side in (-1, 1):
 		zone.add(w_fr.block(f"Hall_DoorTrim{side}", HALL_A0 - TRAIN_TRIM / 2, side * (HALL_GAP - TRAIN_TRIM / 2), LINTEL_Y0 / 2, (TRAIN_TRIM, LINTEL_Y0, TRAIN_TRIM),
 			cyan, material="Neon", **deco))
-	zone.add(w_fr.block("Hall_Back", HALL_A0 + HALL_DEPTH + 1, 0, HALL_H / 2, (2 * HALL_HALF, HALL_H, 2), basalt, cast_shadow=False))
-	for name, a0, depth, b0, b1, h in TRAIN_ANNEXES:
-		mass(name, a0, depth, b0, b1, 0.0, h)
+	zone.add(w_fr.block("Hall_Back", HALL_A0 + HALL_DEPTH + 1, (HALL_S_END + HALL_HALF) / 2, HALL_H / 2, (HALL_HALF - HALL_S_END, HALL_H, 2), basalt,
+		cast_shadow=False))
+	# The short arm of the L: joins the north wing's end (b = 30) and runs toward the plaza along the court's north side, outside the wall.
+	leg_len, leg_w, leg_ac, leg_bc = LEG_A1 - LEG_A0, LEG_B1 - LEG_B0, (LEG_A0 + LEG_A1) / 2, (LEG_B0 + LEG_B1) / 2
+	zone.add(w_fr.block("Hall_ArmN", leg_ac, leg_bc, LEG_H / 2, (leg_w, LEG_H, leg_len), basalt, cast_shadow=False))
+	zone.add(w_fr.block("Hall_ArmN_Link", HALL_A0 + HALL_DEPTH / 2, HALL_HALF + (LEG_B0 - HALL_HALF) / 2, HALL_H / 2,
+		(LEG_B0 - HALL_HALF + 0.2, HALL_H, HALL_DEPTH), basalt, cast_shadow=False))
+	zone.add(w_fr.block("Hall_ArmN_RoofTrim", leg_ac, LEG_B0 - TRAIN_TRIM / 2, LEG_H - TRAIN_TRIM / 2, (TRAIN_TRIM, TRAIN_TRIM, leg_len), cyan,
+		material="Neon", **deco))
+	zone.add(w_fr.block("Hall_ArmN_EndTrim", LEG_A0 - TRAIN_TRIM / 2, leg_bc, LEG_H - TRAIN_TRIM / 2, (leg_w, TRAIN_TRIM, TRAIN_TRIM), cyan,
+		material="Neon", **deco))
+	for i in range(int(leg_len // 5) - 1):
+		for j in range(2):
+			colour = window(i + 3, j)
+			if colour is None:
+				continue
+			zone.add(w_fr.block(f"Hall_ArmN_Win{i}{j}", LEG_A0 + 4.0 + i * 5.0, LEG_B0 - 0.05, 4.0 + j * 4.5, (0.3, 1.8, 1.8), colour,
+				material="Neon", **deco))
 
 	# Low perimeter wall with a Holo Cyan Neon top strip: the front (path gap) and both sides up to the hall.
 	front_a, side_len = 127.0, HALL_A0 - 127.0
@@ -855,7 +900,7 @@ OBS_TRIM = 0.5
 TAN_8 = math.tan(math.pi / 8)
 OBS_WIN_ROWS = (40.0, 44.5, 49.0, 57.0, 61.5)
 OBS_BAND_Y = (37.0, 53.0, 66.5)
-OBS_TELESCOPE = {"scale": 1.7, "forward": 2.0, "side": 0.0, "yaw": 0.0}  # tuned against screenshots
+OBS_TELESCOPE = {"scale": 1.1, "forward": 0.0, "side": 0.0, "yaw": 0.0}  # TASK-0133 Q5: 11 high on the dome axis; the dome is 15.4 high (1.7 at +2 poked through)
 
 
 def octagon_faces(cx: float, cz: float):
@@ -981,6 +1026,7 @@ def build_ranks(zones: Node, sw_fr: Frame) -> None:
 
 
 # --- Lake railing, trees and holo symbols (TASK-0132) ------------------------------------------------------------------------
+WATERLINE_W, WATERLINE_Y = 0.5, 0.33  # the Water top is y = 0.3
 RAIL_R = 44.7  # just outside the water edge (LAKE_R = 44), on the lake side of the 12-wide promenade
 RAIL_TOP_Y, RAIL_MID_Y, RAIL_POST_H = PATH_TOP + 1.5, PATH_TOP + 0.8, 1.9
 LAKE_LAMP_DEGREES, LAKE_LAMP_R = (210, 240), 53.0  # on the promenade, between the R_Lake glyph spots (195, 225, 255)
@@ -1014,6 +1060,18 @@ def add_railing(lake: Node, ring_seg: int) -> None:
 		chord = 2 * RAIL_R * math.tan(math.pi / 2 / ring_seg) + 0.1
 		rail.add(ff.block(f"MidRail_{k:02d}", RAIL_R, 0, RAIL_MID_Y, (chord, 0.2, 0.2), PALETTE["slot"], **deco))
 		rail.add(ff.block(f"TopRail_{k:02d}", RAIL_R, 0, RAIL_TOP_Y, (chord, 0.25, 0.3), PALETTE["amber_neon"], material="Neon", **deco))
+
+
+def add_waterline(lake: Node, ring_seg: int) -> None:
+	"""TASK-0133 Q1: a thin Holo Cyan Neon strip on the water's edge along the promenade (decorative, no light object)."""
+	strip = lake.add(folder("Waterline"))
+	r = LAKE_R - WATERLINE_W / 2
+	for k in range(ring_seg):
+		ang = math.radians(135 + 180 * (k + 0.5) / ring_seg)
+		ff = Frame((math.cos(ang), math.sin(ang)), LAKE_C)
+		chord = 2 * r * math.tan(math.pi / 2 / ring_seg) + 0.1
+		strip.add(ff.block(f"Waterline_{k:02d}", r, 0, WATERLINE_Y, (chord, 0.06, WATERLINE_W), PALETTE["cyan"], material="Neon", collide=False,
+			query=False, cast_shadow=False))
 
 
 def tree_sites() -> list[tuple[float, float, float, float, float]]:
