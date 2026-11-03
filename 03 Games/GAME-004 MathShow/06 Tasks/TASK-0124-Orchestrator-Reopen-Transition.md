@@ -3,7 +3,7 @@ id: TASK-0124
 title: "Orchestrator reopen transition"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: low
 risk: low
 owner: codex
