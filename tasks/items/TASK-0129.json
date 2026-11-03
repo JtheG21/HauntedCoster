@@ -1,0 +1,77 @@
+{
+  "id": "TASK-0129",
+  "game": "GAME-004",
+  "title": "MathShow Hub Art-1 Batch 3: Training",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "games/mathshow/map/Hub.rbxmx",
+    "docs/workflow/evidence/TASK-0129/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0129-MathShow-Hub-Art-Training.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0129-art-training",
+  "acceptance": [
+    "Training hall of Basalt Blue masses with Holo Cyan Neon trim and window blocks (no lights in windows).",
+    "Thin Holo Cyan Neon ring (CanCollide false) and a SurfaceGui sign (PRACTICE / SKILL TEST) at each of the Practice and Skill pads; pad parts, tags, Mode attributes and trigger volumes unchanged.",
+    "Rank ladder display: 9 stepped bars Plastic to Demon in the IdentityTheme rank colours (SmoothPlastic, Neon caps, decorative).",
+    "TRAINING SurfaceGui sign over the hall entrance, readable from the path start at 844x390.",
+    "Budgets: <=8 new PointLights (hub total <=40), <=500 new instances, <=15k new triangles.",
+    "Regression: walk times 8-12 s, 34/34 glyphs reachable, Practice/Skill screens, blocked mid-match, HUD behind menu, competitive pads still work.",
+    "Evidence at a clean BuildStamp: path-start 844x390 screenshot, aerial beside A3, inventory, light total, console clean."
+  ],
+  "evidence": [],
+  "notes": "Approved rows T0-T6 (jg, 2026-11-02). No asset creation. Out of scope: other zones, skybox, holo symbols, Glyph visuals, polish items (violet hue, A2 portal frame), pad logic, audio, Lighting.Technology, saving the place, merging. Do not record-audit or self-audit. Branched from main; TASK-0127/0128 (PR 186/187) are unmerged, expect a generator merge later.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0129-MathShow-Hub-Art-Training.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T20:12:16",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T20:12:17",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T20:21:39",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T21:16:12",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T21:18:14",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T20:21:39",
+      "result": "pass",
+      "notes": "Training zone built at 7f71497; evidence docs/workflow/evidence/TASK-0129/art-training.txt. +2 lights (hub 15), +115 instances, +3240 tris. Walk times 9.9-11.9 s, 34/34 glyphs, pads/HUD/blocked ok."
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-02T21:16:12",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0129-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
+}
