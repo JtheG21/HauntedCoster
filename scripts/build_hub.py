@@ -356,7 +356,7 @@ GLYPHS: list[dict] = []
 # --- Competitive zone (TASK-0127): masses, trim, windows, signs, wall around the three ModeArch pads --------------------
 
 ARCH_A = 150.0  # pads and arches sit this far along the east path
-ARCHES = (("VS", -26), ("Blitz", 0), ("Group", 26))
+ARCHES = (("VS", 26), ("Blitz", 0), ("Group", -26))  # b = -z on the east path: VS is on the viewer's left, as in A2
 NEON_AMBER = PALETTE["amber_neon"]
 ARCH_COLOR = {"VS": PALETTE["competitive"], "Blitz": NEON_AMBER, "Group": PALETTE["training"]}
 SIGN_TEXT = {"VS": (190, 150, 255), "Blitz": (255, 181, 71), "Group": PALETTE["training"]}

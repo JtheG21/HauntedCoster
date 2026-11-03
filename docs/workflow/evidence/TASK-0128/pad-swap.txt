@@ -1,0 +1,22 @@
+# TASK-0128 swap VS and Group pad sides (row requested by jg, 2026-11-02; stacked on TASK-0127)
+# measured git HEAD: 87a1991 (BuildStamp "87a1991 2026-11-03T03:58:45Z", clean, scripts/serve.sh from the TASK-0128 worktree; fresh Play; place not saved)
+# applies_to: Measured at 87a1991. Applies to any later commit whose diff from 87a1991 does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json or games/mathshow/src/**.
+# Screenshot (outside the repo): ~/Roblox-Work/evidence/TASK-0128/pad_swap_a2_framing_844x390.jpg (camera (84,8,0) -> (150,11,0), Edit mode)
+
+Change: ARCHES in scripts/build_hub.py now ("VS", 26), ("Blitz", 0), ("Group", -26). Pads, arches and signs follow it. Pad_VS is at (150, 0.45, -26), Pad_Group at (150, 0.45, 26); sizes (10, 0.5, 10), ModePad tags and Mode attributes read back unchanged. From the path the order is VS | BLITZ | GROUP, as in A2.
+Walk times (PathfindingService, from (0,5,47), length / 16): Daily 189.9 studs 11.9 s, VS 183.8 11.5 s, Blitz 173.6 10.8 s, Group 176.6 11.0 s, Practice 173.7 10.9 s, Skill 158.6 9.9 s. All inside 8-12 s (VS and Group exchanged their TASK-0127 values; VS is now the slower, 11.5 s).
+Reachability: 34/34 GlyphSpawn markers Success.
+Pads (client PivotTo, menu closed): VS -> confirm_vs, Blitz -> confirm_blitz, Group -> confirm_group, one event each.
+Console: no errors (DataStore and ContentId 203785492 warnings as before).
+Not rerun: mid-match blocking, HUD behind menu (pad logic and HUD untouched; TASK-0127 covered them), two players.
+
+## Post-merge re-check (origin/main with TASK-0127 merged into this branch; jg row K2, 2026-11-02)
+# measured git HEAD: ef384d9 (BuildStamp "ef384d9 2026-11-03T04:49:19Z", clean; scripts/serve.sh from the TASK-0128 worktree, Rojo plugin reconnected by hand; fresh Play, single player; place not saved)
+# applies_to: Measured at ef384d9. Applies to any later commit whose diff from ef384d9 does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json or games/mathshow/src/**.
+Merge: origin/main (TASK-0127, PR 186 merge commit 769f6bb) into task/TASK-0128-pad-swap; the only conflict was the generated Hub.rbxmx, regenerated with scripts/build_hub.py. tests/test_build_hub.py (collider guard): 4 tests OK on the regenerated map with VS/Group swapped. scripts/check.sh: all pass, map drift included.
+Order (Edit): Pad_VS (150, 0.45, -26), Pad_Blitz (150, 0.45, 0), Pad_Group (150, 0.45, 26); ModeArch_VS / _Blitz / _Group and their VS / BLITZ / GROUP signs sit at the same z. From the path the order reads VS | BLITZ | GROUP.
+Pads (client character CFrame onto each pad after 2.6 s off the pads, MathShowMenu closed by Enabled=false): VS -> Screen_confirm_vs, Blitz -> Screen_confirm_blitz, Group -> Screen_confirm_group.
+Walk times (Server, PathfindingService radius 2, height 5, can jump, from (0,5,47) to pad centre + 3 studs, length / 16): Blitz 169.6 studs 10.6 s, Daily 185.9 11.6 s, Group 174.3 10.9 s, Practice 169.7 10.6 s, Skill 154.6 9.7 s, VS 178.5 11.2 s. All inside 8-12 s. Target height differs from the earlier runs, so absolute lengths are about 4 studs shorter than the figures above.
+Reachability: 34/34 GlyphSpawn Success (same pathfinding, start (0,5,47), target + 3 studs).
+Console: no errors. Known lines only (DataStore unavailable, ContentId 203785492). One "GlyphCollect rejected: out_of_range (Glyph_C_E2)" from the test's own teleport to (100, 6, 0), not a defect.
+Not rerun: mid-match blocking, HUD behind menu, two players.
