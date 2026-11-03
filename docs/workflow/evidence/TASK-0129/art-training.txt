@@ -1,0 +1,34 @@
+# TASK-0129 Training zone art (rows T0-T6, jg 2026-11-02)
+# measured git HEAD: 7f71497 (BuildStamp "7f71497 2026-11-03T04:15:27Z", clean, scripts/serve.sh from the TASK-0129 worktree, branch from main 5a4b4ff; Rojo plugin reconnected via the Connect prompt; fresh Play; place not saved, MathShow.rbxl mtime stays Oct 31)
+# applies_to: Measured at 7f71497. Applies to any later commit whose diff from 7f71497 does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json or games/mathshow/src/**.
+# Screenshots (outside the repo): ~/Roblox-Work/evidence/TASK-0129/ (training_path_start_844x390.jpg, training_aerial_844x390.jpg, training_aerial_vs_A3.jpg = A3 Training crop left, this build right)
+
+## T1 / T2 What the generator builds (scripts/build_hub.py, build_training and add_props)
+No new meshes or assets. Hub.Zones.Training: hall = two Basalt Blue wings (b 12..30 and -30..-12, 18 high, a 178..192), a lintel over the 24-wide, 10-high entrance, a back wall closing the alcove, Holo Cyan Neon roof/door trim (0.4-stud strips) and Neon window blocks (Holo Cyan with some Lamp Amber #FA7D12, as in A3; no light objects); two annexes (Annex_N, Annex_S, 9 and 11 high); low wall with a cyan Neon top strip (front with a 10-stud gap each side, both sides); a 16-segment thin Neon ring (radius 6.6, 0.35 x 0.15, CanCollide false) around the Practice and Skill pads, plus a post-mounted SurfaceGui sign "PRACTICE" / "SKILL TEST" (Enum.Font.GothamBlack, LightInfluence 0, PixelsPerStud 12); a "TRAINING" SurfaceGui sign (40 x 8) across the hall facade over the entrance; the rank ladder = 9 stepped bars (1.2-stud steps) in front of the north wing, SmoothPlastic with Neon caps, CanCollide false.
+Rank colours (not invented): games/mathshow/src/client/Identity/IdentityTheme.luau Tier.<id>.Rgb: plastic 235,230,215; bronze 230,150,90; copper 214,112,70; silver 220,228,240; gold 255,200,60; emerald 40,214,140; platinum 190,240,255; diamond 110,210,255; demon 255,60,40.
+Lamps: LampPost_W01, W02 (existing LampPost prop) flanking the court entrance at (130, +-9).
+The graybox Ladder_Board and Ladder_Step1-5 are replaced by the ladder. Pads (pad() calls), tags, Mode attributes and sizes are unchanged (read back: size 10, 0.5, 10, Mode Practice/Skill, ModePad tag). CastShadow false on all new parts; CanCollide true only on the hall wings, lintel, back wall, annexes and the wall (the sign posts and rings are CanCollide false).
+Note: on the west path the Frame's lateral b is +Z, so Practice (b=-18) is on the walker's right and Skill on the left. The pad layout is unchanged.
+
+## T3 / T5 Inventory (budget metric of M6: Block 12, Wedge 10, Cylinder 96, Ball 432 + prop manifest triangles; base = main 5a4b4ff)
+                 base      new     delta
+instances         792      907       115
+PointLights        13       15         2
+triangles       33214    36454      3240
+  Block         6168     7344      1176
+  Cylinder      1824     1824         0
+  Ball         16848    17712       864
+  Mesh          8374     9574      1200
+Budgets: new PointLights 2 <= 8 (hub total 15 <= 40); new instances +115 <= 500; new triangles +3240 <= 15000. On top of TASK-0127/0128 (unmerged, PR 186/187) the combined hub would be about lights 20, instances +221, triangles +7164 vs main (graybox parts removed by each task not netted out).
+
+## T5 Framing
+training_path_start_844x390.jpg: Studio screen_capture, camera (-58, 6, 0) looking at (-150, 11, 0) (the west path start, 122 studs from the hall), Edit mode, resized to 844x390. "TRAINING" is legible; the PRACTICE / SKILL TEST plates are small at that distance (they are not required to be). training_aerial_vs_A3.jpg: camera (-95, 75, 85) looking at (-160, 5, 0), next to a crop of A3's Training zone. Differences from A3 stated plainly: A3's hall is one long L-shaped building beside the pads; this one is a gated hall behind them; no holo symbols, glowing holograms over the rings or ground light pools (out of scope); Edit-mode lighting, not Play.
+
+## T4 Regression (fresh Play)
+- Walk times, PathfindingService (radius 2, height 5, can jump) from (0,5,47), length / 16: Daily 189.9 studs 11.9 s, VS 159.1 9.9 s, Blitz 169.8 10.6 s, Group 178.3 11.1 s, Practice 183.4 11.5 s, Skill 178.7 11.2 s. All inside 8-12 s. Versus main (TASK-0126): Practice 173.7 (+9.7 studs), Skill 158.6 (+20.1 studs, +1.3 s): the new front wall closes the diagonal across the court corner. The east pads differ from the TASK-0126 log by a few studs (Blitz 173.6 -> 169.8, VS 158.2 -> 159.1, Group 182.5 -> 178.3) although this branch changes nothing in the east; the cause is not established (likely pathfinder route variation), all stay inside 8-12 s.
+- Reachability: 34/34 Success (glyph-reachability.csv, measured SHA 7f71497). No dummy walks.
+- Pads (client PivotTo, menu closed, 2.6 s off every pad between tries): Practice -> practice, Skill -> skillintro, VS -> confirm_vs, Blitz -> confirm_blitz, Group -> confirm_group, one event each (the competitive pads still work).
+- Mid-match: JoinShow, ShowState participant=true; Practice, Skill and Blitz pads each held 3 s: events 0, menu closed.
+- HUD: GlyphHud.Enabled false while the menu is open, true when closed, false while a pad screen is open.
+- Console: no errors; only the known DataStore warnings and "ContentId: rbxassetid://203785492" (as in TASK-0120 to 0126).
+- Not exercised: after-match re-entry, live walks, two players, real-device perf (TASK-0123).

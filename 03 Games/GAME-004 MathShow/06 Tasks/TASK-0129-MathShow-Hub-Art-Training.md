@@ -34,13 +34,14 @@ Build the Training zone (west path: Practice and Skill pads, rank ladder) to mat
 `scripts/build_hub.py`, `games/mathshow/map/Hub.rbxmx`, evidence, this note, `tasks/items/TASK-0129.json`.
 
 ## Acceptance criteria
-- [ ] AC1 Hall, pad rings and signs, rank ladder, TRAINING sign built by the generator.
-- [ ] AC2 Budgets met.
-- [ ] AC3 Regression.
-- [ ] AC4 Evidence at a clean BuildStamp.
+- [x] AC1 Hall, pad rings and signs, rank ladder, TRAINING sign built by the generator. Evidence: `docs/workflow/evidence/TASK-0129/art-training.txt`.
+- [x] AC2 Budgets met: +2 lights (hub 15), +115 instances, +3240 triangles.
+- [x] AC3 Regression at 7f71497: walk times 9.9-11.9 s, 34/34 glyphs, pad screens, blocked mid-match, HUD, competitive pads.
+- [x] AC4 Evidence at clean BuildStamp 7f71497 (path-start and aerial screenshots, inventory, console).
 
 ---
 ## Implementation record
+Generator-only (`build_training`, `sign_plate`, two LampPost_W lamps); no assets. Rank colours from IdentityTheme.luau. Cost: Skill +1.3 s walk (front wall). Not recorded or self-audited (row T6).
 
 ## Audits
 
