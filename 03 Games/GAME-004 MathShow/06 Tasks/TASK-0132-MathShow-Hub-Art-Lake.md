@@ -3,7 +3,7 @@ id: TASK-0132
 title: "MathShow Hub Art-1 Batch 5: Lake, Terraces, Holo, Glyph Visuals"
 type: task
 project: GAME-004
-status: backlog
+status: in_progress
 priority: medium
 risk: low
 owner: claude-code

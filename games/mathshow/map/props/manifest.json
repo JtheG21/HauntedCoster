@@ -354,5 +354,55 @@
         "outcome": "discarded"
       }
     ]
+  },
+  "task_0132_generation_log": {
+    "note": "Every generate_mesh call in TASK-0132 (cap 3, one prop: PineTree), logged as made.",
+    "calls": [
+      {
+        "prop": "PineTree",
+        "n": 1,
+        "prompt": "low-poly stylized pine: short thick trunk, three stacked cone tiers, maxTriangles 150, untextured, size 7x14x7",
+        "result": "candidate C1",
+        "triangles": 150,
+        "mesh_id": "rbxassetid://114287420201657",
+        "texture_id": "rbxassetid://131975851261070",
+        "published_asset_id": "116978071750912",
+        "size": [
+          7.0,
+          9.3067,
+          6.9134
+        ]
+      },
+      {
+        "prop": "PineTree",
+        "n": 2,
+        "prompt": "tall slim pine, thin trunk, four narrow stacked cone layers, maxTriangles 150, untextured, size 6x14x6",
+        "result": "candidate C2 (the wait call timed out once; the job then completed)",
+        "triangles": 150,
+        "mesh_id": "rbxassetid://78289118787590",
+        "texture_id": "rbxassetid://117975338138930",
+        "published_asset_id": "78692269947190",
+        "size": [
+          6.0,
+          11.0623,
+          5.8762
+        ]
+      },
+      {
+        "prop": "PineTree",
+        "n": 3,
+        "prompt": "chunky rounded fir, stout trunk, two wide drooping cone skirts, maxTriangles 150, untextured, size 8x14x8",
+        "result": "candidate C3 (the wait call timed out once; the job then completed)",
+        "triangles": 150,
+        "mesh_id": "rbxassetid://137965429455162",
+        "texture_id": "rbxassetid://90790202080445",
+        "published_asset_id": "107317985998451",
+        "size": [
+          7.9833,
+          12.4161,
+          8.0
+        ]
+      }
+    ]
   }
 }

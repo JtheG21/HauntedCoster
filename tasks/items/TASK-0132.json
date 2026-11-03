@@ -2,7 +2,7 @@
   "id": "TASK-0132",
   "game": "GAME-004",
   "title": "MathShow Hub Art-1 Batch 5: Lake, Terraces, Holo, Glyph Visuals",
-  "status": "backlog",
+  "status": "in_progress",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -31,5 +31,20 @@
   "evidence": [],
   "notes": "Approved rows L0-L8 (jg, 2026-11-02). Out of scope: skybox, polish items (violet hue, A2 portal frame, A3 L-hall, telescope tip), audio, Lighting.Technology, saving the place, merging. Do not record-audit or self-audit.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0132-MathShow-Hub-Art-Lake.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T22:41:28",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T22:41:28",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
 }
