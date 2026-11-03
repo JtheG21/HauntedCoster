@@ -2,7 +2,7 @@
   "id": "TASK-0132",
   "game": "GAME-004",
   "title": "MathShow Hub Art-1 Batch 5: Lake, Terraces, Holo, Glyph Visuals",
-  "status": "review",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -53,6 +53,18 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T23:46:39",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T23:48:04",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -61,5 +73,13 @@
       "result": "pass",
       "notes": "Lake, terraces, 47 pine trees, holo symbols and Glyph visuals built at 42519a0; evidence docs/workflow/evidence/TASK-0132/art-lake.txt. +2 lights (hub 25), +381 instances, +12510 tris, 34 emitters Rate 5. Walk 10.4-11.6 s, 34/34 glyphs, pads, mid-match, collect/reject-retry/respawn, HUD, lake and edges, console clean. PineTree C2 picked by jg."
     }
-  ]
+  ],
+  "audits": [
+    {
+      "time": "2026-11-02T23:46:39",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0132-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
 }
