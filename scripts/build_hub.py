@@ -52,7 +52,7 @@ PALETTE = {
 	"night": (11, 20, 51),  # Night Navy #0B1433
 }
 
-MATERIAL = {"SmoothPlastic": 272, "Concrete": 816, "Slate": 800, "Neon": 288, "Glass": 1568, "Plastic": 256}
+MATERIAL = {"SmoothPlastic": 272, "Concrete": 816, "Slate": 800, "Neon": 288, "Glass": 1568, "Plastic": 256, "ForceField": 1584}
 SHAPE = {"Ball": 0, "Block": 1, "Cylinder": 2}
 
 PLAZA_R = 55.0
@@ -839,7 +839,7 @@ OBS_TRIM = 0.5
 TAN_8 = math.tan(math.pi / 8)
 OBS_WIN_ROWS = (40.0, 44.5, 49.0, 57.0, 61.5)
 OBS_BAND_Y = (37.0, 53.0, 66.5)
-OBS_TELESCOPE = {"scale": 1.5, "forward": 0.0, "side": 0.0, "yaw": 0.0}  # tuned against screenshots
+OBS_TELESCOPE = {"scale": 1.7, "forward": 2.0, "side": 0.0, "yaw": 0.0}  # tuned against screenshots
 
 
 def octagon_faces(cx: float, cz: float):
@@ -1076,7 +1076,7 @@ def add_props(hub: Node, e_fr: Frame, plaza: Node) -> None:
 	dome_y = OBS_PLACE["dome_y"]
 	cyan, tel = PALETTE["training"], OBS_TELESCOPE
 	folder_node.add(props["ObservatoryDome"].place("ObservatoryDome", (OBS_PLACE["x"], dome_y, OBS_PLACE["z"]), 0.0, color=cyan,
-		material="Neon", scale=OBS_DOME_SCALE))
+		material="ForceField", scale=OBS_DOME_SCALE))
 	folder_node.add(props["Telescope"].place("Telescope", (OBS_PLACE["x"] + tel["side"], dome_y + tel.get("lift", 0.0), OBS_PLACE["z"] + tel["forward"]),
 		tel["yaw"], color=PALETTE["amber"], material="SmoothPlastic", scale=tel["scale"]))
 	add_bunting(hub)
