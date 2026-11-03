@@ -3,7 +3,7 @@ id: TASK-0126
 title: "MathShow Hub Art-1 Batch 1: Plaza"
 type: task
 project: GAME-004
-status: review
+status: done
 priority: medium
 risk: low
 owner: claude-code

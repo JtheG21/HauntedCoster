@@ -2,7 +2,7 @@
   "id": "TASK-0126",
   "game": "GAME-004",
   "title": "MathShow Hub Art-1 Batch 1: Plaza",
-  "status": "review",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -65,6 +65,18 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T19:10:02",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T19:13:26",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -79,5 +91,13 @@
       "notes": "Revision 1 (jg rows): geometry inventory 22,718 new tris plus a same-camera baseline (parent 18,500, HEAD 36,886, streaming off, rendered delta 18,386); streaming-on figures unstable and superseded; ~1210x558 screenshots accepted as an explicit exception by jg. No code or map changes."
     }
   ],
-  "revisions": 1
+  "revisions": 1,
+  "audits": [
+    {
+      "time": "2026-11-02T19:10:02",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0126-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
 }
