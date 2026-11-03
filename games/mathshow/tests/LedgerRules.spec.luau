@@ -8,7 +8,7 @@ local VIEWPORTS = { "844x390", "1920x1080", "phone 812x375" }
 local function good(): { [string]: LedgerRules.Counts }
 	local c: { [string]: LedgerRules.Counts } = {}
 	for _, name in VIEWPORTS do
-		c[name] = { measured = 669, unmeasured = 284 }
+		c[name] = { measured = 682, unmeasured = 297 }
 	end
 	return c
 end
@@ -23,56 +23,56 @@ local function hasFailure(r: LedgerRules.Result, text: string): boolean
 end
 
 return function(t: TestRunner.T)
-	t.test("expected counts are 669 + 284 = 953", function()
-		t.eq(LedgerRules.ExpectedMeasured, 669)
-		t.eq(LedgerRules.ExpectedUnmeasured, 284)
-		t.eq(LedgerRules.ExpectedPerViewport, 953)
+	t.test("expected counts are 682 + 297 = 979", function()
+		t.eq(LedgerRules.ExpectedMeasured, 682)
+		t.eq(LedgerRules.ExpectedUnmeasured, 297)
+		t.eq(LedgerRules.ExpectedPerViewport, 979)
 	end)
 
 	t.test("all-correct counts pass", function()
 		local r = LedgerRules.reconcile(good(), VIEWPORTS)
 		t.eq(r.ok, true)
 		t.eq(#r.failures, 0)
-		t.eq(r.unmeasuredTotal, 284 * #VIEWPORTS)
+		t.eq(r.unmeasuredTotal, 297 * #VIEWPORTS)
 	end)
 
-	t.test("668 + 285 fails: the total is right, the split is not", function()
+	t.test("681 + 298 fails: the total is right, the split is not", function()
 		local c = good()
-		c["1920x1080"] = { measured = 668, unmeasured = 285 }
+		c["1920x1080"] = { measured = 681, unmeasured = 298 }
 		local r = LedgerRules.reconcile(c, VIEWPORTS)
 		t.eq(r.ok, false)
 		t.eq(#r.failures, 1)
 		t.eq(
-			hasFailure(r, "1920x1080: measured 668 (expected 669), unmeasured 285 (expected 284)"),
+			hasFailure(r, "1920x1080: measured 681 (expected 682), unmeasured 298 (expected 297)"),
 			true,
 			"names viewport and counts"
 		)
 	end)
 
-	t.test("670 + 283 fails", function()
+	t.test("683 + 296 fails", function()
 		local c = good()
-		c["phone 812x375"] = { measured = 670, unmeasured = 283 }
+		c["phone 812x375"] = { measured = 683, unmeasured = 296 }
 		local r = LedgerRules.reconcile(c, VIEWPORTS)
 		t.eq(r.ok, false)
-		t.eq(hasFailure(r, "phone 812x375: measured 670 (expected 669), unmeasured 283 (expected 284)"), true)
+		t.eq(hasFailure(r, "phone 812x375: measured 683 (expected 682), unmeasured 296 (expected 297)"), true)
 	end)
 
 	t.test("both wrong splits across two viewports fail separately", function()
 		local c = good()
-		c["844x390"] = { measured = 668, unmeasured = 285 }
-		c["1920x1080"] = { measured = 670, unmeasured = 283 }
+		c["844x390"] = { measured = 681, unmeasured = 298 }
+		c["1920x1080"] = { measured = 683, unmeasured = 296 }
 		local r = LedgerRules.reconcile(c, VIEWPORTS)
 		t.eq(r.ok, false)
 		t.eq(#r.failures, 2)
-		t.eq(r.unmeasuredTotal, 285 + 283 + 284, "total of unmeasured still sums, which is why per-viewport matters")
+		t.eq(r.unmeasuredTotal, 298 + 296 + 297, "total of unmeasured still sums, which is why per-viewport matters")
 	end)
 
 	t.test("a wrong total fails", function()
 		local c = good()
-		c["844x390"] = { measured = 669, unmeasured = 283 }
+		c["844x390"] = { measured = 682, unmeasured = 296 }
 		local r = LedgerRules.reconcile(c, VIEWPORTS)
 		t.eq(r.ok, false)
-		t.eq(hasFailure(r, "total 952 (expected 953)"), true)
+		t.eq(hasFailure(r, "total 978 (expected 979)"), true)
 	end)
 
 	t.test("a missing viewport fails", function()
@@ -94,7 +94,7 @@ return function(t: TestRunner.T)
 	t.test("inputs are not mutated", function()
 		local c = good()
 		LedgerRules.reconcile(c, VIEWPORTS)
-		t.eq(c["844x390"].measured, 669)
+		t.eq(c["844x390"].measured, 682)
 		t.eq(#VIEWPORTS, 3)
 	end)
 end
