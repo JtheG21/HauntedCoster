@@ -32,11 +32,11 @@
           0
         ],
         "size": 2,
-        "color": "#FFB547",
+        "color": "#FA7D12",
         "material": "Neon",
         "can_collide": false,
         "cast_shadow": false,
-        "note": "Pole top (5.0588) + 1 stud: the 2-stud Globe sits in the claw."
+        "note": "Pole top (5.0588) + 1 stud: the 2-stud Globe sits in the claw. Colour is tuned for Neon + Bloom 1.0: #FFB547 (and anything with green >= 130) renders lemon yellow, #FA7D12 reads amber. The PointLight stays #FFB547."
       },
       "pole": {
         "cast_shadow": false
