@@ -424,7 +424,9 @@ def build_competitive(zones: Node, e_fr: Frame) -> None:
 		):
 			comp.add(e_fr.block(f"Sign_{mode}_{name}", ARCH_A, b + bb, y, size, colour, material="Neon", **deco))
 		gui = plate.add(Node("SurfaceGui", "SignGui"))
-		gui.props += ['<token name="Face">5</token>', '<float name="LightInfluence">0</float>', '<bool name="AlwaysOnTop">false</bool>']
+		gui.props += ['<token name="Face">5</token>', '<float name="LightInfluence">0</float>', '<bool name="AlwaysOnTop">false</bool>',
+			'<token name="SizingMode">1</token>',
+			'<float name="PixelsPerStud">12</float>']  # SizingMode 1 = PixelsPerStud (FixedSize is 0): a 192 x 72 canvas, so TextScaled fills the plate unstretched
 		label = gui.add(Node("TextLabel", "Label"))
 		tr, tg, tb = (c / 255 for c in SIGN_TEXT[mode])
 		label.props += [

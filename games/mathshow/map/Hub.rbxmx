@@ -4642,6 +4642,8 @@
 							<token name="Face">5</token>
 							<float name="LightInfluence">0</float>
 							<bool name="AlwaysOnTop">false</bool>
+							<token name="SizingMode">1</token>
+							<float name="PixelsPerStud">12</float>
 						</Properties>
 						<Item class="TextLabel" referent="RBX000247">
 							<Properties>
@@ -4789,6 +4791,8 @@
 							<token name="Face">5</token>
 							<float name="LightInfluence">0</float>
 							<bool name="AlwaysOnTop">false</bool>
+							<token name="SizingMode">1</token>
+							<float name="PixelsPerStud">12</float>
 						</Properties>
 						<Item class="TextLabel" referent="RBX000256">
 							<Properties>
@@ -4936,6 +4940,8 @@
 							<token name="Face">5</token>
 							<float name="LightInfluence">0</float>
 							<bool name="AlwaysOnTop">false</bool>
+							<token name="SizingMode">1</token>
+							<float name="PixelsPerStud">12</float>
 						</Properties>
 						<Item class="TextLabel" referent="RBX000265">
 							<Properties>
