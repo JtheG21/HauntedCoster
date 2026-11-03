@@ -1,0 +1,43 @@
+{
+  "id": "TASK-0134",
+  "game": "GAME-004",
+  "title": "MathShow Menu Exit And Leave Watching",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/client/Menu/init.luau",
+    "games/mathshow/src/client/Menu/View.luau",
+    "games/mathshow/src/client/Menu/MenuTheme.luau",
+    "games/mathshow/src/client/Menu/Watching.luau",
+    "games/mathshow/src/client/init.client.luau",
+    "games/mathshow/src/client/Hud/init.luau",
+    "games/mathshow/src/shared/JoinRules.luau",
+    "games/mathshow/src/shared/MenuCopy.luau",
+    "games/mathshow/src/shared/Net.luau",
+    "games/mathshow/src/server/Remotes.luau",
+    "games/mathshow/src/server/Services/RoundService.luau",
+    "games/mathshow/tests/JoinRules.spec.luau",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0134-MathShow-Menu-Exit-And-Leave-Watching.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0134-menu-exit",
+  "acceptance": [
+    "Main menu has a visible CLOSE button (touch and mouse) and Esc/B closes it; closing sends nothing and leaves the player un-joined with the HUD hidden.",
+    "WATCHING banner has a visible LEAVE button; pressing it sends LeaveShow, the server clears joined and participant, and the player is back in the plaza with no banner and no HUD.",
+    "New LeaveShow remote: sender (Menu), handler (RoundService) and receiver (Hud via ShowState) updated together; rate limited and validated.",
+    "Specs for new pure logic; scripts/check.sh green; stop for jg review, not merged."
+  ],
+  "evidence": [],
+  "notes": "Requested after jg's TASK-0123 iPad playtest (jg_574 stuck on the main menu, then watching). Do not touch TASK-0123's worktree/files. No rojo serve or Studio while the TASK-0123 private playtest runs.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0134-MathShow-Menu-Exit-And-Leave-Watching.md",
+  "risk": "low",
+  "history": [
+    {
+      "time": "2026-11-03T13:00:00",
+      "from": "backlog",
+      "to": "in_progress",
+      "note": "started by jg's request via parent session"
+    }
+  ]
+}
