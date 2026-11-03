@@ -1,0 +1,43 @@
+{
+  "id": "TASK-0127",
+  "game": "GAME-004",
+  "title": "MathShow Hub Art-1 Batch 2: Competitive",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "games/mathshow/map/Hub.rbxmx",
+    "games/mathshow/map/props/",
+    "docs/workflow/evidence/TASK-0127/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0127-MathShow-Hub-Art-Competitive.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0127-art-competitive",
+  "acceptance": [
+    "ModeArch candidates (up to 3, <=300 tris, untextured) generated in a scratch place; jg picks one.",
+    "Competitive zone built by the generator only: Basalt Blue masses with Menu Violet Neon trim, window blocks, three ModeArch instances over the VS/Blitz/Group pads, SurfaceGui signs, perimeter wall; pad trigger volumes and ModePad tags unchanged.",
+    "Budgets: <=8 new PointLights (hub total <=40), <=600 new instances, <=20k new triangles.",
+    "Regression: walk times 8-12 s; all 34 GlyphSpawn markers reachable; pads open the right confirm screens and are blocked mid-match; HUD hides behind the menu.",
+    "Evidence at a clean BuildStamp: A2-framing screenshot at 844x390 beside A2_competitive_entrance.png, inventory counts, light total, clean console."
+  ],
+  "evidence": [],
+  "notes": "Approved rows C0-C6 (jg, 2026-11-02). Asset creation approved: up to 3 generate_mesh candidates for ModeArch only; stop and ask on any Robux cost; stop for jg's pick after candidates. Out of scope: other zones, skybox, holo symbols, Glyph visuals, pad logic, audio, Lighting.Technology, saving the place, merging. Do not record-audit or self-audit.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0127-MathShow-Hub-Art-Competitive.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T19:14:36",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T19:14:36",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}
