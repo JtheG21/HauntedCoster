@@ -203,6 +203,156 @@
           }
         ]
       }
+    },
+    {
+      "name": "ObservatoryDome",
+      "file": "ObservatoryDome.rbxmx",
+      "pivot": "base centre; the model's pivot is the origin and the base sits at y = 0",
+      "dome_light": {
+        "range": 45,
+        "brightness": 1.5,
+        "shadows": false,
+        "note": "one Holo Cyan PointLight on the mesh centre (A4: Range 45); colour comes from the placement"
+      },
+      "assets": {
+        "mesh_id": "rbxassetid://70374810362156",
+        "texture_id": null
+      },
+      "size": [
+        15.6055,
+        11.0,
+        15.6877
+      ],
+      "triangles": 800,
+      "collision_fidelity": "Box (CanCollide false, decoration)",
+      "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0131 (candidate C2 of 3, picked by jg 2026-11-02; maxTriangles 800, untextured). Exported from Studio scratch place, TASK-0131 rev1: a MeshPart from the existing mesh id (AssetService:CreateMeshPartAsync, native size), CanCollide false, CastShadow false, CollisionFidelity Box, serialized with SerializationService and converted with rojo build. No new generate_mesh call.",
+      "prompt": "Observatory dome, a hemisphere built from visible faceted triangular lattice panels with raised diagonal ribs, flat circular base ring, no windows, chunky low-poly, plain untextured single-colour surface.",
+      "dome": {
+        "cast_shadow": false
+      },
+      "collision_note": "Real Box collision data exported from Studio; the part never collides (decorative, above the terrace)."
+    },
+    {
+      "name": "Telescope",
+      "file": "Telescope.rbxmx",
+      "pivot": "base centre; the model's pivot is the origin and the base sits at y = 0",
+      "assets": {
+        "mesh_id": "rbxassetid://117401431585216",
+        "texture_id": null
+      },
+      "size": [
+        3.6826,
+        10.0,
+        6.7192
+      ],
+      "triangles": 398,
+      "collision_fidelity": "Box (CanCollide false, decoration)",
+      "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0131 (candidate C1 of 3, picked by jg 2026-11-02; maxTriangles 400, untextured). Exported from Studio scratch place, TASK-0131 rev1: a MeshPart from the existing mesh id (AssetService:CreateMeshPartAsync, native size), CanCollide false, CastShadow false, CollisionFidelity Box, serialized with SerializationService and converted with rojo build. No new generate_mesh call.",
+      "prompt": "Chunky low-poly observatory telescope on a mount: a thick tapered cylindrical tube pointing up at an angle, on a sturdy tripod-style stand with a rounded pivot yoke, simple readable shapes, plain untextured single-colour surface, game-ready.",
+      "telescope": {
+        "cast_shadow": false
+      },
+      "collision_note": "Real Box collision data exported from Studio; the part never collides (decorative, above the terrace)."
     }
-  ]
+  ],
+  "generation_history_task_0131": {
+    "note": "Every generate_mesh call in TASK-0131: 6 calls (3 per prop, the approved cap), none failed, no Robux cost seen. Dome C1's call timed out but the model still appeared in the scratch place. Triangle counts are EditableMesh face counts. Candidate screenshots (844x390) are outside the repo in ~/Roblox-Work/evidence/TASK-0131/candidates/.",
+    "calls": [
+      {
+        "prop": "ObservatoryDome",
+        "n": 1,
+        "prompt": "geodesic lattice half-sphere dome with rim ring and slit, maxTriangles 800, untextured, size 22x12x22",
+        "result": "candidate C1 (call timed out, model appeared in scratch)",
+        "triangles": 800,
+        "mesh_id": "rbxassetid://76393790341028",
+        "texture_id": "rbxassetid://87807482904109",
+        "size": [
+          11.97,
+          12.0,
+          11.98
+        ],
+        "outcome": "discarded"
+      },
+      {
+        "prop": "ObservatoryDome",
+        "n": 2,
+        "prompt": "hemisphere of faceted triangular lattice panels with raised diagonal ribs, flat base ring, maxTriangles 800, untextured, size 22x11x22",
+        "result": "candidate C2",
+        "triangles": 800,
+        "mesh_id": "rbxassetid://70374810362156",
+        "texture_id": "rbxassetid://107660586510939",
+        "published_asset_id": "121097388843099",
+        "size": [
+          15.61,
+          11.0,
+          15.69
+        ],
+        "outcome": "picked"
+      },
+      {
+        "prop": "Telescope",
+        "n": 1,
+        "prompt": "tapered tube on tripod stand with pivot yoke, maxTriangles 400, untextured, size 5x10x10",
+        "result": "candidate C1",
+        "triangles": 398,
+        "mesh_id": "rbxassetid://117401431585216",
+        "texture_id": "rbxassetid://120110412525868",
+        "published_asset_id": "87870432759576",
+        "size": [
+          3.68,
+          10.0,
+          6.72
+        ],
+        "outcome": "picked"
+      },
+      {
+        "prop": "ObservatoryDome",
+        "n": 3,
+        "prompt": "wide flattened hemisphere, thick crossing arc ribs lattice, heavy base ring, small hub on top, maxTriangles 800, untextured, size 22x11x22",
+        "result": "candidate C3",
+        "triangles": 778,
+        "mesh_id": "rbxassetid://123126442969465",
+        "texture_id": "rbxassetid://84310065344070",
+        "published_asset_id": "80067263775861",
+        "size": [
+          12.57,
+          11.0,
+          12.56
+        ],
+        "outcome": "discarded"
+      },
+      {
+        "prop": "Telescope",
+        "n": 2,
+        "prompt": "refracting telescope, fat tube with lens-hood ring, Y cradle on short pedestal, tilted 45 deg, maxTriangles 400, untextured, size 5x10x10",
+        "result": "candidate C2",
+        "triangles": 400,
+        "mesh_id": "rbxassetid://138312757426924",
+        "texture_id": "rbxassetid://119477990060783",
+        "published_asset_id": "105538073379683",
+        "size": [
+          4.76,
+          9.29,
+          10.0
+        ],
+        "outcome": "discarded"
+      },
+      {
+        "prop": "Telescope",
+        "n": 3,
+        "prompt": "reflector telescope, stubby barrel tube on heavy box base with pivot axle, tilted steeply, maxTriangles 400, untextured, size 5x10x10",
+        "result": "candidate C3",
+        "triangles": 400,
+        "mesh_id": "rbxassetid://119337289181586",
+        "texture_id": "rbxassetid://97569696452074",
+        "published_asset_id": "77781338205521",
+        "size": [
+          4.11,
+          10.0,
+          9.91
+        ],
+        "outcome": "discarded"
+      }
+    ]
+  }
 }

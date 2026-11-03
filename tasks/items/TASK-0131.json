@@ -1,0 +1,113 @@
+{
+  "id": "TASK-0131",
+  "game": "GAME-004",
+  "title": "MathShow Hub Art-1 Batch 4: Observatory + Ranks",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "games/mathshow/map/Hub.rbxmx",
+    "games/mathshow/map/props/ObservatoryDome.rbxmx",
+    "games/mathshow/map/props/Telescope.rbxmx",
+    "games/mathshow/map/props/manifest.json",
+    "docs/workflow/evidence/TASK-0131/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0131-MathShow-Hub-Art-Observatory.md",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md",
+    "AGENTS.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0131-art-observatory",
+  "acceptance": [
+    "ObservatoryDome (<=800 tris, untextured) and Telescope (<=400 tris, untextured) generated with at most 3 generate_mesh calls each, every asset id recorded in manifest.json; candidates screenshotted at 844x390 and picked by jg.",
+    "Observatory: tall octagonal Basalt Blue tower with Holo Cyan Neon trim and amber/cyan window blocks (no window lights) on the highest terrace; dome on top (Holo Cyan, CastShadow false) with ONE PointLight (Holo Cyan, Range 45); telescope in or through the dome; DAILY SurfaceGui sign over the entrance; Daily pad part, tag, attribute and size unchanged.",
+    "Ranks hall (SW): Basalt Blue masses with Lamp Amber Neon trim, RANKS sign, 9 tier podiums inside the entrance in IdentityTheme Tier.*.Rgb colours; decorative only.",
+    "Budgets: <=8 new PointLights (hub <=28), <=600 new instances, <=20k new triangles (inventory metric); collider guard passes.",
+    "Regression at a clean BuildStamp: fresh-Play walk times and reachability, Daily locked toast, mid-match block, HUD, console clean.",
+    "Evidence in docs/workflow/evidence/TASK-0131/art-observatory.txt with measured SHA and applies_to; A1-framing screenshot beside A1_spawn_view.png."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0131/art-observatory.txt"
+  ],
+  "notes": "Approved rows O0-O6 (jg, 2026-11-02). ID: next-id returned TASK-0130 but that ID is in use by Codex's walk-length worktree (uncommitted task file), so TASK-0131 was taken to avoid an add/add collision. Out of scope: lake/terraces art, holo symbols, Glyph visuals, polish items, skybox, pad logic, audio, Lighting.Technology, saving the place, merging. Do not record-audit or self-audit.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0131-MathShow-Hub-Art-Observatory.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T21:26:04",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T21:26:04",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T21:53:11",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T21:59:13",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "changes requested by jg: Rev 1 rows P0-P6: re-export props from a Studio scratch place, brief light total, AGENTS.md ID rule; revision 1/2"
+    },
+    {
+      "time": "2026-11-02T21:59:13",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T22:07:38",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T22:20:17",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T22:26:24",
+      "from": "approved",
+      "to": "approved",
+      "note": "audit report copied unchanged from /Users/jg/Roblox-Work/evidence/TASK-0131/AUD-20261102-TASK-0131-01.md into 06 QA/; reference repointed, verdict unchanged (row M9, jg)"
+    },
+    {
+      "time": "2026-11-02T22:26:24",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T21:53:11",
+      "result": "pass",
+      "notes": "Observatory and Ranks hall built at 246b967; evidence docs/workflow/evidence/TASK-0131/art-observatory.txt. +3 lights (hub 23), +213 instances, +6574 tris. Walk times 10.4-11.6 s, 34/34 glyphs, pads/Daily toast/mid-match/HUD ok. Dome C2 and Telescope C1 picked by jg."
+    },
+    {
+      "time": "2026-11-02T22:07:38",
+      "result": "pass",
+      "notes": "Rev 1: props re-exported from Studio scratch place at 6ce3ca8; picks Dome C2, Telescope C1; before/after render identical; regression repeated (walk 9.7-11.6 s, 34/34 glyphs, pads, Daily toast, mid-match, HUD, console clean); brief 23 of 40; AGENTS.md ID rule."
+    }
+  ],
+  "revisions": 1,
+  "audits": [
+    {
+      "time": "2026-11-02T22:20:17",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0131-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
+}
