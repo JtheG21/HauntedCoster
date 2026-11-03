@@ -1,0 +1,59 @@
+# TASK-0125 art pilot: Studio checks
+# measured git HEAD: a1a77f3 (BuildStamp in Studio: "a1a77f3 2026-11-02T23:26:59Z", no +dirty; served by scripts/serve.sh from the TASK-0125 worktree; Rojo plugin 7.7.0, MathShow.rbxl, place NOT saved)
+# applies_to: any later commit whose diff from a1a77f3 does not touch games/mathshow/map/**, scripts/build_hub.py or mathshow.project.json.
+# Screenshots (outside the vault): ~/Roblox-Work/evidence/TASK-0125/
+
+## A1 generation (scratch place, a copy of MathShow.rbxl; Rojo not connected there)
+generate_mesh states no cost or quota in its description or result (result is only generationName + tag). No Robux amount was shown. 3 candidates generated, maxTriangles 2000, segmentation none:
+  Cand1 chunky street lamp   mesh 102637895288328 tex 70738849024941  1568 tris
+  Cand2 victorian lamp       mesh 103394894312430 tex 135015834962386 1880 tris
+  Cand3 modern park lamp     mesh 105914018615825 tex 112557367926447 1486 tris   <- chosen
+Triangles = EditableMesh:GetFaces() count of the mesh asset. Screenshot: candidates_1_2_3.jpg (left to right).
+Choice: Cand3 has the chunkiest silhouette, a true round globe, a dark pole and the fewest triangles. Weakness: all three baked their globe cream-white, not amber; under the PointLight it reads amber (see shadowmap_lamps_844x390.jpg).
+
+## A2 export
+Studio SerializationService -> scripts/studio_transfer.py -> LampPost.rbxm -> rojo build -> games/mathshow/map/props/LampPost.rbxmx (attempt 1 of 2 on the approach; it worked).
+Size 1.9985 x 8.1416 x 2, pivot at the base centre. CollisionFidelity Box (set in Studio before export; stored in the file as PhysicalConfigData BLOCK, there is no CollisionFidelity element). Anchored true.
+Box justification: the hull of a base-pole-globe shape is nearly the 2 x 8.1 x 2 box, so Box is the cheapest collider that fits.
+
+## A5a render (MathShow.rbxl after a fresh Rojo sync)
+5 lamps LampPost_E01..E05 at x = 63, 78, 93, 108, 123, z = -/+6 alternating (y 4.2708 = path top 0.2 + half height). Every lamp reads back mesh rbxassetid://105914018615825, texture rbxassetid://112557367926447, size 1.9985 x 8.1416 x 2, fidelity Box, anchored; PointLight (1, 0.7098, 0.2784) range 16 brightness 2.5 shadows false at y 7.37.
+844x390 east path screenshot: shadowmap_lamps_844x390.jpg. 1920x1080 screenshot: NOT OBTAINED (see 'Not done' below).
+
+## A5b collision (Server data model, WalkSpeed 16)
+Walking east along z = 6.0084 into lamp E01 (pole x 62.01..64.01) stopped at x = 61.41. Control walk along z = 2 reached x = 71.23.
+Pad: walking z = 0 from x = 56 to 150 fired ModePadOpen screen confirm_blitz at the Blitz pad. Glyphs: the HUD counter went 0 -> 1 on the same walk.
+Walk times (PathfindingService, radius 2, height 5, can jump, /16): spawn -> Blitz 167.1 studs = 10.4 s; centre -> Blitz 150.1 = 9.4 s. TASK-0120 baseline: 164.5 = 10.2 s and 150 = 9.3 s. Control, same session with the Props folder deleted: spawn -> Blitz 164.6 studs = 10.3 s, centre -> Blitz 150.1 = 9.4 s. So the lamps add 2.5 studs (+0.1 s) to spawn -> Blitz (the route bends round the pole boxes) and 0 to centre -> Blitz. Both stay inside the 8-12 s window.
+
+## A5d console (fresh Play)
+"[MathShow] ModePadService: 6 pads" printed. No errors from MathShow. Only the known "ContentId: rbxassetid://203785492 failed due to: Asset type does not match requested type" (also in TASK-0120).
+
+## A5c perf
+Method: Play (fresh session), client data model, fixed camera (44,7,-3)->(100,5,1) FOV 70, character parked at (50,3.6,0), 4 s of per-frame samples of Stats.RenderGPUFrameTime / RenderCPUFrameTime, scene counts from Stats.*. Graphics quality pinned to Level21 for every run (Automatic dropped shadows when frames were slow, which made runs incomparable); restored to Automatic afterwards. Menu UI left on (same in every run). "No lamps" = Workspace.Hub.Props destroyed from the Server data model in the same Play session, since Rojo restores the folder at each Play start. Technology: ShadowMap = MathShow.rbxl as is; Future = scratch copy made with Lune (Lighting.Technology = Future), synced by Rojo at the same stamp, Baseplate and SpawnLocation deleted; neither place saved. Technology cannot be read from script; the Future copy's value was read back by Lune (ShadowMap -> Future).
+Machine: Mac, not a phone. Emulated devices: iPhone 13 (client viewport 749x388) and Android TV 1080p (1920x1080 emulation; client viewport 1728x972).
+
+| Technology | Viewport | Lamps | GPU avg ms | GPU max ms | CPU avg ms | Scene tris | Shadow tris | Draws / shadow draws | Lights |
+|---|---|---|---|---|---|---|---|---|---|
+| ShadowMap | 844x390 | 0 (before) | 1.82 | 9.40 | 15.59 | 11858 | 49612 | 21 / 45 | 0 |
+| ShadowMap | 844x390 | 5 (after) | 1.84 | 9.94 | 15.55 | 19288 | 62966 | 22 / 49 | 5 |
+| Future | 844x390 | 0 (before) | 4.37 | 26.68 | 10.62 | 11844 | 49540 | 19 / 41 | 0 |
+| Future | 844x390 | 5 (after) | 4.78 | 14.18 | 12.69 | 19274 | 62894 | 20 / 45 | 5 |
+| ShadowMap | 1920x1080 | 0 (before) | 126.87 | 171.60 | 68.21 | 11798 | 49248 | 21 / 45 | 0 |
+| ShadowMap | 1920x1080 | 5 (after) | 122.58 and 124.48 (two runs) | 161.13 | 64.30 | 19228 | 61252 | 22 / 49 | 5 |
+| Future | 1920x1080 | 0 (before) | 128.38 | 182.75 | 76.52 | 11784 | 49176 | 19 / 41 | 0 |
+| Future | 1920x1080 | 5 (after) | 122.42 | 169.38 | 72.51 | 19214 | 61044 | 20 / 45 | 5 |
+
+Reading:
+- The lamps add 7430 scene triangles in every row (5 x 1486), about 12-13k shadow triangles, 1 scene draw and 4 shadow draws.
+- At 844x390 the lamps cost +0.02 ms on ShadowMap (noise) and +0.41 ms on Future (GPU avg). Both are far inside a 16.7 ms frame. Future costs about 2.5-2.9 ms more than ShadowMap here, in line with TASK-0120's A/B (+0.5 ms there, measured with Automatic quality).
+- At 1920x1080 on this Mac the GPU time is 120-128 ms (8-15 fps) in all eight configurations, so it is saturated and does not separate ShadowMap from Future or lamps from no lamps (the differences are inside the run-to-run noise of about 2-4 ms). TASK-0120 recorded 6.59 and 8.05 ms at 1080p with Automatic quality; those numbers are not reproducible here with quality pinned to Level21 and are not comparable. Treat the 1080p GPU column as "no measurable lamp cost", not as a Future-vs-ShadowMap result. A real phone is still the number that matters.
+- Lights: 5 PointLights, shadows off, so Future adds no per-light shadow pass.
+
+## A5a round trip (AC1)
+Rojo-built lamp (LampPost_E01 in the hub) and a Studio-built MeshPart from the same mesh and texture ids and size, 5 studs apart in the Future copy: they render identically (roundtrip_hub_vs_studio_844x390_future.jpg; the nearer lamp is the hub one). Property read-back: mesh, texture and size equal.
+Note: the original scratch lamp's window was closed before this shot, so the comparison object is rebuilt from the same asset ids, not the literal first instance.
+
+## Not done / caveats
+- 1920x1080 screenshot of the east path: Studio MCP screen_capture times out at that size, and the pane only shows a small crop of the viewport. Not obtained. The 844x390 shots are in ~/Roblox-Work/evidence/TASK-0125/.
+- Globe colour: the baked texture is cream-white; it reads amber only under the PointLight. A recolour or a Neon globe is a follow-up for the art pass, not this pilot.
+- Studio quality setting changed during the runs and restored to Automatic in both windows.
