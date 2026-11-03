@@ -468,10 +468,7 @@ def build() -> Node:
 	zones.add(w_fr.block("Court_Training", 158, 0, 0, (60, 0.4, 66), PALETTE["path"]))
 	for mode, b in (("Practice", -18), ("Skill", 18)):
 		pad(w_fr, mode, 150, b, PATH_TOP, PALETTE["training"])
-	zones.add(w_fr.block("Ladder_Board", 188, 0, 9, (36, 14, 1.5), PALETTE["training"]))
-	for i in range(5):
-		h = 1.5 * (i + 1)
-		zones.add(w_fr.block(f"Ladder_Step{i + 1}", 178, -16 + 8 * i, h / 2, (6, h, 4), PALETTE["training"]))
+	build_training(zones, w_fr)
 
 	# SW: Ranks hall (walls, roof, stairs up to the roof).
 	sw_fr = add_path("SW", PLAZA_R + 1, 126)
@@ -552,6 +549,146 @@ def build() -> Node:
 			origin_override=(LAKE_C[0] + 50 * math.cos(ang), LAKE_C[1] + 50 * math.sin(ang)))
 	add_props(hub, e_fr, plaza)
 	return hub
+
+
+# --- Training zone (TASK-0129): hall, pad rings and signs, rank ladder, TRAINING sign -------------------------------------
+# West path: out = -X, so the Frame's lateral b = +Z, and a viewer walking out from the plaza sees b < 0 on their right.
+
+TRAIN_PADS = (("Practice", -18, "PRACTICE"), ("Skill", 18, "SKILL TEST"))  # Mode, b, sign text (pads themselves: build())
+HALL_A0, HALL_DEPTH, HALL_H = 178.0, 14.0, 18.0
+TRAIN_TRIM = 0.4  # Neon strips
+TRAIN_WALL_H, TRAIN_WALL_T = 2.4, 1.2
+TRAIN_WALL_GAP = 10.0  # half-width of the opening in the front wall (the path is 14 wide)
+HALL_GAP = 12.0  # half-width of the entrance
+HALL_HALF = 30.0
+LINTEL_Y0 = 10.0  # the entrance is 10 high
+RING_R, RING_W, RING_H, RING_SEGS = 6.6, 0.35, 0.15, 16
+PAD_SIGN_SIZE = (12.0, 3.0, 0.5)
+PAD_SIGN_Y = 8.5
+TRAIN_SIGN_SIZE = (40.0, 8.0, 0.6)  # letters ~6 studs: about 13 px at 844x390 from the path start, 122 studs away
+TRAIN_SIGN_Y = 14.2
+# Rank colours: games/mathshow/src/client/Identity/IdentityTheme.luau, Tier.<id>.Rgb (nine tiers, Plastic to Demon).
+RANK_RGB = (
+	("plastic", (235, 230, 215)),
+	("bronze", (230, 150, 90)),
+	("copper", (214, 112, 70)),
+	("silver", (220, 228, 240)),
+	("gold", (255, 200, 60)),
+	("emerald", (40, 214, 140)),
+	("platinum", (190, 240, 255)),
+	("diamond", (110, 210, 255)),
+	("demon", (255, 60, 40)),
+)
+TRAIN_ANNEXES = (  # name, a0, depth, b0, b1, height
+	("Annex_N", 170.0, 14.0, 36.0, 50.0, 9.0),
+	("Annex_S", 172.0, 14.0, -50.0, -36.0, 11.0),
+)
+TRAIN_LAMPS = ((130.0, -9.0), (130.0, 9.0))  # a, b: flank the court entrance, outside the 14-wide path
+
+
+def sign_plate(parent: Node, fr: Frame, name: str, a: float, b: float, y: float, size, text: str, colour, text_colour,
+		trim_colour=None) -> None:
+	"""A Basalt plate with a Neon frame and a SurfaceGui label on its Front face (which looks back along the path, to the plaza)."""
+	sx, sy, sz = size
+	deco = dict(collide=False, query=False, cast_shadow=False)
+	plate = parent.add(fr.block(name, a, b, y, size, PALETTE["slot"], **deco))
+	for tag, bb, yy, sz3 in (
+		("Top", 0, y + sy / 2 - TRAIN_TRIM / 2, (sx, TRAIN_TRIM, sz + 0.1)),
+		("Bottom", 0, y - sy / 2 + TRAIN_TRIM / 2, (sx, TRAIN_TRIM, sz + 0.1)),
+		("Left", -(sx / 2 - TRAIN_TRIM / 2), y, (TRAIN_TRIM, sy - 2 * TRAIN_TRIM, sz + 0.1)),
+		("Right", sx / 2 - TRAIN_TRIM / 2, y, (TRAIN_TRIM, sy - 2 * TRAIN_TRIM, sz + 0.1)),
+	):
+		parent.add(fr.block(f"{name}_{tag}", a, b + bb, yy, sz3, colour, material="Neon", **deco))
+	gui = plate.add(Node("SurfaceGui", "SignGui"))
+	gui.props += ['<token name="Face">5</token>', '<float name="LightInfluence">0</float>', '<bool name="AlwaysOnTop">false</bool>',
+		'<token name="SizingMode">1</token>', '<float name="PixelsPerStud">12</float>']  # 1 = PixelsPerStud (FixedSize is 0)
+	label = gui.add(Node("TextLabel", "Label"))
+	tr, tg, tb = (c / 255 for c in text_colour)
+	label.props += [
+		f'<string name="Text">{text}</string>',
+		'<token name="Font">20</token>',  # GothamBlack
+		'<bool name="TextScaled">true</bool>',
+		f'<Color3 name="TextColor3"><R>{f(tr)}</R><G>{f(tg)}</G><B>{f(tb)}</B></Color3>',
+		'<float name="BackgroundTransparency">1</float>',
+		'<int name="BorderSizePixel">0</int>',
+		'<UDim2 name="Size"><XS>0.92</XS><XO>0</XO><YS>0.82</YS><YO>0</YO></UDim2>',
+		'<UDim2 name="Position"><XS>0.04</XS><XO>0</XO><YS>0.09</YS><YO>0</YO></UDim2>',
+	]
+
+
+def build_training(zones: Node, w_fr: Frame) -> None:
+	zone = zones.add(folder("Training"))
+	basalt, cyan, amber = PALETTE["slot"], PALETTE["training"], PALETTE["amber_neon"]
+	deco = dict(collide=False, query=False, cast_shadow=False)
+
+	def window(i: int, j: int):
+		if (i + 2 * j) % 5 == 0:
+			return None
+		return amber if (i * 7 + j * 3) % 7 in (2, 5) else cyan
+
+	def mass(name, a0, depth, b0, b1, y0, y1, windows_to=None):
+		bc, w, h = (b0 + b1) / 2, b1 - b0, y1 - y0
+		zone.add(w_fr.block(name, a0 + depth / 2, bc, (y0 + y1) / 2, (w, h, depth), basalt, cast_shadow=False))
+		zone.add(w_fr.block(f"{name}_RoofTrim", a0 - TRAIN_TRIM / 2, bc, y1 - TRAIN_TRIM / 2, (w, TRAIN_TRIM, TRAIN_TRIM), cyan, material="Neon", **deco))
+		top = windows_to if windows_to is not None else y1
+		cols, rows = max(2, int(w // 5)), max(1, int((top - y0 - 3) // 4.5))
+		for i in range(cols):
+			for j in range(rows):
+				colour = window(i, j)
+				if colour is None:
+					continue
+				b = bc + (i - (cols - 1) / 2) * (w - 4) / max(cols - 1, 1)
+				zone.add(w_fr.block(f"{name}_Win{i}{j}", a0 - 0.05, b, y0 + 4.0 + j * 4.5, (1.8, 1.8, 0.3), colour, material="Neon", **deco))
+
+	# Hall: two wings, a lintel over the 24-wide entrance, a back wall closing the alcove.
+	mass("Hall_WingN", HALL_A0, HALL_DEPTH, HALL_GAP, HALL_HALF, 0.0, HALL_H, windows_to=LINTEL_Y0 + 4)
+	mass("Hall_WingS", HALL_A0, HALL_DEPTH, -HALL_HALF, -HALL_GAP, 0.0, HALL_H)
+	zone.add(w_fr.block("Hall_Lintel", HALL_A0 + HALL_DEPTH / 2, 0, (LINTEL_Y0 + HALL_H) / 2, (2 * HALL_GAP, HALL_H - LINTEL_Y0, HALL_DEPTH),
+		basalt, cast_shadow=False))
+	zone.add(w_fr.block("Hall_LintelTrim", HALL_A0 - TRAIN_TRIM / 2, 0, LINTEL_Y0 + TRAIN_TRIM / 2, (2 * HALL_GAP, TRAIN_TRIM, TRAIN_TRIM), cyan, material="Neon", **deco))
+	for side in (-1, 1):
+		zone.add(w_fr.block(f"Hall_DoorTrim{side}", HALL_A0 - TRAIN_TRIM / 2, side * (HALL_GAP - TRAIN_TRIM / 2), LINTEL_Y0 / 2, (TRAIN_TRIM, LINTEL_Y0, TRAIN_TRIM),
+			cyan, material="Neon", **deco))
+	zone.add(w_fr.block("Hall_Back", HALL_A0 + HALL_DEPTH + 1, 0, HALL_H / 2, (2 * HALL_HALF, HALL_H, 2), basalt, cast_shadow=False))
+	for name, a0, depth, b0, b1, h in TRAIN_ANNEXES:
+		mass(name, a0, depth, b0, b1, 0.0, h)
+
+	# Low perimeter wall with a Holo Cyan Neon top strip: the front (path gap) and both sides up to the hall.
+	front_a, side_len = 127.0, HALL_A0 - 127.0
+	front_len = HALL_HALF - TRAIN_WALL_GAP
+	for name, a, b, size in (
+		("Wall_FrontN", front_a, (HALL_HALF + TRAIN_WALL_GAP) / 2, (front_len, TRAIN_WALL_H, TRAIN_WALL_T)),
+		("Wall_FrontS", front_a, -(HALL_HALF + TRAIN_WALL_GAP) / 2, (front_len, TRAIN_WALL_H, TRAIN_WALL_T)),
+		("Wall_SideN", front_a + side_len / 2, HALL_HALF - 0.5, (TRAIN_WALL_T, TRAIN_WALL_H, side_len)),
+		("Wall_SideS", front_a + side_len / 2, -(HALL_HALF - 0.5), (TRAIN_WALL_T, TRAIN_WALL_H, side_len)),
+	):
+		zone.add(w_fr.block(name, a, b, TRAIN_WALL_H / 2, size, basalt, cast_shadow=False))
+		zone.add(w_fr.block(name + "_Strip", a, b, TRAIN_WALL_H + TRAIN_TRIM / 2, (size[0], TRAIN_TRIM, size[2]), cyan, material="Neon", **deco))
+
+	# Pad rings and signs. The pads themselves are made in build(); nothing here touches them.
+	for mode, b, text in TRAIN_PADS:
+		cx, cz = w_fr.world(150.0, b)
+		for k in range(RING_SEGS):
+			ang = 2 * math.pi * (k + 0.5) / RING_SEGS
+			ff = Frame((math.cos(ang), math.sin(ang)), (cx, cz))
+			chord = 2 * RING_R * math.tan(math.pi / RING_SEGS) + 0.2
+			zone.add(ff.block(f"Ring_{mode}_{k:02d}", RING_R, 0, PATH_TOP + RING_H / 2 + 0.05, (chord, RING_H, RING_W), cyan, material="Neon", **deco))
+		sx, sy, sz = PAD_SIGN_SIZE
+		for side in (-1, 1):
+			zone.add(w_fr.block(f"Sign_{mode}_Post{side}", 150.0, b + side * (sx / 2 - 0.5), PAD_SIGN_Y / 2 - sy / 2, (0.6, PAD_SIGN_Y - sy / 2, 0.6),
+				basalt, **deco))
+		sign_plate(zone, w_fr, f"Sign_{mode}", 150.0, b, PAD_SIGN_Y, PAD_SIGN_SIZE, text, cyan, cyan)
+
+	# TRAINING sign across the hall facade, over the entrance.
+	sign_plate(zone, w_fr, "Sign_Training", HALL_A0 - 0.7, 0.0, TRAIN_SIGN_Y, TRAIN_SIGN_SIZE, "TRAINING", cyan, (190, 250, 255))
+
+	# Rank ladder: nine stepped bars, Plastic to Demon, SmoothPlastic with Neon caps, decorative, in front of the north wing.
+	bar_w, bar_depth, step = 1.8, 3.0, 1.2
+	for i, (tier, rgb) in enumerate(RANK_RGB):
+		b = HALL_GAP + 1.0 + bar_w / 2 + 1.9 * i
+		h = step * (i + 1)
+		zone.add(w_fr.block(f"Ladder_{i + 1}_{tier}", HALL_A0 - 2.5, b, h / 2, (bar_w, h, bar_depth), rgb, **deco))
+		zone.add(w_fr.block(f"Ladder_{i + 1}_{tier}_Cap", HALL_A0 - 2.5, b, h + 0.2, (bar_w, 0.4, bar_depth), rgb, material="Neon", **deco))
 
 
 # Lamp placements along the east path, one every LAMP_SPACING studs, alternating sides just inside the path edge (TASK-0125).
@@ -638,6 +775,11 @@ def add_props(hub: Node, e_fr: Frame, plaza: Node) -> None:
 		x, z = RIM_LAMP_R * math.cos(ang), RIM_LAMP_R * math.sin(ang)
 		folder_node.add(lamp.place(f"LampPost_R{i + 1:02d}", (x, 0.0, z)))
 		RIM_LAMPS.append({"name": f"LampPost_R{i + 1:02d}", "x": x, "z": z})
+	w_fr = Frame((-1, 0))
+	for i, (a, b) in enumerate(TRAIN_LAMPS):
+		wx, wz = w_fr.world(a, b)
+		folder_node.add(lamp.place(f"LampPost_W{i + 1:02d}", (wx, PATH_TOP, wz)))
+		LAMPS.append({"name": f"LampPost_W{i + 1:02d}", "x": wx, "z": wz})
 	# Plaza props: the crystal floats above the plinth cap (top y = 1.8); the hex plate sits at the spawn, top at y = 0.5.
 	plaza.add(props["RankCrystal"].place("RankCrystal", (0.0, 3.2, 0.0)))
 	plaza.add(props["SpawnHex"].place("SpawnHex", (0.0, -0.5, SPAWN_Z)))
