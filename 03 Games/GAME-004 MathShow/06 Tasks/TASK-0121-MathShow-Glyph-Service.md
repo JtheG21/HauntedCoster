@@ -3,7 +3,7 @@ id: TASK-0121
 title: "MathShow Glyph Service"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: claude-code

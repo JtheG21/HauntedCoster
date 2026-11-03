@@ -2,7 +2,7 @@
   "id": "TASK-0119",
   "game": "GAME-004",
   "title": "MathShow Glyph Rules",
-  "status": "approved",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "codex",
   "files_owned": [
@@ -47,6 +47,12 @@
       "from": "review",
       "to": "approved",
       "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T17:27:07",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "audits": [
@@ -55,5 +61,6 @@
       "result": "pass",
       "report": "06 QA/AUD-20261101-TASK-0119-01.md"
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }
