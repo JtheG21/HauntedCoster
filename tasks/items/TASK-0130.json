@@ -1,0 +1,62 @@
+{
+  "id": "TASK-0130",
+  "game": "GAME-004",
+  "title": "MathShow Hub Walk-Length Test",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "codex",
+  "files_owned": [
+    "scripts/hub_nav.py",
+    "tests/test_hub_walk.py",
+    "docs/workflow/STUDIO-SYNC.md",
+    "tasks/items/TASK-0130.json",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0130-MathShow-Hub-Walk-Length-Test.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0130-walk-length",
+  "acceptance": [
+    "Pure stdlib 1-stud collision heightfield and A* routes to pads and glyphs.",
+    "Every spawn and plaza-centre pad route takes 8-12 seconds at WalkSpeed 16; all glyphs reachable.",
+    "Calibration against TASK-0129 latest and TASK-0127 rev1 within 10%; stop on mismatch.",
+    "Checks pass, push and open PR; CI green, no merge."
+  ],
+  "evidence": [],
+  "notes": "jg approved W1-W6 on 2026-11-02. Only listed files; no games changes. W4 requires stopping on calibration mismatch.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0130-MathShow-Hub-Walk-Length-Test.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T21:19:18",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T21:19:18",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T21:22:32",
+      "from": "in_progress",
+      "to": "changes_requested",
+      "note": "execution checks failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-02T21:59:36",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T21:22:32",
+      "result": "fail",
+      "notes": "W4 calibration stop: TASK-0127 rev1 Glyph_C_E4 -10.91%, Glyph_C_SE1 -13.59%. No fitting constants. Prototype and full calibration tables in task note; no gate promotion or PR."
+    }
+  ],
+  "revisions": 1
+}
