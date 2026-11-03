@@ -2,7 +2,7 @@
   "id": "TASK-0127",
   "game": "GAME-004",
   "title": "MathShow Hub Art-1 Batch 2: Competitive",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -38,6 +38,19 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-02T19:52:39",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T19:52:39",
+      "result": "pass",
+      "notes": "Competitive zone built at d21894f; evidence docs/workflow/evidence/TASK-0127/art-competitive.txt. Budgets: +5 lights (hub 18), +106 instances, +3924 tris. Walk times 9.9-11.9 s (VS +1.1 s from the front wall), 34/34 glyphs, pads/HUD ok. Deviations from A2: VS on the viewer's right (pad layout), violet reads magenta."
     }
   ]
 }
