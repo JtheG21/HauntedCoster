@@ -17,10 +17,11 @@
     "Two real clients on a private test place show per-player GlyphState (each client's collected glyphs and counter independent).",
     "Two real clients show per-player ModePadOpen: the player on a pad gets it, the other gets nothing; both client consoles captured.",
     "Mid-match block verified with two clients: a player in the match gets no ModePadOpen on a pad while the other player, not in the match, does.",
-    "Evidence log with the measured SHA and an applies_to line; no errors in either console."
+    "Evidence log with the measured SHA and an applies_to line; no errors in either console.",
+    "Real-device FPS/MicroProfiler capture on phone + desktop for the hub (ShadowMap), with the device, build SHA and an applies_to line."
   ],
   "evidence": [],
-  "notes": "Created by jg's option A decision on TASK-0122 (S4d deferred as an accepted risk; the Studio multi-client test failed to join a second client twice, likely memory pressure on an 8 GB Mac). Publishing the private test place needs jg's explicit approval; do not publish without it. Out of scope: code changes beyond test scaffolding, DataStore, merging.",
+  "notes": "Created by jg's option A decision on TASK-0122 (S4d deferred as an accepted risk; the Studio multi-client test failed to join a second client twice, likely memory pressure on an 8 GB Mac). Publishing the private test place needs jg's explicit approval; do not publish without it. Out of scope: code changes beyond test scaffolding, DataStore, merging. Scope extended by jg on 2026-11-02 (TASK-0125 re-scope): real-device FPS/MicroProfiler capture on phone + desktop for the hub (ShadowMap).",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0123-MathShow-Multiplayer-Playtest.md",
   "risk": "low"
 }

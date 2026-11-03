@@ -134,6 +134,7 @@ function ModePadService.start()
 		warn("[MathShow] ModePadService: no ModePad parts under Workspace.Hub")
 		return
 	end
+	print(`[MathShow] ModePadService: {#pads} pads`)
 
 	task.spawn(function()
 		while true do

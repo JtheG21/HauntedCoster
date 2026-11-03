@@ -1,0 +1,154 @@
+{
+  "id": "TASK-0125",
+  "game": "GAME-004",
+  "title": "MathShow Hub Art Pilot: AI Mesh Pipeline",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "scripts/check.sh",
+    "games/mathshow/map/Hub.rbxmx",
+    "games/mathshow/map/props/",
+    "games/mathshow/src/server/Services/ModePadService.luau",
+    "AGENTS.md",
+    "docs/workflow/evidence/TASK-0125/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0125-MathShow-Hub-Art-Pilot.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0125-art-pilot",
+  "acceptance": [
+    "LampPost.rbxmx round-trips: rojo build renders identically to the Studio original (side-by-side screenshot).",
+    "The drift guard catches an edited prop file without a regeneration (fail shown, then pass).",
+    "Perf tables (ShadowMap and Future, 844x390, lamps vs none): informational; non-gating. Real-device perf is in TASK-0123.",
+    "Collision verified; walk times unchanged (spawn to Blitz spot-check).",
+    "Asset ids recorded in manifest.json with 'created by jg_57565 via Studio generate_mesh, pilot TASK-0125'."
+  ],
+  "evidence": [],
+  "notes": "Approved rows A0-A7 (jg, 2026-11-02). Asset creation approved for this pilot only: up to 3 generate_mesh candidates in a scratch place; stop and ask on any Robux cost. Out of scope: other props, buildings, signs, skybox, holo symbols, Glyph visuals, audio, saving the place, Lighting.Technology on the real place, uploads beyond A1, merging. Max 2 attempts on the export/inline approach. Decision record (jg, 2026-11-02): Lighting.Technology = ShadowMap (the place's current setting; no place save). Glow comes from Neon + Bloom per A4. Art-1 light budget: at most 40 PointLights in the hub; CastShadow false on all props. Re-scoped by jg to pipeline-only. In-Studio lighting perf on this Mac is non-gating: the renderer identity is unverifiable (Lighting.Technology isn't script-readable) and the method isn't reproducible. Existing perf tables are kept as informational. Real-device perf moves to TASK-0123.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0125-MathShow-Hub-Art-Pilot.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-02T15:13:16",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-02T15:13:16",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T16:10:16",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T16:13:54",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "changes requested by jg: Revision 1 rows L0-L5 (jg, 2026-11-02): pole-only candidates, Neon globe structure, 844x390 re-measure; revision 1/2"
+    },
+    {
+      "time": "2026-11-02T16:13:54",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T16:24:45",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T16:40:30",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
+    },
+    {
+      "time": "2026-11-02T16:42:18",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-02T16:58:29",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T17:03:17",
+      "from": "review",
+      "to": "blocked",
+      "note": "audit failed; revision limit 2 exceeded, needs human"
+    },
+    {
+      "time": "2026-11-02T17:05:10",
+      "from": "blocked",
+      "to": "blocked",
+      "note": "Re-scoped by jg to pipeline-only. In-Studio lighting perf on this Mac is non-gating: the renderer identity is unverifiable (Lighting.Technology isn't script-readable) and the method isn't reproducible. Existing perf tables are kept as informational. Real-device perf moves to TASK-0123."
+    },
+    {
+      "time": "2026-11-02T17:05:10",
+      "from": "blocked",
+      "to": "review",
+      "note": "hand transition approved by jg; re-scope; orchestrator lacks blocked\u2192review (see TASK-0124)"
+    },
+    {
+      "time": "2026-11-02T17:07:54",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T17:15:32",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T16:10:16",
+      "result": "pass",
+      "notes": "Lamp pipeline built; Studio checks at a1a77f3 in docs/workflow/evidence/TASK-0125/art-pilot.txt. Gaps: no 1920x1080 screenshot; 1080p GPU numbers saturated on this Mac; walk time spawn to Blitz +0.1 s."
+    },
+    {
+      "time": "2026-11-02T16:24:45",
+      "result": "pass",
+      "notes": "Revision 1 (L0-L5): pole-only candidates generated, none picked (jg picks); shadowless pole + Neon Globe structure on the current mesh; 844x390 re-measure at 5f0d07e; 1080p rows invalid."
+    },
+    {
+      "time": "2026-11-02T16:58:29",
+      "result": "pass",
+      "notes": "Revision 2 (C1-C4): pole C perf at 844x390, four configs at 9f3692e; Future label unverified in Studio (see evidence). No code or map changes."
+    }
+  ],
+  "revisions": 3,
+  "audits": [
+    {
+      "time": "2026-11-02T16:40:30",
+      "result": "fail",
+      "report": "06 QA/AUD-20261102-TASK-0125-01.md"
+    },
+    {
+      "time": "2026-11-02T17:03:17",
+      "result": "fail",
+      "report": "06 QA/AUD-20261102-TASK-0125-02.md"
+    },
+    {
+      "time": "2026-11-02T17:07:54",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0125-03.md"
+    }
+  ],
+  "merge_approved_by": "jg"
+}

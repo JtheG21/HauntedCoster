@@ -1,0 +1,46 @@
+{
+  "props": [
+    {
+      "name": "LampPost",
+      "file": "LampPost.rbxmx",
+      "pivot": "base centre; the model's pivot is the origin and the base sits at y = 0",
+      "light": {
+        "color": "#FFB547",
+        "range": 16,
+        "brightness": 2.5,
+        "shadows": false,
+        "parent": "Globe"
+      },
+      "assets": {
+        "mesh_id": "rbxassetid://87757774517450",
+        "texture_id": "rbxassetid://81930988606011"
+      },
+      "size": [
+        2.0,
+        5.0588,
+        1.9765
+      ],
+      "triangles": 600,
+      "collision_fidelity": "Box",
+      "collision_note": "Pole only: Box is the cheapest collider and the claw top is no wider than the base, so the box is close to the real shape.",
+      "provenance": "created by jg_57565 via Studio generate_mesh, pilot TASK-0125 (revision 1, candidate C, picked by jg 2026-11-02)",
+      "prompt": "Chunky low-poly fantasy lamp post pole only, no globe: dark wrought-iron pole with a flared bell-shaped base, a twisted mid section, and a four-pronged claw holder at the top that can hold a glowing ball. Dark metal, simple readable shapes, game-ready.",
+      "globe": {
+        "offset": [
+          0,
+          6.0588,
+          0
+        ],
+        "size": 2,
+        "color": "#FA7D12",
+        "material": "Neon",
+        "can_collide": false,
+        "cast_shadow": false,
+        "note": "Pole top (5.0588) + 1 stud: the 2-stud Globe sits in the claw. Colour is tuned for Neon + Bloom 1.0: #FFB547 (and anything with green >= 130) renders lemon yellow, #FA7D12 reads amber. The PointLight stays #FFB547."
+      },
+      "pole": {
+        "cast_shadow": false
+      }
+    }
+  ]
+}

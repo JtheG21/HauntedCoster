@@ -25,6 +25,7 @@ Prove with two real clients what the single-client Studio rounds could not: per-
 
 ## Scope
 - **In:** a two-client run on a private test place, with both client consoles captured and per-player outcomes recorded.
+- **In (added by jg, 2026-11-02, from the TASK-0125 re-scope):** real-device FPS/MicroProfiler capture on phone + desktop for the hub (ShadowMap), including the five east-path lamps. In-Studio perf on this Mac is non-gating and not a substitute.
 - **Out (non-goals):** gameplay or code changes beyond test scaffolding, DataStore, merging.
 - **Approval:** publishing the private test place needs jg's explicit approval. Do not publish without it.
 
@@ -41,6 +42,7 @@ Evidence only: `docs/workflow/evidence/TASK-0123/`, this note, `tasks/items/TASK
 - [ ] AC2 Per-player ModePadOpen: the player on a pad gets it, the other gets nothing; both consoles captured.
 - [ ] AC3 Mid-match block with two clients: the player in the match gets nothing on a pad, the other player does.
 - [ ] AC4 Evidence log with measured SHA and applies_to; no errors in either console.
+- [ ] AC5 Real-device FPS/MicroProfiler capture on phone + desktop for the hub (ShadowMap), with device, build SHA and applies_to.
 
 ## Tests
 Two real clients on a private test place.

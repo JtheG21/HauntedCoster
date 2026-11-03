@@ -1,0 +1,8 @@
+== prop edited, Hub.rbxmx not regenerated ==
+== Map drift (generated .rbxmx) failed: map_drift
+games/mathshow/map/Hub.rbxmx differs from its generator: run python3 scripts/build_hub.py and commit the result
+FAIL  Map drift (generated .rbxmx)
+CHECKS FAILED (active)
+== prop restored ==
+PASS  Map drift (generated .rbxmx)
+ALL CHECKS PASSED (active)
