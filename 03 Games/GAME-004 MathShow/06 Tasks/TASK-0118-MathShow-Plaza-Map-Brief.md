@@ -3,7 +3,7 @@ id: TASK-0118
 title: "MathShow Plaza Map: Brief + Mockup Intake"
 type: task
 project: GAME-004
-status: backlog
+status: archived
 priority: low
 risk: low
 owner: claude-code
@@ -13,7 +13,7 @@ related:
   - "[[SYS-Plaza-Map-Brief]]"
   - "[[REF-MAP-003-Night-festival-plaza-mood]]"
 created: 2026-11-01
-updated: 2026-11-01
+updated: 2026-11-02
 tags:
   - workflow/task
 ---

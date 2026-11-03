@@ -2,7 +2,7 @@
   "id": "TASK-0118",
   "game": "GAME-004",
   "title": "MathShow Plaza Map: Brief + Mockup Intake",
-  "status": "backlog",
+  "status": "archived",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -20,7 +20,15 @@
     "scripts/check.sh passes."
   ],
   "evidence": [],
-  "notes": "Registered at jg request (B1-B5, 2026-11-01). Brief is a system note because no design-notes type fits the validator (jg chose this). Nothing under games/.",
+  "notes": "Registered at jg request (B1-B5, 2026-11-01). Brief is a system note because no design-notes type fits the validator (jg chose this). Nothing under games/. Closed 2026-11-02 (jg): the brief, mood REF and mockups README were delivered and merged via PR #176 (372c05d) without this task running through the queue, so it is archived rather than done; no audit exists.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0118-MathShow-Plaza-Map-Brief.md",
-  "risk": "low"
+  "risk": "low",
+  "history": [
+    {
+      "time": "2026-11-02T22:35:46",
+      "from": "backlog",
+      "to": "archived",
+      "note": "archived by jg"
+    }
+  ]
 }
