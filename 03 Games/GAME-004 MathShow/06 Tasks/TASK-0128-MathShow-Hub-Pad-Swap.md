@@ -3,7 +3,7 @@ id: TASK-0128
 title: "MathShow Hub: swap VS and Group pad sides to match A2"
 type: task
 project: GAME-004
-status: in_progress
+status: approved
 priority: low
 risk: low
 owner: claude-code
