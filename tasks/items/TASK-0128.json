@@ -2,7 +2,7 @@
   "id": "TASK-0128",
   "game": "GAME-004",
   "title": "MathShow Hub: swap VS and Group pad sides to match A2",
-  "status": "approved",
+  "status": "done",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -47,6 +47,12 @@
       "from": "review",
       "to": "approved",
       "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T20:56:29",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -55,5 +61,6 @@
       "result": "pass",
       "notes": "VS left, Group right at 87a1991; walk times 9.9-11.9 s, 34/34 glyphs, pad screens ok. Evidence docs/workflow/evidence/TASK-0128/pad-swap.txt"
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }
