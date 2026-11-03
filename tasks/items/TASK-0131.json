@@ -2,7 +2,7 @@
   "id": "TASK-0131",
   "game": "GAME-004",
   "title": "MathShow Hub Art-1 Batch 4: Observatory + Ranks",
-  "status": "review",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -69,6 +69,24 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T22:20:17",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-02T22:26:24",
+      "from": "approved",
+      "to": "approved",
+      "note": "audit report copied unchanged from /Users/jg/Roblox-Work/evidence/TASK-0131/AUD-20261102-TASK-0131-01.md into 06 QA/; reference repointed, verdict unchanged (row M9, jg)"
+    },
+    {
+      "time": "2026-11-02T22:26:24",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -83,5 +101,13 @@
       "notes": "Rev 1: props re-exported from Studio scratch place at 6ce3ca8; picks Dome C2, Telescope C1; before/after render identical; regression repeated (walk 9.7-11.6 s, 34/34 glyphs, pads, Daily toast, mid-match, HUD, console clean); brief 23 of 40; AGENTS.md ID rule."
     }
   ],
-  "revisions": 1
+  "revisions": 1,
+  "audits": [
+    {
+      "time": "2026-11-02T22:20:17",
+      "result": "pass",
+      "report": "06 QA/AUD-20261102-TASK-0131-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
 }
