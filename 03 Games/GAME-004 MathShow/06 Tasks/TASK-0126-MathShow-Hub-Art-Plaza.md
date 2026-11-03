@@ -35,9 +35,9 @@ Dress the central plaza in the locked Direction A look (A1 spawn view, A4 palett
 ## Acceptance criteria
 - [x] AC1 Candidates screenshotted; jg picked RankCrystal A and SpawnHex C (2026-11-02). Evidence: `~/Roblox-Work/evidence/TASK-0126/candidates/`.
 - [x] AC2 Plaza built by the generator; drift guard green (`check.sh`).
-- [x] AC3 Budgets: 8 new PointLights, 294 new instances, 22,704 new triangles, no textures (art-plaza.txt).
+- [x] AC3 Budgets: 8 new PointLights, 294 new instances, 22,718 new triangles by geometry inventory (rendered delta 18,386 at the same camera, streaming off), no textures (art-plaza.txt, Revision 1; the first 22,704 figure is superseded).
 - [x] AC4 Regression: walk times 9.9-11.9 s, 34/34 markers reachable at 12c1b4f, pads, Glyphs and HUD hiding checked (art-plaza.txt, glyph-reachability.csv).
-- [x] AC5 Studio evidence at clean BuildStamp 12c1b4f, incl. the forced-error run. Screenshots are ~1210x558, not 844x390.
+- [x] AC5 Studio evidence at clean BuildStamp 12c1b4f, incl. the forced-error run. Screenshots are ~1210x558, not 844x390: **explicit exception by jg, 2026-11-02 (revision 1).**
 - [ ] AC6 check.sh green (done); PR open, CI green, not merged (pending).
 
 ---
@@ -48,6 +48,11 @@ Dress the central plaza in the locked Direction A look (A1 spawn view, A4 palett
 - Budget fit: the first pass (10 lamps, 64 bulbs) measured 42k triangles because a Neon Ball part costs ~430; cut to 8 lamps and 24 bulbs for 22.7k.
 - Evidence: `docs/workflow/evidence/TASK-0126/` (art-plaza.txt, glyph-reachability.csv); screenshots in `~/Roblox-Work/evidence/TASK-0126/`.
 - Process notes: stopped the Rojo server on the main checkout (pid 44346) with jg's approval to serve this worktree; a scratch copy of the place was used for generation and closed with Don't Save; MathShow.rbxl was never saved (mtime 2026-10-31 10:04).
+
+### Revision 1 (jg rows, 2026-11-02)
+- Row 1: geometry inventory plus a same-camera baseline of main's Hub (art-plaza.txt, Revision 1): inventory 22,718, rendered delta 18,386 with streaming off; the streaming-on method was unstable and is superseded.
+- Row 2: ~1210x558 screenshots accepted as an explicit exception for AC5.
+- No code, map or manifest changes.
 
 ## Handoff (Codex review, rev 0, 2026-11-02)
 - **Task:** TASK-0126, plaza art batch 1 (props, generator, HubCosmetics). Receiver: Codex, reviewer only, no edits. Claude implemented; check.sh green, Studio checks done at 12c1b4f.
