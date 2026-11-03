@@ -368,7 +368,7 @@ SIGN_Y = PATH_TOP + ARCH_HEIGHT + 2.9  # plate centre: its 6-stud plate rests on
 TRIM = 0.4
 WALL_H = 2.4
 WALL_T = 1.2
-COURT_A0, COURT_HALF = 116.0, 42.0  # wall line: Court_Competitive is a 116..200 by +-33 slab; the scaled arches reach +-38.8
+COURT_A0, COURT_HALF = 116.0, 42.0  # wall line: Court_Competitive is a 125..191 by +-42 slab; the scaled arches reach +-38.8
 WALL_GAP = 10.0  # half-width of the opening in the front wall (the path is 14 wide)
 MASSES = (  # name, a0, depth, b0, b1, height, edge trim on the front corners too
 	("Mass_W", 180.0, 14.0, -42.0, -14.0, 26.0, False),
