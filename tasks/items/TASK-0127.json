@@ -62,6 +62,24 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T20:34:15",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
+    },
+    {
+      "time": "2026-11-02T20:50:00",
+      "from": "changes_requested",
+      "to": "changes_requested",
+      "note": "Re-scoped by jg: (a) the discarded generate_mesh ids from the first two attempts are unrecoverable (models deleted before capture); texture ids are recorded instead. Accepted as a permanent gap. (b) The flaky Python test seen in the auditor's run is unnamed (its output was not retained); 3 consecutive full-gate passes since. Accepted. (c) jg accepts the x2.14 arch scale and the adjusted walls/masses."
+    },
+    {
+      "time": "2026-11-02T20:51:00",
+      "from": "changes_requested",
+      "to": "review",
+      "note": "hand transition approved by jg; re-scope after 2/2; orchestrator lacks the transition (TASK-0124)"
     }
   ],
   "executions": [
@@ -81,7 +99,12 @@
       "time": "2026-11-02T20:11:36",
       "result": "fail",
       "report": "06 QA/AUD-20261102-TASK-0127-01.md"
+    },
+    {
+      "time": "2026-11-02T20:34:15",
+      "result": "fail",
+      "report": "06 QA/AUD-20261102-TASK-0127-02.md"
     }
   ],
-  "revisions": 1
+  "revisions": 2
 }

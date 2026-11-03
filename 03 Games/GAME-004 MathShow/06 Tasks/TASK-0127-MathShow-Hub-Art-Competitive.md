@@ -60,5 +60,11 @@ Build the Competitive zone (VS / Blitz / Group pads) to match `A2_competitive_en
 
 ## Audits
 - [[AUD-20261102-TASK-0127-01]]: fail, changes requested (F1 P2, F2 P2, F3 P3); addressed in revision 1.
+- [[AUD-20261102-TASK-0127-02]]: fail, changes requested after revision 2/2; remaining findings are unrecoverable evidence, see the re-scope below.
+
+### Re-scope (jg, 2026-11-02)
+Re-scoped by jg: (a) the discarded generate_mesh ids from the first two attempts are unrecoverable (models deleted before capture); texture ids are recorded instead. Accepted as a permanent gap. (b) The flaky Python test seen in the auditor's run is unnamed (its output was not retained); 3 consecutive full-gate passes since. Accepted. (c) jg accepts the x2.14 arch scale and the adjusted walls/masses.
+
+Task moved to review by hand (approved by jg; re-scope after 2/2; orchestrator lacks the transition, TASK-0124).
 
 ## Outcome
