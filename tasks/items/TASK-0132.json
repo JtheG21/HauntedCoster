@@ -2,7 +2,7 @@
   "id": "TASK-0132",
   "game": "GAME-004",
   "title": "MathShow Hub Art-1 Batch 5: Lake, Terraces, Holo, Glyph Visuals",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -28,7 +28,9 @@
     "Regression at a clean BuildStamp: walk times 8-12 s, 34/34 reachable, 6 pads, mid-match block, Glyph collect (common and rare), reject-retry, respawn, HUD, console clean, cannot stand in the lake or leave the map.",
     "Evidence in docs/workflow/evidence/TASK-0132/art-lake.txt (measured SHA, applies_to); A1-framing and aerial screenshots; brief light total updated."
   ],
-  "evidence": [],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0132/art-lake.txt"
+  ],
   "notes": "Approved rows L0-L8 (jg, 2026-11-02). Out of scope: skybox, polish items (violet hue, A2 portal frame, A3 L-hall, telescope tip), audio, Lighting.Technology, saving the place, merging. Do not record-audit or self-audit.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0132-MathShow-Hub-Art-Lake.md",
   "risk": "low",
@@ -45,6 +47,19 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-02T23:31:05",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-02T23:31:05",
+      "result": "pass",
+      "notes": "Lake, terraces, 47 pine trees, holo symbols and Glyph visuals built at 42519a0; evidence docs/workflow/evidence/TASK-0132/art-lake.txt. +2 lights (hub 25), +381 instances, +12510 tris, 34 emitters Rate 5. Walk 10.4-11.6 s, 34/34 glyphs, pads, mid-match, collect/reject-retry/respawn, HUD, lake and edges, console clean. PineTree C2 picked by jg."
     }
   ]
 }

@@ -1,0 +1,46 @@
+# TASK-0132 Lake, terraces, holo symbols, Glyph visuals (rows L0-L8, jg 2026-11-02)
+# measured git HEAD: 42519a0 (BuildStamp "42519a0 2026-11-03T07:22:58Z", clean; scripts/serve.sh from the TASK-0132 worktree; Rojo plugin reconnected with the Connect prompt; fresh Play, single player; place not saved)
+# applies_to: Measured at 42519a0. Applies to any later commit whose diff from 42519a0 does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json or games/mathshow/src/**.
+# Screenshots (outside the repo): ~/Roblox-Work/evidence/TASK-0132/ (A1_framing_spawn_844x390.jpg, spawn_vs_A1_mockup.jpg = A1_spawn_view.png left / this build right, aerial_844x390.jpg, aerial_vs_A3_mockup.jpg, lake_promenade_844x390.jpg, candidates/)
+
+## L1 PineTree (generate_mesh, cap 3, all 3 used; ids in props/manifest.json generation_history_task_0132)
+C1 114287420201657 (150 tris), C2 78289118787590 (150), C3 137965429455162 (150). jg picked C2 (tall slim spire). No call failed, no Robux cost seen; calls 2 and 3 timed out on the first wait and the jobs then completed (each counted once). Native size 6 x 11.06 x 5.88, placed at x1.27 (~14 studs, with +-10% variation). Exported from the Studio scratch place (TASK-0127-scratch.rbxl, never saved): MeshPart from the existing id (CreateMeshPartAsync), CanCollide false, CastShadow false, CollisionFidelity Box, SerializationService -> studio_transfer.py -> rojo build -> props/PineTree.rbxmx (real Box collision data). No new generate_mesh call after the pick.
+
+## L2 Lake and promenade (scripts/build_hub.py)
+Water: still a flat Glass Part (not Terrain), Lake Ink #0F2A4A, Transparency 0.35, Reflectance 0.6, CanCollide false, CastShadow false. New collidable Lakebed (Concrete, diameter 88) under it. The existing invisible collidable Blocker (radius 43) stays: it is what keeps players out of the water. Railing along the promenade's lake edge: 17 posts, a Basalt mid rail and a Lamp Amber Neon top rail (all decorative, CanCollide false). Two reused LampPosts (LampPost_L01, L02) on the promenade at 210 and 240 degrees. Honest note: at night the Lake Ink Glass reads as a near-black disc with the amber rail around it; Reflectance 0 and a lighter lakebed looked almost the same, so palette and Reflectance are as the rows say.
+
+## L3 Terraces and boundary
+Grass-top slabs (Grass1_..-Grass4_.., SmoothPlastic, 0.1 thick, CanCollide false) on all four boundary tiers (192), and grass discs on the three north terraces; Terrace_3 changed from Lamp Amber to Slate Teal. The boundary Tier blocks and the invisible Walls are untouched (the collider guard, 4 tests, passes). 47 PineTree instances (35 on boundary tiers 1-3, 12 on the north terraces; the 40-slot ring skips 5 slots near the R_Tier glyph spots), CanCollide false, CastShadow false.
+
+## L4 Holo symbols
+Hub.Holo: 10 invisible anchored Parts tagged HubHolo, each with a BillboardGui (9 x 9 studs, LightInfluence 0, MaxDistance 500) and a TextLabel (pi, sigma, root, plus, minus, times, divide; Holo Cyan, Menu Violet, Lamp Amber; GothamBlack). Positions y 46-58 on a ring of radius 105-120 (north sector skipped) plus three over the plaza at radius 36-40; the lowest is 46 at rest, 44.7 at the bottom of the bob, more than 25 studs above anything walkable under them (plaza 0.6, paths 0.2; the terraces rise to 32 only in the skipped north sector). No GlyphSpawn tag: read back 10 HubHolo, 34 GlyphSpawn, 0 holos with the Glyph tag. From the spawn A1 view 4 are in frame (pi, root, times, divide). HubCosmetics: one RenderStepped connection now moves the crystal and the holos (bob 1.4 studs / 7 s, label sway +-9 degrees / 9 s; a BillboardGui always faces the camera so it cannot spin, hence the sway), pcall-isolated, same frame budget and cull as before, holos found by tag with Added/Removed signals for streaming. Read back in Play: holo y 46.87 -> 44.97 and label rotation -8.27 -> -6.53 over 1.5 s.
+
+## L5 Glyph visuals (GlyphController, client only)
+Each glyph: the Neon gem (turned on its corner, spin 3.2 rad/s vs 1.2 before; the holos only sway), a larger symbol billboard (3.2 studs, dark stroke), one ParticleEmitter "Sparkle" (default texture, LightEmission 1, Rate 5, 0.8-1.4 s life, size 0.5 -> 0, rarity colour). The pickup burst adds a "Burst" emitter on the burst part (Rate 0, Emit 14), inside the existing pcall, replacing the glyph's own emitter (which left with its part), so there is never more than one emitter per glyph. No change to collection, retry, server, remotes or GlyphRules. Read back in Play: 34 glyph parts, 34 emitters, max Rate 5.
+
+## L6 Inventory (budget metric of M6: Block 12, Wedge 10, Cylinder 96, Ball 432 + prop manifest triangles; base = main 30d1fb9)
+                 base      new     delta
+instances        1260     1641       381
+PointLights        23       25         2
+triangles       48468    60978     12510
+  Block         11932    14944      3012
+  Cylinder       3456     3840       384
+  Ball          19008    19872       864
+  Mesh          14072    22322      8250   (PineTree 150 x 47 = 7050 + 2 lamps x 600)
+Budgets: +2 PointLights <= 4 (hub total 25 <= 27); +381 instances <= 700; +12510 triangles <= 25000; ParticleEmitters 34 <= 34, Rate 5 <= 6. 25 PointLights read back in Studio.
+
+## L7 Regression (fresh Play, 42519a0)
+- Walk times (PathfindingService radius 2, height 5, can jump, from (0,5,47) to pad centre + 3 studs, length / 16): Blitz 165.8 studs 10.4 s, Daily 185.9 11.6 s, Group 174.3 10.9 s, Practice 179.4 11.2 s, Skill 174.7 10.9 s, VS 174.3 10.9 s. All inside 8-12 s. Reachability 34/34 GlyphSpawn Success.
+- Pads (server places the character after 2.8 s off the pads; client counts ModePadOpen): practice, skillintro, confirm_vs, confirm_blitz, confirm_group, one event each. Daily: locked:daily, toast "COMING SOON", menu stays closed.
+- Mid-match: JoinShow, participant=true; Practice, Skill, Blitz and Daily held 3 s each: 0 events, menu closed, no toast.
+- Glyph collect: Glyph_C_SW1 (common) then Glyph_R_Roof1 (rare, on the Ranks roof): counter 0 -> 6 (1 + 5), both parts gone on the client (34 -> 32).
+- Reject -> retry: the client teleported onto Glyph_C_SW2; the server logged "GlyphCollect from jg_57565 rejected: out_of_range (Glyph_C_SW2)" and the client's next ask 1.1 s later succeeded: counter 6 -> 7.
+- Respawn: Glyph_C_SW1 (common, 90 s) was back on the client within its window (parts 32 = 34 - R_Roof1 - C_SW2; R_Roof1 is rare, 300 s, not waited for).
+- HUD: GlyphHud false with the menu open, true when closed.
+- Lake and edges (server character, MoveTo for 6 s): towards the lake centre from the promenade: stopped 43.6 studs from the centre (water radius 44, y 3.1), so it cannot stand in the lake; outward from the tier-4 top: ended at radius 288.9 (walls at 290), y 3.0, so it cannot leave the map.
+- Console: no errors; known DataStore and ContentId 203785492 lines, plus the one expected out_of_range warning above.
+- Walk tool (informational, scripts/walk-check.sh): five of six pads within 8-12 s (VS 11.3, Blitz 10.6, Group 10.9, Practice 11.1, Skill 10.8); Daily "unreachable" in the tool (the same as before this task, the model's Daily ramp, while Studio's PathfindingService reaches Daily in 11.6 s; Studio is the gate).
+- Not exercised: R_Roof1 respawn (300 s), after-match re-entry, two players, real-device perf (TASK-0123).
+
+## L8 Brief
+SYS-Plaza-Map-Brief.md: running PointLight total 25 of 40.
