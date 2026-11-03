@@ -9,8 +9,7 @@ risk: low
 owner: claude-code
 depends_on: []
 branch: task/TASK-0129-art-training
-related:
-  - "[[TASK-0127-MathShow-Hub-Art-Competitive]]"
+related: []
 created: 2026-11-02
 updated: 2026-11-02
 tags:
@@ -28,7 +27,7 @@ Build the Training zone (west path: Practice and Skill pads, rank ladder) to mat
 - **Keep unchanged:** pad parts, tags, Mode attributes, trigger volumes, walk-time limits.
 
 ## Intake
-- **Category, depth:** map, standard. Reuse: TASK-0127 patterns (masses, trim, windows, signs); rank colours from `IdentityTheme.luau` `Tier.*.Rgb`.
+- **Category, depth:** map, standard. Reuse: TASK-0127 patterns (PR 186, unmerged) (masses, trim, windows, signs); rank colours from `IdentityTheme.luau` `Tier.*.Rgb`.
 - **Decisions:** rows T0-T6 approved by jg, 2026-11-02.
 
 ## Files expected to change
