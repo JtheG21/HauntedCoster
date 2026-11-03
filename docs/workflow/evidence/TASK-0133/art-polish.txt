@@ -1,0 +1,46 @@
+# TASK-0133 Hub Art-1 Polish (rows Q0-Q8, jg 2026-11-02)
+# measured git HEAD: 30dd62e (BuildStamp "30dd62e 2026-11-03T08:07:27Z", clean; scripts/serve.sh from the TASK-0133 worktree; Rojo plugin reconnected with the Connect prompt; fresh Play, single player; place not saved)
+# applies_to: Measured at 30dd62e. Applies to any later commit whose diff from 30dd62e does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json or games/mathshow/src/**.
+# Screenshots (outside the repo): ~/Roblox-Work/evidence/TASK-0133/ . Captures are the Studio viewport at the iPhone 13 emulation (844x390 landscape), saved by the MCP at 1210x558, the same aspect. Edit-mode captures except A1_framing (Play).
+# Files: lake_before_after.jpg, violet_capture_vs_A4_swatch.jpg, A2_mockup_vs_build.jpg, A3_mockup_vs_build.jpg, A1_framing_spawn_844x390.jpg, aerial_844x390.jpg, telescope_{south,east,north,top}.jpg, hall_L_aerial.jpg
+
+## Q1 Lake (build_hub.py: LAKE_WATER, LAKE_BED, add_waterline)
+Before (main d6fbfa2): Water Lake Ink (15,42,74) Glass, Transparency 0.35, Reflectance 0.6 read as a near-black disc at night. Findings in Studio: Reflectance darkens (0.6 and 1.0 read pure black: the reflected night sky is dark); Reflectance 0 reads navy blue.
+After: Water (40,100,180) (same hue, 212 degrees, as Lake Ink, one step lighter), Transparency 0.2, Reflectance 0.1, still a flat Glass Part, CanCollide false; Lakebed (30,70,130). New Hub.Lake.Waterline: 16 Holo Cyan Neon strips (0.06 high, 0.5 wide) on the water's edge along the promenade arc, CanCollide false, no light objects. See lake_before_after.jpg (same camera).
+Note: Reflectance 0.1, not the A4 0.6, because a higher value is what made the near-black; the row asked for Reflectance/Color tuning.
+
+## Q2 Map Neon violet (build_hub.py: MAP_NEON_VIOLET)
+Chosen value (96, 82, 255). make_part and PlacedProp swap the A4 Menu Violet (138,77,255) for it on parts whose material is Neon only (court wall strips, roof and edge trim, plinth trims, signs, VS ModeArch mesh colour, frame outline, Neon bulbs...); SmoothPlastic violet (pad, flags, ranks) and MenuTheme / IdentityTheme are untouched. The arch PointLight colour keeps the A4 value.
+Measured on captures (PIL, same camera A2 framing): old value (138,77,255) read hue 278 (magenta); trials (110,78,255) hue 278, (88,85,255) hue 258; final (96,82,255) reads (130,75,255) = hue 258 against the A4 swatch (138,77,255) = hue 261. violet_capture_vs_A4_swatch.jpg shows the capture with the swatch beside it. Capture hue moved by about 14 degrees between two lighting states in one session (lamps lit or not), so treat +-15 degrees as the measurement noise.
+
+## Q3 A2 portal frame (build_competitive)
+Frame_Post-1/+1: Basalt boxes 2.4 x 46 x 2.4 at a = 178.5, b = +-16 (solid, like the masses), Frame_Lintel Basalt 34.4 x 3 x 2.4 (CanCollide false) with Menu Violet Neon outlines (FRAME_TRIM 0.9): post inner edges, lintel top and underside. It stands 4.5 studs in front of Mass_C (a = 183) and 28.5 behind the pads (a = 150); nearest pad edge is 23.5 studs away. Collider guard (tests/test_build_hub.py, 4 tests) passes. The 30-high arches hide the posts' lower part from the path start; the lintel, the outline and the upper 16 studs of the posts read around BLITZ (A2_mockup_vs_build.jpg).
+
+## Q4 A3 L-shaped Training hall (build_training)
+The two Annex masses are gone. One building now: the south wing runs on to b = -52 (long arm), the back wall spans b -52..30, and a new Hall_ArmN (a 138..192, b 31..45, 12 high, joined by Hall_ArmN_Link at the wing's end, Neon roof trim, 6 window columns) is the short arm beside the court, outside Wall_SideN. Not touched: Pad_Practice / Pad_Skill (150, +-18), pad rings, PRACTICE / SKILL TEST signs, Sign_Training, rank ladder (9 bars, b 13.9..29.1), TRAIN_LAMPS, all 34 GlyphSpawn markers (names, tags, Rarity, positions). The arm is named Hall_Arm* because the guard test counts parts with "_Leg" as ModeArch legs.
+
+## Q5 Telescope (OBS_TELESCOPE scale 1.1, forward 0)
+Was scale 1.7 at +2 studs forward: 17 high, above the 15.4-high dome. Now 11 high on the dome axis. Read back in Studio: telescope bounding box 4.05 x 11 x 7.39, centre 5.5 above the dome base; every box corner is at least 3.21 studs inside the dome ellipsoid (radius 10.9, height 15.4). Four views: telescope_south / east / north (camera 40 studs out, 14 up) and telescope_top (45 up): nothing touches the dome.
+
+## Q6 Inventory (budget metric of TASK-0132 M6: Block 12, Wedge 10, Cylinder 96, Ball 432 per primitive; prop meshes unchanged; base = main d6fbfa2)
+                 base      new     delta
+instances        1641     1689      +48
+PointLights        25       25       +0   (Studio read back 25 at 30dd62e)
+triangles(prims) 38668    39232     +564
+Budgets: +0 PointLights <= 2 (hub total 25 <= 40); +48 instances <= 300; +564 triangles <= 8000. Tool: scratchpad script counting <Item> and shape tokens in Hub.rbxmx.
+
+## Q7 Regression (fresh Play)
+Measured at 205086d first, then re-run in part at 30dd62e after the final violet constant. 205086d..30dd62e changes only Color3uint8 of 70 Neon parts (checked with git diff), so nothing below that depends on geometry changed.
+- Walk times at 30dd62e (PathfindingService radius 2, height 5, can jump, from (0,5,47) to pad centre + 3 studs, length / 16): Blitz 173.5 studs 10.8 s, Daily 189.9 11.8 s, Group 178.3 11.1 s, Practice 177.8 11.1 s, Skill 158.6 9.9 s, VS 182.5 11.4 s. All inside 8-12 s. Reachability 34/34 GlyphSpawn Success. Identical at 205086d.
+- Pads at 30dd62e (server places the character on each pad after 2.6 s off the pads, menu closed, client counts ModePadOpen): VS confirm_vs, Blitz confirm_blitz, Group confirm_group, Practice practice, Skill skillintro, Daily locked:daily, one event each.
+- Mid-match (at 205086d): JoinShow, participant became true at the next match's question 1 (JoinRules); Practice, Skill, Blitz and Daily held 3 s each: 0 events, menu closed, no toast.
+- Glyph collect (at 205086d): Glyph_C_SW1 (common) then Glyph_R_Roof1 (rare, Ranks roof): counter 0 -> 6, both parts gone on the client (34 -> 32).
+- Reject -> retry: the client teleported onto Glyph_C_SW2; the server logged "GlyphCollect from jg_57565 rejected: out_of_range (Glyph_C_SW2)" and the retry succeeded 1.0 s later: counter 6 -> 7.
+- Respawn: Glyph_C_SW1 (common, 90 s) was back on the client within its window (31 parts before, present after).
+- HUD: GlyphHud false while the menu is open, true when MathShowMenu.Enabled is false; counter label "Glyphs N".
+- Lake (at 30dd62e, server character MoveTo toward the lake centre from the promenade for 6 s): stopped 43.6 studs from the centre (water radius 44, y 3.1): it cannot stand in the lake. Boundary walls and tiers untouched (guard tests pass).
+- Console (both runs): no errors; known DataStore and ContentId 203785492 lines, the one expected out_of_range warning, and the MCP harness note about resetting a Scriptable camera.
+- Not exercised: R_Roof1 respawn (300 s), two players, real-device perf (TASK-0123).
+
+## Q8 Brief
+SYS-Plaza-Map-Brief.md: running PointLight total stays 25 of 40 (+0).
