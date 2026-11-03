@@ -2,7 +2,7 @@
   "id": "TASK-0131",
   "game": "GAME-004",
   "title": "MathShow Hub Art-1 Batch 4: Observatory + Ranks",
-  "status": "review",
+  "status": "in_progress",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -12,7 +12,9 @@
     "games/mathshow/map/props/Telescope.rbxmx",
     "games/mathshow/map/props/manifest.json",
     "docs/workflow/evidence/TASK-0131/",
-    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0131-MathShow-Hub-Art-Observatory.md"
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0131-MathShow-Hub-Art-Observatory.md",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md",
+    "AGENTS.md"
   ],
   "depends_on": [],
   "branch": "task/TASK-0131-art-observatory",
@@ -49,6 +51,18 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-02T21:59:13",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "changes requested by jg: Rev 1 rows P0-P6: re-export props from a Studio scratch place, brief light total, AGENTS.md ID rule; revision 1/2"
+    },
+    {
+      "time": "2026-11-02T21:59:13",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
     }
   ],
   "executions": [
@@ -57,5 +71,6 @@
       "result": "pass",
       "notes": "Observatory and Ranks hall built at 246b967; evidence docs/workflow/evidence/TASK-0131/art-observatory.txt. +3 lights (hub 23), +213 instances, +6574 tris. Walk times 10.4-11.6 s, 34/34 glyphs, pads/Daily toast/mid-match/HUD ok. Dome C2 and Telescope C1 picked by jg."
     }
-  ]
+  ],
+  "revisions": 1
 }

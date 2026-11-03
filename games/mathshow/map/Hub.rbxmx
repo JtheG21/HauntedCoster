@@ -22140,7 +22140,6 @@
 					</Vector3>
 					<token name="ModelStreamingMode">0</token>
 					<bool name="NeedsPivotMigration">false</bool>
-					<Ref name="PrimaryPart">1</Ref>
 					<bool name="DefinesCapabilities">false</bool>
 					<float name="ScaleFactor">1</float>
 					<BinaryString name="SerializedOverrides">
@@ -22190,9 +22189,9 @@
 						<bool name="HasSkinnedMesh">false</bool>
 						<bool name="InertiaMigrated">false</bool>
 						<Vector3 name="InitialSize">
-							<X>15.6055</X>
-							<Y>11.0</Y>
-							<Z>15.6877</Z>
+							<X>15.605528</X>
+							<Y>11</Y>
+							<Z>15.687699</Z>
 						</Vector3>
 						<Vector3 name="JointOffset">
 							<X>0</X>
@@ -22210,7 +22209,7 @@
 						<Content name="MeshContent">
 							<uri>rbxassetid://70374810362156</uri>
 						</Content>
-						<SharedString name="PhysicalConfigData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
+						<SharedString name="PhysicalConfigData">jMO+3ujG8WZbCV+FbCLE5Q==</SharedString>
 						<BinaryString name="PhysicsData">
 						</BinaryString>
 						<CoordinateFrame name="PivotOffset">
@@ -22259,21 +22258,21 @@
 						<token name="TopSurfaceInput">0</token>
 						<float name="Transparency">0</float>
 						<Vector3 name="UnscaledCofm">
-							<X>-0.00028646438</X>
-							<Y>-0.0031334783</Y>
-							<Z>-0.0021932188</Z>
+							<X>-0.036360934</X>
+							<Y>-1.348364</Y>
+							<Z>-0.0046928297</Z>
 						</Vector3>
 						<Vector3 name="UnscaledVolInertiaDiags">
-							<X>323.9789</X>
-							<Y>315.64243</Y>
-							<Z>561.9478</Z>
+							<X>23681.361</X>
+							<Y>28912.143</Y>
+							<Z>23711.668</Z>
 						</Vector3>
 						<Vector3 name="UnscaledVolInertiaOffDiags">
-							<X>0.121902585</X>
-							<Y>-0.02240119</Y>
-							<Z>0.14643964</Z>
+							<X>-17.07935</X>
+							<Y>-3.3252954</Y>
+							<Z>-1.9595901</Z>
 						</Vector3>
-						<float name="UnscaledVolume">63.022865</float>
+						<float name="UnscaledVolume">1291.3606</float>
 						<Vector3 name="Velocity">
 							<X>0</X>
 							<Y>0</Y>
@@ -22320,7 +22319,6 @@
 					</Vector3>
 					<token name="ModelStreamingMode">0</token>
 					<bool name="NeedsPivotMigration">false</bool>
-					<Ref name="PrimaryPart">1</Ref>
 					<bool name="DefinesCapabilities">false</bool>
 					<float name="ScaleFactor">1</float>
 					<BinaryString name="SerializedOverrides">
@@ -22370,9 +22368,9 @@
 						<bool name="HasSkinnedMesh">false</bool>
 						<bool name="InertiaMigrated">false</bool>
 						<Vector3 name="InitialSize">
-							<X>3.6826</X>
-							<Y>10.0</Y>
-							<Z>6.7192</Z>
+							<X>3.682612</X>
+							<Y>10</Y>
+							<Z>6.7193046</Z>
 						</Vector3>
 						<Vector3 name="JointOffset">
 							<X>0</X>
@@ -22390,7 +22388,7 @@
 						<Content name="MeshContent">
 							<uri>rbxassetid://117401431585216</uri>
 						</Content>
-						<SharedString name="PhysicalConfigData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
+						<SharedString name="PhysicalConfigData">jMO+3ujG8WZbCV+FbCLE5Q==</SharedString>
 						<BinaryString name="PhysicsData">
 						</BinaryString>
 						<CoordinateFrame name="PivotOffset">
@@ -22425,7 +22423,7 @@
 						<Vector3 name="size">
 							<X>6.2604</X>
 							<Y>17</Y>
-							<Z>11.4226</Z>
+							<Z>11.4228</Z>
 						</Vector3>
 						<int64 name="SourceAssetId">-1</int64>
 						<BinaryString name="Tags"></BinaryString>
@@ -22439,21 +22437,21 @@
 						<token name="TopSurfaceInput">0</token>
 						<float name="Transparency">0</float>
 						<Vector3 name="UnscaledCofm">
-							<X>-0.00028646438</X>
-							<Y>-0.0031334783</Y>
-							<Z>-0.0021932188</Z>
+							<X>0.009282169</X>
+							<Y>1.3482531</Y>
+							<Z>0.2740281</Z>
 						</Vector3>
 						<Vector3 name="UnscaledVolInertiaDiags">
-							<X>323.9789</X>
-							<Y>315.64243</Y>
-							<Z>561.9478</Z>
+							<X>285.6445</X>
+							<Y>84.44606</Y>
+							<Z>230.08122</Z>
 						</Vector3>
 						<Vector3 name="UnscaledVolInertiaOffDiags">
-							<X>0.121902585</X>
-							<Y>-0.02240119</Y>
-							<Z>0.14643964</Z>
+							<X>0.79926586</X>
+							<Y>0.020762209</Y>
+							<Z>27.080198</Z>
 						</Vector3>
-						<float name="UnscaledVolume">63.022865</float>
+						<float name="UnscaledVolume">29.242039</float>
 						<Vector3 name="Velocity">
 							<X>0</X>
 							<Y>0</Y>

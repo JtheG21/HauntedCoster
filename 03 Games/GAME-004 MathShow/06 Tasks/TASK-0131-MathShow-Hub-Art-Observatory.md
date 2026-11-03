@@ -3,7 +3,7 @@ id: TASK-0131
 title: "MathShow Hub Art-1 Batch 4: Observatory + Ranks"
 type: task
 project: GAME-004
-status: review
+status: in_progress
 priority: medium
 risk: low
 owner: claude-code

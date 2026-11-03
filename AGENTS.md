@@ -109,6 +109,7 @@ files); DataStore schema changes.** Approval is per action and doesn't carry ove
 
 ## Branches and Git safety (LES-0006, 2026-10-11)
 - One scoped task at a time: `task/TASK-####-slug` for tasks, `chore/<slug>` for docs and tooling. Never commit to `main`.
+- Commit and push a new task's JSON immediately after next-id, before any other work, so parallel agents don't collide.
 - Before any switch, merge, rebase, cherry-pick, reset, clean, commit, push or branch deletion, run
   `scripts/preflight.sh --root <checkout> --branch <expected>` and chain with `&&`. Use `git -C <checkout>`.
 - The main checkout (`/Users/jg/Desktop/Rg1`) stays on `main`. Every task and chore branch gets its own worktree.

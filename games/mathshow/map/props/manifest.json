@@ -224,12 +224,13 @@
         15.6877
       ],
       "triangles": 800,
-      "collision_fidelity": "none (CanCollide false, decoration 70 studs above the terrace)",
-      "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0131 (candidate C2 of 3, picked by jg 2026-11-02; maxTriangles 800, untextured). The .rbxmx is derived from ModeArch.rbxmx (same untextured MeshPart template) with this mesh id and size; the generated texture is not used.",
+      "collision_fidelity": "Box (CanCollide false, decoration)",
+      "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0131 (candidate C2 of 3, picked by jg 2026-11-02; maxTriangles 800, untextured). Exported from Studio scratch place, TASK-0131 rev1: a MeshPart from the existing mesh id (AssetService:CreateMeshPartAsync, native size), CanCollide false, CastShadow false, CollisionFidelity Box, serialized with SerializationService and converted with rojo build. No new generate_mesh call.",
       "prompt": "Observatory dome, a hemisphere built from visible faceted triangular lattice panels with raised diagonal ribs, flat circular base ring, no windows, chunky low-poly, plain untextured single-colour surface.",
       "dome": {
         "cast_shadow": false
-      }
+      },
+      "collision_note": "Real Box collision data exported from Studio; the part never collides (decorative, above the terrace)."
     },
     {
       "name": "Telescope",
@@ -245,12 +246,13 @@
         6.7192
       ],
       "triangles": 398,
-      "collision_fidelity": "none (CanCollide false, decoration)",
-      "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0131 (candidate C1 of 3, picked by jg 2026-11-02; maxTriangles 400, untextured). The .rbxmx is derived from ModeArch.rbxmx (same untextured MeshPart template) with this mesh id and size.",
+      "collision_fidelity": "Box (CanCollide false, decoration)",
+      "provenance": "created by jg_57565 via Studio generate_mesh, TASK-0131 (candidate C1 of 3, picked by jg 2026-11-02; maxTriangles 400, untextured). Exported from Studio scratch place, TASK-0131 rev1: a MeshPart from the existing mesh id (AssetService:CreateMeshPartAsync, native size), CanCollide false, CastShadow false, CollisionFidelity Box, serialized with SerializationService and converted with rojo build. No new generate_mesh call.",
       "prompt": "Chunky low-poly observatory telescope on a mount: a thick tapered cylindrical tube pointing up at an angle, on a sturdy tripod-style stand with a rounded pivot yoke, simple readable shapes, plain untextured single-colour surface, game-ready.",
       "telescope": {
         "cast_shadow": false
-      }
+      },
+      "collision_note": "Real Box collision data exported from Studio; the part never collides (decorative, above the terrace)."
     }
   ],
   "generation_history_task_0131": {

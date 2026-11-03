@@ -27,7 +27,6 @@
       </Vector3>
       <token name="ModelStreamingMode">0</token>
       <bool name="NeedsPivotMigration">false</bool>
-      <Ref name="PrimaryPart">1</Ref>
       <bool name="DefinesCapabilities">false</bool>
       <float name="ScaleFactor">1</float>
       <BinaryString name="SerializedOverrides">
@@ -88,7 +87,7 @@
         <bool name="CastShadow">false</bool>
         <string name="CollisionGroup">Default</string>
         <int name="CollisionGroupId">0</int>
-        <Color3uint8 name="Color3uint8">9063935</Color3uint8>
+        <Color3uint8 name="Color3uint8">10724005</Color3uint8>
         <PhysicalProperties name="CustomPhysicalProperties">
           <CustomPhysics>false</CustomPhysics>
         </PhysicalProperties>
@@ -103,9 +102,9 @@
         <bool name="HasSkinnedMesh">false</bool>
         <bool name="InertiaMigrated">false</bool>
         <Vector3 name="InitialSize">
-          <X>15.6055</X>
-          <Y>11.0</Y>
-          <Z>15.6877</Z>
+          <X>15.605528</X>
+          <Y>11</Y>
+          <Z>15.687699</Z>
         </Vector3>
         <Vector3 name="JointOffset">
           <X>0</X>
@@ -118,12 +117,12 @@
         <token name="LeftSurfaceInput">0</token>
         <bool name="Locked">false</bool>
         <bool name="Massless">false</bool>
-        <token name="Material">288</token>
+        <token name="Material">256</token>
         <string name="MaterialVariantSerialized"></string>
         <Content name="MeshContent">
           <uri>rbxassetid://70374810362156</uri>
         </Content>
-        <SharedString name="PhysicalConfigData">rxNJufX5oaagQE3qNtzJSQ==</SharedString>
+        <SharedString name="PhysicalConfigData">jMO+3ujG8WZbCV+FbCLE5Q==</SharedString>
         <BinaryString name="PhysicsData">
         </BinaryString>
         <CoordinateFrame name="PivotOffset">
@@ -156,9 +155,9 @@
         <BinaryString name="SerializedOverrides">
         </BinaryString>
         <Vector3 name="size">
-          <X>15.6055</X>
-          <Y>11.0</Y>
-          <Z>15.6877</Z>
+          <X>15.605528</X>
+          <Y>11</Y>
+          <Z>15.687699</Z>
         </Vector3>
         <int64 name="SourceAssetId">-1</int64>
         <BinaryString name="Tags"></BinaryString>
@@ -172,21 +171,21 @@
         <token name="TopSurfaceInput">0</token>
         <float name="Transparency">0</float>
         <Vector3 name="UnscaledCofm">
-          <X>-0.00028646438</X>
-          <Y>-0.0031334783</Y>
-          <Z>-0.0021932188</Z>
+          <X>-0.036360934</X>
+          <Y>-1.348364</Y>
+          <Z>-0.0046928297</Z>
         </Vector3>
         <Vector3 name="UnscaledVolInertiaDiags">
-          <X>323.9789</X>
-          <Y>315.64243</Y>
-          <Z>561.9478</Z>
+          <X>23681.361</X>
+          <Y>28912.143</Y>
+          <Z>23711.668</Z>
         </Vector3>
         <Vector3 name="UnscaledVolInertiaOffDiags">
-          <X>0.121902585</X>
-          <Y>-0.02240119</Y>
-          <Z>0.14643964</Z>
+          <X>-17.07935</X>
+          <Y>-3.3252954</Y>
+          <Z>-1.9595901</Z>
         </Vector3>
-        <float name="UnscaledVolume">63.022865</float>
+        <float name="UnscaledVolume">1291.3606</float>
         <Vector3 name="Velocity">
           <X>0</X>
           <Y>0</Y>
@@ -197,6 +196,7 @@
     </Item>
   </Item>
   <SharedStrings>
+    <SharedString md5="jMO+3ujG8WZbCV+FbCLE5Q==">Q1NHUEhTAAAAAEJMT0NL</SharedString>
     <SharedString md5="rxNJufX5oaagQE3qNtzJSQ=="></SharedString>
   </SharedStrings>
 </roblox>
