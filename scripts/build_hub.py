@@ -120,14 +120,14 @@ def from_columns(x, y, z):
 
 
 def make_part(name, size, pos, rot, color, material="SmoothPlastic", shape="Block", transparency=0.0, collide=True,
-		query=True, cls="Part") -> Node:
+		query=True, cls="Part", cast_shadow=True) -> Node:
 	n = Node(cls, name)
 	n.props += [
 		"<bool name=\"Anchored\">true</bool>",
 		f"<bool name=\"CanCollide\">{str(collide).lower()}</bool>",
 		f"<bool name=\"CanQuery\">{str(query).lower()}</bool>",
 		f"<bool name=\"CanTouch\">{str(collide).lower()}</bool>",
-		"<bool name=\"CastShadow\">true</bool>",
+		f"<bool name=\"CastShadow\">{str(cast_shadow).lower()}</bool>",
 		cframe(pos, rot),
 		f'<Color3uint8 name="Color3uint8">{color_int(color)}</Color3uint8>',
 		f'<token name="Material">{MATERIAL[material]}</token>',
@@ -203,6 +203,11 @@ def _inverse(m):
 	return tuple(-sum(rt[i][k] * pos[k] for k in range(3)) for i in range(3)), rt
 
 
+def _hex(color: str):
+	c = color.lstrip("#")
+	return tuple(int(c[i:i + 2], 16) for i in (0, 2, 4))
+
+
 class Prop:
 	"""One prop file: its XML text, with the SharedStrings split off and the root pivot read."""
 
@@ -219,21 +224,22 @@ class Prop:
 		assert first, f"{entry['file']}: root has no WorldPivotData"
 		self.pivot = _cf_to_matrix([float(v) for v in re.findall(r">([-0-9.eE]+)<", first.group(2))])
 
-	def light_nodes(self) -> list[Node]:
-		cfg = self.entry["light"]
-		col = cfg["color"].lstrip("#")
-		r, g, b = (int(col[i:i + 2], 16) / 255 for i in (0, 2, 4))
-		att = Node("Attachment", "LampLightAttachment")
-		att.props += ['<bool name="Visible">false</bool>', cframe(tuple(cfg["attachment_offset"]), IDENT)]
+	def globe_nodes(self, placement) -> list[Node]:
+		"""The Neon Globe sphere (a child of the pole MeshPart) that carries the PointLight. Offsets are pole-local, from the pivot."""
+		g, cfg = self.entry["globe"], self.entry["light"]
+		pos, _ = _mul(placement, (tuple(g["offset"]), ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0))))
+		globe = make_part("Globe", (g["size"],) * 3, pos, IDENT, _hex(g["color"]), material=g["material"], shape="Ball",
+			collide=g["can_collide"], query=False, cast_shadow=g["cast_shadow"])
+		r, gr, b = (c / 255 for c in _hex(cfg["color"]))
 		light = Node("PointLight", "LampLight")
 		light.props += [
-			f'<Color3 name="Color"><R>{f(r)}</R><G>{f(g)}</G><B>{f(b)}</B></Color3>',
+			f'<Color3 name="Color"><R>{f(r)}</R><G>{f(gr)}</G><B>{f(b)}</B></Color3>',
 			f'<float name="Brightness">{f(cfg["brightness"])}</float>',
 			f'<float name="Range">{f(cfg["range"])}</float>',
 			f'<bool name="Shadows">{str(cfg["shadows"]).lower()}</bool>',
 		]
-		att.add(light)
-		return [att]
+		globe.add(light)
+		return [globe]
 
 	def place(self, name: str, pos, yaw: float = 0.0) -> "PlacedProp":
 		return PlacedProp(self, name, pos, yaw)
@@ -271,7 +277,7 @@ class PlacedProp(Node):
 				line = f'<Item class="{m.group(1)}" referent="RBX{_ref[0]:06d}">'
 			elif line == "</Item>":
 				if stack.pop() == "MeshPart":
-					for n in self.prop.light_nodes():
+					for n in self.prop.globe_nodes(placement):
 						out.extend("\t" * (depth + rel + 1) + ln for ln in n.xml(0).splitlines())
 			elif not named and line.startswith('<string name="Name">'):
 				line, named = f'<string name="Name">{self.name}</string>', True

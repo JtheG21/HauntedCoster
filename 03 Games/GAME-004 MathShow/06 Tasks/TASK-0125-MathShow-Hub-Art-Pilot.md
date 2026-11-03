@@ -3,7 +3,7 @@ id: TASK-0125
 title: "MathShow Hub Art Pilot: AI Mesh Pipeline"
 type: task
 project: GAME-004
-status: review
+status: in_progress
 priority: medium
 risk: low
 owner: claude-code
