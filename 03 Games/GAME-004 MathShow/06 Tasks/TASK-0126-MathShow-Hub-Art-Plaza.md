@@ -49,5 +49,19 @@ Dress the central plaza in the locked Direction A look (A1 spawn view, A4 palett
 - Evidence: `docs/workflow/evidence/TASK-0126/` (art-plaza.txt, glyph-reachability.csv); screenshots in `~/Roblox-Work/evidence/TASK-0126/`.
 - Process notes: stopped the Rojo server on the main checkout (pid 44346) with jg's approval to serve this worktree; a scratch copy of the place was used for generation and closed with Don't Save; MathShow.rbxl was never saved (mtime 2026-10-31 10:04).
 
+## Handoff (Codex review, rev 0, 2026-11-02)
+- **Task:** TASK-0126, plaza art batch 1 (props, generator, HubCosmetics). Receiver: Codex, reviewer only, no edits. Claude implemented; check.sh green, Studio checks done at 12c1b4f.
+- **Workspace:** `/Users/jg/Desktop/Rg1-worktrees/TASK-0126`, branch `task/TASK-0126-art-plaza`, commits `b6af3b4..5b0d893` (3 commits, all this task; PR 184).
+- **Inputs:** [[SYS-Plaza-Map-Brief]], [[TASK-0125-MathShow-Hub-Art-Pilot]], `docs/workflow/evidence/TASK-0126/` (art-plaza.txt, glyph-reachability.csv), screenshots in `~/Roblox-Work/evidence/TASK-0126/`.
+- **Review focus:**
+  - `scripts/build_hub.py` (`add_props`, `add_bunting`, `Prop.extra_nodes`): do placements, counts (8 lights, 112 flags, 24 bulbs) and the budgets hold? Do rim lamps or masts block a path, pad or the SpawnLocation?
+  - `games/mathshow/src/client/Hub/HubCosmetics.luau`: one connection, pcall-isolated, fails inert, `warn` on error, budget guard; any leak or per-frame allocation?
+  - Spawn change (`Spawn` now invisible, top y 0.5, plate CanCollide false): does spawning and walking off still behave? CanCollide false on all decoration except floor, plinth, seats and lamp poles?
+  - `props/manifest.json` and `.rbxmx`: asset ids and provenance match jg's pick (crystal A 86836773049913, hex C 111612084578305); no textures uploaded.
+  - Evidence claims in art-plaza.txt (22,704 triangles, 294 instances, walk times 9.9-11.9 s): do the numbers follow from the method? Daily is 11.9 s.
+- **Constraints:** no uploads, publishing, Studio writes or place saves. Rojo is served from this worktree by Claude; do not start another server.
+- **Known non-task:** the `ContentId: rbxassetid://203785492` console warning; no 844x390 screenshots (capture tool has no size option); no real-device perf (TASK-0123).
+- **Report back:** verdict, findings with file:line, checks run, what is unverified.
+
 ## Outcome
 Plaza art batch 1 is built and verified at 12c1b4f. Open items: screenshots are not 844x390; no real-device performance (TASK-0123); jg's visual judgement and the Codex audit are pending. The SpawnHex is an 8-sided plate.
