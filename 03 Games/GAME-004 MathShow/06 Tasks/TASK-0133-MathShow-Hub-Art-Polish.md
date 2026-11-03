@@ -19,7 +19,7 @@ tags:
 # MathShow Hub Art-1 Polish
 
 ## Goal
-Close the Art-1 polish items left by [[TASK-0132]]: lake night read, map violet hue, A2 portal frame, A3 L-shaped Training hall, telescope tip.
+Close the Art-1 polish items left by [[TASK-0132-MathShow-Hub-Art-Lake]]: lake night read, map violet hue, A2 portal frame, A3 L-shaped Training hall, telescope tip.
 
 ## Scope
 - **In:** `scripts/build_hub.py`, regenerated `Hub.rbxmx`, brief light total, evidence.

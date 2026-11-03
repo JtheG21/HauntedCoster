@@ -60,14 +60,15 @@ SHAPE = {"Ball": 0, "Block": 1, "Cylinder": 2}
 
 LAKE_REFLECTANCE = 0.6
 # TASK-0133 Q1: Lake Ink #0F2A4A reads near-black at night, so the Water part takes a lighter step of the same hue (Lake Ink family);
-# the lakebed is lifted with it, because the Glass shows it through.
-LAKE_WATER = (24, 66, 120)
-LAKE_WATER_TRANSPARENCY = 0.3
-LAKE_WATER_REFLECTANCE = 0.8
-LAKE_BED = (14, 40, 76)
+# the lakebed is lifted with it, because the Glass shows it through. Reflectance darkens at night (0.6 and 1.0 read pure black: the sky it
+# reflects is dark), so it drops to 0.1.
+LAKE_WATER = (40, 100, 180)
+LAKE_WATER_TRANSPARENCY = 0.2
+LAKE_WATER_REFLECTANCE = 0.1
+LAKE_BED = (30, 70, 130)
 # TASK-0133 Q2: Menu Violet #8A4DFF reads magenta in captures once it is Neon (bloom pushes red up). Every Neon map part that asks
 # for the violet takes this value instead; the menu UI palette (MenuTheme, IdentityTheme) is untouched.
-MAP_NEON_VIOLET = (110, 78, 255)
+MAP_NEON_VIOLET = (88, 85, 255)  # renders about (119, 63, 255), hue 258 vs the swatch's 261 (the old value rendered hue 278)
 PLAZA_R = 55.0
 SPAWN_Z = 47.0  # the SpawnLocation and the SpawnHex plate sit at (0, SPAWN_Z), the plaza's south edge
 PATH_W = 14.0
@@ -400,8 +401,9 @@ MASSES = (  # name, a0, depth, b0, b1, height, edge trim on the front corners to
 NEW_LAMPS = ((130.0, -9.0), (130.0, 9.0))  # a, b: flank the court entrance, outside the 14-wide path
 # TASK-0133 Q3 (A2): a portal frame around the Blitz arch and the centre mass: two Basalt posts and a lintel, outlined in Menu Violet Neon.
 # It stands 4 studs in front of Mass_C (front face a = 183) and 28 behind the pads (a = 150), so no pad trigger volume is near it.
-FRAME_A, FRAME_HALF, FRAME_POST, FRAME_H = 178.5, 16.0, 2.4, 38.0  # a of the frame plane, post centre b, post width, top y
-FRAME_BEAM_H = 2.0
+FRAME_A, FRAME_HALF, FRAME_POST, FRAME_H = 178.5, 16.0, 2.4, 46.0  # a of the frame plane, post centre b, post width, top y
+FRAME_BEAM_H = 3.0
+FRAME_TRIM = 0.9  # the Neon outline is bolder than the 0.4 trim: it has to read from the path start, 90 studs away
 
 
 def build_competitive(zones: Node, e_fr: Frame) -> None:
@@ -439,12 +441,12 @@ def build_competitive(zones: Node, e_fr: Frame) -> None:
 	for side in (-1, 1):
 		comp.add(e_fr.block(f"Frame_Post{side}", FRAME_A, side * FRAME_HALF, FRAME_H / 2, (FRAME_POST, FRAME_H, FRAME_POST), basalt,
 			cast_shadow=False))
-		comp.add(e_fr.block(f"Frame_PostEdge{side}", FRAME_A - FRAME_POST / 2 - 0.1, side * inner, FRAME_H / 2, (TRIM, FRAME_H, TRIM), violet,
+		comp.add(e_fr.block(f"Frame_PostEdge{side}", FRAME_A - FRAME_POST / 2 - 0.1, side * inner, FRAME_H / 2, (FRAME_TRIM, FRAME_H, 0.4), violet,
 			material="Neon", **deco))
 	comp.add(e_fr.block("Frame_Lintel", FRAME_A, 0, FRAME_H - FRAME_BEAM_H / 2, (2 * FRAME_HALF + FRAME_POST, FRAME_BEAM_H, FRAME_POST), basalt,
 		**deco))
-	for tag, y in (("Top", FRAME_H + TRIM / 2), ("Under", FRAME_H - FRAME_BEAM_H + TRIM / 2)):
-		comp.add(e_fr.block(f"Frame_Lintel{tag}", FRAME_A - 0.1, 0, y, (2 * FRAME_HALF + FRAME_POST, TRIM, FRAME_POST + 0.2), violet, material="Neon",
+	for tag, y in (("Top", FRAME_H + FRAME_TRIM / 2), ("Under", FRAME_H - FRAME_BEAM_H + FRAME_TRIM / 2)):
+		comp.add(e_fr.block(f"Frame_Lintel{tag}", FRAME_A - 0.1, 0, y, (2 * FRAME_HALF + FRAME_POST, FRAME_TRIM, FRAME_POST + 0.2), violet, material="Neon",
 			**deco))
 
 	# Low perimeter wall with a Menu Violet Neon top strip: the front (with the path gap) and both sides up to the masses.
