@@ -3,7 +3,7 @@ id: TASK-0136
 title: "MathShow Daily Ramp Reachability"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -51,7 +51,11 @@ Rises along the spawn -> Daily pad route (north path, world -z; a = studs from t
 Ramps now end exactly at each terrace's near rim (centre a - radius) at terrace top + 0.05, with a 2-stud landing block (ground to top) so the corners the circular rim leaves open are covered; ramp 3 starts at the end of landing 2 (a 100). Ramp slopes: 26, 29 and 38 degrees (ramp 3 was 38 before). E lamps moved to b = +-8.2, outside the path. Daily ModePad position, size, tag and attributes unchanged; Observatory unchanged on the top terrace.
 
 ## Studio run (R4)
-Pending: Studio was in use by another session (TASK-0134 gate place, opened 15:56) when this task reached the Studio step; one assistant uses Studio at a time.
+Scratch place built from the checkout (BuildStamp 7fd395c, clean), fresh Play, Humanoid driven by MoveTo only with jumping disabled. All six pads arrive from spawn along the corridor waypoints in 10.9-12.7 s and each fires its screen (locked:daily, confirm_vs, confirm_blitz, confirm_group, practice, skillintro). A first attempt with a straight MoveTo from spawn failed for Group only (walked off the path into the court wall): a test-method error, fixed by using the corridor waypoints (second attempt; the two-attempt limit is used for this method). Regression: 34 glyph spawns, 6 pads, mid-match block (0 events on five pads), console clean. Details and what was not exercised: `docs/workflow/evidence/TASK-0136/daily-ramp.txt`.
 
-## Outcome
-_pending_
+## Outcome (2026-11-03)
+- R1: the dark wall is a 3.1-stud face where ramp 3 meets Terrace_3's rim; plus a 1.1-stud lip (ramp 1) and 0.8-stud slots (ramp 2). See Diagnosis.
+- R2: ramps end at the terrace rims with landing blocks; E lamps moved off the path; Daily pad and Observatory unchanged; collider guard and drift check pass.
+- R3: `tests/test_hub_routes.py` fails on main (13 lane failures, `before-fix.txt`) and passes now; picked up by check.sh's Python test discovery.
+- R4: see above. `hub_nav.py` (informational) still reports Daily unreachable; the Studio run is the gate.
+- R5: `check.sh` green; PR open, not merged; no audit recorded.
