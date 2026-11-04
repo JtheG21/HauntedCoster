@@ -113,3 +113,27 @@ DECISIONS (jg, 2026-11-03; appended at close-out, append-only)
     mobile jump keep-clear zone, TextFit ledger not updated, evidence missing, one spec gap); this log does not change that.
   - F5 (Daily ramp): treated as a real bug; it goes to the fix task (separate prompt). Not fixed here.
   - The test experience 10774566206 stays Private and untouched; no further publishes planned.
+
+PUBLISH LEDGER (appended 2026-11-03 after AUD-20261103-TASK-0123-01 F1; append-only; wording copied from the TASK-0123 session transcript, with jg's permission to quote it)
+  Publish 1 - CREATE
+    UTC time:     2026-11-03T20:53Z
+    Target:       NEW experience "MathShow Private Test" under jg_57565; universe 10774566206, place 93701543861123
+    Source SHA:   a3bc341df1b3adbbe37073465a2abdd3cdf71440 (main HEAD, clean build; BuildStamp "a3bc341 2026-11-03T20:37:13Z")
+    Approval:     jg's prompt of 2026-11-03T20:36:07Z, header: 'APPROVED (jg, in chat: "approve test publish"; publishing is limited to exactly this)'.
+                  Row U2: 'Publish: open the scratch .rbxl in Studio and use "Publish to Roblox As..." -> a NEW experience named
+                  "MathShow Private Test" under jg's MAIN account. Before publishing, confirm in the dialog that it's creating a NEW experience
+                  (not overwriting). Report the new universe/place ids.'
+                  "approve test publish" is jg's chat wording as quoted inside that prompt; the chat message itself is not in the transcript.
+  Publish 2 - OVERWRITE
+    UTC time:     2026-11-03T21:18:34Z
+    Target:       same place 93701543861123 in universe 10774566206 (MathShow Private Test); nothing else overwritten
+    Source SHA:   81d21fc45e490028c2f62b1ed2d9a9cf28bb8318 (branch task/TASK-0134-menu-exit, draft PR 196, not merged;
+                  BuildStamp "81d21fc 2026-11-03T21:15:27Z")
+    Question put to jg (assistant message, 21:15:02Z), option 2: "Approve a republish. You'd have to approve an update to MathShow Private
+                  Test, universe 10774566206, with the TASK-0134 build, because the current approval covers only the first publish. I'd build
+                  from that branch, republish to the same experience, and rerun the playtest."
+    Approval:     jg's typed chat message, 2026-11-03T21:15:21Z, verbatim: "Republish to MathShow Private Test (universe 10774566206) with
+                  the TASK-0134 branch build, then continue the playtest."
+                  This was a typed message, NOT a button reply. The earlier line "jg approved in chat" refers to it.
+                  (jg's "yes" at 21:04:53Z answered an unrelated iPad-screen question and is not a publish approval.)
+  No other publish occurred. Live MathShow experience untouched.
