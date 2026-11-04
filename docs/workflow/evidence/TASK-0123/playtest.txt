@@ -1,0 +1,139 @@
+TASK-0123 private multiplayer playtest: evidence log (partial; see "Not done")
+Recorded 2026-11-03 by Claude Code with jg. Times are UTC.
+
+SUMMARY (added 2026-11-03 at close-out; the sections below are unchanged)
+  What happened: a private test experience (universe 10774566206, place 93701543861123) was published twice (main a3bc341, then
+  the TASK-0134 build 81d21fc) and stayed Private. Run 1 hit a menu dead end (F1-F3); TASK-0134 (PR 196) added CLOSE/LEAVE and run 2
+  worked. Passed: per-player Glyph independence (P4), pads opening their screens, Mac client and server consoles clean, Mac
+  frame times on a clean client (CPU ~16.7 ms at the 60 FPS cap, GPU 3-4 ms, ~1.6 GB). Not conclusive or not done: P2 live
+  attempt, P3 (iPad perf), iPad console, triangle count. jg's decisions on those are appended at the end.
+
+
+MEASURED
+  Run 1 build: main a3bc341df1b3adbbe37073465a2abdd3cdf71440, BuildStamp "a3bc341 2026-11-03T20:37:13Z"
+               applies_to: no later commit touches games/mathshow/src (task JSON only).
+  Run 2 build: branch task/TASK-0134-menu-exit @ 81d21fc45e490028c2f62b1ed2d9a9cf28bb8318 (draft PR 196, NOT merged),
+               BuildStamp "81d21fc 2026-11-03T21:15:27Z". Run 2 is the build under test for P1 and P4 below.
+               applies_to: main plus the TASK-0134 diff only (menu exit; JoinRules/RoundService/Remotes/Net/MenuCopy).
+  Scratch builds (outside the repo): ~/Roblox-Work/scratch/MathShowPrivateTest.rbxl, MathShowPrivateTest-0134.rbxl.
+  Studio publish dialogs also showed the "Lighting Technology Migration" notice (Compatibility -> Voxel); Continue was clicked.
+
+EXPERIENCE
+  Name: MathShow Private Test (new experience, owner jg_57565). Universe 10774566206, place 93701543861123.
+  Published 2026-11-03T20:53Z (create), republished 2026-11-03T21:18:34Z (same place, overwrite, jg approved in chat).
+  Data Sharing turned OFF in the publish dialog; Team Create left on (default). No Robux, no paid features.
+  Profiles persist in THIS test experience only; the live MathShow experience was not touched.
+
+SETTINGS READBACK (Creator Dashboard)
+  2026-11-03 between 20:53Z and 20:59Z (exact time not logged): Game access Private; Audience reach Private; Manage audience "Only available to you, your
+  collaborators, and early testers. Playtesters under 16 won't have access."; Early testers: jg_574 (1/10, a friend of
+  jg_57565, persisted after reload); Collaborators: none.
+  2026-11-03T21:18Z, 21:36Z and ~22:36Z (final): Game access Private; Audience reach Private (still private after both publishes and all joins).
+  Content rating questionnaire: Not Started, label Unknown. NOT filled in: the iPad account joined without it.
+
+DEVICES
+  Mac: jg_57565 (main) in Roblox Player (not Studio), Mac OS 26.5.1. iPad: jg_574; model and iPadOS version NOT recorded.
+
+FINDINGS (build a3bc341)
+  F1  The main menu opens on join and has no exit: Back/Esc does nothing on the main screen (Menu/init.luau back());
+      only Group Battle > JOIN SHOW hides it.
+  F2  Joining mid-match gives "WATCHING - YOU JOIN NEXT MATCH" under a full-screen show HUD. iPad: could not move or tap
+      (two attempts, one after leaving and rejoining).
+  F3  Mac reproduced it: the show HUD (question, results, "GET READY 10" lobby) covers the plaza in every phase; no way
+      back to the plaza while joined. Matches: ~13 s/question, 6 questions, then lobby 10 s, then the next match.
+      Two-attempt rule reached for P1/P2/P4 on this build. jg asked for a close-menu button -> TASK-0134 (PR 196).
+FINDING (build 81d21fc)
+  F4  Mac avatar walked off the Daily ramp onto the grass beside the wall, then stuck against the wall with the camera
+      inside the avatar; Respawn from the Roblox menu recovered it. Not investigated (may be my key-driven movement).
+
+RESULTS (build 81d21fc unless noted)
+  U4  21:21:36 Mac joined the same server as the iPad (toast "You've joined jg_574"). The new CLOSE button on the main
+      menu returned to the plaza on the Mac (screenshot 02). jg: "the fix worked" on the iPad.
+  P1  (iPad, reported by jg) every pad opened its corresponding screen as expected; everything functionally normal; the
+      Glyph counter stays on screen in the plaza outside menus. NOT reported: Daily toast, rare Glyph, HUD behind menu.
+      Pad screens were not independently screenshotted by Claude.
+  P4  Mac (B, idle, then driven): counter 0, no menu opened while A used pads and Glyphs; the path Glyph orbs A had
+      collected were still visible to B up the ramp; B collected on the path and the counter went 0 -> 1 -> 2 (later 5);
+      jg confirmed A's count and view were unchanged (after 21:31:47Z; exact time not logged). PASS for per-player GlyphState independence.
+      Screenshots 01-03 in ~/Roblox-Work/evidence/TASK-0123/.
+
+SOLO FOLLOW-UP (jg stopped the two-player test at ~22:25Z: "handle the rest solo"; build 81d21fc, Mac only)
+  22:20Z  Mac was disconnected for idle 20 min (error 278); reconnected. 22:22:57Z Blitz pad opened the Blitz screen
+          (matches jg's iPad report; screenshot 04). Mac client then stalled near the Group pad (low memory).
+  22:27:59Z Mac Roblox Player killed and relaunched for a clean client.
+  22:28Z  PLAY > Group Battle > JOIN SHOW: joined mid-match, "WATCHING - YOU JOIN NEXT MATCH" banner now has a LEAVE
+          button next to it (TASK-0134). Next match started with the Mac as a participant (TYPE ANSWER / LOCK IN).
+  Console (Developer Console, Mac, ~22:31Z): Client tab: 0 errors, 0 warnings; log only "[MathShow] client ready" and
+          "Hud first RoundState". Server tab: 0 errors, 0 warnings; "ModePadService: 6 pads", "GlyphService: 34 glyph
+          spawns", "server ready", round phases looping normally (screenshot 05).
+  Memory (Mac client, 22:31Z): Client Memory Usage 1514-1530 MB total, CoreMemory 676.7 MB; avg data ping 104-166 ms
+          (screenshot 06). Roblox's own note: memory category counters need MicroProfiler on to be exact.
+  Mac at that moment was heavily memory-starved (free pages ~60 MB), so these are not clean perf numbers.
+
+CLEAN-MAC FOLLOW-UP (jg quit Chrome, VS Code and ChatGPT; I quit the idle Studio launcher; build 81d21fc, Mac only, 23:21-23:33Z)
+  P5  In-game Performance Stats (Settings > Performance Stats On; it only showed once the right row was toggled) read as
+      numbers on a clean client, 60 FPS cap (Maximum Frame Rate "Default (60 FPS)"), Graphics Mode Manual, Quality 6/10:
+        spawn (23:22Z):        CPU 15.64 / 16.86 / 17.27 / 15.98 ms, GPU 3.82 / 3.06 / 3.99 / 4.21 ms, Mem 1624-1627 MB
+        foot of the N ramp (23:23Z): CPU 16.57 / 16.74 / 16.70 ms, GPU 3.29 / 3.57 / 3.50 ms, Mem 1624.6 MB
+        top of the N ramp, Daily gallery in view (23:24Z): CPU 16.79 / 16.50 / 16.28 ms, GPU 3.89 / 3.98 / 3.94 ms, Mem 1623.7 MB
+      Network ping 29-90 ms. CPU sits at the 60 FPS frame budget (~16.7 ms) with GPU at 3-4 ms, so the client holds the
+      cap; FPS itself was not shown as a number (inferred from frame ms). Plaza centre was walked through, not isolated.
+      The Observatory (Daily gallery) was seen only from the ramp top. Triangle count is not available in these stats, so the
+      4,332 gap was not compared. Screenshots 07 (spawn) and 08 (ramp top).
+  P2  Joined from the Group pad (23:28Z, watcher at Q3), became a participant at the next match (TYPE ANSWER / LOCK IN),
+      then strafed left ~800 key presses along the arch fronts through Q2-Q6: no pad screen opened. The control failed:
+      after leaving and rejoining I could not retrace the same line (route differs run to run), so I cannot show that
+      Blitz/VS pads were actually crossed. Outside a show, the Group pad (23:27Z) and Blitz pad opened their screens.
+      Result: consistent with the block, NOT conclusive.
+  F5 (unconfirmed, Mac key-driven only): at the top of the N ramp the avatar stopped in front of a dark wall below the Daily
+      gallery lip; walking plus three jump attempts did not reach the Daily pad. The map script has stepped terraces
+      (ramps to a=74, 98, 122), so this may be my input, not the map. jg reported all pads worked on the iPad (Daily not
+      named). Screenshot 08.
+  Glyph counter persisted across a Respawn (7 stayed 7) on the Mac.
+
+NOT DONE (do not read these as passes)
+  P2  not conclusive (see above).
+  P3  iPad FPS / frame ms / memory / triangle count / MicroProfiler: jg could not read the stats; model and iPadOS not recorded.
+  P5  no triangle count; FPS inferred from frame ms, not read as a number.
+  iPad console was not captured (acceptance "no errors in either console" holds for the Mac client and server only).
+
+DECISIONS (jg, 2026-11-03; appended at close-out, append-only)
+  - jg will no longer test on the iPad (2026-11-03).
+  - P3 iPad performance: DEFERRED, risk accepted by jg. Mitigations in place: Lighting Technology ShadowMap, now set by the
+    project file (TASK-0135, PR 198, merged 2026-11-03T23:15Z, merge commit 4a9fe32); PointLights <= 40 (current hub total
+    25, Hub.rbxmx read 2026-11-03; TASK-0133 evidence also records 25 of 40); CastShadow off on props and the inventory
+    budgets (both named by jg; not re-verified in this task). Mac P5 numbers are recorded above. Re-measure whenever a
+    mobile device is available.
+  - P2 (mid-match pad block): accepted by jg as covered by the ModePadRules spec (games/mathshow/tests/ModePadRules.spec.luau)
+    and TASK-0122 Studio S4c (real participation blocking; cited in AUD-20261102-TASK-0122-03). The live attempt in this task
+    stays inconclusive.
+  - P1 leftovers: rare Glyph and HUD hiding are covered by TASK-0121 Studio evidence (docs/workflow/evidence/TASK-0121:
+    glyph-play.txt step 2 collects a rare Glyph, hud-menu-open/closed images). CLOSE/LEAVE were confirmed by jg on the iPad
+    on build 81d21fc. Note: the Codex audit of PR 196 (AUD-20261103-TASK-0134-01, attempt 1) is FAIL at 81d21fc (LEAVE overlaps the
+    mobile jump keep-clear zone, TextFit ledger not updated, evidence missing, one spec gap); this log does not change that.
+  - F5 (Daily ramp): treated as a real bug; it goes to the fix task (separate prompt). Not fixed here.
+  - The test experience 10774566206 stays Private and untouched; no further publishes planned.
+
+PUBLISH LEDGER (appended 2026-11-03 after AUD-20261103-TASK-0123-01 F1; append-only; wording copied from the TASK-0123 session transcript, with jg's permission to quote it)
+  Publish 1 - CREATE
+    UTC time:     2026-11-03T20:53Z
+    Target:       NEW experience "MathShow Private Test" under jg_57565; universe 10774566206, place 93701543861123
+    Source SHA:   a3bc341df1b3adbbe37073465a2abdd3cdf71440 (main HEAD, clean build; BuildStamp "a3bc341 2026-11-03T20:37:13Z")
+    Approval:     jg's prompt of 2026-11-03T20:36:07Z, header: 'APPROVED (jg, in chat: "approve test publish"; publishing is limited to exactly this)'.
+                  Row U2: 'Publish: open the scratch .rbxl in Studio and use "Publish to Roblox As..." -> a NEW experience named
+                  "MathShow Private Test" under jg's MAIN account. Before publishing, confirm in the dialog that it's creating a NEW experience
+                  (not overwriting). Report the new universe/place ids.'
+                  "approve test publish" is jg's chat wording as quoted inside that prompt; the chat message itself is not in the transcript.
+  Publish 2 - OVERWRITE
+    UTC time:     2026-11-03T21:18:34Z
+    Target:       same place 93701543861123 in universe 10774566206 (MathShow Private Test); nothing else overwritten
+    Source SHA:   81d21fc45e490028c2f62b1ed2d9a9cf28bb8318 (branch task/TASK-0134-menu-exit, draft PR 196, not merged;
+                  BuildStamp "81d21fc 2026-11-03T21:15:27Z")
+    Question put to jg (assistant message, 21:15:02Z), option 2: "Approve a republish. You'd have to approve an update to MathShow Private
+                  Test, universe 10774566206, with the TASK-0134 build, because the current approval covers only the first publish. I'd build
+                  from that branch, republish to the same experience, and rerun the playtest."
+    Approval:     jg's typed chat message, 2026-11-03T21:15:21Z, verbatim: "Republish to MathShow Private Test (universe 10774566206) with
+                  the TASK-0134 branch build, then continue the playtest."
+                  This was a typed message, NOT a button reply. The earlier line "jg approved in chat" refers to it.
+                  (jg's "yes" at 21:04:53Z answered an unrelated iPad-screen question and is not a publish approval.)
+  No other publish occurred. Live MathShow experience untouched.
