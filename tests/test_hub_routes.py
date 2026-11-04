@@ -4,18 +4,15 @@ Corridors are polylines exported by scripts/build_hub.py to games/mathshow/map/H
 rectangle CORRIDOR_WIDTH (12) wide centred on it; every interior joint adds a disc of radius CORRIDOR_WIDTH / 2 on the joint, so the
 outer side of a bend is covered too (the rectangles of the two segments overlap on the inner side).
 
-What it asserts (all exact, no sampling):
-1. Obstacles: no CanCollide part has an upward face that, anywhere inside a corridor rectangle or joint disc, sits more than
-   STEP_UP (1.0) stud above the route floor F(s) at the same distance along the route. Tops are planes (or flat discs, for vertical
-   cylinders), their overlap with the corridor is a convex polygon and the height difference is linear on it, so the worst point is
-   a vertex. Parts hanging overhead are not exempted.
-2. Floor: F(s) is the highest walkable facet (slope under 45 degrees) under the centreline. A gap along it, or an upward step of
-   more than STEP_UP between consecutive floor facets (inside a segment or at a joint, outgoing against incoming limit), fails.
-3. Floor support across the whole strip: every point of every corridor rectangle and joint disc is covered by a walkable facet
-   within STEP_UP of the route floor there (convex polygon subtraction: the covering region of a planar facet is two half-planes).
-   A one-stud bridge, a lateral gap or a pit at the edge fails. A vertical cylinder's disc counts as its inscribed 360-gon and a
-   joint disc as its circumscribed 360-gon, so the approximation can only report a gap, never hide one.
-It does not prove that an avatar can walk the route (engine behaviour: the Studio MoveTo run in the evidence, TASK-0136).
+What it asserts, and only this: no CanCollide part has an upward face that, anywhere inside a corridor rectangle or joint disc,
+sits more than STEP_UP (1.0) stud above the highest walkable facet (slope under 45 degrees) under the route's centreline at that
+distance. Tops are planes (or flat discs, for vertical cylinders), their overlap with the corridor is a convex polygon and the
+height difference is linear on it, so the worst point is a vertex: the convex clip below is exact, not sampled. Parts hanging
+overhead are not exempted. The walkable facet is only the datum for "above"; it is never itself checked.
+
+What it does NOT prove: that the floor is continuous across the corridor (a gap or a one-stud-wide bridge passes), that steps
+between consecutive floor parts are small, or that an avatar can walk the route. Walkability is engine behaviour: the gate is the
+Studio test games/mathshow/tests/studio/HubRoutes.luau (see docs/workflow/STUDIO-SYNC.md, "HubRoutes").
 
 Pure stdlib; reuses only the part loader of scripts/hub_nav.py. Set HUB_UNDER_TEST=<file.rbxmx> to run the guard on another map.
 """
@@ -247,71 +244,6 @@ class Floor:
         return -math.inf
 
 
-def area(poly):
-    return abs(sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(poly, poly[1:] + poly[:1]))) / 2
-
-
-def subtract(pieces, other):
-    """Convex pieces minus one convex counter-clockwise polygon, as convex pieces (split along each edge of the polygon)."""
-    out = []
-    for q in pieces:
-        cur = q
-        for i, a in enumerate(other):
-            b = other[(i + 1) % len(other)]
-            ex, ey = b[0] - a[0], b[1] - a[1]
-            bound = ey * a[0] - ex * a[1]
-            outside = clip_half(cur, -ey, ex, -bound)  # the strictly outer side of this edge survives the subtraction
-            if len(outside) >= 3 and area(outside) > 1e-12:
-                out.append(outside)
-            cur = clip_half(cur, ey, -ex, bound)
-            if len(cur) < 3:
-                cur = []
-                break
-        # whatever remains of cur lies inside `other` and is dropped
-    return out
-
-
-def ngon(cx, cz, r, n=360):
-    return [(cx + r * math.cos(2 * math.pi * k / n), cz + r * math.sin(2 * math.pi * k / n)) for k in range(n)]
-
-
-def walkable_facets(all_facets):
-    """(world polygon, plane) of every upward face under 45 degrees; a vertical cylinder's disc is its inscribed 360-gon (a
-    conservative stand-in: it can only report a gap, never hide one)."""
-    out = []
-    for f in all_facets:
-        if f.disc is not None:
-            out.append((ngon(*f.disc), f.plane, f.part.name))
-        elif 1.0 / math.sqrt(1 + f.plane[1] ** 2 + f.plane[2] ** 2) >= WALKABLE_NORMAL_Y:
-            out.append((f.poly, f.plane, f.part.name))
-    return out
-
-
-def uncovered(region, walk, floor_h):
-    """The part of a convex region (world x, z polygon) not covered by walkable facets within STEP_UP of the floor height.
-
-    floor_h(x, z) is the route floor there, linear on the region. A facet covers the points where |h - floor| <= STEP_UP, which is
-    two half-planes on a planar facet, so every covering piece is convex and the subtraction is exact."""
-    pieces = [region]
-    xs, zs = [q[0] for q in region], [q[1] for q in region]
-    for poly, (h0, gx, gz, x0, z0), _ in walk:
-        if max(q[0] for q in poly) < min(xs) - EPS or min(q[0] for q in poly) > max(xs) + EPS:
-            continue
-        if max(q[1] for q in poly) < min(zs) - EPS or min(q[1] for q in poly) > max(zs) + EPS:
-            continue
-        # d(x, z) = facet height - floor height is linear: d = d0 + dx x + dz z
-        f0, fx, fz = floor_h
-        d0, dx, dz = h0 - gx * x0 - gz * z0 - f0, gx - fx, gz - fz
-        cover = clip_half(poly, dx, dz, STEP_UP - d0)
-        if len(cover) >= 3:
-            cover = clip_half(cover, -dx, -dz, STEP_UP + d0)
-        if len(cover) >= 3 and area(cover) > 1e-12:
-            pieces = subtract(pieces, hull(cover))
-            if not pieces:
-                return []
-    return [q for q in pieces if area(q) > 1e-6]
-
-
 # ---- the guard ---------------------------------------------------------------------------------------------------------------
 
 def check_route(route, parts):
@@ -323,25 +255,9 @@ def check_route(route, parts):
     failures = []
     segs = [Segment(a, b) for a, b in zip(points, points[1:])]
     floors = [Floor(s, all_facets) for s in segs]
-    walk = walkable_facets(all_facets)
     for i, (seg, fl) in enumerate(zip(segs, floors)):
         cuts = sorted({0.0, seg.length, *[p[0] for p in fl.pieces], *[p[1] for p in fl.pieces]})
         slabs = [(lo, hi) for lo, hi in zip(cuts, cuts[1:]) if hi - lo > 1e-7]
-        for lo, hi in slabs:  # floor support across the whole strip: nothing uncovered, nothing more than a step off the floor
-            piece = next((pc for pc in fl.pieces if pc[0] - EPS <= (lo + hi) / 2 <= pc[1] + EPS), None)
-            if piece is None:
-                continue  # a gap along the centreline is already reported
-            f_a, f_slope = piece[2] + piece[3] * (lo - piece[0]), piece[3]
-            # floor height in world x, z: F(s) = f_a + slope (s - lo), s = (q - p0) . u
-            fx, fz = f_slope * seg.u[0], f_slope * seg.u[1]
-            f0 = f_a - f_slope * lo - fx * seg.p0[0] - fz * seg.p0[1]
-            region = [seg.to_xz(lo, -half), seg.to_xz(hi, -half), seg.to_xz(hi, half), seg.to_xz(lo, half)]
-            gaps = uncovered(region, walk, (f0, fx, fz))
-            if gaps:
-                g = max(gaps, key=area)
-                gx_, gz_ = sum(q[0] for q in g) / len(g), sum(q[1] for q in g) / len(g)
-                s_, t_ = seg.to_st(gx_, gz_)
-                failures.append(f'{mode}: segment {i + 1} s={s_:.2f} t={t_:+.2f} ({gx_:.1f}, {gz_:.1f}): no floor within a step of the route floor across the corridor ({sum(area(q) for q in gaps):.2f} sq studs uncovered)')
         for f in all_facets:
             worst = None
             for lo, hi in slabs:
@@ -371,17 +287,9 @@ def check_route(route, parts):
                 failures.append(f'{mode}: segment {i + 1} s={worst[1]:.2f} t={worst[2]:+.2f} ({x:.1f}, {z:.1f}): {f.part.name} rises {worst[0]:.2f} studs above the floor')
     for i in range(1, len(points) - 1):  # joints: floor taken at the joint itself
         cx, cz = points[i]
-        joint_floor = floors[i - 1].at(segs[i - 1].length, -1)  # the level the walker arrives at
-        out_floor = floors[i].at(0.0, 1)
-        if joint_floor == -math.inf or out_floor == -math.inf:
+        joint_floor = max(floors[i - 1].at(segs[i - 1].length, -1), floors[i].at(0.0, 1))
+        if joint_floor == -math.inf:
             continue
-        if out_floor - joint_floor > STEP_UP + EPS:
-            failures.append(f'{mode}: joint {i} at ({cx:.1f}, {cz:.1f}): floor steps up {out_floor - joint_floor:.2f} studs from the incoming to the outgoing segment')
-        disc = ngon(cx, cz, half / math.cos(math.pi / 360))  # circumscribed, so a gap at the disc rim is never missed
-        gaps = uncovered(disc, walk, (joint_floor, 0.0, 0.0))
-        if gaps:
-            g = max(gaps, key=area)
-            failures.append(f'{mode}: joint {i} at ({cx:.1f}, {cz:.1f}): no floor within a step of the route floor across the joint disc ({sum(area(q) for q in gaps):.2f} sq studs uncovered near ({g[0][0]:.1f}, {g[0][1]:.1f}))')
         for f in all_facets:
             if f.disc is not None:
                 if math.hypot(f.disc[0] - cx, f.disc[1] - cz) > f.disc[2] + half:
@@ -456,34 +364,10 @@ class GuardOnSyntheticWorlds(unittest.TestCase):
         fails = check_route(STRAIGHT, [flat(), make_block('Kerb', (5, 0.55, 2.5), (4, 1.1, 2))])
         self.assertTrue(named(fails, 'Kerb'), fails)
 
-    def test_a_floor_one_stud_wide_is_not_a_twelve_stud_corridor(self):  # audit AUD-02 F2a
-        fails = check_route(STRAIGHT, [make_block('Floor', (5, -0.5, 0), (30, 1, 1))])
-        self.assertTrue(named(fails, 'no floor within a step'), fails)
-
-    def test_a_lateral_floor_gap_inside_the_strip_fails(self):
-        a, b = make_block('A', (5, -0.5, -4.0), (30, 1, 4)), make_block('B', (5, -0.5, 4.0), (30, 1, 4))  # z -6..-2 and 2..6; gap -2..2
-        fails = check_route(STRAIGHT, [a, b, make_block('Mid', (5, -0.5, 0), (30, 1, 3.0))])  # mid fills -1.5..1.5: still 0.5 gaps
-        self.assertTrue(named(fails, 'no floor within a step'), fails)
-        self.assertEqual(check_route(STRAIGHT, [a, b, make_block('Mid', (5, -0.5, 0), (30, 1, 4.2))]), [])
-
-    def test_a_floor_two_studs_lower_at_the_edge_of_the_strip_fails(self):
-        wide = make_block('Wide', (5, -2.5, 0), (30, 1, 20))  # top -2: a pit under the strip
-        mid = make_block('Mid', (5, -0.5, 0), (30, 1, 6))  # top 0, only 6 wide
-        fails = check_route(STRAIGHT, [wide, mid])
-        self.assertTrue(named(fails, 'no floor within a step'), fails)
-
-    def test_a_step_exactly_at_a_joint_fails(self):  # audit AUD-02 F2b
-        low, high = make_block('Low', (0, -0.5, 0), (10, 1, 20)), make_block('High', (10, 1.5, 0), (10, 1, 20))
-        fails = check_route({'mode': 'T', 'points': [[-4.0, 0.0], [5.0, 0.0], [12.0, 0.0]]}, [low, high])
-        self.assertTrue(named(fails, 'steps up'), fails)
-        high_ok = make_block('High', (10, 0.4, 0), (10, 1, 20))  # 0.9 step passes
-        self.assertEqual(check_route({'mode': 'T', 'points': [[-4.0, 0.0], [5.0, 0.0], [12.0, 0.0]]}, [low, high_ok]), [])
-
-    def test_a_floor_missing_under_a_bend_joint_fails(self):
-        a = make_block('A', (5, -0.5, 0), (14, 1, 12.0))  # covers the first leg
-        b = make_block('B', (10, -0.5, 8), (12.0, 1, 16))  # covers the second leg; the outer corner x 10..16, z -6..0 is bare
-        fails = check_route(BEND, [a, b])
-        self.assertTrue(named(fails, 'no floor within a step'), fails)
+    def test_documented_non_goals_are_not_asserted(self):  # a floor gap and a kerb ON the centreline are the Studio gate's job
+        a, b = make_block('A', (0, -0.5, 0), (10, 1, 20)), make_block('B', (14, -0.5, 0), (10, 1, 20))
+        self.assertEqual(check_route({'mode': 'T', 'points': [[-4.0, 0.0], [16.0, 0.0]]}, [a, b]), [])
+        self.assertEqual(check_route(STRAIGHT, [flat(), make_block('Kerb', (5, 0.55, 0), (4, 1.1, 2))]), [])
 
     def test_a_ramp_is_floor_not_an_obstacle(self):  # 1-in-2 slope, 4 studs high, 20 wide, onto a landing
         phi = math.atan2(4, 8)
