@@ -1,0 +1,83 @@
+{
+  "id": "TASK-0138",
+  "game": "GAME-004",
+  "title": "MathShow Lifetime Glyph Total (G-DS)",
+  "status": "done",
+  "tier": "deep",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/shared/ProfileRules.luau",
+    "games/mathshow/tests/ProfileRules.spec.luau",
+    "games/mathshow/src/shared/Net.luau",
+    "games/mathshow/src/server/Services/ProfileService.luau",
+    "games/mathshow/src/server/Services/GlyphService.luau",
+    "games/mathshow/src/client/Glyphs/GlyphController.luau",
+    "docs/workflow/evidence/TASK-0138/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0138-MathShow-Lifetime-Glyph-Total.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0138-glyph-lifetime",
+  "acceptance": [
+    "G1: existing ProfileService schema, key scheme, save cadence and fallback reported; none changed.",
+    "G2: ProfileRules.migrate and addGlyphs are pure, idempotent, never downgrade, preserve unknown fields; spec covers the listed cases.",
+    "G3: ProfileService migrates on load (memory profiles too) and exposes a server-only increment; no DataStore write per collect.",
+    "G4: GlyphService adds the server-derived rarity value after a successful applyCollect.",
+    "G5: GlyphState {available, count, lifetime}; sender GlyphService, receiver GlyphController, Net payload type change together; HUD shows the lifetime total.",
+    "G6: Studio memory-only check and private-test-experience persistence check with evidence; API access disabled again and read back.",
+    "G7: record-exec; check.sh and validators green; PR open, CI green, not merged, no self-audit."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0138/gds.txt"
+  ],
+  "notes": "DataStore schema change approved by jg in chat (\"approve G-DS\"), 2026-11-03: adds glyphsLifetime only. Out of scope: quests/XP, other profile fields, key renames/deletions, data wipes, live experience, publishing, merging, saving MathShow.rbxl.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0138-MathShow-Lifetime-Glyph-Total.md",
+  "risk": "high",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-03T18:26:56",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-03T18:26:56",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-03T20:08:40",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-03T20:14:04",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-03T20:15:27",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-03T20:08:40",
+      "result": "pass",
+      "notes": "check.sh green (358 specs); Studio memory-only: Total 6, resets on rejoin; private test experience: migrate, persist across rejoin, accumulate to 12 (docs/workflow/evidence/TASK-0138/gds.txt)"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-03T20:14:04",
+      "result": "pass",
+      "report": "06 QA/AUD-20261103-TASK-0138-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
+}

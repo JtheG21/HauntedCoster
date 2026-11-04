@@ -153,10 +153,12 @@ export type VsResultPayload = {
 	them: number,
 }
 
--- available: the ids of the glyphs this player can collect now, sorted; count: the session total (GlyphConfig.Value).
+-- available: the ids of the glyphs this player can collect now, sorted; count: the session total (GlyphConfig.Value);
+-- lifetime: the saved total over all visits (ProfileService, TASK-0138), 0 while the profile is not available.
 export type GlyphStatePayload = {
 	available: { string },
 	count: number,
+	lifetime: number,
 }
 
 local Net = table.freeze({

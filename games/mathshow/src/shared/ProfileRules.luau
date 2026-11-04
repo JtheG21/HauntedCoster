@@ -19,6 +19,7 @@ export type Profile = {
 	lastTestRank: number?, -- rank cleared by the last Skill Test, with lastTakenAt
 	lastTakenAt: number?, -- os.time() of the last Skill Test start; the cooldown runs from it
 	blitzBest: number?, -- 0..MenuConfig.BlitzTotal, never decreases
+	glyphsLifetime: number?, -- hub glyph value collected over all visits (TASK-0138), never decreases
 }
 export type Patch = {
 	settings: Settings?,
@@ -26,6 +27,7 @@ export type Patch = {
 	lastTestRank: number?,
 	lastTakenAt: number?,
 	blitzBest: number?,
+	glyphsLifetime: number?,
 }
 export type ClientProfile = {
 	rank: number?,
@@ -37,7 +39,8 @@ export type ClientProfile = {
 	persistence: string, -- "saved" | "memory": memory means progress is not kept (Studio / unpublished place)
 }
 
-local VERSION = 1
+local VERSION = 2 -- 2: glyphsLifetime (TASK-0138)
+local MAX_GLYPHS = 2 ^ 53 -- the largest exact integer; a total can never overflow into noise
 local MAX_TIME = 2 ^ 40 -- far beyond any os.time(), keeps garbage out
 local UNAVAILABLE = { "publish", "studioaccesstoapisnotallowed", "403", "not allowed", "api services" }
 local SETTING_KEYS = { "music", "sfx", "reducedMotion", "colorBlind", "haptics" }
@@ -68,7 +71,54 @@ function ProfileRules.defaultSettings(): Settings
 end
 
 function ProfileRules.defaults(): Profile
-	return { version = VERSION, settings = ProfileRules.defaultSettings() }
+	return { version = VERSION, settings = ProfileRules.defaultSettings(), glyphsLifetime = 0 }
+end
+
+-- Any stored number as a valid lifetime total: non-finite, negative or non-number -> 0, fractions floored, capped.
+local function cleanGlyphs(value: any): number
+	if typeof(value) ~= "number" or value ~= value or value <= 0 or value == math.huge then
+		return 0
+	end
+	return math.min(math.floor(value), MAX_GLYPHS)
+end
+
+-- Brings stored data up to VERSION without touching anything else: a shallow copy that keeps unknown fields, adds
+-- glyphsLifetime = 0 when missing and cleans a bad one. Idempotent. A newer version is returned as a copy, untouched
+-- (never downgraded); a missing or garbage version counts as the oldest. Non-tables are returned as they are.
+function ProfileRules.migrate(data: any): any
+	if typeof(data) ~= "table" then
+		return data
+	end
+	local out = table.clone(data)
+	local version = out.version
+	if typeof(version) ~= "number" or version ~= version then
+		version = 0
+	end
+	if version > VERSION then
+		return out
+	end
+	out.glyphsLifetime = cleanGlyphs(out.glyphsLifetime)
+	out.version = math.max(math.floor(version), VERSION)
+	return out
+end
+
+-- Was this stored data written by a newer server than this build? Such a profile must not be saved back: sanitize()
+-- drops fields this build does not know, and the newer version number would then hide that loss.
+function ProfileRules.isNewerVersion(data: any): boolean
+	return typeof(data) == "table"
+		and typeof(data.version) == "number"
+		and data.version == data.version
+		and data.version > VERSION
+end
+
+-- A copy with `amount` added to the lifetime total. Anything but a finite positive integer leaves the total as it is.
+function ProfileRules.addGlyphs(data: Profile, amount: any): Profile
+	local out = table.clone(data)
+	local valid = typeof(amount) == "number" and amount > 0 and amount < math.huge and amount == math.floor(amount)
+	if valid then
+		out.glyphsLifetime = math.min(cleanGlyphs(out.glyphsLifetime) + amount, MAX_GLYPHS)
+	end
+	return out
 end
 
 -- Strict: exactly the five keys, integers 0..SettingMax and booleans. Returns a fresh table, or nil for anything else
@@ -144,6 +194,10 @@ function ProfileRules.sanitize(raw: any): Profile
 	if isInt(raw.blitzBest, 0, MenuConfig.BlitzTotal) then
 		profile.blitzBest = raw.blitzBest
 	end
+	profile.glyphsLifetime = cleanGlyphs(raw.glyphsLifetime)
+	if typeof(raw.version) == "number" and raw.version == raw.version and raw.version > VERSION then
+		profile.version = math.floor(raw.version) -- written by a newer server: keep its number
+	end
 	return profile
 end
 
@@ -166,12 +220,14 @@ function ProfileRules.merge(stored: any, patch: Patch): Profile
 		lastTestRank = patch.lastTestRank,
 		lastTakenAt = patch.lastTakenAt,
 		blitzBest = patch.blitzBest,
+		glyphsLifetime = patch.glyphsLifetime,
 	})
 	if patch.settings ~= nil and ProfileRules.sanitizeSettings(patch.settings) ~= nil then
 		base.settings = clean.settings
 	end
 	base.bestRank = maxOf(base.bestRank, clean.bestRank)
 	base.blitzBest = maxOf(base.blitzBest, clean.blitzBest)
+	base.glyphsLifetime = math.max(cleanGlyphs(base.glyphsLifetime), cleanGlyphs(clean.glyphsLifetime))
 	if clean.lastTakenAt ~= nil then
 		local newer = base.lastTakenAt == nil or clean.lastTakenAt > base.lastTakenAt
 		if newer or (clean.lastTakenAt == base.lastTakenAt and clean.lastTestRank ~= nil) then
@@ -190,6 +246,7 @@ function ProfileRules.toPatch(profile: Profile): Patch
 		lastTestRank = profile.lastTestRank,
 		lastTakenAt = profile.lastTakenAt,
 		blitzBest = profile.blitzBest,
+		glyphsLifetime = profile.glyphsLifetime,
 	}
 end
 

@@ -1,7 +1,8 @@
 --!strict
 -- GlyphService (TASK-0121): the hub's collectable glyphs. Spawns come from the GlyphSpawn-tagged attachments under
 -- Workspace.Hub (id = the attachment's parent part). Each player has their own GlyphRules state, in memory only: it
--- starts fresh on join and is dropped on leave. The client asks with GlyphCollect(id); the server checks it against
+-- starts fresh on join and is dropped on leave. Each collect also adds its rarity value to the profile's lifetime total
+-- (ProfileService.addGlyphs, TASK-0138), which the autosave persists. The client asks with GlyphCollect(id); the server checks it against
 -- its own clock and the character's HumanoidRootPart and answers only with GlyphState. Rejections are silent to the
 -- client; the server warns at most once per reason per player per WARN_WINDOW seconds, for debugging.
 
@@ -18,14 +19,17 @@ local Net = require(Shared:WaitForChild("Net"))
 local RateRules = require(Shared:WaitForChild("RateRules"))
 
 local Remotes = require(script.Parent.Parent.Remotes)
+local ProfileService = require(script.Parent.ProfileService)
 
 local WARN_WINDOW = 5
+local PROFILE_WAIT_SECONDS = 45 -- longer than ProfileService's rejoin wait (30 s) plus a load
 local STUDIO = RunService:IsStudio()
 
 type Entry = {
 	state: GlyphRules.PlayerState,
 	rawStamps: { number }, -- every GlyphCollect, success or fail (RawRequestLimit per RateWindowSeconds)
 	warnStamps: { [string]: { number } },
+	pendingLifetime: number, -- collected before the profile was available; added to the total once it is
 }
 
 local GlyphService = {}
@@ -88,7 +92,7 @@ local function readSpawns(): { GlyphRules.Spawn }
 	return parsed
 end
 
-local function payload(state: GlyphRules.PlayerState): Net.GlyphStatePayload
+local function payload(player: Player, state: GlyphRules.PlayerState): Net.GlyphStatePayload
 	local available: { string } = {}
 	for _, spawn in spawns do
 		local glyph = state.glyphs[spawn.id]
@@ -96,12 +100,12 @@ local function payload(state: GlyphRules.PlayerState): Net.GlyphStatePayload
 			table.insert(available, spawn.id)
 		end
 	end
-	return { available = available, count = state.sessionCount }
+	return { available = available, count = state.sessionCount, lifetime = ProfileService.glyphsLifetime(player) or 0 }
 end
 
 local function sendState(player: Player, entry: Entry)
 	local ok, err = pcall(function()
-		Remotes.GlyphState:FireClient(player, payload(entry.state))
+		Remotes.GlyphState:FireClient(player, payload(player, entry.state))
 	end)
 	if not ok then
 		warn(`[MathShow] GlyphState to {player.Name} failed: {err}`)
@@ -150,7 +154,15 @@ local function onCollect(player: Player, raw: unknown)
 		debugWarn(player, entry, reason, if type(raw) == "string" then string.sub(raw, 1, 40) else typeof(raw))
 		return
 	end
+	local glyph = entry.state.glyphs[raw :: string]
 	entry.state = GlyphRules.applyCollect(entry.state, raw :: string, now)
+	if glyph then
+		-- The value comes from the server's own spawn table. While the profile loads it is held back, not lost.
+		local value = GlyphConfig.Value[glyph.rarity]
+		if ProfileService.addGlyphs(player, value) == nil then
+			entry.pendingLifetime += value
+		end
+	end
 	stats.collected += 1
 	publishStats()
 	sendState(player, entry)
@@ -160,10 +172,30 @@ local function addPlayer(player: Player)
 	if entries[player] then
 		return
 	end
-	local entry: Entry = { state = GlyphRules.newPlayerState(spawns), rawStamps = {}, warnStamps = {} }
+	local entry: Entry =
+		{ state = GlyphRules.newPlayerState(spawns), rawStamps = {}, warnStamps = {}, pendingLifetime = 0 }
 	entries[player] = entry
 	publishStats()
 	sendState(player, entry)
+	-- The profile loads after the join (a quick rejoin waits for the last visit's save first, so there may be no session
+	-- yet): send the saved total as soon as it is known, or stop waiting when the profile is read-only.
+	task.spawn(function()
+		local deadline = os.clock() + PROFILE_WAIT_SECONDS
+		while
+			entries[player] == entry
+			and ProfileService.glyphsLifetime(player) == nil
+			and ProfileService.persistence(player) ~= "readonly"
+			and os.clock() < deadline
+		do
+			task.wait(0.5)
+		end
+		if entries[player] == entry then
+			if entry.pendingLifetime > 0 and ProfileService.addGlyphs(player, entry.pendingLifetime) ~= nil then
+				entry.pendingLifetime = 0
+			end
+			sendState(player, entry)
+		end
+	end)
 end
 
 -- One loop for every player: O(players x spawns) per tick, and a GlyphState only when a glyph came back.

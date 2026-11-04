@@ -1,7 +1,7 @@
 --!strict
 -- GlyphController (TASK-0121): renders the hub glyphs this player can collect and asks the server for them.
 -- Driven only by GlyphState: a glyph appears when its id is in `available` and goes when it leaves, and the counter shows
--- `count`. Standing within CollectRadius of an available glyph sends GlyphCollect for it, at most once per
+-- `count` (this visit) and the saved lifetime total (TASK-0138). Standing within CollectRadius of an available glyph sends GlyphCollect for it, at most once per
 -- RetryAfterSeconds (GlyphRules.shouldRequest; the timer clears when the glyph leaves or returns); the client never
 -- changes its own count. Positions come from the same GlyphSpawn attachments the server reads, learnt as they stream in
 -- (the place uses StreamingEnabled), and kept once known. The symbol index is the id's place in the first GlyphState,
@@ -43,7 +43,7 @@ local GlyphTheme = table.freeze({
 	BurstSeconds = 0.35,
 	BurstScale = 4,
 	PickupSound = "rbxasset://sounds/electronicpingshort.wav",
-	CounterSize = UDim2.fromOffset(150, 36),
+	CounterSize = UDim2.fromOffset(260, 36),
 	CounterPosition = UDim2.new(1, -16, 0, 64),
 	CounterTextSize = 22,
 	CounterDisplayOrder = 4, -- above the HUD (0), below the watching banner (5) and the menu (10)
@@ -223,8 +223,8 @@ local function onState(raw: unknown)
 		return
 	end
 	local data = raw :: { [string]: unknown }
-	local available, count = data.available, data.count
-	if type(available) ~= "table" or type(count) ~= "number" then
+	local available, count, lifetime = data.available, data.count, data.lifetime
+	if type(available) ~= "table" or type(count) ~= "number" or type(lifetime) ~= "number" then
 		return
 	end
 	local nextWanted: { [string]: boolean } = {}
@@ -240,7 +240,7 @@ local function onState(raw: unknown)
 	wanted = nextWanted
 	refresh()
 	if counter then
-		counter.Text = `Glyphs {count}`
+		counter.Text = `Glyphs {count}  ·  Total {lifetime}`
 	end
 end
 
@@ -318,7 +318,7 @@ local function makeCounter()
 	label.TextColor3 = GlyphTheme.SymbolColour
 	label.TextStrokeTransparency = 0.4
 	label.FontFace = GlyphTheme.CounterFont
-	label.Text = "Glyphs 0"
+	label.Text = "Glyphs 0  ·  Total 0"
 	label.Parent = gui
 	local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui") :: PlayerGui
 	gui.Parent = playerGui

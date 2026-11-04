@@ -1,0 +1,37 @@
+TASK-0138 G-DS evidence (2026-11-03)
+measured_sha: 890ecc7   applies_to: games/mathshow/src/{shared/ProfileRules,shared/Net,server/Services/ProfileService,server/Services/GlyphService,client/Glyphs/GlyphController}.luau
+BuildStamp in Studio: "890ecc7 2026-11-04T02:29:25Z" (== HEAD, no +dirty), Rojo 7.7.0 on localhost:34872 from the task worktree.
+
+G1  Existing ProfileService (unchanged except the additions below)
+  DataStore "MathShow_Profiles_v1", key "p_<userId>". Profile had version = 1 (now 2). Saves are UpdateAsync + ProfileRules.merge
+  (bests only rise, no session lock). Autosave 60 s, debounced save 2 s after apply(), PlayerRemoving save (4 tries), BindToClose
+  (25 s). Load: GetAsync, 4 tries, backoff 2/4/8 s; "readonly" after that; "memory" mode when the API is unavailable in Studio or
+  an unpublished place. Version field existed, so no STOP was needed.
+  Note: sanitize() already dropped unknown fields on load/save before this task; migrate() itself preserves them (specced).
+  Merge rule for the new field is max (monotone), consistent with the bests; two servers adding at once would not sum.
+
+G6a  Unpublished place (PlaceId 0, memory-only), fresh Play, server data model
+  Teleported to Glyph_C_SW2 (common) and Glyph_R_Terrace3 (rare): client HUD "Glyphs 6  ·  Total 6".
+  Stop, Play again: HUD "Glyphs 0  ·  Total 0" (reset, expected for memory-only).
+  Console: "[MathShow] DataStores unavailable (You must publish this place to the web to access DataStore.); ... memory-only mode"
+  unchanged; no errors (the rbxassetid://203785492 ContentId warning predates this task).
+
+  Limit (audit AUD finding 4): G6a was measured at 890ecc7; acf8bae and the revision after it changed GlyphService (profile-wait loop,
+  pending amount) and ProfileService (newer-version profiles run memory-only). The loop exits at once in memory mode.
+
+G6b  Private test experience (universe 10774566206, place 93701543861123, "MathShow Private Test", Private): PASS
+  measured_sha for this block: acf8bae (BuildStamp "acf8bae 2026-11-04T03:27:09Z" == HEAD, no +dirty). Rojo 7.7.0 synced into the open
+  place only: not saved, not published. jg enabled "Studio Access to API Services" for this experience; readback: Edit-mode GetAsync
+  on MathShow_Profiles_v1 failed with "Studio access to APIs is not allowed" before, and succeeded after.
+  Setup: the store had no profile for jg's account, so an old-format profile (version 1; settings, bestRank, blitzBest; no
+  glyphsLifetime) was written with SetAsync to p_<jg userId>. This stays in that experience's store.
+  Play 1: migrated on load; collected 1 common + 1 rare: HUD "Glyphs 6 · Total 6". The 60 s autosave then stored
+    {version=2, glyphsLifetime=6, bestRank, blitzBest, settings}: field names before = bestRank, blitzBest, settings, version(1);
+    after = bestRank, blitzBest, glyphsLifetime, settings, version(2). Other fields intact.
+  Play 2 (after Stop): HUD "Total 6" on rejoin (persisted); collected again: "Total 12"; the leave save stored glyphsLifetime=12.
+  Bug found and fixed at acf8bae: on a same-server quick rejoin the first GlyphState was sent while ProfileService had no session
+    yet (it waits for the previous visit's save), and the resend after waitLoaded returned at once, so the HUD stayed at "Total 0"
+    although the store held 6. GlyphService now polls until the profile is available (45 s cap).
+  The TASK-0123 playtest profile did not exist in this store; the seeded v1 profile stands in for it.
+  Setting afterwards: LEFT ENABLED at jg's request (chat, 2026-11-03: "yea just leave it"); the G6b instruction to disable it again
+  was waived by jg.
