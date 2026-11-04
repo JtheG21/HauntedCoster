@@ -1,7 +1,8 @@
 --!strict
 -- ModePadController (TASK-0122): receives ModePadOpen from ModePadService (the server saw this character step onto a hub
 -- mode pad) and opens that menu screen. Client-only and one-way: it sends nothing. An open menu ignores the pad, so
--- screens never stack. ModePadLeave closes the pad's screen (or locked toast) when the player walks off. "locked:*" screens show the coming-soon toast. The pad glow is cosmetic and fails inert.
+-- screens never stack. ModePadLeave closes the pad's screen (or locked toast) when the player walks off.
+-- "locked:*" screens show the coming-soon toast. The pad glow is cosmetic and fails inert.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

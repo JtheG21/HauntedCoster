@@ -3,7 +3,7 @@ id: TASK-0137
 title: "MathShow Pad Prompt Dismiss On Leave"
 type: task
 project: GAME-004
-status: review
+status: approved
 priority: medium
 risk: low
 owner: claude-code
@@ -47,5 +47,6 @@ See the task file; ticked in the Outcome once measured.
 - Studio: `docs/workflow/evidence/TASK-0137/pad-leave.txt` (plain path): leave closes the pad screen and the locked toast, entry opens once, a VS matchmaking screen is not closed.
 
 ## Audits
+- [[AUD-20261103-TASK-0137-01]]: pass. Two narrow minor races accepted (see the note); both nits fixed after the audit.
 
 ## Outcome

@@ -105,8 +105,9 @@ local function poll()
 		local blocked = isBusy(player)
 		for index, record in pads do
 			local prev = playerState.pads[index] or { inside = false }
-			local left = ModePadRules.left(prev, ModePadRules.isInside(record.pad, pos))
-			local nextState, trigger = ModePadRules.step(prev, ModePadRules.isInside(record.pad, pos), now, blocked)
+			local inside = ModePadRules.isInside(record.pad, pos)
+			local left = ModePadRules.left(prev, inside)
+			local nextState, trigger = ModePadRules.step(prev, inside, now, blocked)
 			playerState.pads[index] = nextState
 			if trigger then
 				Remotes.ModePadOpen:FireClient(player, { screen = record.screen })
