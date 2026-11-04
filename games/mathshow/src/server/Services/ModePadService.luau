@@ -2,7 +2,7 @@
 -- ModePadService (TASK-0122): tells a client when its character walks onto a hub mode pad. Pads are the ModePad-tagged
 -- parts under Workspace.Hub (Mode attribute -> ModePadConfig.Modes). One poll loop every PollSeconds checks each player's
 -- HumanoidRootPart against each pad (ModePadRules.isInside), steps the per-player state (ModePadRules.step: enter only,
--- with a cooldown) and fires ModePadOpen to that player alone. The client only ever opens a screen; it asks the server
+-- with a cooldown) and fires ModePadOpen to that player alone, and ModePadLeave when they step off (TASK-0137). The client only ever opens a screen; it asks the server
 -- for nothing, so there is no client -> server remote here.
 
 local CollectionService = game:GetService("CollectionService")
@@ -105,10 +105,14 @@ local function poll()
 		local blocked = isBusy(player)
 		for index, record in pads do
 			local prev = playerState.pads[index] or { inside = false }
-			local nextState, trigger = ModePadRules.step(prev, ModePadRules.isInside(record.pad, pos), now, blocked)
+			local inside = ModePadRules.isInside(record.pad, pos)
+			local left = ModePadRules.left(prev, inside)
+			local nextState, trigger = ModePadRules.step(prev, inside, now, blocked)
 			playerState.pads[index] = nextState
 			if trigger then
 				Remotes.ModePadOpen:FireClient(player, { screen = record.screen })
+			elseif left then
+				Remotes.ModePadLeave:FireClient(player, { screen = record.screen })
 			end
 		end
 	end

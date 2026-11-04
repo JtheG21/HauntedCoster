@@ -75,6 +75,7 @@ return table.freeze({
 	LeaveShow = event(Net.LeaveShow),
 	ShowState = event(Net.ShowState),
 	ModePadOpen = event(Net.ModePadOpen),
+	ModePadLeave = event(Net.ModePadLeave),
 	MenuRequest = remoteFunction(Net.MenuRequest),
 	SettingsSave = event(Net.SettingsSave),
 	GlyphCollect = event(Net.GlyphCollect),

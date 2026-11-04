@@ -62,4 +62,14 @@ function ModePadRules.step(prev: State, insideNow: boolean, now: number, blocked
 	return { inside = insideNow, lastTriggerAt = if trigger then now else last }, trigger
 end
 
+-- True on an inside -> outside transition (TASK-0137). No cooldown and not suppressed by `blocked`: the client closes a
+-- pad prompt only while that prompt is still the one the pad opened, so a busy player's VS queue or run is left alone.
+-- Bad input is false.
+function ModePadRules.left(prev: State, insideNow: boolean): boolean
+	if typeof(insideNow) ~= "boolean" or typeof(prev) ~= "table" then
+		return false
+	end
+	return prev.inside == true and not insideNow
+end
+
 return table.freeze(ModePadRules)

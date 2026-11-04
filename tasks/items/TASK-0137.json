@@ -1,0 +1,83 @@
+{
+  "id": "TASK-0137",
+  "game": "GAME-004",
+  "title": "MathShow Pad Prompt Dismiss On Leave",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/shared/ModePadRules.luau",
+    "games/mathshow/src/shared/Net.luau",
+    "games/mathshow/src/server/Remotes.luau",
+    "games/mathshow/src/server/Services/ModePadService.luau",
+    "games/mathshow/src/client/Hub/ModePadController.luau",
+    "games/mathshow/src/client/Menu/init.luau",
+    "games/mathshow/src/client/Menu/View.luau",
+    "games/mathshow/tests/ModePadRules.spec.luau",
+    "docs/workflow/evidence/TASK-0137/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0137-MathShow-Pad-Prompt-Dismiss-On-Leave.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0137-pad-prompt-dismiss",
+  "acceptance": [
+    "P1: ModePadRules.step reports an inside-to-outside transition (no cooldown); spec covers leave, blocked leave, bad input and that enter behaviour is unchanged.",
+    "P2: new server-to-client remote ModePadLeave {screen}; sender (ModePadService), Net/Remotes and receiver (ModePadController) change together.",
+    "P3: leaving a pad closes its pad-opened menu screen or toast only while that screen is still the pad-opened one; VS queue, Blitz/Skill runs and navigated-away screens are not closed.",
+    "P4: fresh-Play Studio check: walking off a pad closes its screen, standing on it opens it exactly once, a mid-VS queue is not closed; evidence with measured SHA.",
+    "P5: record-exec; check.sh and validators green; one audit; no publish, not merged."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0137/pad-leave.txt"
+  ],
+  "notes": "Plan approved by jg 2026-11-03 (plan from this session). Out of scope: pad geometry (TASK-0136), publishing, merging, saving MathShow.rbxl.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0137-MathShow-Pad-Prompt-Dismiss-On-Leave.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-03T17:01:02",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-03T17:01:07",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-03T17:06:19",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-03T17:07:57",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-03T17:19:00",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-03T17:06:19",
+      "result": "pass",
+      "notes": "check.sh green (348 specs); fresh-Play: leave closes pad screen and locked toast, enter opens once, VS matchmaking not closed"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-03T17:07:57",
+      "result": "pass",
+      "report": "06 QA/AUD-20261103-TASK-0137-01.md"
+    }
+  ],
+  "merge_approved_by": "jg"
+}

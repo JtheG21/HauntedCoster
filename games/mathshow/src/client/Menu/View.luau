@@ -132,6 +132,7 @@ export type View = {
 	root: Frame,
 	render: (id: string, model: Model) -> (),
 	toast: (text: string, icon: boolean, hold: boolean?) -> (),
+	hideToast: () -> (), -- takes the current toast down now (a pad prompt after the player walks off)
 	setRetakeLabel: (text: string) -> (),
 	setSkillTimer: (fraction: number, seconds: number) -> (),
 	setBlitzClock: (fraction: number, text: string) -> (),
@@ -717,6 +718,13 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 
 	local function toast(str: string, withIcon: boolean, hold: boolean?)
 		toastAt(str, if withIcon then "icon-menu-lock" else nil, "silver", false, hold)
+	end
+
+	local function hideToast()
+		toastToken += 1 -- a pending fade-out for the old toast must not touch a later one
+		for _, child in toastLayer:GetChildren() do
+			child:Destroy()
+		end
 	end
 
 	------------------------------------------------------------------------------------------------------------
@@ -2410,6 +2418,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		root = root,
 		render = render,
 		toast = toast,
+		hideToast = hideToast,
 		setVsCount = function(str: string)
 			if vsCount then
 				vsCount.Text = str
