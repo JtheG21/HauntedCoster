@@ -97,6 +97,8 @@ only; don't change them unless a task says so. Table, build commands and old-to-
 Never do these without jg's explicit approval: **merge; publish or change a live experience; spend money or Robux, or make paid
 API calls; destructive changes (deleting files, branches or history, force-push, discarding user edits, removing untracked
 files); DataStore schema changes.** Approval is per action and doesn't carry over.
+- Deep-tier and DataStore tasks merge only after a recorded independent Codex PASS on the exact head.
+  No publish of main while any DataStore finding is open.
 - **Two-attempt rule:** at most 2 attempts on a failing approach or 2 revisions per task. Then stop and report what you learned.
 - Run `scripts/check.sh` before any AI review.
 - Never read, print or store credentials (`.env`, keys, cookies).
