@@ -3,7 +3,7 @@ id: TASK-0137
 title: "MathShow Pad Prompt Dismiss On Leave"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: claude-code
@@ -49,4 +49,7 @@ See the task file; ticked in the Outcome once measured.
 ## Audits
 - [[AUD-20261103-TASK-0137-01]]: pass. Two narrow minor races accepted (see the note); both nits fixed after the audit.
 
-## Outcome
+## Outcome (2026-11-03)
+- Walking off a hub mode pad now closes its menu screen or the locked:daily toast via the new `ModePadLeave` remote; entry still opens once, and a screen the player navigated into (VS matchmaking) is left alone. PR 200, merge approved by jg.
+- Evidence: `docs/workflow/evidence/TASK-0137/pad-leave.txt`; audit [[AUD-20261103-TASK-0137-01]] pass; check.sh green (348 specs).
+- Known, accepted: walking off in the instant between clicking START or FIND OPPONENT and the server's reply can close the screen; stepping straight onto an adjacent pad can lose its prompt (re-enter fixes it). Follow-up only if playtests show it.
