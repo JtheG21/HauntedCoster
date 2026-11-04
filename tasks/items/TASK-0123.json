@@ -2,7 +2,7 @@
   "id": "TASK-0123",
   "game": "GAME-004",
   "title": "MathShow Multiplayer Playtest",
-  "status": "review",
+  "status": "changes_requested",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -55,6 +55,12 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-03T15:56:13",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
     }
   ],
   "executions": [
@@ -69,5 +75,12 @@
       "notes": "Close-out: jg accepted P3 (iPad perf) as deferred risk and P2 as covered by ModePadRules spec + TASK-0122 S4c; P4 and Mac P5 recorded; F5 goes to a fix task. See docs/workflow/evidence/TASK-0123/playtest.txt DECISIONS."
     }
   ],
-  "revisions": 1
+  "revisions": 2,
+  "audits": [
+    {
+      "time": "2026-11-03T15:56:13",
+      "result": "fail",
+      "report": "06 QA/AUD-20261103-TASK-0123-01.md"
+    }
+  ]
 }

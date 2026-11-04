@@ -3,7 +3,7 @@ id: TASK-0123
 title: "MathShow Multiplayer Playtest"
 type: task
 project: GAME-004
-status: review
+status: changes_requested
 priority: medium
 risk: low
 owner: claude-code
