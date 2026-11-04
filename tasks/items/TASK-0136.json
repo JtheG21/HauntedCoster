@@ -2,7 +2,7 @@
   "id": "TASK-0136",
   "game": "GAME-004",
   "title": "MathShow Daily Ramp Reachability",
-  "status": "review",
+  "status": "approved",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -96,6 +96,12 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-03T17:45:14",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
     }
   ],
   "executions": [
@@ -125,6 +131,11 @@
       "time": "2026-11-03T17:15:29",
       "result": "fail",
       "report": "06 QA/AUD-20261103-TASK-0136-02.md"
+    },
+    {
+      "time": "2026-11-03T17:45:14",
+      "result": "pass",
+      "report": "06 QA/AUD-20261103-TASK-0136-03.md"
     }
   ],
   "revisions": 2
