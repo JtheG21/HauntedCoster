@@ -2,7 +2,7 @@
   "id": "TASK-0135",
   "game": "GAME-004",
   "title": "MathShow Deterministic Lighting Technology",
-  "status": "approved",
+  "status": "done",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -36,6 +36,12 @@
       "from": "review",
       "to": "approved",
       "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "time": "2026-11-03T18:01:37",
+      "from": "approved",
+      "to": "done",
+      "note": "merged 4a9fe32 (PR #198)"
     }
   ],
   "executions": [
@@ -44,5 +50,6 @@
       "result": "pass",
       "notes": "Technology ShadowMap in project file; Lune read ShadowMap; built place opens without Migration dialog (control build shows it); live serve+plugin sync clean, BuildStamp==HEAD d24b35a."
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }
