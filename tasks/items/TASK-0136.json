@@ -2,7 +2,7 @@
   "id": "TASK-0136",
   "game": "GAME-004",
   "title": "MathShow Daily Ramp Reachability",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -89,7 +89,13 @@
       "to": "in_progress",
       "reason": "RE-PLAN approved by jg (rows X0-X5, 2026-11-03): audit -02 F2a/F2b stand; the Python walkability guard is replaced by exact-intersection Python test (tests/test_hub_routes.py) plus engine-behaviour Studio gate tests/studio/HubRoutes.luau. Transition via 'orchestrator.py start' (reopen only targets review). AUD -01 and -02 preserved; revisions stays 2.",
       "by": "jg",
-      "at": "2026-11-03T17:18:27"
+      "time": "2026-11-03T17:26:29"
+    },
+    {
+      "time": "2026-11-03T17:27:13",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -102,6 +108,11 @@
       "time": "2026-11-03T16:53:06",
       "result": "pass",
       "notes": "Revision 1 (F0-F5): 4 Glyph markers restored (34 GlyphSpawn blocks diff empty vs main); exact route guard fails on main (17) and the canary, passes the map; regression at b40fcd5: walk 9.7-11.6 s, 34/34 reachable, HUD/mid-match/console clean, no-jump MoveTo arrives at all 6 pads."
+    },
+    {
+      "time": "2026-11-03T17:27:13",
+      "result": "pass",
+      "notes": "Re-plan X0-X5: tests/test_hub_routes.py narrowed to exact obstacle intersection (fails main 16, passes 17 tests, canary kept); Studio gate HubRoutes at c1847ff 6/6 pass, canary blocked; on main Daily fails 12.6 studs short (run stopped after VS, partial). check.sh green."
     }
   ],
   "audits": [

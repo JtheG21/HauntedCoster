@@ -52,3 +52,30 @@ R4 no-jump MoveTo at b40fcd5 (client Humanoid, JumpPower 0, Jumping state disabl
   Skill    arrived 11.6 s  root (-150.1, 3.7, 18.0)   screen skillintro
   All six arrive without jumping; each fires exactly its one screen. These MoveTo times include the 0.2 s re-issue loop and the corridor detour and are not the 8-12 s pathfinding band above (Group 13.5 s vs 12.7 s at 7fd395c is run-to-run MoveTo variation, no map change near it). An earlier six-route run in this window timed out before returning its log; its results were not used, and the figures above are from the per-route re-run.
 - Not exercised: Glyph collect/retry/respawn, two players, real-device input (TASK-0123).
+
+## RE-PLAN (rows X0-X5, jg 2026-11-03; audit AUD-20261103-TASK-0136-02 F2a/F2b)
+The Python walkability guard is replaced: tests/test_hub_routes.py now asserts only the exact obstacle intersection (floor continuity, step heights and walkability are NOT proved there); the walkability gate is the Studio test games/mathshow/tests/studio/HubRoutes.luau. The REVISION 1 Python-guard figures above are superseded for walkability; the map is unchanged (no map edits in the re-plan).
+
+### Python test (narrowed), fail-on-main -> pass
+  main 840ef65 map (HUB_UNDER_TEST=git show main:games/mathshow/map/Hub.rbxmx, HEAD route sidecar): test_every_corridor_is_clear FAILS, 16 failures: Daily Terrace_3 rises 3.11 studs above the floor; VS, Blitz, Group lamp posts (body_geom) rise 5.06 at five places each.
+  branch map: python3 -m unittest tests.test_hub_routes -> 17 tests OK (canary pole 1 stud off the Daily centreline still FAILS the guard by name).
+
+### Studio gate HubRoutes, branch HEAD
+# measured git HEAD: c1847ff (BuildStamp "c1847ff 2026-11-04T01:20:52Z", clean tree, read in Edit before Play). Scratch place `rojo build mathshow.project.json` -> ~/Roblox-Work/scratch/TASK-0136-replan-head.rbxl, opened with Studio -localPlaceFile (second window beside another task's; jg chose this), no Rojo server, fresh Play, single player, client run: require(...StudioTests.HubRoutes).run(). MathShow.rbxl untouched, nothing saved or published.
+# applies_to: any later commit whose diff from c1847ff does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json, games/mathshow/src/** or games/mathshow/tests/studio/HubRoutes*.
+[HubRoutes] Daily    | arrived=y | 12.4s | dist=0.61 | jumps=0 | locked:daily (locked:daily)       | PASS
+[HubRoutes] VS       | arrived=y | 12.3s | dist=0.57 | jumps=0 | confirm_vs (confirm_vs)           | PASS
+[HubRoutes] Blitz    | arrived=y | 10.7s | dist=0.60 | jumps=0 | confirm_blitz (confirm_blitz)     | PASS
+[HubRoutes] Group    | arrived=y | 12.3s | dist=0.57 | jumps=0 | confirm_group (confirm_group)     | PASS
+[HubRoutes] Practice | arrived=y | 11.8s | dist=0.65 | jumps=0 | practice (practice)               | PASS
+[HubRoutes] Skill    | arrived=y | 11.7s | dist=0.69 | jumps=0 | skillintro (skillintro)           | PASS
+[HubRoutes] CANARY   | arrived=n | 10.1s | dist=10.60 | jumps=0 | none ()                         | CANARY BLOCKED (gate works)
+HUBROUTES_RESULT routes=6/6 failures=0 stamp=c1847ff 2026-11-04T01:20:52Z
+Console: no errors; known lines only (DataStore unavailable, ContentId 203785492 x3, GlyphCollect out_of_range from the walk). Note: Studio throttles the game clock when its window is not frontmost (times above are game seconds).
+
+### Studio gate HubRoutes, on main (catches the original bug)
+# measured: main 840ef65 source (git archive main) with ONLY the two gate files overlaid (tests/studio/HubRoutes.luau, HubRoutesData.json); Hub.rbxmx byte-identical to main's (cmp). BuildStamp written by hand as "840ef65 2026-11-04T01:50:00Z" (not a git checkout, so no automatic stamp). Scratch place built with rojo build, own Studio window, fresh Play, single player; scratch place deleted afterwards.
+# applies_to: main 840ef65 map and the HubRoutes.luau of c1847ff only.
+[HubRoutes] Daily | arrived=n | 30.1s | dist=12.58 | jumps=0 | none (locked:daily) | FAIL
+[HubRoutes] VS    | arrived=y | 12.9s | dist=0.57  | jumps=0 | confirm_vs (confirm_vs) | PASS
+Daily stops 12.6 studs short of the pad and never fires its screen: the original bug, caught. The run was stopped after VS (Studio runs the game clock slowly when its window is not frontmost, so the remaining four routes would have cost minutes of wall time); Blitz, Group, Practice, Skill and the canary were NOT run on main. Their branch results are above.

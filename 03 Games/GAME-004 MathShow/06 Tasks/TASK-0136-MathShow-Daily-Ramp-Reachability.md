@@ -3,7 +3,7 @@ id: TASK-0136
 title: "MathShow Daily Ramp Reachability"
 type: task
 project: GAME-004
-status: changes_requested
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -67,3 +67,12 @@ Scratch place built from the checkout (BuildStamp 7fd395c, clean), fresh Play, H
 - F4: games/mathshow/map/Hub.routes.json added to files_owned.
 - Not done by design: record-audit and self-audit. Out of scope and raised by jg during this revision: hide the pad prompt when the player is not on the pad (pad logic; separate task).
 
+
+## Re-plan (rows X0-X5, jg 2026-11-03; after AUD-20261103-TASK-0136-02, revision 2/2 failed on the guard only)
+- Audits -01 and -02 are preserved. History records the re-plan; the task moved back to in_progress with `orchestrator.py start` (`reopen` only targets review). Revisions stay at 2.
+- X1: `tests/test_hub_routes.py` now asserts only the exact obstacle intersection (convex clip; a collidable upward face more than 1.0 stud above the highest walkable facet under the centreline, inside the 12-wide corridor and joint discs). Floor-gap and step logic are deleted; the docstring and a test state that floor continuity, step heights and walkability are not proved there. Canary kept. Fails on main (16), passes on the branch (17 tests).
+- X2: `games/mathshow/tests/studio/HubRoutes.luau` (client Studio gate): no-jump `Humanoid:MoveTo` along each `Hub.routes.json` route to the pad; pass = within 1 stud and the pad's screen fired; canary into an in-memory sealed box must fail. `HubRoutesData.json` is a symlink to `Hub.routes.json` so the Studio test and the Python test share one source.
+- X3: at c1847ff the gate passes 6/6 with the canary blocked; on main (map overlay) Daily fails 12.6 studs short, VS passes; run stopped after VS (partial, stated in the log). `daily-ramp.txt` "RE-PLAN".
+- X4: AGENTS.md (2 lines) and STUDIO-SYNC.md "HubRoutes" (how to run).
+- Judgement call to confirm: "delete floor-coverage and step-height logic" was applied literally to gap and step checks, but the obstacle check still needs a height datum, so the highest walkable facet under the centreline remains as the reference for "above" (it is never itself checked). A pure plan-view intersection cannot tell a floor from a post.
+- Not done by design: record-audit and self-audit.
