@@ -2,7 +2,7 @@
   "id": "TASK-0138",
   "game": "GAME-004",
   "title": "MathShow Lifetime Glyph Total (G-DS)",
-  "status": "backlog",
+  "status": "in_progress",
   "tier": "deep",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -31,5 +31,20 @@
   ],
   "notes": "DataStore schema change approved by jg in chat (\"approve G-DS\"), 2026-11-03: adds glyphsLifetime only. Out of scope: quests/XP, other profile fields, key renames/deletions, data wipes, live experience, publishing, merging, saving MathShow.rbxl.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0138-MathShow-Lifetime-Glyph-Total.md",
-  "risk": "high"
+  "risk": "high",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-03T18:26:56",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-03T18:26:56",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
 }

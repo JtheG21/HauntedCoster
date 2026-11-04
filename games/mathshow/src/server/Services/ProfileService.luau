@@ -92,13 +92,14 @@ local function load(player: Player, session: Session)
 			ok, result = false, storeError
 		end
 		if ok then
-			session.profile = ProfileRules.sanitize(result)
+			session.profile = ProfileRules.sanitize(ProfileRules.migrate(result))
 			session.persistence = "saved"
 			return
 		end
 		local message = tostring(result)
 		if ProfileRules.loadFailure(message, DEVELOPMENT_PLACE) == "memory" then
 			warn(`[MathShow] DataStores unavailable ({message}); {player.Name} runs in memory-only mode`)
+			session.profile = ProfileRules.sanitize(ProfileRules.migrate(session.profile))
 			session.persistence = "memory"
 			return
 		end
@@ -186,6 +187,34 @@ function ProfileService.apply(player: Player, patch: ProfileRules.Patch): boolea
 		scheduleSave(player, session)
 	end
 	return true
+end
+
+-- Server-only (TASK-0138): adds `amount` to the lifetime glyph total and returns the new total, or nil when nothing was
+-- changed (not loaded, read-only, invalid amount). It only marks the profile dirty: the 60 s autosave, the leave save
+-- and BindToClose persist it, so a collect never causes a DataStore write of its own.
+function ProfileService.addGlyphs(player: Player, amount: number): number?
+	local session = sessions[player]
+	if not session or (session.persistence ~= "saved" and session.persistence ~= "memory") then
+		return nil
+	end
+	local updated = ProfileRules.addGlyphs(session.profile, amount)
+	if updated.glyphsLifetime == session.profile.glyphsLifetime then
+		return nil
+	end
+	session.profile = updated
+	if session.persistence == "saved" then
+		session.dirty = true
+	end
+	return updated.glyphsLifetime
+end
+
+-- The lifetime glyph total, or nil while the profile is loading or unavailable.
+function ProfileService.glyphsLifetime(player: Player): number?
+	local session = sessions[player]
+	if session and (session.persistence == "saved" or session.persistence == "memory") then
+		return session.profile.glyphsLifetime or 0
+	end
+	return nil
 end
 
 -- Yields until the profile has loaded (or LOAD_WAIT_SECONDS passes). Safe to call from a remote handler.
