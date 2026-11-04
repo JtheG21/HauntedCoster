@@ -3,7 +3,7 @@ id: TASK-0134
 title: "MathShow Menu Exit And Leave Watching"
 type: task
 project: GAME-004
-status: review
+status: approved
 priority: high
 risk: low
 owner: claude-code

@@ -2,7 +2,7 @@
   "id": "TASK-0134",
   "game": "GAME-004",
   "title": "MathShow Menu Exit And Leave Watching",
-  "status": "review",
+  "status": "approved",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -65,6 +65,12 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-03T16:05:06",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
     }
   ],
   "executions": [
@@ -84,6 +90,11 @@
       "time": "2026-11-03T15:14:57",
       "result": "fail",
       "report": "06 QA/AUD-20261103-TASK-0134-01.md"
+    },
+    {
+      "time": "2026-11-03T16:05:06",
+      "result": "pass",
+      "report": "06 QA/AUD-20261103-TASK-0134-02.md"
     }
   ],
   "revisions": 1
