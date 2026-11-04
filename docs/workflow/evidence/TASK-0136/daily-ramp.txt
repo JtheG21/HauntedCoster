@@ -79,3 +79,6 @@ Console: no errors; known lines only (DataStore unavailable, ContentId 203785492
 [HubRoutes] Daily | arrived=n | 30.1s | dist=12.58 | jumps=0 | none (locked:daily) | FAIL
 [HubRoutes] VS    | arrived=y | 12.9s | dist=0.57  | jumps=0 | confirm_vs (confirm_vs) | PASS
 Daily stops 12.6 studs short of the pad and never fires its screen: the original bug, caught. The run was stopped after VS (Studio runs the game clock slowly when its window is not frontmost, so the remaining four routes would have cost minutes of wall time); Blitz, Group, Practice, Skill and the canary were NOT run on main. Their branch results are above.
+
+### Correction (found by the delta re-audit of e8dd98a)
+c1847ff and e8dd98a accidentally committed a different, uncommitted version of tests/test_hub_routes.py (21 tests, with floor-gap/step/strip logic) written concurrently by another session in the same worktree; the narrowed file measured above was left uncommitted. The next commit commits the narrowed file. Python-test figures above (17 tests OK on the branch map; 16 failures on main's map, re-confirmed against this file) apply to that commit, not to c1847ff/e8dd98a. The Studio gate results are unaffected (they exercise HubRoutes.luau and the map only).
