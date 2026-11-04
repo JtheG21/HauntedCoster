@@ -1,0 +1,33 @@
+TASK-0134 revision 1: evidence for audit AUD-20261103-TASK-0134-01 (FAIL at 81d21fc)
+Recorded 2026-11-03 (UTC) by Claude Code. Builds were made with rojo build into ~/Roblox-Work/scratch/TASK-0134-gate.rbxl
+(never MathShow.rbxl), opened in Studio, fresh Play, client data model. Nothing published.
+
+F1  LEAVE vs the mobile jump keep-clear zone: Layout.WatchLeave moved from (604, 276, 112, 44) to (110, 332, 112, 44), under
+    the WATCHING banner (hit target x 110-222, y 330-378; jump zone is x 664-844, y 240-390; insets are 44 px). Studio run:
+    "10-group-watching | Screen_watching/Back .../Hit [target] | 112x48 | PASS" at 844x390. CLOSE target also 112x48, PASS.
+    No exemption added and the jump zone is unchanged.
+F2  TextFit ledger: measured at f93f7ae the first run reported every one of the five viewports at measured 682 (expected
+    669), unmeasured 297 (expected 284), total 979; failures=5 (reconcile only, every category "fail 0"). Cause: 12 CLOSE
+    labels + 1 LEAVE label (+13 measured) and the same 13 Hit [target] rows (+13 unmeasured). LedgerRules now expects
+    682 + 297 = 979 and LedgerRules.spec follows; strict reconciliation is kept, no control is skipped.
+    Re-run at c2c6f3f (BuildStamp "c2c6f3f 2026-11-03T23:58:08Z" read back in the run):
+      RECONCILE 844x390, 1920x1080, phone 812x375, 1024x768, 1180x820: measured 682 + unmeasured 297 = 979 OK each
+      RECONCILE total unmeasured 1485, expected 1485 OK
+      COUNTS 844x390: clip=264 tap=10 overlap=0 overlap-allow=8 review-gap=24 collision=64 halo=819 canary=4 other=0, all
+      "fail 0"; SMALLEST TAP 844x390 112x48
+      TEXTFIT_RESULT rows=10900 failures=0 (5 viewports x 979 = 4,895 ledger rows; 10,900 includes the collision rows)
+    applies_to: c2c6f3f and any later commit that does not touch client/Menu, Hud, MenuTheme, MenuCopy, LedgerRules or
+    TextFit; verify with git diff --stat c2c6f3f..HEAD -- games/mathshow/src/client games/mathshow/src/shared.
+F3  Device and build evidence (recorded, not new measurements): on build 81d21fc (BuildStamp "81d21fc 2026-11-03T21:15:27Z",
+    published to the private test place 10774566206 at 21:18:34Z) jg reported "ipad is in and the fix worked nice job" (iPad,
+    about 21:21Z), and the Mac Roblox Player showed the main menu with CLOSE at the top right, CLOSE returned to the plaza
+    (screenshot ~/Roblox-Work/evidence/TASK-0123/02-mac-plaza-after-close-81d21fc.jpg), and the WATCHING banner showed LEAVE next to
+    it at 22:28Z (Mac, TASK-0123 solo follow-up). Scope: these ran at 81d21fc, where LEAVE sat beside the banner. The LEAVE
+    position change (F1) came later (f93f7ae) and has NOT been seen on a device; jg will not use the iPad again. The Studio gate
+    above is the evidence for the new position. Limitation kept: no Studio multiplayer run of LEAVE.
+F4  Specs: JoinRules.afterLeave (the state a leave leaves behind) is used by RoundService.onLeave, so a spec can catch
+    forgetting to clear participant. New cases in JoinRules.spec: afterLeave clears both flags; leave, repeat leave (no
+    change), rejoin during the match (questions 2-6 stay non-participant and watching), next match question 1 admits; a left
+    player is not a participant at any question. Lune: 347 passed, 0 failed (was 344).
+Also corrected in the task note: only LEAVE sends LeaveShow (CLOSE is client-only), and the handler is synchronously
+debounced (idempotent), it is not wired to the JoinShow rate limiter.

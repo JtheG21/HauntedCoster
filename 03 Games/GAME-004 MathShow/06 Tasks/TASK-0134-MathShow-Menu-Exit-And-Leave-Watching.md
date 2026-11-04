@@ -3,7 +3,7 @@ id: TASK-0134
 title: "MathShow Menu Exit And Leave Watching"
 type: task
 project: GAME-004
-status: changes_requested
+status: review
 priority: high
 risk: low
 owner: claude-code
@@ -30,8 +30,8 @@ jg's iPad playtest (TASK-0123) found a dead end: the main menu has no exit excep
 - **Decisions (assumptions, reversible):** closing the main menu is client-only (the server never learned of the player). LEAVE clears `joined` and `participant` on the server; a participant can technically send it, but only watchers get the button. Re-joining stays through the Play pad, Group Battle.
 
 ## Remote change (sender, handler, receiver)
-- Sender: `Menu/init.luau` (CLOSE, LEAVE) fires `LeaveShow` with no payload.
-- Handler: `RoundService.onLeave` (validated by `JoinRules.validLeave`, shares the JoinShow rate limit).
+- Sender: `Menu.leaveShow` (the LEAVE button only) fires `LeaveShow` with no payload. CLOSE is client-only and sends nothing.
+- Handler: `RoundService.onLeave` (validated by `JoinRules.validLeave`; synchronously debounced: a repeat leave sees both flags false and returns. It does not use the JoinShow rate limiter).
 - Receiver: `Hud` already consumes `ShowState {joined=false, participant=false}` and hides the banner; the client also calls `Hud.setVisible(false)`.
 
 ## Acceptance criteria
@@ -39,12 +39,13 @@ See `tasks/items/TASK-0134.json`.
 
 ---
 ## Implementation record
-- Client: `View.backButton` takes an optional box; CLOSE (`Layout.Close`, top right of main) and LEAVE (`Layout.WatchLeave`, beside the banner) reuse it and `handlers.back`. `Menu.back()` closes the menu on main; Esc/B now works on main. `Menu.leaveShow()` fires `LeaveShow`, hides the menu, `onLeave` hides HUD and banner. `Watching.start({onLeave})`.
+- Client: `View.backButton` takes an optional box; CLOSE (`Layout.Close`, top right of main) and LEAVE (`Layout.WatchLeave`, under the banner since revision 1) reuse it and `handlers.back`. `Menu.back()` closes the menu on main; Esc/B now works on main. `Menu.leaveShow()` fires `LeaveShow`, hides the menu, `onLeave` hides HUD and banner. `Watching.start({onLeave})`.
 - Shared/server: `Net.LeaveShow`, `Remotes.LeaveShow`, `JoinRules.validLeave/leaveChanges` (specs in `JoinRules.spec.luau`), `RoundService.onLeave`. No rate limit on purpose: a repeat leave is a no-op and a dropped leave would admit an invisible player.
-- Not run in Studio or on device (TASK-0123 playtest owns Studio). Layout positions come from the 844x390 grid; the top-right CLOSE (x 688-800, y 6-50) and the LEAVE slot (x 604-716, y 276-320) need a visual check on the iPad.
+- Revision 1 (audit F1 to F4): LEAVE moved to (110, 332) under the banner, out of the jump zone; `JoinRules.afterLeave` added and used by `onLeave`; TextFit ledger now 682 + 297 = 979 (`LedgerRules`, `LedgerRules.spec`); leave-rejoin specs added. Evidence: `docs/workflow/evidence/TASK-0134/gate.txt`.
 
 ## Audits
 
 ## Outcome
-- [x] `scripts/check.sh` green (341+ specs).
-- [ ] Visual and touch check in Studio/iPad (pending, needs Studio free).
+- [x] `scripts/check.sh` green (347 specs).
+- [x] TextFit gate at c2c6f3f: 0 failures, 5 viewports, LEAVE target 112x48 clear of the jump zone (evidence file).
+- [x] jg confirmed the fix on the iPad at build 81d21fc (LEAVE was beside the banner then); the moved LEAVE position is Studio-gate verified only, not seen on a device (applies_to in the evidence file).

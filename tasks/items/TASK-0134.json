@@ -2,7 +2,7 @@
   "id": "TASK-0134",
   "game": "GAME-004",
   "title": "MathShow Menu Exit And Leave Watching",
-  "status": "changes_requested",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -18,7 +18,10 @@
     "games/mathshow/src/server/Remotes.luau",
     "games/mathshow/src/server/Services/RoundService.luau",
     "games/mathshow/tests/JoinRules.spec.luau",
-    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0134-MathShow-Menu-Exit-And-Leave-Watching.md"
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0134-MathShow-Menu-Exit-And-Leave-Watching.md",
+    "games/mathshow/src/shared/LedgerRules.luau",
+    "games/mathshow/tests/LedgerRules.spec.luau",
+    "docs/workflow/evidence/TASK-0134/"
   ],
   "depends_on": [],
   "branch": "task/TASK-0134-menu-exit",
@@ -50,6 +53,18 @@
       "from": "review",
       "to": "changes_requested",
       "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-03T16:02:06",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-03T16:02:06",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -57,6 +72,11 @@
       "time": "2026-11-03T15:14:57",
       "result": "pass",
       "notes": "User authorised execution-to-review transition in chat. Audited head 81d21fc: check.sh passes, 344 specs pass, validators and CI green. This records execution checks only; independent audit has major findings and will be recorded as fail."
+    },
+    {
+      "time": "2026-11-03T16:02:06",
+      "result": "pass",
+      "notes": "Revision 1: F1 LEAVE moved out of the jump zone, F2 TextFit ledger 682+297=979 (Studio gate 0 failures at c2c6f3f), F3 evidence recorded, F4 leave-rejoin specs (347 pass)."
     }
   ],
   "audits": [
