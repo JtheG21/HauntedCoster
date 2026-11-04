@@ -40,3 +40,11 @@ See the task file; ticked in the Outcome once measured.
 ## Tests
 - **Automated:** `scripts/check.sh`, `ProfileRules.spec`.
 - **Studio:** memory-only run on unpublished place; persistence on the private test experience.
+
+---
+## Implementation record
+- `ProfileRules` v2 (`migrate`, `addGlyphs`, `isNewerVersion`, max-merge of `glyphsLifetime`), `ProfileService` migrate-on-load and `addGlyphs`, `GlyphService` add-after-collect with a pending amount while the profile loads, `GlyphState.lifetime` to the HUD (`Net`, `GlyphController`).
+- Studio: `docs/workflow/evidence/TASK-0138/gds.txt` (memory-only; private test experience migration, persistence and accumulation). The API-access disable step was waived by jg in chat; the setting was left on.
+
+## Audits
+- [[AUD-20261103-TASK-0138-01]]: pass. Minors fixed after the audit; one release requirement: shut down all old servers before the first publish.

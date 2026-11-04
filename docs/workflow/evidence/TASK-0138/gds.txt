@@ -16,6 +16,9 @@ G6a  Unpublished place (PlaceId 0, memory-only), fresh Play, server data model
   Console: "[MathShow] DataStores unavailable (You must publish this place to the web to access DataStore.); ... memory-only mode"
   unchanged; no errors (the rbxassetid://203785492 ContentId warning predates this task).
 
+  Limit (audit AUD finding 4): G6a was measured at 890ecc7; acf8bae and the revision after it changed GlyphService (profile-wait loop,
+  pending amount) and ProfileService (newer-version profiles run memory-only). The loop exits at once in memory mode.
+
 G6b  Private test experience (universe 10774566206, place 93701543861123, "MathShow Private Test", Private): PASS
   measured_sha for this block: acf8bae (BuildStamp "acf8bae 2026-11-04T03:27:09Z" == HEAD, no +dirty). Rojo 7.7.0 synced into the open
   place only: not saved, not published. jg enabled "Studio Access to API Services" for this experience; readback: Edit-mode GetAsync

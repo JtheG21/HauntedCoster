@@ -93,6 +93,12 @@ local function load(player: Player, session: Session)
 		end
 		if ok then
 			session.profile = ProfileRules.sanitize(ProfileRules.migrate(result))
+			if ProfileRules.isNewerVersion(result) then
+				-- Stored by a newer build: play on a copy and never write it back (that would drop its newer fields).
+				warn(`[MathShow] profile of {player.Name} is a newer version; running in memory-only mode`)
+				session.persistence = "memory"
+				return
+			end
 			session.persistence = "saved"
 			return
 		end

@@ -102,6 +102,15 @@ function ProfileRules.migrate(data: any): any
 	return out
 end
 
+-- Was this stored data written by a newer server than this build? Such a profile must not be saved back: sanitize()
+-- drops fields this build does not know, and the newer version number would then hide that loss.
+function ProfileRules.isNewerVersion(data: any): boolean
+	return typeof(data) == "table"
+		and typeof(data.version) == "number"
+		and data.version == data.version
+		and data.version > VERSION
+end
+
 -- A copy with `amount` added to the lifetime total. Anything but a finite positive integer leaves the total as it is.
 function ProfileRules.addGlyphs(data: Profile, amount: any): Profile
 	local out = table.clone(data)
@@ -212,7 +221,6 @@ function ProfileRules.merge(stored: any, patch: Patch): Profile
 		lastTakenAt = patch.lastTakenAt,
 		blitzBest = patch.blitzBest,
 		glyphsLifetime = patch.glyphsLifetime,
-		version = VERSION,
 	})
 	if patch.settings ~= nil and ProfileRules.sanitizeSettings(patch.settings) ~= nil then
 		base.settings = clean.settings

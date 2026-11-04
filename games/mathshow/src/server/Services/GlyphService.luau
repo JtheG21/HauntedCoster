@@ -29,6 +29,7 @@ type Entry = {
 	state: GlyphRules.PlayerState,
 	rawStamps: { number }, -- every GlyphCollect, success or fail (RawRequestLimit per RateWindowSeconds)
 	warnStamps: { [string]: { number } },
+	pendingLifetime: number, -- collected before the profile was available; added to the total once it is
 }
 
 local GlyphService = {}
@@ -156,7 +157,11 @@ local function onCollect(player: Player, raw: unknown)
 	local glyph = entry.state.glyphs[raw :: string]
 	entry.state = GlyphRules.applyCollect(entry.state, raw :: string, now)
 	if glyph then
-		ProfileService.addGlyphs(player, GlyphConfig.Value[glyph.rarity]) -- the value comes from the server's own spawn table
+		-- The value comes from the server's own spawn table. While the profile loads it is held back, not lost.
+		local value = GlyphConfig.Value[glyph.rarity]
+		if ProfileService.addGlyphs(player, value) == nil then
+			entry.pendingLifetime += value
+		end
 	end
 	stats.collected += 1
 	publishStats()
@@ -167,7 +172,8 @@ local function addPlayer(player: Player)
 	if entries[player] then
 		return
 	end
-	local entry: Entry = { state = GlyphRules.newPlayerState(spawns), rawStamps = {}, warnStamps = {} }
+	local entry: Entry =
+		{ state = GlyphRules.newPlayerState(spawns), rawStamps = {}, warnStamps = {}, pendingLifetime = 0 }
 	entries[player] = entry
 	publishStats()
 	sendState(player, entry)
@@ -184,6 +190,9 @@ local function addPlayer(player: Player)
 			task.wait(0.5)
 		end
 		if entries[player] == entry then
+			if entry.pendingLifetime > 0 and ProfileService.addGlyphs(player, entry.pendingLifetime) ~= nil then
+				entry.pendingLifetime = 0
+			end
 			sendState(player, entry)
 		end
 	end)
