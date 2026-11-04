@@ -1,0 +1,24 @@
+# TASK-0136 Daily Ramp Reachability (rows R0-R5, jg 2026-11-03)
+# measured git HEAD: 7fd395c (BuildStamp "7fd395c 2026-11-04T00:09:46Z", clean tree; the fix itself is 3560e4c, 7fd395c adds only the task note). Scratch place built with `rojo build` from the TASK-0136 worktree into ~/Roblox-Work/scratch (deleted afterwards), opened in its own Studio window, fresh Play, single player; no Rojo server needed; MathShow.rbxl untouched (mtime 12:42 unchanged); nothing published or saved.
+# applies_to: Measured at 7fd395c. Applies to any later commit whose diff from 7fd395c does not touch games/mathshow/map/**, scripts/build_hub.py or games/mathshow/src/**.
+
+## R4 MoveTo-only run (server script: JumpPower 0, Jumping state disabled, Humanoid:MoveTo only, character put at (0,4,47) before each route)
+Waypoints are the corridor polylines of games/mathshow/map/Hub.routes.json (path entry -> pad). Arrival = within 2 studs (x, z) of the pad centre. Client listener on Remotes.ModePadOpen logs the screen.
+Attempt 1 (straight MoveTo from spawn to the pad centre, no waypoints): Daily 11.6 s, VS 11.4 s, Blitz 11.2 s, Practice 11.4 s, Skill 9.9 s arrived; Group did NOT: stopped at (115.8, 3.0, 30.4) after 45 s. That is off the path, against the east court's front wall (the straight line from the plaza's south edge runs outside the 14-wide path); a test-method error, not ramp geometry. Screens fired for the five that arrived: locked:daily, confirm_vs, confirm_blitz, practice, skillintro.
+Attempt 2 (with the corridor waypoints), all six arrived, no jumping:
+  Daily    arrived 11.8 s  root (0.0, 35.5, -129.4)   pad (0.0, 32.2, -130.0)   top terrace, via the three ramps
+  VS       arrived 12.4 s  root (148.1, 3.7, -25.9)
+  Blitz    arrived 10.9 s  root (149.3, 3.7, 0.0)
+  Group    arrived 12.7 s  root (149.4, 3.7, 26.0)
+  Practice arrived 11.9 s  root (-148.0, 3.7, -17.9)
+  Skill    arrived 12.0 s  root (-148.1, 3.7, 17.9)
+Screens (client, across both attempts): locked:daily, confirm_vs, confirm_blitz, confirm_group, practice, skillintro: one per pad. Times include the 0.2 s MoveTo re-issue loop and a detour of up to 12 studs; Group 12.7 s is 0.7 s over the 8-12 s band of earlier walk estimates (which used a different, pathfinding method), so the band is not comparable.
+Before the fix (R1, main 4a9fe32): Daily was not walkable without jumping (3.1-stud face at the top of ramp 3, 1.1-stud lip at ramp 1, 0.8-stud slots at ramp 2); see before-fix.txt. I did not re-run Studio MoveTo on main: the geometry guard fails there and the diagnosis is geometric.
+
+## Regression (fresh Play, same build)
+- GlyphService: 34 glyph spawns; client sees 34 GlyphSpawn attachments. ModePadService: 6 pads.
+- Mid-match block: JoinShow fired; leaderstats "published n=1" from the next match's first question (participant), MathShowHud on. Server put the character on Practice, Skill, VS, Blitz and Daily, 3 s each: 0 ModePadOpen events, menu closed. (The execute_luau require of RoundService reported isParticipant false: that module copy is not the live service; the n=1 log and the 0 events are the evidence.)
+- HUD: MathShowMenu.Enabled false while joined; MathShowHud true in the match. GlyphHud was false during the match and not checked outside it (not re-verified here).
+- Console: no errors. Known lines: DataStore unavailable (unpublished place), ContentId 203785492, and "GlyphCollect rejected: out_of_range" for the common Glyphs the teleports passed near (expected, as in TASK-0133).
+- hub_nav.py (informational model, not the gate): spawn->Pad_Daily still inf (its dilated-footprint rule treats the ramp flanks as blockers; the Studio run above shows the route walkable); Glyph routes finite 24/34 against 20/34 on main (C_N1-C_N3 and R_Terrace1 now route; the rest are rare tier/roof spots that need a jump by design).
+- Not exercised: Glyph collect/retry/respawn (no Glyph or collect code changed; geometry only), two players, real-device input (TASK-0123).
