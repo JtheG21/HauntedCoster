@@ -2,7 +2,7 @@
   "id": "TASK-0136",
   "game": "GAME-004",
   "title": "MathShow Daily Ramp Reachability",
-  "status": "changes_requested",
+  "status": "in_progress",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -12,7 +12,11 @@
     "tests/test_hub_routes.py",
     "scripts/check.sh",
     "docs/workflow/evidence/TASK-0136/",
-    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0136-MathShow-Daily-Ramp-Reachability.md"
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0136-MathShow-Daily-Ramp-Reachability.md",
+    "games/mathshow/tests/studio/HubRoutes.luau",
+    "games/mathshow/tests/studio/HubRoutesData.json",
+    "AGENTS.md",
+    "docs/workflow/STUDIO-SYNC.md"
   ],
   "depends_on": [],
   "branch": "task/TASK-0136-daily-ramp",
@@ -73,6 +77,19 @@
       "from": "review",
       "to": "changes_requested",
       "note": "audit failed; revision 2/2"
+    },
+    {
+      "time": "2026-11-03T17:18:27",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "from": "in_progress",
+      "to": "in_progress",
+      "reason": "RE-PLAN approved by jg (rows X0-X5, 2026-11-03): audit -02 F2a/F2b stand; the Python walkability guard is replaced by exact-intersection Python test (tests/test_hub_routes.py) plus engine-behaviour Studio gate tests/studio/HubRoutes.luau. Transition via 'orchestrator.py start' (reopen only targets review). AUD -01 and -02 preserved; revisions stays 2.",
+      "by": "jg",
+      "at": "2026-11-03T17:18:27"
     }
   ],
   "executions": [

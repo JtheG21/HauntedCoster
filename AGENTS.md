@@ -90,6 +90,8 @@ only; don't change them unless a task says so. Table, build commands and old-to-
 - In Studio: a **fresh Play session (Server data model)** with `require(game.TestService.Tests.TestRunner).run()`. Edit mode
   caches modules (LES-0005). Client-side gates are in `tests/studio/`, scenarios in `tests/multiclient/`.
 - Agents reconnect the Rojo Studio plugin themselves via the Studio MCP and confirm BuildStamp == HEAD before any Play run.
+- Walkability/reachability gates are engine-behaviour Studio tests (`tests/studio/HubRoutes.luau`); Python geometry tests may
+  only assert exact intersections (e.g. `tests/test_hub_routes.py`), never walkability.
 
 ## Approval gates
 Never do these without jg's explicit approval: **merge; publish or change a live experience; spend money or Robux, or make paid
