@@ -2,7 +2,7 @@
   "id": "TASK-0123",
   "game": "GAME-004",
   "title": "MathShow Multiplayer Playtest",
-  "status": "review",
+  "status": "approved",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -68,6 +68,12 @@
       "reason": "AUD-20261103-TASK-0123-01 F1/F2 are docs-only; fixed append-only (publish ledger, results table)",
       "by": "jg",
       "at": "2026-11-03T18:03:30"
+    },
+    {
+      "time": "2026-11-03T18:07:42",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
     }
   ],
   "executions": [
@@ -88,6 +94,11 @@
       "time": "2026-11-03T15:56:13",
       "result": "fail",
       "report": "06 QA/AUD-20261103-TASK-0123-01.md"
+    },
+    {
+      "time": "2026-11-03T18:07:42",
+      "result": "pass",
+      "report": "06 QA/AUD-20261103-TASK-0123-02.md"
     }
   ]
 }
