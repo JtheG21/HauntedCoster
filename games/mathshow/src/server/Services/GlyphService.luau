@@ -22,6 +22,7 @@ local Remotes = require(script.Parent.Parent.Remotes)
 local ProfileService = require(script.Parent.ProfileService)
 
 local WARN_WINDOW = 5
+local PROFILE_WAIT_SECONDS = 45 -- longer than ProfileService's rejoin wait (30 s) plus a load
 local STUDIO = RunService:IsStudio()
 
 type Entry = {
@@ -170,9 +171,18 @@ local function addPlayer(player: Player)
 	entries[player] = entry
 	publishStats()
 	sendState(player, entry)
-	-- The profile loads after the join: send the saved total as soon as it is known.
+	-- The profile loads after the join (a quick rejoin waits for the last visit's save first, so there may be no session
+	-- yet): send the saved total as soon as it is known, or stop waiting when the profile is read-only.
 	task.spawn(function()
-		ProfileService.waitLoaded(player)
+		local deadline = os.clock() + PROFILE_WAIT_SECONDS
+		while
+			entries[player] == entry
+			and ProfileService.glyphsLifetime(player) == nil
+			and ProfileService.persistence(player) ~= "readonly"
+			and os.clock() < deadline
+		do
+			task.wait(0.5)
+		end
 		if entries[player] == entry then
 			sendState(player, entry)
 		end
