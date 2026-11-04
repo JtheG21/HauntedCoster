@@ -1,0 +1,18 @@
+TASK-0136 R3: tests/test_hub_routes.py test_no_rise_above_one_stud against current main geometry (Hub.rbxmx byte-identical to main 4a9fe32; only the Hub.routes.json export and the test were added). 5 tests, FAILED (failures=1). Lines: route, lane offset (studs), sample index, world x z, rise needed, parts.
+measured: 4a9fe32 + route export; applies_to: games/mathshow/map/Hub.rbxmx at 4a9fe32
+
+Daily     lane -6 sample 96 at (-6.0, -99.0): needs a 10.0-stud rise: Ground, Terrace_1, Terrace_2
+Daily     lane -4 sample 135 at (-4.0, -118.5): needs a 3.1-stud rise: Ground, Terrace_1, Terrace_2, Terrace_3
+Daily     lane -2 sample 135 at (-2.0, -118.5): needs a 3.1-stud rise: Ground, Terrace_1, Terrace_2, Terrace_3
+Daily     lane +0 sample 42 at (0.0, -72.0): needs a 1.1-stud rise: Ground, Terrace_1, Path_N_Ramp1
+Daily     lane +2 sample 135 at (2.0, -118.5): needs a 3.1-stud rise: Ground, Terrace_1, Terrace_2, Terrace_3
+Daily     lane +4 sample 135 at (4.0, -118.5): needs a 3.1-stud rise: Ground, Terrace_1, Terrace_2, Terrace_3
+Daily     lane +6 sample 96 at (6.0, -99.0): needs a 10.0-stud rise: Ground, Terrace_1, Terrace_2
+VS        lane -6 sample 52 at (77.0, -6.0): needs a 5.1-stud rise: Ground, Path_E, body_geom
+VS        lane +6 sample 22 at (62.0, 6.0): needs a 5.1-stud rise: Ground, Path_E, body_geom
+Blitz     lane -6 sample 52 at (77.0, -6.0): needs a 5.1-stud rise: Ground, Path_E, body_geom
+Blitz     lane +6 sample 22 at (62.0, 6.0): needs a 5.1-stud rise: Ground, Path_E, body_geom
+Group     lane -6 sample 52 at (77.0, -6.0): needs a 5.1-stud rise: Ground, Path_E, body_geom
+Group     lane +6 sample 22 at (62.0, 6.0): needs a 5.1-stud rise: Ground, Path_E, body_geom
+Ran 5 tests in 0.844s
+FAILED (failures=1)

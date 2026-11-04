@@ -1,0 +1,149 @@
+{
+  "id": "TASK-0136",
+  "game": "GAME-004",
+  "title": "MathShow Daily Ramp Reachability",
+  "status": "done",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "games/mathshow/map/Hub.rbxmx",
+    "games/mathshow/map/Hub.routes.json",
+    "tests/test_hub_routes.py",
+    "scripts/check.sh",
+    "docs/workflow/evidence/TASK-0136/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0136-MathShow-Daily-Ramp-Reachability.md",
+    "games/mathshow/tests/studio/HubRoutes.luau",
+    "games/mathshow/tests/studio/HubRoutesData.json",
+    "AGENTS.md",
+    "docs/workflow/STUDIO-SYNC.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0136-daily-ramp",
+  "acceptance": [
+    "R1: every vertical rise on the spawn-to-Daily-pad route listed with location, height and causing part(s); the dark wall the Mac avatar stopped at is named.",
+    "R2: build_hub.py route from the plaza to the Daily pad is walkable without jumping: no single rise above 1.0 stud, >= 12 studs wide, no collidable part narrowing it; Observatory stays on the highest terrace; Daily ModePad tag/attributes/size unchanged; collider guard and drift check pass.",
+    "R3: tests/test_hub_routes.py (stdlib, run by check.sh) asserts no collidable rise > 1.0 stud and corridor width >= 12 studs for the plaza-to-pad corridors of all 6 pads; shown failing on current main, passing after the fix.",
+    "R4: Humanoid driven by MoveTo only (no jump) arrives at each of the 6 pads from spawn and fires its screen/toast, times logged; fresh-Play regression (8-12 s, 34/34 Glyphs, mid-match block, HUD, console clean); evidence docs/workflow/evidence/TASK-0136/daily-ramp.txt with measured SHA and applies_to.",
+    "R5: record-exec; check.sh, specs, validators green; PR open, CI green, not merged."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0136/daily-ramp.txt",
+    "docs/workflow/evidence/TASK-0136/before-fix.txt"
+  ],
+  "notes": "Approved rows R0-R5 (jg, 2026-11-03). Out of scope: art beyond ramp/path geometry, pad logic, Glyph logic, menu, publishing, iPad, merging. Do not record-audit or self-audit. Not the TASK-0123 evidence files.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0136-MathShow-Daily-Ramp-Reachability.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-03T15:52:13",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-03T15:52:13",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-03T16:20:42",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-03T16:29:17",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-03T16:30:48",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-03T16:53:06",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-03T17:15:29",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
+    },
+    {
+      "time": "2026-11-03T17:18:27",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "from": "in_progress",
+      "to": "in_progress",
+      "reason": "RE-PLAN approved by jg (rows X0-X5, 2026-11-03): audit -02 F2a/F2b stand; the Python walkability guard is replaced by exact-intersection Python test (tests/test_hub_routes.py) plus engine-behaviour Studio gate tests/studio/HubRoutes.luau. Transition via 'orchestrator.py start' (reopen only targets review). AUD -01 and -02 preserved; revisions stays 2.",
+      "by": "jg",
+      "time": "2026-11-03T17:26:29"
+    },
+    {
+      "time": "2026-11-03T17:27:13",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-03T17:45:14",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-03T17:48:48",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-03T16:20:42",
+      "result": "pass",
+      "notes": "Ramps meet terrace rims; route guard fails on main and passes; Studio MoveTo-only run reaches all 6 pads (10.9-12.7 s), screens fire; regression clean at 7fd395c."
+    },
+    {
+      "time": "2026-11-03T16:53:06",
+      "result": "pass",
+      "notes": "Revision 1 (F0-F5): 4 Glyph markers restored (34 GlyphSpawn blocks diff empty vs main); exact route guard fails on main (17) and the canary, passes the map; regression at b40fcd5: walk 9.7-11.6 s, 34/34 reachable, HUD/mid-match/console clean, no-jump MoveTo arrives at all 6 pads."
+    },
+    {
+      "time": "2026-11-03T17:27:13",
+      "result": "pass",
+      "notes": "Re-plan X0-X5: tests/test_hub_routes.py narrowed to exact obstacle intersection (fails main 16, passes 17 tests, canary kept); Studio gate HubRoutes at c1847ff 6/6 pass, canary blocked; on main Daily fails 12.6 studs short (run stopped after VS, partial). check.sh green."
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-03T16:29:17",
+      "result": "fail",
+      "report": "06 QA/AUD-20261103-TASK-0136-01.md"
+    },
+    {
+      "time": "2026-11-03T17:15:29",
+      "result": "fail",
+      "report": "06 QA/AUD-20261103-TASK-0136-02.md"
+    },
+    {
+      "time": "2026-11-03T17:45:14",
+      "result": "pass",
+      "report": "06 QA/AUD-20261103-TASK-0136-03.md"
+    }
+  ],
+  "revisions": 2,
+  "merge_approved_by": "jg"
+}

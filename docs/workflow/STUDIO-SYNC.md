@@ -394,3 +394,9 @@ Technology is set by the project file for **built and published places**. The li
 
 Hub walk lengths/reachability: Studio fresh-Play remains the gate (TASK-0130 calibration failed twice).
 `tests/test_hub_walk.py` prints informational estimates and never fails the gate on route results. Its slow route estimate is opt-in (`scripts/walk-check.sh`); the default `check.sh` skips it (about 22 s again, jg row M11).
+
+## HubRoutes: the walkability gate (TASK-0136, 2026-11-03)
+
+`games/mathshow/tests/studio/HubRoutes.luau` drives the local character (jumping disabled, jump count logged) with `Humanoid:MoveTo` from the plaza spawn along each polyline of `Hub.routes.json` (its `HubRoutesData.json` is a symlink to that file: one source) to all six pads. A route passes when the character ends within 1 stud of the pad centre and the pad's `ModePadOpen` screen fired. A canary route to a point inside a sealed box built in memory must fail to arrive.
+
+Run: `scripts/studio-preflight.sh --game mathshow`, Rojo from the checkout under test, BuildStamp in Edit equal to HEAD (clean tree), then a fresh Play, one player, menu closed. On the client: `require(game.Players.LocalPlayer.PlayerScripts.StudioTests.HubRoutes).run()`; `.run({ only = "Daily" })` for one route. The log starts with the BuildStamp, prints one row per route (arrived, seconds, final distance, jumps, screen) and ends with `HUBROUTES_RESULT routes=6/6 failures=0`. Each route takes about 12 s, so start the run without waiting on it and read the console. Never save `MathShow.rbxl`.

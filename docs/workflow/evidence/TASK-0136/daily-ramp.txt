@@ -1,0 +1,84 @@
+# TASK-0136 Daily Ramp Reachability (rows R0-R5, jg 2026-11-03)
+# measured git HEAD: 7fd395c (BuildStamp "7fd395c 2026-11-04T00:09:46Z", clean tree; the fix itself is 3560e4c, 7fd395c adds only the task note). Scratch place built with `rojo build` from the TASK-0136 worktree into ~/Roblox-Work/scratch (deleted afterwards), opened in its own Studio window, fresh Play, single player; no Rojo server needed; MathShow.rbxl untouched (mtime 12:42 unchanged); nothing published or saved.
+# applies_to: Measured at 7fd395c. Applies to any later commit whose diff from 7fd395c does not touch games/mathshow/map/**, scripts/build_hub.py or games/mathshow/src/**.
+
+## R4 MoveTo-only run (server script: JumpPower 0, Jumping state disabled, Humanoid:MoveTo only, character put at (0,4,47) before each route)
+Waypoints are the corridor polylines of games/mathshow/map/Hub.routes.json (path entry -> pad). Arrival = within 2 studs (x, z) of the pad centre. Client listener on Remotes.ModePadOpen logs the screen.
+Attempt 1 (straight MoveTo from spawn to the pad centre, no waypoints): Daily 11.6 s, VS 11.4 s, Blitz 11.2 s, Practice 11.4 s, Skill 9.9 s arrived; Group did NOT: stopped at (115.8, 3.0, 30.4) after 45 s. That is off the path, against the east court's front wall (the straight line from the plaza's south edge runs outside the 14-wide path); a test-method error, not ramp geometry. Screens fired for the five that arrived: locked:daily, confirm_vs, confirm_blitz, practice, skillintro.
+Attempt 2 (with the corridor waypoints), all six arrived, no jumping:
+  Daily    arrived 11.8 s  root (0.0, 35.5, -129.4)   pad (0.0, 32.2, -130.0)   top terrace, via the three ramps
+  VS       arrived 12.4 s  root (148.1, 3.7, -25.9)
+  Blitz    arrived 10.9 s  root (149.3, 3.7, 0.0)
+  Group    arrived 12.7 s  root (149.4, 3.7, 26.0)
+  Practice arrived 11.9 s  root (-148.0, 3.7, -17.9)
+  Skill    arrived 12.0 s  root (-148.1, 3.7, 17.9)
+Screens (client, across both attempts): locked:daily, confirm_vs, confirm_blitz, confirm_group, practice, skillintro: one per pad. Times include the 0.2 s MoveTo re-issue loop and a detour of up to 12 studs; Group 12.7 s is 0.7 s over the 8-12 s band of earlier walk estimates (which used a different, pathfinding method), so the band is not comparable.
+Before the fix (R1, main 4a9fe32): Daily was not walkable without jumping (3.1-stud face at the top of ramp 3, 1.1-stud lip at ramp 1, 0.8-stud slots at ramp 2); see before-fix.txt. I did not re-run Studio MoveTo on main: the geometry guard fails there and the diagnosis is geometric.
+
+## Regression (fresh Play, same build)
+- GlyphService: 34 glyph spawns; client sees 34 GlyphSpawn attachments. ModePadService: 6 pads.
+- Mid-match block: JoinShow fired; leaderstats "published n=1" from the next match's first question (participant), MathShowHud on. Server put the character on Practice, Skill, VS, Blitz and Daily, 3 s each: 0 ModePadOpen events, menu closed. (The execute_luau require of RoundService reported isParticipant false: that module copy is not the live service; the n=1 log and the 0 events are the evidence.)
+- HUD: MathShowMenu.Enabled false while joined; MathShowHud true in the match. GlyphHud was false during the match and not checked outside it (not re-verified here).
+- Console: no errors. Known lines: DataStore unavailable (unpublished place), ContentId 203785492, and "GlyphCollect rejected: out_of_range" for the common Glyphs the teleports passed near (expected, as in TASK-0133).
+- hub_nav.py (informational model, not the gate): spawn->Pad_Daily still inf (its dilated-footprint rule treats the ramp flanks as blockers; the Studio run above shows the route walkable); Glyph routes finite 24/34 against 20/34 on main (C_N1-C_N3 and R_Terrace1 now route; the rest are rare tier/roof spots that need a jump by design).
+- Not exercised: Glyph collect/retry/respawn (no Glyph or collect code changed; geometry only), two players, real-device input (TASK-0123).
+
+## REVISION 1 (rows F0-F5, jg 2026-11-03; audit AUD-20261103-TASK-0136-01)
+# measured git HEAD: b40fcd5 (BuildStamp "b40fcd5 2026-11-04T00:35:57Z", clean tree). Scratch place built with `rojo build mathshow.project.json` into ~/Roblox-Work/scratch/TASK-0136-rev1.rbxl (no Rojo server), opened with Studio -localPlaceFile as the only Studio window, fresh Play, single player. MathShow.rbxl untouched; nothing published or saved. The 7fd395c record above is superseded: F1 changed four marker heights and the guard changed.
+# applies_to: Measured at b40fcd5. Applies to any later commit whose diff from b40fcd5 does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json or games/mathshow/src/**.
+
+F1 GlyphSpawn proof (all 34 GlyphSpawn Part+Attachment blocks, referent ids normalised, generated Hub.rbxmx versus main's 4a9fe32 Hub.rbxmx):
+  diff <(python3 glyphs.py main_Hub.rbxmx) <(python3 glyphs.py new_Hub.rbxmx)   -> empty output, exit 0 (34 Glyph_ Parts, 34 GlyphSpawn tags on both sides)
+  (glyphs.py: regex-extracts each <Item class="Part"> named Glyph_* through the end of its Attachment child.) The four north markers read back in Studio at their main heights (Glyph_C_N4 y 26.7222).
+
+F2 Guard (tests/test_hub_routes.py, exact; corridor rectangles 12 wide per segment + radius-6 disc on every interior joint; obstacle = collidable upward face rising over 1.0 stud above the route's own floor within the corridor; floor gaps and steps over 1.0 fail):
+  on main's Hub (HUB_UNDER_TEST=4a9fe32 Hub, HEAD route definitions): 17 failures: Daily floor steps up 3.11 at s=67 (Path_N_Ramp3 -> Terrace_3); VS, Blitz, Group lamp posts (body_geom) rise 5.06 at five places each.
+  canary (0.5 x 100 x 0.5 CanCollide pole 1 stud off the Daily centreline, in memory): FAILS: "Daily: segment 1 s=39.25 t=+1.25 (1.2, -90.2): CanaryPole rises 86.26 studs above the floor"
+  real map at b40fcd5: 0 failures; python3 -m unittest tests.test_hub_routes: 18 tests OK.
+
+F3 Studio regression (same method and definitions as TASK-0129/0131: Server data model, PathfindingService radius 2, height 5, can jump, from (0,5,47) to pad centre + 3 studs, length / 16):
+- Walk times: Blitz 168.9 studs 10.6 s, Daily 185.1 11.6 s, Group 174.3 10.9 s, Practice 173.9 10.9 s, Skill 154.7 9.7 s, VS 179.5 11.2 s. All inside 8-12 s (TASK-0131: Blitz 185.6, Daily 185.9, Group 173.7, Practice 173.9, Skill 154.7, VS 174.4).
+- Reachability: 34/34 GlyphSpawn Success by pathfinding, glyph-reachability.csv regenerated with 34 rows (not a tag count). Includes C_N1-C_N4 at their main positions, R_Terrace1-3, R_Roof1/2.
+- HUD (client): GlyphHud.Enabled false with the menu open, true when the menu closed, false when reopened.
+- Mid-match: JoinShow, ShowState participant=true after 21.4 s; the character was put on Practice, Skill, VS, Blitz and Daily for 3 s each (2.6 s off the pads between): 0 ModePadOpen events each, menu closed, MathShowHud on during the match; leaderstats "published n=1" from the next match.
+- Console: no errors. Known lines: DataStore unavailable, ContentId 203785492 (x3), and "GlyphCollect rejected: out_of_range" from the test's own teleports and walks.
+
+R4 no-jump MoveTo at b40fcd5 (client Humanoid, JumpPower 0, Jumping state disabled, jump count 0 on every route; character placed at (0,4,47) before each; MoveTo through the Hub.routes.json waypoints; arrival within 2 studs of the pad centre; menu closed; client listener on Remotes.ModePadOpen):
+  Daily    arrived 11.6 s  root (0.0, 35.5, -129.0)   screen locked:daily
+  VS       arrived 12.2 s  root (150.0, 3.7, -26.0)   screen confirm_vs
+  Blitz    arrived 10.5 s  root (148.7, 3.7, 0.0)     screen confirm_blitz
+  Group    arrived 13.5 s  root (149.3, 3.7, 25.9)    screen confirm_group
+  Practice arrived 11.5 s  root (-150.0, 3.7, -18.0)  screen practice
+  Skill    arrived 11.6 s  root (-150.1, 3.7, 18.0)   screen skillintro
+  All six arrive without jumping; each fires exactly its one screen. These MoveTo times include the 0.2 s re-issue loop and the corridor detour and are not the 8-12 s pathfinding band above (Group 13.5 s vs 12.7 s at 7fd395c is run-to-run MoveTo variation, no map change near it). An earlier six-route run in this window timed out before returning its log; its results were not used, and the figures above are from the per-route re-run.
+- Not exercised: Glyph collect/retry/respawn, two players, real-device input (TASK-0123).
+
+## RE-PLAN (rows X0-X5, jg 2026-11-03; audit AUD-20261103-TASK-0136-02 F2a/F2b)
+The Python walkability guard is replaced: tests/test_hub_routes.py now asserts only the exact obstacle intersection (floor continuity, step heights and walkability are NOT proved there); the walkability gate is the Studio test games/mathshow/tests/studio/HubRoutes.luau. The REVISION 1 Python-guard figures above are superseded for walkability; the map is unchanged (no map edits in the re-plan).
+
+### Python test (narrowed), fail-on-main -> pass
+  main 840ef65 map (HUB_UNDER_TEST=git show main:games/mathshow/map/Hub.rbxmx, HEAD route sidecar): test_every_corridor_is_clear FAILS, 16 failures: Daily Terrace_3 rises 3.11 studs above the floor; VS, Blitz, Group lamp posts (body_geom) rise 5.06 at five places each.
+  branch map: python3 -m unittest tests.test_hub_routes -> 17 tests OK (canary pole 1 stud off the Daily centreline still FAILS the guard by name).
+
+### Studio gate HubRoutes, branch HEAD
+# measured git HEAD: c1847ff (BuildStamp "c1847ff 2026-11-04T01:20:52Z", clean tree, read in Edit before Play). Scratch place `rojo build mathshow.project.json` -> ~/Roblox-Work/scratch/TASK-0136-replan-head.rbxl, opened with Studio -localPlaceFile (second window beside another task's; jg chose this), no Rojo server, fresh Play, single player, client run: require(...StudioTests.HubRoutes).run(). MathShow.rbxl untouched, nothing saved or published.
+# applies_to: any later commit whose diff from c1847ff does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json, games/mathshow/src/** or games/mathshow/tests/studio/HubRoutes*.
+[HubRoutes] Daily    | arrived=y | 12.4s | dist=0.61 | jumps=0 | locked:daily (locked:daily)       | PASS
+[HubRoutes] VS       | arrived=y | 12.3s | dist=0.57 | jumps=0 | confirm_vs (confirm_vs)           | PASS
+[HubRoutes] Blitz    | arrived=y | 10.7s | dist=0.60 | jumps=0 | confirm_blitz (confirm_blitz)     | PASS
+[HubRoutes] Group    | arrived=y | 12.3s | dist=0.57 | jumps=0 | confirm_group (confirm_group)     | PASS
+[HubRoutes] Practice | arrived=y | 11.8s | dist=0.65 | jumps=0 | practice (practice)               | PASS
+[HubRoutes] Skill    | arrived=y | 11.7s | dist=0.69 | jumps=0 | skillintro (skillintro)           | PASS
+[HubRoutes] CANARY   | arrived=n | 10.1s | dist=10.60 | jumps=0 | none ()                         | CANARY BLOCKED (gate works)
+HUBROUTES_RESULT routes=6/6 failures=0 stamp=c1847ff 2026-11-04T01:20:52Z
+Console: no errors; known lines only (DataStore unavailable, ContentId 203785492 x3, GlyphCollect out_of_range from the walk). Note: Studio throttles the game clock when its window is not frontmost (times above are game seconds).
+
+### Studio gate HubRoutes, on main (catches the original bug)
+# measured: main 840ef65 source (git archive main) with ONLY the two gate files overlaid (tests/studio/HubRoutes.luau, HubRoutesData.json); Hub.rbxmx byte-identical to main's (cmp). BuildStamp written by hand as "840ef65 2026-11-04T01:50:00Z" (not a git checkout, so no automatic stamp). Scratch place built with rojo build, own Studio window, fresh Play, single player; scratch place deleted afterwards.
+# applies_to: main 840ef65 map and the HubRoutes.luau of c1847ff only.
+[HubRoutes] Daily | arrived=n | 30.1s | dist=12.58 | jumps=0 | none (locked:daily) | FAIL
+[HubRoutes] VS    | arrived=y | 12.9s | dist=0.57  | jumps=0 | confirm_vs (confirm_vs) | PASS
+Daily stops 12.6 studs short of the pad and never fires its screen: the original bug, caught. The run was stopped after VS (Studio runs the game clock slowly when its window is not frontmost, so the remaining four routes would have cost minutes of wall time); Blitz, Group, Practice, Skill and the canary were NOT run on main. Their branch results are above.
+
+### Correction (found by the delta re-audit of e8dd98a)
+c1847ff and e8dd98a accidentally committed a different, uncommitted version of tests/test_hub_routes.py (21 tests, with floor-gap/step/strip logic) written concurrently by another session in the same worktree; the narrowed file measured above was left uncommitted. The next commit commits the narrowed file. Python-test figures above (17 tests OK on the branch map; 16 failures on main's map, re-confirmed against this file) apply to that commit, not to c1847ff/e8dd98a. The Studio gate results are unaffected (they exercise HubRoutes.luau and the map only).
