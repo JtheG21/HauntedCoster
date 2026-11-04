@@ -2,12 +2,13 @@
   "id": "TASK-0136",
   "game": "GAME-004",
   "title": "MathShow Daily Ramp Reachability",
-  "status": "review",
+  "status": "in_progress",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
     "scripts/build_hub.py",
     "games/mathshow/map/Hub.rbxmx",
+    "games/mathshow/map/Hub.routes.json",
     "tests/test_hub_routes.py",
     "scripts/check.sh",
     "docs/workflow/evidence/TASK-0136/",
@@ -48,6 +49,18 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-03T16:29:17",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-03T16:30:48",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
     }
   ],
   "executions": [
@@ -56,5 +69,13 @@
       "result": "pass",
       "notes": "Ramps meet terrace rims; route guard fails on main and passes; Studio MoveTo-only run reaches all 6 pads (10.9-12.7 s), screens fire; regression clean at 7fd395c."
     }
-  ]
+  ],
+  "audits": [
+    {
+      "time": "2026-11-03T16:29:17",
+      "result": "fail",
+      "report": "06 QA/AUD-20261103-TASK-0136-01.md"
+    }
+  ],
+  "revisions": 1
 }

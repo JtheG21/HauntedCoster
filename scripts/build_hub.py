@@ -719,9 +719,13 @@ def build() -> Node:
 		walls.add(fr.block(f"Wall_{k:02d}", WALL_R, 0, 40, (chord, 80, 1), PALETTE["tier"], transparency=1.0, query=False))
 
 	# ---- glyph spawns (30-40; common on paths, rare on terraces / roofs / lake edge) ----
+	# TASK-0136 F1: the four north common markers keep their pre-task world positions (jg approves any Glyph move), so their heights
+	# follow the original ramp profile, not the reshaped N_RAMPS.
+	GLYPH_N_PROFILE = ((PLAZA_R + 1, PATH_TOP, 74.0, 8.0), (80.0, 8.0, 98.0, 18.0), (104.0, 18.0, 122.0, 32.0))
+
 	def ramp_y(a):
 		y = PATH_TOP
-		for a0, y0, a1, y1 in N_RAMPS:
+		for a0, y0, a1, y1 in GLYPH_N_PROFILE:
 			if a < a0:
 				return y
 			if a <= a1:
