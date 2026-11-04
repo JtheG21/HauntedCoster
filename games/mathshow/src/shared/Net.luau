@@ -23,6 +23,7 @@
 --   VsState      server -> one client    VsStatePayload (the opponent's answer is never sent)
 --   VsResult     server -> one client    VsResultPayload
 --   ModePadOpen  server -> one client    ModePadOpenPayload (walked onto a hub mode pad; ModePadService -> ModePadController)
+--   ModePadLeave server -> one client    ModePadLeavePayload (walked off a hub mode pad; ModePadService -> ModePadController)
 --   MenuRequest  client -> server (RemoteFunction)  { kind: "profile" } -> MenuProfileReply
 --   SettingsSave client -> server        SettingsPayload (validated by ProfileRules.sanitizeSettings)
 --   GlyphCollect client -> server        (id: string; GlyphRules.validateCollect, TASK-0121)
@@ -58,6 +59,11 @@ export type AnswerResultPayload = {
 
 -- screen is a ModePadConfig.Modes value: a menu screen id, or "locked:<name>" for a mode that is not open yet.
 export type ModePadOpenPayload = {
+	screen: string,
+}
+
+-- screen is the ModePadOpen screen of the pad the player just left (same ModePadConfig.Modes value).
+export type ModePadLeavePayload = {
 	screen: string,
 }
 
@@ -178,6 +184,7 @@ local Net = table.freeze({
 	LeaveShow = "LeaveShow",
 	ShowState = "ShowState",
 	ModePadOpen = "ModePadOpen",
+	ModePadLeave = "ModePadLeave",
 	MenuRequest = "MenuRequest",
 	SettingsSave = "SettingsSave",
 	GlyphCollect = "GlyphCollect",

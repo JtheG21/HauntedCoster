@@ -105,6 +105,16 @@ return function(t: TestRunner.T)
 		t.eq(trigger, true)
 	end)
 
+	t.test("left: only an inside -> outside transition, no cooldown, bad input is false", function()
+		t.eq(ModePadRules.left({ inside = true }, false), true)
+		t.eq(ModePadRules.left({ inside = true, lastTriggerAt = 100 }, false), true) -- no cooldown on leaving
+		t.eq(ModePadRules.left({ inside = true }, true), false) -- still on the pad
+		t.eq(ModePadRules.left({ inside = false }, false), false) -- never was
+		t.eq(ModePadRules.left({ inside = false }, true), false) -- entering
+		t.eq((ModePadRules.left :: any)({ inside = true }, nil), false)
+		t.eq((ModePadRules.left :: any)(nil, false), false)
+	end)
+
 	t.test("step: a blocked entry never triggers, unblocking while inside does not, exit then re-enter does", function()
 		local s: ModePadRules.State = { inside = false }
 		local trigger

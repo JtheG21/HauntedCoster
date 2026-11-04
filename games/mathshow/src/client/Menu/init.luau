@@ -1062,6 +1062,19 @@ function Menu.open(id: string): boolean
 	return true
 end
 
+-- Closes the menu if it is still exactly the screen a mode pad opened (TASK-0137): the player walked off the pad. Any
+-- other state is left alone: a screen the player navigated into (a VS queue, a Blitz or Skill run, a result), or one they
+-- opened themselves. Client-only: it sends nothing. Returns true when it closed.
+function Menu.closePadScreen(id: string): boolean
+	if not Menu.isOpen() or not padStack or stack ~= padStack or #stack ~= 2 or stack[2] ~= id then
+		return false
+	end
+	padStack = nil
+	stack = { "main" }
+	Menu.hide()
+	return true
+end
+
 function Menu.hide()
 	tickToken += 1 -- a running retake ticker must not re-render or take focus while the menu is hidden
 	unbindBack()

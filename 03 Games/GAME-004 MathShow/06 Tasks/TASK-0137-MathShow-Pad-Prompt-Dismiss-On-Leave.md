@@ -9,8 +9,7 @@ risk: low
 owner: claude-code
 depends_on: []
 branch: task/TASK-0137-pad-prompt-dismiss
-related:
-  - "[[TASK-0122]]"
+related: []
 created: 2026-11-03
 updated: 2026-11-03
 tags:
