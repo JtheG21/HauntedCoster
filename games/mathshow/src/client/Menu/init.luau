@@ -26,7 +26,7 @@ local View = require(script.View)
 
 local Menu = {}
 
-export type Options = { onJoin: () -> () }
+export type Options = { onJoin: () -> (), onLeave: (() -> ())? }
 
 local BACK_ACTION = "MathShowMenuBack"
 
@@ -432,6 +432,10 @@ local function go(id: string)
 end
 
 local function back()
+	if #stack == 1 and stack[1] == "main" then
+		Menu.hide() -- CLOSE / Esc / B on the main menu: back to the plaza, not joined; the server never heard of this player
+		return
+	end
 	if padStack and stack == padStack and #stack == 2 then
 		padStack = nil
 		stack = { "main" }
@@ -992,7 +996,7 @@ function Menu.start(opts: Options)
 			inputConnection:Disconnect()
 		end
 		ContextActionService:BindAction(BACK_ACTION, function(_name, state)
-			if state == Enum.UserInputState.Begin and #stack > 1 then
+			if state == Enum.UserInputState.Begin then
 				back()
 				return Enum.ContextActionResult.Sink
 			end
@@ -1024,6 +1028,17 @@ function Menu.start(opts: Options)
 	end
 	rebindInput = bindInput
 	bindInput()
+end
+
+-- LEAVE on the WATCHING banner: tells the server to clear joined and participant, then returns to the plaza (menu and HUD
+-- hidden). Nothing here waits on the server: ShowState follows and takes the banner down.
+function Menu.leaveShow()
+	fire(Net.LeaveShow)
+	stack = { "main" }
+	Menu.hide()
+	if options and options.onLeave then
+		options.onLeave()
+	end
 end
 
 -- True while the menu is on screen (the first menu, or one a mode pad opened).

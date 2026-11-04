@@ -28,6 +28,23 @@ function JoinRules.validJoin(raw: any): boolean
 	return typeof(raw) == "table" and next(raw) == nil
 end
 
+-- LeaveShow carries no data either (CLOSE on the menu, LEAVE on the WATCHING banner).
+function JoinRules.validLeave(raw: any): boolean
+	return JoinRules.validJoin(raw)
+end
+
+-- True when a LeaveShow changes anything: the player is joined or in the match. Leaving twice does nothing, so a leave
+-- needs no rate limit (a dropped leave would admit an invisible player to the next match).
+function JoinRules.leaveChanges(joined: boolean, participant: boolean): boolean
+	return joined == true or participant == true
+end
+
+-- What a LeaveShow leaves behind: not joined and not a participant, so the player cannot score or enter standings and is
+-- not admitted to the next match until they join again. RoundService.onLeave applies exactly this.
+function JoinRules.afterLeave(): (boolean, boolean)
+	return false, false
+end
+
 -- ShowState from the server: exactly { joined: boolean, participant: boolean }.
 function JoinRules.isValidShowState(raw: any): boolean
 	if typeof(raw) ~= "table" then

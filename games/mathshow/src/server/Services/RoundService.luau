@@ -338,6 +338,17 @@ local function onJoin(player: Player, raw: any)
 	sendState(player) -- the HUD gets the current phase at once, not at the next broadcast
 end
 
+-- LEAVE SHOW: no data. Clears joined and participant, so the player is neither admitted to the next match nor counted in
+-- this one. Idempotent, hence no rate limit (JoinRules.leaveChanges).
+local function onLeave(player: Player, raw: any)
+	local state = states[player]
+	if not state or not JoinRules.validLeave(raw) or not JoinRules.leaveChanges(state.joined, state.participant) then
+		return
+	end
+	state.joined, state.participant = JoinRules.afterLeave()
+	sendShow(player)
+end
+
 -- True while this player is in the current match (ShowState.participant). Read-only; ModePadService blocks pads on it.
 function RoundService.isParticipant(player: Player): boolean
 	local state = states[player]
@@ -364,6 +375,14 @@ function RoundService.start(): ()
 		end)
 		if not ok then
 			warn(`[MathShow] JoinShow from {player.Name} failed: {err}`)
+		end
+	end)
+	Remotes.LeaveShow.OnServerEvent:Connect(function(player: Player, raw: any)
+		local ok, err = pcall(function()
+			onLeave(player, raw)
+		end)
+		if not ok then
+			warn(`[MathShow] LeaveShow from {player.Name} failed: {err}`)
 		end
 	end)
 	Players.PlayerAdded:Connect(onPlayerAdded)

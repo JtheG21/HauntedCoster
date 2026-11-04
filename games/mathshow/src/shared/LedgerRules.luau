@@ -1,13 +1,15 @@
 --!strict
 -- Pure reconciliation of the TextFit gate's historical row ledger (TASK-0114). No Instances: plain tables in and out.
--- Each viewport must hold exactly the TASK-0107 split, 669 measured and 284 unmeasured rows, so a wrong split fails even
--- when the total of 953 is right.
+-- Each viewport must hold exactly the expected split, 682 measured and 297 unmeasured rows, so a wrong split fails even
+-- when the total of 979 is right. TASK-0107 set 669 + 284 = 953; TASK-0134 adds the CLOSE and LEAVE controls: +13 measured
+-- (12 CLOSE labels, one on each of the two main-screen states for six player fixtures, and 1 LEAVE label on the watching
+-- state) and +13 unmeasured (the same 13 Hit [target] rows). Measured in Studio at f93f7ae on all five viewports.
 
 local LedgerRules = {}
 
-LedgerRules.ExpectedMeasured = 669
-LedgerRules.ExpectedUnmeasured = 284
-LedgerRules.ExpectedPerViewport = LedgerRules.ExpectedMeasured + LedgerRules.ExpectedUnmeasured -- 953
+LedgerRules.ExpectedMeasured = 682
+LedgerRules.ExpectedUnmeasured = 297
+LedgerRules.ExpectedPerViewport = LedgerRules.ExpectedMeasured + LedgerRules.ExpectedUnmeasured -- 979
 
 export type Counts = { measured: number, unmeasured: number }
 
