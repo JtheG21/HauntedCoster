@@ -3,7 +3,7 @@ id: TASK-0137
 title: "MathShow Pad Prompt Dismiss On Leave"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -43,6 +43,8 @@ See the task file; ticked in the Outcome once measured.
 
 ---
 ## Implementation record
+- `ModePadRules.left`, `ModePadLeave` remote (sender `ModePadService`, `Net`/`Remotes`, receiver `ModePadController`), `Menu.closePadScreen`, `View.hideToast`; spec extended (348 specs).
+- Studio: `docs/workflow/evidence/TASK-0137/pad-leave.txt` (plain path): leave closes the pad screen and the locked toast, entry opens once, a VS matchmaking screen is not closed.
 
 ## Audits
 

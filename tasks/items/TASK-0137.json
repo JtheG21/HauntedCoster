@@ -2,7 +2,7 @@
   "id": "TASK-0137",
   "game": "GAME-004",
   "title": "MathShow Pad Prompt Dismiss On Leave",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -26,7 +26,9 @@
     "P4: fresh-Play Studio check: walking off a pad closes its screen, standing on it opens it exactly once, a mid-VS queue is not closed; evidence with measured SHA.",
     "P5: record-exec; check.sh and validators green; one audit; no publish, not merged."
   ],
-  "evidence": [],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0137/pad-leave.txt"
+  ],
   "notes": "Plan approved by jg 2026-11-03 (plan from this session). Out of scope: pad geometry (TASK-0136), publishing, merging, saving MathShow.rbxl.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0137-MathShow-Pad-Prompt-Dismiss-On-Leave.md",
   "risk": "low",
@@ -43,6 +45,19 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-03T17:06:19",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-03T17:06:19",
+      "result": "pass",
+      "notes": "check.sh green (348 specs); fresh-Play: leave closes pad screen and locked toast, enter opens once, VS matchmaking not closed"
     }
   ]
 }
