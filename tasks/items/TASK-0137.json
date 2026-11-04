@@ -1,0 +1,48 @@
+{
+  "id": "TASK-0137",
+  "game": "GAME-004",
+  "title": "MathShow Pad Prompt Dismiss On Leave",
+  "status": "in_progress",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/shared/ModePadRules.luau",
+    "games/mathshow/src/shared/Net.luau",
+    "games/mathshow/src/server/Remotes.luau",
+    "games/mathshow/src/server/Services/ModePadService.luau",
+    "games/mathshow/src/client/Hub/ModePadController.luau",
+    "games/mathshow/src/client/Menu/init.luau",
+    "games/mathshow/src/client/Menu/View.luau",
+    "games/mathshow/tests/ModePadRules.spec.luau",
+    "docs/workflow/evidence/TASK-0137/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0137-MathShow-Pad-Prompt-Dismiss-On-Leave.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0137-pad-prompt-dismiss",
+  "acceptance": [
+    "P1: ModePadRules.step reports an inside-to-outside transition (no cooldown); spec covers leave, blocked leave, bad input and that enter behaviour is unchanged.",
+    "P2: new server-to-client remote ModePadLeave {screen}; sender (ModePadService), Net/Remotes and receiver (ModePadController) change together.",
+    "P3: leaving a pad closes its pad-opened menu screen or toast only while that screen is still the pad-opened one; VS queue, Blitz/Skill runs and navigated-away screens are not closed.",
+    "P4: fresh-Play Studio check: walking off a pad closes its screen, standing on it opens it exactly once, a mid-VS queue is not closed; evidence with measured SHA.",
+    "P5: record-exec; check.sh and validators green; one audit; no publish, not merged."
+  ],
+  "evidence": [],
+  "notes": "Plan approved by jg 2026-11-03 (plan from this session). Out of scope: pad geometry (TASK-0136), publishing, merging, saving MathShow.rbxl.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0137-MathShow-Pad-Prompt-Dismiss-On-Leave.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-03T17:01:02",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-03T17:01:07",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}
