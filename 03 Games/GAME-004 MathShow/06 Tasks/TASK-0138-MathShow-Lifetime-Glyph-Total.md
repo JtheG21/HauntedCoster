@@ -3,7 +3,7 @@ id: TASK-0138
 title: "MathShow Lifetime Glyph Total (G-DS)"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: high
 owner: claude-code
