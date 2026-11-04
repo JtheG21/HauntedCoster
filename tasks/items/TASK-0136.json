@@ -2,7 +2,7 @@
   "id": "TASK-0136",
   "game": "GAME-004",
   "title": "MathShow Daily Ramp Reachability",
-  "status": "in_progress",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -61,6 +61,12 @@
       "from": "changes_requested",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-03T16:53:06",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -68,6 +74,11 @@
       "time": "2026-11-03T16:20:42",
       "result": "pass",
       "notes": "Ramps meet terrace rims; route guard fails on main and passes; Studio MoveTo-only run reaches all 6 pads (10.9-12.7 s), screens fire; regression clean at 7fd395c."
+    },
+    {
+      "time": "2026-11-03T16:53:06",
+      "result": "pass",
+      "notes": "Revision 1 (F0-F5): 4 Glyph markers restored (34 GlyphSpawn blocks diff empty vs main); exact route guard fails on main (17) and the canary, passes the map; regression at b40fcd5: walk 9.7-11.6 s, 34/34 reachable, HUD/mid-match/console clean, no-jump MoveTo arrives at all 6 pads."
     }
   ],
   "audits": [

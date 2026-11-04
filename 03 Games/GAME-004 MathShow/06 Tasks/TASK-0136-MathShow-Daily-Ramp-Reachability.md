@@ -3,7 +3,7 @@ id: TASK-0136
 title: "MathShow Daily Ramp Reachability"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: medium
 risk: low
 owner: claude-code
@@ -59,3 +59,11 @@ Scratch place built from the checkout (BuildStamp 7fd395c, clean), fresh Play, H
 - R3: `tests/test_hub_routes.py` fails on main (13 lane failures, `before-fix.txt`) and passes now; picked up by check.sh's Python test discovery.
 - R4: see above. `hub_nav.py` (informational) still reports Daily unreachable; the Studio run is the gate.
 - R5: `check.sh` green; PR open, not merged; no audit recorded.
+
+## Revision 1 (audit AUD-20261103-TASK-0136-01, rows F0-F5)
+- F1: the four north common markers are back at their main positions (build_hub.py `GLYPH_N_PROFILE`); all 34 GlyphSpawn blocks diff empty against main (command and output in daily-ramp.txt).
+- F2: tests/test_hub_routes.py is now exact (no sampling): 12-wide rectangle per segment plus radius-6 joint discs, floor from the route's own walkable facets, obstacle = collidable upward face over 1.0 stud above the floor. Fails on main (17), the Daily canary pole fails by name, the real map passes.
+- F3: regression at b40fcd5 in daily-ramp.txt "REVISION 1": walk times 9.7-11.6 s, 34/34 reachability (glyph-reachability.csv), HUD, mid-match block, console clean, and no-jump MoveTo arrivals at all six pads.
+- F4: games/mathshow/map/Hub.routes.json added to files_owned.
+- Not done by design: record-audit and self-audit. Out of scope and raised by jg during this revision: hide the pad prompt when the player is not on the pad (pad logic; separate task).
+
