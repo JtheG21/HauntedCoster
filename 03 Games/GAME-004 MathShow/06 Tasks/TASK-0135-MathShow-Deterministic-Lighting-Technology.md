@@ -3,7 +3,7 @@ id: TASK-0135
 title: "MathShow Deterministic Lighting Technology"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: claude-code
