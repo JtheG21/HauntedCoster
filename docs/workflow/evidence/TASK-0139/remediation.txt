@@ -1,0 +1,28 @@
+TASK-0139 remediation evidence (2026-11-05)
+measured_sha: f6faf50   applies_to: games/mathshow/src/{shared/ProfileRules,server/Services/ProfileService}.luau, tests/ProfileRules.spec.luau
+
+R1/R2  Codex AUD-02 probe, re-run against the fixed ProfileRules in Lune (the same four checks; the store is modelled as
+UpdateAsync old -> ProfileRules.planSave(old, patch), nil cancels):
+  migrate unknown true | load unknown (in memory, expected nil) nil
+  save unknown flag/quests true 1 version 2
+  overlap total 16 expected 16
+  future write accepted false extra must survive version 99 total 20
+  Before the fix (AUD-02): save unknown nil nil | future update 99 nil | overlap total 15 expected 16.
+  "load unknown nil" is the in-memory copy (sanitized by design); the write path now keeps the stored fields.
+
+Specs: ProfileRules.spec gains 7 tests; Lune total 366 passed, 0 failed (was 359). check.sh ALL CHECKS PASSED.
+  merge adds glyphsDelta (invalid deltas ignored, capped at 2^53); two overlapping sessions total 16 in either order;
+  a repeated callback credits a patch once per stored value; merge keeps unknown fields incl. migrate -> sanitize -> merge;
+  planSave refuses a newer stored version that appeared after load; adopt keeps increments that arrive during a save.
+
+ProfileService: glyphsPending counts unsaved increments; a save takes them as glyphsDelta and puts them back on failure;
+a refused write (newer stored version) turns the session memory-only with a warn. No remote, key, store-name, cadence or
+schema change (glyphsLifetime already existed).
+
+Residual risk (not closed, no schema change allowed without jg): if UpdateAsync writes and then errors on the way back,
+the retry credits that save's increments a second time. An operation-id field in the profile would close it; that is a
+DataStore schema change and needs jg's approval.
+
+R3 Studio: not re-run for this revision. The private test experience's "Studio Access to API Services" was switched OFF
+on 2026-11-05 at jg's instruction (read back OFF), so persistence cannot be exercised there without re-enabling it.
+The lifecycle paths changed here (saveNow bookkeeping, refused write) are exercised only by the pure specs above.
