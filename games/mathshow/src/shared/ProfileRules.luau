@@ -27,7 +27,7 @@ export type Patch = {
 	lastTestRank: number?,
 	lastTakenAt: number?,
 	blitzBest: number?,
-	glyphsLifetime: number?,
+	glyphsDelta: number?, -- glyph value earned since the last confirmed save; ADDED to the stored total (AUD-02 F2)
 }
 export type ClientProfile = {
 	rank: number?,
@@ -44,6 +44,7 @@ local MAX_GLYPHS = 2 ^ 53 -- the largest exact integer; a total can never overfl
 local MAX_TIME = 2 ^ 40 -- far beyond any os.time(), keeps garbage out
 local UNAVAILABLE = { "publish", "studioaccesstoapisnotallowed", "403", "not allowed", "api services" }
 local SETTING_KEYS = { "music", "sfx", "reducedMotion", "colorBlind", "haptics" }
+local KNOWN_KEYS = { "version", "settings", "bestRank", "lastTestRank", "lastTakenAt", "blitzBest", "glyphsLifetime" }
 
 local ProfileRules = {}
 
@@ -210,8 +211,22 @@ local function maxOf(a: number?, b: number?): number?
 	return math.max(a, b)
 end
 
+-- The stored table with every field this build knows replaced by its clean value (nil when invalid or absent) and every
+-- other field left exactly as stored. sanitize() alone would drop those fields, and an UpdateAsync that returns the
+-- sanitized table erases them from the store (AUD-02 F1).
+local function overlay(stored: any, clean: Profile): Profile
+	local out: { [any]: any } = if typeof(stored) == "table" then table.clone(stored) else {}
+	local cleaned: { [any]: any } = clean :: any
+	for _, key in KNOWN_KEYS do
+		out[key] = cleaned[key]
+	end
+	return out :: any
+end
+
 -- Folds `patch` into whatever is stored (UpdateAsync transform). Bests and the test time only ever go up, so a server
--- with older data cannot lower them; settings are last writer wins; the last test rank follows the newest test.
+-- with older data cannot lower them; settings are last writer wins; the last test rank follows the newest test. The glyph
+-- total is ADDED to (stored + patch.glyphsDelta): a counter built from independent increments cannot be max-merged without
+-- losing some of them (AUD-02 F2). Fields this build does not know are kept as stored.
 function ProfileRules.merge(stored: any, patch: Patch): Profile
 	local base = ProfileRules.sanitize(stored)
 	local clean = ProfileRules.sanitize({
@@ -220,14 +235,13 @@ function ProfileRules.merge(stored: any, patch: Patch): Profile
 		lastTestRank = patch.lastTestRank,
 		lastTakenAt = patch.lastTakenAt,
 		blitzBest = patch.blitzBest,
-		glyphsLifetime = patch.glyphsLifetime,
 	})
 	if patch.settings ~= nil and ProfileRules.sanitizeSettings(patch.settings) ~= nil then
 		base.settings = clean.settings
 	end
 	base.bestRank = maxOf(base.bestRank, clean.bestRank)
 	base.blitzBest = maxOf(base.blitzBest, clean.blitzBest)
-	base.glyphsLifetime = math.max(cleanGlyphs(base.glyphsLifetime), cleanGlyphs(clean.glyphsLifetime))
+	base.glyphsLifetime = math.min(cleanGlyphs(base.glyphsLifetime) + cleanGlyphs(patch.glyphsDelta), MAX_GLYPHS)
 	if clean.lastTakenAt ~= nil then
 		local newer = base.lastTakenAt == nil or clean.lastTakenAt > base.lastTakenAt
 		if newer or (clean.lastTakenAt == base.lastTakenAt and clean.lastTestRank ~= nil) then
@@ -235,10 +249,30 @@ function ProfileRules.merge(stored: any, patch: Patch): Profile
 			base.lastTestRank = clean.lastTestRank
 		end
 	end
-	return base
+	return overlay(stored, base)
 end
 
--- Everything in a profile as a patch (autosave and release): merge() makes it safe against older in-memory data.
+-- The session profile after a confirmed save: what UpdateAsync returned (another server may have raised a best or added
+-- glyphs), our settings and bests folded in, and the glyph increments that arrived while the save was in flight
+-- (`pending`, not yet in the stored total) added on top.
+function ProfileRules.adopt(result: any, current: Profile, pending: number): Profile
+	local adopted = ProfileRules.merge(result, ProfileRules.toPatch(current))
+	adopted.glyphsLifetime = ProfileRules.addGlyphs(ProfileRules.merge(result, {}), pending).glyphsLifetime
+	return adopted
+end
+
+-- The UpdateAsync transform for a save: merge(), or nil (cancel the write) when the stored data was written by a newer
+-- build than this one, even if it only became newer after this session loaded. Returning it with its fields dropped and
+-- only the version number kept would hide the loss (AUD-02 F1).
+function ProfileRules.planSave(stored: any, patch: Patch): Profile?
+	if ProfileRules.isNewerVersion(stored) then
+		return nil
+	end
+	return ProfileRules.merge(stored, patch)
+end
+
+-- Everything in a profile as a patch (autosave and release): merge() makes it safe against older in-memory data. The glyph
+-- total is not part of it: the caller supplies glyphsDelta.
 function ProfileRules.toPatch(profile: Profile): Patch
 	return {
 		settings = profile.settings,
@@ -246,7 +280,6 @@ function ProfileRules.toPatch(profile: Profile): Patch
 		lastTestRank = profile.lastTestRank,
 		lastTakenAt = profile.lastTakenAt,
 		blitzBest = profile.blitzBest,
-		glyphsLifetime = profile.glyphsLifetime,
 	}
 end
 

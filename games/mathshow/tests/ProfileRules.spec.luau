@@ -254,12 +254,86 @@ return function(t: TestRunner.T)
 		t.eq(ProfileRules.addGlyphs(profile, nil :: any).glyphsLifetime, 7)
 	end)
 
-	t.test("merge only raises the total, so older in-memory data cannot lower it", function()
-		local merged = ProfileRules.merge({ version = 2, glyphsLifetime = 30 }, { glyphsLifetime = 10 })
-		t.eq(merged.glyphsLifetime, 30)
-		t.eq(ProfileRules.merge({ glyphsLifetime = 4 }, { glyphsLifetime = 9 }).glyphsLifetime, 9)
+	t.test("merge adds the glyph delta to the stored total and never lowers it", function()
+		t.eq(ProfileRules.merge({ version = 2, glyphsLifetime = 30 }, { glyphsDelta = 10 }).glyphsLifetime, 40)
 		t.eq(ProfileRules.merge({ glyphsLifetime = 4 }, {}).glyphsLifetime, 4)
-		t.eq(ProfileRules.merge({ version = 99 }, { glyphsLifetime = 1 }).version, 99)
-		t.eq(ProfileRules.toPatch(ProfileRules.addGlyphs(ProfileRules.defaults(), 2)).glyphsLifetime, 2)
+		for _, bad in { -3, 0, NAN, math.huge, 1.5 :: number } do
+			local expected = if bad == 1.5 then 5 else 4
+			t.eq(ProfileRules.merge({ glyphsLifetime = 4 }, { glyphsDelta = bad }).glyphsLifetime, expected)
+		end
+		t.eq(ProfileRules.merge({ glyphsLifetime = 4 }, { glyphsDelta = "3" :: any }).glyphsLifetime, 4)
+		t.eq(ProfileRules.toPatch(ProfileRules.addGlyphs(ProfileRules.defaults(), 2)).glyphsDelta, nil)
+	end)
+
+	t.test("two sessions that overlap lose no glyph (AUD-02 F2)", function()
+		-- Both load total 10; A collects a common (+1), B a rare (+5).
+		local stored: any = { version = 2, glyphsLifetime = 10 }
+		stored = ProfileRules.planSave(stored, { glyphsDelta = 1 })
+		stored = ProfileRules.planSave(stored, { glyphsDelta = 5 })
+		t.eq(stored.glyphsLifetime, 16)
+		local reversed: any = { version = 2, glyphsLifetime = 10 }
+		reversed = ProfileRules.planSave(reversed, { glyphsDelta = 5 })
+		reversed = ProfileRules.planSave(reversed, { glyphsDelta = 1 })
+		t.eq(reversed.glyphsLifetime, 16)
+	end)
+
+	t.test("a repeated UpdateAsync callback credits one patch once", function()
+		local patch = { glyphsDelta = 5 }
+		local old: any = { version = 2, glyphsLifetime = 10 }
+		local first = ProfileRules.planSave(old, patch)
+		local again = ProfileRules.planSave(old, patch) -- the same stored value: the same result, no second credit
+		t.eq(first and first.glyphsLifetime, 15)
+		t.eq(again and again.glyphsLifetime, 15)
+		t.eq(old.glyphsLifetime, 10, "the stored table is not mutated")
+		local retried = ProfileRules.planSave({ version = 2, glyphsLifetime = 12 }, patch) -- fresher value: still +5 once
+		t.eq(retried and retried.glyphsLifetime, 17)
+	end)
+
+	t.test("the total is capped and never overflows", function()
+		local top = 2 ^ 53
+		t.eq(ProfileRules.merge({ glyphsLifetime = top }, { glyphsDelta = 9 }).glyphsLifetime, top)
+	end)
+
+	t.test("merge keeps unknown stored fields, also after migrate -> sanitize (AUD-02 F1)", function()
+		local stored = { version = 1, quests = { a = 1 }, flag = true, bestRank = 2 }
+		local loaded = ProfileRules.sanitize(ProfileRules.migrate(stored))
+		t.eq((loaded :: any).flag, nil, "the in-memory copy is sanitized")
+		local written = ProfileRules.merge(stored, ProfileRules.toPatch(loaded)) :: any
+		t.eq(written.flag, true)
+		t.eq(written.quests.a, 1)
+		t.eq(written.bestRank, 2)
+		t.eq(written.version, 2)
+		t.eq(written.glyphsLifetime, 0)
+		t.eq(stored.version, 1, "the stored table is not mutated")
+	end)
+
+	t.test("merge replaces invalid known fields and keeps the rest", function()
+		local written = ProfileRules.merge({ bestRank = 99, blitzBest = 3, extra = "x" }, {}) :: any
+		t.eq(written.bestRank, nil)
+		t.eq(written.blitzBest, 3)
+		t.eq(written.extra, "x")
+	end)
+
+	t.test("planSave refuses stored data from a newer build, even one that appeared after load (AUD-02 F1)", function()
+		local loadedV2 = ProfileRules.sanitize({ version = 2, glyphsLifetime = 20 })
+		local patch = ProfileRules.toPatch(loadedV2)
+		patch.glyphsDelta = 3
+		local newerNow = { version = 99, extra = "must survive", glyphsLifetime = 20 }
+		t.eq(ProfileRules.planSave(newerNow, patch), nil, "the write is cancelled, so nothing is erased")
+		t.eq(newerNow.extra, "must survive")
+		local same = ProfileRules.planSave({ version = 2, glyphsLifetime = 20 }, patch)
+		t.eq(same and same.glyphsLifetime, 23)
+		local older = ProfileRules.planSave({ version = 1 }, patch)
+		t.eq(older and older.version, 2)
+	end)
+
+	t.test("adopt takes the stored total and keeps increments that arrived during the save", function()
+		-- Stored 16 after this save (another server added 5); 2 more glyphs were collected while it was in flight.
+		local current = ProfileRules.sanitize({ version = 2, glyphsLifetime = 11, bestRank = 2 })
+		local adopted = ProfileRules.adopt({ version = 2, glyphsLifetime = 16, bestRank = 4 }, current, 2)
+		t.eq(adopted.glyphsLifetime, 18)
+		t.eq(adopted.bestRank, 4)
+		t.eq(ProfileRules.adopt({ version = 2, glyphsLifetime = 16 }, current, 0).glyphsLifetime, 16)
+		t.eq(ProfileRules.adopt(nil, current, 0).glyphsLifetime, 0)
 	end)
 end

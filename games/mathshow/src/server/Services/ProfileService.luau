@@ -1,8 +1,9 @@
 --!strict
 -- Player profiles for the menu (TASK-0099): settings, best rank, blitz best and the Skill Test clock, stored in one
 -- DataStore per player. Adapted from the Haunted Collector PlayerDataService, simplified: no session lock, because every
--- save is an UpdateAsync that MERGES into what is stored (ProfileRules.merge: bests only go up, settings last writer wins),
--- so two servers can never lower a rank or blitz best.
+-- save is an UpdateAsync that MERGES into what is stored (ProfileRules.merge: bests only go up, settings last writer wins,
+-- the glyph total grows by this session's unsaved increments, fields this build does not know are kept), so two servers
+-- can never lower a rank or blitz best or lose each other's glyphs. Stored data from a newer build is never rewritten.
 --
 -- Safety: every DataStore call is pcall-isolated and never blocks the match loop. A failed load retries, then the profile is
 -- "readonly" (nothing written, so an outage can never overwrite real data with defaults). In Studio or an unpublished place,
@@ -30,6 +31,7 @@ type Session = {
 	profile: ProfileRules.Profile,
 	persistence: Persistence,
 	dirty: boolean,
+	glyphsPending: number, -- glyph value added since the last confirmed save; the save ADDS it to the stored total
 	saving: boolean,
 	queued: boolean,
 	token: number, -- debounce: only the newest scheduled save runs
@@ -134,17 +136,32 @@ local function saveNow(userId: number, session: Session)
 	end
 	session.saving = true
 	session.dirty = false
+	-- The increments this save carries. They leave the pending count now and come back if the save fails, so a callback
+	-- that UpdateAsync repeats always adds the same amount to a fresh stored total (never twice for one write).
+	local delta = session.glyphsPending
+	session.glyphsPending = 0
 	local patch = ProfileRules.toPatch(session.profile)
+	patch.glyphsDelta = delta
+	local refused = false
 	local ok, result = pcall(function()
 		return ds:UpdateAsync(keyFor(userId), function(old: any)
-			return ProfileRules.merge(old, patch)
+			local planned = ProfileRules.planSave(old, patch)
+			refused = planned == nil
+			return planned
 		end)
 	end)
 	session.saving = false
-	if ok then
-		-- Adopt what is stored if another server raised a best meanwhile.
-		session.profile = ProfileRules.merge(result, ProfileRules.toPatch(session.profile))
+	if ok and refused then
+		-- The stored profile was written by a newer build after this session loaded: leave it alone from now on.
+		session.glyphsPending += delta
+		session.persistence = "memory"
+		warn(`[MathShow] stored profile of {userId} is a newer version; not saving, memory-only from now on`)
+	elseif ok then
+		-- Adopt what is stored (another server may have raised a best or added glyphs), keeping increments that arrived
+		-- while this save was in flight.
+		session.profile = ProfileRules.adopt(result, session.profile, session.glyphsPending)
 	else
+		session.glyphsPending += delta
 		session.dirty = true
 		warn(`[MathShow] profile save failed for {userId}: {result}`)
 	end
@@ -204,11 +221,13 @@ function ProfileService.addGlyphs(player: Player, amount: number): number?
 		return nil
 	end
 	local updated = ProfileRules.addGlyphs(session.profile, amount)
-	if updated.glyphsLifetime == session.profile.glyphsLifetime then
+	local added = (updated.glyphsLifetime or 0) - (session.profile.glyphsLifetime or 0)
+	if added <= 0 then
 		return nil
 	end
 	session.profile = updated
 	if session.persistence == "saved" then
+		session.glyphsPending += added
 		session.dirty = true
 	end
 	return updated.glyphsLifetime
@@ -295,6 +314,7 @@ local function onPlayerAdded(player: Player)
 		profile = ProfileRules.defaults(),
 		persistence = "loading",
 		dirty = false,
+		glyphsPending = 0,
 		saving = false,
 		queued = false,
 		token = 0,
