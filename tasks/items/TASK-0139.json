@@ -1,0 +1,46 @@
+{
+  "id": "TASK-0139",
+  "game": "GAME-004",
+  "title": "MathShow Profile Save Remediation (AUD-02 F1-F3)",
+  "status": "in_progress",
+  "tier": "deep",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/shared/ProfileRules.luau",
+    "games/mathshow/tests/ProfileRules.spec.luau",
+    "games/mathshow/src/server/Services/ProfileService.luau",
+    "games/mathshow/src/server/Services/GlyphService.luau",
+    "docs/workflow/evidence/TASK-0139/",
+    "06 QA/AUD-20261103-TASK-0138-02.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0139-MathShow-Profile-Save-Remediation.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0139-profile-remediation",
+  "acceptance": [
+    "R1: AUD-02 F1: the save transform preserves unknown stored fields; a profile that is newer than this build when saved is never rewritten (write refused, session memory-only). Specs cover migrate -> sanitize -> merge and a newer version appearing after load.",
+    "R2: AUD-02 F2: glyphsLifetime is credited additively (stored total + this session's unsaved increments), never max-merged; a two-session interleaving spec totals 16; repeated UpdateAsync callbacks cannot double-credit. No schema, key or lock change.",
+    "R3: AUD-02 F3: the final-source behaviour is evidenced, or jg confirms the recorded exception; API access state reported.",
+    "R4: AUD-02 is recorded in the repo (tracked) and linked from TASK-0138; check.sh and validators green; PR open, CI green, not merged; independent re-audit recorded."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0139/remediation.txt"
+  ],
+  "notes": "Started on jg's chat instruction 2026-11-05: \"reaudit and make sure its passing if not fix it up until it passes. make sure there are no more untracked files\". Fixes the two high findings of AUD-20261103-TASK-0138-02 (Codex, FAIL, post-merge on 1d4eaff). NO schema change: glyphsLifetime already exists; if exactly-once needs an operation-id field, STOP and ask jg (DataStore schema change needs fresh approval). Out of scope: other profile fields, key renames, data wipes, live experience, publishing, merging, saving MathShow.rbxl.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0139-MathShow-Profile-Save-Remediation.md",
+  "risk": "high",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-05T15:08:55",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-05T15:08:56",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}
