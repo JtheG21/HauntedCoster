@@ -6,8 +6,22 @@ local ProfileRules = require(ReplicatedStorage.Shared.ProfileRules)
 
 local NAN = 0 / 0
 
+local NOW = 1_800_000_000
+local WEEK = 604800
+
 local function valid(): { [string]: any }
 	return { music = 3, sfx = 4, reducedMotion = true, colorBlind = false, haptics = true }
+end
+
+local function op(sessionId: string, seq: number, delta: number, patch: ProfileRules.Patch?): ProfileRules.SaveOp
+	return { sessionId = sessionId, seq = seq, glyphsDelta = delta, patch = patch or {} }
+end
+
+-- planSave's value, failing the test when the write was refused.
+local function save(t: TestRunner.T, stored: any, saveOp: ProfileRules.SaveOp, now: number?): (any, boolean)
+	local out, already = ProfileRules.planSave(stored, saveOp, now or NOW)
+	t.truthy(out ~= nil, "the write was refused")
+	return out, already
 end
 
 return function(t: TestRunner.T)
@@ -265,28 +279,83 @@ return function(t: TestRunner.T)
 		t.eq(ProfileRules.toPatch(ProfileRules.addGlyphs(ProfileRules.defaults(), 2)).glyphsDelta, nil)
 	end)
 
-	t.test("two sessions that overlap lose no glyph (AUD-02 F2)", function()
+	t.test("two sessions that overlap lose no glyph, in both orders (AUD-02 F2)", function()
 		-- Both load total 10; A collects a common (+1), B a rare (+5).
 		local stored: any = { version = 2, glyphsLifetime = 10 }
-		stored = ProfileRules.planSave(stored, { glyphsDelta = 1 })
-		stored = ProfileRules.planSave(stored, { glyphsDelta = 5 })
+		stored = save(t, stored, op("A", 1, 1))
+		stored = save(t, stored, op("B", 1, 5))
 		t.eq(stored.glyphsLifetime, 16)
 		local reversed: any = { version = 2, glyphsLifetime = 10 }
-		reversed = ProfileRules.planSave(reversed, { glyphsDelta = 5 })
-		reversed = ProfileRules.planSave(reversed, { glyphsDelta = 1 })
+		reversed = save(t, reversed, op("B", 1, 5))
+		reversed = save(t, reversed, op("A", 1, 1))
 		t.eq(reversed.glyphsLifetime, 16)
+		t.eq(reversed.applied.A.seq, 1)
+		t.eq(reversed.applied.B.seq, 1)
 	end)
 
-	t.test("a repeated UpdateAsync callback credits one patch once", function()
-		local patch = { glyphsDelta = 5 }
-		local old: any = { version = 2, glyphsLifetime = 10 }
-		local first = ProfileRules.planSave(old, patch)
-		local again = ProfileRules.planSave(old, patch) -- the same stored value: the same result, no second credit
-		t.eq(first and first.glyphsLifetime, 15)
-		t.eq(again and again.glyphsLifetime, 15)
+	t.test("a repeated UpdateAsync callback credits one op once", function()
+		local saveOp = op("S", 1, 5)
+		local old: any = { version = 3, glyphsLifetime = 10, applied = {} }
+		local first = save(t, old, saveOp)
+		local again = save(t, old, saveOp) -- the same stored value: the same result, no second credit
+		t.eq(first.glyphsLifetime, 15)
+		t.eq(again.glyphsLifetime, 15)
 		t.eq(old.glyphsLifetime, 10, "the stored table is not mutated")
-		local retried = ProfileRules.planSave({ version = 2, glyphsLifetime = 12 }, patch) -- fresher value: still +5 once
-		t.eq(retried and retried.glyphsLifetime, 17)
+		t.eq(next(old.applied), nil, "the stored log is not mutated")
+		-- The engine replays the callback against a fresher value another server wrote: still +5 once.
+		local fresher = save(t, { version = 3, glyphsLifetime = 12, applied = { O = { seq = 4, at = NOW } } }, saveOp)
+		t.eq(fresher.glyphsLifetime, 17)
+		t.eq(fresher.applied.O.seq, 4, "the other session's entry is kept")
+		-- And a replay against the value this op itself committed credits nothing.
+		local replay, already = save(t, first, saveOp)
+		t.eq(replay.glyphsLifetime, 15)
+		t.eq(already, true)
+	end)
+
+	t.test("committed then errored: retrying the same op does not credit it again (TASK-0139 3a)", function()
+		local stored: any = { version = 3, glyphsLifetime = 15, applied = { s = { seq = 1, at = NOW - 10 } } }
+		local retried, already = save(t, stored, op("s", 1, 5))
+		t.eq(retried.glyphsLifetime, 15)
+		t.eq(already, true)
+		t.eq(retried.applied.s.seq, 1)
+		local nextOp, nextAlready = save(t, retried, op("s", 2, 2))
+		t.eq(nextOp.glyphsLifetime, 17)
+		t.eq(nextAlready, false)
+		t.eq(nextOp.applied.s.seq, 2)
+		t.eq(nextOp.applied.s.at, NOW)
+	end)
+
+	t.test("an already-applied op still overlays its idempotent fields", function()
+		local stored: any = { version = 3, glyphsLifetime = 15, bestRank = 2, applied = { s = { seq = 3, at = NOW } } }
+		local out, already = save(t, stored, op("s", 3, 5, { bestRank = 6 }))
+		t.eq(already, true)
+		t.eq(out.glyphsLifetime, 15)
+		t.eq(out.bestRank, 6)
+	end)
+
+	t.test("a lower seq is skipped; the same seq from another session is applied", function()
+		local stored: any = { version = 3, glyphsLifetime = 20, applied = { s = { seq = 4, at = NOW } } }
+		local lower, lowerAlready = save(t, stored, op("s", 2, 7))
+		t.eq(lower.glyphsLifetime, 20)
+		t.eq(lowerAlready, true)
+		t.eq(lower.applied.s.seq, 4, "the stored seq is not lowered")
+		local other, otherAlready = save(t, stored, op("t", 4, 7))
+		t.eq(other.glyphsLifetime, 27)
+		t.eq(otherAlready, false)
+		t.eq(other.applied.t.seq, 4)
+		t.eq(other.applied.s.seq, 4)
+	end)
+
+	t.test("planSave refuses an op without a valid identity or time", function()
+		local stored = { version = 3, glyphsLifetime = 1 }
+		local bads: { any } =
+			{ op("", 1, 1), op(string.rep("x", 65), 1, 1), op("s", 0, 1), op("s", 1.5, 1), op("s", NAN, 1) }
+		for i, bad in bads do
+			t.eq(ProfileRules.planSave(stored, bad, NOW), nil, "op " .. i)
+		end
+		t.eq(ProfileRules.planSave(stored, op("s", 1, 1), NAN), nil, "now NaN")
+		t.eq(ProfileRules.planSave(stored, op("s", 1, 1), math.huge), nil, "now inf")
+		t.truthy(ProfileRules.planSave(stored, op(string.rep("x", 64), 1, 1), NOW), "64 characters is allowed")
 	end)
 
 	t.test("the total is capped and never overflows", function()
@@ -302,7 +371,7 @@ return function(t: TestRunner.T)
 		t.eq(written.flag, true)
 		t.eq(written.quests.a, 1)
 		t.eq(written.bestRank, 2)
-		t.eq(written.version, 2)
+		t.eq(written.version, 3)
 		t.eq(written.glyphsLifetime, 0)
 		t.eq(stored.version, 1, "the stored table is not mutated")
 	end)
@@ -315,16 +384,145 @@ return function(t: TestRunner.T)
 	end)
 
 	t.test("planSave refuses stored data from a newer build, even one that appeared after load (AUD-02 F1)", function()
-		local loadedV2 = ProfileRules.sanitize({ version = 2, glyphsLifetime = 20 })
-		local patch = ProfileRules.toPatch(loadedV2)
-		patch.glyphsDelta = 3
-		local newerNow = { version = 99, extra = "must survive", glyphsLifetime = 20 }
-		t.eq(ProfileRules.planSave(newerNow, patch), nil, "the write is cancelled, so nothing is erased")
+		local loaded = ProfileRules.sanitize({ version = 3, glyphsLifetime = 20 })
+		local saveOp = op("s", 1, 3, ProfileRules.toPatch(loaded))
+		local newerNow = { version = 4, extra = "must survive", glyphsLifetime = 20 }
+		local refused, already = ProfileRules.planSave(newerNow, saveOp, NOW)
+		t.eq(refused, nil, "version 4 is refused, so nothing is erased")
+		t.eq(already, false)
 		t.eq(newerNow.extra, "must survive")
-		local same = ProfileRules.planSave({ version = 2, glyphsLifetime = 20 }, patch)
-		t.eq(same and same.glyphsLifetime, 23)
-		local older = ProfileRules.planSave({ version = 1 }, patch)
-		t.eq(older and older.version, 2)
+		t.eq(ProfileRules.planSave({ version = 99 }, saveOp, NOW), nil)
+		local same = save(t, { version = 3, glyphsLifetime = 20 }, saveOp)
+		t.eq(same.glyphsLifetime, 23)
+		local older = save(t, { version = 1 }, saveOp)
+		t.eq(older.version, 3)
+	end)
+
+	t.test("migrate v2 -> v3 adds an empty save log and keeps unknown fields, the total and settings", function()
+		local v2: { [string]: any } =
+			{ version = 2, glyphsLifetime = 12, settings = valid(), quests = { a = 1 }, flag = true }
+		local out = ProfileRules.migrate(v2)
+		t.eq(out.version, 3)
+		t.eq(typeof(out.applied), "table")
+		t.eq(next(out.applied), nil)
+		t.eq(out.glyphsLifetime, 12)
+		t.eq(out.settings.music, 3)
+		t.eq(out.quests.a, 1)
+		t.eq(out.flag, true)
+		t.eq(v2.applied, nil, "the input is not mutated")
+		local keep = ProfileRules.migrate({ version = 3, applied = { s = { seq = 2, at = NOW } } })
+		t.eq(keep.applied.s.seq, 2, "a v3 log is not reset")
+		-- Saved through the v3 path, the unknown fields and the total survive and the log gains the op.
+		local written = save(t, v2, op("s", 1, 4))
+		t.eq(written.version, 3)
+		t.eq(written.glyphsLifetime, 16)
+		t.eq(written.flag, true)
+		t.eq(written.quests.a, 1)
+		t.eq(written.applied.s.seq, 1)
+	end)
+
+	t.test("an unknown settings sub-key survives a save and a known key is updated (TASK-0139 3b)", function()
+		local storedSettings = valid()
+		storedSettings.futureToggle = "keep me"
+		local stored = { version = 3, glyphsLifetime = 1, settings = storedSettings }
+		local changed = valid()
+		changed.music = 9
+		local written = save(t, stored, op("s", 1, 0, { settings = changed :: any }))
+		t.eq(written.settings.futureToggle, "keep me")
+		t.eq(written.settings.music, 9)
+		t.eq(written.settings.sfx, 4)
+		t.eq(storedSettings.music, 3, "the stored settings table is not mutated")
+		local untouched = ProfileRules.merge(stored, {}) :: any
+		t.eq(untouched.settings.futureToggle, "keep me", "also when the patch has no settings")
+		local garbage = ProfileRules.merge({ settings = "x" }, { settings = changed :: any }) :: any
+		t.eq(garbage.settings.music, 9, "a non-table stored settings value is rebuilt")
+	end)
+
+	t.test("an adopted unknown settings sub-key stays out of memory, patches and the client", function()
+		local storedSettings = valid()
+		storedSettings.futureToggle = true
+		local current = ProfileRules.sanitize({ version = 3, settings = valid() })
+		local adopted = ProfileRules.adopt({ version = 3, settings = storedSettings, extra = 1 }, current, 0)
+		t.eq((adopted.settings :: any).futureToggle, nil)
+		t.eq((adopted :: any).extra, nil)
+		local patch = ProfileRules.toPatch(adopted)
+		t.truthy(ProfileRules.sanitizeSettings(patch.settings), "the strict settings check still accepts the patch")
+		local stray = ProfileRules.sanitize({ settings = valid() });
+		(stray.settings :: any).futureToggle = true
+		t.truthy(ProfileRules.sanitizeSettings(ProfileRules.toPatch(stray).settings), "toPatch copies known keys only")
+		t.eq(
+			(ProfileRules.toClient(stray, "saved").settings :: any).futureToggle,
+			nil,
+			"the client gets known keys only"
+		)
+	end)
+
+	t.test("the save log keeps entries exactly 7 days old and drops older ones", function()
+		local log = ProfileRules.sanitizeApplied({
+			edge = { seq = 1, at = NOW - WEEK },
+			old = { seq = 1, at = NOW - WEEK - 1 },
+			fresh = { seq = 2, at = NOW },
+		}, NOW)
+		t.truthy(log.edge, "at == now - 7 days is kept")
+		t.eq(log.old, nil, "at < now - 7 days is dropped")
+		t.eq(log.fresh.seq, 2)
+		local written = save(t, { version = 3, applied = { old = { seq = 1, at = NOW - WEEK - 1 } } }, op("s", 1, 0))
+		t.eq(written.applied.old, nil, "a save prunes the stored log")
+		t.truthy(
+			ProfileRules.sanitizeApplied({ old = { seq = 1, at = 0 } }, nil).old,
+			"without now nothing is aged out"
+		)
+	end)
+
+	t.test("the save log is capped at 200, oldest first, keeping the op being written", function()
+		local raw = {}
+		for i = 1, 201 do
+			raw["s" .. i] = { seq = 1, at = NOW - 1000 + i } -- s1 is the oldest
+		end
+		local log = ProfileRules.sanitizeApplied(raw, NOW)
+		local count = 0
+		for _ in log do
+			count += 1
+		end
+		t.eq(count, 200)
+		t.eq(log.s1, nil, "the oldest entry is dropped")
+		t.truthy(log.s2)
+		t.truthy(log.s201)
+		local full = {}
+		for i = 1, 200 do
+			full["s" .. i] = { seq = 1, at = NOW + 50 } -- clock skew: all newer than this server's now
+		end
+		local written = save(t, { version = 3, applied = full }, op("me", 1, 1))
+		count = 0
+		for _ in written.applied do
+			count += 1
+		end
+		t.eq(count, 200)
+		t.truthy(written.applied.me, "the op just written is never the one capped away")
+	end)
+
+	t.test("malformed save log entries are dropped", function()
+		local raw: { [any]: any } = {
+			ok = { seq = 3, at = NOW },
+			zero = { seq = 0, at = NOW },
+			frac = { seq = 1.5, at = NOW },
+			nan = { seq = 1, at = NAN },
+			inf = { seq = 1, at = math.huge },
+			str = { seq = "1", at = NOW },
+			notTable = 5,
+		}
+		raw[""] = { seq = 1, at = NOW }
+		raw[string.rep("x", 65)] = { seq = 1, at = NOW }
+		raw[1] = { seq = 1, at = NOW }
+		local log = ProfileRules.sanitizeApplied(raw, NOW)
+		local keys = {}
+		for id in log do
+			table.insert(keys, id)
+		end
+		t.eq(#keys, 1)
+		t.eq(log.ok.seq, 3)
+		t.eq(next(ProfileRules.sanitizeApplied("x", NOW)), nil)
+		t.eq(next(ProfileRules.sanitize({ applied = { bad = 1 } }).applied :: any), nil, "sanitize cleans the log too")
 	end)
 
 	t.test("adopt takes the stored total and keeps increments that arrived during the save", function()

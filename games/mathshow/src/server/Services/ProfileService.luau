@@ -4,16 +4,24 @@
 -- save is an UpdateAsync that MERGES into what is stored (ProfileRules.merge: bests only go up, settings last writer wins,
 -- the glyph total grows by this session's unsaved increments, fields this build does not know are kept), so two servers
 -- can never lower a rank or blitz best or lose each other's glyphs. Stored data from a newer build is never rewritten.
+-- Exactly-once (TASK-0139 rev 2): each save is an operation {sessionId, seq, glyphsDelta}. A failed or ambiguous save
+-- (UpdateAsync may have committed before it errored) keeps the SAME operation in flight and retries it unchanged; the
+-- stored save log (`applied`) then tells a committed retry apart, so the delta is credited once. Increments that arrive
+-- meanwhile wait in glyphsPending for the next seq. Leave, autosave and BindToClose all go through saveNow().
 --
 -- Safety: every DataStore call is pcall-isolated and never blocks the match loop. A failed load retries, then the profile is
 -- "readonly" (nothing written, so an outage can never overwrite real data with defaults). In Studio or an unpublished place,
 -- an "API unavailable" error runs the player in "memory" mode (works, not saved). Remotes: MenuRequest (RemoteFunction) and
 -- SettingsSave (RemoteEvent); every client value is validated (type, range, rate) and the server never trusts the client.
 --
--- Studio-only test hook: set workspace attribute MathShowForceProfileFail = true before a player joins to simulate a load
--- failure (ignored outside Studio).
+-- Studio-only test hooks (inert unless RunService:IsStudio() and RunService:IsServer(); server workspace attributes, which a
+-- client cannot set):
+--  * MathShowForceProfileFail = true before a player joins simulates a load failure.
+--  * MathShowForceSaveErrorAfterCommit = true makes the next save error AFTER UpdateAsync has committed (consumed once),
+--    to prove that the retry of that operation does not credit it twice.
 
 local DataStoreService = game:GetService("DataStoreService")
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -27,11 +35,15 @@ local RateRules = require(Shared:WaitForChild("RateRules"))
 local Remotes = require(script.Parent.Parent.Remotes)
 
 export type Persistence = "loading" | "saved" | "memory" | "readonly"
+type InFlight = { seq: number, glyphsDelta: number }
 type Session = {
 	profile: ProfileRules.Profile,
 	persistence: Persistence,
 	dirty: boolean,
-	glyphsPending: number, -- glyph value added since the last confirmed save; the save ADDS it to the stored total
+	glyphsPending: number, -- glyph value added since the last save op was taken; the next op ADDS it to the stored total
+	sessionId: string, -- this server session's id in the save log
+	nextSeq: number,
+	inflight: InFlight?, -- the save op not yet confirmed; retried unchanged (same seq, same delta) until it is
 	saving: boolean,
 	queued: boolean,
 	token: number, -- debounce: only the newest scheduled save runs
@@ -78,6 +90,19 @@ local function forcedFailure(): boolean
 	return RunService:IsStudio() and workspace:GetAttribute("MathShowForceProfileFail") == true
 end
 
+-- Studio-only: error once after a committed write, as an UpdateAsync that wrote and then failed on the way back would.
+local function forcedErrorAfterCommit(): boolean
+	if
+		RunService:IsStudio()
+		and RunService:IsServer()
+		and workspace:GetAttribute("MathShowForceSaveErrorAfterCommit")
+	then
+		workspace:SetAttribute("MathShowForceSaveErrorAfterCommit", nil)
+		return true
+	end
+	return false
+end
+
 local function load(player: Player, session: Session)
 	local userId = player.UserId
 	local tries = 0
@@ -121,9 +146,10 @@ local function load(player: Player, session: Session)
 	end
 end
 
--- One save in flight per player, at most one queued behind it. Merges into the stored value (see header).
+-- One save in flight per player, at most one queued behind it. Merges into the stored value (see header). Everything up
+-- to the UpdateAsync call runs without yielding, so the in-flight flag and the operation are settled before any yield.
 local function saveNow(userId: number, session: Session)
-	if session.persistence ~= "saved" or not session.dirty then
+	if session.persistence ~= "saved" or (not session.dirty and session.inflight == nil) then
 		return
 	end
 	if session.saving then
@@ -135,35 +161,58 @@ local function saveNow(userId: number, session: Session)
 		return
 	end
 	session.saving = true
-	session.dirty = false
-	-- The increments this save carries. They leave the pending count now and come back if the save fails, so a callback
-	-- that UpdateAsync repeats always adds the same amount to a fresh stored total (never twice for one write).
-	local delta = session.glyphsPending
-	session.glyphsPending = 0
-	local patch = ProfileRules.toPatch(session.profile)
-	patch.glyphsDelta = delta
-	local refused = false
+	-- Reuse the unconfirmed operation if there is one: it may already have committed, and only its own seq lets the save
+	-- log recognise that. Folding its delta back into pending under a new seq is what would double-credit it.
+	local retrying = session.inflight ~= nil
+	local inflight: InFlight = session.inflight or { seq = session.nextSeq, glyphsDelta = session.glyphsPending }
+	if not retrying then
+		session.nextSeq += 1
+		session.glyphsPending = 0
+		session.inflight = inflight
+	end
+	session.dirty = session.glyphsPending > 0 -- a retry leaves newer increments for the next seq
+	local op: ProfileRules.SaveOp = {
+		sessionId = session.sessionId,
+		seq = inflight.seq,
+		glyphsDelta = inflight.glyphsDelta,
+		patch = ProfileRules.toPatch(session.profile),
+	}
+	local now = os.time()
+	local refused, alreadyApplied = false, false
 	local ok, result = pcall(function()
-		return ds:UpdateAsync(keyFor(userId), function(old: any)
-			local planned = ProfileRules.planSave(old, patch)
+		local written = ds:UpdateAsync(keyFor(userId), function(old: any)
+			local planned, applied = ProfileRules.planSave(old, op, now)
 			refused = planned == nil
+			alreadyApplied = applied
 			return planned
 		end)
+		if not refused and forcedErrorAfterCommit() then
+			error("simulated: UpdateAsync committed, then errored (Studio hook)")
+		end
+		return written
 	end)
 	session.saving = false
 	if ok and refused then
 		-- The stored profile was written by a newer build after this session loaded: leave it alone from now on.
-		session.glyphsPending += delta
+		session.inflight = nil
+		session.glyphsPending += inflight.glyphsDelta
 		session.persistence = "memory"
 		warn(`[MathShow] stored profile of {userId} is a newer version; not saving, memory-only from now on`)
 	elseif ok then
+		session.inflight = nil
+		if alreadyApplied then
+			warn(`[MathShow] save op {inflight.seq} of {userId} had already committed; its glyphs were not added again`)
+		end
 		-- Adopt what is stored (another server may have raised a best or added glyphs), keeping increments that arrived
 		-- while this save was in flight.
 		session.profile = ProfileRules.adopt(result, session.profile, session.glyphsPending)
+		if retrying and session.dirty then
+			session.queued = true -- increments that waited behind the retried op go out now
+		end
 	else
-		session.glyphsPending += delta
+		-- Errored, possibly after committing: keep the same op in flight (same seq, same delta) for the next attempt.
 		session.dirty = true
-		warn(`[MathShow] profile save failed for {userId}: {result}`)
+		warn(`[MathShow] profile save failed for {userId} (op {inflight.seq}, kept for retry): {result}`)
 	end
 	if session.queued then
 		session.queued = false
@@ -315,6 +364,9 @@ local function onPlayerAdded(player: Player)
 		persistence = "loading",
 		dirty = false,
 		glyphsPending = 0,
+		sessionId = HttpService:GenerateGUID(false),
+		nextSeq = 1,
+		inflight = nil,
 		saving = false,
 		queued = false,
 		token = 0,
@@ -345,7 +397,7 @@ local function onPlayerRemoving(player: Player)
 			while session.saving do
 				task.wait(0.1)
 			end
-			if not session.dirty or session.persistence ~= "saved" then
+			if (not session.dirty and session.inflight == nil) or session.persistence ~= "saved" then
 				break
 			end
 			if attempt < 4 then
@@ -397,7 +449,7 @@ function ProfileService.start(): ()
 		while true do
 			task.wait(AUTOSAVE_SECONDS)
 			for player, session in sessions do
-				if session.dirty then
+				if session.dirty or session.inflight ~= nil then
 					task.spawn(saveNow, player.UserId, session)
 				end
 			end
