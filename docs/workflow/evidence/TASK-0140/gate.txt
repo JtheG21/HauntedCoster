@@ -1,0 +1,57 @@
+TASK-0140 gate evidence (2026-11-05)
+measured_sha: fdf070ca1714b7140ad7475c8c4fab63731c01e7   applies_to: scripts/orchestrator.py scripts/audit_gate.py tests/ .github/workflows/audit-gate.yml AGENTS.md docs/workflow/TASKS.md
+
+$ python3 -m unittest tests.test_orchestrator_gate tests.test_audit_gate tests.test_orchestrator -v 2>&1 | grep -E "(TestTask0138Timeline|TestRecordAudit|TestApproveMerge|TestMarkMerged|TestPostMerge|TestGate)" | sort | head -60
+test_a_chore_that_touches_scripts_needs_a_task [TestGate] ... ok
+test_a_chore_without_source_passes_trivially [TestGate] ... ok
+test_a_codex_pass_is_enough [TestDeepTier] ... ok
+test_a_deep_task_needs_a_codex_pass [TestDeepTier] ... ok
+test_a_deep_task_needs_codex [TestGate] ... ok
+test_a_draft_is_skipped [TestGate] ... ok
+test_a_fail_or_a_missing_audit_cannot_be_approved [TestApproveMerge] ... ok
+test_a_failed_audit_fails [TestGate] ... ok
+test_a_finding_on_a_done_task_is_appended_and_the_status_stays [TestPostMerge] ... ok
+test_a_head_that_does_not_descend_from_the_audited_commit_is_refused [TestApproveMerge] ... ok
+test_a_merged_pr_sets_done_and_records_the_merge [TestMarkMerged] ... ok
+test_a_missing_head_is_undecidable [TestGate] ... ok
+test_a_pass_recorded_before_head_binding_is_refused [TestApproveMerge] ... ok
+test_a_pass_that_covers_the_head_passes [TestGate] ... ok
+test_a_post_merge_finding_needs_a_remediation_task [TestPostMerge] ... ok
+test_a_pr_merged_with_source_the_audit_never_saw_is_not_marked_done [TestMarkMerged] ... ok
+test_a_report_citing_a_different_sha_is_refused [TestRecordAudit] ... ok
+test_a_report_with_no_verdict_line_is_refused [TestRecordAudit] ... ok
+test_a_report_without_the_measured_sha_is_refused [TestRecordAudit] ... ok
+test_a_short_or_unknown_sha_is_refused [TestRecordAudit] ... ok
+test_a_source_change_without_a_task_fails [TestGate] ... ok
+test_a_task_with_no_audit_fails [TestGate] ... ok
+test_a_verdict_line_that_disagrees_is_refused [TestRecordAudit] ... ok
+test_an_edited_audit_report_is_refused [TestApproveMerge] ... ok
+test_an_open_pr_is_not_done [TestMarkMerged] ... ok
+test_another_note_is_source_to_the_gate [TestTask0138Timeline] ... ok
+test_applies_to_and_auditor_are_required [TestRecordAudit] ... ok
+test_green_checks_stand_in_for_a_pass [TestLightTier] ... ok
+test_it_needs_a_recorded_approval [TestMarkMerged] ... ok
+test_it_needs_the_approval_to_be_for_that_pr [TestMarkMerged] ... ok
+test_it_records_the_approval_verbatim_and_never_sets_done [TestApproveMerge] ... ok
+test_it_refuses_empty_text_an_agent_a_draft_a_closed_pr_and_a_foreign_branch [TestApproveMerge] ... ok
+test_light_tier_passes_without_an_audit [TestGate] ... ok
+test_only_audit_and_task_records_after_the_pass_is_allowed [TestTask0138Timeline] ... ok
+test_post_merge_is_only_for_done_tasks_and_a_pass_is_not_a_verdict_on_a_new_head [TestPostMerge] ... ok
+test_records_after_the_pass_still_pass [TestGate] ... ok
+test_reopen_is_unchanged [TestPostMerge] ... ok
+test_source_change_after_the_pass_is_refused [TestTask0138Timeline] ... ok
+test_source_changed_after_the_pass_fails_and_names_the_file [TestGate] ... ok
+test_the_binding_is_stored [TestRecordAudit] ... ok
+test_the_cli_commands [TestMarkMerged] ... ok
+test_the_cli_takes_the_new_flags [TestRecordAudit] ... ok
+test_the_executor_cannot_audit_its_own_task [TestRecordAudit] ... ok
+test_the_task_note_may_change_after_the_pass [TestTask0138Timeline] ... ok
+
+Ran 86 tests in 22.244s
+
+OK
+
+$ python3 scripts/audit_gate.py --head <this branch head> --branch task/TASK-0140-audit-head-gate --base origin/main   (dry run, before any audit exists)
+audit-gate: TASK-0140: PR head fdf070ca1714 is not covered by a recorded audit PASS:
+  - no audit is recorded for this task
+exit=1
