@@ -7,10 +7,14 @@
   "owner_agent": "claude-code",
   "files_owned": [
     "games/mathshow/src/shared/ProfileRules.luau",
+    "games/mathshow/src/shared/ProfileConfig.luau",
     "games/mathshow/tests/ProfileRules.spec.luau",
     "games/mathshow/src/server/Services/ProfileService.luau",
+    "docs/workflow/PUBLISH-CHECKLIST.md",
+    "04 Agents/Workflow.md",
     "docs/workflow/evidence/TASK-0141/",
-    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0141-MathShow-Profile-Exactly-Once-Saves-v2.md"
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0141-MathShow-Profile-Exactly-Once-Saves-v2.md",
+    "tasks/items/TASK-0141.json"
   ],
   "depends_on": [],
   "branch": "task/TASK-0141-profile-exactly-once",
