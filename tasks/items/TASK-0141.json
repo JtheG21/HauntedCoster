@@ -2,7 +2,7 @@
   "id": "TASK-0141",
   "game": "GAME-004",
   "title": "MathShow Profile Exactly-Once Saves v2",
-  "status": "backlog",
+  "status": "in_progress",
   "tier": "deep",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -24,5 +24,20 @@
   "evidence": [],
   "notes": "Registered at jg request 2026-11-06 (row K2); backlog only, no plan approval, no source change. Successor to TASK-0139 (parked after 2/2 failed revisions; final Codex audit AUD-20261106-TASK-0139-03 FAIL: receipt expiry/eviction allows replay double-credit, v2 writers can erase v3 receipts). Branched from c54123ecfe99cd0d2cbcdbeffb0d6282f2427513 (TASK-0139 rev 2 head). Design in the task note is pending Codex design review. files_owned is provisional; no publish checklist exists in the repo yet, so its location is decided in the plan. PR #204 must not be merged.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0141-MathShow-Profile-Exactly-Once-Saves-v2.md",
-  "risk": "high"
+  "risk": "high",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-06T15:46:31",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-06T15:46:31",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
 }
