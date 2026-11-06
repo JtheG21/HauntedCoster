@@ -35,9 +35,9 @@ Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, backlog) → [HUMAN:
 `max_revisions` (default 2) is in `00 Studio/budget.json`. Going past it blocks the task. Nothing retries automatically.
 
 ## Merge procedure (human-approved merges only)
-1. `orchestrator.py approve-merge TASK-#### --by jg --pr <N> --approval-text "<jg's words>"` on the task branch (it checks the PR head against the audit; commit and push the record, which changes only task files). jg merges on the GitHub UI after CI, including `audit-gate`, passes. Agents never merge, approve or mark done.
-2. Afterwards `orchestrator.py mark-merged TASK-#### --pr <N>` on a `chore/` branch from `main` sets `done` only if GitHub reports MERGED. Stop Rojo, then `scripts/preflight.sh --root <main checkout> --clean && git -C <main checkout> switch main && git -C <main checkout> pull --ff-only`.
-3. Delete the branch locally and on the remote. The outcome notes go on the task branch **before** the merge, so it carries them.
+1. The task note's Outcome is committed and pushed on the task branch first. Then `orchestrator.py approve-merge TASK-#### --by jg --pr <N> --approval-text "<jg's words>"` in the task worktree runs the CI gate on the PR head and records the approval with that head; **don't commit or push it to the PR branch** (that moves the approved head). jg merges on the GitHub UI after CI, including `audit-gate`, passes. Agents never merge, approve or mark done.
+2. Afterwards, on a `chore/` branch from `main` with the task file carried over from the task worktree, `orchestrator.py mark-merged TASK-#### --pr <N>` sets `done` only if GitHub reports MERGED with exactly the approved head; commit it with the remaining outcome notes. Stop Rojo, then `scripts/preflight.sh --root <main checkout> --clean && git -C <main checkout> switch main && git -C <main checkout> pull --ff-only`.
+3. Delete the branch locally and on the remote.
 
 ## Isolation
 - One Git branch per task, from an up-to-date `main`. Workflow and doc changes use `chore/<slug>` branches.
