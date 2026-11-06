@@ -1,5 +1,6 @@
 """Tests for scripts/orchestrator.py. Run: python3 -m unittest discover tests"""
 
+import hashlib
 import io
 import json
 import subprocess
@@ -33,6 +34,7 @@ class Base(unittest.TestCase):
                            "dispatch_mode": "dry-run"})
         self.write_queue([task("TASK-0001"), task("TASK-0002", deps=["TASK-0001"])])
         self.sha = self.init_git()
+        self.base_sha = self.sha  # the PR base the fixtures report (gh baseRefOid)
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -41,7 +43,7 @@ class Base(unittest.TestCase):
         """A one-commit repo, so record-audit can check the measured SHA."""
         def run(*args):
             return subprocess.run(["git", "-C", str(self.root), *args], capture_output=True, text=True, check=True).stdout
-        run("init", "-q")
+        run("init", "-q", "-b", "main")
         run("config", "user.email", "t@example.com")
         run("config", "user.name", "T")
         (self.root / "seed.txt").write_text("seed")
@@ -56,14 +58,16 @@ class Base(unittest.TestCase):
         return subprocess.run(["git", "-C", str(self.root), "rev-parse", "HEAD"], capture_output=True, text=True,
                               check=True).stdout.strip()
 
-    def report(self, name: str, verdict: str) -> str:
-        """An audit report naming the measured SHA with a matching verdict line; returns its repo path."""
+    def report(self, name: str, verdict: str, task_id: str = "TASK-0001", reviewer: str = "codex",
+               sha: str | None = None) -> str:
+        """An audit report whose frontmatter holds the decisive fields; returns its repo path."""
         rel = f"06 QA/{name}.md"
-        (self.root / rel).write_text(f"---\nverdict: {verdict}\nreviewed_commit: {self.sha}\n---\n# audit\n")
+        (self.root / rel).write_text(f"---\nid: {name}\ntask_id: {task_id}\nverdict: {verdict}\n"
+                                     f"reviewed_commit: {sha or self.sha}\nreviewer: {reviewer}\n---\n# audit\n")
         return rel
 
     def audit(self, p, tid, verdict, name="a0", auditor="codex"):
-        p.record_audit(tid, verdict, self.report(name, verdict), self.sha, ["games/"], auditor)
+        p.record_audit(tid, verdict, self.report(name, verdict, tid, auditor), self.sha, ["games/"], auditor)
 
     def write_budget(self, b):
         (self.root / "00 Studio" / "budget.json").write_text(json.dumps(b))
@@ -79,7 +83,7 @@ class Base(unittest.TestCase):
 
     def open_pr(self, head=None, **extra):
         return {"state": "OPEN", "isDraft": False, "headRefOid": head or self.sha, "headRefName": "task/TASK-0001",
-                **extra}
+                "baseRefOid": self.base_sha, **extra}
 
     def merged_pr(self, head=None):
         return {"state": "MERGED", "headRefOid": head or self.sha, "headRefName": "task/TASK-0001",
@@ -146,8 +150,6 @@ class TestWorkflow(Base):
         with mock.patch.object(orch, "gh_pr_view", return_value=self.open_pr(head)):
             p.approve_merge("TASK-0001", "jg", 7, "Merge PR 7")
         self.assertEqual(p.task("TASK-0001")["status"], "approved", "approve-merge never sets done")
-        p.save()
-        head = self.commit("approval record")
         with mock.patch.object(orch, "gh_pr_view", return_value=self.merged_pr(head)):
             p.mark_merged("TASK-0001", 7)
         p.save()
@@ -158,6 +160,7 @@ class TestWorkflow(Base):
         t = task("TASK-0001")
         t["tier"] = "light"
         self.write_queue([t])
+        self.base_sha = self.sha = self.commit("registered light")
         p = self.proj()
         p.approve("TASK-0001", "jg")
         p.start("TASK-0001")
@@ -405,12 +408,25 @@ class TestBudgetAndDispatch(Base):
 
 
 class TestOverrideMerge(Base):
-    def failed_task(self, **extra):
-        self.write_queue([task("TASK-0001", "changes_requested") | {"audits": [{"result": "fail", "report": "a.md"}]} | extra])
+    """override-merge records jg's merge over a failed audit, verified like mark-merged (gh MERGED, the report says fail)."""
+
+    def entry(self, name, verdict):
+        rel = self.report(name, verdict)
+        digest = hashlib.sha256((self.root / rel).read_bytes()).hexdigest()
+        return {"result": verdict, "report": rel, "report_sha256": digest, "measured_sha": self.sha, "auditor": "codex"}
+
+    def failed_task(self, status="changes_requested", verdicts=("fail",)):
+        audits = [self.entry(f"a{i}", v) for i, v in enumerate(verdicts)]
+        self.write_queue([task("TASK-0001", status) | {"audits": audits}])
+        return self.commit("failed audit recorded")
+
+    def override(self, head, *extra, reason="x", by="jg"):
+        with mock.patch.object(orch, "gh_pr_view", return_value=self.merged_pr(head) | dict(extra)):
+            return self.cli("override-merge", "TASK-0001", "--by", by, "--reason", reason, "--pr", "7")
 
     def test_records_who_and_why_and_keeps_the_fail(self):
-        self.failed_task()
-        code, out = self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "placeholders accepted")
+        head = self.failed_task()
+        code, out = self.override(head, reason="placeholders accepted")
         self.assertEqual(code, 0, out)
         t = self.proj().task("TASK-0001")
         self.assertEqual(t["status"], "done")
@@ -418,27 +434,42 @@ class TestOverrideMerge(Base):
         self.assertEqual(t["audits"][-1]["result"], "fail")
         self.assertEqual(t["audits"][-1]["merge_override"]["by"], "jg")
         self.assertEqual(t["audits"][-1]["merge_override"]["reason"], "placeholders accepted")
-        self.assertIn("over failed audit", t["history"][-1]["note"])
+        self.assertEqual((t["merged"]["head_sha"], t["merged"]["override"]), (head, True))
+        self.assertIn("over a failed audit", t["history"][-1]["note"])
 
     def test_allows_a_blocked_task(self):
-        self.write_queue([task("TASK-0001", "blocked") | {"audits": [{"result": "fail", "report": "a.md"}]}])
-        self.assertEqual(self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "x")[0], 0)
+        head = self.failed_task("blocked")
+        self.assertEqual(self.override(head)[0], 0)
         self.assertEqual(self.proj().task("TASK-0001")["status"], "done")
 
     def test_refuses_other_statuses_and_a_later_passing_audit(self):
         for status in ("review", "approved"):
-            self.write_queue([task("TASK-0001", status) | {"audits": [{"result": "fail", "report": "a.md"}]}])
-            self.assertEqual(self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "x")[0], 2)
-        audits = [{"result": "fail", "report": "a.md"}, {"result": "pass", "report": "b.md"}]
-        self.write_queue([task("TASK-0001", "changes_requested") | {"audits": audits}])
-        self.assertEqual(self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "x")[0], 2)
+            head = self.failed_task(status)
+            self.assertEqual(self.override(head)[0], 2)
+        head = self.failed_task(verdicts=("fail", "pass"))
+        self.assertEqual(self.override(head)[0], 2)
 
-    def test_refuses_without_a_failed_audit_or_a_reason(self):
+    def test_refuses_without_a_failed_audit_a_reason_a_human_or_a_merge(self):
         self.write_queue([task("TASK-0001", "changes_requested")])
-        self.assertEqual(self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "x")[0], 2)
-        self.failed_task()
-        self.assertEqual(self.cli("override-merge", "TASK-0001", "--by", "jg", "--reason", "  ")[0], 2)
+        head = self.commit("no audit")
+        self.assertEqual(self.override(head)[0], 2)
+        head = self.failed_task()
+        self.assertEqual(self.override(head, reason="  ")[0], 2)
+        self.assertEqual(self.override(head, by="claude-code")[0], 2)
+        self.assertEqual(self.override(head, ("state", "OPEN"))[0], 2)
+        self.assertEqual(self.override(head, ("headRefName", "task/other"))[0], 2)
         self.assertEqual(self.proj().task("TASK-0001")["status"], "changes_requested")
+
+    def test_a_json_fail_whose_report_says_pass_is_not_overridable(self):
+        """The verdict is the report's: a JSON-only fail is not a failed audit."""
+        rel = self.report("a0", "pass")
+        digest = hashlib.sha256((self.root / rel).read_bytes()).hexdigest()
+        audits = [{"result": "fail", "report": rel, "report_sha256": digest, "measured_sha": self.sha, "auditor": "codex"}]
+        self.write_queue([task("TASK-0001", "changes_requested") | {"audits": audits}])
+        code, out = self.override(self.commit("json says fail"))
+        self.assertEqual(code, 2)
+        self.assertIn("says 'pass'", out)
+
 
 
 class TestReports(Base):
