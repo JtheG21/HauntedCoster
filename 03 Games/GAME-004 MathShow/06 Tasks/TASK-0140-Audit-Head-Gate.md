@@ -3,7 +3,7 @@ id: TASK-0140
 title: "Audit verdicts bound to the PR head; done means merged"
 type: task
 project: GAME-004
-status: review
+status: changes_requested
 priority: high
 risk: high
 owner: claude-code
@@ -12,7 +12,7 @@ branch: task/TASK-0140-audit-head-gate
 related:
   - "[[TASK-0138-MathShow-Lifetime-Glyph-Total]]"
 created: 2026-11-05
-updated: 2026-11-05
+updated: 2026-11-06
 tags:
   - workflow/task
 ---

@@ -2,7 +2,7 @@
   "id": "TASK-0140",
   "game": "GAME-004",
   "title": "Audit verdicts bound to the PR head; done means merged",
-  "status": "review",
+  "status": "changes_requested",
   "tier": "deep",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -75,6 +75,12 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-06T14:00:30",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
     }
   ],
   "executions": [
@@ -104,7 +110,31 @@
         "docs/workflow/TASKS.md"
       ],
       "auditor": "codex"
+    },
+    {
+      "time": "2026-11-06T14:00:30",
+      "result": "fail",
+      "report": "06 QA/AUD-20261106-TASK-0140-02.md",
+      "report_sha256": "4024aaa7b9f7b3561764701d2d77d8aca9b248a381248ecf4b8c3fdbf530ffcd",
+      "measured_sha": "b51d2720ef55e05b553b5035ff7a7424f1d91b82",
+      "applies_to": [
+        "scripts/audit_gate.py",
+        "scripts/orchestrator.py",
+        ".github/workflows/audit-gate.yml",
+        "tests/test_audit_gate.py",
+        "tests/test_orchestrator_gate.py",
+        "tests/test_orchestrator.py",
+        "AGENTS.md",
+        "docs/workflow/TASKS.md",
+        "04 Agents/Workflow.md",
+        ".agents/skills/task-close/SKILL.md",
+        ".claude/skills/task-close/SKILL.md",
+        "tasks/items/TASK-0140.json",
+        "03 Games/GAME-004 MathShow/06 Tasks/TASK-0140-Audit-Head-Gate.md",
+        "06 QA/AUD-20261105-TASK-0140-01.md"
+      ],
+      "auditor": "codex (independent)"
     }
   ],
-  "revisions": 1
+  "revisions": 2
 }
