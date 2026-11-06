@@ -46,3 +46,6 @@ See `tasks/items/TASK-0139.json`.
 - **Evidence:** `docs/workflow/evidence/TASK-0139/revision2.txt`, measured at source `61e1eeb`, Studio at `aa2fe41`. 376 specs passed and check.sh is green. Studio checks 1–6 passed in the private test place. API access was ON for the run, then OFF and read back OFF.
 - **Not covered:** the leave-save retry loop and BindToClose were not exercised in the engine. If every leave save fails, that op is lost; this was already true before.
 - F3 (UserIds/metadata) is a separate task.
+
+## Outcome
+Failed final audit AUD-20261106-TASK-0139-03 (Codex): receipt expiry/eviction allows replay double-credit; v2 writers can erase v3 receipts. 3b settings fix passed. Superseded by TASK-0141. Do not merge PR #204.
