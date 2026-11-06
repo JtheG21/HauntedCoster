@@ -2,11 +2,13 @@
 
 import io
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import orchestrator as orch  # noqa: E402
@@ -27,14 +29,41 @@ class Base(unittest.TestCase):
         (self.root / "tasks").mkdir()
         (self.root / "00 Studio").mkdir()
         (self.root / "06 QA").mkdir()
-        for i in range(3):
-            (self.root / "06 QA" / f"a{i}.md").write_text("audit")
         self.write_budget({"monthly_limit_usd": 10, "per_task_limit_usd": 3, "max_revisions": 2,
                            "dispatch_mode": "dry-run"})
         self.write_queue([task("TASK-0001"), task("TASK-0002", deps=["TASK-0001"])])
+        self.sha = self.init_git()
 
     def tearDown(self):
         self.tmp.cleanup()
+
+    def init_git(self) -> str:
+        """A one-commit repo, so record-audit can check the measured SHA."""
+        def run(*args):
+            return subprocess.run(["git", "-C", str(self.root), *args], capture_output=True, text=True, check=True).stdout
+        run("init", "-q")
+        run("config", "user.email", "t@example.com")
+        run("config", "user.name", "T")
+        (self.root / "seed.txt").write_text("seed")
+        run("add", "-A")
+        run("commit", "-q", "-m", "seed")
+        return run("rev-parse", "HEAD").strip()
+
+    def commit(self, message: str = "work") -> str:
+        """Commit everything in the fixture repo (the PR head moves) and return the new SHA."""
+        for args in (("add", "-A"), ("commit", "-q", "--allow-empty", "-m", message)):
+            subprocess.run(["git", "-C", str(self.root), *args], capture_output=True, text=True, check=True)
+        return subprocess.run(["git", "-C", str(self.root), "rev-parse", "HEAD"], capture_output=True, text=True,
+                              check=True).stdout.strip()
+
+    def report(self, name: str, verdict: str) -> str:
+        """An audit report naming the measured SHA with a matching verdict line; returns its repo path."""
+        rel = f"06 QA/{name}.md"
+        (self.root / rel).write_text(f"---\nverdict: {verdict}\nreviewed_commit: {self.sha}\n---\n# audit\n")
+        return rel
+
+    def audit(self, p, tid, verdict, name="a0", auditor="codex"):
+        p.record_audit(tid, verdict, self.report(name, verdict), self.sha, ["games/"], auditor)
 
     def write_budget(self, b):
         (self.root / "00 Studio" / "budget.json").write_text(json.dumps(b))
@@ -47,6 +76,14 @@ class Base(unittest.TestCase):
         for n, t in enumerate(tasks):
             name = t["id"] if not (items / f"{t['id']}.json").exists() else f"{t['id']}-copy{n}"
             (items / f"{name}.json").write_text(json.dumps(t))
+
+    def open_pr(self, head=None, **extra):
+        return {"state": "OPEN", "isDraft": False, "headRefOid": head or self.sha, "headRefName": "task/TASK-0001",
+                **extra}
+
+    def merged_pr(self, head=None):
+        return {"state": "MERGED", "headRefOid": head or self.sha, "headRefName": "task/TASK-0001",
+                "mergeCommit": {"oid": "f" * 40}, "mergedAt": "2026-11-05T00:00:00Z"}
 
     def proj(self):
         return orch.Project(self.root)
@@ -102,9 +139,17 @@ class TestWorkflow(Base):
         p.approve("TASK-0001", "jg")
         p.start("TASK-0001")
         p.record_exec("TASK-0001", "pass", "checks ok")
-        p.record_audit("TASK-0001", "pass", "06 QA/a0.md")
+        self.audit(p, "TASK-0001", "pass")
+        p.save()
+        head = self.commit("audit record")
         self.assertEqual(p.task("TASK-0001")["status"], "approved")
-        p.approve_merge("TASK-0001", "jg")
+        with mock.patch.object(orch, "gh_pr_view", return_value=self.open_pr(head)):
+            p.approve_merge("TASK-0001", "jg", 7, "Merge PR 7")
+        self.assertEqual(p.task("TASK-0001")["status"], "approved", "approve-merge never sets done")
+        p.save()
+        head = self.commit("approval record")
+        with mock.patch.object(orch, "gh_pr_view", return_value=self.merged_pr(head)):
+            p.mark_merged("TASK-0001", 7)
         p.save()
         self.assertEqual(self.proj().task("TASK-0001")["status"], "done")
         self.assertEqual([t["id"] for t in self.proj().ready()], [])
@@ -118,7 +163,11 @@ class TestWorkflow(Base):
         p.start("TASK-0001")
         p.record_exec("TASK-0001", "pass", "checks ok")
         self.assertEqual(p.task("TASK-0001")["status"], "approved")
-        p.approve_merge("TASK-0001", "jg")
+        green = self.open_pr(statusCheckRollup=[{"conclusion": "SUCCESS"}])
+        with mock.patch.object(orch, "gh_pr_view", return_value=green):
+            p.approve_merge("TASK-0001", "jg", 7, "Merge PR 7")
+        with mock.patch.object(orch, "gh_pr_view", return_value=self.merged_pr()):
+            p.mark_merged("TASK-0001", 7)
         self.assertEqual(p.task("TASK-0001")["status"], "done")
 
     def test_non_light_still_needs_audit(self):
@@ -134,7 +183,7 @@ class TestWorkflow(Base):
         for attempt in range(3):
             p.start("TASK-0001")
             p.record_exec("TASK-0001", "pass", "")
-            p.record_audit("TASK-0001", "fail", f"06 QA/a{attempt}.md")
+            self.audit(p, "TASK-0001", "fail", f"a{attempt}")
         t = p.task("TASK-0001")
         self.assertEqual(t["status"], "blocked")
         self.assertEqual(t["revisions"], 3)
@@ -146,7 +195,7 @@ class TestWorkflow(Base):
         p.approve("TASK-0001", "jg")
         p.start("TASK-0001")
         p.record_exec("TASK-0001", "pass", "")
-        p.record_audit("TASK-0001", "pass", "06 QA/a0.md")
+        self.audit(p, "TASK-0001", "pass")
         p.request_changes("TASK-0001", "jg", "fix minors")
         t = p.task("TASK-0001")
         self.assertEqual((t["status"], t["revisions"]), ("changes_requested", 1))
@@ -158,7 +207,7 @@ class TestWorkflow(Base):
         p.approve("TASK-0001", "jg")
         p.start("TASK-0001")
         with self.assertRaises(orch.OrchestratorError):
-            p.approve_merge("TASK-0001", "jg")
+            p.approve_merge("TASK-0001", "jg", 7, "Merge PR 7")
 
     def test_unblock_resets(self):
         p = self.proj()
@@ -280,7 +329,7 @@ class TestNoteSync(Base):
         p.start("TASK-0001")
         p.record_exec("TASK-0001", "pass", "")
         with self.assertRaises(orch.OrchestratorError):
-            p.record_audit("TASK-0001", "pass", "06 QA/missing.md")
+            p.record_audit("TASK-0001", "pass", "06 QA/missing.md", self.sha, ["games/"], "codex")
 
 
 class TestBudgetAndDispatch(Base):

@@ -20,10 +20,10 @@ This packages steps that already exist: AGENTS.md (knowledge protocol #9 and #17
 4. `python3 scripts/orchestrator.py record-exec $ARGUMENTS --result pass|fail --notes "<one line>"`. Then log the executor's cost: read `mcp__ccd_session_mgmt__get_usage` (`context.tokensUsed`) when the task starts and again here, and record the growth: `python3 scripts/orchestrator.py record-usage $ARGUMENTS --kind subscription --role executor --tokens <close minus start> --model <model> --note "context growth over the task, not cumulative billing"` (check `--help` for the flags). If the start reading is missing, skip it rather than record the close figure; never estimate one. Note the weekly plan percent from the same call in the task note.
 5. On a pass, the next step is the audit: the `auditor` agent, once per task. Don't start it unless jg asked.
 
-**`review`:** not a close-out. Run the audit, write the `AUD-` note, then `record-audit`.
+**`review`:** not a close-out. Run the audit, write the `AUD-` note (with the measured SHA and a verdict line), then `record-audit --verdict ... --measured-sha ... --applies-to ... --auditor ...`.
 
 **`approved` (audit passed)**
-1. Go on only after jg approves the merge in chat. Then `python3 scripts/orchestrator.py approve-merge $ARGUMENTS --by jg`.
+1. Go on only after jg approves the merge in chat. Then `python3 scripts/orchestrator.py approve-merge $ARGUMENTS --by jg --pr <N> --approval-text "<jg's words, verbatim>"`: it records the approval only and refuses a PR head the audit does not cover. jg merges on GitHub; you never merge or mark done. After the merge, `mark-merged $ARGUMENTS --pr <N>` (on a `chore/` branch) sets `done` if GitHub reports MERGED.
 2. Write the outcome notes on the task branch, so the merge carries them, and update `updated:` on each:
    - the task note's **Outcome**
    - the game's `00 Overview`, the affected `SYS-` notes and the Technical Architecture note, only where a fact in them changed (link the task note's evidence; don't restate it)

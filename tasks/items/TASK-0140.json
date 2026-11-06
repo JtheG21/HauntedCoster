@@ -14,7 +14,12 @@
     ".github/workflows/audit-gate.yml",
     "AGENTS.md",
     "docs/workflow/TASKS.md",
-    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0140-Audit-Head-Gate.md"
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0140-Audit-Head-Gate.md",
+    "04 Agents/Auditor.md",
+    "04 Agents/Workflow.md",
+    ".claude/skills/task-close/SKILL.md",
+    ".agents/skills/task-close/SKILL.md",
+    "docs/workflow/evidence/TASK-0140/"
   ],
   "depends_on": [],
   "branch": "task/TASK-0140-audit-head-gate",

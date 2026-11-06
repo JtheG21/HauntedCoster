@@ -1,0 +1,39 @@
+# Blocks a source change from merging unless a recorded audit PASS covers the PR head (TASK-0140).
+# The PASS is bound to the commit it measured: that commit must be an ancestor of the head, and only audit and task
+# records, evidence and the task note may have changed since. Git only: no gh, no secrets, read-only token.
+# Chore branches that change nothing under games/ or scripts/ pass at once; drafts are skipped (they cannot merge).
+# Branch protection is set by hand: this job only reports.
+name: audit-gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+
+permissions:
+  contents: read
+
+jobs:
+  audit-gate:
+    runs-on: ubuntu-latest
+    steps:
+      # The PR head itself, not the merge commit, with full history for the ancestor check.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: audit-gate
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          IS_DRAFT: ${{ github.event.pull_request.draft }}
+        run: |
+          git fetch --no-tags origin "$BASE_REF"
+          args=(--head "$HEAD_SHA" --branch "$HEAD_REF" --base "origin/$BASE_REF")
+          if [ "$IS_DRAFT" = "true" ]; then args+=(--draft); fi
+          python3 scripts/audit_gate.py "${args[@]}"

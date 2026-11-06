@@ -28,16 +28,16 @@ Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, backlog) → [HUMAN:
 | `in_progress` | Executor working on `task/TASK-####-slug` | `review` / `changes_requested` | `record-exec` |
 | `review` | Auditor reviewing | `approved` / `changes_requested` | `record-audit` |
 | `changes_requested` | A check or audit failed (+1 revision) | `in_progress` / `blocked` | `start` |
-| `approved` | Audit passed, merge pending | `done` | **Human** (`approve-merge`, then merge) |
+| `approved` | Audit passed, merge pending | `done` | **Human** (`approve-merge`, merges on GitHub), then `mark-merged` |
 | `blocked` | Retry limit hit or a decision is needed | `ready` / `backlog` / `archived` | **Human** (`unblock`) |
 | `done` / `archived` | Terminal | | |
 
 `max_revisions` (default 2) is in `00 Studio/budget.json`. Going past it blocks the task. Nothing retries automatically.
 
 ## Merge procedure (human-approved merges only)
-1. Merge on GitHub without a local checkout: `gh pr merge <N> --repo JtheG21/HauntedCoster --merge --subject "Merge pull request #<N> from JtheG21/<branch> (approved by <who>)"`, after CI passes.
-2. Stop Rojo, then `scripts/preflight.sh --root <main checkout> --clean && git -C <main checkout> switch main && git -C <main checkout> pull --ff-only`.
-3. Delete the branch locally and on the remote. Task branches run `orchestrator.py approve-merge` and the outcome notes on the branch **before** step 1, so the merge carries them.
+1. `orchestrator.py approve-merge TASK-#### --by jg --pr <N> --approval-text "<jg's words>"` on the task branch (it checks the PR head against the audit; commit and push the record, which changes only task files). jg merges on the GitHub UI after CI, including `audit-gate`, passes. Agents never merge, approve or mark done.
+2. Afterwards `orchestrator.py mark-merged TASK-#### --pr <N>` on a `chore/` branch from `main` sets `done` only if GitHub reports MERGED. Stop Rojo, then `scripts/preflight.sh --root <main checkout> --clean && git -C <main checkout> switch main && git -C <main checkout> pull --ff-only`.
+3. Delete the branch locally and on the remote. The outcome notes go on the task branch **before** the merge, so it carries them.
 
 ## Isolation
 - One Git branch per task, from an up-to-date `main`. Workflow and doc changes use `chore/<slug>` branches.

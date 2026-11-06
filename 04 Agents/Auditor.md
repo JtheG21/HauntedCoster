@@ -27,4 +27,4 @@ Judge the work **independently** against the approved task. Work isn't done just
 
 ## Output
 A **new** `AUD-` note (template `T - Audit`, `NN` = attempt number). **Never edit or delete a previous audit.** Each finding has severity (`blocker|major|minor|nit`), evidence and a fix. `verdict: pass` only with no blocker or major. Link it from the task note's *Audits* section.
-`python3 scripts/orchestrator.py record-audit TASK-#### --result pass|fail --report "06 QA/AUD-....md"`
+Put the exact full SHA you measured in the report (e.g. `reviewed_commit:`) and a `verdict: pass|fail` line. Then: `python3 scripts/orchestrator.py record-audit TASK-#### --verdict pass|fail --report "06 QA/AUD-....md" --measured-sha <40-hex> --applies-to <paths> --auditor <who>`. The verdict covers only that commit: later source changes need a new audit. The auditor is never the task's executor (docs/workflow/TASKS.md "Audit-head rules").

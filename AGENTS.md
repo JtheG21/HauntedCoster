@@ -99,6 +99,15 @@ API calls; destructive changes (deleting files, branches or history, force-push,
 files); DataStore schema changes.** Approval is per action and doesn't carry over.
 - Deep-tier and DataStore tasks merge only after a recorded independent Codex PASS on the exact head.
   No publish of main while any DataStore finding is open. At most one Studio window at a time on this Mac.
+- **Audit verdicts are bound to the head (TASK-0140).** `record-audit` takes `--measured-sha` (the full SHA the audit
+  measured), `--applies-to` and `--auditor`, and refuses a report that lacks that SHA or a matching verdict line, and an
+  auditor who is the task's executor (`owner_agent`). A PASS covers a PR head only if its measured commit is an ancestor of
+  the head and nothing but `06 QA/`, `tasks/items/`, `docs/workflow/evidence/` and the task's own note changed since; any
+  other change needs a new audit. The `audit-gate` check runs this on every PR. Deep-tier tasks need that PASS from `codex`.
+- **Executors never approve, merge or mark done.** `approve-merge --pr N --approval-text "<jg's words>"` only records jg's
+  approval, after the head check. jg merges on the GitHub UI; `mark-merged --pr N` then sets `done`, and only if GitHub
+  reports MERGED. A finding on a `done` task goes in with `record-audit --post-merge --remediation TASK-####` (status
+  unchanged) and gets a remediation task. Branch protection and rulesets are jg's to change.
 - **Two-attempt rule:** at most 2 attempts on a failing approach or 2 revisions per task. Then stop and report what you learned.
 - Run `scripts/check.sh` before any AI review.
 - Never read, print or store credentials (`.env`, keys, cookies).

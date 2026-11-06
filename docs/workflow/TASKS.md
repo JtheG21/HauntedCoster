@@ -24,7 +24,31 @@ Each task is one file, `tasks/items/TASK-####.json`, and those files are authori
 | `risk` | `low`, `medium`, `high` | High means DataStores, Robux, data loss, security or a live game. |
 
 Fields the orchestrator also keeps: `history`, `executions`,
-`audits`, `revisions`, `approved_by`, `merge_approved_by`, `stacked_on`, `migrated_from`.
+`audits`, `revisions`, `approved_by`, `merge_approved_by`, `merge_approval`, `merged`, `stacked_on`, `migrated_from`.
+
+**Executor and auditor.** The executor is the task's `owner_agent`. Each audit record also holds `auditor` (who ran it,
+e.g. `codex`; it must differ from `owner_agent`, compared case-insensitively), `measured_sha` (the full commit it measured),
+`applies_to` (paths or globs it covers), `report` and `report_sha256`, and for a finding on a done task `post_merge: true`
+and `remediation` (a task id). `merge_approval` holds `{by, text, pr, head_sha, time}` and `merged` holds
+`{pr, merge_commit, merged_at, head_sha, recorded_at}`. Older audit records have no `measured_sha`; they cannot be used to
+approve a merge, so such a task needs a new audit.
+
+## Audit-head rules
+- **`record-audit TASK-#### --verdict pass|fail --report "06 QA/AUD-...md" --measured-sha <40 hex> --applies-to <paths...> --auditor <who> [--post-merge --remediation TASK-####]`.**
+  The report must contain that exact SHA and a `verdict:` line equal to `--verdict`; the SHA must be a commit here; the
+  auditor must not be `owner_agent`. `--result` still works as an alias of `--verdict`. With `--post-merge` the task must be
+  `done`: the finding is appended with its remediation task and the status does not change. `reopen` is unchanged.
+- **`approve-merge TASK-#### --by <human> --pr N --approval-text "<verbatim>"`** reads `gh pr view N` and refuses a PR that is
+  not OPEN, is a draft, comes from another branch, or whose head the latest audit does not cover: a PASS whose `measured_sha`
+  is an ancestor of the head, and `git diff --name-only <measured>..<head>` touching only `06 QA/`, `tasks/items/`,
+  `docs/workflow/evidence/` and the task's own `note_path`. The offending files are printed. A deep-tier task needs the PASS
+  from `codex`. A light-tier task needs every check green instead of a PASS. It records `merge_approval` and never sets `done`.
+- **`mark-merged TASK-#### --pr N`** needs a recorded `merge_approval` for that PR and sets `done` only if GitHub reports
+  MERGED, with the merge commit and time; the merged head must satisfy the same audit rule, otherwise it refuses and a
+  post-merge finding is the way to record it.
+- **CI:** `.github/workflows/audit-gate.yml` (job `audit-gate`) runs `scripts/audit_gate.py` on each non-draft PR against
+  the PR head, using git only. Chore branches that change nothing under `games/` or `scripts/` pass at once. Requiring the
+  check is a branch-protection setting, made by jg by hand.
 
 ## Statuses
 
@@ -35,9 +59,9 @@ Fields the orchestrator also keeps: `history`, `executions`,
 | `in_progress` | Being implemented | `review`, `changes_requested` | `record-exec` |
 | `review` | Being audited | `approved`, `changes_requested` | `record-audit` |
 | `changes_requested` | Needs a revision (limit 2) | `in_progress`, `blocked`, `review` | `start`; **jg** (`reopen`) |
-| `approved` | Audit passed, waiting for the merge decision | `done`, `changes_requested`, `review` | **jg** (`approve-merge`, `reopen`) |
+| `approved` | Audit passed, waiting for the merge | `done`, `changes_requested`, `review` | **jg** (`approve-merge` records the approval, `reopen`); `mark-merged` sets `done` after a verified merge |
 | `blocked` | Limit hit or a decision is needed | `ready`, `backlog`, `archived`, `review` | **jg** (`unblock`, `reopen`) |
-| `done` | Merged | terminal | |
+| `done` | Merged (GitHub reported MERGED; `merged` holds the merge commit and time) | terminal | `mark-merged`; **jg** (`override-merge`) |
 | `archived` | Dropped or unstarted when its game was paused | terminal | `archive` |
 
 **Merging over a failed audit** is jg's decision alone: `python3 scripts/orchestrator.py override-merge TASK-#### --by jg --reason "..."`. The verdict stays a fail, and who decided and why go on that audit record.
