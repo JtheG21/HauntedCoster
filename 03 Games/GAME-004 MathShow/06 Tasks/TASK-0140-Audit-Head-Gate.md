@@ -38,3 +38,6 @@ See the task file.
 
 ## Tests
 - **Automated:** `scripts/check.sh`, `tests/test_orchestrator_gate.py`, `tests/test_audit_gate.py`.
+
+## Outcome
+Failed 2/2 attempts. Root cause: the gate trusts data the PR can write (report status fields, tier at first registration, reviewer labels). Superseded by a redesign task (not yet created). Do not merge PR #205.
