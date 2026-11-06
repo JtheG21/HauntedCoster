@@ -3,7 +3,7 @@ id: TASK-0139
 title: "MathShow Profile Save Remediation (AUD-02 F1-F3)"
 type: task
 project: GAME-004
-status: review
+status: changes_requested
 priority: high
 risk: high
 owner: claude-code
