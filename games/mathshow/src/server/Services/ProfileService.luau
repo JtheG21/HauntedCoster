@@ -4,21 +4,30 @@
 -- save is an UpdateAsync that MERGES into what is stored (ProfileRules.merge: bests only go up, settings last writer wins,
 -- the glyph total grows by this session's unsaved increments, fields this build does not know are kept), so two servers
 -- can never lower a rank or blitz best or lose each other's glyphs. Stored data from a newer build is never rewritten.
--- Exactly-once (TASK-0139 rev 2): each save is an operation {sessionId, seq, glyphsDelta}. A failed or ambiguous save
--- (UpdateAsync may have committed before it errored) keeps the SAME operation in flight and retries it unchanged; the
--- stored save log (`applied`) then tells a committed retry apart, so the delta is credited once. Increments that arrive
--- meanwhile wait in glyphsPending for the next seq. Leave, autosave and BindToClose all go through saveNow().
+-- Glyph saves are at most once (TASK-0141; design in the TASK-0141 note). Each session has a ProfileRules.Ledger and ONE
+-- save worker (work()). Debounce, autosave, leave and BindToClose only signal it. The worker takes a frozen operation
+-- {sessionId, seq, glyphsDelta, createdAt = os.clock()} before any yield, attempts it with UpdateAsync, and settles the
+-- outcome: applied / acknowledged (confirmed), abandoned (logged once, never recredited), capacity (kept, retried),
+-- newer_schema (memory-only). An error after a callback returned a write candidate marks the op ambiguous; a later
+-- attempt then only acknowledges it from a covering receipt or abandons it. No attempt starts at or past the retry window
+-- (monotonic os.clock(), checked at dispatch and inside every callback). Increments that arrive meanwhile stay pending for
+-- the next op. A left player's session stays in `releasing` until its work is resolved; autosave keeps signalling it.
 --
 -- Safety: every DataStore call is pcall-isolated and never blocks the match loop. A failed load retries, then the profile is
 -- "readonly" (nothing written, so an outage can never overwrite real data with defaults). In Studio or an unpublished place,
 -- an "API unavailable" error runs the player in "memory" mode (works, not saved). Remotes: MenuRequest (RemoteFunction) and
 -- SettingsSave (RemoteEvent); every client value is validated (type, range, rate) and the server never trusts the client.
 --
--- Studio-only test hooks (inert unless RunService:IsStudio() and RunService:IsServer(); server workspace attributes, which a
--- client cannot set):
---  * MathShowForceProfileFail = true before a player joins simulates a load failure.
---  * MathShowForceSaveErrorAfterCommit = true makes the next save error AFTER UpdateAsync has committed (consumed once),
---    to prove that the retry of that operation does not credit it twice.
+-- Studio-only test hooks: all read through studioHook(), which returns nil unless RunService:IsStudio() and
+-- RunService:IsServer(). They are server workspace attributes (a client's attribute change does not replicate to the
+-- server), and this module runs only on the server. Entry points:
+--  * MathShowForceProfileFail = true: the next loads fail (load()).
+--  * MathShowForceSaveErrorAfterCommit = true: the next attempt whose callback returned a write errors AFTER UpdateAsync
+--    committed (consumed once; attempt()).
+--  * MathShowForceSaveCandidateThenError = true: consumed by the next attempt; if its callback returns a write, it errors
+--    instead, so the call fails with a candidate submitted but nothing committed (attempt()).
+--  * MathShowForceSaveFailures = n: the next n attempts fail before dispatch, no candidate (decremented; attempt()).
+--  * MathShowProfileRetryWindowS = s: a shorter retry window in seconds (never longer than RETRY_WINDOW_S; retryWindow()).
 
 local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
@@ -29,23 +38,25 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local MenuConfig = require(Shared:WaitForChild("MenuConfig"))
 local Net = require(Shared:WaitForChild("Net"))
+local ProfileConfig = require(Shared:WaitForChild("ProfileConfig"))
 local ProfileRules = require(Shared:WaitForChild("ProfileRules"))
 local RateRules = require(Shared:WaitForChild("RateRules"))
 
 local Remotes = require(script.Parent.Parent.Remotes)
 
 export type Persistence = "loading" | "saved" | "memory" | "readonly"
-type InFlight = { seq: number, glyphsDelta: number }
 type Session = {
+	userId: number,
 	profile: ProfileRules.Profile,
 	persistence: Persistence,
-	dirty: boolean,
-	glyphsPending: number, -- glyph value added since the last save op was taken; the next op ADDS it to the stored total
-	sessionId: string, -- this server session's id in the save log
-	nextSeq: number,
-	inflight: InFlight?, -- the save op not yet confirmed; retried unchanged (same seq, same delta) until it is
-	saving: boolean,
-	queued: boolean,
+	dirty: boolean, -- idempotent fields (settings, bests, test clock) changed since the last op was taken
+	ledger: ProfileRules.Ledger, -- seq, pending glyph value, the unresolved op and its ambiguity
+	working: boolean, -- the save worker is running
+	signalled: boolean, -- a signal arrived while it was running: loop once more
+	attempting: boolean, -- an UpdateAsync call is in flight
+	leaving: boolean, -- the player left; the worker retries with backoff until the work is resolved
+	overdueSeq: number, -- the op already reported overdue (once)
+	reportedSeq: number, -- the op already reported unconfirmed at shutdown (once)
 	token: number, -- debounce: only the newest scheduled save runs
 	menuStamps: { number },
 	saveStamps: { number },
@@ -58,13 +69,18 @@ local RETRIES = 4
 local SAVE_DEBOUNCE_SECONDS = 2
 local AUTOSAVE_SECONDS = 60
 local LOAD_WAIT_SECONDS = 20 -- longer than the load backoff (2 + 4 + 8 s), so a slow load is not reported as unavailable
+local REJOIN_WAIT_SECONDS = 30
+local LEAVE_ATTEMPTS = 5 -- per leave signal; after them the session stays in `releasing` and autosave signals it again
+local SHUTDOWN_ATTEMPTS = 6 -- per session during the BindToClose drain
 local DEVELOPMENT_PLACE = RunService:IsStudio() or game.PlaceId == 0
 
 local started = false
 local store: DataStore? = nil
 local storeError = "no DataStore" -- why GetDataStore failed, so load() can tell "unpublished place" from a real outage
 local sessions: { [Player]: Session } = {}
-local releasing: { [number]: Session } = {} -- leave saves still in flight, by userId (a rejoin must wait for them)
+local releasing: { [Session]: true } = {} -- left players whose save work is not resolved yet (a rejoin waits for them)
+local shuttingDown = false
+local shutdownDeadline = math.huge
 
 local function keyFor(userId: number): string
 	return `p_{userId}`
@@ -86,21 +102,25 @@ local function getStore(): DataStore?
 	return store
 end
 
-local function forcedFailure(): boolean
-	return RunService:IsStudio() and workspace:GetAttribute("MathShowForceProfileFail") == true
+-- The one gate for every Studio test hook: nil unless this is a Studio server.
+local function studioHook(name: string): any
+	if RunService:IsStudio() and RunService:IsServer() then
+		return workspace:GetAttribute(name)
+	end
+	return nil
 end
 
--- Studio-only: error once after a committed write, as an UpdateAsync that wrote and then failed on the way back would.
-local function forcedErrorAfterCommit(): boolean
-	if
-		RunService:IsStudio()
-		and RunService:IsServer()
-		and workspace:GetAttribute("MathShowForceSaveErrorAfterCommit")
-	then
-		workspace:SetAttribute("MathShowForceSaveErrorAfterCommit", nil)
+local function consumeHook(name: string): boolean
+	if studioHook(name) == true then
+		workspace:SetAttribute(name, nil)
 		return true
 	end
 	return false
+end
+
+local function retryWindow(): number
+	local override = studioHook("MathShowProfileRetryWindowS")
+	return ProfileRules.retryWindow(if typeof(override) == "number" then override else nil)
 end
 
 local function load(player: Player, session: Session)
@@ -109,7 +129,7 @@ local function load(player: Player, session: Session)
 	while player.Parent do
 		local ds = getStore()
 		local ok, result
-		if forcedFailure() then
+		if studioHook("MathShowForceProfileFail") == true then
 			ok, result = false, "simulated load failure"
 		elseif ds then
 			ok, result = pcall(function()
@@ -146,87 +166,181 @@ local function load(player: Player, session: Session)
 	end
 end
 
--- One save in flight per player, at most one queued behind it. Merges into the stored value (see header). Everything up
--- to the UpdateAsync call runs without yielding, so the in-flight flag and the operation are settled before any yield.
-local function saveNow(userId: number, session: Session)
-	if session.persistence ~= "saved" or (not session.dirty and session.inflight == nil) then
-		return
+local function logTerminal(userId: number, terminal: ProfileRules.Terminal)
+	warn(
+		`[MathShow] profile save op ended unconfirmed for {userId}: reason={terminal.reason} seq={terminal.seq} `
+			.. `delta={terminal.glyphsDelta} ambiguous={terminal.ambiguous}`
+	)
+end
+
+-- One attempt of `op`. Never yields before UpdateAsync; the deadline is checked here (dispatch) and in every callback.
+local function attempt(session: Session, op: ProfileRules.SaveOp): (ProfileRules.Attempt, any, boolean)
+	local window = retryWindow()
+	if ProfileRules.expired(op, os.clock(), window) then
+		return { kind = "expired" }, nil, false
 	end
-	if session.saving then
-		session.queued = true
-		return
+	local failures = studioHook("MathShowForceSaveFailures")
+	if typeof(failures) == "number" and failures >= 1 then
+		workspace:SetAttribute("MathShowForceSaveFailures", if failures > 1 then failures - 1 else nil)
+		warn(`[MathShow] simulated save failure before dispatch (Studio hook), op {op.seq}`)
+		return { kind = "error", candidate = false }, nil, false
 	end
 	local ds = getStore()
 	if not ds then
+		return { kind = "error", candidate = false }, nil, false
+	end
+	local patch = ProfileRules.toPatch(session.profile)
+	local ambiguous = session.ledger.ambiguous
+	local failInCallback = consumeHook("MathShowForceSaveCandidateThenError")
+	local candidate = false
+	local plan: ProfileRules.SavePlan? = nil
+	local seen: any = nil
+	session.attempting = true
+	local ok, result = pcall(function()
+		return ds:UpdateAsync(keyFor(session.userId), function(old: any)
+			local decided = ProfileRules.planSave(old, op, {
+				nowWall = os.time(),
+				elapsed = os.clock() - op.createdAt,
+				ambiguous = ambiguous,
+				patch = patch,
+				window = window,
+			})
+			plan, seen = decided, old
+			if decided.write ~= nil then
+				candidate = true -- set before returning: an error from here on means "possibly committed"
+				if failInCallback then
+					error("simulated: write candidate returned, then the call failed (Studio hook)")
+				end
+			end
+			return decided.write
+		end)
+	end)
+	session.attempting = false
+	local decided = plan
+	if ok and decided ~= nil and decided.write ~= nil and consumeHook("MathShowForceSaveErrorAfterCommit") then
+		ok, result = false, "simulated: UpdateAsync committed, then errored (Studio hook)"
+	end
+	if not ok or decided == nil then
+		warn(
+			`[MathShow] profile save attempt failed for {session.userId} (op {op.seq}, candidate={candidate}): {result}`
+		)
+		return { kind = "error", candidate = candidate }, nil, false
+	end
+	-- Confirmed: the last callback's decision is what UpdateAsync committed (or cancelled).
+	local base = if decided.write ~= nil then (if result ~= nil then result else decided.write) else seen
+	return { kind = "plan", tag = decided.tag, reason = decided.reason }, base, decided.write ~= nil
+end
+
+-- Applies a settled attempt to the session: ledger, terminal log, memory-only switch and profile adoption. `wrote` says
+-- whether the committed callback wrote (and so persisted this attempt's idempotent fields).
+local function settleAttempt(session: Session, outcome: ProfileRules.Attempt, base: any, wrote: boolean)
+	local seq = if session.ledger.op ~= nil then (session.ledger.op :: ProfileRules.SaveOp).seq else 0
+	local ledger, terminal = ProfileRules.settle(session.ledger, outcome)
+	session.ledger = ledger
+	if terminal ~= nil then
+		logTerminal(session.userId, terminal)
+	end
+	if outcome.kind == "expired" then
+		session.dirty = true -- the abandoned op's idempotent fields go out with the next op (its delta does not)
+	elseif outcome.kind == "plan" then
+		local tag = outcome.tag
+		if tag == "newer_schema" then
+			session.persistence = "memory"
+			warn(
+				`[MathShow] stored profile of {session.userId} is a newer version; not saving, memory-only from now on`
+			)
+			return
+		elseif tag == "capacity" then
+			warn(`[MathShow] profile receipt log of {session.userId} is full; op {seq} kept for retry`)
+			return
+		elseif tag == "acknowledged" then
+			warn(`[MathShow] save op {seq} of {session.userId} acknowledged by its receipt; glyphs not added again`)
+		end
+		if not wrote then
+			session.dirty = true
+		end
+		if base ~= nil then
+			-- Adopt what is stored (another server may have raised a best or added glyphs), plus increments still pending.
+			-- After an abandon this drops the abandoned delta from the displayed total: the store is the truth.
+			session.profile = ProfileRules.adopt(base, session.profile, session.ledger.pending)
+		end
+	end
+end
+
+local function settled(session: Session): boolean
+	return session.ledger.op == nil and session.ledger.pending <= 0 and not session.dirty
+end
+
+local function release(session: Session)
+	if releasing[session] and (settled(session) or session.persistence ~= "saved") then
+		releasing[session] = nil
+	end
+end
+
+local function drive(session: Session)
+	local failures = 0
+	while session.persistence == "saved" do
+		session.signalled = false
+		if shuttingDown and os.clock() >= shutdownDeadline then
+			break
+		end
+		local ledger, op, fresh = ProfileRules.takeOp(session.ledger, session.dirty, os.clock())
+		if op == nil then
+			break
+		end
+		session.ledger = ledger
+		if fresh then
+			session.dirty = false
+		end
+		local outcome, base, wrote = attempt(session, op)
+		settleAttempt(session, outcome, base, wrote)
+		if session.ledger.op == nil then
+			failures = 0
+			if not (session.signalled or session.leaving or shuttingDown) then
+				break
+			end
+		else
+			-- Unresolved (error or capacity): ordinary saves wait for the next signal; leave and shutdown back off here.
+			failures += 1
+			local limit = if shuttingDown then SHUTDOWN_ATTEMPTS elseif session.leaving then LEAVE_ATTEMPTS else 0
+			if failures >= limit then
+				break
+			end
+			local backoff = if shuttingDown then math.min(2 ^ (failures - 1), 4) else math.min(2 ^ failures, 16)
+			if shuttingDown then
+				backoff = math.min(backoff, shutdownDeadline - os.clock())
+			end
+			if backoff > 0 then
+				task.wait(backoff)
+			end
+		end
+	end
+end
+
+-- The one save worker of a session. Every entry point calls this; a call while it runs only sets `signalled`.
+local function work(session: Session)
+	if session.working then
+		session.signalled = true
 		return
 	end
-	session.saving = true
-	-- Reuse the unconfirmed operation if there is one: it may already have committed, and only its own seq lets the save
-	-- log recognise that. Folding its delta back into pending under a new seq is what would double-credit it.
-	local retrying = session.inflight ~= nil
-	local inflight: InFlight = session.inflight or { seq = session.nextSeq, glyphsDelta = session.glyphsPending }
-	if not retrying then
-		session.nextSeq += 1
-		session.glyphsPending = 0
-		session.inflight = inflight
-	end
-	session.dirty = session.glyphsPending > 0 -- a retry leaves newer increments for the next seq
-	local op: ProfileRules.SaveOp = {
-		sessionId = session.sessionId,
-		seq = inflight.seq,
-		glyphsDelta = inflight.glyphsDelta,
-		patch = ProfileRules.toPatch(session.profile),
-	}
-	local now = os.time()
-	local refused, alreadyApplied = false, false
-	local ok, result = pcall(function()
-		local written = ds:UpdateAsync(keyFor(userId), function(old: any)
-			local planned, applied = ProfileRules.planSave(old, op, now)
-			refused = planned == nil
-			alreadyApplied = applied
-			return planned
-		end)
-		if not refused and forcedErrorAfterCommit() then
-			error("simulated: UpdateAsync committed, then errored (Studio hook)")
-		end
-		return written
+	session.working = true
+	local ok, err = pcall(function()
+		drive(session)
 	end)
-	session.saving = false
-	if ok and refused then
-		-- The stored profile was written by a newer build after this session loaded: leave it alone from now on.
-		session.inflight = nil
-		session.glyphsPending += inflight.glyphsDelta
-		session.persistence = "memory"
-		warn(`[MathShow] stored profile of {userId} is a newer version; not saving, memory-only from now on`)
-	elseif ok then
-		session.inflight = nil
-		if alreadyApplied then
-			warn(`[MathShow] save op {inflight.seq} of {userId} had already committed; its glyphs were not added again`)
-		end
-		-- Adopt what is stored (another server may have raised a best or added glyphs), keeping increments that arrived
-		-- while this save was in flight.
-		session.profile = ProfileRules.adopt(result, session.profile, session.glyphsPending)
-		if retrying and session.dirty then
-			session.queued = true -- increments that waited behind the retried op go out now
-		end
-	else
-		-- Errored, possibly after committing: keep the same op in flight (same seq, same delta) for the next attempt.
-		session.dirty = true
-		warn(`[MathShow] profile save failed for {userId} (op {inflight.seq}, kept for retry): {result}`)
+	session.attempting = false
+	session.working = false
+	if not ok then
+		warn(`[MathShow] profile save worker of {session.userId} failed: {err}`)
 	end
-	if session.queued then
-		session.queued = false
-		saveNow(userId, session)
-	end
+	release(session)
 end
 
 local function scheduleSave(player: Player, session: Session)
 	session.token += 1
 	local token = session.token
-	local userId = player.UserId
 	task.delay(SAVE_DEBOUNCE_SECONDS, function()
-		if session.token == token then
-			saveNow(userId, session)
+		if session.token == token and not shuttingDown and sessions[player] == session then
+			work(session)
 		end
 	end)
 end
@@ -276,8 +390,7 @@ function ProfileService.addGlyphs(player: Player, amount: number): number?
 	end
 	session.profile = updated
 	if session.persistence == "saved" then
-		session.glyphsPending += added
-		session.dirty = true
+		session.ledger = ProfileRules.credit(session.ledger, added) -- for the NEXT op; never derived from the total
 	end
 	return updated.glyphsLifetime
 end
@@ -350,25 +463,37 @@ local function onSettingsSave(player: Player, raw: any)
 	ProfileService.apply(player, { settings = settings })
 end
 
+local function releasingFor(userId: number): boolean
+	for session in releasing do
+		if session.userId == userId then
+			return true
+		end
+	end
+	return false
+end
+
 local function onPlayerAdded(player: Player)
 	if sessions[player] then
 		return
 	end
-	-- A quick rejoin must not read the stored value before the previous visit's save has landed.
-	local deadline = os.clock() + 30
-	while releasing[player.UserId] and os.clock() < deadline and player.Parent do
+	-- A quick rejoin must not read the stored value before the previous visit's save has landed. Past the wait the new
+	-- session loads anyway: the old one keeps its own session id and ops, and saves are additive, so nothing is lost.
+	local deadline = os.clock() + REJOIN_WAIT_SECONDS
+	while releasingFor(player.UserId) and os.clock() < deadline and player.Parent do
 		task.wait(0.2)
 	end
 	local session: Session = {
+		userId = player.UserId,
 		profile = ProfileRules.defaults(),
 		persistence = "loading",
 		dirty = false,
-		glyphsPending = 0,
-		sessionId = HttpService:GenerateGUID(false),
-		nextSeq = 1,
-		inflight = nil,
-		saving = false,
-		queued = false,
+		ledger = ProfileRules.newLedger(HttpService:GenerateGUID(false)),
+		working = false,
+		signalled = false,
+		attempting = false,
+		leaving = false,
+		overdueSeq = 0,
+		reportedSeq = 0,
 		token = 0,
 		menuStamps = {},
 		saveStamps = {},
@@ -388,31 +513,79 @@ local function onPlayerRemoving(player: Player)
 	if not session then
 		return
 	end
-	local userId = player.UserId
-	releasing[userId] = session
-	task.spawn(function()
-		-- A failed leave save is retried a few times: once the session is dropped nothing else would write it.
-		for attempt = 1, 4 do
-			saveNow(userId, session)
-			while session.saving do
-				task.wait(0.1)
-			end
-			if (not session.dirty and session.inflight == nil) or session.persistence ~= "saved" then
-				break
-			end
-			if attempt < 4 then
-				task.wait(2)
-			else
-				warn(`[MathShow] giving up saving the profile of {userId} after the player left`)
+	sessions[player] = nil
+	session.leaving = true
+	session.token += 1 -- a scheduled debounce for this session no longer fires
+	if session.persistence ~= "saved" or settled(session) then
+		return
+	end
+	releasing[session] = true
+	task.spawn(work, session)
+end
+
+-- Every session that may still have save work: players in game and left players not yet released.
+local function allSessions(): { Session }
+	local list = {}
+	for _, session in sessions do
+		table.insert(list, session)
+	end
+	for session in releasing do
+		table.insert(list, session)
+	end
+	return list
+end
+
+-- An op whose window passed while its call is in flight is left to settle (its ownership stays); report it once.
+local function markOverdue(session: Session, window: number)
+	local op = session.ledger.op
+	if
+		op ~= nil
+		and session.attempting
+		and session.overdueSeq ~= op.seq
+		and ProfileRules.expired(op, os.clock(), window)
+	then
+		session.overdueSeq = op.seq
+		warn(`[MathShow] save op {op.seq} of {session.userId} is overdue; letting the call in flight settle`)
+	end
+end
+
+local function drainOnShutdown()
+	shuttingDown = true
+	shutdownDeadline = os.clock() + ProfileConfig.SHUTDOWN_DEADLINE_S
+	local list = allSessions()
+	for _, session in list do
+		task.spawn(work, session)
+	end
+	task.wait()
+	while os.clock() < shutdownDeadline do
+		local busy = false
+		for _, session in list do
+			if session.working then
+				busy = true
 			end
 		end
-		if sessions[player] == session then
-			sessions[player] = nil
+		if not busy then
+			break
 		end
-		if releasing[userId] == session then
-			releasing[userId] = nil
+		task.wait(0.2)
+	end
+	-- Report what is unresolved, once per op: an op still in flight stays potentially committed.
+	for _, session in list do
+		if session.persistence == "saved" then
+			local op = session.ledger.op
+			if op ~= nil and session.reportedSeq ~= op.seq then
+				session.reportedSeq = op.seq
+				local _, terminal =
+					ProfileRules.settle(session.ledger, { kind = "unconfirmed", candidate = session.attempting })
+				if terminal ~= nil then
+					logTerminal(session.userId, terminal)
+				end
+			end
+			if session.ledger.pending > 0 then
+				warn(`[MathShow] {session.ledger.pending} glyphs of {session.userId} not saved before shutdown`)
+			end
 		end
-	end)
+	end
 end
 
 function ProfileService.start(): ()
@@ -446,34 +619,21 @@ function ProfileService.start(): ()
 	end
 
 	task.spawn(function()
-		while true do
+		while not shuttingDown do
 			task.wait(AUTOSAVE_SECONDS)
-			for player, session in sessions do
-				if session.dirty or session.inflight ~= nil then
-					task.spawn(saveNow, player.UserId, session)
+			if shuttingDown then
+				break
+			end
+			local window = retryWindow()
+			for _, session in allSessions() do
+				markOverdue(session, window)
+				if session.persistence == "saved" and not settled(session) then
+					task.spawn(work, session)
 				end
 			end
 		end
 	end)
-	game:BindToClose(function()
-		local deadline = os.clock() + 25
-		for player, session in sessions do
-			task.spawn(saveNow, player.UserId, session)
-		end
-		task.wait()
-		local pending = true
-		while pending and os.clock() < deadline do
-			pending = false
-			for _, session in sessions do
-				if session.saving or session.queued then
-					pending = true
-				end
-			end
-			if pending then
-				task.wait(0.2)
-			end
-		end
-	end)
+	game:BindToClose(drainOnShutdown)
 end
 
 return ProfileService

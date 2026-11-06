@@ -2,11 +2,15 @@
 -- Pure player-profile rules (TASK-0099): defaults, sanitising stored and client data, merging a save into what is
 -- already stored, and the payload the menu receives. No Instances, no services. Nothing here throws on bad input.
 -- Stored data is lenient (bad fields fall back); client settings are strict (anything off is rejected whole).
--- Saves are exactly-once for the glyph total (TASK-0139 rev 2, schema v3): every save is an operation (session id, seq)
--- and the profile keeps a small save log `applied` of the last seq each session wrote, so a retried operation that had
--- already committed is never credited twice.
+-- Glyph saves are at most once (TASK-0141, schema v3): every save is an immutable operation (session id, seq, delta,
+-- createdAt) and the profile keeps a receipt log `applied` of the last seq each session wrote. planSave() decides one
+-- UpdateAsync callback; the Ledger functions below are the per-session operation state the save worker drives. Over-credit
+-- is impossible by construction: an operation is retried only inside RETRY_WINDOW_S, its receipt outlives that window
+-- (TTL prune and cap eviction never reach a receipt younger than window + skew), and an operation that may have committed
+-- is never credited again: a covering receipt acknowledges it, otherwise it is abandoned (under-credit, logged).
 
 local MenuConfig = require(script.Parent.MenuConfig)
+local ProfileConfig = require(script.Parent.ProfileConfig)
 
 export type Settings = {
 	music: number,
@@ -35,13 +39,39 @@ export type Patch = {
 	blitzBest: number?,
 	glyphsDelta: number?, -- glyph value earned since the last confirmed save; ADDED to the stored total (AUD-02 F2)
 }
--- One save. A retry of an operation that may have committed reuses its seq and delta, so the save log can tell.
+-- One save operation, frozen when taken. Every attempt of it reuses seq and delta, so the receipt log can tell.
 export type SaveOp = {
 	sessionId: string, -- one per server session of a player (HttpService GUID)
 	seq: number, -- 1, 2, 3 ... per session; never reused for a different delta
-	glyphsDelta: number,
-	patch: Patch, -- the idempotent fields (settings, bests, test clock); its glyphsDelta is ignored
+	glyphsDelta: number, -- taken from pending, never from the displayed total
+	createdAt: number, -- os.clock() when taken: monotonic, meaningful on this server only
 }
+-- What one UpdateAsync callback knows besides the stored value.
+export type SaveContext = {
+	nowWall: number, -- this server's os.time(): stamps a new receipt and measures stored receipts' age
+	elapsed: number, -- os.clock() - op.createdAt, read inside the callback
+	ambiguous: boolean, -- an earlier attempt errored after a callback had returned a write candidate
+	patch: Patch?, -- idempotent fields (settings, bests, test clock), rebuilt per attempt; its glyphsDelta is ignored
+	window: number?, -- Studio hook only: a shorter retry window (never longer than RETRY_WINDOW_S)
+}
+export type SaveTag = "applied" | "acknowledged" | "abandoned" | "capacity" | "newer_schema"
+-- The callback's decision: `write` is the value to return (nil cancels the write).
+export type SavePlan = { tag: SaveTag, write: Profile?, reason: string? }
+-- Per-session save state, replaced (never mutated) by takeOp / credit / settle.
+export type Ledger = {
+	sessionId: string,
+	nextSeq: number,
+	pending: number, -- glyph value earned since the last op was taken; goes into the NEXT op only
+	op: SaveOp?, -- the unresolved operation
+	ambiguous: boolean, -- op may have committed (an attempt errored after returning a write candidate)
+}
+-- How an attempt ended. plan: the call returned, `tag` is the last callback's decision. error: the call errored,
+-- `candidate` says whether any callback had returned a write. expired: not dispatched (elapsed >= window).
+-- unconfirmed: the shutdown deadline passed with the op unresolved (`candidate`: a call was still in flight).
+export type AttemptKind = "plan" | "error" | "expired" | "unconfirmed"
+export type Attempt = { kind: AttemptKind, tag: SaveTag?, reason: string?, candidate: boolean? }
+-- A terminal operation, logged once: reason, seq, delta and whether it may have committed.
+export type Terminal = { reason: string, seq: number, glyphsDelta: number, ambiguous: boolean }
 export type ClientProfile = {
 	rank: number?,
 	lastTestRank: number?,
@@ -56,8 +86,10 @@ local VERSION = 3 -- 2: glyphsLifetime (TASK-0138); 3: applied save log (TASK-01
 local MAX_GLYPHS = 2 ^ 53 -- the largest exact integer; a total can never overflow into noise
 local MAX_TIME = 2 ^ 40 -- far beyond any os.time(), keeps garbage out
 local UNAVAILABLE = { "publish", "studioaccesstoapisnotallowed", "403", "not allowed", "api services" }
-local SAVE_LOG_SECONDS = 604800 -- 7 days: a save log entry older than this is dropped (no session lives that long)
-local SAVE_LOG_CAP = 200 -- at most this many sessions in the log, the oldest `at` dropped first
+local RETRY_WINDOW = ProfileConfig.RETRY_WINDOW_S
+local EVICT_AGE = ProfileConfig.RETRY_WINDOW_S + ProfileConfig.CLOCK_SKEW_ALLOWANCE_S -- strictly older may be evicted
+local RECEIPT_TTL = ProfileConfig.RECEIPT_TTL_S
+local RECEIPT_CAP = ProfileConfig.RECEIPT_CAP
 local MAX_SESSION_ID = 64
 local SETTING_KEYS = { "music", "sfx", "reducedMotion", "colorBlind", "haptics" }
 local KNOWN_KEYS =
@@ -104,53 +136,29 @@ function ProfileRules.defaults(): Profile
 	return { version = VERSION, settings = ProfileRules.defaultSettings(), glyphsLifetime = 0, applied = {} }
 end
 
--- Keeps the SAVE_LOG_CAP newest entries (by `at`, ties by session id), always keeping `keep`. Mutates `log`.
-local function capLog(log: AppliedLog, keep: string?)
-	local ids = {}
-	for id in log do
-		table.insert(ids, id)
+local function cleanEntry(entry: any): AppliedEntry?
+	if typeof(entry) == "table" and isInt(entry.seq, 1, MAX_GLYPHS) and isFinite(entry.at) then
+		return { seq = entry.seq, at = entry.at }
 	end
-	if #ids <= SAVE_LOG_CAP then
-		return
-	end
-	table.sort(ids, function(a: string, b: string): boolean
-		if a == keep then
-			return b ~= keep
-		elseif b == keep then
-			return false
-		end
-		local atA, atB = log[a].at, log[b].at
-		if atA ~= atB then
-			return atA > atB
-		end
-		return a < b
-	end)
-	for i = SAVE_LOG_CAP + 1, #ids do
-		log[ids[i]] = nil
-	end
+	return nil
 end
 
--- A clean copy of a stored save log: entries with a non-empty session id of at most 64 characters, a positive integer
--- seq and a finite `at` survive; anything else is dropped. With `now`, entries older than 7 days are dropped (exactly
--- 7 days is kept). Capped at SAVE_LOG_CAP entries, oldest `at` first.
+-- A clean copy of a stored receipt log: entries with a non-empty session id of at most 64 characters, a positive integer
+-- seq and a finite `at` survive; anything else is dropped. With `now`, entries older than RECEIPT_TTL_S are pruned
+-- (exactly RECEIPT_TTL_S old is kept; a future `at` from a skewed clock is kept). Never capped here: only planSave makes
+-- room, and only by evicting receipts older than window + skew.
 function ProfileRules.sanitizeApplied(raw: any, now: number?): AppliedLog
 	local out: AppliedLog = {}
 	if typeof(raw) ~= "table" then
 		return out
 	end
-	local oldest = if now ~= nil and isFinite(now) then now - SAVE_LOG_SECONDS else nil
+	local oldest = if now ~= nil and isFinite(now) then now - RECEIPT_TTL else nil
 	for id, entry in raw do
-		if
-			isSessionId(id)
-			and typeof(entry) == "table"
-			and isInt(entry.seq, 1, MAX_GLYPHS)
-			and isFinite(entry.at)
-			and (oldest == nil or entry.at >= oldest)
-		then
-			out[id] = { seq = entry.seq, at = entry.at }
+		local clean = cleanEntry(entry)
+		if isSessionId(id) and clean ~= nil and (oldest == nil or clean.at >= oldest) then
+			out[id] = clean
 		end
 	end
-	capLog(out, nil)
 	return out
 end
 
@@ -366,38 +374,200 @@ function ProfileRules.adopt(result: any, current: Profile, pending: number): Pro
 	return adopted
 end
 
--- The UpdateAsync transform for one save operation, exactly-once for the glyph total. Returns the value to write and
--- whether the operation had already been applied, or nil (cancel the write) when:
---  * the stored data was written by a newer build than this one, even if it only became newer after this session loaded
---    (returning it with its fields dropped and only the version number kept would hide the loss, AUD-02 F1), or
---  * the operation has no valid identity (session id, positive integer seq) or `now` is not finite.
--- When the save log already holds this session's seq or a later one, the delta is NOT added again (the operation
--- committed before, e.g. UpdateAsync wrote and then errored); the idempotent fields are still overlaid. Otherwise the
--- delta is added and the log records { seq, at = now }. The log is pruned (7 days) and capped on every write.
-function ProfileRules.planSave(stored: any, op: SaveOp, now: number): (Profile?, boolean)
+local function validOp(op: any): boolean
+	return typeof(op) == "table"
+		and isSessionId(op.sessionId)
+		and isInt(op.seq, 1, MAX_GLYPHS)
+		and isInt(op.glyphsDelta, 0, MAX_GLYPHS)
+		and isFinite(op.createdAt)
+end
+
+-- The retry window in force: RETRY_WINDOW_S, or a shorter positive override (the Studio hook). Never longer.
+function ProfileRules.retryWindow(override: number?): number
+	if override ~= nil and isFinite(override) and override > 0 then
+		return math.min(override, RETRY_WINDOW)
+	end
+	return RETRY_WINDOW
+end
+
+-- Is the op at or past its retry window at monotonic time `clock`? NaN / garbage counts as expired.
+function ProfileRules.expired(op: SaveOp, clock: number, window: number?): boolean
+	return not (clock - op.createdAt < ProfileRules.retryWindow(window))
+end
+
+local function patchWith(patch: Patch?, delta: number): Patch
+	local out: Patch = if typeof(patch) == "table" then table.clone(patch) else {}
+	out.glyphsDelta = delta
+	return out
+end
+
+-- Fits `log` (which already holds `keep`) into RECEIPT_CAP by evicting only receipts strictly older than window + skew,
+-- oldest first (ties by session id). Mutates `log`; returns false when it still does not fit.
+local function makeRoom(log: AppliedLog, keep: string, now: number): boolean
+	local count = 0
+	local evictable = {}
+	for id, entry in log do
+		count += 1
+		if id ~= keep and now - entry.at > EVICT_AGE then
+			table.insert(evictable, id)
+		end
+	end
+	if count <= RECEIPT_CAP then
+		return true
+	end
+	table.sort(evictable, function(a: string, b: string): boolean
+		local atA, atB = log[a].at, log[b].at
+		if atA ~= atB then
+			return atA < atB
+		end
+		return a < b
+	end)
+	for _, id in evictable do
+		if count <= RECEIPT_CAP then
+			break
+		end
+		log[id] = nil
+		count -= 1
+	end
+	return count <= RECEIPT_CAP
+end
+
+-- Decides one UpdateAsync callback for `op`. Pure; never mutates `stored`. In order:
+--  1. stored data from a newer build -> newer_schema, no write (also when it became newer after this session loaded).
+--  2. an op or context without a valid identity -> abandoned ("invalid"), no write.
+--  3. the stored receipt for this session covers op.seq (checked BEFORE any pruning) -> acknowledged: no delta. Inside the
+--     window the idempotent fields are written over a pruned log; at or past it nothing is written.
+--  4. op ambiguous (may have committed) and no covering receipt -> abandoned, no write. A missing receipt never
+--     authorises a second credit.
+--  5. elapsed >= window -> abandoned ("expired"), no write: a replayed callback past the deadline returns no candidate.
+--  6. prune receipts older than TTL, record {seq, at = nowWall}, make room at the cap (evicting only receipts older than
+--     window + skew); no room -> capacity, no write (retryable, nothing changed). Otherwise applied: delta added.
+function ProfileRules.planSave(stored: any, op: SaveOp, ctx: SaveContext): SavePlan
 	if ProfileRules.isNewerVersion(stored) then
-		return nil, false
+		return { tag = "newer_schema" }
 	end
-	if
-		typeof(op) ~= "table"
-		or not isSessionId(op.sessionId)
-		or not isInt(op.seq, 1, MAX_GLYPHS)
-		or not isFinite(now)
-	then
-		return nil, false
+	if not validOp(op) or typeof(ctx) ~= "table" or not isFinite(ctx.nowWall) then
+		return { tag = "abandoned", reason = "invalid" }
 	end
-	local log = ProfileRules.sanitizeApplied(if typeof(stored) == "table" then stored.applied else nil, now)
-	local prior = log[op.sessionId]
-	local alreadyApplied = prior ~= nil and op.seq <= prior.seq
-	local patch: Patch = if typeof(op.patch) == "table" then table.clone(op.patch) else {}
-	patch.glyphsDelta = if alreadyApplied then 0 else op.glyphsDelta
-	local out = ProfileRules.merge(stored, patch)
-	if not alreadyApplied then
-		log[op.sessionId] = { seq = op.seq, at = now }
-		capLog(log, op.sessionId)
+	local rawLog = if typeof(stored) == "table" then stored.applied else nil
+	local receipt = if typeof(rawLog) == "table" then cleanEntry(rawLog[op.sessionId]) else nil
+	local expired = not (ctx.elapsed < ProfileRules.retryWindow(ctx.window))
+	if receipt ~= nil and receipt.seq >= op.seq then
+		if expired then
+			return { tag = "acknowledged", reason = "receipt" }
+		end
+		local log = ProfileRules.sanitizeApplied(rawLog, ctx.nowWall)
+		log[op.sessionId] = receipt -- the covering receipt is never pruned by its own acknowledgement
+		local out = ProfileRules.merge(stored, patchWith(ctx.patch, 0))
+		out.applied = log
+		return { tag = "acknowledged", write = out, reason = "receipt" }
 	end
+	if ctx.ambiguous == true then
+		return {
+			tag = "abandoned",
+			reason = if receipt == nil then "ambiguous_no_receipt" else "ambiguous_receipt_behind",
+		}
+	end
+	if expired then
+		return { tag = "abandoned", reason = "expired" }
+	end
+	local log = ProfileRules.sanitizeApplied(rawLog, ctx.nowWall)
+	log[op.sessionId] = { seq = op.seq, at = ctx.nowWall }
+	if not makeRoom(log, op.sessionId, ctx.nowWall) then
+		return { tag = "capacity" }
+	end
+	local out = ProfileRules.merge(stored, patchWith(ctx.patch, op.glyphsDelta))
 	out.applied = log
-	return out, alreadyApplied
+	return { tag = "applied", write = out }
+end
+
+-- A fresh ledger for one server session of a player.
+function ProfileRules.newLedger(sessionId: string): Ledger
+	return { sessionId = sessionId, nextSeq = 1, pending = 0, op = nil, ambiguous = false }
+end
+
+-- `amount` added to pending (for the next op). Anything but a positive integer leaves the ledger as it is.
+function ProfileRules.credit(ledger: Ledger, amount: any): Ledger
+	if not isInt(amount, 1, MAX_GLYPHS) then
+		return ledger
+	end
+	local out = table.clone(ledger)
+	out.pending = math.min(ledger.pending + amount, MAX_GLYPHS)
+	return out
+end
+
+-- The op to attempt: the unresolved one unchanged, or (when there is pending glyph value or `want`, i.e. dirty
+-- idempotent fields) a new frozen op that takes ALL of pending, with the next seq. Returns the new ledger, the op (nil
+-- when there is nothing to save) and whether the op is new.
+function ProfileRules.takeOp(ledger: Ledger, want: boolean, clock: number): (Ledger, SaveOp?, boolean)
+	if ledger.op ~= nil then
+		return ledger, ledger.op, false
+	end
+	if ledger.pending <= 0 and not want then
+		return ledger, nil, false
+	end
+	local op: SaveOp = table.freeze({
+		sessionId = ledger.sessionId,
+		seq = ledger.nextSeq,
+		glyphsDelta = ledger.pending,
+		createdAt = clock,
+	})
+	local out = table.clone(ledger)
+	out.nextSeq = ledger.nextSeq + 1
+	out.pending = 0
+	out.op = op
+	out.ambiguous = false
+	return out, op, true
+end
+
+local function finish(ledger: Ledger, reason: string?, ambiguous: boolean): (Ledger, Terminal?)
+	local op = ledger.op :: SaveOp
+	local out = table.clone(ledger)
+	out.op = nil
+	out.ambiguous = false
+	if reason == nil then
+		return out, nil
+	end
+	return out, { reason = reason, seq = op.seq, glyphsDelta = op.glyphsDelta, ambiguous = ambiguous }
+end
+
+-- Folds an attempt's outcome into the ledger. Pending is never touched: an abandoned or possibly committed delta never
+-- returns to it, and increments that arrived meanwhile stay for the next op. Returns the terminal record when the op
+-- ended without a confirmed write (log it once).
+function ProfileRules.settle(ledger: Ledger, attempt: Attempt): (Ledger, Terminal?)
+	if ledger.op == nil then
+		return ledger, nil
+	end
+	local kind = attempt.kind
+	if kind == "plan" then
+		local tag = attempt.tag
+		if tag == "applied" or tag == "acknowledged" then
+			return finish(ledger, nil, false)
+		elseif tag == "capacity" then
+			return ledger, nil -- unchanged op, retried until room opens or it expires
+		elseif tag == "newer_schema" then
+			return finish(ledger, "newer_schema", ledger.ambiguous)
+		end
+		return finish(ledger, attempt.reason or "abandoned", ledger.ambiguous)
+	elseif kind == "error" then
+		if attempt.candidate == true and not ledger.ambiguous then
+			local out = table.clone(ledger)
+			out.ambiguous = true
+			return out, nil
+		end
+		return ledger, nil
+	elseif kind == "expired" then
+		return finish(ledger, "expired", ledger.ambiguous)
+	end
+	-- unconfirmed (shutdown deadline): the op stays as it is; an in-flight call keeps it potentially committed.
+	local ambiguous = ledger.ambiguous or attempt.candidate == true
+	return ledger,
+		{
+			reason = "unconfirmed_at_shutdown",
+			seq = (ledger.op :: SaveOp).seq,
+			glyphsDelta = (ledger.op :: SaveOp).glyphsDelta,
+			ambiguous = ambiguous,
+		}
 end
 
 -- Everything in a profile as a patch (autosave and release): merge() makes it safe against older in-memory data. The glyph
