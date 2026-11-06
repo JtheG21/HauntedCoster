@@ -1,0 +1,51 @@
+{
+  "id": "TASK-0140",
+  "game": "GAME-004",
+  "title": "Audit verdicts bound to the PR head; done means merged",
+  "status": "in_progress",
+  "tier": "deep",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/orchestrator.py",
+    "scripts/audit_gate.py",
+    "tests/test_orchestrator.py",
+    "tests/test_orchestrator_gate.py",
+    "tests/test_audit_gate.py",
+    ".github/workflows/audit-gate.yml",
+    "AGENTS.md",
+    "docs/workflow/TASKS.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0140-Audit-Head-Gate.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0140-audit-head-gate",
+  "stacked_on": "chore/agents-datastore-merge-gate",
+  "acceptance": [
+    "GATE-02: record-audit needs --measured-sha (40 hex), --applies-to and --auditor; refuses a report without that exact SHA and a matching verdict line, and an auditor equal to the task's executor; stores measured_sha, applies_to, auditor, report path and report sha256.",
+    "GATE-03: approve-merge needs --pr and --approval-text, reads gh pr view, requires a PASS whose measured_sha is an ancestor of the PR head with only non-source paths changed since (light tier: a green check), records the approval and never sets done; mark-merged --pr sets done only when gh reports MERGED and records mergeCommit and mergedAt.",
+    "GATE-04: record-audit --post-merge on a done task appends the finding with a remediation task id and leaves the status; reopen is unchanged.",
+    "GATE-05: .github/workflows/audit-gate.yml job audit-gate runs scripts/audit_gate.py against the PR head; chore branches with no games/ or scripts/ source change pass trivially; branch protection and rulesets are not touched.",
+    "GATE-06: AGENTS.md and docs/workflow/TASKS.md state the rules, including the chore/agents-datastore-merge-gate rules (e8f2f07, 24ccd2a).",
+    "Tests reproduce the TASK-0138 timeline; scripts/check.sh green on the final head; PR open as ready for review; no approve, merge or mark-done by the executor."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0140/gate.txt"
+  ],
+  "notes": "Approved by jg in chat as rows GATE-01..GATE-06 (2026-11-05). Deep tier: independent Codex PASS on the exact head required before merge. Out of scope: games/**, existing 06 QA/** reports, TASK-0138*/TASK-0139* task files, task/TASK-0139-profile-remediation, branch protection or ruleset changes, merging, recording any audit.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0140-Audit-Head-Gate.md",
+  "risk": "high",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-05T16:00:56",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-05T16:00:56",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
+}
