@@ -2,7 +2,7 @@
   "id": "TASK-0140",
   "game": "GAME-004",
   "title": "Audit verdicts bound to the PR head; done means merged",
-  "status": "changes_requested",
+  "status": "in_progress",
   "tier": "deep",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -63,6 +63,12 @@
       "from": "review",
       "to": "changes_requested",
       "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-05T16:26:56",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
     }
   ],
   "executions": [

@@ -3,7 +3,7 @@ id: TASK-0140
 title: "Audit verdicts bound to the PR head; done means merged"
 type: task
 project: GAME-004
-status: changes_requested
+status: in_progress
 priority: high
 risk: high
 owner: claude-code
