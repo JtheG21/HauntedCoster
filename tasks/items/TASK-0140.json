@@ -2,7 +2,7 @@
   "id": "TASK-0140",
   "game": "GAME-004",
   "title": "Audit verdicts bound to the PR head; done means merged",
-  "status": "review",
+  "status": "changes_requested",
   "tier": "deep",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -57,6 +57,12 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-05T16:20:23",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
     }
   ],
   "executions": [
@@ -65,5 +71,23 @@
       "result": "pass",
       "notes": "check.sh green; 86 python tests incl. TASK-0138 timeline replay; gate dry run fails as expected without an audit; see docs/workflow/evidence/TASK-0140/gate.txt"
     }
-  ]
+  ],
+  "audits": [
+    {
+      "time": "2026-11-05T16:20:23",
+      "result": "fail",
+      "report": "06 QA/AUD-20261105-TASK-0140-01.md",
+      "report_sha256": "0844085b09b0dfbc7ea29415d4ccdc0c2dce6b51620829e8dd5c119103c5d6ab",
+      "measured_sha": "b4880b82d547cc66261eb9d2a8dd2b1da8552a19",
+      "applies_to": [
+        "scripts/",
+        "tests/",
+        ".github/",
+        "AGENTS.md",
+        "docs/workflow/TASKS.md"
+      ],
+      "auditor": "codex"
+    }
+  ],
+  "revisions": 1
 }
