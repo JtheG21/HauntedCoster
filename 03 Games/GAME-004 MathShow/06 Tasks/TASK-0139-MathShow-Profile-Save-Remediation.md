@@ -3,7 +3,7 @@ id: TASK-0139
 title: "MathShow Profile Save Remediation (AUD-02 F1-F3)"
 type: task
 project: GAME-004
-status: approved
+status: changes_requested
 priority: high
 risk: high
 owner: claude-code
@@ -13,7 +13,7 @@ related:
   - "[[TASK-0138-MathShow-Lifetime-Glyph-Total]]"
   - "[[AUD-20261103-TASK-0138-02]]"
 created: 2026-11-05
-updated: 2026-11-05
+updated: 2026-11-06
 tags:
   - workflow/task
 ---
