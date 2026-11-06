@@ -2,7 +2,7 @@
   "id": "TASK-0139",
   "game": "GAME-004",
   "title": "MathShow Profile Save Remediation (AUD-02 F1-F3)",
-  "status": "changes_requested",
+  "status": "in_progress",
   "tier": "deep",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -68,6 +68,12 @@
       "from": "review",
       "to": "changes_requested",
       "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-06T14:55:46",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
     }
   ],
   "executions": [
