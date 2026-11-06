@@ -1,0 +1,24 @@
+{
+  "id": "TASK-0141",
+  "game": "GAME-004",
+  "title": "MathShow Profile Exactly-Once Saves v2",
+  "status": "backlog",
+  "tier": "deep",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/shared/ProfileRules.luau",
+    "games/mathshow/tests/ProfileRules.spec.luau",
+    "games/mathshow/src/server/Services/ProfileService.luau",
+    "docs/workflow/evidence/TASK-0141/",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0141-MathShow-Profile-Exactly-Once-Saves-v2.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0141-profile-exactly-once",
+  "acceptance": [
+    "Design review PASS recorded before implementation; no over-credit possible by construction (window < TTL, no live-receipt eviction); spec cases per design; Studio evidence on final head with ON and OFF dialog readbacks; publish checklist documents the v3 cutover; independent Codex PASS on the exact head."
+  ],
+  "evidence": [],
+  "notes": "Registered at jg request 2026-11-06 (row K2); backlog only, no plan approval, no source change. Successor to TASK-0139 (parked after 2/2 failed revisions; final Codex audit AUD-20261106-TASK-0139-03 FAIL: receipt expiry/eviction allows replay double-credit, v2 writers can erase v3 receipts). Branched from c54123ecfe99cd0d2cbcdbeffb0d6282f2427513 (TASK-0139 rev 2 head). Design in the task note is pending Codex design review. files_owned is provisional; no publish checklist exists in the repo yet, so its location is decided in the plan. PR #204 must not be merged.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0141-MathShow-Profile-Exactly-Once-Saves-v2.md",
+  "risk": "high"
+}
