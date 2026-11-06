@@ -3,7 +3,7 @@ id: TASK-0139
 title: "MathShow Profile Save Remediation (AUD-02 F1-F3)"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: high
 risk: high
 owner: claude-code
@@ -37,3 +37,12 @@ See `tasks/items/TASK-0139.json`.
 
 ## Tests
 - **Automated:** `scripts/check.sh`, `ProfileRules.spec` (interleaving, newer-version, unknown-field cases).
+
+## Revision 2 (2026-11-06, Claude): AUD-20261106-TASK-0139-02 F1 + F2
+- **Approval S1 (DataStore schema):** jg, Task Audit chat, 2026-11-06 14:53 PT, typed "A" in reply to "A: schema v3 with a save log". Only `version` 2 -> 3 and the new `applied` field changed; store name, key and remotes are unchanged.
+- **F1 / 3a, exactly-once:** every save is an op `{sessionId, seq, glyphsDelta}`. `ProfileRules.planSave(stored, op, now)` skips the delta when `applied[sessionId].seq >= seq`. ProfileService retries the same op after any error. The save log is pruned after 7 days and capped at 200.
+- **F2 / 3b, nested settings:** known settings keys are overlaid onto a clone of the stored settings. `adopt` sanitizes, and `toPatch`/`toClient` copy only the known keys, so a stray stored key never reaches memory or the client.
+- **Studio-only hook:** `MathShowForceSaveErrorAfterCommit`, a workspace attribute that only works when `IsStudio` and `IsServer` are both true.
+- **Evidence:** `docs/workflow/evidence/TASK-0139/revision2.txt`, measured at source `61e1eeb`, Studio at `aa2fe41`. 376 specs passed and check.sh is green. Studio checks 1–6 passed in the private test place. API access was ON for the run, then OFF and read back OFF.
+- **Not covered:** the leave-save retry loop and BindToClose were not exercised in the engine. If every leave save fails, that op is lost; this was already true before.
+- F3 (UserIds/metadata) is a separate task.
