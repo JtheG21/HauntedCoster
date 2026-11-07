@@ -72,6 +72,18 @@ Redo the TASK-0139 exactly-once save so over-credit is impossible by constructio
   retry superseded (music 8, +1 once), S4, S5, S6, rejoin, S4b, (b) shutdown failure then success with the full log through
   "shutdown drain done" (mirrored via a 1 h MemoryStore map), plus S7. Evidence: `docs/workflow/evidence/TASK-0141/rev2/studio-pass.txt`.
   Rojo stopped; place not saved; nothing published.
+## Revision 3 (claude-code): AUD-20261106-TASK-0141-02
+- jg approved a revision 3 in chat (2026-11-06) after the Opus re-audit failed (AUD-02). The orchestrator counted it as revision 2/2
+  (AUD-01 was revision 1), so `start` moved it on directly; no unblock was needed.
+- F1: `noteSettings` now takes the change time (`os.time()` from `ProfileService.apply`) and keeps the earliest pending change in
+  `settingsWall`; `takeOp` already dates an op's createdAtWall from the min, so R3 compares a patch against receipts written since
+  the player made the change. Spec "AUD-02 F1" replays the auditor's probe (expired and late-applied op 1); it fails on `69004d2`.
+- F2: after the op's shutdown report, a late failed attempt and a late newer_schema are now silent too.
+- F3, accepted behaviour (jg-approved R3): a session's own settings change is dropped when another session's receipt was written
+  after this session loaded and within 300 s of the change (e.g. an old server's late leave save after a server hop). The client
+  keeps its local value until its next MenuRequest, which returns the stored one. No payload change.
+- F4 (nit, optional) not done: the older plan/error attempt shapes stay readable by settle().
+
 ## Acceptance criteria
 See `tasks/items/TASK-0141.json`.
 

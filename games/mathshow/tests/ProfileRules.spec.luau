@@ -1166,4 +1166,48 @@ return function(t: TestRunner.T)
 		t.eq(plan({ version = 3, glyphsLifetime = 10, applied = {} }, first, { ambiguous = true }).tag, "abandoned")
 		t.eq(ProfileRules.settle(ledger, { kind = "retryable_no_candidate" }).ambiguous, true, "ambiguity is sticky")
 	end)
+	t.test("AUD-02 F1: a settings change made while an earlier op is unresolved is dated from the change", function()
+		local T0 = NOW
+		local after = valid()
+		after.music = 4
+		-- Departed session A: a glyph-only op 1 at T0; the player sets music 4 at T0+5 and leaves.
+		local ledger = ProfileRules.credit(ProfileRules.newLedger("A"), 2)
+		ledger = ProfileRules.takeOp(ledger, false, 0, T0)
+		ledger = ProfileRules.noteSettings(ledger, valid() :: any, after :: any, T0 + 5)
+		t.eq(ledger.settingsWall, T0 + 5)
+		local later = table.clone(after)
+		later.sfx = 1
+		t.eq(
+			ProfileRules.noteSettings(ledger, after :: any, later :: any, T0 + 50).settingsWall,
+			T0 + 5,
+			"the earliest pending change dates the patch"
+		)
+		-- Session B saves music 8 at T0+100. Op 1 then expires, or applies late; op 2 is taken at T0+910.
+		local s8 = valid()
+		s8.music = 8
+		local stored: any =
+			{ version = 3, glyphsLifetime = 10, settings = s8, applied = { B = { seq = 1, at = T0 + 100 } } }
+		local alone: any = { version = 3, glyphsLifetime = 10, settings = valid(), applied = {} }
+		local endings: { any } = { { kind = "expired" }, { kind = "applied" } }
+		for _, ending in endings do
+			local settled = ProfileRules.settle(ledger, ending)
+			local _, op2: any = ProfileRules.takeOp(settled, false, 910, T0 + 910)
+			t.eq(op2.seq, 2)
+			t.eq(op2.createdAtWall, T0 + 5, ending.kind)
+			t.eq(op2.settingsPatch.music, 4)
+			local decided = plan(stored, op2, { nowWall = T0 + 910, elapsed = 1 })
+			t.eq(decided.tag, "applied")
+			t.eq(decided.superseded, true, ending.kind)
+			t.eq((decided.write :: any).settings.music, 8, "B's newer music 8 stays")
+			-- With no newer session the change still lands.
+			local own = plan(alone, op2, { nowWall = T0 + 910, elapsed = 1 })
+			t.eq(own.superseded, nil)
+			t.eq((own.write :: any).settings.music, 4)
+		end
+		t.eq(
+			ProfileRules.noteSettings(ProfileRules.newLedger("x"), valid() :: any, after :: any).settingsWall,
+			nil,
+			"without a change time nothing is stamped"
+		)
+	end)
 end

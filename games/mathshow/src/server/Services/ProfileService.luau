@@ -244,11 +244,14 @@ local function attempt(session: Session, op: ProfileRules.SaveOp): (ProfileRules
 	local outcome, reason = ProfileRules.classifyAttempt(decisions, if ok then result else nil, not ok)
 	local kind: ProfileRules.AttemptKind = outcome :: any -- Luau widens the returned string union
 	if outcome == "ambiguous" or (outcome == "retryable_no_candidate" and not ok) then
-		local detail = if ok then "UpdateAsync returned no value after a write candidate" else tostring(result)
-		warn(
-			`[MathShow] profile save attempt failed for {session.userId} (op {op.seq}, outcome={outcome}, `
-				.. `callbacks={#decisions}): {detail}`
-		)
+		-- Silent once the op had its terminal report at shutdown (R4; read now: the drain may have reported it mid-call).
+		if session.ledger.reportedSeq ~= op.seq then
+			local detail = if ok then "UpdateAsync returned no value after a write candidate" else tostring(result)
+			warn(
+				`[MathShow] profile save attempt failed for {session.userId} (op {op.seq}, outcome={outcome}, `
+					.. `callbacks={#decisions}): {detail}`
+			)
+		end
 		return { kind = kind, reason = reason }, nil, false
 	end
 	local wrote = outcome == "applied"
@@ -274,7 +277,11 @@ local function settleAttempt(session: Session, outcome: ProfileRules.Attempt, ba
 		return
 	elseif kind == "newer_schema" then
 		session.persistence = "memory"
-		warn(`[MathShow] stored profile of {session.userId} is a newer version; not saving, memory-only from now on`)
+		if not quiet then
+			warn(
+				`[MathShow] stored profile of {session.userId} is a newer version; not saving, memory-only from now on`
+			)
+		end
 		return
 	elseif kind == "capacity" then
 		if not quiet then
@@ -411,7 +418,7 @@ function ProfileService.apply(player: Player, patch: ProfileRules.Patch): boolea
 	if session.persistence == "saved" then
 		if patch.settings ~= nil then
 			-- Only the keys that changed go into the next op (R2), never the whole settings table.
-			session.ledger = ProfileRules.noteSettings(session.ledger, before, session.profile.settings)
+			session.ledger = ProfileRules.noteSettings(session.ledger, before, session.profile.settings, os.time())
 		end
 		session.dirty = true
 		scheduleSave(player, session)

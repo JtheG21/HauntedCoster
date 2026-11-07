@@ -51,7 +51,7 @@ export type SaveOp = {
 	seq: number, -- 1, 2, 3 ... per session; never reused for a different delta
 	glyphsDelta: number, -- taken from pending, never from the displayed total
 	createdAt: number, -- os.clock() when taken: monotonic, meaningful on this server only
-	createdAtWall: number, -- os.time() when taken (the earlier op's, when it carries settings an unconfirmed op returned)
+	createdAtWall: number, -- os.time() when taken, or earlier: when the settings it carries were first changed (R3)
 	settingsPatch: SettingsPatch, -- frozen; empty when no setting changed
 }
 -- What one UpdateAsync callback knows besides the stored value.
@@ -74,7 +74,7 @@ export type Ledger = {
 	nextSeq: number,
 	pending: number, -- glyph value earned since the last op was taken; goes into the NEXT op only
 	settingsPatch: SettingsPatch, -- settings changed since the last op was taken; goes into the NEXT op only
-	settingsWall: number?, -- createdAtWall of an unconfirmed op whose settings were returned to settingsPatch
+	settingsWall: number?, -- os.time() of the earliest pending settings change (or of a returned unconfirmed op's)
 	op: SaveOp?, -- the unresolved operation
 	ambiguous: boolean, -- op may have committed (an attempt errored after returning a write candidate)
 	reportedSeq: number, -- the op already given its terminal report (unconfirmed at shutdown); never reported again
@@ -630,8 +630,11 @@ function ProfileRules.newLedger(sessionId: string): Ledger
 end
 
 -- The ledger with the settings keys that differ between `before` and `after` recorded (newest value wins) for the next
--- op. Only known keys with valid values; nothing changed -> the same ledger.
-function ProfileRules.noteSettings(ledger: Ledger, before: Settings, after: Settings): Ledger
+-- op. Only known keys with valid values; nothing changed -> the same ledger. `wall` (os.time() of the change) dates the
+-- pending patch from its EARLIEST change (settingsWall), so R3 compares it against receipts written since the player made
+-- it, not since the next op happened to be taken (AUD-20261106-TASK-0141-02 F1: a change made while an earlier op is
+-- unresolved can wait up to the retry window for its op).
+function ProfileRules.noteSettings(ledger: Ledger, before: Settings, after: Settings, wall: number?): Ledger
 	local changed: SettingsPatch = table.clone(ledger.settingsPatch)
 	local any = false
 	local old: { [string]: any } = before :: any
@@ -648,6 +651,9 @@ function ProfileRules.noteSettings(ledger: Ledger, before: Settings, after: Sett
 	end
 	local out = table.clone(ledger)
 	out.settingsPatch = changed
+	if wall ~= nil and isFinite(wall) then
+		out.settingsWall = math.min(ledger.settingsWall or wall, wall)
+	end
 	return out
 end
 
@@ -663,9 +669,9 @@ end
 
 -- The op to attempt: the unresolved one unchanged, or (when there is pending glyph value, a pending settings change or
 -- `want`, i.e. dirty idempotent fields) a new frozen op that takes ALL of pending and the settings patch, with the next
--- seq, createdAt = `clock` and createdAtWall = `wall` (os.time(); the earlier op's when the patch carries settings an
--- unconfirmed op returned, so R3 still dates them from when they were first sent). Returns the new ledger, the op (nil when
--- there is nothing to save) and whether the op is new.
+-- seq, createdAt = `clock` and createdAtWall = `wall` (os.time()), or settingsWall when earlier: the time its settings
+-- were first changed (or first sent, for settings an unconfirmed op returned), so R3 dates them from then. Returns the new
+-- ledger, the op (nil when there is nothing to save) and whether the op is new.
 function ProfileRules.takeOp(ledger: Ledger, want: boolean, clock: number, wall: number?): (Ledger, SaveOp?, boolean)
 	if ledger.op ~= nil then
 		return ledger, ledger.op, false
