@@ -2,7 +2,7 @@
   "id": "TASK-0145",
   "game": "GAME-004",
   "title": "MathShow Map Finish B3 Path and Plaza Dressing",
-  "status": "backlog",
+  "status": "in_progress",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -24,5 +24,20 @@
   ],
   "notes": "Map Finish B3, rows MF-P/MF-M. Generator-only; no Studio authoring; no new meshes.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0145-MathShow-Map-Finish-B3-Dressing.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-06T20:32:51",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-06T20:32:51",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
 }

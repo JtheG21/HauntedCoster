@@ -3,7 +3,7 @@ id: TASK-0145
 title: "MathShow Map Finish B3 Path and Plaza Dressing"
 type: task
 project: GAME-004
-status: backlog
+status: in_progress
 priority: medium
 risk: low
 owner: executor
