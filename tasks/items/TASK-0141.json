@@ -2,7 +2,7 @@
   "id": "TASK-0141",
   "game": "GAME-004",
   "title": "MathShow Profile Exactly-Once Saves v2",
-  "status": "review",
+  "status": "changes_requested",
   "tier": "deep",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -49,6 +49,12 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-06T16:19:50",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
     }
   ],
   "executions": [
@@ -57,5 +63,13 @@
       "result": "pass",
       "notes": "Final source 7b8e7d4 (c1f0498 + Studio-found fix: confirm a save only when UpdateAsync returns the value). check.sh ALL PASSED, Lune 388/0. Studio pass on 7b8e7d4, private test place 93701543861123: v2->v3, overlap, ambiguous ack, ambiguous abandon (receipt behind and missing), shortened-window expiry, shutdown drain, rejoin 37, v4 refused: PASS. API access OFF->ON->OFF dialog readbacks. Evidence: docs/workflow/evidence/TASK-0141/studio-pass.txt"
     }
-  ]
+  ],
+  "audits": [
+    {
+      "time": "2026-11-06T16:19:50",
+      "result": "fail",
+      "report": "06 QA/AUD-20261106-TASK-0141-01.md"
+    }
+  ],
+  "revisions": 1
 }
