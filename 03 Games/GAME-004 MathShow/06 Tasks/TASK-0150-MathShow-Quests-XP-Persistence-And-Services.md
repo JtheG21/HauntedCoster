@@ -35,5 +35,6 @@ ProfileRules v4, XpService, QuestService, event hooks and remotes (DataStore sch
 ## Implementation record
 
 ## Audits
+- [[AUD-20261107-QUESTS-XP-DESIGN-01]]: design review, DESIGN CHANGES REQUIRED.
 
 ## Outcome
