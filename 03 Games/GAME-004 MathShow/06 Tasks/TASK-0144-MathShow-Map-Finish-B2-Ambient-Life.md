@@ -3,7 +3,7 @@ id: TASK-0144
 title: "MathShow Map Finish B2 Ambient Life"
 type: task
 project: GAME-004
-status: backlog
+status: in_progress
 priority: medium
 risk: low
 owner: executor

@@ -2,7 +2,7 @@
   "id": "TASK-0144",
   "game": "GAME-004",
   "title": "MathShow Map Finish B2 Ambient Life",
-  "status": "backlog",
+  "status": "in_progress",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -25,5 +25,20 @@
   ],
   "notes": "Map Finish B2, rows MF-P/MF-M/MF-X. Free Creator Store asset IDs only; no uploads. Client-only cosmetic; no remotes.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0144-MathShow-Map-Finish-B2-Ambient-Life.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-06T20:23:26",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-06T20:23:26",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
 }

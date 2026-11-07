@@ -5,6 +5,7 @@ local Hud = require(script.Hud)
 local Menu = require(script.Menu)
 local Watching = require(script.Menu.Watching)
 local ModePadController = require(script.Hub.ModePadController)
+local AmbientLife = require(script.Hub.AmbientLife)
 local HubCosmetics = require(script.Hub.HubCosmetics)
 local GlyphController = require(script.Glyphs.GlyphController)
 
@@ -26,4 +27,5 @@ Menu.start({
 ModePadController.start()
 GlyphController.start() -- hub glyphs and their counter (TASK-0121)
 HubCosmetics.start() -- rank crystal spin and bob (TASK-0126); cosmetic, fails inert
+AmbientLife.start() -- shooting stars and ambient loops (TASK-0144); cosmetic, fails inert
 print("[MathShow] client ready")
