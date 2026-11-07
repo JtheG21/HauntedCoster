@@ -20,7 +20,9 @@
     "games/mathshow/src/server/Services/ProfileService.luau",
     "games/mathshow/tests/ProfileRules.spec.luau",
     "tasks/items/TASK-0150.json",
-    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Persistence-And-Services.md"
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Persistence-And-Services.md",
+    "games/mathshow/src/server/Services/ModePadService.luau",
+    "games/mathshow/src/shared/ModePadConfig.luau"
   ],
   "depends_on": [
     "TASK-0149"
