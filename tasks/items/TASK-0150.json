@@ -7,6 +7,13 @@
   "owner_agent": "codex",
   "files_owned": [
     "games/mathshow/src/server/Services/QuestService.luau",
+    "games/mathshow/src/server/Services/XpService.luau",
+    "games/mathshow/src/server/Services/RoundService.luau",
+    "games/mathshow/src/server/Services/BlitzService.luau",
+    "games/mathshow/src/server/Services/SkillTestService.luau",
+    "games/mathshow/src/server/Services/GlyphService.luau",
+    "games/mathshow/src/server/Remotes.luau",
+    "docs/workflow/PUBLISH-CHECKLIST.md",
     "games/mathshow/src/shared/ProfileRules.luau",
     "games/mathshow/src/shared/ProfileConfig.luau",
     "games/mathshow/src/shared/Net.luau",
@@ -23,7 +30,7 @@
     "Profile schema v4 with xp, quests and xpDay saved as deltas through the TASK-0141 receipt log; QuestService awards XP only from server events; remotes created by the server; migration spec from v3; Studio two-client run; Opus audit passes."
   ],
   "evidence": [],
-  "notes": "Backlog; waiting for the Codex design review of SYS-Quests-And-XP and jg's plan rows. No plan approval yet.",
+  "notes": "Backlog; Codex design review applied, jg's post-review decisions applied (QX-D3: no reroll, fast/streak quests or VS XP/quests in v1). files_owned widened to the hook services, Remotes and the publish checklist. No plan approval yet.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Persistence-And-Services.md",
   "risk": "high"
 }
