@@ -3,7 +3,7 @@ id: TASK-0141
 title: "MathShow Profile Exactly-Once Saves v2"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: high
 risk: high
 owner: claude-code
@@ -83,6 +83,9 @@ Redo the TASK-0139 exactly-once save so over-credit is impossible by constructio
   after this session loaded and within 300 s of the change (e.g. an old server's late leave save after a server hop). The client
   keeps its local value until its next MenuRequest, which returns the stored one. No payload change.
 - F4 (nit, optional) not done: the older plan/error attempt shapes stay readable by settle().
+- Source `237f8b1`; check.sh ALL CHECKS PASSED, Lune 398/0. Studio on BuildStamp `237f8b1` == HEAD, API access read back ON:
+  (c) a change made while op 1 was held unresolved, B's save, op 2 taken > 300 s later -> "settings superseded", music stays 7,
+  every glyph credited once (45). Evidence: `docs/workflow/evidence/TASK-0141/rev3/studio-pass.txt`.
 
 ## Acceptance criteria
 See `tasks/items/TASK-0141.json`.

@@ -1,0 +1,35 @@
+TASK-0141 revision 3 evidence (2026-11-06 PT / 2026-11-07 UTC): AUD-20261106-TASK-0141-02 F1 (settings change time)
+measured_sha: 237f8b1 (BuildStamp "237f8b1 2026-11-07T03:29:54Z" == HEAD at the run; also the source commit).
+applies_to: games/mathshow/src/shared/ProfileRules.luau, games/mathshow/src/server/Services/ProfileService.luau,
+            games/mathshow/tests/ProfileRules.spec.luau (ProfileConfig unchanged)
+Synced in Studio == disk: ProfileService 27213 B, ProfileRules 35495 B, ProfileConfig 1000 B.
+Checks at 237f8b1: scripts/check.sh ALL CHECKS PASSED (active). Lune 398 passed, 0 failed. The new spec
+"AUD-02 F1: a settings change made while an earlier op is unresolved is dated from the change" fails on 69004d2
+(expected createdAtWall 1800000005, got nil) and passes on 237f8b1.
+
+Environment: private test experience ONLY ("MathShow Private Test", universe 10774566206, place 93701543861123), Rojo 7.7.0
+via scripts/serve.sh from the task worktree (port 34872), plugin reconnected, one Studio window. API access read back ON
+from Experience Settings -> Security (api-access-on-readback.jpg), closed with Cancel; left ON per jg (2026-11-06).
+Revision 2's 11 scenarios (rev2/studio-pass.txt) are not repeated: the source change since 69004d2 is noteSettings' change
+time plus two silenced warnings (git diff 69004d2..237f8b1 -- games/mathshow/src).
+
+(c) F1 in the engine: a settings change made while an earlier op is unresolved, op N+1 taken > 300 s after B's save. PASS
+  Fresh session A = 19870ffb-9296-47cd-b478-742aa91ef2a6; store before: total 40, music 8, session-B-test {seq 2} known at
+  load. ForceSaveFailures=100; collected Glyph_C_N1 (+1); settings trigger -> "simulated save failure before dispatch ...,
+  op 1" (op 1 = +1, no settings, held unresolved).
+  1794022268  player changed music 8 -> 4 (SettingsSave) while op 1 was unresolved.
+  1794022277  session B saved music 7 + receipt session-B-test {seq 3} (not covered by A's load-time seq 2).
+  op 1 kept failing on every signal (autosave) until 1794022607, when the hook was cleared (threshold B.at + 300 = 1794022577).
+  Two settings triggers with no change: op 1 applied, then op 2 (music 4) taken at ~1794022613:
+     "[MathShow] save op 2 of 8757379006: settings superseded by a newer session; glyphs applied"
+  Store at 1794022615: music 7 (B's value kept), A seq 2. With the 69004d2 code op 2 would have been dated ~1794022613,
+  past 1794022577, and written music 4 over 7.
+  Glyphs: N1 respawns every 90 s and the character stood on it, so it was collected 5 times (GlyphService Collected = 5).
+  Store 44 = 40 + 4 at op 2; HUD "Glyphs 5 · Total 45"; Stop Play -> the drain wrote op 3: next Play read total 45, A seq 3,
+  music 7. Every collect credited once.
+
+Fixture now: version 3, total 45, music 7, sfx 2; receipts cecf8b89 seq 11, 9028aff9 seq 2, 19870ffb seq 3,
+other-server-test seq 7, session-B-test seq 3.
+Not exercised in the engine: service-level R4 (a call in flight past the shutdown deadline), capacity, the full 900 s window
+(specs only). F2's silenced warnings need the same in-flight shutdown case.
+Nothing published; live experience untouched; MathShow.rbxl not saved; place not saved by the agent. Rojo stopped.
