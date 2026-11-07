@@ -102,6 +102,7 @@ Redo the TASK-0139 exactly-once save so over-credit is impossible by constructio
 ## Audits
 - [[AUD-20261106-TASK-0141-01]] (Codex, `a853705`): FAIL (F1 Major stale settings).
 - [[AUD-20261106-TASK-0141-02]] (Opus auditor, `9b1e64e`): FAIL (F1 Major settings change time); fixed in revision 3.
+- [[AUD-20261106-TASK-0141-03]] (Codex, `6302063`): PASS for revisions 2–3, no actionable findings; check.sh green, Lune 398/0, CI SUCCESS.
 
 ## Acceptance criteria
 See `tasks/items/TASK-0141.json`.
