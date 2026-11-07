@@ -3,7 +3,7 @@ id: TASK-0141
 title: "MathShow Profile Exactly-Once Saves v2"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: high
 risk: high
 owner: claude-code
@@ -43,6 +43,14 @@ Redo the TASK-0139 exactly-once save so over-credit is impossible by constructio
 - Accepted tradeoff (jg, 2026-11-06): ambiguous + no covering receipt = abandoned delta (under-credit, warn). Key-version fence is out of scope.
 - Tunables in ProfileConfig (table.freeze): RETRY_WINDOW_S = 900, CLOCK_SKEW_ALLOWANCE_S = 300 (evict only entries older than 1200 s),
   RECEIPT_TTL_S = 604800, RECEIPT_CAP = 200, SHUTDOWN_DEADLINE_S = 25.
+
+## Implementation (claude-code, attempt 1 of 2)
+- Plan approved by jg (row P1, 2026-11-06); started. Holds Studio and Rojo for the P5 pass (both released afterwards).
+- Source: `c1f0498` (ProfileConfig, ProfileRules planSave + Ledger, ProfileService single worker, publish gate), `7b8e7d4` (fix found in Studio: a save is confirmed only when UpdateAsync returns the value; a transform error returns nil instead of raising). Final source head `7b8e7d4`.
+- Clock: `os.clock()` (creator-docs `libraries/os.yaml`: not moved by system clock adjustments). Hook entry points and every scenario: `docs/workflow/evidence/TASK-0141/studio-pass.txt`.
+- Remotes, store name, key and payloads unchanged. Persisted schema: version 3 + `applied` only.
+- check.sh ALL CHECKS PASSED; Lune 388 passed. Studio pass on 7b8e7d4: S1–S7 + rejoin PASS; API access readbacks OFF → ON → OFF (images in the evidence folder).
+- Draft PR #206 (not merged; no audit recorded by Claude).
 
 ## Acceptance criteria
 See `tasks/items/TASK-0141.json`.
