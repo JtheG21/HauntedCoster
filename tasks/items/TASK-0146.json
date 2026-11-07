@@ -2,7 +2,7 @@
   "id": "TASK-0146",
   "game": "GAME-004",
   "title": "MathShow Map Finish B4 Boundary Sweep",
-  "status": "in_progress",
+  "status": "approved",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -37,6 +37,25 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-06T20:53:41",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-06T20:53:41",
+      "from": "review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-06T20:53:41",
+      "result": "pass",
+      "notes": "Found and fixed a stuck 8-stud moat outside tier 4 (WALL_R 290->283) at 649813f; 24-angle edge walk, 48 pathfinding spots, HubRoutes 6/6, check.sh green; lights 25/40. Evidence docs/workflow/evidence/MAP-FINISH/B4-boundary.txt."
     }
   ]
 }
