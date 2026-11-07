@@ -8,7 +8,7 @@ Approved rows (jg, 2026-11-06): MF-P, MF-M, MF-X, MF-C. Resume: read this file, 
 |---|---|---|---|---|---|---|
 | MF-0 inventory | TASK-0142 | merged | #207 | 70b33f8 | 25/40 | 39,232 (TASK-0133) |
 | B1 sky | TASK-0143 | merged | #209 | a4768e2 | 25/40 | 39,232 |
-| B2 ambient life | - | pending | | | | |
+| B2 ambient life | TASK-0144 | in review | - | - | 25/40 | 39,232 |
 | B3 path/plaza dressing | - | pending | | | | |
 | B4 boundary sweep | - | pending | | | | |
 | B5 final regression | - | pending | | | | |

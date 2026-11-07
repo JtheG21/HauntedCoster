@@ -1,0 +1,22 @@
+# TASK-0144 Map Finish B2 Ambient life (rows MF-P, MF-M, MF-X)
+# measured git HEAD: 83b8b05 (BuildStamp "83b8b05 2026-11-07T04:25:12Z", clean tree; scripts/serve.sh from the TASK-0144 worktree; Rojo plugin reconnected; fresh Play, single player; place not saved)
+# applies_to: Measured at 83b8b05. Applies to later commits whose diff from 83b8b05 does not touch games/mathshow/src/client/**, games/mathshow/src/shared/AmbientRules.luau, games/mathshow/map/** or mathshow.project.json.
+
+## Change
+- shared/AmbientRules.luau: pure timing/geometry (nextDelay, streak, transparency), no Instances, no Random (samples passed in). Spec tests/AmbientRules.spec.luau: 5 tests, 5 new passing cases in the headless run (403 passed, 0 failed).
+- client/Hub/AmbientLife.luau, started from init.client.luau next to HubCosmetics: one pooled Neon Part (30 x 0.6 x 0.6, CanCollide/CanTouch/CanQuery false, CastShadow false) parented to the camera folder; one RenderStepped connection; a streak every 7-16 s (first at 4 s), 1.3 s life, 120 studs, sinks along the horizon tangent; skipped when GuiService.ReducedMotionEnabled. pcall-isolated (try wrapper), warns, disconnects and destroys on failure; frame budget 2 ms for 30 frames in a row stops it. task.* only. No remotes, no server change.
+- Sounds (MF-X, free Creator Store audio by id, no upload), created in code under SoundService.HubAmbience, routed through the menu's "Sfx" SoundGroup so the player's SFX setting applies, Looped, fail inert, warn if not loaded after 12 s:
+  NightAir  9112764546 "Crickets Night 1" (ProSoundEffects)  TimeLength 36.01 s measured in Studio, loaded=true, volume 0.10
+  DistantFestival 9112766533 "Crowd Outdoor 2" (ProSoundEffects)  TimeLength 36.01 s measured, loaded=true, volume 0.05
+  Also probed: 9112764573 (64.04 s), 9112766532 (36.01 s), 9112766543 (65.69 s), all loaded; not used. Listing durations were only claims; the TimeLength is the measurement.
+
+## Gates (fresh Play at 83b8b05)
+- scripts/check.sh: ALL CHECKS PASSED (StyLua, Selene, strict types, 403 specs, Rojo build, drift, validators, Python tests).
+- Play read-back: both Sounds loaded=true playing=true, SoundGroup Sfx. Over 40 s the streak part was visible for 155 frames (about 2 streaks at 60 fps), Size.Z 30.
+- HubRoutes: HUBROUTES_RESULT routes=6/6 failures=0 stamp=83b8b05. Daily 11.6 s, VS 12.4, Blitz 10.7, Group 12.5, Practice 11.8, Skill 11.8; canary blocked; all 6 pads opened their screens.
+- Console: no new warnings or errors. The three "ContentId rbxassetid://203785492 ... Asset type does not match requested type" lines predate this work (seen at B1 and earlier).
+- Not verified: a screenshot of a streak (it is on screen about 1.3 s of every ~12 s; the check above is instance state, not pixels); AmbientLife.stop() cleanup via Studio MCP (execute_luau runs in its own module context, so the call did not touch the running instance; the same code path is used by the failure handler, which is read-only reviewed, not triggered); a failure-injection run; audibility (nothing can be heard from here; volumes are low by design: 0.10 and 0.05 through the Sfx group).
+- Not re-run live: collect/respawn, HUD, mid-match, 34/34 GlyphSpawn. The diff adds a client cosmetic module and one shared pure module; no geometry, remotes, server or gameplay code. Scope argument, not measured evidence. HUD/menu were not covered by a screenshot this batch.
+
+## Budgets
+PointLights 25/40 (+0). Triangle inventory 39,232 (+0 static; one runtime Part of 12 triangles, not in the committed inventory). Instances in Hub.rbxmx unchanged. CastShadow false on the new Part.
