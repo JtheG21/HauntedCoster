@@ -2,7 +2,7 @@
   "id": "TASK-0147",
   "game": "GAME-004",
   "title": "MathShow Map Finish B5 Final Regression and Close",
-  "status": "approved",
+  "status": "done",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -48,6 +48,12 @@
       "from": "review",
       "to": "approved",
       "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "time": "2026-11-06T21:08:32",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -56,5 +62,6 @@
       "result": "pass",
       "notes": "Full regression at be1da32: check.sh green, HubRoutes 6/6, 34/34 reachable, collect/retry/respawn, HUD, mid-match; budgets 25/40 lights, 43,912 tris; gallery outside repo; PROGRAM.md Map v1 done + Codex handoff. Evidence docs/workflow/evidence/MAP-FINISH/B5-final.txt."
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }
