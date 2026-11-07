@@ -1,0 +1,140 @@
+{
+  "id": "TASK-0140",
+  "game": "GAME-004",
+  "title": "Audit verdicts bound to the PR head; done means merged",
+  "status": "changes_requested",
+  "tier": "deep",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/orchestrator.py",
+    "scripts/audit_gate.py",
+    "tests/test_orchestrator.py",
+    "tests/test_orchestrator_gate.py",
+    "tests/test_audit_gate.py",
+    ".github/workflows/audit-gate.yml",
+    "AGENTS.md",
+    "docs/workflow/TASKS.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0140-Audit-Head-Gate.md",
+    "04 Agents/Auditor.md",
+    "04 Agents/Workflow.md",
+    ".claude/skills/task-close/SKILL.md",
+    ".agents/skills/task-close/SKILL.md",
+    "docs/workflow/evidence/TASK-0140/"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0140-audit-head-gate",
+  "stacked_on": "chore/agents-datastore-merge-gate",
+  "acceptance": [
+    "GATE-02: record-audit needs --measured-sha (40 hex), --applies-to and --auditor; refuses a report without that exact SHA and a matching verdict line, and an auditor equal to the task's executor; stores measured_sha, applies_to, auditor, report path and report sha256.",
+    "GATE-03: approve-merge needs --pr and --approval-text, reads gh pr view, requires a PASS whose measured_sha is an ancestor of the PR head with only non-source paths changed since (light tier: a green check), records the approval and never sets done; mark-merged --pr sets done only when gh reports MERGED and records mergeCommit and mergedAt.",
+    "GATE-04: record-audit --post-merge on a done task appends the finding with a remediation task id and leaves the status; reopen is unchanged.",
+    "GATE-05: .github/workflows/audit-gate.yml job audit-gate runs scripts/audit_gate.py against the PR head; chore branches with no games/ or scripts/ source change pass trivially; branch protection and rulesets are not touched.",
+    "GATE-06: AGENTS.md and docs/workflow/TASKS.md state the rules, including the chore/agents-datastore-merge-gate rules (e8f2f07, 24ccd2a).",
+    "Tests reproduce the TASK-0138 timeline; scripts/check.sh green on the final head; PR open as ready for review; no approve, merge or mark-done by the executor."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0140/gate.txt"
+  ],
+  "notes": "Approved by jg in chat as rows GATE-01..GATE-06 (2026-11-05). Deep tier: independent Codex PASS on the exact head required before merge. Out of scope: games/**, existing 06 QA/** reports, TASK-0138*/TASK-0139* task files, task/TASK-0139-profile-remediation, branch protection or ruleset changes, merging, recording any audit.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0140-Audit-Head-Gate.md",
+  "risk": "high",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-05T16:00:56",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-05T16:00:56",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-05T16:07:41",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-05T16:20:23",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-05T16:26:56",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-05T16:47:19",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-06T14:00:30",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-05T16:07:41",
+      "result": "pass",
+      "notes": "check.sh green; 86 python tests incl. TASK-0138 timeline replay; gate dry run fails as expected without an audit; see docs/workflow/evidence/TASK-0140/gate.txt"
+    },
+    {
+      "time": "2026-11-05T16:47:19",
+      "result": "pass",
+      "notes": "attempt 2: check.sh green at bd5af5c; 131 python tests in test_audit_gate (42), test_orchestrator_gate (50), test_orchestrator (39) incl. a reproduction of each AUD-20261105-TASK-0140-01 bypass; gate dry run on the branch refuses on the decisive FAIL report. docs/workflow/evidence/TASK-0140/gate.txt is attempt-1 evidence."
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-05T16:20:23",
+      "result": "fail",
+      "report": "06 QA/AUD-20261105-TASK-0140-01.md",
+      "report_sha256": "0844085b09b0dfbc7ea29415d4ccdc0c2dce6b51620829e8dd5c119103c5d6ab",
+      "measured_sha": "b4880b82d547cc66261eb9d2a8dd2b1da8552a19",
+      "applies_to": [
+        "scripts/",
+        "tests/",
+        ".github/",
+        "AGENTS.md",
+        "docs/workflow/TASKS.md"
+      ],
+      "auditor": "codex"
+    },
+    {
+      "time": "2026-11-06T14:00:30",
+      "result": "fail",
+      "report": "06 QA/AUD-20261106-TASK-0140-02.md",
+      "report_sha256": "4024aaa7b9f7b3561764701d2d77d8aca9b248a381248ecf4b8c3fdbf530ffcd",
+      "measured_sha": "b51d2720ef55e05b553b5035ff7a7424f1d91b82",
+      "applies_to": [
+        "scripts/audit_gate.py",
+        "scripts/orchestrator.py",
+        ".github/workflows/audit-gate.yml",
+        "tests/test_audit_gate.py",
+        "tests/test_orchestrator_gate.py",
+        "tests/test_orchestrator.py",
+        "AGENTS.md",
+        "docs/workflow/TASKS.md",
+        "04 Agents/Workflow.md",
+        ".agents/skills/task-close/SKILL.md",
+        ".claude/skills/task-close/SKILL.md",
+        "tasks/items/TASK-0140.json",
+        "03 Games/GAME-004 MathShow/06 Tasks/TASK-0140-Audit-Head-Gate.md",
+        "06 QA/AUD-20261105-TASK-0140-01.md"
+      ],
+      "auditor": "codex (independent)"
+    }
+  ],
+  "revisions": 2
+}

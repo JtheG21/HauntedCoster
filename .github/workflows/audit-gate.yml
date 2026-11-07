@@ -1,0 +1,55 @@
+# Blocks a source change from merging unless an immutable audit report PASS covers the PR head (TASK-0140).
+# pull_request_target: this file and scripts/audit_gate.py come from the BASE branch, so a PR cannot change the code
+# that judges it. The PR head is checked out into pr-data/ as data only: it is read with git and never executed,
+# imported or installed. Read-only token, no persisted credentials, fails closed (any non-zero exit fails the job).
+# A fork PR is refused. The first PR that adds or changes this file is not gated by it (the base has the old one).
+# Branch protection is set by hand: this job only reports.
+name: audit-gate
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited, ready_for_review, converted_to_draft]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  audit-gate:
+    runs-on: ubuntu-latest
+    steps:
+      # Trusted: the gate code at the PR base commit.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: gate
+          persist-credentials: false
+
+      # Untrusted data: the PR head with full history (for ancestry and report history). Never executed.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pr-data
+          fetch-depth: 0
+          persist-credentials: false
+          lfs: false
+          submodules: false
+
+      - name: audit-gate
+        working-directory: gate
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_REPO: ${{ github.repository }}
+          IS_DRAFT: ${{ github.event.pull_request.draft }}
+        run: |
+          set -euo pipefail
+          if [ "$HEAD_REPO" != "$BASE_REPO" ]; then
+            echo "audit-gate: PR from another repository ($HEAD_REPO) is refused."
+            exit 1
+          fi
+          args=(--root "$GITHUB_WORKSPACE/pr-data" --head "$HEAD_SHA" --branch "$HEAD_REF" --base "$BASE_SHA")
+          if [ "$IS_DRAFT" = "true" ]; then args+=(--draft); fi
+          python3 -I "$GITHUB_WORKSPACE/gate/scripts/audit_gate.py" "${args[@]}"

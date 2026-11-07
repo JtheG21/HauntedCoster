@@ -24,7 +24,70 @@ Each task is one file, `tasks/items/TASK-####.json`, and those files are authori
 | `risk` | `low`, `medium`, `high` | High means DataStores, Robux, data loss, security or a live game. |
 
 Fields the orchestrator also keeps: `history`, `executions`,
-`audits`, `revisions`, `approved_by`, `merge_approved_by`, `stacked_on`, `migrated_from`.
+`audits`, `revisions`, `approved_by`, `merge_approved_by`, `merge_approval`, `merged`, `stacked_on`, `migrated_from`.
+
+**Executor and auditor.** The executor is the task's `owner_agent`. The audit record is the **report**, not the JSON: an
+`06 QA/<audit id>.md` file whose frontmatter holds `id` (equal to the file name), `task_id`, `verdict: pass|fail`,
+`reviewed_commit` (the full 40-hex SHA it measured) and `reviewer` (e.g. `codex`). Each `audits` entry in the task JSON is
+an **index only**: `result`, `measured_sha`, `auditor`, `report`, `report_sha256` and `applies_to`, plus `advisory: true`
+for a PASS from an auditor not in the independent list, and `post_merge: true` with `remediation` for a finding on a done
+task. `merge_approval` holds `{by, text, pr, head_sha, base_sha, time}` and `merged` holds
+`{pr, merge_commit, merged_at, head_sha, recorded_at}` (plus `override: true` after `override-merge`). Older audit
+records without these fields cannot approve a merge; such a task needs a new audit.
+
+## Audit-head rules
+Every decision (the `audit-gate` check, `approve-merge`, `mark-merged`) runs `scripts/audit_gate.py`, which reads only
+committed Git objects at decision time and never reads `status`. `approved` is a prerequisite for `approve-merge` and
+`mark-merged`, never sufficient.
+- **The report decides.** The decisive report is the newest report whose frontmatter names the task, and it must be the
+  last non-post-merge JSON entry. Its own `verdict`, `reviewed_commit` and `reviewer` are used. The gate refuses when the
+  JSON disagrees with it (result, measured SHA, auditor or sha256), when a report names the task but is not indexed, or
+  when the JSON order does not match the order the reports were added.
+- **Reports are immutable.** Exactly one commit adds each report, and its blob at the head equals the blob at that
+  commit. An edited, deleted-and-re-added or symlinked report, or a second file with the same audit id (frontmatter `id`
+  or file name), refuses. A new audit is a new report with a new id.
+- **Tier is pinned.** Tier, `owner_agent`, `note_path`, `branch` and `id` come from the task JSON on the PR base, or, for a
+  new task, from the commit that added the JSON. Any change to them on the branch refuses, as does more than one task file
+  naming the branch at the base or the head.
+- **Standard is deep.** A standard or deep task needs a PASS whose reviewer is a listed independent auditor (`codex`,
+  `INDEPENDENT_AUDITORS` in `audit_gate.py`) and not the pinned `owner_agent`. A light task needs no audit; `approve-merge`
+  then needs every check green. An untiered task is treated as deep.
+- **Paths after the audit.** The reviewed commit must be an ancestor of the head. `git diff --raw --no-renames
+  <reviewed>..<head>` (a rename counts as a delete and an add, so both sides are judged) may touch only regular `100644`
+  files in `06 QA/` (`.md`), `tasks/items/` (`.json`), `docs/workflow/evidence/` and the one pinned task note, which must be
+  `03 Games/<game>/06 Tasks/<TASK-####>-<slug>.md`. Matching is per path component, so `06 QA-x/` is source. Symlinks,
+  submodules, mode and type changes refuse even in those paths.
+- **Chore branches** pass without a task only if nothing under `games/`, `scripts/` or `.github/`, no `.gitmodules` or
+  `.gitattributes`, and no symlink or submodule changed (renames counted on both sides).
+- **`record-audit TASK-#### --verdict pass|fail --report "06 QA/<id>.md" --measured-sha <40 hex> --applies-to <paths...> --auditor <who> [--post-merge --remediation TASK-####]`**
+  indexes a report. The flags must equal the report's frontmatter, the SHA must be a commit here, the auditor must not be
+  `owner_agent`, and a report or audit id already indexed refuses. Only a PASS by a listed independent auditor moves a
+  standard or deep task to `approved`; any other reviewer's PASS is indexed as `advisory` and the status stays `review`. No
+  other command moves a standard or deep task to `approved`. With `--post-merge` the task must be `done`: the finding is
+  appended with its remediation task and the status does not change. `reopen` is unchanged.
+- **`approve-merge TASK-#### --by <human> --pr N --approval-text "<verbatim>"`** needs every `gh pr view` field it uses
+  (OPEN, `isDraft: false`, this task's branch, full head and base SHAs), runs the gate on that head and base, and records
+  `merge_approval` with both SHAs. It never sets `done`. Do not commit the approval record to the PR branch: that moves the
+  head.
+- **`mark-merged TASK-#### --pr N`** needs a `merge_approval` for that PR and sets `done` only if GitHub reports MERGED with a
+  full merge commit SHA and time, from this task's branch, **and the merged head equals the approved `head_sha`**. It re-runs
+  the gate at that head against the approved base. Anything else refuses; a post-merge finding is the way to record it.
+- **CI:** `.github/workflows/audit-gate.yml` (job `audit-gate`) runs on `pull_request_target`. It checks out the **base**
+  commit into `gate/` and runs `python3 -I gate/scripts/audit_gate.py`; the PR head is checked out into `pr-data/` as data
+  and passed only as `--root`: nothing from it is executed, imported or installed. Permissions are `contents: read` and
+  `pull-requests: read`, `persist-credentials: false`, untrusted names reach the script through `env` only, actions are
+  pinned to full SHAs, any non-zero exit fails, and a PR from another repository is refused. Requiring the check is a
+  branch-protection setting, made by jg by hand.
+
+## Known limitations
+- **Identity is self-asserted.** The report's `reviewer`, the task's `owner_agent` and `--by` are text anyone with push access
+  can write; the gate checks they are consistent and independent, not who wrote them. Signed audit commits (TASK-0141) close
+  this.
+- **The first PR that introduces or changes the gate is not gated by it.** `pull_request_target` runs the base branch's
+  workflow and code, so PR #205 (which adds this version) runs the old one, or none. Its merge rests on jg's review and the
+  Codex audit.
+- **A new task's tier is whatever its first commit says.** jg's plan approval is the check on it; the gate only stops it
+  changing afterwards.
 
 ## Statuses
 
@@ -35,12 +98,12 @@ Fields the orchestrator also keeps: `history`, `executions`,
 | `in_progress` | Being implemented | `review`, `changes_requested` | `record-exec` |
 | `review` | Being audited | `approved`, `changes_requested` | `record-audit` |
 | `changes_requested` | Needs a revision (limit 2) | `in_progress`, `blocked`, `review` | `start`; **jg** (`reopen`) |
-| `approved` | Audit passed, waiting for the merge decision | `done`, `changes_requested`, `review` | **jg** (`approve-merge`, `reopen`) |
+| `approved` | Audit passed, waiting for the merge | `done`, `changes_requested`, `review` | **jg** (`approve-merge` records the approval, `reopen`); `mark-merged` sets `done` after a verified merge |
 | `blocked` | Limit hit or a decision is needed | `ready`, `backlog`, `archived`, `review` | **jg** (`unblock`, `reopen`) |
-| `done` | Merged | terminal | |
+| `done` | Merged (GitHub reported MERGED; `merged` holds the merge commit and time) | terminal | `mark-merged`; **jg** (`override-merge`) |
 | `archived` | Dropped or unstarted when its game was paused | terminal | `archive` |
 
-**Merging over a failed audit** is jg's decision alone: `python3 scripts/orchestrator.py override-merge TASK-#### --by jg --reason "..."`. The verdict stays a fail, and who decided and why go on that audit record.
+**Merging over a failed audit** is jg's decision alone. After jg merges, `python3 scripts/orchestrator.py override-merge TASK-#### --by jg --reason "..." --pr N` sets `done` only if GitHub reports the PR MERGED from this task's branch and the decisive report at the merged head says fail. The verdict stays a fail, and who decided and why go on that audit record.
 
 **Reopening an approved re-scope:** use `python3 scripts/orchestrator.py reopen TASK-#### --to review --reason "..." [--by jg]` instead of hand-editing status.
 Only `blocked`, `changes_requested` and `approved` may reopen; only `review` is supported. The reason must be non-empty; `--by` defaults to `jg`.

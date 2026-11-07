@@ -21,6 +21,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import audit_gate
 import task_store
 
 STATES = {
@@ -39,6 +40,28 @@ USAGE_KINDS = {"subscription", "api"}
 
 class OrchestratorError(Exception):
     pass
+
+
+def gh_pr_view(root: Path, pr: int, fields: str) -> dict:
+    """`gh pr view <pr> --json <fields>` as a dict. The only place the orchestrator talks to GitHub."""
+    try:
+        out = subprocess.run(["gh", "pr", "view", str(pr), "--json", fields], capture_output=True, text=True, cwd=root)
+    except OSError as e:
+        raise OrchestratorError(f"gh is not available ({e}); cannot verify PR {pr}") from e
+    if out.returncode != 0:
+        raise OrchestratorError(f"gh pr view {pr} failed: {out.stderr.strip() or out.stdout.strip()}")
+    try:
+        return json.loads(out.stdout)
+    except json.JSONDecodeError as e:
+        raise OrchestratorError(f"gh pr view {pr}: unreadable output ({e})") from e
+
+
+def checks_green(rollup: list | None) -> bool:
+    """Every reported check finished and succeeded (neutral and skipped count); at least one was reported."""
+    if not rollup:
+        return False
+    ok = {"SUCCESS", "NEUTRAL", "SKIPPED"}
+    return all((c.get("conclusion") or c.get("state") or "").upper() in ok for c in rollup)
 
 
 def now() -> str:
@@ -177,7 +200,11 @@ class Project:
         return None
 
     # ---- transitions -----------------------------------------------------
-    def _move(self, t: dict, new: str, note: str) -> None:
+    def _move(self, t: dict, new: str, note: str, via_independent_pass: bool = False) -> None:
+        if new == "approved" and t.get("tier") != "light" and not via_independent_pass:
+            raise OrchestratorError(
+                f"{t['id']}: only record-audit with a PASS from an independent auditor "
+                f"({', '.join(sorted(audit_gate.INDEPENDENT_AUDITORS))}) moves a {t.get('tier') or 'untiered'} task to approved")
         old = t["status"]
         t["status"] = new
         t.setdefault("history", []).append({"time": now(), "from": old, "to": new, "note": note})
@@ -250,14 +277,68 @@ class Project:
         else:
             self._fail(t, "execution checks failed")
 
-    def record_audit(self, task_id: str, result: str, report: str) -> None:
+    def record_audit(self, task_id: str, result: str, report: str, measured_sha: str, applies_to: list[str],
+                     auditor: str, post_merge: bool = False, remediation: str | None = None) -> None:
+        """Index an audit report in the task JSON. The report's own frontmatter is the record.
+
+        The report must carry `id` (its file name), `task_id`, `verdict`, `reviewed_commit` (full SHA) and `reviewer`,
+        and the flags must equal them. The reviewer is never the task's executor (`owner_agent`). On a standard or
+        deep task only a PASS by a listed independent auditor moves the task to approved; another reviewer's PASS is
+        indexed as advisory and the status stays. With `post_merge`, a finding on a `done` task is appended (linked to
+        the remediation task) and the status is left alone. The gate re-reads the report at decision time."""
         t = self.task(task_id)
-        self._expect(t, "review")
-        if not (self.root / report).exists():
-            raise OrchestratorError(f"audit report not found: {report}")
-        t.setdefault("audits", []).append({"time": now(), "result": result, "report": report})
+        if post_merge:
+            self._expect(t, "done")
+            if not remediation:
+                raise OrchestratorError("--post-merge needs --remediation TASK-#### (the task that fixes the finding)")
+            if remediation == task_id or not ID_RE.match(remediation):
+                raise OrchestratorError(f"--remediation must be another task id, got {remediation!r}")
+            self.task(remediation)
+        else:
+            self._expect(t, "review")
+            if remediation:
+                raise OrchestratorError("--remediation is only for --post-merge")
+        if not audit_gate.HEX40.match(measured_sha or ""):
+            raise OrchestratorError("--measured-sha must be the full 40-hex commit SHA, lower case")
+        if not [p for p in applies_to if p.strip()]:
+            raise OrchestratorError("--applies-to needs at least one path or glob the audit covers")
+        who = audit_gate.normalize_identity(auditor)
+        if not who:
+            raise OrchestratorError("--auditor must name who ran the audit")
+        executor = audit_gate.normalize_identity(t.get("owner_agent"))
+        if executor and who == executor:
+            raise OrchestratorError(
+                f"the auditor {auditor!r} is this task's executor (owner_agent); an audit must be independent")
+        if not audit_gate.valid_report_path(report):
+            raise OrchestratorError(f"the report must be <audit id>.md directly in 06 QA/, got {report!r}")
+        path = self.root / report
+        if path.is_symlink() or not path.is_file():
+            raise OrchestratorError(f"audit report not found (or not a regular file): {report}")
+        fields, problems = audit_gate.report_fields(path.read_text(encoding="utf-8"), report, task_id)
+        claims = {"verdict": result, "reviewed_commit": measured_sha, "reviewer": who}
+        problems += [f"the report's {k} is {fields[k]!r}, not {v!r}" for k, v in claims.items() if fields[k] != v]
+        if problems:
+            raise OrchestratorError(f"audit report {report} does not match the claim: " + "; ".join(problems))
+        for a in t.get("audits") or []:
+            if a.get("report") == report or Path(str(a.get("report"))).stem == fields["id"]:
+                raise OrchestratorError(f"{task_id} already indexes audit {fields['id']}; a new audit needs a new report")
+        if not audit_gate.commit_exists(self.root, measured_sha):
+            raise OrchestratorError(f"measured SHA {measured_sha} is not a commit in this repository (fetch it first)")
+        entry = {"time": now(), "result": result, "report": report, "report_sha256": audit_gate.sha256_file(path),
+                 "measured_sha": measured_sha, "applies_to": list(applies_to), "auditor": who}
+        independent = who in audit_gate.INDEPENDENT_AUDITORS
+        if post_merge:
+            entry["post_merge"] = True
+            entry["remediation"] = remediation
+            t.setdefault("audits", []).append(entry)
+            return
+        if result == "pass" and t.get("tier") != "light" and not independent:
+            entry["advisory"] = True
+            t.setdefault("audits", []).append(entry)
+            return
+        t.setdefault("audits", []).append(entry)
         if result == "pass":
-            self._move(t, "approved", "audit passed; merge needs human approval")
+            self._move(t, "approved", f"audit passed ({who}); merge needs human approval", via_independent_pass=independent)
         else:
             self._fail(t, "audit failed")
 
@@ -280,24 +361,120 @@ class Project:
         t.setdefault("history", []).append({"from": old, "to": to, "reason": reason, "by": by, "at": now()})
         self._sync_note(t)
 
-    def approve_merge(self, task_id: str, by: str) -> None:
+    def _human(self, by: str) -> None:
+        if not by.strip() or audit_gate.normalize_identity(by) in audit_gate.AGENT_IDS:
+            raise OrchestratorError(f"--by must be the human who decided, not an agent ({by!r})")
+
+    def _pr(self, t: dict, pr: int, merged: bool) -> dict:
+        """`gh pr view` with every field this decision needs present and well formed."""
+        fields = ("state,mergeCommit,mergedAt,headRefOid,headRefName" if merged
+                  else "headRefOid,headRefName,baseRefOid,state,isDraft,statusCheckRollup")
+        info = gh_pr_view(self.root, pr, fields)
+        if not isinstance(info, dict):
+            raise OrchestratorError(f"PR {pr}: gh returned no object")
+        branch = t.get("branch")
+        if not isinstance(branch, str) or not branch:
+            raise OrchestratorError(f"{t['id']} has no branch; cannot match it to PR {pr}")
+        if info.get("headRefName") != branch:
+            raise OrchestratorError(f"PR {pr} is from {info.get('headRefName')!r}, not this task's branch {branch!r}")
+        if not audit_gate.HEX40.match(str(info.get("headRefOid") or "")):
+            raise OrchestratorError(f"PR {pr}: gh reports no full head SHA ({info.get('headRefOid')!r})")
+        if merged:
+            if info.get("state") != "MERGED":
+                raise OrchestratorError(f"PR {pr} is {info.get('state')}, not MERGED; the task is not done")
+            oid = (info.get("mergeCommit") or {}).get("oid") if isinstance(info.get("mergeCommit"), dict) else None
+            if not audit_gate.HEX40.match(str(oid or "")) or not isinstance(info.get("mergedAt"), str) \
+                    or not info["mergedAt"]:
+                raise OrchestratorError(f"PR {pr}: gh reports MERGED without a full merge commit SHA and time")
+        else:
+            if info.get("state") != "OPEN":
+                raise OrchestratorError(f"PR {pr} is {info.get('state')}, not OPEN")
+            if info.get("isDraft") is not False:
+                raise OrchestratorError(f"PR {pr} is a draft (or gh did not say); mark it ready for review first")
+            if not audit_gate.HEX40.match(str(info.get("baseRefOid") or "")):
+                raise OrchestratorError(f"PR {pr}: gh reports no full base SHA ({info.get('baseRefOid')!r})")
+        return info
+
+    def _gate(self, t: dict, pr: int, head: str, base: str) -> dict:
+        """Run the same decision CI runs; refuse unless it passes for this task. Returns the gate's facts."""
+        try:
+            code, lines, facts = audit_gate.evaluate(self.root, head, t["branch"], base)
+        except audit_gate.GateError as e:
+            raise OrchestratorError(f"PR {pr}: audit gate could not decide: {e}") from e
+        if code != 0:
+            raise OrchestratorError(f"PR {pr} head {head[:12]} is refused by the audit gate:\n" + "\n".join(lines))
+        if facts.get("task_id") != t["id"]:
+            raise OrchestratorError(f"PR {pr}: the gate resolved branch {t['branch']} to {facts.get('task_id')}, "
+                                    f"not {t['id']}")
+        return facts
+
+    def approve_merge(self, task_id: str, by: str, pr: int, approval_text: str) -> None:
+        """HUMAN: record jg's approval to merge PR `pr`, after the audit gate passes for its head.
+
+        Never sets `done` (see mark_merged). `approved` status is a prerequisite only: the decision is the gate's,
+        made from the report at the PR head and the tier pinned at registration. Light tier (pinned) also needs every
+        check green."""
         t = self.task(task_id)
         self._expect(t, "approved")
+        self._human(by)
+        if not approval_text.strip():
+            raise OrchestratorError("--approval-text must hold jg's approval, verbatim")
+        info = self._pr(t, pr, merged=False)
+        head, base = info["headRefOid"], info["baseRefOid"]
+        facts = self._gate(t, pr, head, base)
+        if facts.get("tier") == "light" and not checks_green(info.get("statusCheckRollup")):
+            raise OrchestratorError(f"PR {pr}: a light-tier merge needs every check green, and they are not")
         t["merge_approved_by"] = by
-        self._move(t, "done", f"merge approved by {by}")
+        t["merge_approval"] = {"by": by, "text": approval_text, "pr": pr, "head_sha": head, "base_sha": facts["base"],
+                               "time": now()}
 
-    def override_merge(self, task_id: str, by: str, reason: str) -> None:
-        """HUMAN: merge over a failed audit. The verdict stays a fail; who decided and why go on that audit record."""
+    def mark_merged(self, task_id: str, pr: int) -> None:
+        """Set `done` only when GitHub says PR `pr` is MERGED with exactly the head that approve-merge approved."""
+        t = self.task(task_id)
+        self._expect(t, "approved")
+        approval = t.get("merge_approval")
+        if not isinstance(approval, dict) or approval.get("pr") != pr:
+            raise OrchestratorError(f"{task_id}: no merge approval recorded for PR {pr}; run approve-merge --pr {pr} first")
+        approved_head, approved_base = str(approval.get("head_sha") or ""), str(approval.get("base_sha") or "")
+        if not (audit_gate.HEX40.match(approved_head) and audit_gate.HEX40.match(approved_base)):
+            raise OrchestratorError(f"{task_id}: the recorded approval has no full head and base SHA; approve again")
+        info = self._pr(t, pr, merged=True)
+        head = info["headRefOid"]
+        if head != approved_head:
+            raise OrchestratorError(f"PR {pr} merged with head {head[:12]}, but jg approved {approved_head[:12]}. "
+                                    "Not done: record a post-merge finding and remediate.")
+        self._gate(t, pr, head, approved_base)
+        merge_commit = info["mergeCommit"]["oid"]
+        t["merged"] = {"pr": pr, "merge_commit": merge_commit, "merged_at": info["mergedAt"], "head_sha": head,
+                       "recorded_at": now()}
+        self._move(t, "done", f"merged via PR {pr} ({merge_commit[:7]}) at {info['mergedAt']}")
+
+    def override_merge(self, task_id: str, by: str, reason: str, pr: int) -> None:
+        """HUMAN: record that jg merged PR `pr` over a failed audit. Verified like mark-merged: gh must report MERGED
+        from this task's branch, and the decisive report at the merged head must say fail. The verdict stays a fail;
+        who decided and why go on that audit record."""
         t = self.task(task_id)
         self._expect(t, "changes_requested", "blocked")
+        self._human(by)
         if not reason.strip():
             raise OrchestratorError("override-merge needs a --reason")
-        audits = t.get("audits") or []
-        if not audits or audits[-1].get("result") != "fail":
-            raise OrchestratorError(f"{task_id}: the latest audit didn't fail, so there is nothing to override")
-        audits[-1]["merge_override"] = {"by": by, "reason": reason, "time": now()}
+        info = self._pr(t, pr, merged=True)
+        head = info["headRefOid"]
+        try:
+            fields, problems = audit_gate.decisive_audit(self.root, t, head)
+        except audit_gate.GateError as e:
+            raise OrchestratorError(f"PR {pr}: could not read the audit at {head[:12]}: {e}") from e
+        if problems or not fields:
+            raise OrchestratorError(f"PR {pr}: the audit record at {head[:12]} is not intact:\n  - " + "\n  - ".join(problems))
+        if fields["verdict"] != "fail":
+            raise OrchestratorError(f"{task_id}: the decisive report says {fields['verdict']}, so there is nothing to override")
+        audits = [a for a in t.get("audits") or [] if not a.get("post_merge")]
+        audits[-1]["merge_override"] = {"by": by, "reason": reason, "time": now(), "pr": pr}
+        merge_commit = info["mergeCommit"]["oid"]
         t["merge_approved_by"] = by
-        self._move(t, "done", f"merge approved by {by} over failed audit: {reason}")
+        t["merged"] = {"pr": pr, "merge_commit": merge_commit, "merged_at": info["mergedAt"], "head_sha": head,
+                       "recorded_at": now(), "override": True}
+        self._move(t, "done", f"merged via PR {pr} ({merge_commit[:7]}) over a failed audit, by {by}: {reason}")
 
     def unblock(self, task_id: str, to: str, by: str) -> None:
         t = self.task(task_id)
@@ -536,21 +713,33 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("report", help="write 08 Reviews/HLT-<date>.md")
     sub.add_parser("state", help="print the project state, calculated from the task files")
     sub.add_parser("next-id", help="print the next TASK-#### free across all branches")
-    for name in ("approve", "approve-merge", "archive"):
+    for name in ("approve", "archive"):
         s = sub.add_parser(name)
         s.add_argument("id")
         s.add_argument("--by", required=True, help="name of the human approving")
+    s = sub.add_parser("approve-merge", help="HUMAN: record the merge approval for a PR whose head the audit covers (never sets done)")
+    s.add_argument("id"); s.add_argument("--by", required=True, help="name of the human approving")
+    s.add_argument("--pr", type=int, required=True); s.add_argument("--approval-text", required=True, help="jg's approval, verbatim")
+    s = sub.add_parser("mark-merged", help="set done once gh reports the PR MERGED; records the merge commit and time")
+    s.add_argument("id"); s.add_argument("--pr", type=int, required=True)
     s = sub.add_parser("start"); s.add_argument("id")
     s = sub.add_parser("request-changes", help="HUMAN: send a review/approved task back for fixes (counts as a revision)")
     s.add_argument("id"); s.add_argument("--by", required=True); s.add_argument("--reason", required=True)
-    s = sub.add_parser("override-merge", help="HUMAN: merge over a failed audit; the verdict stays a fail")
+    s = sub.add_parser("override-merge", help="HUMAN: record a merge over a failed audit once gh reports MERGED; the verdict stays a fail")
     s.add_argument("id"); s.add_argument("--by", required=True); s.add_argument("--reason", required=True)
+    s.add_argument("--pr", type=int, required=True)
     s = sub.add_parser("unblock"); s.add_argument("id"); s.add_argument("--to", required=True); s.add_argument("--by", required=True)
     s = sub.add_parser("reopen", help="HUMAN: return an approved re-scope to review, preserving history and audits")
     s.add_argument("id"); s.add_argument("--to", choices=["review"], required=True)
     s.add_argument("--reason", required=True); s.add_argument("--by", default="jg")
     s = sub.add_parser("record-exec"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--notes", default="")
-    s = sub.add_parser("record-audit"); s.add_argument("id"); s.add_argument("--result", choices=["pass", "fail"], required=True); s.add_argument("--report", required=True)
+    s = sub.add_parser("record-audit", help="index a report whose frontmatter holds the verdict, reviewed_commit and reviewer")
+    s.add_argument("id"); s.add_argument("--verdict", "--result", dest="verdict", choices=["pass", "fail"], required=True)
+    s.add_argument("--report", required=True); s.add_argument("--measured-sha", required=True, help="full 40-hex SHA the audit measured")
+    s.add_argument("--applies-to", nargs="+", required=True, help="paths or globs the audit covers")
+    s.add_argument("--auditor", required=True, help="who ran it: must equal the report's reviewer, never the executor")
+    s.add_argument("--post-merge", action="store_true", help="a finding on a done task: appended, status unchanged")
+    s.add_argument("--remediation", help="with --post-merge: the task that fixes it")
     s = sub.add_parser("record-usage"); s.add_argument("id"); s.add_argument("--kind", choices=sorted(USAGE_KINDS), required=True)
     s.add_argument("--role", default=""); s.add_argument("--model", default=""); s.add_argument("--cost-usd", type=float)
     s.add_argument("--est-cost-usd", type=float); s.add_argument("--tokens", type=int); s.add_argument("--note", default="")
@@ -604,15 +793,17 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         actions = {
             "approve": lambda: proj.approve(a.id, a.by),
-            "approve-merge": lambda: proj.approve_merge(a.id, a.by),
+            "approve-merge": lambda: proj.approve_merge(a.id, a.by, a.pr, a.approval_text),
+            "mark-merged": lambda: proj.mark_merged(a.id, a.pr),
             "archive": lambda: proj.archive(a.id, a.by),
             "start": lambda: proj.start(a.id),
             "unblock": lambda: proj.unblock(a.id, a.to, a.by),
             "reopen": lambda: proj.reopen(a.id, a.to, a.reason, a.by),
-            "override-merge": lambda: proj.override_merge(a.id, a.by, a.reason),
+            "override-merge": lambda: proj.override_merge(a.id, a.by, a.reason, a.pr),
             "request-changes": lambda: proj.request_changes(a.id, a.by, a.reason),
             "record-exec": lambda: proj.record_exec(a.id, a.result, a.notes),
-            "record-audit": lambda: proj.record_audit(a.id, a.result, a.report),
+            "record-audit": lambda: proj.record_audit(a.id, a.verdict, a.report, a.measured_sha, a.applies_to,
+                                                      a.auditor, a.post_merge, a.remediation),
         }
         actions[a.cmd]()
         proj.save()

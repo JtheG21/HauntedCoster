@@ -28,16 +28,16 @@ Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, backlog) → [HUMAN:
 | `in_progress` | Executor working on `task/TASK-####-slug` | `review` / `changes_requested` | `record-exec` |
 | `review` | Auditor reviewing | `approved` / `changes_requested` | `record-audit` |
 | `changes_requested` | A check or audit failed (+1 revision) | `in_progress` / `blocked` | `start` |
-| `approved` | Audit passed, merge pending | `done` | **Human** (`approve-merge`, then merge) |
+| `approved` | Audit passed, merge pending | `done` | **Human** (`approve-merge`, merges on GitHub), then `mark-merged` |
 | `blocked` | Retry limit hit or a decision is needed | `ready` / `backlog` / `archived` | **Human** (`unblock`) |
 | `done` / `archived` | Terminal | | |
 
 `max_revisions` (default 2) is in `00 Studio/budget.json`. Going past it blocks the task. Nothing retries automatically.
 
 ## Merge procedure (human-approved merges only)
-1. Merge on GitHub without a local checkout: `gh pr merge <N> --repo JtheG21/HauntedCoster --merge --subject "Merge pull request #<N> from JtheG21/<branch> (approved by <who>)"`, after CI passes.
-2. Stop Rojo, then `scripts/preflight.sh --root <main checkout> --clean && git -C <main checkout> switch main && git -C <main checkout> pull --ff-only`.
-3. Delete the branch locally and on the remote. Task branches run `orchestrator.py approve-merge` and the outcome notes on the branch **before** step 1, so the merge carries them.
+1. The task note's Outcome is committed and pushed on the task branch first. Then `orchestrator.py approve-merge TASK-#### --by jg --pr <N> --approval-text "<jg's words>"` in the task worktree runs the CI gate on the PR head and records the approval with that head; **don't commit or push it to the PR branch** (that moves the approved head). jg merges on the GitHub UI after CI, including `audit-gate`, passes. Agents never merge, approve or mark done.
+2. Afterwards, on a `chore/` branch from `main` with the task file carried over from the task worktree, `orchestrator.py mark-merged TASK-#### --pr <N>` sets `done` only if GitHub reports MERGED with exactly the approved head; commit it with the remaining outcome notes. Stop Rojo, then `scripts/preflight.sh --root <main checkout> --clean && git -C <main checkout> switch main && git -C <main checkout> pull --ff-only`.
+3. Delete the branch locally and on the remote.
 
 ## Isolation
 - One Git branch per task, from an up-to-date `main`. Workflow and doc changes use `chore/<slug>` branches.
