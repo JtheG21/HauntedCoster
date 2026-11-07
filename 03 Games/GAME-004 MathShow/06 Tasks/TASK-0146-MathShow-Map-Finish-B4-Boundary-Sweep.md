@@ -3,7 +3,7 @@ id: TASK-0146
 title: "MathShow Map Finish B4 Boundary Sweep"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
