@@ -2,7 +2,7 @@
   "id": "TASK-0141",
   "game": "GAME-004",
   "title": "MathShow Profile Exactly-Once Saves v2",
-  "status": "review",
+  "status": "approved",
   "tier": "deep",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -90,6 +90,12 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-06T19:43:23",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
     }
   ],
   "executions": [
@@ -119,6 +125,11 @@
       "time": "2026-11-06T19:27:54",
       "result": "fail",
       "report": "06 QA/AUD-20261106-TASK-0141-02.md"
+    },
+    {
+      "time": "2026-11-06T19:43:23",
+      "result": "pass",
+      "report": "06 QA/AUD-20261106-TASK-0141-03.md"
     }
   ],
   "revisions": 2
