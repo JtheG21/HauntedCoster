@@ -2,7 +2,7 @@
   "id": "TASK-0149",
   "game": "GAME-004",
   "title": "MathShow Quests XP Rules",
-  "status": "review",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "codex",
   "files_owned": [
@@ -62,6 +62,18 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-07T15:15:48",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-07T15:15:48",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -81,7 +93,13 @@
       "time": "2026-11-07T15:07:34",
       "result": "fail",
       "report": "06 QA/AUD-20261107-TASK-0149-01.md"
+    },
+    {
+      "time": "2026-11-07T15:15:48",
+      "result": "pass",
+      "report": "06 QA/AUD-20261107-TASK-0149-02.md"
     }
   ],
-  "revisions": 1
+  "revisions": 1,
+  "merge_approved_by": "jg"
 }

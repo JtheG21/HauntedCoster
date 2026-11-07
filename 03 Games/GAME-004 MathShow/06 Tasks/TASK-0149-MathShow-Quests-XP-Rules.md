@@ -3,7 +3,7 @@ id: TASK-0149
 title: "MathShow Quests XP Rules"
 type: task
 project: GAME-004
-status: review
+status: done
 priority: medium
 risk: low
 owner: executor
