@@ -3,7 +3,7 @@ id: TASK-0143
 title: "MathShow Map Finish Map Finish B1 Sky"
 type: task
 project: GAME-004
-status: in_progress
+status: approved
 priority: medium
 risk: low
 owner: executor

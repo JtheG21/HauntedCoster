@@ -2,7 +2,7 @@
   "id": "TASK-0143",
   "game": "GAME-004",
   "title": "MathShow Map Finish B1 Sky",
-  "status": "in_progress",
+  "status": "approved",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -37,6 +37,25 @@
       "from": "ready",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-06T20:20:22",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-06T20:20:22",
+      "from": "review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-06T20:20:22",
+      "result": "pass",
+      "notes": "Sky.rbxmx + violet Atmosphere at dfdd30b; HubRoutes 6/6 fresh Play; lights 25/40, +0 tris; no skybox texture (two free ones did not render in Studio). Evidence docs/workflow/evidence/MAP-FINISH/B1-sky.txt. Collect/HUD/mid-match not re-run (scope argument)."
     }
   ]
 }
