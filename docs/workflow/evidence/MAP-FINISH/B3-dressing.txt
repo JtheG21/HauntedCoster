@@ -1,0 +1,29 @@
+# TASK-0145 Map Finish B3 Path and plaza dressing (rows MF-P, MF-M)
+# measured git HEAD: fc8e8dd (BuildStamp "fc8e8dd 2026-11-07T04:38:26Z", clean tree; scripts/serve.sh from the TASK-0145 worktree; Rojo plugin reconnected; fresh Play, single player; place not saved)
+# applies_to: Measured at fc8e8dd. Applies to later commits whose diff from fc8e8dd does not touch games/mathshow/map/**, scripts/build_hub.py, mathshow.project.json or games/mathshow/src/**.
+# Captures (outside the repo): ~/Roblox-Work/evidence/TASK-0145/ : before_A1, before_A2, before_A3, before_lake (main at 83b8b05, Play, iPhone 13 emulation); after_A2, after_A3, after_lake_bench, after_path_bench_flowers (fc8e8dd or its predecessor, see below).
+
+## Change (scripts/build_hub.py add_dressing; Hub.rbxmx regenerated, drift guard passes)
+- Flowers: 120 clumps (one Plastic stem + a Neon plus-sign bloom of two thin bars) on both sides of the four flat radial paths E, W, SW, SE, 3.5 studs apart, 10.2 studs off the centre line (outside the 12-wide route corridor, outside the lamp posts), deterministic jitter (no Random, so the file is stable), colours violet / cyan / amber cycling. All CanCollide, CanTouch, CanQuery and CastShadow false; no lights. The bloom is a plus sign (a math motif) on purpose: a first version with flat Neon caps read as mushrooms, which the IP rule excludes.
+- Benches: 4 on the lake promenade (155, 180, 270, 295 degrees, clear of the lake lamps and R_Lake glyphs, seat facing the water) and 2 on the E and W path sides (a = 86 and 90, b = +-12.5, facing the path). Each is a Plaza Stone seat, a back, two supports and a Holo Cyan Neon edge trim. Seats, backs and supports collide; none is within a route corridor.
+- North path not lined: it is a ramp up three terraces, so ground-level flowers beside it would sit under the rising deck. Recorded as a gap, not built.
+- RankCrystal at the plaza centre: already present and animated by HubCosmetics; no change.
+- Renamed bench "Leg" parts to "Support" because tests/test_build_hub.py counts parts named "_Leg" as the six arch legs.
+
+## Gates (fresh Play at fc8e8dd)
+- scripts/check.sh: ALL CHECKS PASSED (also on each earlier commit of the branch).
+- HubRoutes: HUBROUTES_RESULT routes=6/6 failures=0 stamp=fc8e8dd. Daily 11.8 s, VS 12.3, Blitz 10.7, Group 12.2, Practice 11.8, Skill 11.7; canary blocked; all 6 pads opened their screens.
+- Python walk and route guards (check.sh): pass; they cover the 34/34 GlyphSpawn reachability on the regenerated map.
+- Console: no new warnings or errors. The three "ContentId rbxassetid://203785492" lines predate this work. One tooling line ("execute_luau changed camera type") comes from the Studio assistant resetting my debug camera, not from the game.
+- Not re-run live: collect/respawn, HUD, mid-match (no gameplay or remote change; scope argument, not measured evidence).
+
+## Budgets (counted from Hub.rbxmx, main vs this branch)
+- PointLights: 25 -> 25 (Studio read back 25 at fc8e8dd). Limit 40.
+- Instances: 1692 -> 2084 (+392: 360 flower parts, 30 bench parts, 2 folders).
+- Triangles (primitive count by the TASK-0132 stated costs: Block 12): +4,680. Program baseline 39,232 (TASK-0133) + 4,680 = 43,912; the stop line is +25% = 49,040, leaving 5,128 for B4 and B5. (My counter reads the base file at 38,136, not 39,232, so only the delta is used.)
+- CastShadow false on every new part (flowers and benches both pass cast_shadow=False).
+
+## Captures: what they show and what they do not
+- before/after A2 (Competitive entrance, same scripted camera): flowers and lamps line the path after; none before. before/after A3 (aerial, same scripted camera): flowers are too small to read from the air. before_A1 is the default player camera, not the scripted A1 pose, so there is no matching after_A1.
+- The bench captures were taken after a contrast fix (lighter seat, bolder cyan trim). The first lake-bench capture, before the fix, showed benches as near-black boxes.
+- Not captured: a bench in daylight-style framing for A1/A3; plus the plus-sign blooms blur into round glows from far away because of Bloom.
