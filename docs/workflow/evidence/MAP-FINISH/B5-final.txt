@@ -1,0 +1,29 @@
+# TASK-0147 Map Finish B5 Final regression (rows MF-P, MF-M, MF-C)
+# measured git HEAD: be1da32 (BuildStamp "be1da32 2026-11-07T04:57:45Z", clean tree). be1da32 is main's head 99fbf45 plus two docs-only commits for this task; all code and map files are identical to main at 99fbf45. scripts/serve.sh from the TASK-0147 worktree; Rojo plugin reconnected; fresh Play, single player; place not saved.
+# applies_to: Measured at be1da32. Applies to later commits whose diff from be1da32 does not touch games/mathshow/map/**, games/mathshow/src/**, games/mathshow/tests/**, scripts/build_hub.py or mathshow.project.json.
+# Gallery (outside the repo): ~/Roblox-Work/evidence/MAP-FINISH/gallery_before_after.jpg (top row before at ea039b1, bottom row after at be1da32; same scripted cameras A1, A2, A3 and a sky view, Play, iPhone 13 emulation) and the eight source images before_*.jpg / after_*.jpg. Earlier per-batch captures: ~/Roblox-Work/evidence/TASK-0145/.
+
+## Gates at be1da32
+- scripts/check.sh: ALL CHECKS PASSED (StyLua, Selene, strict types, 403 specs, Rojo build, map drift, JSON, task files, queue, vault, references, skills, Python tests incl. route and walk guards).
+- HubRoutes (fresh Play): HUBROUTES_RESULT routes=6/6 failures=0 stamp=be1da32. Daily 11.7 s, VS 12.4, Blitz 10.7, Group 12.3, Practice 11.6, Skill 11.8 (all in the 8-12 s band); canary blocked; all 6 pads opened their screens (locked:daily, confirm_vs, confirm_blitz, confirm_group, practice, skillintro).
+- GlyphSpawn reachability (PathfindingService, agent radius 2, height 5, can jump, spawn (0,5,47) to each marker, server): 34/34 Success, 0 fail.
+- Glyph collect (client teleport onto the marker): Glyph_C_SW1 common: "Glyphs 0 / Total 51" -> "Glyphs 1 / Total 52", client parts 34 -> 33, glyph gone. Glyph_R_Roof1 rare (Ranks roof): -> "Glyphs 6 / Total 57", parts 32, glyph gone.
+- Reject -> retry: teleport onto Glyph_C_SW2; the server logged "GlyphCollect from jg_57565 rejected: out_of_range (Glyph_C_SW2)" and the retry took it: "Glyphs 6 / Total 57" -> "Glyphs 7 / Total 58".
+- Respawn: about 157 s after the SW1 pickup both Glyph_C_SW1 (common, 90 s) and Glyph_C_SW2 were back on the client (33 parts present after the two commons and the rare were taken; the rare's 300 s respawn was not waited for).
+- HUD: GlyphHud.Enabled=false while MathShowMenu.Enabled=true; true after the menu was set closed; label "Glyphs N  ·  Total M".
+- Mid-match: JoinShow fired in intermission; participant=true 50 s later (next match's question 1). Teleported onto Practice, Skill, Blitz and Daily for 3.5 s each: 0 ModePadOpen events each, while participant. (The menu was closed by my script, so "menu closed" there is not independent evidence.)
+- Console: no new warnings or errors. Known lines: three "ContentId rbxassetid://203785492 ... Asset type does not match requested type" (predate this program, seen on the first Play of the session); the server rejections above, which are the validation working.
+- Not exercised: the rare respawn (300 s), two players, real-device performance (TASK-0123), audibility of the B2 ambient loops, a screenshot of a shooting star in flight, AmbientLife failure injection.
+
+## Final budget table (Hub.rbxmx counted at ea039b1 vs be1da32; stated costs Block 12, Cylinder 96, Ball 432)
+                       ea039b1   be1da32   delta   limit
+PointLights                 25        25      +0    <= 40
+Hub.rbxmx instances      1,692     2,084    +392
+Triangle inventory     38,136*   42,816    +4,680   program stop at +25% over the TASK-0133 base 39,232 = 49,040
+Program triangle total (TASK-0133 base 39,232 + 4,680) = 43,912 (+11.9%), 5,128 below the stop line.
+* my counter reads the base map at 38,136, not TASK-0133's 39,232 (a different counting scope); only the delta is used.
+Other changes outside Hub.rbxmx: Lighting.Sky (+1 instance), Atmosphere retune, one runtime streak Part (12 tris, not in the inventory), 2 ambient Sounds (client created).
+CastShadow false on every new part; no new remotes; no server code changed; no uploads, no paid assets.
+
+## Range changed (ea039b1..99fbf45)
+games/mathshow/map/Hub.rbxmx (generated), games/mathshow/map/Sky.rbxmx, mathshow.project.json, scripts/build_hub.py, games/mathshow/src/client/Hub/AmbientLife.luau, games/mathshow/src/client/init.client.luau, games/mathshow/src/shared/AmbientRules.luau, games/mathshow/tests/AmbientRules.spec.luau, plus tasks, notes and evidence.

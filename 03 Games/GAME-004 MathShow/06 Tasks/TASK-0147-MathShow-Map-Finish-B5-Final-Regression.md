@@ -3,7 +3,7 @@ id: TASK-0147
 title: "MathShow Map Finish B5 Final Regression and Close"
 type: task
 project: GAME-004
-status: in_progress
+status: approved
 priority: medium
 risk: low
 owner: executor
