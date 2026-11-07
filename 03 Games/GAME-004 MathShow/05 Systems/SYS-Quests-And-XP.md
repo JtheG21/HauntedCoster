@@ -93,7 +93,7 @@ T2 persistence and services: ProfileRules v4, XpService, QuestService, event hoo
 - Unchanged: level cap 50, titles + nameplate colours, 3 daily per player, claim button, Daily pad opens QUESTS.
 
 ## Decisions changed by the re-review (need jg's OK)
-- None of jg's recorded decisions is reversed. Codex proposals that add detail and need jg's OK: the 300-second daily skew bound (QX-D3 said only "bounded"); the top-three tie rule (score descending, then userId ascending); one easy, one medium and one hard quest per day (keeps the 950/day ceiling).
+Accepted by jg (row QX-D5): 300 s skew bound; tie rule score desc then userId asc; one easy, one medium, one hard quest per day.
 
 ## Open (Codex)
 - Open (Codex): "assign ... a concrete nameplate renderer/startup path to T3". The re-review names no file, so T3 ownership has none yet.
