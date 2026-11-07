@@ -52,6 +52,24 @@ Redo the TASK-0139 exactly-once save so over-credit is impossible by constructio
 - check.sh ALL CHECKS PASSED; Lune 388 passed. Studio pass on 7b8e7d4: S1–S7 + rejoin PASS; API access readbacks OFF → ON → OFF (images in the evidence folder).
 - Draft PR #206 (not merged; no audit recorded by Claude).
 
+## Revision 2 (claude-code, attempt 2 of 2, FINAL): AUD-20261106-TASK-0141-01
+- Rows G1–G3 (jg, 2026-11-06). Started with `orchestrator.py start` (changes_requested -> in_progress), `5fb44c2`.
+- Source `69004d2`: R1 acknowledging writes nothing; R2 ops carry a frozen `settingsPatch` of changed keys only; R3 the
+  patch is dropped when another session's receipt has `at >= createdAtWall - 300`, except receipts this session already saw
+  at load at the same or a higher seq (jg chose this load exemption, 2026-11-06: it keeps a server hop's first settings
+  change); R4 the ledger records the terminal report (`reportedSeq`); R5 every callback checks the op window and, during
+  shutdown, the shared deadline; R6 `ProfileRules.classifyAttempt`. An unconfirmed op's settings go out with the next op,
+  dated from their first send. In memory only: `createdAtWall`, `settingsPatch`, `settingsWall`, `reportedSeq`,
+  `knownReceipts`. Schema, store, key, remotes and payloads unchanged. The client sees adopted settings at its next
+  MenuRequest (no push).
+- Specs: the 5 existing cases that asserted an acknowledgement write or a full settings snapshot were updated to R1/R2; 9 new
+  cases (R1, R3, skew boundary, load exemption, R2, settings requeue, R4, R5, R6 table). check.sh ALL CHECKS PASSED, Lune
+  397 passed, 0 failed.
+- Studio (G2): BuildStamp `69004d2` == HEAD, synced sizes == disk; API access read back OFF before the run
+  (`docs/workflow/evidence/TASK-0141/rev2/api-access-before-off.jpg`). jg chose Stop at the ON request, so no scenario ran
+  and API access was never switched ON. Rojo stopped. **Pending:** the 11-scenario pass on the final head, then
+  record-exec. Not recorded as executed.
+
 ## Acceptance criteria
 See `tasks/items/TASK-0141.json`.
 
