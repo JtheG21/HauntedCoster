@@ -1,0 +1,26 @@
+{
+  "id": "TASK-0151",
+  "game": "GAME-004",
+  "title": "MathShow Quests XP UI",
+  "status": "backlog",
+  "tier": "standard",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/client/Menu/",
+    "games/mathshow/src/shared/MenuCopy.luau",
+    "games/mathshow/src/shared/LedgerRules.luau",
+    "tasks/items/TASK-0151.json",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0151-MathShow-Quests-XP-UI.md"
+  ],
+  "depends_on": [
+    "TASK-0150"
+  ],
+  "branch": "task/TASK-0151-quests-xp-ui",
+  "acceptance": [
+    "Menu quests panel, level badge, XP bar and Reveal toast built in code from MenuTheme; reducedMotion respected; text-fit ledger updated and green on all viewports; Studio visual check on phone and desktop."
+  ],
+  "evidence": [],
+  "notes": "T3 of SYS-Quests-And-XP. Client display only.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0151-MathShow-Quests-XP-UI.md",
+  "risk": "low"
+}
