@@ -1,0 +1,11 @@
+MF-C fixes (TASK-0148, rows MF-F1/MF-F2) for AUD-20261106-TASK-0147-01
+measured_sha: 692ed70
+applies_to: games/mathshow/src/client/Hub/AmbientLife.luau at 692ed70 and any later commit whose diff from 692ed70 does not touch it
+Changes: AmbientLife finds or creates SoundService.Sfx (SoundGroup, Volume 0 if created), no yield, no ungrouped fallback, non-SoundGroup name = warn and skip; generation counter in start()/stop() guards startSounds and the load-warning task.delay. Evidence wording corrected (B1-B5, PROGRAM.md). No map, server, shared or Menu change.
+- scripts/check.sh: ALL CHECKS PASSED at 692ed70.
+- Studio: one window (private test place), scripts/serve.sh from the worktree, Rojo reconnected by hand via the plugin prompt, BuildStamp 692ed70 confirmed in Edit, fresh Play (not saved). Readback via Studio MCP, Client data model:
+  (a) SoundService.Sfx is a SoundGroup, exactly one; NightAir and DistantFestival: SoundGroup == Sfx, Looped, IsLoaded, IsPlaying all true. Sfx.Volume 0.2 (Menu had applied it to the same group).
+  (b) PARTIAL: set Sfx.Volume 0 directly, sounds still grouped to Sfx (so muted by the group), restored to 0.2. Menu SFX stepper was NOT driven through the UI; Menu.applySettings is a local function. Menu code unchanged and already uses the same find-or-create name.
+  (c) Using a required AmbientLife instance after clearing existing HubAmbience/ShootingStar: start-stop-start -> 1 folder, 2 sounds, 1 star; stop -> 0 folders, 0 stars. Caveat: execute_luau's require may not be the same module instance as the running client's; an earlier uncontrolled run showed an extra folder from the other instance.
+  (d) Console: no new warnings or errors (only the pre-existing ContentId rbxassetid://203785492 lines).
+- Stopped Play, quit Studio without saving, stopped rojo.

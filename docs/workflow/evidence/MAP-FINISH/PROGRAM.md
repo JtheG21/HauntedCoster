@@ -1,6 +1,6 @@
 # Map Finish program (GAME-004 MathShow)
 
-**STATUS: Map v1 done (B5 TASK-0147). The program stops here for jg: MF-C Codex audit pending, nothing else queued.**
+**STATUS: Map Finish program CLOSED (TASK-0148 merged over AUD-02 minor, row MF-F3).**
 
 Goal: "Map v1 done" per `03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md`, mockups A1-A4 and REF-MAP-003. Light tier throughout.
 Approved rows (jg, 2026-11-06): MF-P, MF-M, MF-X, MF-C. Resume: read this file, sync main, continue at the first unfinished batch.
@@ -62,10 +62,13 @@ PointLights 25 of 40 (+0 over the program). Triangle inventory +4,680 over the p
 - Gallery: ~/Roblox-Work/evidence/MAP-FINISH/gallery_before_after.jpg (outside the repo).
 
 ## Deferred / known gaps (not built)
+- AUD-02 minor, accepted by design (row MF-F3, jg): `Sfx` is the shared SoundGroup holding the player's SFX volume; destroying it in `stop()` would reset that volume. See [[AUD-20261106-TASK-0147-02]].
 - Walk-on floor puzzles on the plaza rings (new mechanic).
 - Flowers on the north ramp path.
 - A galaxy skybox texture (free ones loaded but showed nothing in the Studio emulator; needs a different asset or a real-device check).
 - Unverified: audibility of the ambient loops, a shooting star in a screenshot, AmbientLife failure injection and stop() cleanup, the rare glyph respawn, two-player and real-device performance (TASK-0123).
+- Route times: 4 of 6 modes are inside the 8-12 s band; VS 12.4 s and Group 12.3 s are over the 12 s design target (the HubRoutes gate passed). Not changed (no map change in MF-C fixes).
+- Python route/clearance checks are informational (static); reachability proof is the Studio HubRoutes gate and PathfindingService.
 - Collision geometry the sweep did not climb out of: every concave corner of every building (sampled by pathfinding only).
 
 ## Codex handoff (row MF-C): one audit of the full Map Finish range

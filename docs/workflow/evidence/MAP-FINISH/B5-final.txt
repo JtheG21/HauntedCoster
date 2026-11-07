@@ -4,8 +4,8 @@
 # Gallery (outside the repo): ~/Roblox-Work/evidence/MAP-FINISH/gallery_before_after.jpg (top row before at ea039b1, bottom row after at be1da32; same scripted cameras A1, A2, A3 and a sky view, Play, iPhone 13 emulation) and the eight source images before_*.jpg / after_*.jpg. Earlier per-batch captures: ~/Roblox-Work/evidence/TASK-0145/.
 
 ## Gates at be1da32
-- scripts/check.sh: ALL CHECKS PASSED (StyLua, Selene, strict types, 403 specs, Rojo build, map drift, JSON, task files, queue, vault, references, skills, Python tests incl. route and walk guards).
-- HubRoutes (fresh Play): HUBROUTES_RESULT routes=6/6 failures=0 stamp=be1da32. Daily 11.7 s, VS 12.4, Blitz 10.7, Group 12.3, Practice 11.6, Skill 11.8 (all in the 8-12 s band); canary blocked; all 6 pads opened their screens (locked:daily, confirm_vs, confirm_blitz, confirm_group, practice, skillintro).
+- scripts/check.sh: ALL CHECKS PASSED (StyLua, Selene, strict types, 403 specs, Rojo build, map drift, JSON, task files, queue, vault, references, skills, Python tests incl. route and walk guards, which are informational (static); reachability proof is the Studio HubRoutes gate / PathfindingService).
+- HubRoutes (fresh Play): HUBROUTES_RESULT routes=6/6 failures=0 stamp=be1da32. Daily 11.7 s, VS 12.4, Blitz 10.7, Group 12.3, Practice 11.6, Skill 11.8 (4 of 6 in the 8-12 s band; VS 12.4 s and Group 12.3 s are over the 12 s design target; the HubRoutes gate passed); canary blocked; all 6 pads opened their screens (locked:daily, confirm_vs, confirm_blitz, confirm_group, practice, skillintro).
 - GlyphSpawn reachability (PathfindingService, agent radius 2, height 5, can jump, spawn (0,5,47) to each marker, server): 34/34 Success, 0 fail.
 - Glyph collect (client teleport onto the marker): Glyph_C_SW1 common: "Glyphs 0 / Total 51" -> "Glyphs 1 / Total 52", client parts 34 -> 33, glyph gone. Glyph_R_Roof1 rare (Ranks roof): -> "Glyphs 6 / Total 57", parts 32, glyph gone.
 - Reject -> retry: teleport onto Glyph_C_SW2; the server logged "GlyphCollect from jg_57565 rejected: out_of_range (Glyph_C_SW2)" and the retry took it: "Glyphs 6 / Total 57" -> "Glyphs 7 / Total 58".

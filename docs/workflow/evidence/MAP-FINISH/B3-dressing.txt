@@ -13,7 +13,7 @@
 ## Gates (fresh Play at fc8e8dd)
 - scripts/check.sh: ALL CHECKS PASSED (also on each earlier commit of the branch).
 - HubRoutes: HUBROUTES_RESULT routes=6/6 failures=0 stamp=fc8e8dd. Daily 11.8 s, VS 12.3, Blitz 10.7, Group 12.2, Practice 11.8, Skill 11.7; canary blocked; all 6 pads opened their screens.
-- Python walk and route guards (check.sh): pass; they cover the 34/34 GlyphSpawn reachability on the regenerated map.
+- Python walk and route guards (check.sh, informational (static)): pass. Reachability proof is the Studio HubRoutes gate / PathfindingService, not these.
 - Console: no new warnings or errors. The three "ContentId rbxassetid://203785492" lines predate this work. One tooling line ("execute_luau changed camera type") comes from the Studio assistant resetting my debug camera, not from the game.
 - Not re-run live: collect/respawn, HUD, mid-match (no gameplay or remote change; scope argument, not measured evidence).
 
