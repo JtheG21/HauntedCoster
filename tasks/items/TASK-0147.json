@@ -2,7 +2,7 @@
   "id": "TASK-0147",
   "game": "GAME-004",
   "title": "MathShow Map Finish B5 Final Regression and Close",
-  "status": "backlog",
+  "status": "in_progress",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -22,5 +22,20 @@
   ],
   "notes": "Map Finish B5, rows MF-P/MF-M/MF-C. Documentation and evidence only; no map or code change. Stop for jg after the handoff.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0147-MathShow-Map-Finish-B5-Final-Regression.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-06T20:57:42",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-06T20:57:42",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
 }
