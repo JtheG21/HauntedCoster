@@ -2,7 +2,7 @@
   "id": "TASK-0141",
   "game": "GAME-004",
   "title": "MathShow Profile Exactly-Once Saves v2",
-  "status": "in_progress",
+  "status": "review",
   "tier": "deep",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -25,7 +25,10 @@
     "docs/workflow/evidence/TASK-0141/studio-pass.txt",
     "docs/workflow/evidence/TASK-0141/api-access-before-off.jpg",
     "docs/workflow/evidence/TASK-0141/api-access-on-readback.jpg",
-    "docs/workflow/evidence/TASK-0141/api-access-off-readback.jpg"
+    "docs/workflow/evidence/TASK-0141/api-access-off-readback.jpg",
+    "docs/workflow/evidence/TASK-0141/rev2/studio-pass.txt",
+    "docs/workflow/evidence/TASK-0141/rev2/api-access-before-off.jpg",
+    "docs/workflow/evidence/TASK-0141/rev2/api-access-on-readback.jpg"
   ],
   "notes": "Registered at jg request 2026-11-06 (row K2); backlog only, no plan approval, no source change. Successor to TASK-0139 (parked after 2/2 failed revisions; final Codex audit AUD-20261106-TASK-0139-03 FAIL: receipt expiry/eviction allows replay double-credit, v2 writers can erase v3 receipts). Branched from c54123ecfe99cd0d2cbcdbeffb0d6282f2427513 (TASK-0139 rev 2 head). Design in the task note is pending Codex design review. files_owned is provisional; no publish checklist exists in the repo yet, so its location is decided in the plan. PR #204 must not be merged.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0141-MathShow-Profile-Exactly-Once-Saves-v2.md",
@@ -61,6 +64,12 @@
       "from": "changes_requested",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-06T19:06:10",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -68,6 +77,11 @@
       "time": "2026-11-06T16:13:40",
       "result": "pass",
       "notes": "Final source 7b8e7d4 (c1f0498 + Studio-found fix: confirm a save only when UpdateAsync returns the value). check.sh ALL PASSED, Lune 388/0. Studio pass on 7b8e7d4, private test place 93701543861123: v2->v3, overlap, ambiguous ack, ambiguous abandon (receipt behind and missing), shortened-window expiry, shutdown drain, rejoin 37, v4 refused: PASS. API access OFF->ON->OFF dialog readbacks. Evidence: docs/workflow/evidence/TASK-0141/studio-pass.txt"
+    },
+    {
+      "time": "2026-11-06T19:06:10",
+      "result": "pass",
+      "notes": "Revision 2 (AUD-20261106-TASK-0141-01 F1-F3): source 69004d2 (R1 ack writes nothing, R2 settings patches, R3 newer session wins + load exemption per jg, R4 one terminal report, R5 both deadlines per callback, R6 classifyAttempt). check.sh ALL PASSED, Lune 397/0. Studio pass on BuildStamp b495b99 (no games/ change since 69004d2), private test place 93701543861123: 11 scenarios PASS incl. stale-settings ack/retry (music 8 kept, glyphs once) and full shutdown log via 1 h MemoryStore mirror. API access read back OFF then ON; left ON per jg. Evidence: docs/workflow/evidence/TASK-0141/rev2/studio-pass.txt"
     }
   ],
   "audits": [

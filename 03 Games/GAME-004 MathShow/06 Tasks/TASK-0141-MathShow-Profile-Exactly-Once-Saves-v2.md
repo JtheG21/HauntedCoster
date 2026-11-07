@@ -3,7 +3,7 @@ id: TASK-0141
 title: "MathShow Profile Exactly-Once Saves v2"
 type: task
 project: GAME-004
-status: in_progress
+status: review
 priority: high
 risk: high
 owner: claude-code
@@ -65,11 +65,13 @@ Redo the TASK-0139 exactly-once save so over-credit is impossible by constructio
 - Specs: the 5 existing cases that asserted an acknowledgement write or a full settings snapshot were updated to R1/R2; 9 new
   cases (R1, R3, skew boundary, load exemption, R2, settings requeue, R4, R5, R6 table). check.sh ALL CHECKS PASSED, Lune
   397 passed, 0 failed.
-- Studio (G2): BuildStamp `69004d2` == HEAD, synced sizes == disk; API access read back OFF before the run
-  (`docs/workflow/evidence/TASK-0141/rev2/api-access-before-off.jpg`). jg chose Stop at the ON request, so no scenario ran
-  and API access was never switched ON. Rojo stopped. **Pending:** the 11-scenario pass on the final head, then
-  record-exec. Not recorded as executed.
-
+- Studio (G2): first attempt stopped by jg before API access ON (read back OFF, `rev2/api-access-before-off.jpg`). Second
+  attempt on BuildStamp `b495b99` == HEAD (no `games/` change since `69004d2`), synced sizes == disk; API access read back ON
+  (`rev2/api-access-on-readback.jpg`); jg: leave it ON from now on, so no OFF step. 11 scenarios PASS: S1 (v2->v3, R2 keeps
+  another writer's sfx), S2, S3, (a1) stale-settings acknowledgement writes nothing (music 8 kept, glyph once), (a2) delayed
+  retry superseded (music 8, +1 once), S4, S5, S6, rejoin, S4b, (b) shutdown failure then success with the full log through
+  "shutdown drain done" (mirrored via a 1 h MemoryStore map), plus S7. Evidence: `docs/workflow/evidence/TASK-0141/rev2/studio-pass.txt`.
+  Rojo stopped; place not saved; nothing published.
 ## Acceptance criteria
 See `tasks/items/TASK-0141.json`.
 

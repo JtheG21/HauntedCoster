@@ -1,0 +1,90 @@
+TASK-0141 revision 2 evidence (2026-11-06 PT / 2026-11-07 UTC): AUD-20261106-TASK-0141-01 fixes R1-R6
+measured_sha: b495b99 (BuildStamp "b495b99 2026-11-07T02:53:56Z" == HEAD). Source commit 69004d2; b495b99 adds only the task note
+              and an image. Verify: git diff --stat 69004d2..b495b99 -- games/mathshow  -> empty.
+applies_to: games/mathshow/src/shared/ProfileRules.luau, games/mathshow/src/shared/ProfileConfig.luau,
+            games/mathshow/src/server/Services/ProfileService.luau, games/mathshow/tests/ProfileRules.spec.luau
+Synced in Studio == disk: ProfileService 26991 B, ProfileRules 35003 B, ProfileConfig 1000 B.
+
+Schema: version 3 + applied {[sessionId] = {seq, at}} only (jg "A"). In memory only: op.createdAtWall, op.settingsPatch,
+ledger.settingsPatch/settingsWall/reportedSeq, session.knownReceipts. Store MathShow_Profiles_v1, key p_{userId}, remotes and
+payloads unchanged.
+
+Checks at 69004d2: scripts/check.sh ALL CHECKS PASSED (active). Lune: 397 passed, 0 failed.
+
+Environment: private test experience ONLY, "MathShow Private Test", universe 10774566206, place 93701543861123. Rojo 7.7.0 via
+scripts/serve.sh from the task worktree, port 34872; one Studio window; Rojo plugin reconnected, BuildStamp checked in Edit.
+Saves driven through the real paths: SettingsSave remote from the Client data model (debounced save), real glyph collects
+(server PivotTo, client auto-collect), autosave, leave and BindToClose. "Other session" writes and reads: direct
+UpdateAsync / GetAsync from the Server data model. "Nothing written" is shown by DataStoreKeyInfo.UpdatedTime / Version.
+
+API access: read back OFF before the run (api-access-before-off.jpg, first attempt). jg switched it ON and said to leave it
+on from now on (2026-11-06); Claude read it back ON from Experience Settings -> Security (api-access-on-readback.jpg), closed
+with Cancel. No OFF step afterwards, per jg.
+
+Fixture (written at the start): version 2, glyphsLifetime 23, quests={a=1}, flag=true, bestRank 2, blitzBest 7,
+settings music 4, sfx 5, futureToggle="keep me". Session A = cecf8b89-bb48-46bf-848f-70f303ded40e (Play 1).
+
+Play 1 (fresh session A, loaded the v2 fixture)
+ S1  v2 -> v3 + R2: after A loaded, another writer set stored sfx=2 (no receipt). A sent music 5 (its sfx still 5 in memory).
+     Store: version 3, total 23, applied {A seq 1}, music 5, sfx 2 (not overwritten: the op carried {music} only),
+     quests/flag/futureToggle kept.                                                                                   PASS
+ S2  overlap: other server +5 and receipt other-server-test {seq 7}; A collected E1 (+1), Lake1 (+5), saved (no settings
+     change): total 34 = 23+5+1+5, other receipt kept, A seq 2.                                                        PASS
+ S3  ambiguous + covering receipt (ErrorAfterCommit): E2 (+1); op 3 committed 35 / A seq 3, then
+     "profile save attempt failed ... (op 3, outcome=ambiguous, callbacks=1): simulated: UpdateAsync committed, then errored";
+     next attempt "save op 3 ... acknowledged by its receipt; nothing written". After the acknowledgement the key's
+     UpdatedTime was still op 3's commit (1794020421004); total 35 (not 36). The later A seq 4 is a separate zero-delta op
+     from the settings trigger.                                                                                        PASS
+ (a1) stale settings, acknowledgement (R1, F1): E3 (+1), A sent music 4 with ErrorAfterCommit: op 5 committed +1 (36),
+     its music patch dropped by R3 (other-server-test receipt from S2 was written after A loaded and is < 300 s older);
+     then the error -> ambiguous. Session B saved music 8 + receipt session-B-test {seq 1}. A's retry: "save op 5 ...
+     acknowledged by its receipt; nothing written"; music 8 kept, total 36 (glyph once). A's next op 6 re-sent music 4:
+     "save op 6 ...: settings superseded by a newer session; glyphs applied"; music still 8.                            PASS
+ (a2) stale settings, delayed retry (R3): E4 (+1), A sent music 3 with ForceSaveFailures=1: "simulated save failure before
+     dispatch ..., op 7" (op kept, no candidate). B saved again {seq 2, music 8}. A's retry of the same op 7:
+     "save op 7 ...: settings superseded by a newer session; glyphs applied"; store A seq 7, music 8, total 37
+     (+1 once).                                                                                                         PASS
+ S4  ambiguous + receipt behind (CandidateThenError): E5 (+1); op 8: "Transform function error ...",
+     "(op 8, outcome=ambiguous, callbacks=1): UpdateAsync returned no value after a write candidate"; store unchanged 37 /
+     A seq 7. E6 (+1) meanwhile. Retry: "ended unconfirmed: reason=ambiguous_receipt_behind seq=8 delta=1 ambiguous=true";
+     E6 went out as op 9: total 38 (the abandoned +1 never reappeared).                                                  PASS
+ S5  shortened window: MathShowProfileRetryWindowS=3, ForceSaveFailures=1, W1 (+1): "simulated save failure ..., op 10";
+     8 s later "ended unconfirmed: reason=expired seq=10 delta=1 ambiguous=false"; total 38. Override cleared.           PASS
+ S6  shutdown drain: W2 (+1), ForceSaveFailures=2, no save trigger, Stop Play. MCP console cut when the server data model
+     closed (last line "simulated save failure ... op 11"). Next Play read the store: total 39, A seq 11 at 1794020602
+     (~4 s after Stop: two failures, backoff, success).                                                                PASS
+
+Play 2 (fresh session 9028aff9-c1a0-4aec-8729-f8aafa328d3d)
+ Rejoin: HUD "Glyphs 0  ·  Total 39" == stored 39.                                                                    PASS
+ S4b ambiguous + NO receipt: CandidateThenError, W3 (+1); op 1 "(op 1, outcome=ambiguous, callbacks=1): UpdateAsync
+     returned no value after a write candidate"; retry "ended unconfirmed: reason=ambiguous_no_receipt seq=1 delta=1
+     ambiguous=true"; total 39 unchanged, no receipt for this session.                                                  PASS
+ (b) shutdown, forced failure then success, FULL log: W4 (+1), ForceSaveFailures=1, Stop Play. The Server data model's
+     LogService.MessageOut was mirrored (save/shutdown lines only) into MemoryStore sorted map TASK0141_rev2_shutdown_log
+     (1 h expiry, nothing persistent) with a BindToClose that waited for the last line; read back in Play 3:
+       0001 t+0.00s wall=1794020672 [MathShow] TEST mirror armed for shutdown capture (save log)
+       0002 t+1.94s wall=1794020674 [Warning] [MathShow] simulated save failure before dispatch (Studio hook), op 2
+       0003 t+4.83s wall=1794020677 [MathShow] shutdown: save op 2 of 8757379006 confirmed (applied)
+       0004 t+4.98s wall=1794020677 [MathShow] shutdown drain done: 1 sessions, 0 unresolved
+     Stored value read in Play 3: total 40 = 39 + W4, session 9028aff9 seq 2 at 1794020677 (W3's abandoned +1 not
+     counted).                                                                                                          PASS
+
+Play 3
+ S7  version 4 after load: store set to version 4 + extra="must survive"; W5 (+1), save -> "ended unconfirmed:
+     reason=newer_schema seq=1 delta=1 ambiguous=false", "stored profile ... is a newer version; not saving, memory-only
+     from now on". Key UpdatedTime unchanged (1794020701926, the v4 write); extra kept; total 40.                        PASS
+ Fixture restored: version 3, extra removed (quests, flag, futureToggle, other-server-test, session-B-test stay as
+     fixtures). Final store: version 3, total 40, music 8, sfx 2, applied {cecf8b89 seq 11, 9028aff9 seq 2,
+     other-server-test seq 7, session-B-test seq 2}.
+
+Observed, not failures:
+ - R3 as specified drops a live session's settings change within 300 s of another session's receipt written after this
+   session loaded (S2's test receipt dropped A's music 4 in (a1); B's dropped music 4 in op 6). The client keeps showing its
+   local value until its next MenuRequest (no push; payloads unchanged).
+ - An autosave tick acknowledged op 3 and op 5 before the explicit retry trigger; the outcome is the same either way.
+ - The HUD total is republished only on collect (unchanged from attempt 1).
+Not exercised in the engine: capacity (cap 200), the 900 s window at full length, the overdue-call warning, and R4's
+silent late settlement (needs a call in flight past the shutdown deadline); specs cover them.
+
+Nothing published; live experience untouched; MathShow.rbxl not saved; the place was not saved by the agent. Rojo stopped.
+API access left ON per jg.
