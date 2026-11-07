@@ -34,7 +34,7 @@ RULES = {
     "research": (rf"RSH-\d{{8}}-{SLUG}", r"02 Research"),
     "task": (rf"TASK-\d{{4}}-{SLUG}", rf"{GAME}/06 Tasks"),
     "bug": (rf"BUG-\d{{4}}-{SLUG}", r"06 QA"),
-    "audit": (r"AUD-\d{8}-TASK-\d{4}-\d{2}", r"06 QA"),
+    "audit": (r"AUD-\d{8}-(?:TASK-\d{4}|[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*)-\d{2}", r"06 QA"),
     "adr": (rf"ADR-\d{{4}}-{SLUG}", rf"(05 Engineering|{GAME}/04 Decisions)"),
     "system": (rf"SYS-{SLUG}", rf"{GAME}/05 Systems"),
     "playtest": (r"TEST-\d{8}-\d{2}", rf"{GAME}/07 Playtests"),
