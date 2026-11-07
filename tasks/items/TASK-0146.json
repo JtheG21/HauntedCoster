@@ -1,0 +1,27 @@
+{
+  "id": "TASK-0146",
+  "game": "GAME-004",
+  "title": "MathShow Map Finish B4 Boundary Sweep",
+  "status": "backlog",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "games/mathshow/map/Hub.rbxmx",
+    "docs/workflow/evidence/MAP-FINISH/",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md",
+    "tasks/items/TASK-0146.json",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0146-MathShow-Map-Finish-B4-Boundary-Sweep.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0146-mf-boundary",
+  "acceptance": [
+    "Every edge, terrace and roof checked for escapes, stuck spots and falls out of the world; list of spots checked in evidence; any gap sealed through build_hub.py (invisible colliders where needed); check.sh green; Studio fresh Play HubRoutes 6/6."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/MAP-FINISH/B4-boundary.txt"
+  ],
+  "notes": "Map Finish B4, rows MF-P/MF-M. Generator-only fixes; no Studio authoring.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0146-MathShow-Map-Finish-B4-Boundary-Sweep.md",
+  "risk": "low"
+}
