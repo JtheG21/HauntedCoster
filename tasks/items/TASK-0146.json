@@ -2,7 +2,7 @@
   "id": "TASK-0146",
   "game": "GAME-004",
   "title": "MathShow Map Finish B4 Boundary Sweep",
-  "status": "backlog",
+  "status": "in_progress",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -23,5 +23,20 @@
   ],
   "notes": "Map Finish B4, rows MF-P/MF-M. Generator-only fixes; no Studio authoring.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0146-MathShow-Map-Finish-B4-Boundary-Sweep.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-06T20:46:19",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-06T20:46:19",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
 }
