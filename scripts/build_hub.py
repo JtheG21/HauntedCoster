@@ -75,7 +75,8 @@ PATH_W = 14.0
 PATH_TOP = 0.2
 TIER_COUNT = 4
 TIER_RING = 48
-WALL_R = 290.0
+WALL_R = 283.0  # TASK-0146: tier 4's outer face is at 282 (centre 278, depth 8); the wall's inner face (thickness 1) at 282.5 closes the strip that used to lie out to 290.
+# A player who stepped off tier 4 into that strip dropped 12 studs and could not jump back up (jump about 7), a stuck spot.
 LAKE_C = (112.0, 112.0)
 LAKE_R = 44.0
 
