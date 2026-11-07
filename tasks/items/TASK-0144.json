@@ -1,0 +1,29 @@
+{
+  "id": "TASK-0144",
+  "game": "GAME-004",
+  "title": "MathShow Map Finish B2 Ambient Life",
+  "status": "backlog",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/client/Hub/AmbientLife.luau",
+    "games/mathshow/src/client/init.client.luau",
+    "games/mathshow/src/shared/AmbientRules.luau",
+    "games/mathshow/tests/AmbientRules.spec.luau",
+    "docs/workflow/evidence/MAP-FINISH/",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md",
+    "tasks/items/TASK-0144.json",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0144-MathShow-Map-Finish-B2-Ambient-Life.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0144-mf-ambient",
+  "acceptance": [
+    "Cosmetic shooting stars as a client module that fails inert (pcall, warn, task.*, cleanup, per-frame budget); pure rules spec; with MF-X, low-volume ambient Sounds that fail inert; no remotes, no server code; check.sh green; Studio fresh Play: HubRoutes 6/6, console clean; lights 25/40."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/MAP-FINISH/B2-ambient.txt"
+  ],
+  "notes": "Map Finish B2, rows MF-P/MF-M/MF-X. Free Creator Store asset IDs only; no uploads. Client-only cosmetic; no remotes.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0144-MathShow-Map-Finish-B2-Ambient-Life.md",
+  "risk": "low"
+}
