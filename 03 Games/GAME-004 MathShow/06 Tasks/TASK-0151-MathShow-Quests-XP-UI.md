@@ -27,7 +27,7 @@ Menu panel, level badge, XP bar and Reveal toast. Design: [[SYS-Quests-And-XP]].
 - **Out (non-goals):** anything under "Out of scope" in the brief.
 
 ## Intake
-- **Decisions:** registered as backlog by row QX-D1 (jg, 2026-11-07). Plan approval is still needed before start.
+- **Decisions:** Backlog; waiting for the Codex design review of SYS-Quests-And-XP and jg's plan rows. No plan approval yet. Registered by row QX-D1 (jg, 2026-11-07).
 
 ## Acceptance criteria
 - [ ] AC1 See `tasks/items/TASK-0151.json`.
