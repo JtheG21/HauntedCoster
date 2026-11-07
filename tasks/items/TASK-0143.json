@@ -1,0 +1,27 @@
+{
+  "id": "TASK-0143",
+  "game": "GAME-004",
+  "title": "MathShow Map Finish B1 Sky",
+  "status": "backlog",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "mathshow.project.json",
+    "games/mathshow/map/Sky.rbxmx",
+    "docs/workflow/evidence/MAP-FINISH/",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md",
+    "tasks/items/TASK-0143.json",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0143-MathShow-Map-Finish-B1-Sky.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0143-mf-sky",
+  "acceptance": [
+    "Sky with a free Creator Store galaxy skybox (MF-X) mounted in Lighting via Sky.rbxmx; Studio fresh Play gates pass; before/after captures from A1/A2/A3 viewpoints; lights 25/40; no new triangles; check.sh green."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/MAP-FINISH/B1-sky.txt"
+  ],
+  "notes": "Map Finish B1, rows MF-P/MF-M/MF-X. Free Creator Store asset IDs only; no uploads.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0143-MathShow-Map-Finish-B1-Sky.md",
+  "risk": "low"
+}
