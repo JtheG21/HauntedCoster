@@ -3,7 +3,7 @@ id: TASK-0148
 title: "MathShow Map Finish MF-C Fixes for AUD-20261106-TASK-0147-01"
 type: task
 project: GAME-004
-status: in_progress
+status: approved
 priority: medium
 risk: low
 owner: executor
