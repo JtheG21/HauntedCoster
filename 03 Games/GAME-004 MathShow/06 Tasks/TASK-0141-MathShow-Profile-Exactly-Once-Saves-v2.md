@@ -3,7 +3,7 @@ id: TASK-0141
 title: "MathShow Profile Exactly-Once Saves v2"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: high
 risk: high
 owner: claude-code
