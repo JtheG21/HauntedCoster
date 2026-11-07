@@ -1241,13 +1241,13 @@ def add_bench(parent: Node, name: str, fr: Frame, a: float, b: float, face: int)
 	"""A bench in frame `fr` with its long side along `a`; `face` is +1 or -1: the lateral direction the sitter looks toward."""
 	w, t, d = BENCH_SIZE
 	slat = PALETTE["slot"]
-	parent.add(fr.block(f"{name}_Seat", a, b, BENCH_SEAT_Y - t / 2, (d, t, w), PALETTE["seat"], cast_shadow=False))
-	parent.add(fr.block(f"{name}_Back", a, b - face * (d / 2 - 0.12), BENCH_SEAT_Y + 0.55, (0.24, 1.0, w), slat, cast_shadow=False))
+	parent.add(fr.block(f"{name}_Seat", a, b, BENCH_SEAT_Y - t / 2, (d, t, w), PALETTE["plaza_a"], cast_shadow=False))
+	parent.add(fr.block(f"{name}_Back", a, b - face * (d / 2 - 0.12), BENCH_SEAT_Y + 0.55, (0.24, 1.0, w), PALETTE["plaza_b"], cast_shadow=False))
 	for end in (-1, 1):
 		parent.add(fr.block(f"{name}_Support{end:+d}", a + end * (w / 2 - 0.35), b, (BENCH_SEAT_Y - t) / 2, (d - 0.3, BENCH_SEAT_Y - t, 0.4), slat,
 			cast_shadow=False))
 	# a Holo Cyan Neon strip on the seat's front edge ties the benches to the rest of the night palette
-	parent.add(fr.block(f"{name}_Trim", a, b + face * (d / 2 - 0.05), BENCH_SEAT_Y + 0.02, (0.1, 0.06, w - 0.2), PALETTE["cyan"], material="Neon",
+	parent.add(fr.block(f"{name}_Trim", a, b + face * (d / 2 - 0.05), BENCH_SEAT_Y + 0.02, (0.16, 0.1, w - 0.2), PALETTE["cyan"], material="Neon",
 		collide=False, query=False, cast_shadow=False))
 
 

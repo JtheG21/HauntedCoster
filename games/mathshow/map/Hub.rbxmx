@@ -48071,7 +48071,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>64.5095</X><Y>0.75</Y><Z>134.1452</Z><R00>-0.9063</R00><R01>0</R01><R02>-0.4226</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0.4226</R20><R21>0</R21><R22>-0.9063</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4283851374</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>1.5</X><Y>0.5</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48090,7 +48090,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>63.9385</X><Y>1.55</Y><Z>134.4114</Z><R00>-0.9063</R00><R01>0</R01><R02>-0.4226</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0.4226</R20><R21>0</R21><R22>-0.9063</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4282930272</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>0.24</X><Y>1</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48149,7 +48149,7 @@
 					<CoordinateFrame name="CFrame"><X>65.1439</X><Y>1.02</Y><Z>133.8494</Z><R00>-0.9063</R00><R01>0</R01><R02>-0.4226</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0.4226</R20><R21>0</R21><R22>-0.9063</R22></CoordinateFrame>
 					<Color3uint8 name="Color3uint8">4282310896</Color3uint8>
 					<token name="Material">288</token>
-					<Vector3 name="Size"><X>0.1</X><Y>0.06</Y><Z>4.2</Z></Vector3>
+					<Vector3 name="Size"><X>0.16</X><Y>0.1</Y><Z>4.2</Z></Vector3>
 					<float name="Transparency">0</float>
 					<float name="Reflectance">0</float>
 					<token name="TopSurface">0</token>
@@ -48166,7 +48166,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>59.6</X><Y>0.75</Y><Z>112</Z><R00>-1</R00><R01>0</R01><R02>-0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>-1</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4283851374</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>1.5</X><Y>0.5</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48185,7 +48185,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>58.97</X><Y>1.55</Y><Z>112</Z><R00>-1</R00><R01>0</R01><R02>-0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>-1</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4282930272</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>0.24</X><Y>1</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48244,7 +48244,7 @@
 					<CoordinateFrame name="CFrame"><X>60.3</X><Y>1.02</Y><Z>112</Z><R00>-1</R00><R01>0</R01><R02>-0</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>0</R20><R21>0</R21><R22>-1</R22></CoordinateFrame>
 					<Color3uint8 name="Color3uint8">4282310896</Color3uint8>
 					<token name="Material">288</token>
-					<Vector3 name="Size"><X>0.1</X><Y>0.06</Y><Z>4.2</Z></Vector3>
+					<Vector3 name="Size"><X>0.16</X><Y>0.1</Y><Z>4.2</Z></Vector3>
 					<float name="Transparency">0</float>
 					<float name="Reflectance">0</float>
 					<token name="TopSurface">0</token>
@@ -48261,7 +48261,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>112</X><Y>0.75</Y><Z>59.6</Z><R00>-0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>-0</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4283851374</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>1.5</X><Y>0.5</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48280,7 +48280,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>112</X><Y>1.55</Y><Z>58.97</Z><R00>-0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>-0</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4282930272</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>0.24</X><Y>1</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48339,7 +48339,7 @@
 					<CoordinateFrame name="CFrame"><X>112</X><Y>1.02</Y><Z>60.3</Z><R00>-0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>0</R21><R22>-0</R22></CoordinateFrame>
 					<Color3uint8 name="Color3uint8">4282310896</Color3uint8>
 					<token name="Material">288</token>
-					<Vector3 name="Size"><X>0.1</X><Y>0.06</Y><Z>4.2</Z></Vector3>
+					<Vector3 name="Size"><X>0.16</X><Y>0.1</Y><Z>4.2</Z></Vector3>
 					<float name="Transparency">0</float>
 					<float name="Reflectance">0</float>
 					<token name="TopSurface">0</token>
@@ -48356,7 +48356,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>134.1452</X><Y>0.75</Y><Z>64.5095</Z><R00>0.4226</R00><R01>-0</R01><R02>0.9063</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-0.9063</R20><R21>-0</R21><R22>0.4226</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4283851374</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>1.5</X><Y>0.5</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48375,7 +48375,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>134.4114</X><Y>1.55</Y><Z>63.9385</Z><R00>0.4226</R00><R01>-0</R01><R02>0.9063</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-0.9063</R20><R21>-0</R21><R22>0.4226</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4282930272</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>0.24</X><Y>1</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48434,7 +48434,7 @@
 					<CoordinateFrame name="CFrame"><X>133.8494</X><Y>1.02</Y><Z>65.1439</Z><R00>0.4226</R00><R01>-0</R01><R02>0.9063</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-0.9063</R20><R21>-0</R21><R22>0.4226</R22></CoordinateFrame>
 					<Color3uint8 name="Color3uint8">4282310896</Color3uint8>
 					<token name="Material">288</token>
-					<Vector3 name="Size"><X>0.1</X><Y>0.06</Y><Z>4.2</Z></Vector3>
+					<Vector3 name="Size"><X>0.16</X><Y>0.1</Y><Z>4.2</Z></Vector3>
 					<float name="Transparency">0</float>
 					<float name="Reflectance">0</float>
 					<token name="TopSurface">0</token>
@@ -48451,7 +48451,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>86</X><Y>0.75</Y><Z>-12.5</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4283851374</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>1.5</X><Y>0.5</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48470,7 +48470,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>86</X><Y>1.55</Y><Z>-13.13</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4282930272</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>0.24</X><Y>1</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48529,7 +48529,7 @@
 					<CoordinateFrame name="CFrame"><X>86</X><Y>1.02</Y><Z>-11.8</Z><R00>0</R00><R01>-0</R01><R02>1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>-1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 					<Color3uint8 name="Color3uint8">4282310896</Color3uint8>
 					<token name="Material">288</token>
-					<Vector3 name="Size"><X>0.1</X><Y>0.06</Y><Z>4.2</Z></Vector3>
+					<Vector3 name="Size"><X>0.16</X><Y>0.1</Y><Z>4.2</Z></Vector3>
 					<float name="Transparency">0</float>
 					<float name="Reflectance">0</float>
 					<token name="TopSurface">0</token>
@@ -48546,7 +48546,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>-90</X><Y>0.75</Y><Z>-12.5</Z><R00>0</R00><R01>0</R01><R02>-1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4283851374</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>1.5</X><Y>0.5</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48565,7 +48565,7 @@
 					<bool name="CanTouch">true</bool>
 					<bool name="CastShadow">false</bool>
 					<CoordinateFrame name="CFrame"><X>-90</X><Y>1.55</Y><Z>-13.13</Z><R00>0</R00><R01>0</R01><R02>-1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
-					<Color3uint8 name="Color3uint8">4280430655</Color3uint8>
+					<Color3uint8 name="Color3uint8">4282930272</Color3uint8>
 					<token name="Material">272</token>
 					<Vector3 name="Size"><X>0.24</X><Y>1</Y><Z>4.4</Z></Vector3>
 					<float name="Transparency">0</float>
@@ -48624,7 +48624,7 @@
 					<CoordinateFrame name="CFrame"><X>-90</X><Y>1.02</Y><Z>-11.8</Z><R00>0</R00><R01>0</R01><R02>-1</R02><R10>0</R10><R11>1</R11><R12>0</R12><R20>1</R20><R21>-0</R21><R22>0</R22></CoordinateFrame>
 					<Color3uint8 name="Color3uint8">4282310896</Color3uint8>
 					<token name="Material">288</token>
-					<Vector3 name="Size"><X>0.1</X><Y>0.06</Y><Z>4.2</Z></Vector3>
+					<Vector3 name="Size"><X>0.16</X><Y>0.1</Y><Z>4.2</Z></Vector3>
 					<float name="Transparency">0</float>
 					<float name="Reflectance">0</float>
 					<token name="TopSurface">0</token>
