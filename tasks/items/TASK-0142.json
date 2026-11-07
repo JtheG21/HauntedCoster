@@ -2,7 +2,7 @@
   "id": "TASK-0142",
   "game": "GAME-004",
   "title": "MathShow Map Finish MF-0 Gap Inventory",
-  "status": "approved",
+  "status": "done",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -46,6 +46,12 @@
       "from": "review",
       "to": "approved",
       "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "time": "2026-11-06T20:01:32",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -54,5 +60,6 @@
       "result": "pass",
       "notes": "MF-0 inventory in docs/workflow/evidence/MAP-FINISH/PROGRAM.md; no map change; check.sh ALL CHECKS PASSED; lights 25/40 unchanged; no Studio captures taken (generator read only)."
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }

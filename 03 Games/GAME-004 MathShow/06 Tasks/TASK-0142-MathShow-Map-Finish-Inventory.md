@@ -3,7 +3,7 @@ id: TASK-0142
 title: "MathShow Map Finish MF-0 Gap Inventory"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
