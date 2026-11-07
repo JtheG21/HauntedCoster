@@ -63,3 +63,6 @@ Mockups: [[Map Mockups/README]]. Palette (A4): Night Navy #0B1433, Slate Teal #1
 
 Graybox status: 34 `GlyphSpawn` markers (21 common, 13 rare) with attribute `Rarity`; markers only, no Glyph system (see [[TASK-0120-MathShow-Hub-Graybox]]).
 
+
+## Map v1 status (Map Finish program, 2026-11-06)
+**Map v1 done** (TASK-0142..0147, evidence in `docs/workflow/evidence/MAP-FINISH/`). Sky and a violet Atmosphere tint, shooting stars and ambient loops (client, cosmetic), flower-lined paths (E, W, SW, SE), lake and path benches, and a sealed terrace boundary are in. Final budgets: PointLights 25 of 40, triangle inventory 43,912 (stop line 49,040). Deferred: walk-on floor puzzles, flowers on the north ramp, a galaxy skybox texture. Pending: one Codex audit of the range (row MF-C).

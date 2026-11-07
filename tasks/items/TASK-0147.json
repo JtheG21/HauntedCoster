@@ -1,0 +1,60 @@
+{
+  "id": "TASK-0147",
+  "game": "GAME-004",
+  "title": "MathShow Map Finish B5 Final Regression and Close",
+  "status": "approved",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "docs/workflow/evidence/MAP-FINISH/",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md",
+    "tasks/items/TASK-0147.json",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0147-MathShow-Map-Finish-B5-Final-Regression.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0147-mf-final",
+  "acceptance": [
+    "Full gate run at main's head (check.sh, fresh Play: HubRoutes 6/6, 34/34 reachable, pads, collect/retry/respawn, HUD, mid-match, console); final budget table; before/after gallery; PROGRAM.md marked Map v1 done; brief status updated; MF-C Codex handoff written into PROGRAM.md."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/MAP-FINISH/B5-final.txt",
+    "docs/workflow/evidence/MAP-FINISH/PROGRAM.md"
+  ],
+  "notes": "Map Finish B5, rows MF-P/MF-M/MF-C. Documentation and evidence only; no map or code change. Stop for jg after the handoff.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0147-MathShow-Map-Finish-B5-Final-Regression.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-06T20:57:42",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-06T20:57:42",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-06T21:05:48",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-06T21:05:48",
+      "from": "review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-06T21:05:48",
+      "result": "pass",
+      "notes": "Full regression at be1da32: check.sh green, HubRoutes 6/6, 34/34 reachable, collect/retry/respawn, HUD, mid-match; budgets 25/40 lights, 43,912 tris; gallery outside repo; PROGRAM.md Map v1 done + Codex handoff. Evidence docs/workflow/evidence/MAP-FINISH/B5-final.txt."
+    }
+  ]
+}
