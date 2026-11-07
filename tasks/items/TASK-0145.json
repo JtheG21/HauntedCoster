@@ -2,7 +2,7 @@
   "id": "TASK-0145",
   "game": "GAME-004",
   "title": "MathShow Map Finish B3 Path and Plaza Dressing",
-  "status": "approved",
+  "status": "done",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -50,6 +50,12 @@
       "from": "review",
       "to": "approved",
       "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "time": "2026-11-06T20:43:29",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -58,5 +64,6 @@
       "result": "pass",
       "notes": "Flowers (120 clumps) and 6 benches via build_hub.py at fc8e8dd; check.sh green; HubRoutes 6/6; lights 25/40; +4680 tris (43,912 of 49,040 cap). Evidence docs/workflow/evidence/MAP-FINISH/B3-dressing.txt. N path not lined; collect/HUD/mid-match not re-run."
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }
