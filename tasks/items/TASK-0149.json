@@ -2,7 +2,7 @@
   "id": "TASK-0149",
   "game": "GAME-004",
   "title": "MathShow Quests XP Rules",
-  "status": "backlog",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "codex",
   "files_owned": [
@@ -24,5 +24,82 @@
   "evidence": [],
   "notes": "Backlog; waiting for the Codex design review of SYS-Quests-And-XP and jg's plan rows. No plan approval yet.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0149-MathShow-Quests-XP-Rules.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-07T14:58:22",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-07T14:58:22",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-07T15:01:59",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-07T15:07:34",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-07T15:07:38",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-07T15:08:57",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-07T15:15:48",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-07T15:15:48",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-07T15:01:59",
+      "result": "pass",
+      "notes": "check.sh ALL PASSED; specs 403->432; pure modules, no Studio needed"
+    },
+    {
+      "time": "2026-11-07T15:08:57",
+      "result": "pass",
+      "notes": "revision 1: AUD-01 F1-F3 fixed, check.sh ALL PASSED"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-07T15:07:34",
+      "result": "fail",
+      "report": "06 QA/AUD-20261107-TASK-0149-01.md"
+    },
+    {
+      "time": "2026-11-07T15:15:48",
+      "result": "pass",
+      "report": "06 QA/AUD-20261107-TASK-0149-02.md"
+    }
+  ],
+  "revisions": 1,
+  "merge_approved_by": "jg"
 }
