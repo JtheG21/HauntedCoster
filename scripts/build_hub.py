@@ -759,6 +759,7 @@ def build() -> Node:
 			origin_override=(LAKE_C[0] + 50 * math.cos(ang), LAKE_C[1] + 50 * math.sin(ang)))
 	add_props(hub, e_fr, plaza)
 	add_holos(hub)
+	add_dressing(hub, {"E": e_fr, "W": w_fr, "SW": sw_fr, "SE": se_fr})
 	return hub
 
 
@@ -1214,6 +1215,74 @@ def add_bunting(hub: Node) -> None:
 			line.add(make_part(f"Bulb_{i:02d}", (0.45, 0.45, 0.45), (wx, line_y(t) - 0.05, wz), IDENT, PALETTE[NEON_COLORS[(i + 1) % 3]],
 				material="Neon", shape="Ball", collide=False, query=False, cast_shadow=False))
 			BUNTING_STATS["bulbs"] += 1
+
+
+# --- Path flowers and hangout benches (TASK-0145, Map Finish B3) --------------------------------------------------------------
+# Flower clumps line both sides of the four flat radial paths (E, W, SW, SE): a Plastic stem and a small Neon plus-sign bloom, decorative (no
+# collision, no query, no shadow, no light). They stand outside the 12-wide route corridor and clear of the lamp posts (|b| = 8.2 +- 1).
+# The north path is a ramp up three terraces, so it is not lined. Benches are collidable but sit well outside every route.
+FLOWER_B = 10.2  # lateral offset from the path centre line: path edge 7.0, lamp posts reach 9.2
+FLOWER_SPACING = 3.5
+FLOWER_JITTER = 0.5
+FLOWER_STEM = (0.22, 1.1, 0.22)
+FLOWER_ARM = 0.95  # the bloom is a small plus sign (two thin Neon bars), a math motif; a flat cap on a stem would read as a mushroom (IP rule)
+FLOWER_ARM_T = 0.28
+FLOWER_COLOURS = ("violet", "cyan", "amber_neon", "cyan", "violet")
+FLOWER_A_RANGE = {"E": (62.0, 118.0), "W": (62.0, 118.0), "SW": (62.0, 112.0), "SE": (62.0, 100.0)}  # court and hall start at a = 125-130
+BENCH_SIZE = (4.4, 0.5, 1.5)  # width along the bench, seat thickness, depth
+BENCH_SEAT_Y = 1.0  # seat top, from the ground (y = 0)
+LAKE_BENCH_DEGREES = (155, 180, 270, 295)  # clear of the lake lamps (210, 240) and the R_Lake glyph spots (195, 225, 255)
+LAKE_BENCH_R = 52.4  # on the promenade (44..56), the back to the outside
+PATH_BENCHES = (("E", 86.0, 12.5), ("W", 90.0, -12.5))  # path label, a, b: facing the path, clear of the lamp posts and flowers
+FLOWER_STATS: dict[str, int] = {}
+
+
+def add_bench(parent: Node, name: str, fr: Frame, a: float, b: float, face: int) -> None:
+	"""A bench in frame `fr` with its long side along `a`; `face` is +1 or -1: the lateral direction the sitter looks toward."""
+	w, t, d = BENCH_SIZE
+	slat = PALETTE["slot"]
+	parent.add(fr.block(f"{name}_Seat", a, b, BENCH_SEAT_Y - t / 2, (d, t, w), PALETTE["plaza_a"], cast_shadow=False))
+	parent.add(fr.block(f"{name}_Back", a, b - face * (d / 2 - 0.12), BENCH_SEAT_Y + 0.55, (0.24, 1.0, w), PALETTE["plaza_b"], cast_shadow=False))
+	for end in (-1, 1):
+		parent.add(fr.block(f"{name}_Support{end:+d}", a + end * (w / 2 - 0.35), b, (BENCH_SEAT_Y - t) / 2, (d - 0.3, BENCH_SEAT_Y - t, 0.4), slat,
+			cast_shadow=False))
+	# a Holo Cyan Neon strip on the seat's front edge ties the benches to the rest of the night palette
+	parent.add(fr.block(f"{name}_Trim", a, b + face * (d / 2 - 0.05), BENCH_SEAT_Y + 0.02, (0.16, 0.1, w - 0.2), PALETTE["cyan"], material="Neon",
+		collide=False, query=False, cast_shadow=False))
+
+
+def add_dressing(hub: Node, frames: dict[str, Frame]) -> None:
+	deco = dict(collide=False, query=False, cast_shadow=False)
+	flowers = hub.add(folder("Flowers"))
+	count = 0
+	for label, (a0, a1) in FLOWER_A_RANGE.items():
+		fr = frames[label]
+		n = int((a1 - a0) / FLOWER_SPACING) + 1
+		for i in range(n):
+			a = a0 + i * FLOWER_SPACING
+			for side in (-1, 1):
+				# deterministic jitter (no Random): the same file on every run, so the drift guard holds
+				j = math.sin(count * 12.9898 + 78.233) * FLOWER_JITTER
+				b = side * (FLOWER_B + j)
+				colour = PALETTE[FLOWER_COLOURS[count % len(FLOWER_COLOURS)]]
+				flowers.add(fr.block(f"Stem_{label}_{count:03d}", a + j, b, FLOWER_STEM[1] / 2, FLOWER_STEM, PALETTE["grass"], material="Plastic", **deco))
+				cy = FLOWER_STEM[1] + FLOWER_ARM / 2 - 0.2
+				flowers.add(fr.block(f"BloomH_{label}_{count:03d}", a + j, b, cy, (FLOWER_ARM, FLOWER_ARM_T, FLOWER_ARM_T), colour, material="Neon", **deco))
+				flowers.add(fr.block(f"BloomV_{label}_{count:03d}", a + j, b, cy, (FLOWER_ARM_T, FLOWER_ARM, FLOWER_ARM_T), colour, material="Neon", **deco))
+				count += 1
+	FLOWER_STATS["flowers"] = count
+	benches = hub.add(folder("Benches"))
+	for k, deg in enumerate(LAKE_BENCH_DEGREES):
+		ang = math.radians(deg)
+		ff = Frame((math.cos(ang), math.sin(ang)), LAKE_C)
+		# the sitter looks toward the lake (-a), so the bench's lateral axis is the tangent: build it with the long side along the tangent
+		wx, wz = ff.world(LAKE_BENCH_R, 0)
+		tangent = Frame((-math.sin(ang), math.cos(ang)), (wx, wz))
+		# tangent.a runs along the shore; tangent.b is lateral = +side. The lake lies toward the centre, i.e. along -ff.out.
+		face = 1 if (tangent.side[0] * -ff.out[0] + tangent.side[1] * -ff.out[1]) > 0 else -1
+		add_bench(benches, f"LakeBench_{k + 1}", tangent, 0.0, 0.0, face)
+	for k, (label, a, b) in enumerate(PATH_BENCHES):
+		add_bench(benches, f"PathBench_{label}", frames[label], a, b, -1 if b > 0 else 1)
 
 
 def add_props(hub: Node, e_fr: Frame, plaza: Node) -> None:
