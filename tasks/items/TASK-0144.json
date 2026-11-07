@@ -2,7 +2,7 @@
   "id": "TASK-0144",
   "game": "GAME-004",
   "title": "MathShow Map Finish B2 Ambient Life",
-  "status": "approved",
+  "status": "done",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -51,6 +51,12 @@
       "from": "review",
       "to": "approved",
       "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "time": "2026-11-06T20:29:37",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -59,5 +65,6 @@
       "result": "pass",
       "notes": "AmbientLife + AmbientRules at 83b8b05; check.sh green; HubRoutes 6/6; sounds loaded and playing, ~2 streaks in 40 s; lights 25/40. Evidence docs/workflow/evidence/MAP-FINISH/B2-ambient.txt. Streak screenshot, stop() and failure injection not verified."
     }
-  ]
+  ],
+  "merge_approved_by": "jg"
 }
