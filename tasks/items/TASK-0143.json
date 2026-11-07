@@ -1,0 +1,61 @@
+{
+  "id": "TASK-0143",
+  "game": "GAME-004",
+  "title": "MathShow Map Finish B1 Sky",
+  "status": "approved",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "mathshow.project.json",
+    "games/mathshow/map/Sky.rbxmx",
+    "docs/workflow/evidence/MAP-FINISH/",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md",
+    "tasks/items/TASK-0143.json",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0143-MathShow-Map-Finish-B1-Sky.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0143-mf-sky",
+  "acceptance": [
+    "Sky with a free Creator Store galaxy skybox (MF-X) mounted in Lighting via Sky.rbxmx; Studio fresh Play gates pass; before/after captures from A1/A2/A3 viewpoints; lights 25/40; no new triangles; check.sh green."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/MAP-FINISH/B1-sky.txt"
+  ],
+  "notes": "Map Finish B1, rows MF-P/MF-M/MF-X. Free Creator Store asset IDs only; no uploads.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0143-MathShow-Map-Finish-B1-Sky.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-06T20:04:35",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-06T20:04:35",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-06T20:20:22",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-06T20:20:22",
+      "from": "review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-06T20:20:22",
+      "result": "pass",
+      "notes": "Sky.rbxmx + violet Atmosphere at dfdd30b; HubRoutes 6/6 fresh Play; lights 25/40, +0 tris; no skybox texture (two free ones did not render in Studio). Evidence docs/workflow/evidence/MAP-FINISH/B1-sky.txt. Collect/HUD/mid-match not re-run (scope argument)."
+    }
+  ]
+}

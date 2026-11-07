@@ -58,19 +58,19 @@
       "Atmosphere": {
         "$className": "Atmosphere",
         "$properties": {
-          "Density": 0.32,
+          "Density": 0.42,
           "Offset": 0.1,
-          "Haze": 1.8,
-          "Glare": 0.3,
+          "Haze": 2.4,
+          "Glare": 0.6,
           "Color": [
-            0.2275,
-            0.2471,
-            0.5412
+            0.4706,
+            0.2745,
+            0.902
           ],
           "Decay": [
-            0.1059,
-            0.1647,
-            0.2902
+            0.3529,
+            0.1569,
+            0.7843
           ]
         }
       },
@@ -80,6 +80,9 @@
           "Saturation": 0.15,
           "Contrast": 0.1
         }
+      },
+      "Sky": {
+        "$path": "games/mathshow/map/Sky.rbxmx"
       }
     }
   }

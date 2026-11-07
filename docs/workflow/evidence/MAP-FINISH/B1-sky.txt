@@ -1,0 +1,20 @@
+# TASK-0143 Map Finish B1 Sky and atmosphere (rows MF-P, MF-M; MF-X tried)
+# measured git HEAD: dfdd30b (BuildStamp "dfdd30b 2026-11-07T04:17:33Z", clean; scripts/serve.sh from the TASK-0143 worktree; Rojo plugin reconnected; fresh Play, single player; place not saved)
+# applies_to: Measured at dfdd30b. Applies to later commits whose diff from dfdd30b does not touch games/mathshow/map/**, mathshow.project.json, scripts/build_hub.py or games/mathshow/src/**.
+# Captures (outside the repo): ~/Roblox-Work/evidence/TASK-0143/after_spawn_sky_844x390.jpg (Play, iPhone 13 emulation). No scripted before capture: the before state is "no Sky object, black sky with default stars" (seen in the Studio viewport at session start).
+
+## Change
+- Lighting.Sky (games/mathshow/map/Sky.rbxmx, mounted in mathshow.project.json): StarCount 3000, CelestialBodiesShown true, Sun 6, Moon 8. All property names read from ~/Code/creator-docs Sky.yaml.
+- Atmosphere retuned for a violet night: Color (120,70,230), Decay (90,40,200), Density 0.42, Haze 2.4, Glare 0.6 (was 0.32 / 1.8 / 0.3, blue). Tuned live in the Play client against captures. Bloom, ColorCorrection, Technology untouched.
+
+## MF-X skybox: not used
+Two free Creator Store skyboxes (assets 15125422596 "Galaxy Skybox", 109084979379698 "Purple Nebula") loaded (AssetFetchStatus Success) but rendered no visible change in the Studio emulator viewport, so they were dropped. The sky has no texture IDs. A built-in galaxy look comes from the stars plus the violet Atmosphere. Skyboxes ported from Nintendo or Sven Co-op material were not considered (IP rule).
+
+## Gates
+- scripts/check.sh: ALL CHECKS PASSED (see task note).
+- HubRoutes (fresh Play at dfdd30b): HUBROUTES_RESULT routes=6/6 failures=0 stamp=dfdd30b. Daily 11.6 s, VS 12.4, Blitz 10.7, Group 12.4, Practice 11.8, Skill 11.7; canary blocked. All 6 pads opened their screens.
+- Console: no new warnings or errors. The three "ContentId rbxassetid://203785492 ... Asset type does not match requested type" lines were already present before the sky change (first Play of this session) and are not from this diff.
+- Not re-run live this batch: collect/respawn, HUD, mid-match. The B1 diff against main (ea039b1..) touches only mathshow.project.json (Lighting) and Sky.rbxmx, no geometry, code or remotes; the 30dd62e evidence does NOT carry over (main has changed since), so this is a scope argument, not measured evidence. 34/34 GlyphSpawn reachability is covered by the check.sh Python walk tests (geometry unchanged).
+
+## Budgets
+PointLights 25/40 (+0). Triangle inventory 39,232 (+0; no parts added). Instances +1 (the Sky). CastShadow: no new props.
