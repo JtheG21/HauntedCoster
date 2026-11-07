@@ -2,7 +2,7 @@
   "id": "TASK-0148",
   "game": "GAME-004",
   "title": "MathShow Map Finish MF-C Fixes for AUD-20261106-TASK-0147-01",
-  "status": "approved",
+  "status": "done",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -49,6 +49,25 @@
       "from": "review",
       "to": "approved",
       "note": "Light tier: no audit; merge needs human approval"
+    },
+    {
+      "from": "approved",
+      "to": "review",
+      "reason": "reopened to record AUD-02 and apply row MF-F3 override",
+      "by": "jg",
+      "at": "2026-11-06T21:52:50"
+    },
+    {
+      "time": "2026-11-06T21:52:50",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-06T21:52:50",
+      "from": "changes_requested",
+      "to": "done",
+      "note": "merge approved by jg over failed audit: MF-F3: AUD-02 minor accepted by design; Sfx is the shared SoundGroup holding the player's SFX volume, destroying it in stop() would reset that volume"
     }
   ],
   "executions": [
@@ -57,5 +76,19 @@
       "result": "pass",
       "notes": "check.sh green at 692ed70; Studio readback a,c,d done, b partial (group volume set directly). Evidence docs/workflow/evidence/MAP-FINISH/MF-C-fixes.txt."
     }
-  ]
+  ],
+  "audits": [
+    {
+      "time": "2026-11-06T21:52:50",
+      "result": "fail",
+      "report": "06 QA/AUD-20261106-TASK-0147-02.md",
+      "merge_override": {
+        "by": "jg",
+        "reason": "MF-F3: AUD-02 minor accepted by design; Sfx is the shared SoundGroup holding the player's SFX volume, destroying it in stop() would reset that volume",
+        "time": "2026-11-06T21:52:50"
+      }
+    }
+  ],
+  "revisions": 1,
+  "merge_approved_by": "jg"
 }

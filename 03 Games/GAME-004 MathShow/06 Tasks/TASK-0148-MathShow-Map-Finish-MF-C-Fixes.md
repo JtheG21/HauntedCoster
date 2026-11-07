@@ -3,7 +3,7 @@ id: TASK-0148
 title: "MathShow Map Finish MF-C Fixes for AUD-20261106-TASK-0147-01"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -39,5 +39,6 @@ Close the Codex FAIL audit AUD-20261106-TASK-0147-01: two Moderate AmbientLife f
 
 ## Audits
 - Source audit: [[AUD-20261106-TASK-0147-01]] (Codex, FAIL).
+- Re-audit: [[AUD-20261106-TASK-0147-02]] (Codex, FAIL, one minor). Merged over it by jg, row MF-F3: by design, `Sfx` is the shared SoundGroup holding the player's SFX volume; destroying it in `stop()` would reset that volume.
 
 ## Outcome
