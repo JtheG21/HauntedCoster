@@ -1,0 +1,24 @@
+{
+  "id": "TASK-0142",
+  "game": "GAME-004",
+  "title": "MathShow Map Finish MF-0 Gap Inventory",
+  "status": "backlog",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "docs/workflow/evidence/MAP-FINISH/",
+    "tasks/items/TASK-0142.json",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0142-MathShow-Map-Finish-Inventory.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0142-mf-inventory",
+  "acceptance": [
+    "Gap list vs brief, mockups A1-A4 and REF-MAP-003 recorded in PROGRAM.md with B1-B5 scope and a Deferred list; no map change; check.sh green; PR merged under MF-M."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/MAP-FINISH/PROGRAM.md"
+  ],
+  "notes": "Map Finish MF-0, rows MF-P/MF-M (MF-X, MF-C also typed by jg 2026-11-06). No map change.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0142-MathShow-Map-Finish-Inventory.md",
+  "risk": "low"
+}
