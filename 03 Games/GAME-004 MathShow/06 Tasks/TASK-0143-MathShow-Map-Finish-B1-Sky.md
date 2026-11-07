@@ -3,7 +3,7 @@ id: TASK-0143
 title: "MathShow Map Finish Map Finish B1 Sky"
 type: task
 project: GAME-004
-status: done
+status: in_progress
 priority: medium
 risk: low
 owner: executor
@@ -20,11 +20,11 @@ tags:
 # MathShow Map Finish Map Finish B1 Sky
 
 ## Goal
-Compare main's hub with the map brief, mockups A1-A4 and REF-MAP-003; write the gap list and B1-B5 scope in `docs/workflow/evidence/MAP-FINISH/PROGRAM.md`.
+Add a galaxy-night Sky to Lighting (B1 in `docs/workflow/evidence/MAP-FINISH/PROGRAM.md`).
 
 ## Scope
-- **In:** inventory and progress log only.
-- **Out (non-goals):** any map, code or Lighting change.
+- **In:** Sky.rbxmx mounted in Lighting; evidence.
+- **Out (non-goals):** gameplay code, Lighting.Technology, uploads.
 
 ## Intake
 - **Category → workflow, depth:** Map → light
@@ -32,7 +32,7 @@ Compare main's hub with the map brief, mockups A1-A4 and REF-MAP-003; write the 
 - **Decisions:** rows MF-P, MF-M, MF-X, MF-C approved by jg 2026-11-06.
 
 ## Acceptance criteria
-- [ ] AC1 Gap list, B1-B5 scope and Deferred list in PROGRAM.md.
+- [ ] AC1 Sky live in Play, gates evidenced.
 
 ## Implementation record
 

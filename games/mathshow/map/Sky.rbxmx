@@ -1,0 +1,11 @@
+<roblox version="4">
+  <Item class="Sky" referent="0">
+    <Properties>
+      <string name="Name">Sky</string>
+      <int name="StarCount">3000</int>
+      <bool name="CelestialBodiesShown">true</bool>
+      <float name="MoonAngularSize">8</float>
+      <float name="SunAngularSize">6</float>
+    </Properties>
+  </Item>
+</roblox>
