@@ -87,6 +87,22 @@ Redo the TASK-0139 exactly-once save so over-credit is impossible by constructio
   (c) a change made while op 1 was held unresolved, B's save, op 2 taken > 300 s later -> "settings superseded", music stays 7,
   every glyph credited once (45). Evidence: `docs/workflow/evidence/TASK-0141/rev3/studio-pass.txt`.
 
+## Handoff (Codex review, revisions 2–3, 2026-11-06)
+- Task: TASK-0141 profile saves; confirm AUD-01 F1–F3 and AUD-02 F1–F3 are closed without new over-credit or stale writes. Receiver: Codex, reviewer, no edits.
+- Workspace `/Users/jg/Desktop/Rg1-worktrees/profile-exactly-once`, branch `task/TASK-0141-profile-exactly-once`, PR #206, range `b7e6b29..7bbaecb` (source `69004d2`, `237f8b1`; the rest is docs/evidence).
+- Inputs: [[AUD-20261106-TASK-0141-01]], [[AUD-20261106-TASK-0141-02]], sections "Revision 2" and "Revision 3" above, evidence `docs/workflow/evidence/TASK-0141/rev2/` and `rev3/studio-pass.txt`.
+- Focus: (1) ProfileRules `planSave`/`superseded`/`noteSettings`/`takeOp`/`finish`: can any path (ack, delayed retry, requeue, change during an unresolved op, departed-session drain) still write stale settings over a newer session's? Is the load exemption (`knownReceipts`) safe?
+  (2) ProfileRules `classifyAttempt` and `settle` (incl. the older plan/error shapes): exactly-once glyphs, sticky ambiguity, no fresh credit after a candidate.
+  (3) ProfileService `attempt`/`settleAttempt`/`drive`/`drainOnShutdown`: R4 one terminal report and silent late settlement; R5 `shutdownLeft()` at dispatch and in every callback.
+  (4) ProfileRules.spec: do the 10 new and 5 updated cases test R1–R6 and AUD-02 F1 (the F1 case fails on `69004d2`)?
+- Constraints: persisted schema v3 + `applied {seq, at}` only (jg "A"); no remote, payload, store or key change. No uploads, publishing or Studio writes; Claude has stopped Rojo and released Studio.
+- Known, not this task: AUD-01 F4 (transform drops UserIds/metadata, as on main), tracked separately. `check.sh` is green at `7bbaecb`.
+- Report: verdict, findings with file:line, checks run (`scripts/check.sh`, Lune total), what stays unverified (service-level R4 with a call in flight past the shutdown deadline; capacity and the full 900 s window are specs-only).
+
+## Audits
+- [[AUD-20261106-TASK-0141-01]] (Codex, `a853705`): FAIL (F1 Major stale settings).
+- [[AUD-20261106-TASK-0141-02]] (Opus auditor, `9b1e64e`): FAIL (F1 Major settings change time); fixed in revision 3.
+
 ## Acceptance criteria
 See `tasks/items/TASK-0141.json`.
 
