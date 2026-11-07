@@ -21,7 +21,7 @@
     "XpRules and QuestRules are pure (no Instances), with frozen XpConfig and QuestConfig; specs cover level maths, daily cap, quest selection determinism, progress idempotence; check.sh green."
   ],
   "evidence": [],
-  "notes": "T1 of SYS-Quests-And-XP. Pure code only; no remotes, no DataStore.",
+  "notes": "Backlog; waiting for the Codex design review of SYS-Quests-And-XP and jg's plan rows. No plan approval yet.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0149-MathShow-Quests-XP-Rules.md",
   "risk": "low"
 }

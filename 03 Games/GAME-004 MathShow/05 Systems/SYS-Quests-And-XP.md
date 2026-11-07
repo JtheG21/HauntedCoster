@@ -1,6 +1,6 @@
 ---
 id: SYS-Quests-And-XP
-title: "MathShow Quests and XP Design Brief"
+title: "MathShow Quests and XP (v1)"
 type: system
 project: GAME-004
 status: proposed
@@ -8,93 +8,63 @@ side: shared
 source: []
 related:
   - "[[TASK-0149-MathShow-Quests-XP-Rules]]"
-  - "[[TASK-0150-MathShow-Quests-XP-Service]]"
+  - "[[TASK-0150-MathShow-Quests-XP-Persistence-And-Services]]"
   - "[[TASK-0151-MathShow-Quests-XP-UI]]"
-  - "[[SYS-Plaza-Map-Brief]]"
 created: 2026-11-07
 updated: 2026-11-07
 tags:
   - game/system
 ---
 
-# MathShow Quests and XP Design Brief
+# MathShow Quests and XP (v1)
 
-Design only. No code ships with this note. Approved as row QX-D1 (jg, 2026-11-07); the numbers below are **proposals** until jg approves task T1 (plan approval) and T2 (DataStore schema change).
+Decisions: jg interview 2026-11-07. Defaults marked (D) are Claude's picks, open to change in the design review.
 
-## Purpose
-Give players a reason to come back and a sense of progress between matches, without touching how a match is scored or ranked. XP is a long-term meter; quests are short goals that pay XP. Rank stays the skill signal (Skill Test); XP is the effort signal.
+## Player level
+- XP raises a level, capped at 50. Levelling cost to go from L to L+1: 100 + 35*(L-1) XP (D); ~46k XP to 50, ~8 weeks for a daily player.
+- Rank stays tied to the Skill Test; level is separate.
+- Unlocks (cosmetic only): a title every 5 levels (10 titles, placeholder names) (D); a nameplate colour every 10 levels (5 colours, not rank colours) (D).
+  Titles and colours are data in a frozen LevelRewards table. XP is never spent.
+- Shown on: the menu main card (level + XP bar) and an overhead nameplate (level + title, tinted by the colour), rendered by each client
+  from server-set Player attributes (Level, Title, PlateColor). Post-finish add-ins (not v1): trails, menu/HUD themes.
 
-## Principles
-- **Server-authoritative.** The server decides what happened (a correct answer, a finished match) and awards XP. The client only displays.
-- **Derived from existing events.** Quests listen to events the server already knows (accepted answer, round reveal, results, Skill Test result, glyph pickup). No new client-to-server remote for earning.
-- **Pure rules.** Quest progress and level maths live in `shared/QuestRules` and `shared/XpRules` (no Instances), tunables in frozen `shared/QuestConfig` and `shared/XpConfig`.
-- **No pay-to-progress, no Robux.** XP is earned only by play. Rank stays visual flair only (Plaza brief "Access").
-- **Quiet failure.** If a save fails, progress stays in memory for the session and retries; the UI never blocks a match.
+## XP sources
+- Play XP, server-awarded on validated events only: gameshow match finished as a participant 20 (+10 top 3), Blitz run finished 15,
+  VS match finished 15 (+10 win), Skill Test finished 20, Glyph collected 1, Practice 0 (D). Daily play-XP cap 400 (D); quest XP is outside the cap.
+- Quest XP: easy 100, medium 150, hard 200; finishing all three that day gives a 100 bonus (D).
 
-## XP
-| Topic | Proposal |
-|---|---|
-| Sources | Correct answer, finishing a match, quest completion, Skill Test pass, first win of the day. |
-| Correct answer | 5 XP (flat; no speed bonus, so XP does not reward typing speed over accuracy). |
-| Finish a match | 20 XP for completing it, +10 for a podium place. |
-| Quest reward | Quest-defined, 25 to 100 XP. |
-| Cap | At most 600 XP from answers and matches per UTC day; quest rewards sit outside the cap. Stops grinding bots and AFK farms. |
-| Levels | Level 1 to 50. XP to next level = `100 + 25 * (level - 1)`, so level 50 needs about 36 k XP in total. |
-| Level reward | Cosmetic only (title strings, name-plate colour, plaza emote). Nothing that changes scoring. |
-| Display | Level badge by the name plate, XP bar on the menu, a small "+XP" toast at Reveal (respects `reducedMotion`). |
+## Daily quests
+- 3 per player per UTC day (day = floor(os.time()/86400)); reset at 00:00 UTC; picked deterministically from the pool, seeded by userId + day,
+  one per category where possible, no duplicates.
+- Pool categories: play modes (finish N gameshow matches / Blitz runs / VS matches, take 1 Skill Test), math skill (N correct answers in any
+  mode, a 5-answer streak, N answers under 3 s), glyphs (collect N, find 1 rare). Daily Challenge quest type dropped (no mode in v1).
+- Progress counts only server-validated events (same sources as play XP). Progress caps at the target.
+- Claim: a finished quest shows CLAIM; the server grants its XP once. Finished-but-unclaimed quests are granted at rollover or next load (D).
+- Reroll: 1 free per day, unfinished quests only, the replacement comes from the pool and isn't already on the board.
+- Clock: a stored quest day never goes backwards; if a server's day is behind the stored day (skew), the stored board stands.
 
-## Quests
-| Topic | Proposal |
-|---|---|
-| Slots | 3 daily quests (reset 00:00 UTC) and 3 weekly quests (reset Monday 00:00 UTC). One re-roll per day. |
-| Selection | Server picks from a pool by player level band, no duplicates, deterministic from `userId` + date so a rejoin shows the same set. |
-| Kinds | `answers` (get N correct), `matches` (finish N), `streak` (N correct in a row in one match), `mode` (play a given mode), `podium` (place in the top 3), `skilltest` (pass a rank). |
-| Progress | Monotonic counters; completing is idempotent. A quest is claimed once. |
-| Claim | Automatic on completion; XP is added at the next save and shown at Reveal or in the menu. |
-| Difficulty | Targets scale with the player's `bestRank` band so a Plastic player and a Demon player both get reachable goals. |
+## Entry points
+- Menu: a QUESTS screen (3 cards: description, progress bar, CLAIM / REROLL), reached from the menu and by the Observatory "Daily" pad,
+  which opens QUESTS instead of the locked "daily" secondary. Toasts: quest complete, level up.
 
-## Data and state
-Profile schema moves from v3 to **v4** (a DataStore schema change, so it needs fresh explicit approval from jg before T2 starts).
+## Persistence (deep)
+- Profile schema v4 (migrated from v3): xp (integer total), playXpDay {day, amount}, quests {day, slots[3]{id, progress, claimed}, rerolled}.
+  Level, title and colour are derived from xp (not stored).
+- XP and quest changes go through the TASK-0141 exactly-once save path as deltas. Ambiguity rule unchanged: no covering receipt = drop the delta
+  (under-credit, warn). Older (v3) writers refuse v4 profiles; add a "profile schema v4 cutover" gate to PUBLISH-CHECKLIST.md.
 
-| Field | Type | Rule |
-|---|---|---|
-| `xp` | number | Lifetime XP; never decreases; added as a delta like `glyphsDelta`, so the exactly-once receipt log covers it. |
-| `quests` | table | Active quests: id, kind, target, progress, day key, claimed flag. Replaced at reset. |
-| `xpDay` | table | `{ day, earned }` for the daily cap. |
+## Remotes (server creates all; validate type -> range -> ownership -> rate limit, debounce before any yield)
+- QuestRequest() -> server sends QuestState to that player. QuestClaim(slot: 1..3). QuestReroll(slot: 1..3). QuestState (server -> client):
+  board, progress, claimed, rerollUsed, xp, level, next-level XP. ModePadOpen for the Daily pad carries "quests".
 
-Reuse the TASK-0141 save-operation and receipt design: XP and quest progress travel as deltas inside the same `SaveOp`, never as absolute totals, so two servers cannot over-credit. Stored data is lenient (bad fields fall back); any client-supplied value is rejected whole.
-
-## Interfaces
-| API / Remote | Direction | Args (validated) | Notes |
-|---|---|---|---|
-| `QuestState` (RemoteEvent) | server to owner | `{ level, xp, xpToNext, quests = {...} }` | Sent on join and after a change. Server creates it. |
-| `XpGain` (RemoteEvent) | server to owner | `{ amount, reason }` | Display only. |
-| `QuestReroll` (RemoteFunction or event) | client to server | none; rate-limited, once per day, ownership by `Player` | Only client request in the system. Server ignores it if the re-roll is spent. |
-
-A changed payload updates sender, handler and receiver together (AGENTS.md remote change rule).
-
-## Trust boundary
-Clients cannot award, claim or set anything. The one client request (re-roll) carries no data to trust. XP and quest counters change only inside server code paths triggered by server-observed events.
-
-## Out of scope
-Leaderboards of XP, seasons, a quest shop, monetisation, group quests, anything touching Blitz, VS or Group Battle scoring, and any change to Skill Test rank rules.
-
-## Open questions for jg
-1. Are the XP numbers and the daily cap right, or should answers pay more?
-2. Level reward list: titles and name-plate colours only, or also a plaza emote?
-3. Is 3 + 3 quest slots right?
-4. T2 touches the DataStore schema: approve at plan time, per the Approval Protocol.
+## Out of scope (v1)
+Trails, menu/HUD themes, weekly quests, Daily Challenge mode, spending XP, leaderboards by level, publishing.
 
 ## Tasks
-| Task | Title | Tier | Depends on |
-|---|---|---|---|
-| [[TASK-0149-MathShow-Quests-XP-Rules]] (T1) | Pure rules, config and specs | standard | none |
-| [[TASK-0150-MathShow-Quests-XP-Service]] (T2) | Service, profile v4, remotes | deep | T1 |
-| [[TASK-0151-MathShow-Quests-XP-UI]] (T3) | Menu panel, XP bar, toasts | standard | T2 |
-
-## Tests
-- Automated: lune specs for `QuestRules` and `XpRules` (T1); profile v4 migration and save-delta specs (T2); text-fit ledger rows for the new UI (T3).
-- Playtest: two Studio clients, one full match, daily reset by faking the day key, rejoin shows the same quests.
+T1 rules: XpRules, QuestRules (+ XpConfig, QuestConfig, LevelRewards), pure, with specs ([[TASK-0149-MathShow-Quests-XP-Rules]]).
+T2 persistence and services: ProfileRules v4, XpService, QuestService, event hooks in Round/Blitz/Vs/SkillTest/Glyph services, remotes
+([[TASK-0150-MathShow-Quests-XP-Persistence-And-Services]]). T3 UI: QUESTS screen, level card, toasts, nameplate, Daily pad wiring
+([[TASK-0151-MathShow-Quests-XP-UI]]). Order T1 -> T2 -> T3.
 
 ## History
-- 2026-11-07: brief written (row QX-D1). No code.
+- 2026-11-07: brief registered (row QX-D1); waiting for the Codex design review and jg's plan rows.

@@ -1,7 +1,7 @@
 {
   "id": "TASK-0150",
   "game": "GAME-004",
-  "title": "MathShow Quests XP Service",
+  "title": "MathShow Quests XP Persistence And Services",
   "status": "backlog",
   "tier": "deep",
   "owner_agent": "codex",
@@ -13,17 +13,17 @@
     "games/mathshow/src/server/Services/ProfileService.luau",
     "games/mathshow/tests/ProfileRules.spec.luau",
     "tasks/items/TASK-0150.json",
-    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Service.md"
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Persistence-And-Services.md"
   ],
   "depends_on": [
     "TASK-0149"
   ],
-  "branch": "task/TASK-0150-quests-xp-service",
+  "branch": "task/TASK-0150-quests-xp-persistence",
   "acceptance": [
     "Profile schema v4 with xp, quests and xpDay saved as deltas through the TASK-0141 receipt log; QuestService awards XP only from server events; remotes created by the server; migration spec from v3; Studio two-client run; Opus audit passes."
   ],
   "evidence": [],
-  "notes": "T2 of SYS-Quests-And-XP. DataStore schema change: needs jg fresh explicit approval before start.",
-  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Service.md",
+  "notes": "Backlog; waiting for the Codex design review of SYS-Quests-And-XP and jg's plan rows. No plan approval yet.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Persistence-And-Services.md",
   "risk": "high"
 }
