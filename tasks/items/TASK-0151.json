@@ -11,9 +11,7 @@
     "games/mathshow/src/shared/LedgerRules.luau",
     "tasks/items/TASK-0151.json",
     "03 Games/GAME-004 MathShow/06 Tasks/TASK-0151-MathShow-Quests-XP-UI.md",
-    "games/mathshow/src/client/Hub/ModePadController.luau",
-    "games/mathshow/src/client/Identity/",
-    "games/mathshow/src/client/init.client.luau"
+    "games/mathshow/src/client/Hub/ModePadController.luau"
   ],
   "depends_on": [
     "TASK-0150"
