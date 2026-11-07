@@ -1,0 +1,61 @@
+{
+  "id": "TASK-0146",
+  "game": "GAME-004",
+  "title": "MathShow Map Finish B4 Boundary Sweep",
+  "status": "approved",
+  "tier": "light",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "scripts/build_hub.py",
+    "games/mathshow/map/Hub.rbxmx",
+    "docs/workflow/evidence/MAP-FINISH/",
+    "03 Games/GAME-004 MathShow/05 Systems/SYS-Plaza-Map-Brief.md",
+    "tasks/items/TASK-0146.json",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0146-MathShow-Map-Finish-B4-Boundary-Sweep.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0146-mf-boundary",
+  "acceptance": [
+    "Every edge, terrace and roof checked for escapes, stuck spots and falls out of the world; list of spots checked in evidence; any gap sealed through build_hub.py (invisible colliders where needed); check.sh green; Studio fresh Play HubRoutes 6/6."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/MAP-FINISH/B4-boundary.txt"
+  ],
+  "notes": "Map Finish B4, rows MF-P/MF-M. Generator-only fixes; no Studio authoring.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0146-MathShow-Map-Finish-B4-Boundary-Sweep.md",
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-06T20:46:19",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-06T20:46:19",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-06T20:53:41",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-06T20:53:41",
+      "from": "review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-06T20:53:41",
+      "result": "pass",
+      "notes": "Found and fixed a stuck 8-stud moat outside tier 4 (WALL_R 290->283) at 649813f; 24-angle edge walk, 48 pathfinding spots, HubRoutes 6/6, check.sh green; lights 25/40. Evidence docs/workflow/evidence/MAP-FINISH/B4-boundary.txt."
+    }
+  ]
+}

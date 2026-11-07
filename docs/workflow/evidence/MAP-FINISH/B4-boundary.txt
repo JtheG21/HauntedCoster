@@ -1,0 +1,38 @@
+# TASK-0146 Map Finish B4 Boundary sweep (rows MF-P, MF-M)
+# measured git HEAD: 649813f (BuildStamp "649813f 2026-11-07T04:48:34Z", clean tree; scripts/serve.sh from the TASK-0146 worktree; Rojo plugin reconnected; fresh Play, single player; place not saved)
+# applies_to: Measured at 649813f. Applies to later commits whose diff from 649813f does not touch games/mathshow/map/**, scripts/build_hub.py or mathshow.project.json.
+
+## Finding and fix
+FOUND (before the fix, measured at 6395686): a stuck spot all the way round the boundary. The invisible wall sat at radius 290, but tier 4's outer face is at 282 (tier centres 254, 262, 270, 278; depth 8; tops 3, 6, 9, 12). A player walking off the outer edge of tier 4 dropped 12 studs into an 8-stud strip (282..290) and could not climb back (jump about 7). Reproduced in Play: start on tier 4 top (R=279, y=15), walk outward: end R=287.2, y=3.0; then walk and jump toward the centre for 8 s: end R=282.9, y=3.0, max y 3.0. Stuck.
+FIX: WALL_R 290 -> 283 in scripts/build_hub.py (wall inner face at 282.5, 0.5 stud off tier 4's face, so nothing fits between). Hub.rbxmx regenerated; drift guard passes. No route, pad, GlyphSpawn or prop moved.
+
+## Spots checked (all at 649813f unless stated)
+Static, Edit DataModel:
+ 1. Wall ring: 48 segments, all at radius 283.00, bottom y 0, top y 80, all CanCollide true; every segment end lies inside a neighbour (0 uncovered seams). (Measured at 6395686 with radius 290.00; the radius is the only change.)
+ 2. Ground under the hub: 7,673 downward raycasts on rings every 6 studs from the centre to R=296 (collidable hits only; non-collidable parts are skipped): 0 misses, lowest walkable surface y = 0.00. Nothing falls out of the world inside the Ground disc (radius 300). (At 6395686.)
+ 3. Highest standing surface is the N terrace 3 top at y = 32 plus the observatory gallery; with a jump of about 7 a player reaches about 39, well under the wall top (80), so the wall cannot be climbed over.
+Engine behaviour, Play client (a Humanoid MoveTo plus jump):
+ 4. Tier 4 top, edge walk-out, 24 angles (every 15 degrees; the odd ones offset 3.75 degrees so 12 land on wall seams and 12 on segment centres): start y 15.0, walk outward 2.8 s with jump held; all 24 stayed on tier 4 at y 15.0, end radius 281.89..282.45 (the plane of the wall's inner face). 0 fails. No drop into the old strip, no leaving the hub.
+ 5. The original moat reproduction at 200 degrees, repeated after the fix: end R=282.17, y=15.0 (stayed on top).
+Pathfinding (PathfindingService, server, agent radius 2, height 5, can jump; from each point to the plaza spawn), 48 points, 48 ok, 0 fail:
+ 6. Tier 1..4 tops at 30, 120, 215 and 300 degrees (16 points).
+ 7. Ground at R=245 and R=200, every 45 degrees (16 points).
+ 8. N Terrace_1, 2, 3 tops; ground beside Terrace_1 and Terrace_3; ground behind Terrace_3 (6 points).
+ 9. Ranks hall roof and the stairs' foot; SW hall floor (3 points).
+10. Lake promenade W, N and E (3 points).
+11. E court, W court, and the E court's two far corners (4 points).
+Detector sanity: a path from the old moat position (R=288 at 200 degrees, now outside the wall) returns NoPath, so the check can see a trap. It was not run against the pre-fix map (only the physical test above was), so the pathfinding list is a regression check, not proof that it would have found the moat.
+
+## Regression (fresh Play at 649813f)
+- scripts/check.sh: ALL CHECKS PASSED (python walk and route guards cover 34/34 GlyphSpawn reachability on the regenerated map).
+- HubRoutes: HUBROUTES_RESULT routes=6/6 failures=0 stamp=649813f. Daily 11.6 s, VS 12.4, Blitz 10.7, Group 12.3, Practice 11.7, Skill 11.8; canary blocked; all 6 pads opened their screens.
+- Console: no new warnings or errors. The three "ContentId rbxassetid://203785492" lines predate B1. One "GlyphCollect ... out_of_range (Glyph_R_Tier5)" is a server rejection caused by my teleports passing the tier-4 rare glyph at 150 degrees; the validation worked as designed.
+- Not re-run live: collect/respawn, HUD, mid-match (no gameplay code or remote changed; scope argument, not measured evidence).
+
+## Not covered
+- Edges of props, bunting and holo symbols (all CanCollide false or out of reach).
+- Rooftops other than the Ranks hall and the N terraces: the Competitive and Training buildings have no stairs or ramps to their roofs, so players cannot stand on them (not tested by climbing attempts).
+- A physical climb-out attempt from every concave corner of every building; the pathfinding list is a sample, not a proof of absence.
+
+## Budgets
+PointLights 25/40 (+0). Triangle inventory unchanged from B3 (43,912 of the 49,040 cap; no parts added, one wall moved).
