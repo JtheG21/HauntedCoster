@@ -1,0 +1,121 @@
+{
+  "id": "TASK-0139",
+  "game": "GAME-004",
+  "title": "MathShow Profile Save Remediation (AUD-02 F1-F3)",
+  "status": "changes_requested",
+  "tier": "deep",
+  "owner_agent": "claude-code",
+  "files_owned": [
+    "games/mathshow/src/shared/ProfileRules.luau",
+    "games/mathshow/tests/ProfileRules.spec.luau",
+    "games/mathshow/src/server/Services/ProfileService.luau",
+    "games/mathshow/src/server/Services/GlyphService.luau",
+    "docs/workflow/evidence/TASK-0139/",
+    "06 QA/AUD-20261103-TASK-0138-02.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0139-MathShow-Profile-Save-Remediation.md",
+    "03 Games/GAME-004 MathShow/06 Tasks/TASK-0138-MathShow-Lifetime-Glyph-Total.md",
+    "06 QA/AUD-20261105-TASK-0139-01.md"
+  ],
+  "depends_on": [],
+  "branch": "task/TASK-0139-profile-remediation",
+  "acceptance": [
+    "R1: AUD-02 F1: the save transform preserves unknown stored fields; a profile that is newer than this build when saved is never rewritten (write refused, session memory-only). Specs cover migrate -> sanitize -> merge and a newer version appearing after load.",
+    "R2: AUD-02 F2: glyphsLifetime is credited additively (stored total + this session's unsaved increments), never max-merged; a two-session interleaving spec totals 16; repeated UpdateAsync callbacks cannot double-credit. No schema, key or lock change.",
+    "R3: AUD-02 F3: the final-source behaviour is evidenced, or jg confirms the recorded exception; API access state reported.",
+    "R4: AUD-02 is recorded in the repo (tracked) and linked from TASK-0138; check.sh and validators green; PR open, CI green, not merged; independent re-audit recorded."
+  ],
+  "evidence": [
+    "docs/workflow/evidence/TASK-0139/remediation.txt"
+  ],
+  "notes": "Started on jg's chat instruction 2026-11-05: \"reaudit and make sure its passing if not fix it up until it passes. make sure there are no more untracked files\". Fixes the two high findings of AUD-20261103-TASK-0138-02 (Codex, FAIL, post-merge on 1d4eaff). NO schema change: glyphsLifetime already exists; if exactly-once needs an operation-id field, STOP and ask jg (DataStore schema change needs fresh approval). Out of scope: other profile fields, key renames, data wipes, live experience, publishing, merging, saving MathShow.rbxl.",
+  "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0139-MathShow-Profile-Save-Remediation.md",
+  "risk": "high",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-05T15:08:55",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-05T15:08:56",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-05T15:11:59",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-05T15:15:38",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "from": "approved",
+      "to": "review",
+      "reason": "approved came from task-audit (non-Codex) AUD-01; independent Codex AUD-20261106-TASK-0139-02 = FAIL",
+      "by": "jg",
+      "at": "2026-11-06T14:52:55"
+    },
+    {
+      "time": "2026-11-06T14:52:55",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-06T14:55:46",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-06T15:12:15",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-06T15:22:09",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-05T15:11:59",
+      "result": "pass",
+      "notes": "check.sh green (366 specs); Codex AUD-02 probe re-run: unknown fields kept, newer-version write refused, overlap total 16; Studio not re-run (API access off), see docs/workflow/evidence/TASK-0139/remediation.txt"
+    },
+    {
+      "time": "2026-11-06T15:12:15",
+      "result": "pass",
+      "notes": "rev 2 (AUD-02 F1+F2): schema v3 save log (jg S1 2026-11-06), exactly-once ops, nested settings overlay; check.sh green, Lune 376; Studio S3 PASS 1-6 on aa2fe41 (BuildStamp==HEAD), API ON then OFF read back; see docs/workflow/evidence/TASK-0139/revision2.txt"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-05T15:15:38",
+      "result": "pass",
+      "report": "06 QA/AUD-20261105-TASK-0139-01.md"
+    },
+    {
+      "time": "2026-11-06T14:52:55",
+      "result": "fail",
+      "report": "06 QA/AUD-20261106-TASK-0139-02.md"
+    },
+    {
+      "time": "2026-11-06T15:22:09",
+      "result": "fail",
+      "report": "06 QA/AUD-20261106-TASK-0139-03.md"
+    }
+  ],
+  "revisions": 2
+}

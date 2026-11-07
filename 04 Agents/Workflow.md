@@ -60,3 +60,4 @@ Idea (01 Inbox) → Research (RSH) → Proposed task (TASK, backlog) → [HUMAN:
 
 ## Human gates (always)
 Approving a plan · approving a merge · major design changes · DataStore schema changes · anything that touches Robux · publishing · paid API calls · changes to a live experience · deciding what happens to Inbox items · accepting an ADR.
+Before any publish, every gate in `docs/workflow/PUBLISH-CHECKLIST.md` must hold (profile v3 cutover: TASK-0141).

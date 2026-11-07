@@ -1,0 +1,44 @@
+TASK-0139 remediation evidence (2026-11-05)
+measured_sha: f6faf50   applies_to: games/mathshow/src/{shared/ProfileRules,server/Services/ProfileService}.luau, tests/ProfileRules.spec.luau
+
+R1/R2  Codex AUD-02 probe, re-run against the fixed ProfileRules in Lune (the same four checks; the store is modelled as
+UpdateAsync old -> ProfileRules.planSave(old, patch), nil cancels):
+  migrate unknown true | load unknown (in memory, expected nil) nil
+  save unknown flag/quests true 1 version 2
+  overlap total 16 expected 16
+  future write accepted false extra must survive version 99 total 20
+  Before the fix (AUD-02): save unknown nil nil | future update 99 nil | overlap total 15 expected 16.
+  "load unknown nil" is the in-memory copy (sanitized by design); the write path now keeps the stored fields.
+
+Specs: ProfileRules.spec gains 7 tests; Lune total 366 passed, 0 failed (was 359). check.sh ALL CHECKS PASSED.
+  merge adds glyphsDelta (invalid deltas ignored, capped at 2^53); two overlapping sessions total 16 in either order;
+  a repeated callback credits a patch once per stored value; merge keeps unknown fields incl. migrate -> sanitize -> merge;
+  planSave refuses a newer stored version that appeared after load; adopt keeps increments that arrive during a save.
+
+ProfileService: glyphsPending counts unsaved increments; a save takes them as glyphsDelta and puts them back on failure;
+a refused write (newer stored version) turns the session memory-only with a warn. No remote, key, store-name, cadence or
+schema change (glyphsLifetime already existed).
+
+Residual risk (not closed, no schema change allowed without jg): if UpdateAsync writes and then errors on the way back,
+the retry credits that save's increments a second time. An operation-id field in the profile would close it; that is a
+DataStore schema change and needs jg's approval.
+
+R3 Studio, private test experience (universe 10774566206, place 93701543861123, "MathShow Private Test", Private): PASS (2026-11-05)
+  measured_sha: 083821c (BuildStamp "083821c 2026-11-05T23:17:42Z" == HEAD at the run; no source diff from f6faf50, only docs).
+  applies_to: games/mathshow/src/{shared/ProfileRules,server/Services/ProfileService}.luau. Rojo 7.7.0 from the task worktree, port 34872,
+  one Studio window, synced into the open place only (Team Create is ON there, so Studio autosaves Saved versions; nothing published).
+  Setup: jg re-enabled "Studio Access to API Services" for this run (chat, "Run Studio pass"). Edit-mode GetAsync still said
+  "Access forbidden" after enabling, also after closing and reopening the place; Play (Server data model) could read and write the
+  store, so the checks below ran in Play. Stored profile before: version 2, glyphsLifetime 12 (from the TASK-0138 run).
+  Run 1 (fresh Play, server data model):
+   - After the server loaded the profile, an "other server" write set glyphsLifetime = 17 and added unknown fields quests={a=1}, flag=true.
+   - Collected 1 common (+1) and 1 rare (+5). HUD "Glyphs 6 · Total 23". First autosave stored glyphsLifetime 18 (17 + 1), the next
+     stored 23 (17 + 1 + 5; the old max-merge would have ended at 18). quests and flag survived both saves. (F2 and F1 confirmed.)
+   - Then version 99 plus extra="must survive" was written after load; a settings change (SettingsSave) forced a save. Console:
+     "[MathShow] stored profile of <userId> is a newer version; not saving, memory-only from now on". Store afterwards: version 99,
+     extra intact, music unchanged (4), glyphsLifetime 23: the write was refused, nothing erased. (F1 refused path confirmed.)
+   - Test profile restored to version 2 (extra removed) so later runs are not memory-only; quests and flag stay as test fixtures.
+  Run 2 (Play again): HUD "Total 23" on rejoin (persisted). Console clean apart from the known ContentId rbxassetid://203785492 warning.
+  Not exercised in the engine: UpdateAsync commit-then-error (residual risk above), leave-save retry loop, BindToClose.
+  Setting afterwards: "Studio Access to API Services" switched OFF again and saved in the settings dialog; read back OFF
+  (reopened Experience Settings -> Security). Team Create left ON (jg's choice, 2026-11-05). Place closed without saving or publishing.

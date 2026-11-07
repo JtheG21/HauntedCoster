@@ -1,0 +1,96 @@
+TASK-0141 evidence (2026-11-06): at-most-once profile glyph saves v2, Codex design 2026-11-06 applied verbatim
+measured_sha: 7b8e7d4   (final source commit; later commits add only this evidence and task records:
+                         verify with git diff --stat 7b8e7d4..HEAD -- games/mathshow)
+applies_to: games/mathshow/src/shared/ProfileConfig.luau, games/mathshow/src/shared/ProfileRules.luau,
+            games/mathshow/src/server/Services/ProfileService.luau, games/mathshow/tests/ProfileRules.spec.luau
+
+Schema (jg approval "A", 2026-11-06 14:53 PT): version 3 + applied {[sessionId] = {seq, at}} only. Store MathShow_Profiles_v1,
+key p_{userId}, remotes and payloads unchanged.
+
+Clock: os.clock(), monotonic. creator-docs content/en-us/reference/engine/libraries/os.yaml (clone af5f853, 2026-10-10):
+"adjustments to the system clock (such as by the user or NTP) do not cause time to jump forwards or backwards".
+https://create.roblox.com/docs/reference/engine/libraries/os#clock . time() was not chosen: its docs say nothing about clock
+adjustments.
+
+Studio hook entry points (all through ProfileService.studioHook(): nil unless RunService:IsStudio() and RunService:IsServer();
+server workspace attributes, which a client cannot set on the server):
+  MathShowForceProfileFail            load()      loads fail
+  MathShowForceSaveErrorAfterCommit   attempt()   commit, then error (consumed once)
+  MathShowForceSaveCandidateThenError attempt()   callback returns a candidate, then the call fails, nothing committed
+                                                  (consumed by the next attempt)
+  MathShowForceSaveFailures = n       attempt()   n attempts fail before dispatch, no candidate (decremented)
+  MathShowProfileRetryWindowS = s     retryWindow() shorter window only (ProfileRules.retryWindow clamps to <= 900)
+
+Checks at 7b8e7d4: scripts/check.sh ALL CHECKS PASSED (active). Lune: 388 passed, 0 failed.
+ProfileRules.spec save cases (all pass):
+  two sessions that overlap lose no glyph, in both orders
+  a repeated UpdateAsync callback credits one op once
+  retry window: 899.999 applies; 900, 900.001, 901, 1e9, NaN abandon with no candidate
+  the Studio window override only shortens the window
+  a callback replayed across the deadline returns no candidate and abandons cleanly
+  a candidate submitted before the deadline is confirmed by a late successful response
+  ambiguous with a matching receipt is acknowledged (and past the window: acknowledged, no write)
+  ambiguous with a missing or lower-seq receipt is abandoned and writes nothing
+  ambiguous retry after its receipt was removed is abandoned; the total is unchanged (15, never 20)
+  a known no-candidate failure retries the unchanged op; ambiguity is sticky; ops are frozen
+  abandoned deltas never reappear under a new seq; later increments stay separate
+  an old shutdown completion arriving while newer increments are pending (10 + 5 once + 3 = 18)
+  leave, autosave and shutdown signals share one op until it resolves
+  shutdown: an unresolved op is reported unconfirmed and stays potentially committed
+  planSave abandons an op or context without a valid identity
+  planSave refuses stored data from a newer build (newer_schema in every context)
+  migrate v2 -> v3 ... and existing v3 receipts survive another session's save and still deduplicate
+  receipts exactly 7 days old are kept, older pruned; the own receipt is checked before pruning
+  at the cap only receipts strictly older than 1200 s are evicted: 1200 kept, 1201 evictable
+  an all-young full log refuses with capacity, leaves the store unchanged, and recovers (+201 s)
+  clock skew +300 / -300 s never exposes a live receipt
+  sanitizeApplied no longer caps the log; only planSave makes room
+
+Revision during the Studio pass (attempt 1): the first run at c1f0498 showed that an error raised inside the UpdateAsync
+transform does NOT reach the pcall in Studio: the engine prints "Transform function error ..." and returns nil. attempt() took
+that as "applied" (op 5 confirmed with nothing committed: silent under-credit, no over-credit). Fix 7b8e7d4: a write is
+confirmed only by UpdateAsync returning the updated value (creator-docs GlobalDataStore.yaml: "Returns ... the updated value");
+nil after a write candidate = error with candidate (ambiguous). Every scenario below was re-run from a fresh fixture on 7b8e7d4.
+
+Studio pass, private test experience ONLY (universe 10774566206, place 93701543861123, "MathShow Private Test"): PASS
+  Build: BuildStamp "7b8e7d4 2026-11-07T00:06:29Z" == HEAD 7b8e7d4; synced ProfileService 24177 B, ProfileRules 25662 B,
+  ProfileConfig 1000 B == disk. Rojo 7.7.0 via scripts/serve.sh from the task worktree, port 34872; one Studio window; Play,
+  Server data model for store reads/writes, Client data model for the SettingsSave remote. Saves were driven through the real
+  paths: SettingsSave remote (debounced save), real glyph collects (server PivotTo, client auto-collect), autosave, leave and
+  BindToClose. "Other server" writes and fresh reads were direct UpdateAsync calls from the Server data model.
+  API access readback BEFORE: OFF (api-access-before-off.jpg). jg switched it ON and saved; Claude reopened Experience
+  Settings -> Security and read it back ON (api-access-on-readback.jpg), closed with Cancel. Edit-mode DataStore calls still
+  returned "502 ... Access forbidden"; Play server calls worked.
+  Fixture: version 2, glyphsLifetime 23, quests={a=1}, flag=true, settings music 4 + futureToggle="keep me", bestRank 2, blitzBest 7.
+  Session A = 204c3a65-7685-458f-9188-e5dcb6c56687.
+  S1 v2 -> v3: settings save -> version 3, total 23, applied {A seq 1}, quests/flag/futureToggle kept, music 5.          PASS
+  S2 overlap: other server +5 and applied other-server-test={seq 7}; collected E1 (+1), Lake1 (+5); save -> total 34
+     = 23+5+1+5, other receipt kept, A seq 2.                                                                           PASS
+  S3 ambiguous + covering receipt: ErrorAfterCommit armed, collected E2 (+1); save committed 35 / A seq 3, console
+     "profile save attempt failed ... (op 3, candidate=true): simulated: UpdateAsync committed, then errored"; next save
+     -> "save op 3 ... acknowledged by its receipt; glyphs not added again"; total 35 (old path 36), music 8.            PASS
+  S4 ambiguous + receipt behind: CandidateThenError armed, collected E3 (+1); save -> "Transform function error ...",
+     "(op 5, candidate=true): UpdateAsync returned no value after a write candidate"; store unchanged 35 / A seq 4.
+     Collected E4 (+1) meanwhile. Retry -> "ended unconfirmed: reason=ambiguous_receipt_behind seq=5 delta=1
+     ambiguous=true"; E4 went out as op 6: total 36 (the abandoned +1 never reappeared).                                 PASS
+  S5 shortened window: MathShowProfileRetryWindowS=3, ForceSaveFailures=1, collected E5 (+1); save -> "simulated save
+     failure before dispatch, op 7"; 7 s later -> "ended unconfirmed: reason=expired seq=7 delta=1 ambiguous=false";
+     total 36. Autosave then wrote op 8 (delta 0, music 6): total 36.                                                  PASS
+  S6 shutdown drain: ForceSaveFailures=2, collected E6 (+1), no save trigger, Stop Play. Console (cut when the server data
+     model closed) shows "simulated save failure before dispatch ... op 9"; next Play read the store: total 37, A seq 9,
+     at 1794010222 (about 2 s after Stop). The retry after the forced failure(s) is evidenced by the stored value only.   PASS
+  Rejoin (fresh Play): HUD "Glyphs 0 · Total 37" == stored 37.                                                          PASS
+  S4b ambiguous + NO receipt (fresh session B, no receipt yet): CandidateThenError armed, collected W1 (+1); save -> "(op 1,
+     candidate=true): UpdateAsync returned no value ..."; retry -> "reason=ambiguous_no_receipt seq=1 delta=1
+     ambiguous=true"; total 37 unchanged, no receipt for B.                                                             PASS
+  S7 version 4: store set to version 4 + extra="must survive"; collected W2 (+1), save -> "reason=newer_schema seq=2" and
+     "stored profile ... is a newer version; not saving, memory-only from now on"; store v4, extra kept, 37, music 6.    PASS
+  Fixture restored: version 3, extra removed (quests, flag, futureToggle, other-server-test stay as fixtures). Final store:
+     version 3, total 37, applied {A seq 9, other-server-test seq 7}.
+  Noted, not a failure: the HUD glyph total is republished only on collect, so it can lag the store after an abandon
+     (e.g. 37 shown while the store held 36 until the next collect/adopt).
+  Not exercised in the engine: capacity (cap 200) and the 900 s window at full length (specs cover both); overdue-call
+     warning (needs a call in flight past the window).
+  API access readback AFTER: jg switched it OFF and saved; Claude reopened Experience Settings -> Security and read it back
+     OFF (api-access-off-readback.jpg), closed with Cancel. Rojo stopped afterwards.
+  Nothing published; live experience untouched; MathShow.rbxl not saved; the place was not saved by the agent.

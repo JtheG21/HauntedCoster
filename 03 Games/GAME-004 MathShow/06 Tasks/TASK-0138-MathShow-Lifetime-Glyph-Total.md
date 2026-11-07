@@ -48,3 +48,4 @@ See the task file; ticked in the Outcome once measured.
 
 ## Audits
 - [[AUD-20261103-TASK-0138-01]]: pass. Minors fixed after the audit; one release requirement: shut down all old servers before the first publish.
+- [[AUD-20261103-TASK-0138-02]]: fail (Codex, post-merge, on `1d4eaff`). F1 and F2 fixed in [[TASK-0139-MathShow-Profile-Save-Remediation]]; re-audit [[AUD-20261105-TASK-0139-01]].

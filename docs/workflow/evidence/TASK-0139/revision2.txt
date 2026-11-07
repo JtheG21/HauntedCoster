@@ -1,0 +1,69 @@
+TASK-0139 revision 2 evidence (2026-11-06): AUD-20261106-TASK-0139-02 Majors F1 (3a, exactly-once) and F2 (3b, nested settings)
+measured_sha: 61e1eeb   (source commit; HEAD at the Studio run aa2fe41 adds only task-state records: git diff --stat 61e1eeb..aa2fe41 -- games/mathshow is empty)
+applies_to: games/mathshow/src/shared/ProfileRules.luau, games/mathshow/src/server/Services/ProfileService.luau,
+            games/mathshow/tests/ProfileRules.spec.luau
+Profile version constant: ProfileRules.luau (`local VERSION = 3`); there is no separate profile config module.
+
+Approval S1 (DataStore schema): jg, Task Audit chat, 2026-11-06 14:53 PT, typed "A" in reply to "A: schema v3 with a save log".
+Schema change made: version 2 -> 3 and the new `applied` field only. Store name MathShow_Profiles_v1, key p_{userId}, remotes and
+every other field unchanged (settings gains no key; unknown settings sub-keys are now preserved, not added).
+
+Design as built
+- ProfileRules.planSave(stored, op, now) -> (value | nil, alreadyApplied). nil when stored.version > 3 or the op has no valid identity
+  (session id 1..64 chars, seq positive integer) or `now` is not finite. applied[op.sessionId].seq >= op.seq -> delta not added again,
+  idempotent fields still overlaid. Otherwise delta added (cap 2^53) and applied[sessionId] = { seq, at = now }.
+- sanitizeApplied: drops malformed entries, prunes at < now - 604800 (exactly 7 days kept), caps at 200 by oldest `at`; the op being
+  written is never the one capped away (clock skew case).
+- migrate: below v3 adds applied = {}; keeps unknown top-level fields and glyphsLifetime; a v3 log is not reset.
+- overlay: known settings keys are written onto a clone of stored.settings (unknown sub-keys survive). `applied` is a map this build owns
+  (pruned), so it is written whole; settings is the only record-type known field.
+- Extra (found while implementing): adopt() now sanitizes, and toPatch()/toClient() copy the five known settings keys. Without this, an
+  unknown stored settings sub-key would reach the session profile, make the strict sanitizeSettings reject every later settings patch,
+  and be sent to the client. No remote payload change.
+- ProfileService: sessionId = HttpService:GenerateGUID(false) per player session; the save op {seq, glyphsDelta} is taken without a
+  yield and kept in `inflight` until a save succeeds; any error keeps the SAME op for the next attempt (leave loop, autosave,
+  BindToClose, next debounced save); increments during the save wait in glyphsPending for the next seq; a successful retry chains a save
+  for increments that waited behind it. Refused (version > 3): the op's delta goes back to pending, memory-only, warn.
+- Studio-only hook: workspace attribute MathShowForceSaveErrorAfterCommit (ProfileService.forcedErrorAfterCommit). Inert unless
+  RunService:IsStudio() and RunService:IsServer(); consumed once; errors after UpdateAsync committed. A client cannot set a server
+  workspace attribute.
+
+Specs (ProfileRules.spec, Lune): 376 passed, 0 failed (was 366). check.sh ALL CHECKS PASSED (active).
+  pass  two sessions that overlap lose no glyph, in both orders (A+1, B+5 on 10 = 16)
+  pass  a repeated UpdateAsync callback credits one op once (same stored, fresher stored 12 -> 17, replay on own commit -> 15)
+  pass  committed then errored: applied[s].seq=1, total 15, retry seq 1 (+5) stays 15; seq 2 (+2) gives 17
+  pass  an already-applied op still overlays its idempotent fields
+  pass  a lower seq is skipped; the same seq from another session is applied
+  pass  planSave refuses an op without a valid identity or time (65-char id refused, 64 allowed)
+  pass  planSave refuses stored data from a newer build (version 4 and 99 -> nil, store untouched)
+  pass  migrate v2 -> v3 adds an empty save log and keeps unknown fields, the total and settings
+  pass  an unknown settings sub-key survives a save and a known key is updated
+  pass  an adopted unknown settings sub-key stays out of memory, patches and the client
+  pass  the save log keeps entries exactly 7 days old and drops older ones
+  pass  the save log is capped at 200, oldest first, keeping the op being written
+  pass  malformed save log entries are dropped
+
+S3 Studio persistence pass, private test experience ONLY (universe 10774566206, place 93701543861123, "MathShow Private Test"): PASS
+  Build: BuildStamp "aa2fe41 2026-11-06T23:01:39Z" == HEAD aa2fe41 (synced ProfileRules 17654 B and ProfileService 17113 B == disk).
+  Rojo 7.7.0 via scripts/serve.sh from the task worktree, port 34872, plugin 7.7.0 connected; one Studio window; Play (Server data model).
+  API access ON: jg typed "on" (2026-11-06). The first Play still returned "StudioAccessToApisNotAllowed" (session memory-only, nothing
+    read or written); jg saved the setting in Experience Settings -> Security and typed "on" again; the next Play read and wrote the store.
+  Saves were driven through the real paths: client SettingsSave remote (debounced save), real glyph collects (character moved by server
+  PivotTo, client GlyphCollect). "Other server" writes were direct UpdateAsync calls from the Server data model.
+  Stored before: version 2, glyphsLifetime 23, quests={a=1}, flag=true, music 4, bestRank 2, blitzBest 7.
+  1) v2 -> v3: first save -> version 3, total 23, quests/flag kept, bests kept, music 5, applied {4c359aa3-...=1}.            PASS
+  2) overlap: other server +5 (28) and applied other-server-test=1; session collected Glyph_C_E3 (+1) and Glyph_R_Tier4 (+5);
+     save -> total 34 = 23+5+1+5, other entry kept, own seq 2.                                                               PASS
+  3) settings.futureToggle="keep me" written after load survived the save; music updated 5 -> 6.                             PASS
+  4) hook armed, collected Glyph_C_E6 (+1), save -> stored 35, own seq 3, console "profile save failed for 8757379006 (op 3, kept
+     for retry): ... simulated: UpdateAsync committed, then errored (Studio hook)". Next save -> console "save op 3 of 8757379006 had
+     already committed; its glyphs were not added again"; stored total 35 (old path: 36), music 8.                           PASS
+  5) version 4 + extra="must survive" written after load; settings save -> console "stored profile of 8757379006 is a newer
+     version; not saving, memory-only from now on"; store: version 4, extra kept, total 35, music 8 (9 not written).          PASS
+     Fixture restored afterwards: version 3, extra removed (quests, flag, futureToggle, other-server-test stay as fixtures).
+  6) rejoin (fresh Play): HUD "Glyphs 0 · Total 35" == stored 35; console clean apart from the known ContentId 203785492 warning. PASS
+  Not exercised in the engine: the leave-save retry loop and BindToClose (same saveNow path, covered by code reading only).
+  Residual (unchanged by design): if every leave-save attempt fails, the session is dropped and that op is lost (nothing persists it).
+  API access OFF afterwards: jg switched it OFF, saved, and read it back OFF ("Off, reads off", 2026-11-06).
+  Nothing published; live experience untouched; MathShow.rbxl not saved; place not saved to file by the agent (Team Create stays ON, jg's
+  earlier choice, so Studio cloud autosave applies).
