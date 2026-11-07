@@ -2,7 +2,7 @@
   "id": "TASK-0142",
   "game": "GAME-004",
   "title": "MathShow Map Finish MF-0 Gap Inventory",
-  "status": "backlog",
+  "status": "approved",
   "tier": "light",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -20,5 +20,39 @@
   ],
   "notes": "Map Finish MF-0, rows MF-P/MF-M (MF-X, MF-C also typed by jg 2026-11-06). No map change.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0142-MathShow-Map-Finish-Inventory.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-06T19:59:37",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-06T19:59:37",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-06T20:00:36",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-06T20:00:36",
+      "from": "review",
+      "to": "approved",
+      "note": "Light tier: no audit; merge needs human approval"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-06T20:00:36",
+      "result": "pass",
+      "notes": "MF-0 inventory in docs/workflow/evidence/MAP-FINISH/PROGRAM.md; no map change; check.sh ALL CHECKS PASSED; lights 25/40 unchanged; no Studio captures taken (generator read only)."
+    }
+  ]
 }
