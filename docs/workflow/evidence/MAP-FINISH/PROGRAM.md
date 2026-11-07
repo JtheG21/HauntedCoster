@@ -13,7 +13,7 @@ Approved rows (jg, 2026-11-06): MF-P, MF-M, MF-X, MF-C. Resume: read this file, 
 | B2 ambient life | TASK-0144 | merged | #211 | 5d8306b | 25/40 | 39,232 |
 | B3 path/plaza dressing | TASK-0145 | merged | #213 | 4d2e4e6 | 25/40 | 43,912 |
 | B4 boundary sweep | TASK-0146 | merged | #215 | b46b68e | 25/40 | 43,912 |
-| B5 final regression | TASK-0147 | in review | - | - | 25/40 | 43,912 |
+| B5 final regression | TASK-0147 | merged | #217 | a5f6ea5 | 25/40 | 43,912 |
 
 ## Budgets
 - PointLights: 25 of 40 at TASK-0133 (25 counted in `Hub.rbxmx` at MF-0).
