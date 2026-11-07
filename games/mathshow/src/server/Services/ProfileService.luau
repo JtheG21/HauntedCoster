@@ -217,6 +217,11 @@ local function attempt(session: Session, op: ProfileRules.SaveOp): (ProfileRules
 	end)
 	session.attempting = false
 	local decided = plan
+	if ok and decided ~= nil and decided.write ~= nil and result == nil then
+		-- A write is confirmed only by UpdateAsync returning the updated value. An error raised inside the transform does
+		-- not reach the pcall: the engine logs "Transform function error" and returns nil (seen in Studio, TASK-0141 S4).
+		ok, result = false, "UpdateAsync returned no value after a write candidate (transform failed?)"
+	end
 	if ok and decided ~= nil and decided.write ~= nil and consumeHook("MathShowForceSaveErrorAfterCommit") then
 		ok, result = false, "simulated: UpdateAsync committed, then errored (Studio hook)"
 	end
@@ -227,7 +232,7 @@ local function attempt(session: Session, op: ProfileRules.SaveOp): (ProfileRules
 		return { kind = "error", candidate = candidate }, nil, false
 	end
 	-- Confirmed: the last callback's decision is what UpdateAsync committed (or cancelled).
-	local base = if decided.write ~= nil then (if result ~= nil then result else decided.write) else seen
+	local base = if decided.write ~= nil then result else seen
 	return { kind = "plan", tag = decided.tag, reason = decided.reason }, base, decided.write ~= nil
 end
 
