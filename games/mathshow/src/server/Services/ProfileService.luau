@@ -7,11 +7,15 @@
 -- Glyph saves are at most once (TASK-0141; design in the TASK-0141 note). Each session has a ProfileRules.Ledger and ONE
 -- save worker (work()). Debounce, autosave, leave and BindToClose only signal it. The worker takes a frozen operation
 -- {sessionId, seq, glyphsDelta, createdAt = os.clock()} before any yield, attempts it with UpdateAsync, and settles the
--- outcome: applied / acknowledged (confirmed), abandoned (logged once, never recredited), capacity (kept, retried),
--- newer_schema (memory-only). An error after a callback returned a write candidate marks the op ambiguous; a later
--- attempt then only acknowledges it from a covering receipt or abandons it. No attempt starts at or past the retry window
--- (monotonic os.clock(), checked at dispatch and inside every callback). Increments that arrive meanwhile stay pending for
--- the next op. A left player's session stays in `releasing` until its work is resolved; autosave keeps signalling it.
+-- outcome (ProfileRules.classifyAttempt, R6): applied / acknowledged (confirmed), abandoned (logged once, never
+-- recredited), capacity and retryable_no_candidate (kept, retried), newer_schema (memory-only), ambiguous (any end after
+-- a write candidate other than a returned value: a later attempt then only acknowledges it from a covering receipt or
+-- abandons it). Acknowledging writes nothing (R1). An op carries only the settings keys this session changed (R2), and
+-- they are dropped when another session saved since the op was created (R3). No write candidate is returned at or past the
+-- retry window (monotonic os.clock()) or, during shutdown, the shutdown deadline (R5), checked at dispatch and inside
+-- every callback. An op reported unconfirmed at shutdown is never reported again (R4). Increments that arrive meanwhile
+-- stay pending for the next op. A left player's session stays in `releasing` until its work is resolved; autosave keeps
+-- signalling it.
 --
 -- Safety: every DataStore call is pcall-isolated and never blocks the match loop. A failed load retries, then the profile is
 -- "readonly" (nothing written, so an outage can never overwrite real data with defaults). In Studio or an unpublished place,
@@ -50,13 +54,13 @@ type Session = {
 	profile: ProfileRules.Profile,
 	persistence: Persistence,
 	dirty: boolean, -- idempotent fields (settings, bests, test clock) changed since the last op was taken
-	ledger: ProfileRules.Ledger, -- seq, pending glyph value, the unresolved op and its ambiguity
+	ledger: ProfileRules.Ledger, -- seq, pending glyphs and settings, the unresolved op, its ambiguity and terminal report
+	knownReceipts: { [string]: number }, -- other sessions' receipt seqs in the value this session loaded (R3 exemption)
 	working: boolean, -- the save worker is running
 	signalled: boolean, -- a signal arrived while it was running: loop once more
 	attempting: boolean, -- an UpdateAsync call is in flight
 	leaving: boolean, -- the player left; the worker retries with backoff until the work is resolved
 	overdueSeq: number, -- the op already reported overdue (once)
-	reportedSeq: number, -- the op already reported unconfirmed at shutdown (once)
 	token: number, -- debounce: only the newest scheduled save runs
 	menuStamps: { number },
 	saveStamps: { number },
@@ -140,6 +144,7 @@ local function load(player: Player, session: Session)
 		end
 		if ok then
 			session.profile = ProfileRules.sanitize(ProfileRules.migrate(result))
+			session.knownReceipts = ProfileRules.receiptSeqs(result)
 			if ProfileRules.isNewerVersion(result) then
 				-- Stored by a newer build: play on a copy and never write it back (that would drop its newer fields).
 				warn(`[MathShow] profile of {player.Name} is a newer version; running in memory-only mode`)
@@ -173,27 +178,39 @@ local function logTerminal(userId: number, terminal: ProfileRules.Terminal)
 	)
 end
 
--- One attempt of `op`. Never yields before UpdateAsync; the deadline is checked here (dispatch) and in every callback.
+-- Seconds left to the shared shutdown deadline, or nil when the server is not shutting down. Read live (R5).
+local function shutdownLeft(): number?
+	return if shuttingDown then shutdownDeadline - os.clock() else nil
+end
+
+-- One attempt of `op`. Never yields before UpdateAsync. The op window and, during shutdown, the shutdown deadline are
+-- checked here (dispatch) and in every callback (R5). How the attempt ended is ProfileRules.classifyAttempt's call (R6).
+-- Returns the attempt, the value to adopt (what UpdateAsync returned after a write, else what the last callback saw),
+-- and whether the committed write dropped its settings patch as superseded (R3).
 local function attempt(session: Session, op: ProfileRules.SaveOp): (ProfileRules.Attempt, any, boolean)
 	local window = retryWindow()
 	if ProfileRules.expired(op, os.clock(), window) then
 		return { kind = "expired" }, nil, false
 	end
+	local left = shutdownLeft()
+	if left ~= nil and left <= 0 then
+		return { kind = "retryable_no_candidate", reason = "shutdown_deadline" }, nil, false
+	end
 	local failures = studioHook("MathShowForceSaveFailures")
 	if typeof(failures) == "number" and failures >= 1 then
 		workspace:SetAttribute("MathShowForceSaveFailures", if failures > 1 then failures - 1 else nil)
 		warn(`[MathShow] simulated save failure before dispatch (Studio hook), op {op.seq}`)
-		return { kind = "error", candidate = false }, nil, false
+		return { kind = "retryable_no_candidate", reason = "simulated" }, nil, false
 	end
 	local ds = getStore()
 	if not ds then
-		return { kind = "error", candidate = false }, nil, false
+		return { kind = "retryable_no_candidate", reason = "no_store" }, nil, false
 	end
-	local patch = ProfileRules.toPatch(session.profile)
+	local patch = ProfileRules.toPatch(session.profile) -- its settings are ignored: the op carries its own patch (R2)
 	local ambiguous = session.ledger.ambiguous
+	local known = session.knownReceipts
 	local failInCallback = consumeHook("MathShowForceSaveCandidateThenError")
-	local candidate = false
-	local plan: ProfileRules.SavePlan? = nil
+	local decisions: { ProfileRules.SavePlan } = {}
 	local seen: any = nil
 	session.attempting = true
 	local ok, result = pcall(function()
@@ -204,76 +221,93 @@ local function attempt(session: Session, op: ProfileRules.SaveOp): (ProfileRules
 				ambiguous = ambiguous,
 				patch = patch,
 				window = window,
+				shutdownLeft = shutdownLeft(),
+				knownReceipts = known,
 			})
-			plan, seen = decided, old
-			if decided.write ~= nil then
-				candidate = true -- set before returning: an error from here on means "possibly committed"
-				if failInCallback then
-					error("simulated: write candidate returned, then the call failed (Studio hook)")
-				end
+			table.insert(decisions, decided) -- recorded before returning: an error from here on is "possibly committed"
+			seen = old
+			if decided.write ~= nil and failInCallback then
+				error("simulated: write candidate returned, then the call failed (Studio hook)")
 			end
 			return decided.write
 		end)
 	end)
 	session.attempting = false
-	local decided = plan
-	if ok and decided ~= nil and decided.write ~= nil and result == nil then
-		-- A write is confirmed only by UpdateAsync returning the updated value. An error raised inside the transform does
-		-- not reach the pcall: the engine logs "Transform function error" and returns nil (seen in Studio, TASK-0141 S4).
-		ok, result = false, "UpdateAsync returned no value after a write candidate (transform failed?)"
+	local last = decisions[#decisions]
+	if ok and result ~= nil and last ~= nil and last.write ~= nil then
+		if consumeHook("MathShowForceSaveErrorAfterCommit") then
+			ok, result = false, "simulated: UpdateAsync committed, then errored (Studio hook)"
+		end
 	end
-	if ok and decided ~= nil and decided.write ~= nil and consumeHook("MathShowForceSaveErrorAfterCommit") then
-		ok, result = false, "simulated: UpdateAsync committed, then errored (Studio hook)"
-	end
-	if not ok or decided == nil then
+	-- An error raised inside the transform does not reach the pcall: the engine logs "Transform function error" and
+	-- returns nil (seen in Studio, TASK-0141 S4). classifyAttempt treats that nil after a candidate as ambiguous.
+	local outcome, reason = ProfileRules.classifyAttempt(decisions, if ok then result else nil, not ok)
+	local kind: ProfileRules.AttemptKind = outcome :: any -- Luau widens the returned string union
+	if outcome == "ambiguous" or (outcome == "retryable_no_candidate" and not ok) then
+		local detail = if ok then "UpdateAsync returned no value after a write candidate" else tostring(result)
 		warn(
-			`[MathShow] profile save attempt failed for {session.userId} (op {op.seq}, candidate={candidate}): {result}`
+			`[MathShow] profile save attempt failed for {session.userId} (op {op.seq}, outcome={outcome}, `
+				.. `callbacks={#decisions}): {detail}`
 		)
-		return { kind = "error", candidate = candidate }, nil, false
+		return { kind = kind, reason = reason }, nil, false
 	end
-	-- Confirmed: the last callback's decision is what UpdateAsync committed (or cancelled).
-	local base = if decided.write ~= nil then result else seen
-	return { kind = "plan", tag = decided.tag, reason = decided.reason }, base, decided.write ~= nil
+	local wrote = outcome == "applied"
+	local base = if wrote then result else seen
+	return { kind = kind, reason = reason }, base, wrote and last ~= nil and last.superseded == true
 end
 
--- Applies a settled attempt to the session: ledger, terminal log, memory-only switch and profile adoption. `wrote` says
--- whether the committed callback wrote (and so persisted this attempt's idempotent fields).
-local function settleAttempt(session: Session, outcome: ProfileRules.Attempt, base: any, wrote: boolean)
-	local seq = if session.ledger.op ~= nil then (session.ledger.op :: ProfileRules.SaveOp).seq else 0
+-- Applies a settled attempt to the session: ledger, terminal log, memory-only switch and profile adoption. `dropped`: the
+-- committed write dropped its settings patch as superseded (R3). After an op already reported
+-- unconfirmed at shutdown, a late settlement only updates state (R4): no second report of any kind.
+local function settleAttempt(session: Session, outcome: ProfileRules.Attempt, base: any, dropped: boolean)
+	local op = session.ledger.op
+	local seq = if op ~= nil then op.seq else 0
+	local quiet = op ~= nil and session.ledger.reportedSeq == seq
 	local ledger, terminal = ProfileRules.settle(session.ledger, outcome)
 	session.ledger = ledger
 	if terminal ~= nil then
 		logTerminal(session.userId, terminal)
 	end
-	if outcome.kind == "expired" then
+	local kind = outcome.kind
+	if kind == "expired" then
 		session.dirty = true -- the abandoned op's idempotent fields go out with the next op (its delta does not)
-	elseif outcome.kind == "plan" then
-		local tag = outcome.tag
-		if tag == "newer_schema" then
-			session.persistence = "memory"
-			warn(
-				`[MathShow] stored profile of {session.userId} is a newer version; not saving, memory-only from now on`
-			)
-			return
-		elseif tag == "capacity" then
+		return
+	elseif kind == "newer_schema" then
+		session.persistence = "memory"
+		warn(`[MathShow] stored profile of {session.userId} is a newer version; not saving, memory-only from now on`)
+		return
+	elseif kind == "capacity" then
+		if not quiet then
 			warn(`[MathShow] profile receipt log of {session.userId} is full; op {seq} kept for retry`)
-			return
-		elseif tag == "acknowledged" then
-			warn(`[MathShow] save op {seq} of {session.userId} acknowledged by its receipt; glyphs not added again`)
 		end
-		if not wrote then
-			session.dirty = true
+		return
+	elseif kind ~= "applied" and kind ~= "acknowledged" and kind ~= "abandoned" then
+		return -- ambiguous / retryable: the op is kept, nothing to adopt
+	end
+	if not quiet then
+		if kind == "acknowledged" then
+			warn(`[MathShow] save op {seq} of {session.userId} acknowledged by its receipt; nothing written`)
+		elseif dropped then
+			warn(`[MathShow] save op {seq} of {session.userId}: settings superseded by a newer session; glyphs applied`)
 		end
-		if base ~= nil then
-			-- Adopt what is stored (another server may have raised a best or added glyphs), plus increments still pending.
-			-- After an abandon this drops the abandoned delta from the displayed total: the store is the truth.
-			session.profile = ProfileRules.adopt(base, session.profile, session.ledger.pending)
+		if shuttingDown and (kind == "applied" or kind == "acknowledged") then
+			print(`[MathShow] shutdown: save op {seq} of {session.userId} confirmed ({kind})`)
 		end
+	end
+	if kind == "abandoned" then
+		session.dirty = true -- the abandoned op's bests may not have landed; an acknowledged op's did
+	end
+	if base ~= nil then
+		-- Adopt what is stored (another server may have raised a best, added glyphs or saved newer settings), plus what is
+		-- still pending. After an abandon this drops the abandoned delta from the displayed total: the store is the truth.
+		session.profile =
+			ProfileRules.adopt(base, session.profile, session.ledger.pending, session.ledger.settingsPatch)
 	end
 end
 
 local function settled(session: Session): boolean
-	return session.ledger.op == nil and session.ledger.pending <= 0 and not session.dirty
+	local ledger = session.ledger
+	return ledger.op == nil and ledger.pending <= 0 and next(ledger.settingsPatch) == nil and not session.dirty
 end
 
 local function release(session: Session)
@@ -289,7 +323,7 @@ local function drive(session: Session)
 		if shuttingDown and os.clock() >= shutdownDeadline then
 			break
 		end
-		local ledger, op, fresh = ProfileRules.takeOp(session.ledger, session.dirty, os.clock())
+		local ledger, op, fresh = ProfileRules.takeOp(session.ledger, session.dirty, os.clock(), os.time())
 		if op == nil then
 			break
 		end
@@ -297,8 +331,8 @@ local function drive(session: Session)
 		if fresh then
 			session.dirty = false
 		end
-		local outcome, base, wrote = attempt(session, op)
-		settleAttempt(session, outcome, base, wrote)
+		local outcome, base, dropped = attempt(session, op)
+		settleAttempt(session, outcome, base, dropped)
 		if session.ledger.op == nil then
 			failures = 0
 			if not (session.signalled or session.leaving or shuttingDown) then
@@ -372,8 +406,13 @@ function ProfileService.apply(player: Player, patch: ProfileRules.Patch): boolea
 	if not session or (session.persistence ~= "saved" and session.persistence ~= "memory") then
 		return false
 	end
+	local before = session.profile.settings
 	session.profile = ProfileRules.merge(session.profile, patch)
 	if session.persistence == "saved" then
+		if patch.settings ~= nil then
+			-- Only the keys that changed go into the next op (R2), never the whole settings table.
+			session.ledger = ProfileRules.noteSettings(session.ledger, before, session.profile.settings)
+		end
 		session.dirty = true
 		scheduleSave(player, session)
 	end
@@ -493,12 +532,12 @@ local function onPlayerAdded(player: Player)
 		persistence = "loading",
 		dirty = false,
 		ledger = ProfileRules.newLedger(HttpService:GenerateGUID(false)),
+		knownReceipts = {},
 		working = false,
 		signalled = false,
 		attempting = false,
 		leaving = false,
 		overdueSeq = 0,
-		reportedSeq = 0,
 		token = 0,
 		menuStamps = {},
 		saveStamps = {},
@@ -575,13 +614,15 @@ local function drainOnShutdown()
 		task.wait(0.2)
 	end
 	-- Report what is unresolved, once per op: an op still in flight stays potentially committed.
+	local unresolved = 0
 	for _, session in list do
 		if session.persistence == "saved" then
 			local op = session.ledger.op
-			if op ~= nil and session.reportedSeq ~= op.seq then
-				session.reportedSeq = op.seq
-				local _, terminal =
+			if op ~= nil then
+				-- The op's one terminal report (R4); settle() records it, so a later settlement stays silent.
+				local ledger, terminal =
 					ProfileRules.settle(session.ledger, { kind = "unconfirmed", candidate = session.attempting })
+				session.ledger = ledger
 				if terminal ~= nil then
 					logTerminal(session.userId, terminal)
 				end
@@ -589,8 +630,12 @@ local function drainOnShutdown()
 			if session.ledger.pending > 0 then
 				warn(`[MathShow] {session.ledger.pending} glyphs of {session.userId} not saved before shutdown`)
 			end
+			if not settled(session) then
+				unresolved += 1
+			end
 		end
 	end
+	print(`[MathShow] shutdown drain done: {#list} sessions, {unresolved} unresolved`)
 end
 
 function ProfileService.start(): ()

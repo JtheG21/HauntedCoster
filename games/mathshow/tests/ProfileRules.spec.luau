@@ -16,8 +16,16 @@ end
 local WINDOW = 900
 local SKEW = 300
 
-local function op(sessionId: string, seq: number, delta: number): ProfileRules.SaveOp
-	return { sessionId = sessionId, seq = seq, glyphsDelta = delta, createdAt = 0 }
+-- An op taken at NOW (wall) and 0 (monotonic); `settingsPatch` (default: none) are the settings keys it changed.
+local function op(sessionId: string, seq: number, delta: number, settingsPatch: { [string]: any }?): ProfileRules.SaveOp
+	return {
+		sessionId = sessionId,
+		seq = seq,
+		glyphsDelta = delta,
+		createdAt = 0,
+		createdAtWall = NOW,
+		settingsPatch = settingsPatch or {},
+	}
 end
 
 -- A callback context: inside the window, not ambiguous, at NOW, unless overridden.
@@ -342,10 +350,11 @@ return function(t: TestRunner.T)
 		local fresher = save(t, { version = 3, glyphsLifetime = 12, applied = { O = { seq = 4, at = NOW } } }, saveOp)
 		t.eq(fresher.glyphsLifetime, 17)
 		t.eq(fresher.applied.O.seq, 4, "the other session's receipt is kept")
-		-- And a replay against the value this op itself committed is acknowledged, not credited.
+		-- And a replay against the value this op itself committed is acknowledged, not credited, and writes nothing (R1).
 		local replay = plan(first, saveOp)
 		t.eq(replay.tag, "acknowledged")
-		t.eq((replay.write :: any).glyphsLifetime, 15)
+		t.eq(replay.write, nil)
+		t.eq(first.glyphsLifetime, 15)
 	end)
 
 	t.test("retry window: just below 900 s applies, exactly 900 and above abandon with no candidate", function()
@@ -419,16 +428,15 @@ return function(t: TestRunner.T)
 			bestRank = 2,
 			applied = { s = { seq = 1, at = NOW - 10 }, old = { seq = 1, at = NOW - WEEK - 1 } },
 		}
-		local ack = plan(stored, op("s", 1, 5), { ambiguous = true, patch = { bestRank = 6 } })
+		local ack = plan(stored, op("s", 1, 5, { music = 9 }), { ambiguous = true, patch = { bestRank = 6 } })
 		t.eq(ack.tag, "acknowledged")
-		local written = ack.write :: any
-		t.eq(written.glyphsLifetime, 15)
-		t.eq(written.bestRank, 6, "idempotent fields are still overlaid")
-		t.eq(written.applied.s.seq, 1)
-		t.eq(written.applied.old, nil, "acknowledging prunes aged receipts")
+		t.eq(ack.write, nil, "R1: acknowledging writes nothing, not even bests, settings or a pruned log")
+		t.eq(stored.glyphsLifetime, 15)
+		t.eq(stored.bestRank, 2)
+		t.truthy(stored.applied.old, "the stored log is untouched")
 		local lateAck = plan(stored, op("s", 1, 5), { ambiguous = true, elapsed = WINDOW })
 		t.eq(lateAck.tag, "acknowledged", "a covering receipt is honoured past the window")
-		t.eq(lateAck.write, nil, "but nothing is written")
+		t.eq(lateAck.write, nil, "and nothing is written")
 		t.eq(plan(stored, op("s", 1, 5)).tag, "acknowledged", "also when not marked ambiguous")
 	end)
 
@@ -520,7 +528,8 @@ return function(t: TestRunner.T)
 		local op2: any
 		ledger, op2 = ProfileRules.takeOp(ledger, false, 5)
 		t.eq(op2.glyphsDelta, 3)
-		local final = save(t, ack.write, op2)
+		t.eq(ack.write, nil, "the acknowledgement writes nothing")
+		local final = save(t, committed, op2)
 		t.eq(final.glyphsLifetime, 18, "10 + 5 once + 3")
 		t.eq(final.applied.s.seq, 2)
 	end)
@@ -669,10 +678,12 @@ return function(t: TestRunner.T)
 		local stored = { version = 3, glyphsLifetime = 1, settings = storedSettings }
 		local changed = valid()
 		changed.music = 9
-		local written = save(t, stored, op("s", 1, 0), { settings = changed :: any })
+		local written = save(t, stored, op("s", 1, 0, { music = 9 }))
 		t.eq(written.settings.futureToggle, "keep me")
 		t.eq(written.settings.music, 9)
 		t.eq(written.settings.sfx, 4)
+		local snapshot = save(t, stored, op("s", 1, 0), { settings = changed :: any })
+		t.eq(snapshot.settings.music, 3, "R2: a full settings table in the attempt patch is never written")
 		t.eq(storedSettings.music, 3, "the stored settings table is not mutated")
 		local untouched = ProfileRules.merge(stored, {}) :: any
 		t.eq(untouched.settings.futureToggle, "keep me", "also when the patch has no settings")
@@ -724,8 +735,8 @@ return function(t: TestRunner.T)
 			local aged = { version = 3, glyphsLifetime = 9, applied = { s = { seq = 3, at = NOW - WEEK - 50 } } }
 			local ack = plan(aged, op("s", 3, 4), { ambiguous = true })
 			t.eq(ack.tag, "acknowledged")
-			t.eq((ack.write :: any).glyphsLifetime, 9)
-			t.eq((ack.write :: any).applied.s.seq, 3, "and is kept")
+			t.eq(ack.write, nil, "and nothing is written, so the receipt stays as stored")
+			t.eq(aged.glyphsLifetime, 9)
 		end
 	)
 
@@ -832,5 +843,327 @@ return function(t: TestRunner.T)
 		t.eq(adopted.bestRank, 4)
 		t.eq(ProfileRules.adopt({ version = 2, glyphsLifetime = 16 }, current, 0).glyphsLifetime, 16)
 		t.eq(ProfileRules.adopt(nil, current, 0).glyphsLifetime, 0)
+	end)
+	-- TASK-0141 revision 2 (AUD-20261106-TASK-0141-01): R1-R6 and the R3 load exemption.
+
+	t.test(
+		"R1: old session A's acknowledgement after newer session B saved music = 8 leaves music 8, glyphs once",
+		function()
+			local s8 = valid()
+			s8.music = 8
+			s8.futureToggle = "keep me"
+			-- A's op 1 (+5, music 4) committed (10 -> 15) and errored; then B saved music 8.
+			local stored: any = {
+				version = 3,
+				glyphsLifetime = 15,
+				bestRank = 2,
+				settings = s8,
+				applied = { A = { seq = 1, at = NOW - 100 }, B = { seq = 1, at = NOW - 10 } },
+			}
+			local aOp = op("A", 1, 5, { music = 4 })
+			local ack = plan(stored, aOp, { ambiguous = true, patch = { bestRank = 1 } })
+			t.eq(ack.tag, "acknowledged")
+			t.eq(ack.write, nil, "nothing is returned, so nothing is written")
+			t.eq(ProfileRules.classifyAttempt({ ack }, nil, false), "acknowledged")
+			t.eq(stored.settings.music, 8)
+			t.eq(stored.glyphsLifetime, 15)
+			t.eq(stored.applied.B.seq, 1)
+			-- The ledger ends the op without sending its settings again, and the session adopts the stored music 8.
+			local before = valid()
+			local after = valid()
+			after.music = 4
+			local ledger = ProfileRules.noteSettings(
+				ProfileRules.credit(ProfileRules.newLedger("A"), 5),
+				before :: any,
+				after :: any
+			)
+			ledger = ProfileRules.takeOp(ledger, false, 0, NOW - 100)
+			ledger = ProfileRules.settle(ledger, { kind = "ambiguous" })
+			local done, terminal = ProfileRules.settle(ledger, { kind = "acknowledged" })
+			t.eq(done.op, nil)
+			t.eq(terminal, nil)
+			t.eq(next(done.settingsPatch), nil, "an acknowledged patch is not sent again")
+			local view = ProfileRules.adopt(
+				stored,
+				ProfileRules.sanitize({ settings = after }),
+				done.pending,
+				done.settingsPatch
+			)
+			t.eq(view.settings.music, 8)
+			t.eq(view.glyphsLifetime, 15)
+		end
+	)
+
+	t.test(
+		"R3: A's delayed in-window retry with settingsPatch {music = 4} after B's newer receipt keeps music 8",
+		function()
+			local s8 = valid()
+			s8.music = 8
+			s8.futureToggle = "keep me"
+			local stored: any =
+				{ version = 3, glyphsLifetime = 10, settings = s8, applied = { B = { seq = 1, at = NOW } } }
+			local aOp: ProfileRules.SaveOp = {
+				sessionId = "A",
+				seq = 1,
+				glyphsDelta = 5,
+				createdAt = 0,
+				createdAtWall = NOW - 120, -- taken two minutes before B saved
+				settingsPatch = { music = 4 },
+			}
+			local decided = plan(stored, aOp, { elapsed = 600 })
+			t.eq(decided.tag, "applied")
+			t.eq(decided.superseded, true)
+			local written = decided.write :: any
+			t.eq(written.settings.music, 8, "B's newer setting stays")
+			t.eq(written.settings.futureToggle, "keep me")
+			t.eq(written.glyphsLifetime, 15, "A's glyph delta is applied")
+			t.eq(written.applied.A.seq, 1)
+			t.eq(written.applied.B.seq, 1)
+			local replay = plan(written, aOp, { elapsed = 601 })
+			t.eq(replay.tag, "acknowledged")
+			t.eq(replay.write, nil)
+			t.eq(written.glyphsLifetime, 15, "applied once, never 20")
+			t.eq(ProfileRules.classifyAttempt({ decided }, written, false), "applied")
+			local view = ProfileRules.adopt(written, ProfileRules.sanitize({ settings = valid() }), 0, {})
+			t.eq(view.settings.music, 8, "the session view comes from what UpdateAsync returned")
+			-- The own receipt never supersedes the own patch.
+			local own = save(
+				t,
+				{ version = 3, settings = s8, applied = { A = { seq = 1, at = NOW } } },
+				op("A", 2, 0, { music = 4 })
+			)
+			t.eq(own.settings.music, 4)
+		end
+	)
+
+	t.test("R3 skew boundary: B.at == createdAtWall - 300 drops the patch, - 301 applies it", function()
+		local function withB(at: number): any
+			return { version = 3, glyphsLifetime = 1, settings = valid(), applied = { B = { seq = 2, at = at } } }
+		end
+		local aOp = op("A", 1, 1, { music = 6 })
+		local edge = plan(withB(NOW - SKEW), aOp)
+		t.eq(edge.tag, "applied")
+		t.eq(edge.superseded, true)
+		t.eq((edge.write :: any).settings.music, 3)
+		t.eq((edge.write :: any).glyphsLifetime, 2)
+		local older = plan(withB(NOW - SKEW - 1), aOp)
+		t.eq(older.tag, "applied")
+		t.eq(older.superseded, nil)
+		t.eq((older.write :: any).settings.music, 6)
+		local malformed = plan({ version = 3, settings = valid(), applied = { B = { seq = "x", at = NOW } } }, aOp)
+		t.eq((malformed.write :: any).settings.music, 6, "a malformed receipt is ignored")
+	end)
+
+	t.test("R3 load exemption: a receipt this session saw at load does not drop its patch (server hop)", function()
+		-- The player left server X (its last save 20 s ago), joined A and changed music within the first minute.
+		local loaded: any =
+			{ version = 3, glyphsLifetime = 10, settings = valid(), applied = { X = { seq = 4, at = NOW - 20 } } }
+		local known = ProfileRules.receiptSeqs(loaded)
+		t.eq(known.X, 4)
+		local aOp = op("A", 1, 0, { music = 6 })
+		local kept = plan(loaded, aOp, { knownReceipts = known })
+		t.eq(kept.superseded, nil)
+		t.eq((kept.write :: any).settings.music, 6)
+		t.eq(plan(loaded, aOp).superseded, true, "without the exemption R3 drops it")
+		-- X saving again after A loaded (seq 5) counts.
+		local again: any = { version = 3, settings = valid(), applied = { X = { seq = 5, at = NOW + 10 } } }
+		local dropped = plan(again, aOp, { knownReceipts = known })
+		t.eq(dropped.superseded, true)
+		t.eq((dropped.write :: any).settings.music, 3)
+		t.eq(next(ProfileRules.receiptSeqs({ applied = { bad = { seq = 0, at = NOW } } })), nil)
+		t.eq(next(ProfileRules.receiptSeqs(nil)), nil)
+	end)
+
+	t.test("R2: a settings patch holds only changed keys; an empty patch leaves settings untouched", function()
+		local before = valid()
+		local after = valid()
+		after.music = 7
+		local ledger = ProfileRules.noteSettings(ProfileRules.newLedger("s"), before :: any, after :: any)
+		t.eq(ledger.settingsPatch.music, 7)
+		t.eq(count(ledger.settingsPatch), 1, "only the changed key")
+		local back = ProfileRules.noteSettings(ledger, after :: any, before :: any)
+		t.eq(back.settingsPatch.music, 3, "changing it back is a change too")
+		t.truthy(ProfileRules.noteSettings(ledger, after :: any, after :: any) == ledger, "no change, same ledger")
+		local bad = valid()
+		bad.music = 99
+		t.eq(ProfileRules.noteSettings(ProfileRules.newLedger("s"), before :: any, bad :: any).settingsPatch.music, nil)
+		local taken, saveOp = ProfileRules.takeOp(ledger, false, 0, NOW)
+		t.eq((saveOp :: any).settingsPatch.music, 7)
+		t.truthy(table.isfrozen((saveOp :: any).settingsPatch), "the op's patch is frozen")
+		t.eq(next(taken.settingsPatch), nil, "the patch moves into the op")
+		t.eq((saveOp :: any).createdAtWall, NOW)
+		local _, settingsOnly = ProfileRules.takeOp(ledger, false, 0, NOW)
+		t.truthy(settingsOnly ~= nil, "a settings change alone makes an op")
+		-- Empty patch: the stored settings (including an unknown sub-key) stay exactly as stored.
+		local storedSettings = valid()
+		storedSettings.music = 2
+		storedSettings.futureToggle = "keep me"
+		local stored = { version = 3, settings = storedSettings }
+		local untouched = save(t, stored, op("s", 1, 0))
+		t.eq(untouched.settings.music, 2)
+		t.eq(untouched.settings.sfx, 4)
+		t.eq(untouched.settings.futureToggle, "keep me")
+		-- A patch writes its valid known keys only; unknown or invalid ones are ignored and unknown stored keys survive.
+		local mixed = save(t, stored, op("s", 1, 0, { music = 5, sfx = "x", futureToggle = false }))
+		t.eq(mixed.settings.music, 5)
+		t.eq(mixed.settings.sfx, 4)
+		t.eq(mixed.settings.futureToggle, "keep me")
+		t.eq(storedSettings.music, 2, "the stored table is not mutated")
+	end)
+
+	t.test("an unconfirmed op's settings return for the next op, still dated from when they were first sent", function()
+		local after = valid()
+		after.music = 7
+		local ledger = ProfileRules.noteSettings(ProfileRules.newLedger("s"), valid() :: any, after :: any)
+		ledger = ProfileRules.takeOp(ledger, false, 0, NOW - 50)
+		local later = table.clone(after)
+		later.sfx = 1
+		ledger = ProfileRules.noteSettings(ledger, after :: any, later :: any) -- changed while op 1 was in flight
+		local ended, terminal = ProfileRules.settle(ledger, { kind = "expired" })
+		t.eq((terminal :: any).reason, "expired")
+		t.eq(ended.settingsPatch.music, 7)
+		t.eq(ended.settingsPatch.sfx, 1)
+		t.eq(ended.settingsWall, NOW - 50)
+		local _, second: any = ProfileRules.takeOp(ended, false, 10, NOW)
+		t.eq(second.seq, 2)
+		t.eq(second.createdAtWall, NOW - 50, "R3 compares the carried settings against their first send")
+		t.eq(second.settingsPatch.music, 7)
+		t.eq(second.glyphsDelta, 0)
+		-- A newer key wins over the requeued value; a confirmed op returns nothing.
+		local newer = ProfileRules.noteSettings(ProfileRules.newLedger("s"), valid() :: any, after :: any)
+		newer = ProfileRules.takeOp(newer, false, 0, NOW)
+		newer = ProfileRules.noteSettings(newer, after :: any, valid() :: any)
+		t.eq(ProfileRules.settle(newer, { kind = "abandoned", reason = "ambiguous_no_receipt" }).settingsPatch.music, 3)
+		t.eq(
+			next(
+				ProfileRules.settle(
+					ProfileRules.takeOp(
+						ProfileRules.noteSettings(ProfileRules.newLedger("s"), valid() :: any, after :: any),
+						false,
+						0,
+						NOW
+					),
+					{ kind = "applied" }
+				).settingsPatch
+			),
+			nil
+		)
+	end)
+
+	t.test("R4: an op reported unconfirmed at shutdown, then settling late, has exactly one terminal report", function()
+		local ledger, op1: any = ProfileRules.takeOp(ProfileRules.credit(ProfileRules.newLedger("s"), 4), false, 0, NOW)
+		local reports = 0
+		local reported, terminal = ProfileRules.settle(ledger, { kind = "unconfirmed", candidate = true })
+		if terminal ~= nil then
+			reports += 1
+		end
+		t.eq(reported.reportedSeq, 1)
+		t.truthy(reported.op == op1, "the op is kept")
+		local _, again = ProfileRules.settle(reported, { kind = "unconfirmed", candidate = true })
+		t.eq(again, nil, "the shutdown report is not repeated")
+		local lates: { any } = {
+			{ kind = "abandoned", reason = "ambiguous_no_receipt" },
+			{ kind = "expired" },
+			{ kind = "newer_schema" },
+			{ kind = "plan", tag = "abandoned", reason = "expired" },
+		}
+		for _, late in lates do
+			local ended, lateTerminal = ProfileRules.settle(reported, late :: any)
+			t.eq(ended.op, nil, late.kind)
+			if lateTerminal ~= nil then
+				reports += 1
+			end
+		end
+		t.eq(reports, 1, "exactly one terminal report")
+		local confirmed, quiet = ProfileRules.settle(reported, { kind = "applied" })
+		t.eq(confirmed.op, nil)
+		t.eq(quiet, nil, "a late confirmation is silent")
+		-- Credited at most once: the late commit is +4; a replay of op 1 is acknowledged.
+		local stored = save(t, { version = 3, glyphsLifetime = 10, applied = {} }, op1)
+		t.eq(stored.glyphsLifetime, 14)
+		t.eq(plan(stored, op1, { ambiguous = true }).tag, "acknowledged")
+		t.eq(confirmed.pending, 0, "nothing returns to pending")
+		-- The next op is reported on its own.
+		local nextLedger = ProfileRules.takeOp(ProfileRules.credit(confirmed, 1), false, 1, NOW)
+		t.truthy(select(2, ProfileRules.settle(nextLedger, { kind = "expired" })) ~= nil, "op 2 gets its own report")
+	end)
+
+	t.test(
+		"R5: a callback replayed after the shutdown deadline but inside the 900 s window returns no candidate",
+		function()
+			local stored = { version = 3, glyphsLifetime = 10, applied = {} }
+			local saveOp = op("s", 1, 5, { music = 6 })
+			local first = plan(stored, saveOp, { elapsed = 20, shutdownLeft = 0.5 })
+			t.eq(first.tag, "applied", "before the deadline a candidate is returned")
+			for _, left in { 0, -0.001, -5, NAN } do
+				local replay = plan(stored, saveOp, { elapsed = 30, shutdownLeft = left })
+				t.eq(replay.tag, "deadline", tostring(left))
+				t.eq(replay.write, nil)
+			end
+			t.eq(plan(stored, saveOp, { elapsed = 30 }).tag, "applied", "outside shutdown only the op window applies")
+			t.eq(
+				plan(stored, saveOp, { elapsed = WINDOW, shutdownLeft = 10 }).reason,
+				"expired",
+				"the op window still applies"
+			)
+			local covered = { version = 3, applied = { s = { seq = 1, at = NOW } } }
+			local ack = plan(covered, saveOp, { shutdownLeft = 0 })
+			t.eq(ack.tag, "acknowledged")
+			t.eq(ack.write, nil)
+			-- The candidate from before the deadline then a cancelled replay: ambiguous, never confirmed.
+			local replay = plan(stored, saveOp, { elapsed = 30, shutdownLeft = 0 })
+			t.eq(ProfileRules.classifyAttempt({ first, replay }, nil, false), "ambiguous")
+			t.eq(ProfileRules.classifyAttempt({ replay }, nil, false), "retryable_no_candidate")
+			local ledger = ProfileRules.takeOp(ProfileRules.credit(ProfileRules.newLedger("s"), 5), false, 0, NOW)
+			local kept = ProfileRules.settle(ledger, { kind = "plan", tag = "deadline", reason = "shutdown_deadline" })
+			t.truthy(kept.op == ledger.op, "the op stays unresolved")
+			t.eq(kept.ambiguous, false)
+		end
+	)
+
+	t.test("R6: attempt classification table", function()
+		local value = { version = 3 }
+		local applied: ProfileRules.SavePlan = { tag = "applied", write = value :: any }
+		local ack: ProfileRules.SavePlan = { tag = "acknowledged", reason = "receipt" }
+		local abandoned: ProfileRules.SavePlan = { tag = "abandoned", reason = "expired" }
+		local capacity: ProfileRules.SavePlan = { tag = "capacity" }
+		local newer: ProfileRules.SavePlan = { tag = "newer_schema" }
+		local deadline: ProfileRules.SavePlan = { tag = "deadline", reason = "shutdown_deadline" }
+		local cases: { { any } } = {
+			{ { applied }, value, false, "applied" },
+			{ { applied, applied }, value, false, "applied" },
+			{ { applied }, nil, false, "ambiguous" },
+			{ { applied }, nil, true, "ambiguous" },
+			{ { applied }, value, true, "ambiguous" },
+			{ { applied, abandoned }, nil, false, "ambiguous" },
+			{ { applied, ack }, nil, false, "ambiguous" },
+			{ { applied, capacity, abandoned }, nil, false, "ambiguous" },
+			{ { applied, abandoned }, value, false, "ambiguous" },
+			{ { applied, deadline }, nil, false, "ambiguous" },
+			{ {}, nil, true, "retryable_no_candidate" },
+			{ { capacity }, nil, true, "retryable_no_candidate" },
+			{ {}, nil, false, "retryable_no_candidate" },
+			{ { deadline }, nil, false, "retryable_no_candidate" },
+			{ { ack }, nil, false, "acknowledged" },
+			{ { abandoned }, nil, false, "abandoned" },
+			{ { abandoned }, value, false, "abandoned" },
+			{ { capacity }, nil, false, "capacity" },
+			{ { newer }, nil, false, "newer_schema" },
+			{ { capacity, newer }, nil, false, "newer_schema" },
+		}
+		for i, case in cases do
+			t.eq(ProfileRules.classifyAttempt(case[1], case[2], case[3]), case[4], "case " .. i)
+		end
+		t.eq(select(2, ProfileRules.classifyAttempt({ abandoned }, nil, false)), "expired", "the reason comes along")
+		-- Ambiguous is never confirmed or retried with a fresh credit: the same op stays, then only ack or abandon.
+		local ledger, first: any =
+			ProfileRules.takeOp(ProfileRules.credit(ProfileRules.newLedger("s"), 5), false, 0, NOW)
+		ledger = ProfileRules.settle(ledger, { kind = "ambiguous" })
+		t.eq(ledger.ambiguous, true)
+		local _, same, fresh = ProfileRules.takeOp(ProfileRules.credit(ledger, 2), true, 1, NOW)
+		t.truthy(same == first)
+		t.eq(fresh, false)
+		t.eq(plan({ version = 3, glyphsLifetime = 10, applied = {} }, first, { ambiguous = true }).tag, "abandoned")
+		t.eq(ProfileRules.settle(ledger, { kind = "retryable_no_candidate" }).ambiguous, true, "ambiguity is sticky")
 	end)
 end

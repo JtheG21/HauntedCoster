@@ -8,6 +8,9 @@
 -- is impossible by construction: an operation is retried only inside RETRY_WINDOW_S, its receipt outlives that window
 -- (TTL prune and cap eviction never reach a receipt younger than window + skew), and an operation that may have committed
 -- is never credited again: a covering receipt acknowledges it, otherwise it is abandoned (under-credit, logged).
+-- Settings (TASK-0141 rev 2, AUD-20261106-TASK-0141-01 F1): an op carries only the settings keys this session changed
+-- (settingsPatch), never a full snapshot; acknowledging writes nothing; and a patch is dropped when another session's
+-- receipt is not older than the op (createdAtWall - skew), unless this session already saw that receipt when it loaded.
 
 local MenuConfig = require(script.Parent.MenuConfig)
 local ProfileConfig = require(script.Parent.ProfileConfig)
@@ -39,36 +42,56 @@ export type Patch = {
 	blitzBest: number?,
 	glyphsDelta: number?, -- glyph value earned since the last confirmed save; ADDED to the stored total (AUD-02 F2)
 }
--- One save operation, frozen when taken. Every attempt of it reuses seq and delta, so the receipt log can tell.
+-- Settings keys a session changed since its last confirmed save, with their newest values (known keys only).
+export type SettingsPatch = { [string]: any }
+-- One save operation, frozen when taken. Every attempt of it reuses seq, delta and settings patch, so the receipt log can
+-- tell. createdAtWall and settingsPatch live in memory only; nothing about them is persisted.
 export type SaveOp = {
 	sessionId: string, -- one per server session of a player (HttpService GUID)
 	seq: number, -- 1, 2, 3 ... per session; never reused for a different delta
 	glyphsDelta: number, -- taken from pending, never from the displayed total
 	createdAt: number, -- os.clock() when taken: monotonic, meaningful on this server only
+	createdAtWall: number, -- os.time() when taken (the earlier op's, when it carries settings an unconfirmed op returned)
+	settingsPatch: SettingsPatch, -- frozen; empty when no setting changed
 }
 -- What one UpdateAsync callback knows besides the stored value.
 export type SaveContext = {
 	nowWall: number, -- this server's os.time(): stamps a new receipt and measures stored receipts' age
 	elapsed: number, -- os.clock() - op.createdAt, read inside the callback
 	ambiguous: boolean, -- an earlier attempt errored after a callback had returned a write candidate
-	patch: Patch?, -- idempotent fields (settings, bests, test clock), rebuilt per attempt; its glyphsDelta is ignored
+	patch: Patch?, -- idempotent fields (bests, test clock), rebuilt per attempt; its settings and glyphsDelta are ignored
 	window: number?, -- Studio hook only: a shorter retry window (never longer than RETRY_WINDOW_S)
+	shutdownLeft: number?, -- during shutdown only: seconds left to the shared shutdown deadline, read inside the callback
+	knownReceipts: { [string]: number }?, -- other sessions' receipt seqs this session saw when it loaded (R3 exemption)
 }
-export type SaveTag = "applied" | "acknowledged" | "abandoned" | "capacity" | "newer_schema"
--- The callback's decision: `write` is the value to return (nil cancels the write).
-export type SavePlan = { tag: SaveTag, write: Profile?, reason: string? }
--- Per-session save state, replaced (never mutated) by takeOp / credit / settle.
+export type SaveTag = "applied" | "acknowledged" | "abandoned" | "capacity" | "newer_schema" | "deadline"
+-- The callback's decision: `write` is the value to return (nil cancels the write). superseded: the op's settings patch
+-- was dropped because another session saved more recently (R3).
+export type SavePlan = { tag: SaveTag, write: Profile?, reason: string?, superseded: boolean? }
+-- Per-session save state, replaced (never mutated) by takeOp / credit / noteSettings / settle.
 export type Ledger = {
 	sessionId: string,
 	nextSeq: number,
 	pending: number, -- glyph value earned since the last op was taken; goes into the NEXT op only
+	settingsPatch: SettingsPatch, -- settings changed since the last op was taken; goes into the NEXT op only
+	settingsWall: number?, -- createdAtWall of an unconfirmed op whose settings were returned to settingsPatch
 	op: SaveOp?, -- the unresolved operation
 	ambiguous: boolean, -- op may have committed (an attempt errored after returning a write candidate)
+	reportedSeq: number, -- the op already given its terminal report (unconfirmed at shutdown); never reported again
 }
--- How an attempt ended. plan: the call returned, `tag` is the last callback's decision. error: the call errored,
--- `candidate` says whether any callback had returned a write. expired: not dispatched (elapsed >= window).
--- unconfirmed: the shutdown deadline passed with the op unresolved (`candidate`: a call was still in flight).
-export type AttemptKind = "plan" | "error" | "expired" | "unconfirmed"
+-- How one UpdateAsync attempt ended (R6, classifyAttempt).
+export type Outcome =
+	"applied"
+	| "acknowledged"
+	| "abandoned"
+	| "capacity"
+	| "newer_schema"
+	| "ambiguous"
+	| "retryable_no_candidate"
+-- What settle() folds in: an Outcome; expired (not dispatched, elapsed >= window); unconfirmed (the shutdown deadline
+-- passed with the op unresolved, `candidate`: a call was still in flight). The older shapes are still read: plan (`tag`
+-- is the last callback's decision) and error (`candidate`: a callback had returned a write).
+export type AttemptKind = Outcome | "plan" | "error" | "expired" | "unconfirmed"
 export type Attempt = { kind: AttemptKind, tag: SaveTag?, reason: string?, candidate: boolean? }
 -- A terminal operation, logged once: reason, seq, delta and whether it may have committed.
 export type Terminal = { reason: string, seq: number, glyphsDelta: number, ambiguous: boolean }
@@ -87,7 +110,8 @@ local MAX_GLYPHS = 2 ^ 53 -- the largest exact integer; a total can never overfl
 local MAX_TIME = 2 ^ 40 -- far beyond any os.time(), keeps garbage out
 local UNAVAILABLE = { "publish", "studioaccesstoapisnotallowed", "403", "not allowed", "api services" }
 local RETRY_WINDOW = ProfileConfig.RETRY_WINDOW_S
-local EVICT_AGE = ProfileConfig.RETRY_WINDOW_S + ProfileConfig.CLOCK_SKEW_ALLOWANCE_S -- strictly older may be evicted
+local SKEW = ProfileConfig.CLOCK_SKEW_ALLOWANCE_S
+local EVICT_AGE = ProfileConfig.RETRY_WINDOW_S + SKEW -- strictly older may be evicted
 local RECEIPT_TTL = ProfileConfig.RECEIPT_TTL_S
 local RECEIPT_CAP = ProfileConfig.RECEIPT_CAP
 local MAX_SESSION_ID = 64
@@ -335,6 +359,42 @@ local function copySettings(settings: Settings): Settings
 	}
 end
 
+-- Is `value` valid for the known setting `key`?
+local function validSetting(key: string, value: any): boolean
+	if key == "music" or key == "sfx" then
+		return isInt(value, 0, MenuConfig.SettingMax)
+	end
+	return table.find(SETTING_KEYS, key) ~= nil and typeof(value) == "boolean"
+end
+
+-- A copy of `profile` with the valid known keys of `patch` written into its settings record. The record is cloned, so
+-- sub-keys this build does not know stay as they are; anything else in the patch is ignored.
+local function withSettings(profile: Profile, patch: SettingsPatch?): Profile
+	if typeof(patch) ~= "table" or next(patch) == nil then
+		return profile
+	end
+	local out = table.clone(profile)
+	local record: { [any]: any } = if typeof(out.settings) == "table" then table.clone(out.settings) :: any else {}
+	for _, key in SETTING_KEYS do
+		local value = patch[key]
+		if value ~= nil and validSetting(key, value) then
+			record[key] = value
+		end
+	end
+	out.settings = record :: any
+	return out
+end
+
+-- Everything in a profile but settings and the glyph total, as a patch: the idempotent fields every attempt re-sends.
+local function idempotentPatch(profile: Profile): Patch
+	return {
+		bestRank = profile.bestRank,
+		lastTestRank = profile.lastTestRank,
+		lastTakenAt = profile.lastTakenAt,
+		blitzBest = profile.blitzBest,
+	}
+end
+
 -- Folds `patch` into whatever is stored (UpdateAsync transform). Bests and the test time only ever go up, so a server
 -- with older data cannot lower them; settings are last writer wins; the last test rank follows the newest test. The glyph
 -- total is ADDED to (stored + patch.glyphsDelta): a counter built from independent increments cannot be max-merged without
@@ -364,14 +424,26 @@ function ProfileRules.merge(stored: any, patch: Patch): Profile
 	return overlay(stored, base)
 end
 
--- The session profile after a confirmed save: what UpdateAsync returned (another server may have raised a best or added
--- glyphs), our settings and bests folded in, and the glyph increments that arrived while the save was in flight
--- (`pending`, not yet in the stored total) added on top. Sanitized: the in-memory copy never carries stored fields or
--- settings sub-keys this build does not know (they stay in the store; the next save overlays onto them again).
-function ProfileRules.adopt(result: any, current: Profile, pending: number): Profile
-	local adopted = ProfileRules.sanitize(ProfileRules.merge(result, ProfileRules.toPatch(current)))
+-- The session profile after a settled save: what UpdateAsync returned or the callback last saw (another server may have
+-- raised a best, added glyphs or saved newer settings), our bests folded in, the settings keys still waiting to be saved
+-- (`settingsPending`) on top of the stored settings, and the glyph increments that arrived while the save was in flight
+-- (`pending`, not yet in the stored total) added. Sanitized: the in-memory copy never carries stored fields or settings
+-- sub-keys this build does not know (they stay in the store; the next save overlays onto them again).
+function ProfileRules.adopt(result: any, current: Profile, pending: number, settingsPending: SettingsPatch?): Profile
+	local merged = withSettings(ProfileRules.merge(result, idempotentPatch(current)), settingsPending)
+	local adopted = ProfileRules.sanitize(merged)
 	adopted.glyphsLifetime = ProfileRules.addGlyphs(ProfileRules.merge(result, {}), pending).glyphsLifetime
 	return adopted
+end
+
+-- The other sessions' receipt seqs in a stored value (the R3 exemption: receipts this session saw when it loaded).
+function ProfileRules.receiptSeqs(stored: any): { [string]: number }
+	local out = {}
+	local raw = if typeof(stored) == "table" then stored.applied else nil
+	for id, entry in ProfileRules.sanitizeApplied(raw, nil) do
+		out[id] = entry.seq
+	end
+	return out
 end
 
 local function validOp(op: any): boolean
@@ -380,6 +452,30 @@ local function validOp(op: any): boolean
 		and isInt(op.seq, 1, MAX_GLYPHS)
 		and isInt(op.glyphsDelta, 0, MAX_GLYPHS)
 		and isFinite(op.createdAt)
+		and isFinite(op.createdAtWall)
+		and typeof(op.settingsPatch) == "table"
+end
+
+-- R3: has another session saved since `op` was created (its receipt at >= op.createdAtWall - skew)? A receipt this
+-- session already saw at load, at the same or a higher seq, does not count: its settings were in what this session loaded,
+-- so this session's changes are newer. Malformed entries are ignored.
+local function superseded(rawLog: any, op: SaveOp, known: { [string]: number }?): boolean
+	if typeof(rawLog) ~= "table" then
+		return false
+	end
+	local since = op.createdAtWall - SKEW
+	for id, entry in rawLog do
+		if id ~= op.sessionId and isSessionId(id) then
+			local clean = cleanEntry(entry)
+			if clean ~= nil and clean.at >= since then
+				local seen = if typeof(known) == "table" then known[id] else nil
+				if not (typeof(seen) == "number" and seen >= clean.seq) then
+					return true
+				end
+			end
+		end
+	end
+	return false
 end
 
 -- The retry window in force: RETRY_WINDOW_S, or a shorter positive override (the Studio hook). Never longer.
@@ -395,8 +491,11 @@ function ProfileRules.expired(op: SaveOp, clock: number, window: number?): boole
 	return not (clock - op.createdAt < ProfileRules.retryWindow(window))
 end
 
+-- The idempotent fields of `patch` with `delta` as the glyph delta. Settings never come from here (R2): only from the
+-- op's own settings patch.
 local function patchWith(patch: Patch?, delta: number): Patch
 	local out: Patch = if typeof(patch) == "table" then table.clone(patch) else {}
+	out.settings = nil
 	out.glyphsDelta = delta
 	return out
 end
@@ -435,13 +534,16 @@ end
 -- Decides one UpdateAsync callback for `op`. Pure; never mutates `stored`. In order:
 --  1. stored data from a newer build -> newer_schema, no write (also when it became newer after this session loaded).
 --  2. an op or context without a valid identity -> abandoned ("invalid"), no write.
---  3. the stored receipt for this session covers op.seq (checked BEFORE any pruning) -> acknowledged: no delta. Inside the
---     window the idempotent fields are written over a pruned log; at or past it nothing is written.
+--  3. the stored receipt for this session covers op.seq (checked BEFORE any pruning) -> acknowledged, and nothing is
+--     written (R1): the stored value, its settings, bests and receipt log stay exactly as they are.
 --  4. op ambiguous (may have committed) and no covering receipt -> abandoned, no write. A missing receipt never
 --     authorises a second credit.
 --  5. elapsed >= window -> abandoned ("expired"), no write: a replayed callback past the deadline returns no candidate.
---  6. prune receipts older than TTL, record {seq, at = nowWall}, make room at the cap (evicting only receipts older than
---     window + skew); no room -> capacity, no write (retryable, nothing changed). Otherwise applied: delta added.
+--  6. during shutdown, at or past the shared shutdown deadline -> deadline, no write (R5; the op stays unresolved).
+--  7. prune receipts older than TTL, record {seq, at = nowWall}, make room at the cap (evicting only receipts older than
+--     window + skew); no room -> capacity, no write (retryable, nothing changed). Otherwise applied: delta added, bests
+--     max-merged, and the op's settings patch written unless another session saved since the op was created (R3:
+--     superseded, the patch is dropped and the delta still applied).
 function ProfileRules.planSave(stored: any, op: SaveOp, ctx: SaveContext): SavePlan
 	if ProfileRules.isNewerVersion(stored) then
 		return { tag = "newer_schema" }
@@ -451,16 +553,8 @@ function ProfileRules.planSave(stored: any, op: SaveOp, ctx: SaveContext): SaveP
 	end
 	local rawLog = if typeof(stored) == "table" then stored.applied else nil
 	local receipt = if typeof(rawLog) == "table" then cleanEntry(rawLog[op.sessionId]) else nil
-	local expired = not (ctx.elapsed < ProfileRules.retryWindow(ctx.window))
 	if receipt ~= nil and receipt.seq >= op.seq then
-		if expired then
-			return { tag = "acknowledged", reason = "receipt" }
-		end
-		local log = ProfileRules.sanitizeApplied(rawLog, ctx.nowWall)
-		log[op.sessionId] = receipt -- the covering receipt is never pruned by its own acknowledgement
-		local out = ProfileRules.merge(stored, patchWith(ctx.patch, 0))
-		out.applied = log
-		return { tag = "acknowledged", write = out, reason = "receipt" }
+		return { tag = "acknowledged", reason = "receipt" }
 	end
 	if ctx.ambiguous == true then
 		return {
@@ -468,8 +562,11 @@ function ProfileRules.planSave(stored: any, op: SaveOp, ctx: SaveContext): SaveP
 			reason = if receipt == nil then "ambiguous_no_receipt" else "ambiguous_receipt_behind",
 		}
 	end
-	if expired then
+	if not (ctx.elapsed < ProfileRules.retryWindow(ctx.window)) then
 		return { tag = "abandoned", reason = "expired" }
+	end
+	if ctx.shutdownLeft ~= nil and not (ctx.shutdownLeft > 0) then
+		return { tag = "deadline", reason = "shutdown_deadline" }
 	end
 	local log = ProfileRules.sanitizeApplied(rawLog, ctx.nowWall)
 	log[op.sessionId] = { seq = op.seq, at = ctx.nowWall }
@@ -477,13 +574,81 @@ function ProfileRules.planSave(stored: any, op: SaveOp, ctx: SaveContext): SaveP
 		return { tag = "capacity" }
 	end
 	local out = ProfileRules.merge(stored, patchWith(ctx.patch, op.glyphsDelta))
+	local hasSettings = next(op.settingsPatch) ~= nil
+	local dropped = hasSettings and superseded(rawLog, op, ctx.knownReceipts)
+	if hasSettings and not dropped then
+		out = withSettings(out, op.settingsPatch)
+	end
 	out.applied = log
-	return { tag = "applied", write = out }
+	return { tag = "applied", write = out, superseded = if dropped then true else nil }
+end
+
+-- R6: how one UpdateAsync attempt ended, from the decisions its callback(s) returned (in order), what UpdateAsync
+-- returned (nil when it returned nothing or errored) and whether it errored. A write is confirmed only when the LAST
+-- decision was a write and UpdateAsync returned a value. Any other end after some callback returned a write candidate is
+-- ambiguous (it may have committed): never confirmed, never retried with a fresh credit. Without any candidate an error or
+-- the shutdown deadline is retryable_no_candidate (the op is unchanged) and every other end is the last decision's tag.
+function ProfileRules.classifyAttempt(decisions: { SavePlan }, returned: any, errored: boolean): (Outcome, string?)
+	local candidate = false
+	for _, decided in decisions do
+		if decided.write ~= nil then
+			candidate = true
+		end
+	end
+	local last = decisions[#decisions]
+	if errored then
+		return if candidate then "ambiguous" else "retryable_no_candidate", "error"
+	end
+	if last ~= nil and last.write ~= nil and returned ~= nil then
+		return "applied", last.reason
+	end
+	if candidate then
+		return "ambiguous", "no_value_after_candidate"
+	end
+	if last == nil then
+		return "retryable_no_candidate", "no_callback"
+	end
+	local tag = last.tag
+	if tag == "deadline" or tag == "applied" then
+		return "retryable_no_candidate", last.reason
+	end
+	return tag :: any, last.reason
 end
 
 -- A fresh ledger for one server session of a player.
 function ProfileRules.newLedger(sessionId: string): Ledger
-	return { sessionId = sessionId, nextSeq = 1, pending = 0, op = nil, ambiguous = false }
+	return {
+		sessionId = sessionId,
+		nextSeq = 1,
+		pending = 0,
+		settingsPatch = {},
+		settingsWall = nil,
+		op = nil,
+		ambiguous = false,
+		reportedSeq = 0,
+	}
+end
+
+-- The ledger with the settings keys that differ between `before` and `after` recorded (newest value wins) for the next
+-- op. Only known keys with valid values; nothing changed -> the same ledger.
+function ProfileRules.noteSettings(ledger: Ledger, before: Settings, after: Settings): Ledger
+	local changed: SettingsPatch = table.clone(ledger.settingsPatch)
+	local any = false
+	local old: { [string]: any } = before :: any
+	local new: { [string]: any } = after :: any
+	for _, key in SETTING_KEYS do
+		local value = new[key]
+		if value ~= old[key] and validSetting(key, value) then
+			changed[key] = value
+			any = true
+		end
+	end
+	if not any then
+		return ledger
+	end
+	local out = table.clone(ledger)
+	out.settingsPatch = changed
+	return out
 end
 
 -- `amount` added to pending (for the next op). Anything but a positive integer leaves the ledger as it is.
@@ -496,83 +661,120 @@ function ProfileRules.credit(ledger: Ledger, amount: any): Ledger
 	return out
 end
 
--- The op to attempt: the unresolved one unchanged, or (when there is pending glyph value or `want`, i.e. dirty
--- idempotent fields) a new frozen op that takes ALL of pending, with the next seq. Returns the new ledger, the op (nil
--- when there is nothing to save) and whether the op is new.
-function ProfileRules.takeOp(ledger: Ledger, want: boolean, clock: number): (Ledger, SaveOp?, boolean)
+-- The op to attempt: the unresolved one unchanged, or (when there is pending glyph value, a pending settings change or
+-- `want`, i.e. dirty idempotent fields) a new frozen op that takes ALL of pending and the settings patch, with the next
+-- seq, createdAt = `clock` and createdAtWall = `wall` (os.time(); the earlier op's when the patch carries settings an
+-- unconfirmed op returned, so R3 still dates them from when they were first sent). Returns the new ledger, the op (nil when
+-- there is nothing to save) and whether the op is new.
+function ProfileRules.takeOp(ledger: Ledger, want: boolean, clock: number, wall: number?): (Ledger, SaveOp?, boolean)
 	if ledger.op ~= nil then
 		return ledger, ledger.op, false
 	end
-	if ledger.pending <= 0 and not want then
+	if ledger.pending <= 0 and not want and next(ledger.settingsPatch) == nil then
 		return ledger, nil, false
+	end
+	local createdAtWall = if wall ~= nil and isFinite(wall) then wall else 0
+	if ledger.settingsWall ~= nil then
+		createdAtWall = math.min(createdAtWall, ledger.settingsWall)
 	end
 	local op: SaveOp = table.freeze({
 		sessionId = ledger.sessionId,
 		seq = ledger.nextSeq,
 		glyphsDelta = ledger.pending,
 		createdAt = clock,
+		createdAtWall = createdAtWall,
+		settingsPatch = table.freeze(table.clone(ledger.settingsPatch)),
 	})
 	local out = table.clone(ledger)
 	out.nextSeq = ledger.nextSeq + 1
 	out.pending = 0
+	out.settingsPatch = {}
+	out.settingsWall = nil
 	out.op = op
 	out.ambiguous = false
 	return out, op, true
 end
 
-local function finish(ledger: Ledger, reason: string?, ambiguous: boolean): (Ledger, Terminal?)
+-- Ends the op. `reason` set: it ended without a confirmed write, and the terminal record is returned unless the op was
+-- already reported (R4). `requeue`: its settings patch returns to the ledger (keys changed since stay newer) with its
+-- createdAtWall, so it goes out with the next op and R3 still compares it against when it was first sent.
+local function finish(ledger: Ledger, reason: string?, ambiguous: boolean, requeue: boolean): (Ledger, Terminal?)
 	local op = ledger.op :: SaveOp
 	local out = table.clone(ledger)
 	out.op = nil
 	out.ambiguous = false
-	if reason == nil then
+	if requeue and next(op.settingsPatch) ~= nil then
+		local merged = table.clone(op.settingsPatch)
+		for key, value in ledger.settingsPatch do
+			merged[key] = value
+		end
+		out.settingsPatch = merged
+		out.settingsWall = math.min(ledger.settingsWall or math.huge, op.createdAtWall)
+	end
+	if reason == nil or ledger.reportedSeq == op.seq then
 		return out, nil
 	end
 	return out, { reason = reason, seq = op.seq, glyphsDelta = op.glyphsDelta, ambiguous = ambiguous }
 end
 
--- Folds an attempt's outcome into the ledger. Pending is never touched: an abandoned or possibly committed delta never
--- returns to it, and increments that arrived meanwhile stay for the next op. Returns the terminal record when the op
--- ended without a confirmed write (log it once).
+-- The R6 outcome an attempt stands for (the older plan / error shapes are mapped onto it).
+local function outcomeOf(attempt: Attempt): string
+	local kind = attempt.kind
+	if kind == "plan" then
+		local tag = attempt.tag or "abandoned"
+		return if tag == "deadline" then "retryable_no_candidate" else tag
+	elseif kind == "error" then
+		return if attempt.candidate == true then "ambiguous" else "retryable_no_candidate"
+	end
+	return kind
+end
+
+-- Folds an attempt's outcome into the ledger. Pending glyphs are never touched: an abandoned or possibly committed delta
+-- never returns to them, and increments that arrived meanwhile stay for the next op. Returns the terminal record when the
+-- op ended without a confirmed write, at most once per op (R4): after "unconfirmed" at shutdown a later settlement of the
+-- same op only updates the ledger.
 function ProfileRules.settle(ledger: Ledger, attempt: Attempt): (Ledger, Terminal?)
 	if ledger.op == nil then
 		return ledger, nil
 	end
-	local kind = attempt.kind
-	if kind == "plan" then
-		local tag = attempt.tag
-		if tag == "applied" or tag == "acknowledged" then
-			return finish(ledger, nil, false)
-		elseif tag == "capacity" then
-			return ledger, nil -- unchanged op, retried until room opens or it expires
-		elseif tag == "newer_schema" then
-			return finish(ledger, "newer_schema", ledger.ambiguous)
+	local op = ledger.op :: SaveOp
+	local outcome = outcomeOf(attempt)
+	if outcome == "applied" or outcome == "acknowledged" then
+		return finish(ledger, nil, false, false)
+	elseif outcome == "capacity" or outcome == "retryable_no_candidate" then
+		return ledger, nil -- unchanged op, retried until it resolves or expires
+	elseif outcome == "ambiguous" then
+		if ledger.ambiguous then
+			return ledger, nil
 		end
-		return finish(ledger, attempt.reason or "abandoned", ledger.ambiguous)
-	elseif kind == "error" then
-		if attempt.candidate == true and not ledger.ambiguous then
-			local out = table.clone(ledger)
-			out.ambiguous = true
-			return out, nil
+		local out = table.clone(ledger)
+		out.ambiguous = true
+		return out, nil
+	elseif outcome == "newer_schema" then
+		return finish(ledger, "newer_schema", ledger.ambiguous, false)
+	elseif outcome == "expired" then
+		return finish(ledger, "expired", ledger.ambiguous, true)
+	elseif outcome == "unconfirmed" then
+		-- The shutdown deadline passed: the op stays as it is; an in-flight call keeps it potentially committed.
+		if ledger.reportedSeq == op.seq then
+			return ledger, nil
 		end
-		return ledger, nil
-	elseif kind == "expired" then
-		return finish(ledger, "expired", ledger.ambiguous)
+		local out = table.clone(ledger)
+		out.reportedSeq = op.seq
+		return out,
+			{
+				reason = "unconfirmed_at_shutdown",
+				seq = op.seq,
+				glyphsDelta = op.glyphsDelta,
+				ambiguous = ledger.ambiguous or attempt.candidate == true,
+			}
 	end
-	-- unconfirmed (shutdown deadline): the op stays as it is; an in-flight call keeps it potentially committed.
-	local ambiguous = ledger.ambiguous or attempt.candidate == true
-	return ledger,
-		{
-			reason = "unconfirmed_at_shutdown",
-			seq = (ledger.op :: SaveOp).seq,
-			glyphsDelta = (ledger.op :: SaveOp).glyphsDelta,
-			ambiguous = ambiguous,
-		}
+	return finish(ledger, attempt.reason or "abandoned", ledger.ambiguous, true)
 end
 
--- Everything in a profile as a patch (autosave and release): merge() makes it safe against older in-memory data. The glyph
--- total is not part of it: the caller supplies glyphsDelta. Settings are copied key by key, so a stray sub-key can never
--- make the strict settings check reject the patch.
+-- Everything in a profile as a patch: merge() makes it safe against older in-memory data. The glyph total is not part of
+-- it: the caller supplies glyphsDelta. Settings are copied key by key, so a stray sub-key can never make the strict
+-- settings check reject the patch. Saves never send these settings: planSave writes only an op's settings patch (R2).
 function ProfileRules.toPatch(profile: Profile): Patch
 	return {
 		settings = copySettings(profile.settings),
