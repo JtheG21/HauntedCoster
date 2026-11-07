@@ -19,6 +19,7 @@
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local LevelRewards = require(Shared:WaitForChild("LevelRewards"))
@@ -58,10 +59,11 @@ type PlayerState = {
 }
 export type Participant = { player: Player, score: number, correct: number }
 
-local QuestService = {}
+local QuestService: any = {}
 
 local started = false
 local states: { [Player]: PlayerState } = {}
+local lastSent: { [Player]: Net.QuestStatePayload } = {} -- Studio only: the newest QuestState built for each player
 
 local function safe(label: string, fn: () -> ())
 	local ok, err = pcall(function()
@@ -137,7 +139,11 @@ local function push(player: Player, result: string)
 		return
 	end
 	safe("QuestState", function()
-		Remotes.QuestState:FireClient(player, buildState(player, st, result))
+		local payload = buildState(player, st, result)
+		if RunService:IsStudio() then
+			lastSent[player] = payload -- test seam for tests/multiclient/QuestsXp.luau; never kept in a published server
+		end
+		Remotes.QuestState:FireClient(player, payload)
 	end)
 end
 
@@ -517,6 +523,23 @@ local function addPlayer(player: Player)
 	end
 end
 
+-- Studio-only test seam (tests/multiclient/QuestsXp.luau): inert in a published server.
+QuestService._test = {
+	lastSent = function(player: Player): Net.QuestStatePayload?
+		return if RunService:IsStudio() then lastSent[player] else nil
+	end,
+	claim = function(player: Player, raw: any)
+		if RunService:IsStudio() then
+			onClaim(player, raw)
+		end
+	end,
+	request = function(player: Player)
+		if RunService:IsStudio() then
+			onRequest(player)
+		end
+	end,
+}
+
 -- Idempotent. Start after ProfileService (it provides the queue and the events).
 function QuestService.start(): ()
 	if started then
@@ -540,6 +563,7 @@ function QuestService.start(): ()
 	Players.PlayerAdded:Connect(addPlayer)
 	Players.PlayerRemoving:Connect(function(player: Player)
 		states[player] = nil
+		lastSent[player] = nil
 	end)
 	for _, player in Players:GetPlayers() do
 		addPlayer(player)
