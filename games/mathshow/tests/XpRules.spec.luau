@@ -142,4 +142,11 @@ return function(t: TestRunner.T)
 		t.truthy(table.isfrozen(LevelRewards), "LevelRewards")
 		t.truthy(table.isfrozen(LevelRewards.Titles[1]), "title entry")
 	end)
+
+	t.test("AUD-01 F3: xpIntoLevel and xpForNextLevel normalise invalid xp", function()
+		for _, bad in { -5, -math.huge, math.huge, 0 / 0 } do
+			t.eq(XpRules.xpIntoLevel(bad), 0, "xpIntoLevel " .. tostring(bad))
+			t.eq(XpRules.xpForNextLevel(bad), XpRules.costOf(1), "xpForNextLevel " .. tostring(bad))
+		end
+	end)
 end

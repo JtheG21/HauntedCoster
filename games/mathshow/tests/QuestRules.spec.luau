@@ -324,4 +324,63 @@ return function(t: TestRunner.T)
 		t.eq(select(2, QuestRules.bonus(b)), 0, "bonus")
 		t.eq((QuestRules.rollover(b, b.day + 1, 1)), 0, "rollover")
 	end)
+
+	local function allDone(b: QuestRules.Board): QuestRules.Board
+		for i = 1, 3 do
+			b = completeSlot(b, i)
+		end
+		return b
+	end
+
+	local function inert(b: any, label: string)
+		t.eq(QuestRules.validate(state(b)), "invalid", label .. " validate")
+		t.eq(select(2, QuestRules.claim(b, b.day, 1, b.boardRevision, 1)), 0, label .. " claim")
+		t.eq(select(2, QuestRules.bonus(b)), 0, label .. " bonus")
+		t.eq((QuestRules.rollover(b, b.day + 1, 1)), 0, label .. " rollover")
+		local _, changed = QuestRules.applyProgress(b, fact(board(), 1, 1))
+		t.eq(changed, false, label .. " applyProgress")
+	end
+
+	t.test("AUD-01 F1: extra slot keys are invalid and never over-credit", function()
+		local good = allDone(board())
+		local _, baseline = QuestRules.rollover(good, good.day + 1, 1234)
+		local base = QuestRules.rollover(good, good.day + 1, 1234)
+		t.truthy(base > 0, "baseline pays")
+		local extras: { [string]: any } = {
+			dup = function(b: any)
+				b.slots.extra = b.slots[1]
+			end,
+			four = function(b: any)
+				b.slots[4] = b.slots[1]
+			end,
+			str = function(b: any)
+				b.slots["extra"] = 99
+			end,
+			sparse = function(b: any)
+				b.slots[3] = nil
+				b.slots[5] = good.slots[3]
+			end,
+		}
+		for name, mutate in extras do
+			local b = allDone(board())
+			mutate(b)
+			inert(b, name)
+		end
+		local three = QuestRules.rollover(good, good.day + 1, 1234)
+		t.eq(three, base, "valid board unchanged")
+		t.truthy(baseline ~= nil, "fresh board returned")
+	end)
+
+	t.test("AUD-01 F2: boards must have one easy, one medium, one hard", function()
+		local function withIds(ids: { string }): QuestRules.Board
+			local b = board()
+			for i = 1, 3 do
+				b.slots[i] =
+					{ id = ids[i], generation = 1, progress = QuestConfig.Catalog[ids[i]].target, claimed = false }
+			end
+			return b
+		end
+		inert(withIds({ "P_H_ROUND6", "A_H_80", "G_H_50" }), "all hard")
+		inert(withIds({ "P_E_ROUND2", "A_E_15", "G_H_50" }), "two easy")
+	end)
 end

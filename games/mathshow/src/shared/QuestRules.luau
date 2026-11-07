@@ -66,7 +66,8 @@ end
 
 local function copyBoard(board: Board): Board
 	local slots: { Slot } = {}
-	for i, s in board.slots do
+	for i = 1, QuestConfig.SlotCount do
+		local s = board.slots[i]
 		slots[i] = { id = s.id, generation = s.generation, progress = s.progress, claimed = s.claimed }
 	end
 	return {
@@ -122,8 +123,8 @@ local function complete(slot: Slot): boolean
 end
 
 local function allComplete(board: Board): boolean
-	for _, slot in board.slots do
-		if not complete(slot) then
+	for i = 1, QuestConfig.SlotCount do
+		if not complete(board.slots[i]) then
 			return false
 		end
 	end
@@ -140,11 +141,29 @@ local function boardValid(board: any): boolean
 	if typeof(board.bonusGranted) ~= "boolean" or typeof(board.slots) ~= "table" then
 		return false
 	end
-	if #board.slots ~= QuestConfig.SlotCount then
+	-- exactly the integer keys 1..SlotCount: no extra, string, sparse or out-of-range entry
+	local keys = 0
+	for _ in board.slots do
+		keys += 1
+	end
+	if keys ~= QuestConfig.SlotCount then
 		return false
 	end
+	local seen: { [string]: boolean } = {}
 	for c, category in QuestConfig.Categories do
-		if not validSlot(board.slots[c], category) then
+		local slot = board.slots[c]
+		if not validSlot(slot, category) then
+			return false
+		end
+		-- one quest of each difficulty (categories are already distinct by position)
+		local difficulty = QuestConfig.Catalog[slot.id].difficulty
+		if seen[difficulty] then
+			return false
+		end
+		seen[difficulty] = true
+	end
+	for _, difficulty in QuestConfig.Difficulties do
+		if not seen[difficulty] then
 			return false
 		end
 	end
@@ -182,7 +201,8 @@ function QuestRules.applyProgress(board: Board, fact: Fact): (Board, boolean)
 	if not isInt(fact.amount) or fact.amount <= 0 or not isInt(fact.generation) then
 		return board, false
 	end
-	for i, slot in board.slots do
+	for i = 1, QuestConfig.SlotCount do
+		local slot = board.slots[i]
 		if slot.id == fact.slotId then
 			local quest = QuestConfig.Catalog[slot.id]
 			if slot.generation ~= fact.generation or quest.kind ~= fact.kind then
@@ -246,7 +266,8 @@ function QuestRules.rollover(board: Board, newDay: number, userId: number): (num
 		return 0, board
 	end
 	local xp = 0
-	for _, slot in board.slots do
+	for i = 1, QuestConfig.SlotCount do
+		local slot = board.slots[i]
 		if complete(slot) and not slot.claimed then
 			xp += QuestConfig.Catalog[slot.id].xp
 		end

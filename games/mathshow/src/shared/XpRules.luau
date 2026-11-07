@@ -50,6 +50,9 @@ function XpRules.xpIntoLevel(xp: number): number
 	if level >= XpConfig.LevelCap then
 		return 0
 	end
+	if not finite(xp) or xp <= 0 then
+		return 0
+	end
 	return math.floor(xp) - XpRules.totalXpForLevel(level)
 end
 

@@ -37,6 +37,10 @@ Pure rules, config and specs for XP levels, the daily cap and quest selection an
 - Choices the brief left open (flag for review): `rollover(board, newDay, userId)` takes `userId` because the fresh board needs it; it returns `(xp, board)`. `validate(stored)` takes the whole daily state `{dailyEpoch, playXpDay, quests}` and also requires `playXpDay.amount` in 0..400. `boardFor` returns nil for an invalid input or unknown catalog. `xpIntoLevel` is 0 at level 50. Colours are plain RGB (no Color3). A claimed slot must be complete, and `bonusGranted` needs three complete slots, or `validate` says invalid.
 - `owner_agent` in the task JSON still says codex; implemented by Claude on jg's instruction.
 
+### Revision 1 (AUD-20261107-TASK-0149-01, Codex FAIL)
+- F1: `boardValid` requires exactly the integer keys 1..SlotCount (counted with pairs); settlement, claim, bonus, applyProgress and copyBoard loop 1..SlotCount only. F2: slots must be one easy, one medium, one hard (categories fixed by position and checked against the catalog). F3: `xpIntoLevel` returns 0 for non-finite or negative xp (`xpForNextLevel` already used the normalised level).
+- New specs `AUD-01 F1`, `AUD-01 F2` (QuestRules.spec) and `AUD-01 F3` (XpRules.spec). All three fail on 00bf9c8 (validate says ok on the extra-keyed and all-hard boards; xpIntoLevel(-5) returns -5) and pass now. `check.sh` ALL PASSED.
+
 ## Audits
 
 ## Outcome
