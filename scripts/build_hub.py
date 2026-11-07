@@ -1218,14 +1218,15 @@ def add_bunting(hub: Node) -> None:
 
 
 # --- Path flowers and hangout benches (TASK-0145, Map Finish B3) --------------------------------------------------------------
-# Flower clumps line both sides of the four flat radial paths (E, W, SW, SE): a Plastic stem and a small Neon head, decorative (no
+# Flower clumps line both sides of the four flat radial paths (E, W, SW, SE): a Plastic stem and a small Neon plus-sign bloom, decorative (no
 # collision, no query, no shadow, no light). They stand outside the 12-wide route corridor and clear of the lamp posts (|b| = 8.2 +- 1).
 # The north path is a ramp up three terraces, so it is not lined. Benches are collidable but sit well outside every route.
 FLOWER_B = 10.2  # lateral offset from the path centre line: path edge 7.0, lamp posts reach 9.2
 FLOWER_SPACING = 3.5
 FLOWER_JITTER = 0.5
 FLOWER_STEM = (0.22, 1.1, 0.22)
-FLOWER_HEAD = (0.9, 0.55, 0.9)
+FLOWER_ARM = 0.95  # the bloom is a small plus sign (two thin Neon bars), a math motif; a flat cap on a stem would read as a mushroom (IP rule)
+FLOWER_ARM_T = 0.28
 FLOWER_COLOURS = ("violet", "cyan", "amber_neon", "cyan", "violet")
 FLOWER_A_RANGE = {"E": (62.0, 118.0), "W": (62.0, 118.0), "SW": (62.0, 112.0), "SE": (62.0, 100.0)}  # court and hall start at a = 125-130
 BENCH_SIZE = (4.4, 0.5, 1.5)  # width along the bench, seat thickness, depth
@@ -1265,8 +1266,9 @@ def add_dressing(hub: Node, frames: dict[str, Frame]) -> None:
 				b = side * (FLOWER_B + j)
 				colour = PALETTE[FLOWER_COLOURS[count % len(FLOWER_COLOURS)]]
 				flowers.add(fr.block(f"Stem_{label}_{count:03d}", a + j, b, FLOWER_STEM[1] / 2, FLOWER_STEM, PALETTE["grass"], material="Plastic", **deco))
-				flowers.add(fr.block(f"Bloom_{label}_{count:03d}", a + j, b, FLOWER_STEM[1] + FLOWER_HEAD[1] / 2 - 0.1, FLOWER_HEAD, colour,
-					material="Neon", **deco))
+				cy = FLOWER_STEM[1] + FLOWER_ARM / 2 - 0.2
+				flowers.add(fr.block(f"BloomH_{label}_{count:03d}", a + j, b, cy, (FLOWER_ARM, FLOWER_ARM_T, FLOWER_ARM_T), colour, material="Neon", **deco))
+				flowers.add(fr.block(f"BloomV_{label}_{count:03d}", a + j, b, cy, (FLOWER_ARM_T, FLOWER_ARM, FLOWER_ARM_T), colour, material="Neon", **deco))
 				count += 1
 	FLOWER_STATS["flowers"] = count
 	benches = hub.add(folder("Benches"))
