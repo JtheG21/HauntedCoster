@@ -6,7 +6,7 @@ Approved rows (jg, 2026-11-06): MF-P, MF-M, MF-X, MF-C. Resume: read this file, 
 ## Batches
 | Batch | Task | Status | PR | Merge SHA | Lights | Tri inventory |
 |---|---|---|---|---|---|---|
-| MF-0 inventory | TASK-0142 | in review | - | - | 25/40 | 39,232 (TASK-0133) |
+| MF-0 inventory | TASK-0142 | merged | #207 | 70b33f8 | 25/40 | 39,232 (TASK-0133) |
 | B1 sky | - | pending | | | | |
 | B2 ambient life | - | pending | | | | |
 | B3 path/plaza dressing | - | pending | | | | |
