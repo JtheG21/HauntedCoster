@@ -22,17 +22,20 @@
     "tasks/items/TASK-0150.json",
     "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Persistence-And-Services.md",
     "games/mathshow/src/server/Services/ModePadService.luau",
-    "games/mathshow/src/shared/ModePadConfig.luau"
+    "games/mathshow/src/shared/ModePadConfig.luau",
+    "games/mathshow/src/server/init.server.luau",
+    "games/mathshow/tests/multiclient/QuestsXp.luau",
+    "docs/workflow/evidence/TASK-0150/"
   ],
   "depends_on": [
     "TASK-0149"
   ],
   "branch": "task/TASK-0150-quests-xp-persistence",
   "acceptance": [
-    "Profile schema v4 with xp, quests and xpDay saved as deltas through the TASK-0141 receipt log; QuestService awards XP only from server events; remotes created by the server; migration spec from v3; Studio two-client run; Opus audit passes."
+    "Profile schema v4 (xp, dailyEpoch, playXpDay, quests with catalogVersion, boardRevision, slots and bonusGranted) applied as ordered conditional commands through the TASK-0141 worker and receipts, with atomic claim, bonus, play-cap and rollover state; QuestService awards XP only from server events; remotes created by the server; migration, cross-server, failure and secrecy tests per AUD-20261107-QUESTS-XP-DESIGN-02; Studio two-client run; Opus audit passes."
   ],
   "evidence": [],
-  "notes": "Backlog; Codex design review applied, jg's post-review decisions applied (QX-D3: no reroll, fast/streak quests or VS XP/quests in v1). files_owned widened to the hook services, Remotes and the publish checklist. No plan approval yet.",
+  "notes": "Backlog; final design applied from AUD-20261107-QUESTS-XP-DESIGN-02 (QX-D4): startup, service scenario and evidence paths added. No plan approval yet.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Persistence-And-Services.md",
   "risk": "high"
 }
