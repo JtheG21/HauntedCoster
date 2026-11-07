@@ -43,6 +43,9 @@ return function(_args: any): any
 		return true
 	end, 60)
 	if not checks.twoPlayersReady then
+		for _, p in Players:GetPlayers() do
+			note(`{p.Name} id={p.UserId} persistence={tostring(ProfileService.persistence(p))}`)
+		end
 		return { ok = false, checks = checks, trace = trace, infra = true }
 	end
 	local p1, p2 = players[1], players[2]
