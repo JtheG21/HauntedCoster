@@ -14,7 +14,7 @@ Two free Creator Store skyboxes (assets 15125422596 "Galaxy Skybox", 10908497937
 - scripts/check.sh: ALL CHECKS PASSED (see task note).
 - HubRoutes (fresh Play at dfdd30b): HUBROUTES_RESULT routes=6/6 failures=0 stamp=dfdd30b. Daily 11.6 s, VS 12.4, Blitz 10.7, Group 12.4, Practice 11.8, Skill 11.7; canary blocked. All 6 pads opened their screens.
 - Console: no new warnings or errors. The three "ContentId rbxassetid://203785492 ... Asset type does not match requested type" lines were already present before the sky change (first Play of this session) and are not from this diff.
-- Not re-run live this batch: collect/respawn, HUD, mid-match. The B1 diff against main (ea039b1..) touches only mathshow.project.json (Lighting) and Sky.rbxmx, no geometry, code or remotes; the 30dd62e evidence does NOT carry over (main has changed since), so this is a scope argument, not measured evidence. 34/34 GlyphSpawn reachability is covered by the check.sh Python walk tests (geometry unchanged).
+- Not re-run live this batch: collect/respawn, HUD, mid-match. The B1 diff against main (ea039b1..) touches only mathshow.project.json (Lighting) and Sky.rbxmx, no geometry, code or remotes; the 30dd62e evidence does NOT carry over (main has changed since), so this is a scope argument, not measured evidence. 34/34 GlyphSpawn reachability is covered only by the check.sh Python walk tests (informational, static; reachability proof is the Studio HubRoutes gate / PathfindingService) (geometry unchanged).
 
 ## Budgets
 PointLights 25/40 (+0). Triangle inventory 39,232 (+0; no parts added). Instances +1 (the Sky). CastShadow: no new props.

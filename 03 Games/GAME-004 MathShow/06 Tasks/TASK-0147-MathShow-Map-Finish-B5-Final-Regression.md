@@ -37,5 +37,6 @@ Final regression at main's head and program close-out (B5 in `docs/workflow/evid
 ## Implementation record
 
 ## Audits
+- [[AUD-20261106-TASK-0147-01]] (Codex, FAIL; fixes in [[TASK-0148-MathShow-Map-Finish-MF-C-Fixes]]).
 
 ## Outcome

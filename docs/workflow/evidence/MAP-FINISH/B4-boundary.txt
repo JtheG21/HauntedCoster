@@ -24,7 +24,7 @@ Pathfinding (PathfindingService, server, agent radius 2, height 5, can jump; fro
 Detector sanity: a path from the old moat position (R=288 at 200 degrees, now outside the wall) returns NoPath, so the check can see a trap. It was not run against the pre-fix map (only the physical test above was), so the pathfinding list is a regression check, not proof that it would have found the moat.
 
 ## Regression (fresh Play at 649813f)
-- scripts/check.sh: ALL CHECKS PASSED (python walk and route guards cover 34/34 GlyphSpawn reachability on the regenerated map).
+- scripts/check.sh: ALL CHECKS PASSED (python walk and route guards are informational (static); reachability proof is the Studio HubRoutes gate / PathfindingService).
 - HubRoutes: HUBROUTES_RESULT routes=6/6 failures=0 stamp=649813f. Daily 11.6 s, VS 12.4, Blitz 10.7, Group 12.3, Practice 11.7, Skill 11.8; canary blocked; all 6 pads opened their screens.
 - Console: no new warnings or errors. The three "ContentId rbxassetid://203785492" lines predate B1. One "GlyphCollect ... out_of_range (Glyph_R_Tier5)" is a server rejection caused by my teleports passing the tier-4 rare glyph at 150 degrees; the validation worked as designed.
 - Not re-run live: collect/respawn, HUD, mid-match (no gameplay code or remote changed; scope argument, not measured evidence).

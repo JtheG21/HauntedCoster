@@ -66,6 +66,8 @@ PointLights 25 of 40 (+0 over the program). Triangle inventory +4,680 over the p
 - Flowers on the north ramp path.
 - A galaxy skybox texture (free ones loaded but showed nothing in the Studio emulator; needs a different asset or a real-device check).
 - Unverified: audibility of the ambient loops, a shooting star in a screenshot, AmbientLife failure injection and stop() cleanup, the rare glyph respawn, two-player and real-device performance (TASK-0123).
+- Route times: 4 of 6 modes are inside the 8-12 s band; VS 12.4 s and Group 12.3 s are over the 12 s design target (the HubRoutes gate passed). Not changed (no map change in MF-C fixes).
+- Python route/clearance checks are informational (static); reachability proof is the Studio HubRoutes gate and PathfindingService.
 - Collision geometry the sweep did not climb out of: every concave corner of every building (sampled by pathfinding only).
 
 ## Codex handoff (row MF-C): one audit of the full Map Finish range
