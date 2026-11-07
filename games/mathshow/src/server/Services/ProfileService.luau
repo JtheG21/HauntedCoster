@@ -32,6 +32,14 @@
 --    instead, so the call fails with a candidate submitted but nothing committed (attempt()).
 --  * MathShowForceSaveFailures = n: the next n attempts fail before dispatch, no candidate (decremented; attempt()).
 --  * MathShowProfileRetryWindowS = s: a shorter retry window in seconds (never longer than RETRY_WINDOW_S; retryWindow()).
+--  * MathShowClockOffsetS = n: the server's wall clock for daily quest logic reads n seconds ahead (wallNow(); TASK-0150
+--    rollover tests). Inert outside Studio: studioHook() returns nil there.
+--
+-- Quests and XP (TASK-0150, schema v4): QuestService queues ordered conditional commands with queueCommand(); the worker
+-- freezes ALL queued commands into the next op before any yield and planSave applies them against the stored value. Nothing
+-- here awards anything: xp changes only inside the transform. Observers (subscribe) hear "loaded" and, when an op that carried
+-- commands resolves, "settled"; they run pcall-isolated and must not yield. Memory mode applies commands to the in-memory
+-- profile only (explicitly nonpersistent).
 
 local DataStoreService = game:GetService("DataStoreService")
 local HttpService = game:GetService("HttpService")
@@ -61,6 +69,7 @@ type Session = {
 	attempting: boolean, -- an UpdateAsync call is in flight
 	leaving: boolean, -- the player left; the worker retries with backoff until the work is resolved
 	overdueSeq: number, -- the op already reported overdue (once)
+	player: Player,
 	token: number, -- debounce: only the newest scheduled save runs
 	menuStamps: { number },
 	saveStamps: { number },
@@ -79,6 +88,14 @@ local SHUTDOWN_ATTEMPTS = 6 -- per session during the BindToClose drain
 local DEVELOPMENT_PLACE = RunService:IsStudio() or game.PlaceId == 0
 
 local started = false
+export type Event = {
+	kind: string, -- "loaded" | "settled"
+	player: Player,
+	outcome: string?, -- settled: the attempt kind (applied / acknowledged / abandoned / expired / newer_schema ...)
+	results: { ProfileRules.CommandResult }?,
+	eventIds: { string }?, -- settled: the event ids of the commands the resolved op carried
+}
+local observers: { (Event) -> () } = {}
 local store: DataStore? = nil
 local storeError = "no DataStore" -- why GetDataStore failed, so load() can tell "unpublished place" from a real outage
 local sessions: { [Player]: Session } = {}
@@ -125,6 +142,26 @@ end
 local function retryWindow(): number
 	local override = studioHook("MathShowProfileRetryWindowS")
 	return ProfileRules.retryWindow(if typeof(override) == "number" then override else nil)
+end
+
+-- Wall-clock seconds for daily quest logic: os.time(), plus a Studio-only test offset (inert in production).
+local function wallNow(): number
+	local offset = studioHook("MathShowClockOffsetS")
+	if typeof(offset) == "number" and offset == offset and math.abs(offset) <= 10 * 86400 then
+		return os.time() + offset
+	end
+	return os.time()
+end
+
+local function notify(event: Event)
+	for _, observer in observers do
+		local ok, err = pcall(function()
+			observer(event)
+		end)
+		if not ok then
+			warn(`[MathShow] profile observer failed: {err}`)
+		end
+	end
 end
 
 local function load(player: Player, session: Session)
@@ -216,7 +253,8 @@ local function attempt(session: Session, op: ProfileRules.SaveOp): (ProfileRules
 	local ok, result = pcall(function()
 		return ds:UpdateAsync(keyFor(session.userId), function(old: any)
 			local decided = ProfileRules.planSave(old, op, {
-				nowWall = os.time(),
+				nowWall = wallNow(),
+				userId = session.userId,
 				elapsed = os.clock() - op.createdAt,
 				ambiguous = ambiguous,
 				patch = patch,
@@ -256,13 +294,18 @@ local function attempt(session: Session, op: ProfileRules.SaveOp): (ProfileRules
 	end
 	local wrote = outcome == "applied"
 	local base = if wrote then result else seen
-	return { kind = kind, reason = reason }, base, wrote and last ~= nil and last.superseded == true
+	local settledAttempt: ProfileRules.Attempt = { kind = kind, reason = reason }
+	if wrote and last ~= nil then
+		settledAttempt.results = last.results
+		settledAttempt.droppedOldDay = last.droppedOldDay
+	end
+	return settledAttempt, base, wrote and last ~= nil and last.superseded == true
 end
 
 -- Applies a settled attempt to the session: ledger, terminal log, memory-only switch and profile adoption. `dropped`: the
 -- committed write dropped its settings patch as superseded (R3). After an op already reported
 -- unconfirmed at shutdown, a late settlement only updates state (R4): no second report of any kind.
-local function settleAttempt(session: Session, outcome: ProfileRules.Attempt, base: any, dropped: boolean)
+local function settleCore(session: Session, outcome: ProfileRules.Attempt, base: any, dropped: boolean)
 	local op = session.ledger.op
 	local seq = if op ~= nil then op.seq else 0
 	local quiet = op ~= nil and session.ledger.reportedSeq == seq
@@ -312,9 +355,52 @@ local function settleAttempt(session: Session, outcome: ProfileRules.Attempt, ba
 	end
 end
 
+local function settleAttempt(session: Session, outcome: ProfileRules.Attempt, base: any, dropped: boolean)
+	local op = session.ledger.op
+	local carried = op ~= nil and op.commands ~= nil and #op.commands > 0
+	local eventIds: { string } = {}
+	if op ~= nil and op.commands ~= nil then
+		for _, command in op.commands do
+			if command.eventId ~= nil then
+				table.insert(eventIds, command.eventId)
+			end
+		end
+	end
+	local seq = if op ~= nil then op.seq else 0
+	settleCore(session, outcome, base, dropped)
+	if carried and session.ledger.op == nil then
+		if (outcome.droppedOldDay or 0) > 0 then
+			warn(
+				`[MathShow] save op {seq} of {session.userId}: {outcome.droppedOldDay} quest/play command(s) of a closed day dropped`
+			)
+		end
+		if outcome.kind == "applied" and outcome.results ~= nil then
+			for _, result in outcome.results do
+				if result.reason == "daily_disabled" then
+					warn(
+						`[MathShow] daily quest state of {session.userId} is damaged or out of range; commands not applied`
+					)
+					break
+				end
+			end
+		end
+		notify({
+			kind = "settled",
+			player = session.player,
+			outcome = outcome.kind,
+			results = outcome.results,
+			eventIds = eventIds,
+		})
+	end
+end
+
 local function settled(session: Session): boolean
 	local ledger = session.ledger
-	return ledger.op == nil and ledger.pending <= 0 and next(ledger.settingsPatch) == nil and not session.dirty
+	return ledger.op == nil
+		and ledger.pending <= 0
+		and next(ledger.settingsPatch) == nil
+		and #ledger.queue == 0
+		and not session.dirty
 end
 
 local function release(session: Session)
@@ -455,6 +541,72 @@ function ProfileService.glyphsLifetime(player: Player): number?
 	return nil
 end
 
+-- Wall-clock seconds for daily logic (see wallNow).
+function ProfileService.wallNow(): number
+	return wallNow()
+end
+
+-- Registers an observer of "loaded" and "settled" events. Observers must not yield.
+function ProfileService.subscribe(observer: (Event) -> ())
+	table.insert(observers, observer)
+end
+
+-- Queues one ordered quest/play command for the player's NEXT save op. Returns (queued, reason). Not loaded / read-only /
+-- newer-schema profiles queue nothing ("loading" / "unavailable"). In memory mode the command is applied to the in-memory
+-- profile at once and nothing is persisted. Never yields.
+function ProfileService.queueCommand(player: Player, command: any): (boolean, string?)
+	local session = sessions[player]
+	if not session then
+		return false, "unavailable"
+	end
+	if session.persistence == "loading" then
+		return false, "loading"
+	end
+	if session.persistence == "memory" then
+		local c = ProfileRules.cleanCommand(command)
+		if c == nil then
+			return false, "invalid"
+		end
+		local applied, results = ProfileRules.applyCommands(
+			session.profile,
+			{ c },
+			{ nowWall = wallNow(), userId = session.userId }
+		)
+		session.profile = ProfileRules.sanitize(applied)
+		task.defer(notify, {
+			kind = "settled",
+			player = player,
+			outcome = "applied",
+			results = results,
+			eventIds = if c.eventId ~= nil then { c.eventId } else {},
+		})
+		return true, nil
+	end
+	if session.persistence ~= "saved" then
+		return false, "unavailable"
+	end
+	local ledger, queued, reason = ProfileRules.queueCommand(session.ledger, command)
+	if queued then
+		session.ledger = ledger
+		scheduleSave(player, session)
+	end
+	return queued, reason
+end
+
+-- Starts the save worker now instead of waiting out the debounce (a claim should land promptly).
+function ProfileService.flush(player: Player)
+	local session = sessions[player]
+	if session and session.persistence == "saved" then
+		task.spawn(work, session)
+	end
+end
+
+-- Commands queued or frozen in an unresolved op, not yet confirmed.
+function ProfileService.pendingCommands(player: Player): number
+	local session = sessions[player]
+	return if session then ProfileRules.pendingCommands(session.ledger) else 0
+end
+
 -- Yields until the profile has loaded (or LOAD_WAIT_SECONDS passes). Safe to call from a remote handler.
 function ProfileService.waitLoaded(player: Player): Persistence?
 	local deadline = os.clock() + LOAD_WAIT_SECONDS
@@ -545,6 +697,7 @@ local function onPlayerAdded(player: Player)
 		attempting = false,
 		leaving = false,
 		overdueSeq = 0,
+		player = player,
 		token = 0,
 		menuStamps = {},
 		saveStamps = {},
@@ -556,6 +709,9 @@ local function onPlayerAdded(player: Player)
 	if not ok then
 		warn(`[MathShow] profile load crashed for {player.Name}: {err}`)
 		session.persistence = "readonly"
+	end
+	if sessions[player] == session then
+		notify({ kind = "loaded", player = player })
 	end
 end
 

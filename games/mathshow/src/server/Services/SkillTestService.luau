@@ -21,6 +21,7 @@ local SkillRules = require(Shared:WaitForChild("SkillRules"))
 
 local Remotes = require(script.Parent.Parent.Remotes)
 local ProfileService = require(script.Parent.ProfileService)
+local QuestService = require(script.Parent.QuestService)
 
 type Session = {
 	run: SkillRules.Run,
@@ -31,6 +32,9 @@ type Session = {
 	seedBase: number,
 	previousBest: number?,
 	answerStamps: { number },
+	runId: string, -- quest event ids derive from it
+	correctCount: number, -- accepted correct answers this run (quest eligibility: at least one)
+	rewarded: boolean, -- the one finalisation guard shared by a normal finish and a leave during the finished final reveal
 }
 
 local SkillTestService = {}
@@ -75,8 +79,18 @@ local function persist(player: Player, session: Session): (SkillRules.Outcome, n
 	return outcome, ProfileRules.retryAt(now, nil) :: number
 end
 
+-- Hands a normally finished run to QuestService exactly once, whichever path reaches it first.
+local function reward(player: Player, session: Session)
+	if session.rewarded then
+		return
+	end
+	session.rewarded = true
+	QuestService.skillFinished(player, session.runId, session.correctCount)
+end
+
 local function finish(player: Player, session: Session)
 	local outcome, retryAt = persist(player, session)
+	reward(player, session)
 	sessions[player] = nil
 	send(player, {
 		state = "ended",
@@ -206,6 +220,9 @@ local function onStart(player: Player, raw: any)
 		seedBase = Random.new():NextInteger(1, 2 ^ 30),
 		previousBest = profile.bestRank,
 		answerStamps = {},
+		runId = QuestService.newId(),
+		correctCount = 0,
+		rewarded = false,
 	}
 	sessions[player] = session
 	askQuestion(player, session)
@@ -234,6 +251,10 @@ local function onAnswer(player: Player, raw: any)
 		return
 	end
 	local correct = if problem.kind == "choice" then answer == problem.correctIndex else answer == problem.answer
+	if correct then
+		session.correctCount += 1
+		QuestService.skillAnswer(player, session.runId, attempt)
+	end
 	resolve(player, session, correct)
 end
 
@@ -271,6 +292,7 @@ function SkillTestService.start(): ()
 			pcall(function()
 				persist(player, session)
 			end)
+			reward(player, session)
 		end
 		sessions[player] = nil -- pending timers see the session gone
 		startStamps[player] = nil

@@ -18,6 +18,7 @@ local RateRules = require(Shared:WaitForChild("RateRules"))
 
 local Remotes = require(script.Parent.Parent.Remotes)
 local ProfileService = require(script.Parent.ProfileService)
+local QuestService = require(script.Parent.QuestService)
 
 type Session = {
 	index: number, -- the question being asked, 1..BlitzTotal
@@ -29,6 +30,8 @@ type Session = {
 	previousBest: number?,
 	ended: boolean,
 	answerStamps: { number },
+	runId: string, -- quest event ids derive from it
+	startDay: number, -- the UTC day the run started: its quest facts keep this day
 }
 
 local BlitzService = {}
@@ -87,6 +90,8 @@ local function finish(player: Player, session: Session)
 	if not saved then
 		warn(`[MathShow] blitz best not saved for {player.Name}: {saveErr}`)
 	end
+	-- Quests / XP: correctness-dependent facts are produced only here, at the result boundary (never mid-run), once.
+	QuestService.blitzFinished(player, session.runId, correct, session.startDay)
 	local ok, err = pcall(function()
 		Remotes.BlitzResult:FireClient(player, {
 			correct = correct,
@@ -137,6 +142,8 @@ local function onStart(player: Player, raw: any)
 		previousBest = profile.blitzBest,
 		ended = false,
 		answerStamps = {},
+		runId = QuestService.newId(),
+		startDay = QuestService.today(),
 	}
 	sessions[player] = session
 	sendState(player, session)

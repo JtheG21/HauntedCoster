@@ -3,6 +3,9 @@ local TestRunner = require(script.Parent.TestRunner)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MenuConfig = require(ReplicatedStorage.Shared.MenuConfig)
 local ProfileRules = require(ReplicatedStorage.Shared.ProfileRules)
+local QuestConfig = require(ReplicatedStorage.Shared.QuestConfig)
+local QuestRules = require(ReplicatedStorage.Shared.QuestRules)
+local XpConfig = require(ReplicatedStorage.Shared.XpConfig)
 
 local NAN = 0 / 0
 
@@ -263,9 +266,9 @@ return function(t: TestRunner.T)
 	end)
 
 	t.test("migrate preserves unknown fields", function()
-		local out = ProfileRules.migrate({ version = 1, quests = { a = 1 }, flag = true })
+		local out = ProfileRules.migrate({ version = 1, legacy = { a = 1 }, flag = true })
 		t.eq(out.flag, true)
-		t.eq(out.quests.a, 1)
+		t.eq(out.legacy.a, 1)
 	end)
 
 	t.test("migrate leaves a future version alone", function()
@@ -603,14 +606,14 @@ return function(t: TestRunner.T)
 	end)
 
 	t.test("merge keeps unknown stored fields, also after migrate -> sanitize (AUD-02 F1)", function()
-		local stored = { version = 1, quests = { a = 1 }, flag = true, bestRank = 2 }
+		local stored = { version = 1, legacy = { a = 1 }, flag = true, bestRank = 2 }
 		local loaded = ProfileRules.sanitize(ProfileRules.migrate(stored))
 		t.eq((loaded :: any).flag, nil, "the in-memory copy is sanitized")
 		local written = ProfileRules.merge(stored, ProfileRules.toPatch(loaded)) :: any
 		t.eq(written.flag, true)
-		t.eq(written.quests.a, 1)
+		t.eq(written.legacy.a, 1)
 		t.eq(written.bestRank, 2)
-		t.eq(written.version, 3)
+		t.eq(written.version, 4)
 		t.eq(written.glyphsLifetime, 0)
 		t.eq(stored.version, 1, "the stored table is not mutated")
 	end)
@@ -624,34 +627,34 @@ return function(t: TestRunner.T)
 
 	t.test("planSave refuses stored data from a newer build, even one that appeared after load (AUD-02 F1)", function()
 		local loaded = ProfileRules.sanitize({ version = 3, glyphsLifetime = 20 })
-		local newerNow = { version = 4, extra = "must survive", glyphsLifetime = 20 }
+		local newerNow = { version = 5, extra = "must survive", glyphsLifetime = 20 }
 		for _, overrides in { {}, { ambiguous = true }, { elapsed = WINDOW } } do
 			local refused = plan(newerNow, op("s", 1, 3), overrides)
 			t.eq(refused.tag, "newer_schema")
-			t.eq(refused.write, nil, "version 4 is refused, so nothing is erased")
+			t.eq(refused.write, nil, "version 5 is refused, so nothing is erased")
 		end
 		t.eq(newerNow.extra, "must survive")
 		t.eq(plan({ version = 99 }, op("s", 1, 3)).tag, "newer_schema")
 		local same = save(t, { version = 3, glyphsLifetime = 20 }, op("s", 1, 3), ProfileRules.toPatch(loaded))
 		t.eq(same.glyphsLifetime, 23)
 		local older = save(t, { version = 1 }, op("s", 1, 3))
-		t.eq(older.version, 3)
+		t.eq(older.version, 4)
 		local ledger = ProfileRules.takeOp(ProfileRules.credit(ProfileRules.newLedger("s"), 3), false, 0)
 		local settled, terminal = ProfileRules.settle(ledger, { kind = "plan", tag = "newer_schema" })
 		t.eq(settled.op, nil)
 		t.eq((terminal :: any).reason, "newer_schema")
 	end)
 
-	t.test("migrate v2 -> v3 adds an empty save log and keeps unknown fields, the total and settings", function()
+	t.test("migrate v2 -> v4 adds an empty save log and keeps unknown fields, the total and settings", function()
 		local v2: { [string]: any } =
-			{ version = 2, glyphsLifetime = 12, settings = valid(), quests = { a = 1 }, flag = true }
+			{ version = 2, glyphsLifetime = 12, settings = valid(), legacy = { a = 1 }, flag = true }
 		local out = ProfileRules.migrate(v2)
-		t.eq(out.version, 3)
+		t.eq(out.version, 4)
 		t.eq(typeof(out.applied), "table")
 		t.eq(next(out.applied), nil)
 		t.eq(out.glyphsLifetime, 12)
 		t.eq(out.settings.music, 3)
-		t.eq(out.quests.a, 1)
+		t.eq(out.legacy.a, 1)
 		t.eq(out.flag, true)
 		t.eq(v2.applied, nil, "the input is not mutated")
 		local keep = ProfileRules.migrate({ version = 3, applied = { s = { seq = 2, at = NOW } } })
@@ -665,10 +668,10 @@ return function(t: TestRunner.T)
 		t.eq(plan(other, op("a", 4, 9)).tag, "acknowledged")
 		-- Saved through the v3 path, the unknown fields and the total survive and the log gains the op.
 		local written = save(t, v2, op("s", 1, 4))
-		t.eq(written.version, 3)
+		t.eq(written.version, 4)
 		t.eq(written.glyphsLifetime, 16)
 		t.eq(written.flag, true)
-		t.eq(written.quests.a, 1)
+		t.eq(written.legacy.a, 1)
 		t.eq(written.applied.s.seq, 1)
 	end)
 
@@ -1210,4 +1213,701 @@ return function(t: TestRunner.T)
 			"without a change time nothing is stamped"
 		)
 	end)
+
+	-- ---------------------------------------------------------------------------------------------------------------
+	-- Schema v4 (TASK-0150): ordered conditional commands applied inside the transform against the STORED state.
+	local DAY = 20833
+	local NOON = DAY * 86400 + 43200
+	local USER = 4242
+
+	local function v4(day: number?, mutate: ((any) -> ())?): any
+		local d = day or DAY
+		local board = QuestRules.boardFor(USER, d, QuestConfig.CatalogVersion)
+		assert(board, "board")
+		local stored: any = {
+			version = 4,
+			xp = 0,
+			glyphsLifetime = 5,
+			settings = valid(),
+			applied = {},
+			dailyEpoch = d,
+			playXpDay = { day = d, amount = 0 },
+			quests = board,
+			extra = "keep me",
+		}
+		if mutate then
+			mutate(stored)
+		end
+		return stored
+	end
+
+	local function qop(session: string, seq: number, commands: { any }): ProfileRules.SaveOp
+		local o = op(session, seq, 0)
+		return table.freeze({
+			sessionId = o.sessionId,
+			seq = o.seq,
+			glyphsDelta = 0,
+			createdAt = 0,
+			createdAtWall = NOON,
+			settingsPatch = {},
+			commands = commands,
+		}) :: any
+	end
+
+	local eventCounter = 0
+	local function eid(): string
+		eventCounter += 1
+		return `e{eventCounter}`
+	end
+
+	-- Runs one op of `commands` for `session` against `stored`; returns the plan (and fails unless it wrote).
+	local function runOp(
+		stored: any,
+		session: string,
+		seq: number,
+		commands: { any },
+		overrides: { [string]: any }?
+	): any
+		local c: { [string]: any } = { nowWall = NOON, userId = USER }
+		if overrides then
+			for key, value in overrides do
+				c[key] = value
+			end
+		end
+		return plan(stored, qop(session, seq, commands), c)
+	end
+
+	local function wrote(runner: TestRunner.T, decided: any): any
+		runner.eq(decided.tag, "applied")
+		return decided.write
+	end
+
+	local function progress(board: any, slot: number, amount: number?): any
+		local s = board.slots[slot]
+		local quest = QuestConfig.Catalog[s.id]
+		return {
+			type = "progress",
+			day = board.day,
+			catalogVersion = board.catalogVersion,
+			slotId = s.id,
+			generation = s.generation,
+			kind = quest.kind,
+			amount = amount or quest.target,
+			eventId = eid(),
+		}
+	end
+
+	local function claim(board: any, slot: number): any
+		return {
+			type = "claim",
+			day = board.day,
+			slot = slot,
+			boardRevision = board.boardRevision,
+			generation = board.slots[slot].generation,
+			eventId = eid(),
+		}
+	end
+
+	local function rewardOf(board: any, slot: number): number
+		return QuestConfig.Catalog[board.slots[slot].id].xp
+	end
+
+	local function deepSame(a: any, b: any): boolean
+		if typeof(a) ~= typeof(b) then
+			return false
+		end
+		if typeof(a) ~= "table" then
+			return a == b
+		end
+		for key, value in a do
+			if not deepSame(value, b[key]) then
+				return false
+			end
+		end
+		for key in b do
+			if a[key] == nil then
+				return false
+			end
+		end
+		return true
+	end
+
+	t.test(
+		"v3 -> v4 migration keeps settings, ranks, bests, glyph total, receipts and unknown fields; xp 0, daily uninitialised",
+		function()
+			local v3: any = {
+				version = 3,
+				settings = valid(),
+				bestRank = 4,
+				lastTestRank = 3,
+				lastTakenAt = NOW - 50,
+				blitzBest = 7,
+				glyphsLifetime = 33,
+				applied = { a = { seq = 2, at = NOW - 10 } },
+				unknownField = { 1, 2, 3 },
+			}
+			local out = ProfileRules.migrate(v3)
+			t.eq(out.version, 4)
+			t.eq(out.xp, 0)
+			t.eq(out.dailyEpoch, nil)
+			t.eq(out.playXpDay, nil)
+			t.eq(out.quests, nil)
+			t.eq(out.settings.music, 3)
+			t.eq(out.bestRank, 4)
+			t.eq(out.lastTestRank, 3)
+			t.eq(out.lastTakenAt, NOW - 50)
+			t.eq(out.blitzBest, 7)
+			t.eq(out.glyphsLifetime, 33)
+			t.eq(out.applied.a.seq, 2)
+			t.eq(out.unknownField[3], 3)
+			t.eq(ProfileRules.dailyStatus(out, NOON), "uninitialized")
+			t.eq(v3.version, 3, "the stored table is not mutated")
+		end
+	)
+
+	t.test("migration is idempotent and never touches an existing v4 value, damaged or not", function()
+		local v3: any = { version = 3, glyphsLifetime = 4 }
+		local once = ProfileRules.migrate(v3)
+		t.truthy(deepSame(once, ProfileRules.migrate(once)), "migrate(migrate(x)) == migrate(x)")
+		local good = v4()
+		t.truthy(deepSame(good, ProfileRules.migrate(good)), "a valid v4 value passes through")
+		local damaged = v4(nil, function(s)
+			s.playXpDay.day = DAY - 1
+		end)
+		t.truthy(deepSame(damaged, ProfileRules.migrate(damaged)), "a damaged v4 value is not repaired")
+	end)
+
+	t.test("a v3 stored value saved with a rollover becomes v4 in the same transform and keeps everything", function()
+		local v3: any = { version = 3, glyphsLifetime = 9, bestRank = 2, settings = valid(), extra = "x", applied = {} }
+		local written = wrote(t, runOp(v3, "A", 1, { { type = "rollover", newDay = DAY } }))
+		t.eq(written.version, 4)
+		t.eq(written.xp, 0, "no historical quest is awarded")
+		t.eq(written.dailyEpoch, DAY)
+		t.eq(written.playXpDay.amount, 0)
+		t.eq(written.quests.day, DAY)
+		t.eq(written.quests.boardRevision, 1)
+		t.eq(written.glyphsLifetime, 9)
+		t.eq(written.bestRank, 2)
+		t.eq(written.extra, "x")
+		t.eq(written.applied.A.seq, 1)
+	end)
+
+	t.test("newer than v4 is refused, also while commands are pending", function()
+		local newer: any = { version = 5, xp = 10, extra = "must survive" }
+		local decided = runOp(newer, "A", 1, { { type = "rollover", newDay = DAY } })
+		t.eq(decided.tag, "newer_schema")
+		t.eq(decided.write, nil)
+		t.eq(newer.xp, 10)
+	end)
+
+	t.test(
+		"malformed v4 daily fields fail closed: nothing is applied, repaired or re-granted, other data kept",
+		function()
+			local cases: { { name: string, fn: (any) -> () } } = {
+				{
+					name = "play day differs from the epoch",
+					fn = function(s)
+						s.playXpDay.day = DAY - 1
+					end,
+				},
+				{
+					name = "quests day differs from the epoch",
+					fn = function(s)
+						s.quests = QuestRules.boardFor(USER, DAY - 1, 1)
+					end,
+				},
+				{
+					name = "amount above the cap",
+					fn = function(s)
+						s.playXpDay.amount = XpConfig.PlayCap + 1
+					end,
+				},
+				{
+					name = "missing quests table",
+					fn = function(s)
+						s.quests = nil
+					end,
+				},
+				{
+					name = "xp is not a number",
+					fn = function(s)
+						s.xp = "lots"
+					end,
+				},
+				{
+					name = "bonus granted without three complete slots",
+					fn = function(s)
+						s.quests.bonusGranted = true
+					end,
+				},
+			}
+			for _, case in cases do
+				local stored = v4(nil, case.fn)
+				t.eq(ProfileRules.dailyStatus(stored, NOON), "disabled", case.name)
+				local decided = runOp(stored, "A", 1, { claim(v4().quests, 1), progress(v4().quests, 1) })
+				local out = wrote(t, decided)
+				t.eq(out.xp, stored.xp, case.name .. ": xp unchanged")
+				t.truthy(deepSame(out.quests, stored.quests), case.name .. ": quests not repaired")
+				t.truthy(deepSame(out.playXpDay, stored.playXpDay), case.name .. ": cap amount not lowered")
+				t.eq(out.extra, "keep me", case.name)
+				t.eq(out.glyphsLifetime, 5, case.name)
+				for _, result in decided.results do
+					t.eq(result.applied, false, case.name)
+					t.eq(result.reason, "daily_disabled", case.name)
+				end
+			end
+		end
+	)
+
+	t.test("an unknown catalog version fails closed and is not reinterpreted", function()
+		local stored = v4(nil, function(s)
+			s.quests.catalogVersion = 99
+		end)
+		t.eq(ProfileRules.dailyStatus(stored, NOON), "disabled")
+		local out = wrote(t, runOp(stored, "A", 1, { { type = "rollover", newDay = DAY + 1 } }))
+		t.eq(out.quests.catalogVersion, 99)
+		t.eq(out.dailyEpoch, DAY)
+		t.eq(out.xp, 0)
+		local loaded = ProfileRules.sanitize(stored)
+		t.eq(loaded.dailyDisabled, true)
+		t.eq(loaded.quests, nil)
+	end)
+
+	t.test("two sessions claiming the same quest award it once", function()
+		local base = v4()
+		local done = wrote(t, runOp(base, "A", 1, { progress(base.quests, 1) }))
+		local reward = rewardOf(done.quests, 1)
+		local claimCmd = claim(done.quests, 1)
+		local first = runOp(done, "A", 2, { claimCmd })
+		local afterA = wrote(t, first)
+		t.eq(afterA.xp, reward)
+		t.eq(first.results[1].xp, reward)
+		-- Session B's independent claim of the same quest runs on A's stored result.
+		local second = runOp(afterA, "B", 1, { claim(done.quests, 1) })
+		local afterB = wrote(t, second)
+		t.eq(afterB.xp, reward, "the second claim awards zero")
+		t.eq(second.results[1].xp, 0)
+		t.eq(second.results[1].reason, "no_award")
+		t.eq(afterB.quests.slots[1].claimed, true)
+	end)
+
+	t.test("claim versus rollover in both orders pays the quest exactly once", function()
+		local base = v4()
+		local done = wrote(t, runOp(base, "A", 1, { progress(base.quests, 2) }))
+		local reward = rewardOf(done.quests, 2)
+		local c = claim(done.quests, 2)
+		local rollover = { type = "rollover", newDay = DAY + 1 }
+		local tomorrow = { nowWall = (DAY + 1) * 86400 + 100 }
+		-- claim, then rollover
+		local a = wrote(t, runOp(done, "A", 2, { c, rollover }, tomorrow))
+		t.eq(a.xp, reward)
+		t.eq(a.dailyEpoch, DAY + 1)
+		-- rollover, then claim (the claim names the closed day and is dropped)
+		local decided = runOp(done, "A", 2, { rollover, claim(done.quests, 2) }, tomorrow)
+		local b = wrote(t, decided)
+		t.eq(b.xp, reward, "rollover settled the completed unclaimed quest")
+		t.eq(decided.results[2].xp, 0)
+		t.eq(decided.droppedOldDay, 1)
+		-- the same two orders across two sessions
+		local viaRollover = wrote(t, runOp(done, "B", 1, { rollover }, tomorrow))
+		local late = runOp(viaRollover, "A", 2, { claim(done.quests, 2) }, tomorrow)
+		t.eq(wrote(t, late).xp, reward)
+		t.eq(late.results[1].reason, "old_day")
+	end)
+
+	t.test("the all-three bonus is paid once through every completion order", function()
+		local orders = { { 1, 2, 3 }, { 1, 3, 2 }, { 2, 1, 3 }, { 2, 3, 1 }, { 3, 1, 2 }, { 3, 2, 1 } }
+		for _, order in orders do
+			local stored = v4()
+			local board = stored.quests
+			local total = 0
+			local current = stored
+			for index, slot in order do
+				local decided = runOp(current, "A", index, { progress(board, slot) })
+				current = wrote(t, decided)
+				total += decided.results[1].xp
+			end
+			t.eq(current.xp, XpConfig.AllThreeBonus, `bonus once: {table.concat(order, ",")}`)
+			t.eq(current.quests.bonusGranted, true)
+			-- claiming afterwards never pays the bonus again
+			local seq = #order
+			for _, slot in order do
+				seq += 1
+				current = wrote(t, runOp(current, "A", seq, { claim(current.quests, slot) }))
+			end
+			local rewards = rewardOf(board, 1) + rewardOf(board, 2) + rewardOf(board, 3)
+			t.eq(current.xp, rewards + XpConfig.AllThreeBonus, "claims pay the quests and no second bonus")
+			-- a claim in the middle of the sequence changes nothing about the bonus
+			local mixed = v4()
+			local m = wrote(t, runOp(mixed, "A", 1, { progress(board, order[1]), claim(board, order[1]) }))
+			m = wrote(t, runOp(m, "A", 2, { progress(board, order[2]), progress(board, order[3]) }))
+			t.eq(m.quests.bonusGranted, true)
+			t.eq(m.xp, rewardOf(board, order[1]) + XpConfig.AllThreeBonus)
+		end
+	end)
+
+	t.test("cap contention 390 + 10 + 10 across two sessions ends at 400", function()
+		local stored = v4(nil, function(s)
+			s.playXpDay.amount = 390
+			s.xp = 390
+		end)
+		local play = function(n: number): any
+			return { type = "play", day = DAY, source = "glyph", nominal = n, eventId = eid() }
+		end
+		local first = runOp(stored, "A", 1, { play(10) })
+		local afterA = wrote(t, first)
+		local second = runOp(afterA, "B", 1, { play(10) })
+		local afterB = wrote(t, second)
+		t.eq(afterA.playXpDay.amount, 400)
+		t.eq(afterB.playXpDay.amount, 400)
+		t.eq(afterB.xp, 400, "xp grew by exactly what the cap permitted")
+		t.eq(second.results[1].reason, "cap")
+		-- one op carrying both: 390 + 10 + 10 in order
+		local both = wrote(t, runOp(stored, "A", 1, { play(10), play(10) }))
+		t.eq(both.xp, 400)
+		-- quest XP bypasses the cap: a claim still pays at 400
+		local board = stored.quests
+		local atCap = wrote(t, runOp(afterB, "A", 2, { progress(board, 1), claim(board, 1) }))
+		t.eq(atCap.xp, 400 + rewardOf(board, 1))
+		t.eq(atCap.playXpDay.amount, 400)
+	end)
+
+	t.test("callback replay recomputes from the supplied value and never mutates the op or the stored value", function()
+		local base = v4()
+		local commands = table.freeze({ progress(base.quests, 1), claim(base.quests, 1) })
+		local frozenOp = qop("A", 1, commands)
+		local c = ctx({ userId = USER, nowWall = NOON })
+		local first = ProfileRules.planSave(base, frozenOp, c)
+		local replay = ProfileRules.planSave(base, frozenOp, c)
+		t.truthy(deepSame(first.write, replay.write), "the same supplied value gives the same candidate")
+		t.eq(base.xp, 0, "the stored value is untouched")
+		-- the engine replays with the newer value another server wrote meanwhile
+		local newer = v4(nil, function(s)
+			s.quests.slots[1].progress = QuestConfig.Catalog[s.quests.slots[1].id].target
+			s.quests.slots[1].claimed = true
+			s.xp = 100
+		end)
+		local again = ProfileRules.planSave(newer, frozenOp, c)
+		t.eq(again.tag, "applied")
+		t.eq((again.write :: any).xp, 100, "recomputed against the newer value: the claim awards zero")
+		-- once committed, a replay is acknowledged by the receipt and writes nothing
+		local committed = first.write :: any
+		local ack = ProfileRules.planSave(committed, frozenOp, c)
+		t.eq(ack.tag, "acknowledged")
+		t.eq(ack.write, nil)
+	end)
+
+	t.test("missing or evicted receipt: an ambiguous op is abandoned and never credits twice", function()
+		local base = v4()
+		local frozenOp = qop("A", 1, { progress(base.quests, 1), claim(base.quests, 1) })
+		local c = ctx({ userId = USER, nowWall = NOON })
+		local first = ProfileRules.planSave(base, frozenOp, c)
+		local committed = first.write :: any
+		t.eq(committed.xp, rewardOf(base.quests, 1))
+		-- the commit happened but the client saw an error; the receipt got evicted by a cap squeeze elsewhere
+		local evicted = table.clone(committed)
+		evicted.applied = {}
+		local ambiguous =
+			ProfileRules.planSave(evicted, frozenOp, ctx({ userId = USER, nowWall = NOON, ambiguous = true }))
+		t.eq(ambiguous.tag, "abandoned")
+		t.eq(ambiguous.write, nil, "no second credit without proof it did not commit")
+		-- the receipt is present: an ambiguous op is acknowledged instead
+		local withReceipt =
+			ProfileRules.planSave(committed, frozenOp, ctx({ userId = USER, nowWall = NOON, ambiguous = true }))
+		t.eq(withReceipt.tag, "acknowledged")
+	end)
+
+	t.test(
+		"ambiguous commit then rejoin: a new session's commands are new facts, the old op is never regenerated",
+		function()
+			local base = v4()
+			local old = qop("OLD", 1, { progress(base.quests, 1) })
+			local committed = ProfileRules.planSave(base, old, ctx({ userId = USER, nowWall = NOON })).write :: any
+			-- the player rejoins with a fresh session id and its own seq 1
+			local fresh = wrote(t, runOp(committed, "NEW", 1, { progress(base.quests, 2) }))
+			t.eq(
+				fresh.quests.slots[1].progress,
+				QuestConfig.Catalog[base.quests.slots[1].id].target,
+				"old op's progress stays once"
+			)
+			t.eq(fresh.quests.slots[2].progress, QuestConfig.Catalog[base.quests.slots[2].id].target)
+			t.eq(fresh.applied.OLD.seq, 1)
+			t.eq(fresh.applied.NEW.seq, 1)
+		end
+	)
+
+	t.test("abandonment without regeneration: an abandoned op's commands are gone and never re-queued", function()
+		local base = v4()
+		local ledger = ProfileRules.newLedger("A")
+		local queued
+		ledger, queued = ProfileRules.queueCommand(ledger, progress(base.quests, 1))
+		t.eq(queued, true)
+		local taken, frozen = ProfileRules.takeOp(ledger, false, 0, NOON)
+		t.eq(#(frozen :: any).commands, 1)
+		t.eq(#taken.queue, 0)
+		local settled, terminal = ProfileRules.settle(taken, { kind = "abandoned", reason = "ambiguous_no_receipt" })
+		t.eq(settled.op, nil)
+		t.eq(#settled.queue, 0, "nothing returns to the queue")
+		t.truthy(terminal ~= nil, "logged once")
+		local _, again = ProfileRules.takeOp(settled, false, 1, NOON)
+		t.eq(again, nil, "no new op is invented from an abandoned one")
+		local expiredLedger = ProfileRules.settle(taken, { kind = "expired" })
+		t.eq(#expiredLedger.queue, 0)
+	end)
+
+	t.test("progress during an unresolved save waits for the next op and never joins the frozen one", function()
+		local base = v4()
+		local ledger = ProfileRules.newLedger("A")
+		ledger = ProfileRules.queueCommand(ledger, progress(base.quests, 1))
+		local taken, frozen = ProfileRules.takeOp(ledger, false, 0, NOON)
+		taken = ProfileRules.queueCommand(taken, progress(base.quests, 2))
+		t.eq(#(frozen :: any).commands, 1, "the frozen op is unchanged")
+		local same, op2, fresh = ProfileRules.takeOp(taken, false, 5, NOON)
+		t.eq(op2, frozen, "the unresolved op is retried as it was")
+		t.eq(fresh, false)
+		t.eq(#same.queue, 1)
+		t.eq(ProfileRules.pendingCommands(same), 2)
+		local resolved = ProfileRules.settle(same, { kind = "applied" })
+		local _, next2 = ProfileRules.takeOp(resolved, false, 6, NOON)
+		t.eq(#(next2 :: any).commands, 1)
+		t.eq((next2 :: any).seq, 2)
+	end)
+
+	t.test("stale day, generation and board revision change nothing", function()
+		local base = v4()
+		local done = wrote(t, runOp(base, "A", 1, { progress(base.quests, 1) }))
+		local board = done.quests
+		local staleRevision = claim(board, 1)
+		staleRevision.boardRevision = board.boardRevision + 1
+		local staleGeneration = claim(board, 1)
+		staleGeneration.generation = board.slots[1].generation + 1
+		local staleDay = claim(board, 1)
+		staleDay.day = DAY - 1
+		local futureDay = claim(board, 1)
+		futureDay.day = DAY + 1
+		local decided = runOp(done, "A", 2, { staleRevision, staleGeneration, staleDay, futureDay })
+		local out = wrote(t, decided)
+		t.eq(out.xp, 0)
+		t.eq(out.quests.slots[1].claimed, false)
+		t.eq(decided.results[1].reason, "no_award")
+		t.eq(decided.results[2].reason, "no_award")
+		t.eq(decided.results[3].reason, "old_day")
+		t.eq(decided.results[4].reason, "future_day")
+		local badGeneration = progress(board, 2)
+		badGeneration.generation = 2
+		local noMatch = runOp(done, "A", 3, { badGeneration })
+		t.eq(noMatch.results[1].reason, "no_match")
+	end)
+
+	t.test("multiple missed days: one rollover settles the old board once and opens the new day", function()
+		local base = v4()
+		local done = wrote(t, runOp(base, "A", 1, { progress(base.quests, 1), progress(base.quests, 3) }))
+		local missed = DAY + 3
+		local out = wrote(
+			t,
+			runOp(done, "A", 2, { { type = "rollover", newDay = missed } }, { nowWall = missed * 86400 + 100 })
+		)
+		t.eq(out.dailyEpoch, missed)
+		t.eq(out.playXpDay.day, missed)
+		t.eq(out.quests.day, missed)
+		t.eq(out.quests.boardRevision, 2)
+		t.eq(out.xp, rewardOf(base.quests, 1) + rewardOf(base.quests, 3))
+		local again =
+			wrote(t, runOp(out, "A", 3, { { type = "rollover", newDay = missed } }, { nowWall = missed * 86400 + 100 }))
+		t.eq(again.xp, out.xp, "a repeated rollover settles nothing")
+		local backwards = runOp(
+			out,
+			"A",
+			4,
+			{ { type = "rollover", newDay = DAY } },
+			{ nowWall = missed * 86400 + 100 }
+		)
+		t.eq(backwards.results[1].reason, "not_later")
+	end)
+
+	t.test("clock skew around midnight: an adjacent stored day is kept, beyond the bound it is disabled", function()
+		local midnight = (DAY + 1) * 86400
+		-- this server is 100 s before midnight; another server already rolled to DAY + 1: adjacentAhead
+		local ahead = v4(DAY + 1)
+		local nowLocal = midnight - 100
+		t.eq(ProfileRules.dailyStatus(ahead, nowLocal), "ok")
+		local behindPlay = { type = "play", day = DAY, source = "glyph", nominal = 1, eventId = eid() }
+		local currentPlay = { type = "play", day = DAY + 1, source = "glyph", nominal = 1, eventId = eid() }
+		local decided = runOp(ahead, "A", 1, { behindPlay, currentPlay }, { nowWall = nowLocal })
+		local out = wrote(t, decided)
+		t.eq(decided.results[1].reason, "old_day", "behind-day commands are rejected")
+		t.eq(decided.results[2].applied, true, "the stored epoch's own day resumes")
+		t.eq(out.dailyEpoch, DAY + 1, "the adjacent epoch is preserved, never moved back")
+		t.eq(out.xp, 1)
+		-- 400 s before midnight is outside the 300 s bound: a stored next day is invalid
+		t.eq(ProfileRules.dailyStatus(ahead, midnight - XpConfig.DailySkewSeconds - 100), "disabled")
+		-- exactly at the bound is still adjacent
+		t.eq(ProfileRules.dailyStatus(ahead, midnight - XpConfig.DailySkewSeconds), "ok")
+		-- two days ahead is corrupt at any time of day
+		t.eq(ProfileRules.dailyStatus(v4(DAY + 2), midnight - 1), "disabled")
+		-- the other side: this server is 100 s past midnight, the stored day is one behind (lagging server): ordinary rollover
+		local lagging = v4(DAY)
+		local rolled =
+			wrote(t, runOp(lagging, "A", 1, { { type = "rollover", newDay = DAY + 1 } }, { nowWall = midnight + 100 }))
+		t.eq(rolled.dailyEpoch, DAY + 1)
+		-- a rollover to a day the clock has not reached is refused
+		local early = runOp(lagging, "A", 1, { { type = "rollover", newDay = DAY + 3 } }, { nowWall = midnight + 100 })
+		t.eq(early.results[1].reason, "bad_day")
+	end)
+
+	t.test("an uninitialised daily state is opened only by a rollover; everything else is dropped", function()
+		local migrated = ProfileRules.migrate({ version = 3, glyphsLifetime = 2 })
+		local base = v4().quests
+		local decided = runOp(migrated, "A", 1, {
+			progress(base, 1),
+			{ type = "play", day = DAY, source = "glyph", nominal = 1, eventId = eid() },
+			claim(base, 1),
+		})
+		local out = wrote(t, decided)
+		for _, result in decided.results do
+			t.eq(result.reason, "uninitialized")
+		end
+		t.eq(out.xp, 0)
+		t.eq(out.quests, nil)
+	end)
+
+	t.test(
+		"queueCommand: duplicate event ids queue once, shapes are validated, the queue is bounded, increments fold",
+		function()
+			local ledger = ProfileRules.newLedger("A")
+			local board = v4().quests
+			local first = progress(board, 1, 2)
+			first.eventId = "dup"
+			local queued, reason
+			ledger, queued = ProfileRules.queueCommand(ledger, first)
+			t.eq(queued, true)
+			local same = ProfileRules.queueCommand(ledger, first)
+			local _, again, why = ProfileRules.queueCommand(ledger, first)
+			t.eq(again, false)
+			t.eq(why, "duplicate")
+			t.eq(same, ledger)
+			-- the same quest again folds into the last command
+			local second = progress(board, 1, 3)
+			ledger = ProfileRules.queueCommand(ledger, second)
+			t.eq(#ledger.queue, 1)
+			t.eq(ledger.queue[1].amount, 5)
+			-- malformed commands
+			local bad: { any } = {
+				"nope",
+				{ type = "mint", amount = 99 },
+				{ type = "play", day = DAY, source = "glyph", nominal = 1.5, eventId = "x" },
+				{ type = "play", day = DAY, source = "cheat", nominal = 1, eventId = "x" },
+				{ type = "play", day = DAY, source = "glyph", nominal = 1, eventId = "x", extra = true },
+				{ type = "play", day = NAN, source = "glyph", nominal = 1, eventId = "x" },
+				{ type = "play", day = DAY, source = "glyph", nominal = XpConfig.PlayCap + 1, eventId = "x" },
+				{ type = "claim", day = DAY, slot = 4, boardRevision = 1, generation = 1 },
+				{ type = "rollover", newDay = -1 },
+				{
+					type = "progress",
+					day = DAY,
+					catalogVersion = 1,
+					slotId = "A_E_15",
+					generation = 1,
+					kind = "correct",
+					amount = 0,
+					eventId = "x",
+				},
+			}
+			for index, command in bad do
+				local unchanged
+				ledger, unchanged, reason = ProfileRules.queueCommand(ledger, command)
+				t.eq(unchanged, false, `bad command {index}`)
+				t.eq(reason, "invalid", `bad command {index}`)
+			end
+			-- the cap
+			local full = ProfileRules.newLedger("B")
+			for i = 1, 64 do
+				full = ProfileRules.queueCommand(
+					full,
+					{ type = "claim", day = DAY, slot = 1 + i % 3, boardRevision = i, generation = 1, eventId = `c{i}` }
+				)
+			end
+			t.eq(#full.queue, 64)
+			local _, over, overWhy =
+				ProfileRules.queueCommand(full, { type = "rollover", newDay = DAY, eventId = "late" })
+			t.eq(over, false)
+			t.eq(overWhy, "queue_full")
+			-- a frozen op carries at most the queue and all of it, in order
+			local _, frozen = ProfileRules.takeOp(full, false, 0, NOON)
+			t.eq(#(frozen :: any).commands, 64)
+			t.eq((frozen :: any).commands[1].boardRevision, 1)
+			t.eq((frozen :: any).commands[64].boardRevision, 64)
+		end
+	)
+
+	t.test(
+		"parseClaimPayload accepts exactly four integers and refuses unknown fields, fractions, NaN and infinity",
+		function()
+			local good = { day = DAY, slot = 2, boardRevision = 1, generation = 1 }
+			t.truthy(ProfileRules.parseClaimPayload(good) ~= nil)
+			local cases: { any } = {
+				"x",
+				{},
+				{ day = DAY, slot = 2, boardRevision = 1 },
+				{ day = DAY, slot = 2, boardRevision = 1, generation = 1, xp = 999 },
+				{ day = DAY, slot = 2.5, boardRevision = 1, generation = 1 },
+				{ day = NAN, slot = 2, boardRevision = 1, generation = 1 },
+				{ day = math.huge, slot = 2, boardRevision = 1, generation = 1 },
+				{ day = DAY, slot = 0, boardRevision = 1, generation = 1 },
+				{ day = DAY, slot = 4, boardRevision = 1, generation = 1 },
+				{ day = DAY, slot = 1, boardRevision = 0, generation = 1 },
+				{ day = DAY, slot = 1, boardRevision = 1, generation = "1" },
+				{ day = -1, slot = 1, boardRevision = 1, generation = 1 },
+			}
+			for index, case in cases do
+				t.eq(ProfileRules.parseClaimPayload(case), nil, `payload {index}`)
+			end
+		end
+	)
+
+	t.test(
+		"sanitize carries xp and a valid board into the session profile; a damaged board marks the daily feature disabled",
+		function()
+			local loaded = ProfileRules.sanitize(v4(nil, function(s)
+				s.xp = 250
+			end))
+			t.eq(loaded.xp, 250)
+			t.eq(loaded.dailyEpoch, DAY)
+			t.eq((loaded.quests :: any).day, DAY)
+			t.eq(loaded.dailyDisabled, nil)
+			local hugeXp = ProfileRules.sanitize({ version = 4, xp = 2 ^ 60 })
+			t.eq(hugeXp.xp, 0)
+			t.eq(hugeXp.dailyDisabled, true)
+			local fresh = ProfileRules.sanitize(ProfileRules.migrate({ version = 3 }))
+			t.eq(fresh.xp, 0)
+			t.eq(fresh.dailyEpoch, nil)
+			t.eq(fresh.dailyDisabled, nil)
+		end
+	)
+
+	t.test(
+		"merge and adopt keep the stored daily fields exactly, so a settings save never resets or lowers them",
+		function()
+			local stored = v4(nil, function(s)
+				s.xp = 321
+				s.playXpDay.amount = 77
+			end)
+			local merged = ProfileRules.merge(stored, { blitzBest = 3 }) :: any
+			t.eq(merged.xp, 321)
+			t.eq(merged.playXpDay.amount, 77)
+			t.truthy(deepSame(merged.quests, stored.quests))
+			local damaged = v4(nil, function(s)
+				s.playXpDay.day = 1
+			end)
+			local kept = ProfileRules.merge(damaged, { blitzBest = 3 }) :: any
+			t.eq(kept.playXpDay.day, 1, "damaged daily fields are carried through, not repaired")
+			local adopted = ProfileRules.adopt(stored, ProfileRules.sanitize(stored), 0, nil)
+			t.eq(adopted.xp, 321)
+			-- a plain glyph/settings op (no commands) on a v4 value changes no daily field
+			local plain = wrote(t, plan(stored, op("A", 1, 4), { userId = USER, nowWall = NOON }))
+			t.eq(plain.xp, 321)
+			t.eq(plain.glyphsLifetime, 9)
+			t.truthy(deepSame(plain.quests, stored.quests))
+		end
+	)
 end

@@ -2,7 +2,7 @@
   "id": "TASK-0150",
   "game": "GAME-004",
   "title": "MathShow Quests XP Persistence And Services",
-  "status": "backlog",
+  "status": "in_progress",
   "tier": "deep",
   "owner_agent": "codex",
   "files_owned": [
@@ -35,5 +35,20 @@
   "evidence": [],
   "notes": "Backlog; final design applied from AUD-20261107-QUESTS-XP-DESIGN-02 (QX-D4): startup, service scenario and evidence paths added. No plan approval yet.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Persistence-And-Services.md",
-  "risk": "high"
+  "risk": "high",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-07T15:19:35",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-07T15:19:35",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
 }
