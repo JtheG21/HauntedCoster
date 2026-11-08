@@ -2,7 +2,7 @@
   "id": "TASK-0150",
   "game": "GAME-004",
   "title": "MathShow Quests XP Persistence And Services",
-  "status": "in_progress",
+  "status": "review",
   "tier": "deep",
   "owner_agent": "codex",
   "files_owned": [
@@ -67,6 +67,12 @@
       "from": "changes_requested",
       "to": "in_progress",
       "note": "started"
+    },
+    {
+      "time": "2026-11-07T16:29:28",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -74,6 +80,11 @@
       "time": "2026-11-07T15:55:44",
       "result": "pass",
       "notes": "check.sh ALL PASSED, 458 specs; Studio pass on private test place, evidence docs/workflow/evidence/TASK-0150/studio-pass.txt"
+    },
+    {
+      "time": "2026-11-07T16:29:28",
+      "result": "pass",
+      "notes": "rev 1 (AUD-20261107-TASK-0150-01 F1-F5): check.sh ALL PASSED, 463 specs incl. 5 AUD-01 regressions (fail on 81f2f8b, pass at 84c9891); CI green on 84c9891; Studio pass on private test place, evidence docs/workflow/evidence/TASK-0150/rev1/studio-pass.txt"
     }
   ],
   "audits": [
