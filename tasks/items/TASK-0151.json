@@ -2,7 +2,7 @@
   "id": "TASK-0151",
   "game": "GAME-004",
   "title": "MathShow Quests XP UI",
-  "status": "blocked",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -97,6 +97,24 @@
       "from": "review",
       "to": "blocked",
       "note": "audit failed; revision limit 2 exceeded, needs human"
+    },
+    {
+      "time": "2026-11-07T17:37:24",
+      "from": "blocked",
+      "to": "ready",
+      "note": "unblocked by jg"
+    },
+    {
+      "time": "2026-11-07T17:37:24",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-07T17:38:57",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -114,6 +132,11 @@
       "time": "2026-11-07T17:32:12",
       "result": "pass",
       "notes": "rev 3 (jg approved over the 2-revision limit, 2026-11-07): catalogVersion, board revision/generation >= 1, unique slot ids; check.sh green; Studio: 6 new malformed pushes rejected, real server push and a valid lower revision accepted"
+    },
+    {
+      "time": "2026-11-07T17:38:57",
+      "result": "pass",
+      "notes": "rev 4 (jg approved, 2026-11-07): boards checked with the shared QuestRules.validate; check.sh green; Studio: 11 malformed pushes rejected, real push and a valid bonus board accepted"
     }
   ],
   "audits": [
@@ -133,5 +156,5 @@
       "report": "06 QA/AUD-20261107-TASK-0151-04.md"
     }
   ],
-  "revisions": 3
+  "revisions": 0
 }

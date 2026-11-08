@@ -3,7 +3,7 @@ id: TASK-0151
 title: "MathShow Quests XP UI"
 type: task
 project: GAME-004
-status: blocked
+status: review
 priority: medium
 risk: low
 owner: executor
@@ -87,6 +87,29 @@ Menu panel, level badge, XP bar and Reveal toast. Design: [[SYS-Quests-And-XP]].
   unique slot ids. Studio (fresh Play, Rojo synced): the real server push was accepted (LV 1); six pushes at revisions
   1000001+ (catalog 99, board without catalogVersion, board revision 0, generation 0, duplicate id, loading with
   catalog 99) were rejected with reasons; a valid revision 500000 then applied (LV 9). check.sh green.
+
+- **Revision 4 (Codex [[AUD-20261107-TASK-0151-04]] F1; approved by jg in chat 2026-11-07, "Approve revision 4"):**
+  a pushed board is now checked with the server's own invariants, `QuestRules.validate` (as a daily state with
+  `dailyEpoch` = the board day), instead of hand-written slot checks: this catalog version, one quest per category in
+  slot order, one easy / medium / hard, board revision and generations >= 1, progress within target, claimed only when
+  complete, bonus only when all three are. `bonusGranted` without a board is rejected. Side effect: a damaged stored board
+  that the server still sends is ignored, so that player's level card stops updating (fail closed). Studio (fresh Play,
+  Rojo synced): the real server push was accepted (LV 1); 11 pushes at revisions 1000001+ (repeated category, two easy,
+  bonus on incomplete, bonus without board, catalog 99, board revision 0, generation 0, level -8, unknown id, progress
+  over target, claimed early) were rejected with reasons; a valid all-claimed board with the bonus at revision 500000
+  then applied (LV 9). check.sh green.
+
+## Handoff (Codex review, rev 4, 2026-11-07)
+- **Task:** TASK-0151 revision 4, fix for [[AUD-20261107-TASK-0151-04]] F1 (jg approved revision 4). Receiver: Codex, delta re-review only, no edits.
+- **Workspace:** `/Users/jg/Desktop/Rg1-worktrees/TASK-0151`, branch `task/TASK-0151-quests-xp-ui` (PR #226). Range `d683ea9..HEAD`;
+  code: `git diff d683ea9..HEAD -- games/mathshow` (only `client/Menu/Quests.luau` `parse`). The head is this handoff commit.
+- **Inputs:** [[AUD-20261107-TASK-0151-04]], "Revision 4" above, `shared/QuestRules.luau` `validate` / `boardValid`, `QuestService.buildState`.
+- **Focus:**
+  - `Quests.parse`: does wrapping the pushed board as `{ dailyEpoch = day, playXpDay = { day, 0 }, quests = board }` make `QuestRules.validate` accept exactly the boards the server can send (fresh, progressed, claimed, bonus, rolled over) and nothing else?
+  - The no-board branch (loading / unavailable): catalogVersion and bonusGranted handling; any other field a malformed push could still use to advance the revision?
+- **Constraints:** no uploads, publishing, DataStore or Studio writes. Rojo is stopped; Studio idle in Edit.
+- **Known:** no non-task failures. Unverified: a real claim round trip through gameplay.
+- **Report back:** verdict, findings with file:line, checks run, what remains unverified.
 
 ## Handoff (Codex review, rev 3, 2026-11-07)
 - **Task:** TASK-0151 revision 3, fix for [[AUD-20261107-TASK-0151-03]] F1 (jg approved revision 3). Receiver: Codex, delta re-review only, no edits.

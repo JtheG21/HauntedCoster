@@ -14,6 +14,7 @@ local LevelRewards = require(Shared:WaitForChild("LevelRewards"))
 local MenuCopy = require(Shared:WaitForChild("MenuCopy"))
 local Net = require(Shared:WaitForChild("Net"))
 local QuestConfig = require(Shared:WaitForChild("QuestConfig"))
+local QuestRules = require(Shared:WaitForChild("QuestRules"))
 local XpConfig = require(Shared:WaitForChild("XpConfig"))
 local XpRules = require(Shared:WaitForChild("XpRules"))
 
@@ -118,24 +119,27 @@ local function parse(p: any): (State?, string?)
 	if (count == SLOTS or p.catalogVersion ~= nil) and p.catalogVersion ~= QuestConfig.CatalogVersion then
 		return nil, "catalogVersion" -- this client's catalog cannot describe another version's quests
 	end
+	-- The board itself: exactly the server's own invariants (QuestRules.validate, the check it applies to stored boards):
+	-- this catalog version, one quest per category in slot order, one easy / medium / hard, board revision and
+	-- generations >= 1, progress within the target, claimed only when complete, the bonus only when all three are.
+	if count == SLOTS then
+		local board = {
+			day = p.day,
+			catalogVersion = p.catalogVersion,
+			boardRevision = p.boardRevision,
+			slots = p.slots,
+			bonusGranted = p.bonusGranted,
+		}
+		local daily = { dailyEpoch = p.day, playXpDay = { day = p.day, amount = 0 }, quests = board }
+		if QuestRules.validate(daily :: any) ~= "ok" then
+			return nil, "board"
+		end
+	elseif p.bonusGranted then
+		return nil, "bonus without a board"
+	end
 	local slots: { Slot } = {}
-	local seen: { [string]: boolean } = {}
 	for i = 1, count do
 		local s = p.slots[i]
-		local quest = if typeof(s) == "table" and typeof(s.id) == "string"
-			then (QuestConfig.Catalog :: { [string]: QuestConfig.Quest })[s.id]
-			else nil
-		if
-			quest == nil
-			or seen[s.id]
-			or not intIn(s.generation, 1, 2 ^ 52)
-			or not intIn(s.progress, 0, quest.target)
-			or typeof(s.claimed) ~= "boolean"
-			or (s.claimed and s.progress < quest.target)
-		then
-			return nil, `slot {i}`
-		end
-		seen[s.id] = true
 		slots[i] = { id = s.id, generation = s.generation, progress = s.progress, claimed = s.claimed }
 	end
 	return {
