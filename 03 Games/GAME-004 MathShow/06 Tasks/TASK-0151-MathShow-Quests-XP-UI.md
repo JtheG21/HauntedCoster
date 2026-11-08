@@ -3,7 +3,7 @@ id: TASK-0151
 title: "MathShow Quests XP UI"
 type: task
 project: GAME-004
-status: changes_requested
+status: review
 priority: medium
 risk: low
 owner: executor
@@ -80,6 +80,25 @@ Menu panel, level badge, XP bar and Reveal toast. Design: [[SYS-Quests-And-XP]].
   1000000+ (Codex's probe, level 51, wrong need, into = need, unknown id, progress over target, claimed early, two
   slots, no day, pendingClaim 4, fractional XP) were each rejected with a reason; a valid revision 500000 then applied
   (LV 7); loading -> saved level 10 gave no toast; saved 10 -> 11 gave `LEVEL UP · LV 11`. check.sh green.
+
+- **Revision 3 (Codex [[AUD-20261107-TASK-0151-03]] F1; approved by jg in chat 2026-11-07, "Approve revision 3", over
+  the two-revision limit):** `Quests.parse` also requires `catalogVersion` = `QuestConfig.CatalogVersion` whenever a
+  board is present or a version is sent, board revision and slot generation >= 1 (QuestRules starts both at 1), and
+  unique slot ids. Studio (fresh Play, Rojo synced): the real server push was accepted (LV 1); six pushes at revisions
+  1000001+ (catalog 99, board without catalogVersion, board revision 0, generation 0, duplicate id, loading with
+  catalog 99) were rejected with reasons; a valid revision 500000 then applied (LV 9). check.sh green.
+
+## Handoff (Codex review, rev 3, 2026-11-07)
+- **Task:** TASK-0151 revision 3, fix for [[AUD-20261107-TASK-0151-03]] F1 (jg approved revision 3). Receiver: Codex, delta re-review only, no edits.
+- **Workspace:** `/Users/jg/Desktop/Rg1-worktrees/TASK-0151`, branch `task/TASK-0151-quests-xp-ui` (PR #226). Range `908d464..HEAD`;
+  code: `git diff 908d464..HEAD -- games/mathshow` (only `client/Menu/Quests.luau` `parse`). The head is this handoff commit.
+- **Inputs:** [[AUD-20261107-TASK-0151-03]], "Revision 3" above, `shared/QuestRules.luau` `boardFor` / rollover, `QuestService.buildState`.
+- **Focus:**
+  - `Quests.parse`: catalogVersion, board revision >= 1, generation >= 1 and unique ids: does anything the server can send still get rejected (loading reply with no board, a rolled-over board), and does any malformed board still get in?
+  - Is there any other field a rejected-but-plausible push could use to advance the revision?
+- **Constraints:** no uploads, publishing, DataStore or Studio writes. Rojo is stopped; Studio idle in Edit.
+- **Known:** no non-task failures. Unverified: a real claim round trip through gameplay.
+- **Report back:** verdict, findings with file:line, checks run, what remains unverified.
 
 ## Handoff (Codex review, rev 2, 2026-11-07)
 - **Task:** TASK-0151 revision 2, fixes for [[AUD-20261107-TASK-0151-02]] F1-F2 (standard; rows QX-T3, QX-T3M). Receiver: Codex, delta re-review only, no edits.

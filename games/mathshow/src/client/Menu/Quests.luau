@@ -97,7 +97,8 @@ local function parse(p: any): (State?, string?)
 	if p.day ~= nil and not intIn(p.day, 0, 2 ^ 52) then
 		return nil, "day"
 	end
-	if p.boardRevision ~= nil and not intIn(p.boardRevision, 0, 2 ^ 52) then
+	-- Board identity as QuestRules makes it: revisions and generations start at 1; one catalog version.
+	if p.boardRevision ~= nil and not intIn(p.boardRevision, 1, 2 ^ 52) then
 		return nil, "boardRevision"
 	end
 	if p.pendingClaim ~= nil and not intIn(p.pendingClaim, 1, SLOTS) then
@@ -114,7 +115,11 @@ local function parse(p: any): (State?, string?)
 	if count == SLOTS and (p.day == nil or p.boardRevision == nil) then
 		return nil, "board identity"
 	end
+	if (count == SLOTS or p.catalogVersion ~= nil) and p.catalogVersion ~= QuestConfig.CatalogVersion then
+		return nil, "catalogVersion" -- this client's catalog cannot describe another version's quests
+	end
 	local slots: { Slot } = {}
+	local seen: { [string]: boolean } = {}
 	for i = 1, count do
 		local s = p.slots[i]
 		local quest = if typeof(s) == "table" and typeof(s.id) == "string"
@@ -122,13 +127,15 @@ local function parse(p: any): (State?, string?)
 			else nil
 		if
 			quest == nil
-			or not intIn(s.generation, 0, 2 ^ 52)
+			or seen[s.id]
+			or not intIn(s.generation, 1, 2 ^ 52)
 			or not intIn(s.progress, 0, quest.target)
 			or typeof(s.claimed) ~= "boolean"
 			or (s.claimed and s.progress < quest.target)
 		then
 			return nil, `slot {i}`
 		end
+		seen[s.id] = true
 		slots[i] = { id = s.id, generation = s.generation, progress = s.progress, claimed = s.claimed }
 	end
 	return {

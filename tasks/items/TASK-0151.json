@@ -2,7 +2,7 @@
   "id": "TASK-0151",
   "game": "GAME-004",
   "title": "MathShow Quests XP UI",
-  "status": "changes_requested",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -79,6 +79,18 @@
       "from": "review",
       "to": "changes_requested",
       "note": "audit failed; revision 2/2"
+    },
+    {
+      "time": "2026-11-07T17:32:02",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-07T17:32:12",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -91,6 +103,11 @@
       "time": "2026-11-07T17:24:48",
       "result": "pass",
       "notes": "rev 2: Codex F1/F2 fixed; check.sh green; Studio: 11 malformed pushes rejected, loading baseline gives no toast"
+    },
+    {
+      "time": "2026-11-07T17:32:12",
+      "result": "pass",
+      "notes": "rev 3 (jg approved over the 2-revision limit, 2026-11-07): catalogVersion, board revision/generation >= 1, unique slot ids; check.sh green; Studio: 6 new malformed pushes rejected, real server push and a valid lower revision accepted"
     }
   ],
   "audits": [
