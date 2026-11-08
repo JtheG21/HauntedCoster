@@ -3,13 +3,14 @@ id: SYS-Quests-And-XP
 title: "MathShow Quests and XP (v1)"
 type: system
 project: GAME-004
-status: proposed
+status: done
 side: shared
 source: []
 related:
   - "[[TASK-0149-MathShow-Quests-XP-Rules]]"
   - "[[TASK-0150-MathShow-Quests-XP-Persistence-And-Services]]"
   - "[[TASK-0151-MathShow-Quests-XP-UI]]"
+  - "[[TEST-20261107-01]]"
 created: 2026-11-07
 updated: 2026-11-07
 tags:
@@ -18,7 +19,8 @@ tags:
 
 # MathShow Quests and XP (v1)
 
-Design: final after AUD-20261107-QUESTS-XP-DESIGN-01 and -02 (Codex). Implementation is audited per task.
+Design: final after AUD-20261107-QUESTS-XP-DESIGN-01 and -02 (Codex). Implemented in v1 (TASK-0149, TASK-0150, TASK-0151, all
+merged); live playtest [[TEST-20261107-01]] passed.
 
 Design review: AUD-20261107-QUESTS-XP-DESIGN-01, DESIGN CHANGES REQUIRED, bullets applied 2026-11-07; no code yet.
 
@@ -105,3 +107,5 @@ Accepted by jg (row QX-D5): 300 s skew bound; tie rule score desc then userId as
 - 2026-11-07: jg's post-review decisions applied (row QX-D3).
 - 2026-11-07: jg decisions applied (row QX-D3); waiting for Codex re-review.
 - 2026-11-07: Codex re-review bullets applied (row QX-D4); design final.
+- 2026-11-07: implemented (v1): TASK-0149 rules, TASK-0150 persistence and services, TASK-0151 UI merged (PR #226 last);
+  live playtest [[TEST-20261107-01]] passed in the private test place (row QX-PT1); status set to done (row QX-PT2).
