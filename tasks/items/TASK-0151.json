@@ -2,7 +2,7 @@
   "id": "TASK-0151",
   "game": "GAME-004",
   "title": "MathShow Quests XP UI",
-  "status": "approved",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -121,6 +121,12 @@
       "from": "review",
       "to": "approved",
       "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-07T17:42:41",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -167,5 +173,6 @@
       "report": "06 QA/AUD-20261107-TASK-0151-05.md"
     }
   ],
-  "revisions": 0
+  "revisions": 0,
+  "merge_approved_by": "jg"
 }

@@ -3,7 +3,7 @@ id: TASK-0151
 title: "MathShow Quests XP UI"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: low
 owner: executor
@@ -170,3 +170,4 @@ Menu panel, level badge, XP bar and Reveal toast. Design: [[SYS-Quests-And-XP]].
   Revisions 3 and 4 were approved by jg over the two-revision limit.
 - Not verified: a real claim round trip through gameplay; the toast hold during a live gameshow question.
 - Ledger: TextFit 781 + 320 per viewport.
+- Merge: jg approved merging PR #226 in chat on 2026-11-07 (rows QX-T3M plus the PR-number confirmation).
