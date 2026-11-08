@@ -90,6 +90,19 @@ Range 81f2f8b..HEAD. Owned files only: `ProfileRules.luau`, `ProfileService.luau
   result semantics. Seen, out of scope: Skill's cooldown save on a final-reveal leave still depends on listener order
   (pre-existing, not part of F1's correction).
 
+## Handoff (Codex review, rev 1, 2026-11-07)
+- **Task:** TASK-0150 revision 1, fixes for [[AUD-20261107-TASK-0150-01]] F1-F5 (Deep tier, rows QX-T2, QX-T2S, QX-T2M). Receiver: Codex, delta re-audit, review only, no edits.
+- **Workspace:** `/Users/jg/Desktop/Rg1-worktrees/TASK-0150`, branch `task/TASK-0150-quests-xp-persistence` (PR #225). Range `81f2f8b..HEAD` (code `84c9891`; the head is this handoff commit, after `8bc3d11`). Code diff only: `git diff 81f2f8b..84c9891 -- games/mathshow`.
+- **Inputs:** [[AUD-20261107-TASK-0150-01]], [[SYS-Quests-And-XP]], "Revision 1" above, `docs/workflow/evidence/TASK-0150/rev1/studio-pass.txt`.
+- **Focus:**
+  - `SkillTestService.luau` `finalize` / `resolve` / `askQuestion`: is the completion queued exactly once for a normal finish and a final-reveal leave, with no listener-order dependence, and never for the missing-problem end?
+  - `BlitzService.luau` `answerDays` + `QuestService.blitzFinished`: does each answer keep its accepted day, the finish use the end day, and nothing leak before BlitzResult?
+  - `ProfileRules.luau` `insertAt` / `needsRollover` / `strandedDays` + `QuestService.ensureDay` / `reopenStranded`: is readiness derived only from the stored epoch and pending rollovers, are abandoned commands never replayed, and does the queue reordering keep claim/rollover and old-day semantics?
+  - `ProfileRules.dailyStatus` (F4) and `claimOutcome` + the index-aligned `eventIds` in `ProfileService.settleAttempt` (F5).
+- **Constraints:** no uploads, publishing, Studio or DataStore writes. Rojo is stopped and Studio is closed; nobody holds them.
+- **Known:** 4 of the 5 regression specs fail at 81f2f8b only because their helper is absent (F4 fails on behaviour). The Studio Skill leave run could not show the listener-order loss. The Skill cooldown save on a final-reveal leave is still order-dependent; this is pre-existing and out of scope. No known non-task failures (check.sh, validate_vault and CI are green).
+- **Report back:** verdict, findings with file:line, checks run, and what remains unverified.
+
 ## Audits
 - [[AUD-20261107-QUESTS-XP-DESIGN-01]]: design review, DESIGN CHANGES REQUIRED.
 - [[AUD-20261107-QUESTS-XP-DESIGN-02]]: design re-review, DESIGN CHANGES REQUIRED; replacement bullets applied (QX-D4).
