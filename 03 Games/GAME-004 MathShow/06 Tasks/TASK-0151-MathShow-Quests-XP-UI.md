@@ -3,7 +3,7 @@ id: TASK-0151
 title: "MathShow Quests XP UI"
 type: task
 project: GAME-004
-status: review
+status: changes_requested
 priority: medium
 risk: low
 owner: executor
@@ -113,5 +113,7 @@ Menu panel, level badge, XP bar and Reveal toast. Design: [[SYS-Quests-And-XP]].
   revision 1; F3 (noop handler list) kept, same pattern as ModePadController and Watching.
 - [[AUD-20261107-TASK-0151-02]]: Codex FAIL at `351f4d8`: F1 moderate (malformed state accepted, advances the
   revision), F2 minor (level toast after a loading reply). Both fixed in revision 2.
+- [[AUD-20261107-TASK-0151-03]]: Codex FAIL at `b4c808f`: F2 closed; F1 partly open (no `catalogVersion` check; zero
+  board revision / generation and duplicate slots accepted). Revision limit reached; waiting for jg's decision.
 
 ## Outcome
