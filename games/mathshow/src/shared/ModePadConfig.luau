@@ -11,6 +11,6 @@ return table.freeze({
 		Group = "confirm_group",
 		Practice = "practice",
 		Skill = "skillintro",
-		Daily = "locked:daily",
+		Daily = "quests", -- TASK-0151: the Observatory Daily pad opens QUESTS
 	}),
 })

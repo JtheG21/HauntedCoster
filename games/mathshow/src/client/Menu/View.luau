@@ -26,7 +26,32 @@ local HudTheme = require(script.Parent.Parent.Hud.Theme)
 local MenuTheme = require(script.Parent.MenuTheme)
 local Shard = require(script.Parent.Shard)
 
-export type Player = { name: string, userId: number?, rank: number?, failed: boolean? }
+-- level / xpInto / xpNeed: the confirmed QuestState level card (TASK-0151); xpNeed 0 = level cap. Absent = not known yet.
+export type Player = {
+	name: string,
+	userId: number?,
+	rank: number?,
+	failed: boolean?,
+	level: number?,
+	xpInto: number?,
+	xpNeed: number?,
+}
+-- One QUESTS card (TASK-0151). status: "progress" | "claim" | "claiming" | "claimed".
+export type QuestCardModel = {
+	description: string,
+	difficulty: string, -- "easy" | "medium" | "hard"
+	xp: number,
+	progress: number,
+	target: number,
+	status: string,
+}
+-- status: "loading" | "unavailable" | "ready" (cards has 3 entries only when ready).
+export type QuestsModel = {
+	status: string,
+	cards: { QuestCardModel },
+	bonusGranted: boolean,
+	bonusXp: number,
+}
 export type Settings = {
 	music: number,
 	sfx: number,
@@ -109,6 +134,8 @@ export type Model = {
 	blitz: BlitzModel?,
 	review: ReviewModel?,
 	vs: VsModel?,
+	quests: QuestsModel?,
+	toastKind: string?, -- Preview only: the toast art for model.toast ("silver" default, "green")
 	quiet: boolean?, -- re-render without entrances (a selection changed, a timer tick) -- Preview only: keep the toast on screen
 }
 export type Handlers = {
@@ -125,6 +152,8 @@ export type Handlers = {
 	vsRematch: () -> (),
 	vsRetry: () -> (),
 	setting: (key: string, value: number | boolean) -> (),
+	claim: ((slot: number) -> ())?, -- QUESTS: CLAIM on card `slot` (TASK-0151)
+	questRetry: (() -> ())?, -- QUESTS: RETRY on the unavailable panel
 }
 export type Options = { overlay: boolean?, name: string?, displayOrder: number? }
 export type View = {
@@ -133,6 +162,7 @@ export type View = {
 	render: (id: string, model: Model) -> (),
 	toast: (text: string, icon: boolean, hold: boolean?) -> (),
 	hideToast: () -> (), -- takes the current toast down now (a pad prompt after the player walks off)
+	notify: (text: string, kind: string, seconds: number?) -> (), -- a "silver" | "green" | "red" toast, no icon (TASK-0151)
 	setRetakeLabel: (text: string) -> (),
 	setSkillTimer: (fraction: number, seconds: number) -> (),
 	setBlitzClock: (fraction: number, text: string) -> (),
@@ -622,7 +652,37 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 				end
 			end)
 		end
-		tag(shard.content, "Contestant", MenuCopy.Main.Contestant).Position = UDim2.fromOffset(128, 30)
+		local LC = MenuTheme.LevelCard
+		local tags = row(shard.content, "Tags", 128, 30, 220, LC.TagGap)
+		tag(tags, "Contestant", MenuCopy.Main.Contestant, false, 1)
+		if player.level then
+			-- TASK-0151 level card: LV tag beside CONTESTANT, XP bar and numbers under the rank column.
+			tag(tags, "Level", string.gsub(MenuCopy.Quests.Level, "{level}", tostring(player.level)), true, 2)
+			local need = player.xpNeed or 0
+			local into = player.xpInto or 0
+			local track = make("Frame", {
+				Name = "XpBar",
+				Position = UDim2.fromOffset(LC.BarX, LC.BarY),
+				Size = UDim2.fromOffset(LC.BarW, LC.BarH),
+				BackgroundColor3 = MenuTheme.Bar.Track,
+				BackgroundTransparency = MenuTheme.Bar.TrackTransparency,
+				BorderSizePixel = 0,
+				ZIndex = 5,
+			}, shard.content)
+			make("Frame", {
+				Name = "Fill",
+				Size = UDim2.fromScale(if need > 0 then math.clamp(into / need, 0, 1) else 1, 1),
+				BackgroundColor3 = MenuTheme.Bar.Fill,
+				BorderSizePixel = 0,
+				ZIndex = 6,
+			}, track)
+			local xpText = if need > 0
+				then string.gsub(string.gsub(MenuCopy.Quests.XpBar, "{into}", tostring(into)), "{need}", tostring(need))
+				else MenuCopy.Quests.XpMax
+			text(shard.content, "Xp", xpText, LC.TextSize, LC.TextX, LC.TextY, LC.TextW, 18, {
+				TextXAlignment = Enum.TextXAlignment.Right,
+			})
+		end
 		local name = text(shard.content, "Name", NameRules.truncateName(player.name), T.PlayerName, 128, 52, 200, 24, {
 			TextTruncate = Enum.TextTruncate.AtEnd,
 		})
@@ -681,7 +741,14 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 	end
 
 	-- style: silver | green | red toast art; iconKey: an icon before the text; bottom: the in-match position (110, 338).
-	local function toastAt(str: string, iconKey: string?, kind: string, bottom: boolean, hold: boolean?)
+	local function toastAt(
+		str: string,
+		iconKey: string?,
+		kind: string,
+		bottom: boolean,
+		hold: boolean?,
+		seconds: number?
+	)
 		toastToken += 1
 		local token = toastToken
 		for _, child in toastLayer:GetChildren() do
@@ -709,7 +776,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		if hold then
 			return
 		end
-		task.delay(MenuConfig.ToastSeconds, function()
+		task.delay(seconds or MenuConfig.ToastSeconds, function()
 			if toastToken == token and shard.root.Parent then
 				shard.root:Destroy()
 			end
@@ -821,8 +888,11 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		end
 		local board = secondary("Leaderboard", L.Leaderboard, MenuCopy.Main.Leaderboard, true, 15)
 		lockedPress(board, "leaderboard")
-		local daily = secondary("Daily", L.DailyChallenge, MenuCopy.Main.DailyChallenge, true, 15)
-		lockedPress(daily, "daily")
+		-- DAILY QUESTS (TASK-0151): the slot the locked DAILY CHALLENGE used.
+		local daily = secondary("Quests", L.Quests, MenuCopy.Main.Quests, false, 15)
+		interactive(daily, function()
+			handlers.go("quests")
+		end, nil)
 
 		link(playItem, "Down", practice)
 		link(practice, "Down", settings)
@@ -2330,7 +2400,148 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		playFx("rise", back.shard.group, 0.4)
 	end
 
-	local function buildWatching()
+	-- QUESTS (TASK-0151): three cards in the mode-select slots. A complete, unclaimed card is the CLAIM button; the rest
+	-- shake. Loading and unavailable use the silver panel (RETRY on unavailable).
+	local function questCard(index: number, box: MenuTheme.Box, card: QuestCardModel): Item
+		local Q = MenuTheme.QuestCard
+		local gem: Shard.Gem = (Q.Gem :: any)[card.difficulty] or "violet"
+		local claimable = card.status == "claim"
+		local shard = newShard(
+			"Quest" .. index,
+			box,
+			"shard-menu-mode-" .. gem,
+			if claimable then "glow-menu-mode-" .. gem else nil,
+			gem
+		)
+		local item: Item = { shard = shard, name = "Quest" .. index }
+		local tags = row(shard.content, "Tags", Q.PadX, Q.TagsY, Q.DescW, 6)
+		tag(tags, "Difficulty", (MenuCopy.Quests.Difficulty :: any)[card.difficulty] or "", false, 1)
+		tag(tags, "Reward", string.gsub(MenuCopy.Quests.Reward, "{xp}", tostring(card.xp)), true, 2)
+		local desc = text(
+			shard.content,
+			"Description",
+			card.description,
+			Q.DescSize,
+			Q.PadX,
+			Q.DescY,
+			Q.DescW,
+			Q.DescLeading * 3,
+			{
+				TextWrapped = true,
+				TextYAlignment = Enum.TextYAlignment.Top,
+				LineHeight = Q.DescLeading / Q.DescSize,
+			}
+		)
+		local done = card.progress >= card.target
+		local track = make("Frame", {
+			Name = "ProgressBar",
+			Position = UDim2.fromOffset(Q.PadX, Q.BarY),
+			Size = UDim2.fromOffset(Q.BarW, Q.BarH),
+			BackgroundColor3 = MenuTheme.Bar.Track,
+			BackgroundTransparency = MenuTheme.Bar.TrackTransparency,
+			BorderSizePixel = 0,
+			ZIndex = 5,
+		}, shard.content)
+		make("Frame", {
+			Name = "Fill",
+			Size = UDim2.fromScale(math.clamp(card.progress / math.max(card.target, 1), 0, 1), 1),
+			BackgroundColor3 = if done then MenuTheme.Bar.Done else MenuTheme.Bar.Fill,
+			BorderSizePixel = 0,
+			ZIndex = 6,
+		}, track)
+		local progress = string.gsub(
+			string.gsub(MenuCopy.Quests.Progress, "{p}", tostring(card.progress)),
+			"{n}",
+			tostring(card.target)
+		)
+		text(shard.content, "Progress", progress, Q.ProgressSize, Q.PadX, Q.ProgressY, Q.DescW, 18)
+		local status = if card.status == "claimed"
+			then MenuCopy.Quests.Claimed
+			elseif card.status == "claiming" then MenuCopy.Quests.Claiming
+			elseif claimable then MenuCopy.Quests.Claim
+			else MenuCopy.Quests.InProgress
+		local statusRow = row(shard.content, "Status", Q.PadX, Q.StatusY, Q.DescW, 6)
+		tag(statusRow, "State", status, claimable, 1)
+		if card.status == "claimed" then
+			desc.TextTransparency = MenuTheme.LockedInkTransparency
+		end
+		interactive(item, function()
+			if claimable and handlers.claim then
+				handlers.claim(index)
+			else
+				playFx("shake", item.shard.group, 0)
+			end
+		end, if claimable then 1.02 else nil)
+		if claimable then
+			glowLoop(item, (index - 1) * 0.3)
+		end
+		return item
+	end
+
+	local function buildQuests(model: Model)
+		topLabel(MenuCopy.Top.Quests)
+		local qm: QuestsModel = model.quests or { status = "loading", cards = {}, bonusGranted = false, bonusXp = 0 }
+		if qm.status ~= "ready" or #qm.cards ~= 3 then
+			local unavailable = qm.status == "unavailable"
+			local p = panel(
+				"silver",
+				MenuCopy.Main.Quests,
+				if unavailable then MenuCopy.Quests.UnavailableTitle else MenuCopy.Quests.LoadingTitle,
+				MenuTheme.Panel.TitleSize3,
+				if unavailable then MenuCopy.Quests.UnavailableLines else MenuCopy.Quests.LoadingLines,
+				{}
+			)
+			local back = backButton(MenuCopy.Common.Back)
+			if unavailable then
+				local retry = action(L.Action, MenuCopy.Common.Retry, true, false)
+				interactive(retry, function()
+					if handlers.questRetry then
+						handlers.questRetry()
+					end
+				end, nil)
+				link(retry, "Down", back)
+				playFx("pop", retry.shard.group, 0.36)
+			end
+			glowLoop(p, 0)
+			playFx("slam", p.shard.group, 0)
+			playFx("rise", back.shard.group, 0.4)
+			return
+		end
+		local boxes = { L.Card1, L.Card2, L.Card3 }
+		local items: { Item } = {}
+		for index, card in qm.cards do
+			items[index] = questCard(index, boxes[index], card)
+			playFx("slam", items[index].shard.group, (index - 1) * 0.1)
+		end
+		local info = row(screen :: Frame, "Info", L.QuestInfo.x, L.QuestInfo.y, L.QuestInfo.w, 6)
+		tag(
+			info,
+			"Bonus",
+			if qm.bonusGranted
+				then MenuCopy.Quests.BonusDone
+				else (string.gsub(MenuCopy.Quests.Bonus, "{xp}", tostring(qm.bonusXp))),
+			qm.bonusGranted,
+			1
+		)
+		tag(info, "Reset", MenuCopy.Quests.Reset, false, 2)
+		local back = backButton(MenuCopy.Common.Back)
+		link(items[1], "Right", items[2])
+		link(items[2], "Right", items[3])
+		for _, item in items do
+			link(item, "Down", back)
+		end
+		-- Focus starts on the first card that can be claimed (else the first card).
+		for _, item in items do
+			if item.shard.glow and item.hit then
+				firstSelectable = item.hit
+				break
+			end
+		end
+		playFx("rise", back.shard.group, 0.4)
+		playFx("rowIn", info, 0.46)
+	end
+
+	local function buildWatching(model: Model)
 		local shard =
 			newShard("Banner", L.WatchBanner, "shard-menu-banner-violet-v2", "glow-menu-banner-violet-v2", "violet")
 		-- Art v2 banner (480x48, 20 px end slants): README 17 px label, centred.
@@ -2341,6 +2552,10 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		playFx("rise", shard.group, 0.3)
 		-- LEAVE: stops watching and returns to the plaza (handlers.back is the watching leave handler).
 		backButton(MenuCopy.Common.Leave, L.WatchLeave)
+		if model.toast then
+			-- Preview only (TASK-0151): the quest / level toast copy, measured over a screen with nothing at the top.
+			toastAt(model.toast, nil, model.toastKind or "silver", false, model.holdToast)
+		end
 	end
 
 	local function render(id: string, model: Model)
@@ -2361,7 +2576,7 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		end
 		local ok, err = pcall(function()
 			if id == "watching" then
-				buildWatching()
+				buildWatching(model)
 			elseif id == "vs" and model.vs then
 				local vm = model.vs
 				if vm.stage == "search" or vm.stage == "timeout" then
@@ -2403,6 +2618,8 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 				buildSettings(model)
 			elseif id == "howto" then
 				buildHowTo()
+			elseif id == "quests" then
+				buildQuests(model)
 			else
 				warn(`[MathShow] Menu has no screen {id}`)
 			end
@@ -2419,6 +2636,9 @@ function View.build(parent: Instance, handlers: Handlers, options: Options?): Vi
 		render = render,
 		toast = toast,
 		hideToast = hideToast,
+		notify = function(str: string, kind: string, seconds: number?)
+			toastAt(str, nil, kind, false, false, seconds)
+		end,
 		setVsCount = function(str: string)
 			if vsCount then
 				vsCount.Text = str

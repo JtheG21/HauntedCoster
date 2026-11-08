@@ -149,7 +149,8 @@ MenuTheme.Layout = {
 	PlayerCard = box(404, 56, 360, 156, 2), -- avatar 84x84 at (28,36); text column at (128,30) w 200
 	HowToPlay = box(404, 218, 230, 44, 1),
 	Leaderboard = box(412, 274, 230, 44, -1),
-	DailyChallenge = box(404, 330, 230, 44, 1),
+	Quests = box(404, 330, 230, 44, 1), -- DAILY QUESTS (TASK-0151; was the locked DAILY CHALLENGE slot)
+	QuestInfo = box(172, 346, 480, 20, 0), -- QUESTS: bonus and reset tags beside BACK, clear of the jump zone (x 664+)
 	-- 02 mode select / 18 how to play (same three slots)
 	Card1 = box(52, 52, 232, 192, -2),
 	Card2 = box(300, 46, 232, 192, 1.5),
@@ -209,6 +210,59 @@ MenuTheme.Layout = {
 	ToggleHint = box(290, 0, 220, 44, 0),
 }
 MenuTheme.LadderOffsets = { 0, 14, 4, 18, 8 }
+
+-- TASK-0151 QUESTS screen: the three cards use Layout.Card1..3 (the mode-select slots, clear of the jump zone). Card-local
+-- px; the card art is shard-menu-mode-* (232x192, top-left cut to y 8, bottom-left cut from y 180).
+MenuTheme.QuestCard = {
+	PadX = 24,
+	TagsY = 22, -- difficulty tag + reward tag
+	DescY = 46,
+	DescW = 184,
+	DescSize = 18,
+	DescLeading = 22, -- up to 3 lines
+	BarY = 120,
+	BarW = 184,
+	BarH = 8,
+	ProgressY = 134,
+	ProgressSize = 15,
+	StatusY = 158, -- CLAIM / CLAIMED / IN PROGRESS tag
+	Gem = { easy = "blue", medium = "violet", hard = "red" },
+}
+-- Level card on the main player card (shard-menu-player-violet, 360x156): LV tag beside CONTESTANT, XP bar under the
+-- rank column. Card-local px.
+MenuTheme.LevelCard = {
+	TagGap = 6, -- after the CONTESTANT tag
+	BarX = 28,
+	BarY = 134,
+	BarW = 200,
+	BarH = 6,
+	TextX = 236,
+	TextY = 128,
+	TextW = 104,
+	TextSize = 12,
+}
+MenuTheme.Bar = {
+	Track = Color3.fromRGB(0, 0, 0),
+	TrackTransparency = 0.45,
+	Fill = Color3.fromRGB(255, 255, 255),
+	Done = Color3.fromRGB(96, 230, 140), -- a complete quest's bar
+}
+-- Quest / level toasts (client/Menu/Quests): how long each stays, the pause between two, and the most that wait.
+MenuTheme.QuestToastSeconds = 2.4
+MenuTheme.QuestToastGap = 0.25
+MenuTheme.QuestToastQueueMax = 4
+MenuTheme.QuestActionWindow = 3 -- s after CLAIM / RETRY in which a "rate" or "stale" reply gets a toast
+MenuTheme.QuestRequestSeconds = 3 -- the client asks for its QuestState at most this often (server: 4 per 10 s)
+-- Overhead nameplate (client/Hud/Nameplates): "LV 12 · QUICK COUNTER" over each character, tinted by PlateColor.
+MenuTheme.Nameplate = {
+	Width = 220,
+	Height = 26,
+	TextSize = 16,
+	StudsOffset = Vector3.new(0, 3.1, 0), -- above the head, over the default name
+	MaxDistance = 60,
+	Default = Color3.fromRGB(255, 255, 255), -- no plate colour unlocked yet
+	StrokeTransparency = 0.35,
+}
 
 -- Upload every PNG in assets/roblox/ and paste the ids. HUD images (shard-input, shard-button, shard-score-silver,
 -- shard-problem-blue, shard-row-*, shard-toast-*, glow-toast-*, glow-problem-blue) come from Theme.Image.

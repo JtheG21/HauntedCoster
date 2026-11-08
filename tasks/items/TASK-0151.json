@@ -15,7 +15,9 @@
     "games/mathshow/src/shared/ModePadConfig.luau",
     "games/mathshow/src/server/Services/ModePadService.luau",
     "games/mathshow/src/client/init.client.luau",
-    "games/mathshow/src/client/Hud/Nameplates.luau"
+    "games/mathshow/src/client/Hud/Nameplates.luau",
+    "games/mathshow/tests/ModePadRules.spec.luau",
+    "games/mathshow/tests/LedgerRules.spec.luau"
   ],
   "depends_on": [
     "TASK-0150"

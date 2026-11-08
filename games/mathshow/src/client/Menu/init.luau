@@ -22,6 +22,7 @@ local PracticeRules = require(Shared:WaitForChild("PracticeRules"))
 local Net = require(Shared:WaitForChild("Net"))
 
 local Fx = require(script.Parent.Hud.Fx)
+local Quests = require(script.Quests)
 local View = require(script.View)
 
 local Menu = {}
@@ -175,7 +176,9 @@ end
 
 local function model(): View.Model
 	local player = Players.LocalPlayer
+	local level, xpInto, xpNeed = Quests.level()
 	return {
+		quests = if stack[#stack] == "quests" then Quests.model() else nil,
 		vs = if stack[#stack] == "vs"
 			then {
 				stage = vsCtx.stage,
@@ -219,6 +222,9 @@ local function model(): View.Model
 			rank = profile.rank,
 			failed = profile.loaded and not profile.ok,
 			loading = not profile.loaded,
+			level = level,
+			xpInto = xpInto,
+			xpNeed = xpNeed,
 		},
 		settings = settings,
 		practice = {
@@ -276,6 +282,9 @@ end
 
 local function show(id: string, focusKey: string?)
 	tickToken += 1 -- any running retake ticker belongs to the previous screen
+	if id == "quests" then
+		Quests.request() -- the screen shows the newest QuestState; this asks for one (throttled)
+	end
 	if view then
 		view.render(id, model())
 		focusDefault(focusKey)
@@ -979,6 +988,8 @@ function Menu.start(opts: Options)
 			scheduleSave()
 			show(stack[#stack], key)
 		end,
+		claim = Quests.claim,
+		questRetry = Quests.retry,
 	}
 	view = View.build(player:WaitForChild("PlayerGui"), handlers)
 	applySettings()
@@ -988,6 +999,17 @@ function Menu.start(opts: Options)
 	task.spawn(connectSkillRemotes)
 	task.spawn(connectBlitzRemotes)
 	task.spawn(connectVsRemotes)
+	-- A new QuestState redraws the screen that shows it (QUESTS, or the level card on the main menu), without entrances.
+	Quests.subscribe(function()
+		local v = view
+		local top = stack[#stack]
+		if v and v.gui.Enabled and (top == "quests" or top == "main") then
+			local m = model()
+			m.quiet = true
+			v.render(top, m)
+			focusDefault(nil)
+		end
+	end)
 
 	-- Back (B / Esc) and the stepper keys. Menu.hide unbinds them; Menu.open binds them again through rebindInput.
 	local function bindInput()

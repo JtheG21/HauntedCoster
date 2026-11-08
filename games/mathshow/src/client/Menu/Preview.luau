@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local MenuConfig = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("MenuConfig"))
+local MenuCopy = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("MenuCopy"))
 
 local Fx = require(script.Parent.Parent.Hud.Fx)
 local View = require(script.Parent.View)
@@ -19,19 +20,52 @@ export type State = { id: string, screen: string, model: View.Model, fixtures: {
 local ALL_OPEN = { blitz = true, vs = true, group = true }
 local UNSETTLED = { music = 0, sfx = 10, reducedMotion = true, colorBlind = false, haptics = false }
 
-local function player(name: string, rank: number?, failed: boolean?): View.Player
-	return { name = name, userId = nil, rank = rank, failed = failed }
+-- level / into / need: the TASK-0151 level card (need 0 = MAX LEVEL); no level = no card yet.
+local function player(
+	name: string,
+	rank: number?,
+	failed: boolean?,
+	level: number?,
+	into: number?,
+	need: number?
+): View.Player
+	return { name = name, userId = nil, rank = rank, failed = failed, level = level, xpInto = into, xpNeed = need }
 end
 
--- Stress fixtures for the main menu's player card (audit E4 items that exist in this scope).
+-- Stress fixtures for the main menu's player card (audit E4 items that exist in this scope). official carries the widest
+-- XP numbers (level 49), wide20 the level cap.
 Preview.PlayerFixtures = {
-	standard = player("JtheG21", 4),
-	wide20 = player(string.rep("W", 20), 9),
-	official = player("SirCountsALot_Official", 8),
-	demon2 = player("DemonSlayer", 7),
-	unranked = player("NewContestant", nil),
+	standard = player("JtheG21", 4, nil, 12, 340, 485),
+	wide20 = player(string.rep("W", 20), 9, nil, 50, 0, 0),
+	official = player("SirCountsALot_Official", 8, nil, 49, 1779, 1780),
+	demon2 = player("DemonSlayer", 7, nil, 7, 0, 310),
+	unranked = player("NewContestant", nil, nil, 1, 0, 100),
 	unavailable = player("OfflineRival", nil, true),
 }
+
+-- QUESTS fixtures (TASK-0151), built from the real copy so a copy change is measured.
+local function quest(
+	kind: string,
+	n: number,
+	difficulty: string,
+	xp: number,
+	progress: number,
+	status: string
+): View.QuestCardModel
+	local copy = (MenuCopy.Quests.Kind :: any)[kind]
+	local template: string = if n == 1 then copy.One else copy.Many
+	return {
+		description = (string.gsub(template, "{n}", tostring(n))),
+		difficulty = difficulty,
+		xp = xp,
+		progress = progress,
+		target = n,
+		status = status,
+	}
+end
+local function quests(cards: { View.QuestCardModel }, bonus: boolean): View.QuestsModel
+	return { status = "ready", cards = cards, bonusGranted = bonus, bonusXp = 100 }
+end
 
 Preview.States = {
 	{ id = "01-main", screen = "main", model = { player = Preview.PlayerFixtures.standard } },
@@ -509,6 +543,81 @@ Preview.States = {
 		id = "20-coming-soon",
 		screen = "main",
 		model = { player = Preview.PlayerFixtures.standard, toast = "COMING SOON", holdToast = true },
+	},
+	{
+		id = "21a-quests",
+		screen = "quests",
+		model = {
+			quests = quests({
+				quest("round_finish", 2, "easy", 100, 1, "progress"),
+				quest("correct", 40, "medium", 150, 40, "claim"),
+				quest("rare", 2, "hard", 200, 2, "claimed"),
+			}, false),
+		},
+	},
+	{
+		id = "21b-quests-long",
+		screen = "quests",
+		model = {
+			quests = quests({
+				quest("blitz_finish", 1, "easy", 100, 1, "claiming"),
+				quest("skill_finish", 1, "medium", 150, 0, "progress"),
+				quest("round_finish", 6, "hard", 200, 5, "progress"),
+			}, false),
+		},
+	},
+	{
+		id = "21c-quests-widest",
+		screen = "quests",
+		model = {
+			quests = quests({
+				quest("correct", 15, "easy", 100, 15, "claim"),
+				quest("correct", 80, "hard", 200, 79, "progress"),
+				quest("glyph", 50, "hard", 200, 49, "progress"),
+			}, false),
+		},
+	},
+	{
+		id = "21d-quests-bonus",
+		screen = "quests",
+		model = {
+			quests = quests({
+				quest("glyph", 10, "easy", 100, 10, "claimed"),
+				quest("rare", 1, "medium", 150, 1, "claimed"),
+				quest("blitz_finish", 5, "hard", 200, 5, "claimed"),
+			}, true),
+		},
+	},
+	{
+		id = "21e-quests-loading",
+		screen = "quests",
+		model = { quests = { status = "loading", cards = {}, bonusGranted = false, bonusXp = 100 } },
+	},
+	{
+		id = "21f-quests-unavailable",
+		screen = "quests",
+		model = { quests = { status = "unavailable", cards = {}, bonusGranted = false, bonusXp = 100 } },
+	},
+	-- Quest and level toasts (client/Menu/Quests), measured over the watching screen, which has nothing at the top.
+	{
+		id = "21g-toast-quest",
+		screen = "watching",
+		model = {
+			toast = (string.gsub(MenuCopy.Quests.ToastQuest, "{xp}", "200")),
+			toastKind = "green",
+			holdToast = true,
+		},
+	},
+	{
+		id = "21h-toast-title",
+		screen = "watching",
+		model = {
+			toast = (
+				string.gsub(string.gsub(MenuCopy.Quests.ToastTitle, "{level}", "45"), "{title}", "GRAND CALCULATOR")
+			),
+			toastKind = "green",
+			holdToast = true,
+		},
 	},
 } :: { State }
 
