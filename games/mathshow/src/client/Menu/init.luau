@@ -1004,10 +1004,40 @@ function Menu.start(opts: Options)
 		local v = view
 		local top = stack[#stack]
 		if v and v.gui.Enabled and (top == "quests" or top == "main") then
+			-- Keep gamepad / keyboard focus on the same control: remember its path under the root, find it again after the
+			-- rebuild, and fall back to the default only when it is gone.
+			local selected = GuiService.SelectedObject
+			local path: { string }? = nil
+			if selected and selected:IsDescendantOf(v.root) then
+				local names: { string } = {}
+				local node: Instance? = selected
+				while node and node ~= v.root do
+					table.insert(names, 1, node.Name)
+					node = node.Parent
+				end
+				path = names
+			end
 			local m = model()
 			m.quiet = true
 			v.render(top, m)
-			focusDefault(nil)
+			if path then
+				local node: Instance? = v.root
+				for _, name in path do
+					node = if node then node:FindFirstChild(name) else nil
+				end
+				if node and node:IsA("GuiObject") then
+					local target: GuiObject = node
+					task.defer(function()
+						if target.Parent then
+							GuiService.SelectedObject = target
+						end
+					end)
+					return
+				end
+			end
+			if selected then
+				focusDefault(nil)
+			end
 		end
 	end)
 

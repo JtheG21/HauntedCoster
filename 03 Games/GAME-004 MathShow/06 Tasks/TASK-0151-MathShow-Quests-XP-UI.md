@@ -3,7 +3,7 @@ id: TASK-0151
 title: "MathShow Quests XP UI"
 type: task
 project: GAME-004
-status: review
+status: approved
 priority: medium
 risk: low
 owner: executor
@@ -65,6 +65,13 @@ Menu panel, level badge, XP bar and Reveal toast. Design: [[SYS-Quests-And-XP]].
   play; QuestService's claim path is TASK-0150's, unchanged); the Reveal hold of toasts during a live gameshow
   question (code path only: ShowState.participant + RoundState phase). No 2-client run (UI-only change).
 
+- **Revision 1 (audit F1, F2):** the QuestState re-render keeps gamepad/keyboard focus on the same control (path under
+  the root; default only if it is gone) instead of `focusDefault` on every push; the toast hold is recomputed on
+  ShowState too (last RoundState phase kept), so a mid-question join holds at once. Studio (fresh Play, synced): a push
+  re-rendered the main menu to `LV 3` and selection stayed on the DAILY QUESTS hit. check.sh green.
+
 ## Audits
+- [[AUD-20261107-TASK-0151-01]]: PASS with findings (2 minor, 1 nit), Sonnet auditor at `fbc45b3`. F1 and F2 fixed in
+  revision 1; F3 (noop handler list) kept, same pattern as ModePadController and Watching.
 
 ## Outcome

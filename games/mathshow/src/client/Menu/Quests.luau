@@ -47,6 +47,7 @@ local queue: { { text: string, kind: string } } = {}
 local showing = false
 local holding = false -- answering a gameshow question: toasts wait for its Reveal
 local participant = false
+local questionUp = false -- the last RoundState phase was "Question"
 local lastRequest = -math.huge
 local lastAction = -math.huge -- the player pressed CLAIM or RETRY: a "rate" / "stale" reply gets a toast
 
@@ -382,8 +383,9 @@ function Quests.start()
 			show.OnClientEvent:Connect(function(p: any)
 				if typeof(p) == "table" and typeof(p.participant) == "boolean" then
 					participant = p.participant
-					if not participant and holding then
-						holding = false
+					local wasHolding = holding
+					holding = participant and questionUp -- a join mid-question holds at once
+					if wasHolding and not holding then
 						pump()
 					end
 				end
@@ -398,7 +400,8 @@ function Quests.start()
 					return
 				end
 				local wasHolding = holding
-				holding = participant and p.phase == "Question"
+				questionUp = p.phase == "Question"
+				holding = participant and questionUp
 				if wasHolding and not holding then
 					pump()
 				end
