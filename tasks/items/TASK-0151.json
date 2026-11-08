@@ -2,7 +2,7 @@
   "id": "TASK-0151",
   "game": "GAME-004",
   "title": "MathShow Quests XP UI",
-  "status": "review",
+  "status": "approved",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -115,6 +115,12 @@
       "from": "in_progress",
       "to": "review",
       "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-07T17:42:07",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
     }
   ],
   "executions": [
@@ -154,6 +160,11 @@
       "time": "2026-11-07T17:36:31",
       "result": "fail",
       "report": "06 QA/AUD-20261107-TASK-0151-04.md"
+    },
+    {
+      "time": "2026-11-07T17:42:07",
+      "result": "pass",
+      "report": "06 QA/AUD-20261107-TASK-0151-05.md"
     }
   ],
   "revisions": 0

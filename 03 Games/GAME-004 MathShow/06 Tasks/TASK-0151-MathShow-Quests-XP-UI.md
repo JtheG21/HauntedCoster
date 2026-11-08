@@ -3,7 +3,7 @@ id: TASK-0151
 title: "MathShow Quests XP UI"
 type: task
 project: GAME-004
-status: review
+status: approved
 priority: medium
 risk: low
 owner: executor
@@ -159,5 +159,14 @@ Menu panel, level badge, XP bar and Reveal toast. Design: [[SYS-Quests-And-XP]].
   board revision / generation and duplicate slots accepted). Revision limit reached; waiting for jg's decision.
 - [[AUD-20261107-TASK-0151-04]]: Codex FAIL at `4425a4e`: the -03 cases are closed; board invariants still incomplete
   (repeated category or difficulty, bonus on incomplete quests). Waiting for jg's decision on a further revision.
+- [[AUD-20261107-TASK-0151-05]]: Codex PASS on rev 4 at `425023d` (verdict relayed by jg; full report not pasted).
 
 ## Outcome
+- Delivered: QUESTS screen (three cards, CLAIM, bonus and reset tags, loading/offline panels), level card on the main
+  player card, quest / claimed / bonus / level-up / title toasts held during a gameshow question, overhead nameplates
+  from the Level / Title / PlateColor attributes, Daily pad and the main menu slot open QUESTS. QuestState is accepted
+  only when it passes the shared rules (`QuestRules.validate` for the board, `XpRules` for the level card).
+- Reviews: Claude audit PASS with findings (fixed rev 1); Codex FAIL x3 (rev 1-3), PASS on rev 4 at `425023d`.
+  Revisions 3 and 4 were approved by jg over the two-revision limit.
+- Not verified: a real claim round trip through gameplay; the toast hold during a live gameshow question.
+- Ledger: TextFit 781 + 320 per viewport.
