@@ -2,7 +2,7 @@
   "id": "TASK-0150",
   "game": "GAME-004",
   "title": "MathShow Quests XP Persistence And Services",
-  "status": "backlog",
+  "status": "done",
   "tier": "deep",
   "owner_agent": "codex",
   "files_owned": [
@@ -21,8 +21,6 @@
     "games/mathshow/tests/ProfileRules.spec.luau",
     "tasks/items/TASK-0150.json",
     "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Persistence-And-Services.md",
-    "games/mathshow/src/server/Services/ModePadService.luau",
-    "games/mathshow/src/shared/ModePadConfig.luau",
     "games/mathshow/src/server/init.server.luau",
     "games/mathshow/tests/multiclient/QuestsXp.luau",
     "docs/workflow/evidence/TASK-0150/"
@@ -32,10 +30,87 @@
   ],
   "branch": "task/TASK-0150-quests-xp-persistence",
   "acceptance": [
-    "Profile schema v4 (xp, dailyEpoch, playXpDay, quests with catalogVersion, boardRevision, slots and bonusGranted) applied as ordered conditional commands through the TASK-0141 worker and receipts, with atomic claim, bonus, play-cap and rollover state; QuestService awards XP only from server events; remotes created by the server; migration, cross-server, failure and secrecy tests per AUD-20261107-QUESTS-XP-DESIGN-02; Studio two-client run; Opus audit passes."
+    "Profile schema v4 (xp, dailyEpoch, playXpDay, quests with catalogVersion, boardRevision, slots and bonusGranted) applied as ordered conditional commands through the TASK-0141 worker and receipts, with atomic claim, bonus, play-cap and rollover state; QuestService awards XP only from server events; remotes created by the server; migration, cross-server, failure and secrecy tests per AUD-20261107-QUESTS-XP-DESIGN-02; Studio two-client run; independent Codex PASS recorded on the exact head."
   ],
   "evidence": [],
   "notes": "Backlog; final design applied from AUD-20261107-QUESTS-XP-DESIGN-02 (QX-D4): startup, service scenario and evidence paths added. No plan approval yet.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0150-MathShow-Quests-XP-Persistence-And-Services.md",
-  "risk": "high"
+  "risk": "high",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-07T15:19:35",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-07T15:19:35",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-07T15:55:44",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-07T16:08:46",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 1/2"
+    },
+    {
+      "time": "2026-11-07T16:08:46",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-07T16:29:28",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-07T16:39:58",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-07T16:40:36",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-07T15:55:44",
+      "result": "pass",
+      "notes": "check.sh ALL PASSED, 458 specs; Studio pass on private test place, evidence docs/workflow/evidence/TASK-0150/studio-pass.txt"
+    },
+    {
+      "time": "2026-11-07T16:29:28",
+      "result": "pass",
+      "notes": "rev 1 (AUD-20261107-TASK-0150-01 F1-F5): check.sh ALL PASSED, 463 specs incl. 5 AUD-01 regressions (fail on 81f2f8b, pass at 84c9891); CI green on 84c9891; Studio pass on private test place, evidence docs/workflow/evidence/TASK-0150/rev1/studio-pass.txt"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-07T16:08:46",
+      "result": "fail",
+      "report": "06 QA/AUD-20261107-TASK-0150-01.md"
+    },
+    {
+      "time": "2026-11-07T16:39:58",
+      "result": "pass",
+      "report": "06 QA/AUD-20261107-TASK-0150-02.md"
+    }
+  ],
+  "revisions": 1,
+  "merge_approved_by": "jg"
 }

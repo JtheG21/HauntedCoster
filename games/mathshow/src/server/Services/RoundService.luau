@@ -20,6 +20,7 @@ local SubmissionConfig = require(ReplicatedStorage.Shared.SubmissionConfig)
 local SubmissionRules = require(ReplicatedStorage.Shared.SubmissionRules)
 local Remotes = require(script.Parent.Parent.Remotes)
 local LeaderstatsService = require(script.Parent.LeaderstatsService)
+local QuestService = require(script.Parent.QuestService)
 
 local ERROR_BACKOFF_SECONDS = 1
 local PLAYER_POLL_SECONDS = 1
@@ -34,6 +35,7 @@ type PlayerState = {
 	answeredIndex: number, -- last question this player has an accepted submission for; 0 = none
 	solvedIndex: number, -- last question this player got right; 0 = none
 	solvedPoints: number, -- points that question earned
+	correctCount: number, -- accepted correct answers this match (quest eligibility: at least one)
 }
 
 local RoundService = {}
@@ -49,6 +51,8 @@ local questionStartClock = 0
 local questionEndsClock = 0
 
 local states: { [Player]: PlayerState } = {}
+local runId = "" -- server-generated id of the current match; every quest event of the match derives its id from it
+local rewardedRunId = "" -- the run whose Results completion has been handed to QuestService (once per run)
 
 local function newState(): PlayerState
 	return {
@@ -61,6 +65,7 @@ local function newState(): PlayerState
 		answeredIndex = 0,
 		solvedIndex = 0,
 		solvedPoints = 0,
+		correctCount = 0,
 	}
 end
 
@@ -169,6 +174,7 @@ local function resetMatch()
 		state.answeredIndex = 0
 		state.solvedIndex = 0
 		state.solvedPoints = 0
+		state.correctCount = 0
 	end
 	local ok, err = pcall(function()
 		LeaderstatsService.reset()
@@ -211,6 +217,17 @@ local function runPhase(nextPhase: RoundRules.Phase, index: number, duration: nu
 			warn(`[MathShow] leaderstats publish failed: {err}`)
 		end
 	end
+	if nextPhase == "Results" and rewardedRunId ~= runId then
+		-- Quests / XP (TASK-0150): one eligible completion per run at Results entry, handed over before anything yields.
+		rewardedRunId = runId
+		local entries: { QuestService.Participant } = {}
+		for player, state in states do
+			if state.participant then
+				table.insert(entries, { player = player, score = state.points, correct = state.correctCount })
+			end
+		end
+		QuestService.roundFinished(runId, entries)
+	end
 	broadcast()
 	local closeAt = if nextPhase == "Question" then deadline + SubmissionConfig.LateGraceSeconds else deadline
 	waitUntil(closeAt)
@@ -229,6 +246,7 @@ local function runMatch()
 		end
 	end
 	matchSeed = Random.new():NextInteger(1, 2 ^ 30)
+	runId = QuestService.newId()
 	print(`[MathShow] match seed={matchSeed}`)
 	local deadline = runPhase("Intermission", 0, RoundConfig.IntermissionSeconds, os.clock())
 	local current: RoundRules.Phase, index = "Intermission", 0
@@ -300,6 +318,8 @@ local function onSubmit(player: Player, raw: any)
 		if correct then
 			state.solvedIndex = questionIndex
 			state.solvedPoints = points
+			state.correctCount += 1
+			QuestService.roundAnswer(player, runId, questionIndex) -- accepted and locked, then the quest fact
 		end
 		reply = { accepted = true, correct = correct, points = points }
 		print(`[MathShow] submit user={player.UserId} q={questionIndex} verdict=ok correct={correct} points={points}`)

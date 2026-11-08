@@ -21,6 +21,7 @@ local SkillRules = require(Shared:WaitForChild("SkillRules"))
 
 local Remotes = require(script.Parent.Parent.Remotes)
 local ProfileService = require(script.Parent.ProfileService)
+local QuestService = require(script.Parent.QuestService)
 
 type Session = {
 	run: SkillRules.Run,
@@ -31,6 +32,9 @@ type Session = {
 	seedBase: number,
 	previousBest: number?,
 	answerStamps: { number },
+	runId: string, -- quest event ids derive from it
+	correctCount: number, -- accepted correct answers this run (quest eligibility: at least one)
+	terminal: string?, -- the one finalisation guard (ProfileRules.finalizeRun): "completed" or "error", set once
 }
 
 local SkillTestService = {}
@@ -75,6 +79,18 @@ local function persist(player: Player, session: Session): (SkillRules.Outcome, n
 	return outcome, ProfileRules.retryAt(now, nil) :: number
 end
 
+-- The one finalisation guard shared by a normal completion and a departure during the already-finished final reveal
+-- (AUD-20261107-TASK-0150-01 F1). A completed run is finalised the moment its last answer closes it, while the player, the
+-- profile session and the quest state are all still present, so the completion is queued exactly once whatever order the
+-- PlayerRemoving listeners later run in. "error" (no problem could be generated) finalises without a completion.
+local function finalize(player: Player, session: Session, reason: string)
+	local terminal, earned = ProfileRules.finalizeRun(session.terminal, reason)
+	session.terminal = terminal
+	if earned then
+		QuestService.skillFinished(player, session.runId, session.correctCount)
+	end
+end
+
 local function finish(player: Player, session: Session)
 	local outcome, retryAt = persist(player, session)
 	sessions[player] = nil
@@ -114,6 +130,9 @@ local function resolve(player: Player, session: Session, correct: boolean)
 	session.answered = true
 	local asked = session.run.rank
 	session.run = SkillRules.advance(session.run, correct)
+	if session.run.finished then
+		finalize(player, session, "completed")
+	end
 	local reveal = MenuConfig.SkillRevealSeconds
 	send(player, {
 		state = "reveal",
@@ -148,6 +167,7 @@ askQuestion = function(player: Player, session: Session)
 	if not problem then
 		warn(`[MathShow] no skill problem for rank {rank}; ending the run`)
 		session.run = SkillRules.finish(session.run)
+		finalize(player, session, "error") -- an error-generated end earns no completion
 		finish(player, session)
 		return
 	end
@@ -206,6 +226,9 @@ local function onStart(player: Player, raw: any)
 		seedBase = Random.new():NextInteger(1, 2 ^ 30),
 		previousBest = profile.bestRank,
 		answerStamps = {},
+		runId = QuestService.newId(),
+		correctCount = 0,
+		terminal = nil,
 	}
 	sessions[player] = session
 	askQuestion(player, session)
@@ -234,6 +257,10 @@ local function onAnswer(player: Player, raw: any)
 		return
 	end
 	local correct = if problem.kind == "choice" then answer == problem.correctIndex else answer == problem.answer
+	if correct then
+		session.correctCount += 1
+		QuestService.skillAnswer(player, session.runId, attempt)
+	end
 	resolve(player, session, correct)
 end
 
@@ -271,6 +298,7 @@ function SkillTestService.start(): ()
 			pcall(function()
 				persist(player, session)
 			end)
+			finalize(player, session, "completed") -- the shared guard: already finalised when the last answer closed the run
 		end
 		sessions[player] = nil -- pending timers see the session gone
 		startStamps[player] = nil

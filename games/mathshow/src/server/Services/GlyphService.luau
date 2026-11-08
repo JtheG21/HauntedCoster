@@ -20,6 +20,7 @@ local RateRules = require(Shared:WaitForChild("RateRules"))
 
 local Remotes = require(script.Parent.Parent.Remotes)
 local ProfileService = require(script.Parent.ProfileService)
+local QuestService = require(script.Parent.QuestService)
 
 local WARN_WINDOW = 5
 local PROFILE_WAIT_SECONDS = 45 -- longer than ProfileService's rejoin wait (30 s) plus a load
@@ -162,6 +163,8 @@ local function onCollect(player: Player, raw: unknown)
 		if ProfileService.addGlyphs(player, value) == nil then
 			entry.pendingLifetime += value
 		end
+		-- Quests / XP: one accepted pickup fact with the server's own rarity, after the collection state changed.
+		QuestService.glyph(player, QuestService.newId(), glyph.rarity)
 	end
 	stats.collected += 1
 	publishStats()

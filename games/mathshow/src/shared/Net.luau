@@ -28,6 +28,9 @@
 --   SettingsSave client -> server        SettingsPayload (validated by ProfileRules.sanitizeSettings)
 --   GlyphCollect client -> server        (id: string; GlyphRules.validateCollect, TASK-0121)
 --   GlyphState   server -> one client    GlyphStatePayload
+--   QuestRequest client -> server        (no payload; rate limited) -> the server answers with QuestState (TASK-0150)
+--   QuestClaim   client -> server        { day, slot, boardRevision, generation } exact integers (QuestService.parseClaim)
+--   QuestState   server -> one client    QuestStatePayload (that player's own state only; revision is monotonic)
 
 local ProfileRules = require(script.Parent.ProfileRules)
 local RoundRules = require(script.Parent.RoundRules)
@@ -161,6 +164,35 @@ export type GlyphStatePayload = {
 	lifetime: number,
 }
 
+-- One quest card. Description text and target come from the shared QuestConfig catalog by id; progress and claimed are the
+-- CONFIRMED stored values (nothing a Blitz run has not released yet, nothing pending).
+export type QuestSlotView = {
+	id: string,
+	generation: number,
+	progress: number,
+	claimed: boolean,
+}
+
+-- result: why this push was sent / how the player's last action ended: "confirmed" | "pending" | "stale" | "rate" |
+-- "loading" | "unavailable". xp, level and nextLevelXp are confirmed values (nextLevelXp is 0 at the level cap).
+-- pending counts commands not yet confirmed (never a projection of their effect); pendingClaim is the slot being claimed.
+export type QuestStatePayload = {
+	revision: number,
+	result: string,
+	persistence: string,
+	day: number?,
+	catalogVersion: number?,
+	boardRevision: number?,
+	slots: { QuestSlotView },
+	bonusGranted: boolean,
+	xp: number,
+	level: number,
+	xpIntoLevel: number,
+	nextLevelXp: number,
+	pending: number,
+	pendingClaim: number?,
+}
+
 local Net = table.freeze({
 	RoundState = "RoundState",
 	SubmitAnswer = "SubmitAnswer",
@@ -191,6 +223,9 @@ local Net = table.freeze({
 	SettingsSave = "SettingsSave",
 	GlyphCollect = "GlyphCollect",
 	GlyphState = "GlyphState",
+	QuestRequest = "QuestRequest",
+	QuestClaim = "QuestClaim",
+	QuestState = "QuestState",
 })
 
 return Net

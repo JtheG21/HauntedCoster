@@ -1,0 +1,53 @@
+TASK-0150 Studio evidence (2026-11-07 UTC): schema v4, QuestService, remotes, hooks
+measured_sha: 5b0c9a8 for S1-S11 (BuildStamp "5b0c9a8 2026-11-07T23:32:23Z" == HEAD of the code under test);
+              866aebb for S12 (adds the Studio-only QuestService._test seam and tests/multiclient/QuestsXp.luau only).
+applies_to: games/mathshow/src/shared/ProfileRules.luau, games/mathshow/src/shared/Net.luau,
+            games/mathshow/src/server/Services/{ProfileService,QuestService,RoundService,BlitzService,SkillTestService,GlyphService}.luau,
+            games/mathshow/src/server/{Remotes,init.server}.luau
+            (git diff --stat 5b0c9a8..HEAD -- <these> shows only the QuestService test seam + the scenario trace line)
+
+Environment: private test experience ONLY ("MathShow Private Test", universe 10774566206, place 93701543861123), Rojo 7.7.0 via
+scripts/serve.sh from the task worktree, one Studio window. API access: not read back from Experience Settings (that dialog is a
+separate process); proven ON by a successful ds:GetAsync("p_<userId>") in a Play server, per jg's standing instruction
+(2026-11-06, left ON). No publish, no live experience. Edit-mode DataStore calls were refused (502), so writes ran only in Play.
+Test profile p_8757379006 (jg's account, private place). Drove real paths: client remotes, server PivotTo onto glyph spawns,
+client-solved problem text, workspace-attribute hook MathShowClockOffsetS.
+
+Test-profile before / after
+  before: version 3, glyphsLifetime 58, blitzBest 7, bestRank 2, applied 9 receipts, unknown fields {flag, settings.futureToggle}.
+  after migration (S1): version 4, xp 0, dailyEpoch 20764, playXpDay {20764, 0}, quests board rev 1
+          [P_H_ROUND6, A_M_40, G_E_10], glyphsLifetime 58, blitzBest 7, bestRank 2, all 9 receipts + new one, flag and
+          futureToggle kept.
+  end of run (restored by me, Play-server UpdateAsync): version 4, xp 280, epoch 20764, play 80, board rev 1, bonusGranted true,
+          P_H_ROUND6 6/6, A_M_40 40/40 (both unclaimed), G_E_10 10/10 claimed; glyphsLifetime 85, blitzBest 10, bestRank 2.
+  (The clock-offset rollover moved the profile to day 20765, xp 630; I wrote the coherent day-20764 state back so the profile
+  is not left a day ahead of the real clock, which would fail closed until 00:00 UTC.)
+
+Results
+S1  v3 -> v4 migration readback: PASS (see "after migration").
+S2  Glyph play XP + quest progress: 12 common + 2 rare pickups -> glyphsLifetime +22, xp +14 (1 per pickup), G_E_10 10/10 (capped).
+S3  Claim: unknown-field payload ignored (no push); claim G_E_10 -> pending then confirmed, xp 14 -> 114; second claim -> xp
+    stays 114 (QuestState result "confirmed": the slot is claimed; awarded 0). Level 2 after 114.
+S4  Blitz secrecy + XP: 10 correct answers. QuestRequest after 5 answers showed no answer progress; after BlitzResult A_M_40 at
+    its target and xp +15 (Blitz play). Caveat: the mid-run reply also still showed values from before my out-of-band progress
+    edit (in-memory profile not yet re-adopted), so it proves nothing was released early, not what a fully synced view looks like.
+S5  Round bonus + completion: first attempt joined mid-match = watcher (submit verdict notOpen), no XP (correct). Next match as
+    participant, all answers: P_H_ROUND6 6/6, xp 129 -> 259 = +20 finish +10 top 3 +100 all-three bonus (bonusGranted true, once).
+S6  Skill: one correct answer then two misses -> run ended; xp +21 (+20 Skill finish, +1 an auto glyph respawn pickup).
+S7  Zero-answer Round (joined, no submits) -> xp unchanged 280. Zero-correct Blitz (all wrong) -> BlitzResult correct 0, xp unchanged.
+S8  Rollover via Studio-only server clock offset (MathShowClockOffsetS=86400, read only when RunService:IsStudio()):
+    QuestRequest -> rollover settled the two completed unclaimed quests once: xp 280 -> 630 (+150 +200), new board day 20765
+    rev 2, play amount 0; a claim for the closed day's board came back "stale", xp unchanged.
+S9  Rejoin keeps state: new Play session read xp 630, level 5, title "Number Rookie" (attributes from confirmed xp).
+S10 Wrote the restore above.
+S11 Console: no errors or QuestService warnings in the output window (the ContentId 203785492 warnings are pre-existing).
+S12 tests/multiclient/QuestsXp.luau (2 clients, scenario passed on the third run; runs 1-2 were infra: only one client joined /
+    harness returned no result, per the Multi-Client Testing note): all 10 checks true: twoPlayersReady, p1SettledOwnXp,
+    p2XpUnchanged, bothHaveState, stateXpIsOwn, p1StateShowsPickups, p2StateNotP1, crossClaimDidNotTouchP1,
+    crossClaimNoXpForP2, attributesPerPlayer. Test players' profiles were written in the private place (p1 started at xp 3
+    from the earlier partial run).
+
+NOT covered in Studio (covered by specs only): Skill leave during the finished final reveal (needs a second client to
+leave mid-reveal); the play cap at 400 through the live path (spec: 390+10+10 across two sessions = 400); two real servers
+claiming at once (spec: two sessions claiming the same quest -> one award); an ambiguous commit then rejoin (spec).
+Not exercised: pre-load buffer overflow (cap 64) and the QuestClaim/QuestRequest rate limits (code reviewed, not driven).

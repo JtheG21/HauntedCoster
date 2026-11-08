@@ -8,12 +8,22 @@
 -- is impossible by construction: an operation is retried only inside RETRY_WINDOW_S, its receipt outlives that window
 -- (TTL prune and cap eviction never reach a receipt younger than window + skew), and an operation that may have committed
 -- is never credited again: a covering receipt acknowledges it, otherwise it is abandoned (under-credit, logged).
+-- Schema v4 (TASK-0150, jg approval QX-T2S): xp (integer total), dailyEpoch (the one authoritative UTC day), playXpDay
+-- {day, amount} and quests {day, catalogVersion, boardRevision, slots, bonusGranted}. Quest and play work arrives as ORDERED
+-- CONDITIONAL COMMANDS frozen into the save op before any yield (play / progress / claim / rollover). planSave applies them
+-- inside the same pure UpdateAsync transform against the STORED state, so claims, the all-three bonus, the daily play cap and
+-- rollover are decided there, and xp grows by what was actually permitted. The daily fields are pass-through for merge():
+-- damaged ones are never rewritten (dailyStatus "disabled" fails closed), and xp is only ever changed by applyCommands.
 -- Settings (TASK-0141 rev 2, AUD-20261106-TASK-0141-01 F1): an op carries only the settings keys this session changed
 -- (settingsPatch), never a full snapshot; acknowledging writes nothing; and a patch is dropped when another session's
 -- receipt is not older than the op (createdAtWall - skew), unless this session already saw that receipt when it loaded.
 
 local MenuConfig = require(script.Parent.MenuConfig)
 local ProfileConfig = require(script.Parent.ProfileConfig)
+local QuestConfig = require(script.Parent.QuestConfig)
+local QuestRules = require(script.Parent.QuestRules)
+local XpConfig = require(script.Parent.XpConfig)
+local XpRules = require(script.Parent.XpRules)
 
 export type Settings = {
 	music: number,
@@ -31,7 +41,36 @@ export type Profile = {
 	blitzBest: number?, -- 0..MenuConfig.BlitzTotal, never decreases
 	glyphsLifetime: number?, -- hub glyph value collected over all visits (TASK-0138), never decreases
 	applied: AppliedLog?, -- v3 save log: the last operation each server session committed (TASK-0139)
+	xp: number?, -- v4: integer total; level, title and plate colour are derived from it (never stored)
+	dailyEpoch: number?, -- v4: the only authoritative day; nil until the first rollover (uninitialised)
+	playXpDay: PlayXpDay?,
+	quests: QuestRules.Board?,
+	dailyDisabled: boolean?, -- in-memory only: the stored daily fields were damaged, daily mutation is closed
 }
+export type PlayXpDay = { day: number, amount: number }
+-- One ordered conditional command (v4). `type` selects the shape; unknown fields make a command invalid.
+--   play      {day, source, nominal, eventId}
+--   progress  {day, catalogVersion, slotId, generation, kind, amount, eventId}
+--   claim     {day, slot, boardRevision, generation}
+--   rollover  {newDay}
+export type Command = {
+	type: string,
+	day: number?,
+	source: string?,
+	nominal: number?,
+	eventId: string?,
+	catalogVersion: number?,
+	slotId: string?,
+	generation: number?,
+	kind: string?,
+	amount: number?,
+	slot: number?,
+	boardRevision: number?,
+	newDay: number?,
+}
+-- What one command did inside the transform: xp it added, whether it changed anything, and why not.
+export type CommandResult = { type: string, applied: boolean, xp: number, reason: string? }
+export type DailyStatus = "ok" | "uninitialized" | "disabled"
 export type AppliedEntry = { seq: number, at: number }
 export type AppliedLog = { [string]: AppliedEntry }
 export type Patch = {
@@ -53,6 +92,7 @@ export type SaveOp = {
 	createdAt: number, -- os.clock() when taken: monotonic, meaningful on this server only
 	createdAtWall: number, -- os.time() when taken, or earlier: when the settings it carries were first changed (R3)
 	settingsPatch: SettingsPatch, -- frozen; empty when no setting changed
+	commands: { Command }?, -- v4: the ordered quest/play commands taken with this op (frozen; absent in older ops)
 }
 -- What one UpdateAsync callback knows besides the stored value.
 export type SaveContext = {
@@ -63,11 +103,19 @@ export type SaveContext = {
 	window: number?, -- Studio hook only: a shorter retry window (never longer than RETRY_WINDOW_S)
 	shutdownLeft: number?, -- during shutdown only: seconds left to the shared shutdown deadline, read inside the callback
 	knownReceipts: { [string]: number }?, -- other sessions' receipt seqs this session saw when it loaded (R3 exemption)
+	userId: number?, -- v4: seeds the deterministic daily board; without it commands are dropped
 }
 export type SaveTag = "applied" | "acknowledged" | "abandoned" | "capacity" | "newer_schema" | "deadline"
 -- The callback's decision: `write` is the value to return (nil cancels the write). superseded: the op's settings patch
 -- was dropped because another session saved more recently (R3).
-export type SavePlan = { tag: SaveTag, write: Profile?, reason: string?, superseded: boolean? }
+export type SavePlan = {
+	tag: SaveTag,
+	write: Profile?,
+	reason: string?,
+	superseded: boolean?,
+	results: { CommandResult }?, -- v4: one per command of the op, in order, when the plan writes
+	droppedOldDay: number?, -- v4: commands dropped because their day is behind the stored epoch (accepted tradeoff)
+}
 -- Per-session save state, replaced (never mutated) by takeOp / credit / noteSettings / settle.
 export type Ledger = {
 	sessionId: string,
@@ -78,6 +126,9 @@ export type Ledger = {
 	op: SaveOp?, -- the unresolved operation
 	ambiguous: boolean, -- op may have committed (an attempt errored after returning a write candidate)
 	reportedSeq: number, -- the op already given its terminal report (unconfirmed at shutdown); never reported again
+	queue: { Command }, -- v4: commands waiting for the NEXT op (bounded, in order)
+	seen: { [string]: boolean }, -- v4: recent event ids; a logical event queues at most once
+	seenOrder: { string },
 }
 -- How one UpdateAsync attempt ended (R6, classifyAttempt).
 export type Outcome =
@@ -92,7 +143,14 @@ export type Outcome =
 -- passed with the op unresolved, `candidate`: a call was still in flight). The older shapes are still read: plan (`tag`
 -- is the last callback's decision) and error (`candidate`: a callback had returned a write).
 export type AttemptKind = Outcome | "plan" | "error" | "expired" | "unconfirmed"
-export type Attempt = { kind: AttemptKind, tag: SaveTag?, reason: string?, candidate: boolean? }
+export type Attempt = {
+	kind: AttemptKind,
+	tag: SaveTag?,
+	reason: string?,
+	candidate: boolean?,
+	results: { CommandResult }?, -- v4: the committed write's per-command results (applied only)
+	droppedOldDay: number?,
+}
 -- A terminal operation, logged once: reason, seq, delta and whether it may have committed.
 export type Terminal = { reason: string, seq: number, glyphsDelta: number, ambiguous: boolean }
 export type ClientProfile = {
@@ -105,7 +163,13 @@ export type ClientProfile = {
 	persistence: string, -- "saved" | "memory": memory means progress is not kept (Studio / unpublished place)
 }
 
-local VERSION = 3 -- 2: glyphsLifetime (TASK-0138); 3: applied save log (TASK-0139, jg approval S1 2026-11-06)
+local VERSION = 4 -- 2: glyphsLifetime (TASK-0138); 3: applied save log (TASK-0139, S1); 4: xp + daily state (TASK-0150, QX-T2S)
+local XP_MAX = ProfileConfig.XP_MAX
+local QUEUE_CAP = ProfileConfig.COMMAND_QUEUE_CAP
+local SEEN_CAP = ProfileConfig.SEEN_EVENT_CAP
+local MAX_EVENT_ID = ProfileConfig.MAX_EVENT_ID
+local PLAY_SOURCES = { round = true, round_top3 = true, blitz = true, skill = true, glyph = true }
+local MAX_FACT_AMOUNT = 100000
 local MAX_GLYPHS = 2 ^ 53 -- the largest exact integer; a total can never overflow into noise
 local MAX_TIME = 2 ^ 40 -- far beyond any os.time(), keeps garbage out
 local UNAVAILABLE = { "publish", "studioaccesstoapisnotallowed", "403", "not allowed", "api services" }
@@ -157,7 +221,7 @@ function ProfileRules.defaultSettings(): Settings
 end
 
 function ProfileRules.defaults(): Profile
-	return { version = VERSION, settings = ProfileRules.defaultSettings(), glyphsLifetime = 0, applied = {} }
+	return { version = VERSION, settings = ProfileRules.defaultSettings(), glyphsLifetime = 0, applied = {}, xp = 0 }
 end
 
 local function cleanEntry(entry: any): AppliedEntry?
@@ -212,6 +276,13 @@ function ProfileRules.migrate(data: any): any
 	out.glyphsLifetime = cleanGlyphs(out.glyphsLifetime)
 	if version < 3 then
 		out.applied = {}
+	end
+	if version < 4 then
+		-- v3 -> v4: xp 0 and an uninitialised daily state; no historical quest is ever awarded. Everything else is kept.
+		out.xp = 0
+		out.dailyEpoch = nil
+		out.playXpDay = nil
+		out.quests = nil
 	end
 	out.version = math.max(math.floor(version), VERSION)
 	return out
@@ -272,6 +343,38 @@ function ProfileRules.sanitizeSettings(raw: any): Settings?
 	}
 end
 
+-- Is the stored v4 daily state usable? "uninitialized": no daily field at all (a migrated v3 profile or a new one), "ok": xp
+-- and all three daily fields valid (QuestRules.validate: one epoch, known catalog, ranges), "disabled": anything else, which
+-- fails closed: nothing is repaired, reset or re-granted. Initialised daily state requires a valid integer xp: a missing xp
+-- there is damaged award state, never read as 0 (AUD-20261107-TASK-0150-01 F4); xp starts at 0 only through migration or
+-- a new profile, both of which are uninitialised. With `nowWall`, a stored epoch beyond the skew bound
+-- (XpRules.classifyDay) is disabled too; an adjacent day ahead near midnight is tolerated.
+function ProfileRules.dailyStatus(raw: any, nowWall: number?): DailyStatus
+	if typeof(raw) ~= "table" then
+		return "uninitialized"
+	end
+	if raw.dailyDisabled == true then
+		return "disabled"
+	end
+	if raw.xp ~= nil and not isInt(raw.xp, 0, XP_MAX) then
+		return "disabled"
+	end
+	if raw.dailyEpoch == nil and raw.playXpDay == nil and raw.quests == nil then
+		return "uninitialized"
+	end
+	if not isInt(raw.xp, 0, XP_MAX) then
+		return "disabled" -- initialised daily state without xp (F4)
+	end
+	local state: any = { dailyEpoch = raw.dailyEpoch, playXpDay = raw.playXpDay, quests = raw.quests }
+	if QuestRules.validate(state) ~= "ok" then
+		return "disabled"
+	end
+	if nowWall ~= nil and XpRules.classifyDay(raw.dailyEpoch, nowWall) == "invalid" then
+		return "disabled"
+	end
+	return "ok"
+end
+
 -- Lenient: keeps every valid stored field and replaces the rest with defaults / nil.
 function ProfileRules.sanitize(raw: any): Profile
 	local profile = ProfileRules.defaults()
@@ -311,6 +414,15 @@ function ProfileRules.sanitize(raw: any): Profile
 	end
 	profile.glyphsLifetime = cleanGlyphs(raw.glyphsLifetime)
 	profile.applied = ProfileRules.sanitizeApplied(raw.applied, nil)
+	profile.xp = if isInt(raw.xp, 0, XP_MAX) then raw.xp else 0
+	local status = ProfileRules.dailyStatus(raw, nil)
+	if status == "ok" then
+		profile.dailyEpoch = raw.dailyEpoch
+		profile.playXpDay = { day = raw.playXpDay.day, amount = raw.playXpDay.amount }
+		profile.quests = raw.quests -- stored values are never mutated: QuestRules returns fresh tables
+	elseif status == "disabled" then
+		profile.dailyDisabled = true
+	end
 	if typeof(raw.version) == "number" and raw.version == raw.version and raw.version > VERSION then
 		profile.version = math.floor(raw.version) -- written by a newer server: keep its number
 	end
@@ -531,6 +643,265 @@ local function makeRoom(log: AppliedLog, keep: string, now: number): boolean
 	return count <= RECEIPT_CAP
 end
 
+local COMMAND_KEYS: { [string]: { string } } = {
+	play = { "type", "day", "source", "nominal", "eventId" },
+	progress = { "type", "day", "catalogVersion", "slotId", "generation", "kind", "amount", "eventId" },
+	claim = { "type", "day", "slot", "boardRevision", "generation", "eventId" },
+	rollover = { "type", "newDay", "eventId" },
+}
+
+local function validEventId(value: any): boolean
+	return typeof(value) == "string" and #value > 0 and #value <= MAX_EVENT_ID
+end
+
+-- A clean copy of a command, or nil when its type is unknown, a field is missing, mistyped or out of range, or it carries
+-- a field its type does not have. Nothing a client sends reaches here directly: the server builds every command.
+function ProfileRules.cleanCommand(raw: any): Command?
+	if typeof(raw) ~= "table" then
+		return nil
+	end
+	local allowed = COMMAND_KEYS[raw.type]
+	if allowed == nil then
+		return nil
+	end
+	for key in raw do
+		if table.find(allowed, key) == nil then
+			return nil
+		end
+	end
+	local t: string = raw.type
+	if raw.eventId ~= nil and not validEventId(raw.eventId) then
+		return nil
+	end
+	if t == "rollover" then
+		if not isInt(raw.newDay, 0, MAX_TIME) then
+			return nil
+		end
+		return ({ type = t, newDay = raw.newDay, eventId = raw.eventId } :: any) :: Command
+	end
+	if not isInt(raw.day, 0, MAX_TIME) then
+		return nil
+	end
+	if t == "play" then
+		if
+			not validEventId(raw.eventId)
+			or PLAY_SOURCES[raw.source] ~= true
+			or not isInt(raw.nominal, 0, XpConfig.PlayCap)
+		then
+			return nil
+		end
+		return (
+			{ type = t, day = raw.day, source = raw.source, nominal = raw.nominal, eventId = raw.eventId } :: any
+		) :: Command
+	elseif t == "progress" then
+		if
+			not validEventId(raw.eventId)
+			or not isInt(raw.catalogVersion, 1, 1000)
+			or typeof(raw.slotId) ~= "string"
+			or #raw.slotId > 32
+			or not isInt(raw.generation, 1, 1000000)
+			or typeof(raw.kind) ~= "string"
+			or not isInt(raw.amount, 1, MAX_FACT_AMOUNT)
+		then
+			return nil
+		end
+		return (
+			{
+				type = t,
+				day = raw.day,
+				catalogVersion = raw.catalogVersion,
+				slotId = raw.slotId,
+				generation = raw.generation,
+				kind = raw.kind,
+				amount = raw.amount,
+				eventId = raw.eventId,
+			} :: any
+		) :: Command
+	elseif t == "claim" then
+		if
+			not isInt(raw.slot, 1, QuestConfig.SlotCount)
+			or not isInt(raw.boardRevision, 1, 1000000)
+			or not isInt(raw.generation, 1, 1000000)
+		then
+			return nil
+		end
+		return (
+			{
+				type = t,
+				day = raw.day,
+				slot = raw.slot,
+				boardRevision = raw.boardRevision,
+				generation = raw.generation,
+				eventId = raw.eventId,
+			} :: any
+		) :: Command
+	end
+	return nil
+end
+
+-- The QuestClaim payload as a claim command, or nil: exactly {day, slot, boardRevision, generation}, finite integers in
+-- range, no other key. The client supplies identity only; never XP, progress, time or a reward choice.
+function ProfileRules.parseClaimPayload(raw: any): Command?
+	if typeof(raw) ~= "table" then
+		return nil
+	end
+	local count = 0
+	for key in raw do
+		if key ~= "day" and key ~= "slot" and key ~= "boardRevision" and key ~= "generation" then
+			return nil
+		end
+		count += 1
+	end
+	if count ~= 4 then
+		return nil
+	end
+	return ProfileRules.cleanCommand({
+		type = "claim",
+		day = raw.day,
+		slot = raw.slot,
+		boardRevision = raw.boardRevision,
+		generation = raw.generation,
+	})
+end
+
+-- The id that seeds the daily board: the user id as a non-negative integer (Studio test players can have negative ids).
+local function boardSeed(userId: any): number?
+	if typeof(userId) ~= "number" or userId ~= userId or userId == math.huge or userId == -math.huge then
+		return nil
+	end
+	return math.abs(math.floor(userId))
+end
+
+-- Applies `commands` in order to a copy of `stored` (a v4 table: stored value or in-memory profile) and returns it with one
+-- result per command. Pure and deterministic given (stored, commands, ctx.nowWall, ctx.userId): UpdateAsync may replay the
+-- callback and every replay recomputes from the value it is given. Every decision (claim, bonus, cap, rollover) is made here
+-- against the stored state. Daily state damaged (dailyStatus "disabled") or no usable user id: nothing is applied and
+-- nothing is repaired. An uninitialised daily state is opened only by a rollover command. Old-day commands (day behind the
+-- stored epoch) are dropped, never moved to today's budget (accepted tradeoff). Returns (value, results, droppedOldDay).
+function ProfileRules.applyCommands(
+	stored: any,
+	commands: { Command }?,
+	ctx: { nowWall: number, userId: number? }
+): (any, { CommandResult }, number)
+	local out: { [any]: any } = if typeof(stored) == "table" then table.clone(stored) else {}
+	local results: { CommandResult } = {}
+	if typeof(commands) ~= "table" or #commands == 0 then
+		return out, results, 0
+	end
+	local status = ProfileRules.dailyStatus(out, ctx.nowWall)
+	local seed = boardSeed(ctx.userId)
+	local list = commands :: { Command }
+	if status == "disabled" or seed == nil or not isFinite(ctx.nowWall) then
+		local reason = if seed == nil then "no_user" else "daily_disabled"
+		for i = 1, math.min(#list, QUEUE_CAP) do
+			local t = if typeof(list[i]) == "table" then tostring(list[i].type) else "invalid"
+			results[i] = { type = t, applied = false, xp = 0, reason = reason }
+		end
+		return out, results, 0
+	end
+	local xp: number = if isInt(out.xp, 0, XP_MAX) then out.xp else 0
+	local epoch: number? = out.dailyEpoch
+	local play: PlayXpDay? = out.playXpDay
+	local board: QuestRules.Board? = out.quests
+	local dropped = 0
+	for i = 1, math.min(#list, QUEUE_CAP) do
+		local c = ProfileRules.cleanCommand(list[i])
+		local result: CommandResult = { type = if c then c.type else "invalid", applied = false, xp = 0 }
+		results[i] = result
+		local granted = 0
+		if c == nil then
+			result.reason = "invalid"
+		elseif c.type == "rollover" then
+			local newDay = c.newDay :: number
+			if XpRules.classifyDay(newDay, ctx.nowWall) == "invalid" then
+				result.reason = "bad_day"
+			elseif epoch == nil or play == nil or board == nil then
+				local fresh = QuestRules.boardFor(seed, newDay, QuestConfig.CatalogVersion)
+				if fresh == nil then
+					result.reason = "bad_day"
+				else
+					epoch, play, board = newDay, { day = newDay, amount = 0 }, fresh
+					result.applied = true
+				end
+			elseif newDay <= epoch then
+				result.reason = "not_later" -- epochs never move backwards; another server already advanced
+			else
+				local settled, fresh = QuestRules.rollover(board, newDay, seed)
+				if fresh.day ~= newDay then
+					result.reason = "bad_day"
+				else
+					granted = settled
+					epoch, play, board = newDay, { day = newDay, amount = 0 }, fresh
+					result.applied = true
+				end
+			end
+		elseif epoch == nil or play == nil or board == nil then
+			result.reason = "uninitialized"
+		elseif (c.day :: number) < epoch then
+			result.reason = "old_day"
+			dropped += 1
+		elseif c.day ~= epoch then
+			result.reason = "future_day" -- needs its rollover first; never attached to a board of another day
+		elseif c.type == "play" then
+			local award = XpRules.playAward(play.amount, c.nominal :: number)
+			if award > 0 then
+				play = { day = play.day, amount = play.amount + award }
+				granted = award
+				result.applied = true
+			else
+				result.reason = "cap"
+			end
+		elseif c.type == "progress" then
+			local nextBoard, changed = QuestRules.applyProgress(board, {
+				day = c.day :: number,
+				catalogVersion = c.catalogVersion :: number,
+				slotId = c.slotId :: string,
+				generation = c.generation :: number,
+				kind = c.kind :: any,
+				amount = c.amount :: number,
+			})
+			if changed then
+				board = nextBoard
+				result.applied = true
+				local withBonus, bonus = QuestRules.bonus(board)
+				if bonus > 0 then
+					board = withBonus
+					granted = bonus -- the all-three bonus, in the transaction that first completes the third quest
+				end
+			else
+				result.reason = "no_match"
+			end
+		else
+			local nextBoard, reward = QuestRules.claim(
+				board,
+				c.day :: number,
+				c.slot :: number,
+				c.boardRevision :: number,
+				c.generation :: number
+			)
+			if reward > 0 then
+				board = nextBoard
+				granted = reward
+				result.applied = true
+				local withBonus, bonus = QuestRules.bonus(board)
+				if bonus > 0 then
+					board = withBonus
+					granted += bonus
+				end
+			else
+				result.reason = "no_award" -- incomplete, already claimed, stale revision or generation
+			end
+		end
+		xp = math.min(xp + granted, XP_MAX)
+		result.xp = granted
+	end
+	out.xp = xp
+	out.dailyEpoch = epoch
+	out.playXpDay = play
+	out.quests = board
+	return out, results, dropped
+end
+
 -- Decides one UpdateAsync callback for `op`. Pure; never mutates `stored`. In order:
 --  1. stored data from a newer build -> newer_schema, no write (also when it became newer after this session loaded).
 --  2. an op or context without a valid identity -> abandoned ("invalid"), no write.
@@ -548,6 +919,7 @@ function ProfileRules.planSave(stored: any, op: SaveOp, ctx: SaveContext): SaveP
 	if ProfileRules.isNewerVersion(stored) then
 		return { tag = "newer_schema" }
 	end
+	stored = ProfileRules.migrate(stored) -- v3 -> v4 inside the transform; idempotent, a v4 value passes through
 	if not validOp(op) or typeof(ctx) ~= "table" or not isFinite(ctx.nowWall) then
 		return { tag = "abandoned", reason = "invalid" }
 	end
@@ -579,8 +951,18 @@ function ProfileRules.planSave(stored: any, op: SaveOp, ctx: SaveContext): SaveP
 	if hasSettings and not dropped then
 		out = withSettings(out, op.settingsPatch)
 	end
+	local results: { CommandResult }
+	local droppedOldDay: number
+	out, results, droppedOldDay =
+		ProfileRules.applyCommands(out, op.commands, { nowWall = ctx.nowWall, userId = ctx.userId })
 	out.applied = log
-	return { tag = "applied", write = out, superseded = if dropped then true else nil }
+	return {
+		tag = "applied",
+		write = out,
+		superseded = if dropped then true else nil,
+		results = results,
+		droppedOldDay = droppedOldDay,
+	}
 end
 
 -- R6: how one UpdateAsync attempt ended, from the decisions its callback(s) returned (in order), what UpdateAsync
@@ -626,7 +1008,198 @@ function ProfileRules.newLedger(sessionId: string): Ledger
 		op = nil,
 		ambiguous = false,
 		reportedSeq = 0,
+		queue = {},
+		seen = {},
+		seenOrder = {},
 	}
+end
+
+-- Same logical fact as the last queued command? Then its amount is folded into it (order is kept: nothing after it moved).
+local function coalescible(last: Command, c: Command): boolean
+	if last.type ~= c.type then
+		return false
+	end
+	if c.type == "play" then
+		return last.day == c.day
+			and last.source == c.source
+			and (last.nominal :: number) + (c.nominal :: number) <= XpConfig.PlayCap
+	elseif c.type == "progress" then
+		return last.day == c.day
+			and last.catalogVersion == c.catalogVersion
+			and last.slotId == c.slotId
+			and last.generation == c.generation
+			and last.kind == c.kind
+			and (last.amount :: number) + (c.amount :: number) <= MAX_FACT_AMOUNT
+	end
+	return false
+end
+
+-- Where a new command goes in the queue: at the end, except that the queue stays in day order around rollovers (each
+-- command meets the board of its own day, AUD-20261107-TASK-0150-01 F2/F3). A rollover to day N goes before the first queued
+-- command of day N or later (a fresh rollover after an unconfirmed one opens the day for facts already waiting); a dated
+-- command of day d goes before the first queued rollover to a day after d (it belongs to the board that rollover closes).
+-- Relative order is otherwise kept. Returns the index to insert at (#queue + 1: append).
+local function insertAt(queue: { Command }, c: Command): number
+	for i, queued in queue do
+		if c.type == "rollover" then
+			local day = if queued.type == "rollover" then queued.newDay else queued.day
+			if day ~= nil and day >= (c.newDay :: number) then
+				return i
+			end
+		elseif queued.type == "rollover" and c.day ~= nil and (queued.newDay :: number) > (c.day :: number) then
+			return i
+		end
+	end
+	return #queue + 1
+end
+
+-- Queues one command for the NEXT op. Returns the new ledger, whether it was queued and why not. A malformed command, an
+-- event id seen recently (a logical event queues once) or a full queue changes nothing. Consecutive increments of the same
+-- quest or play source are folded into one command. Commands of an op already taken are never touched or re-queued.
+function ProfileRules.queueCommand(ledger: Ledger, raw: any): (Ledger, boolean, string?)
+	local c = ProfileRules.cleanCommand(raw)
+	if c == nil then
+		return ledger, false, "invalid"
+	end
+	if c.eventId ~= nil and ledger.seen[c.eventId] then
+		return ledger, false, "duplicate"
+	end
+	local queue = ledger.queue
+	local last = queue[#queue]
+	local at = insertAt(queue, c)
+	local fold = at == #queue + 1 and last ~= nil and coalescible(last, c)
+	if not fold and #queue >= QUEUE_CAP then
+		return ledger, false, "queue_full"
+	end
+	local out = table.clone(ledger)
+	local nextQueue = table.clone(queue)
+	if fold then
+		local merged = table.clone(last)
+		if c.type == "play" then
+			merged.nominal = (last.nominal :: number) + (c.nominal :: number)
+		else
+			merged.amount = (last.amount :: number) + (c.amount :: number)
+		end
+		nextQueue[#nextQueue] = merged
+	else
+		table.insert(nextQueue, at, c)
+	end
+	out.queue = nextQueue
+	if c.eventId ~= nil then
+		local seen = table.clone(ledger.seen)
+		local order = table.clone(ledger.seenOrder)
+		seen[c.eventId] = true
+		table.insert(order, c.eventId)
+		while #order > SEEN_CAP do
+			seen[table.remove(order, 1) :: string] = nil
+		end
+		out.seen = seen
+		out.seenOrder = order
+	end
+	return out, true, nil
+end
+
+-- How many commands have not been confirmed: queued plus those frozen in the unresolved op.
+function ProfileRules.pendingCommands(ledger: Ledger): number
+	local op = ledger.op
+	return #ledger.queue + (if op ~= nil and op.commands ~= nil then #op.commands else 0)
+end
+
+-- Does a command of `day` need a rollover queued first? Readiness comes only from the confirmed stored epoch (`epoch`, what
+-- the session last adopted) and rollovers actually still pending: frozen in the unresolved op (they run before anything
+-- queued) or queued ahead of where a command of `day` would go (insertAt). A rollover whose op ended unconfirmed is in
+-- neither, so it never counts, and the next fact or request queues a fresh one (AUD-20261107-TASK-0150-01 F3).
+function ProfileRules.needsRollover(epoch: number?, ledger: Ledger, day: number): boolean
+	local known = epoch or -1
+	local op = ledger.op
+	if op ~= nil and op.commands ~= nil then
+		for _, c in op.commands do
+			if c.type == "rollover" and c.newDay ~= nil then
+				known = math.max(known, c.newDay)
+			end
+		end
+	end
+	for _, c in ledger.queue do
+		if c.type == "rollover" and c.newDay ~= nil and c.newDay <= day then
+			known = math.max(known, c.newDay)
+		end
+	end
+	return known < day
+end
+
+-- The days of queued commands that no confirmed epoch or pending rollover opens, ascending (AUD-01 F3). They were queued
+-- behind a rollover whose op then ended unconfirmed; a fresh rollover (queued before them by insertAt) opens their day
+-- again. Commands of the unconfirmed op itself are gone and are never replayed.
+function ProfileRules.strandedDays(epoch: number?, ledger: Ledger): { number }
+	local days: { number } = {}
+	for _, c in ledger.queue do
+		local day = c.day
+		if
+			c.type ~= "rollover"
+			and day ~= nil
+			and table.find(days, day) == nil
+			and ProfileRules.needsRollover(epoch, ledger, day)
+		then
+			table.insert(days, day)
+		end
+	end
+	table.sort(days)
+	return days
+end
+
+-- A claim's reply once its op settled (AUD-01 F5): "confirmed" only when this claim's own command applied (`result`), or
+-- when the authoritative adopted `board` shows exactly the claimed identity (day, board revision, slot generation) already
+-- claimed (a repeat claim: zero XP, the quest is claimed). Everything else, including a closed day, a wrong revision or
+-- generation, disabled daily state or another slot being claimed, is "stale".
+function ProfileRules.claimOutcome(claim: Command, board: QuestRules.Board?, result: CommandResult?): string
+	if result ~= nil then
+		if result.applied then
+			return "confirmed"
+		end
+		if result.reason ~= "no_award" then
+			return "stale" -- old_day, future_day, uninitialized, daily_disabled, invalid ...
+		end
+	end
+	if board == nil or board.day ~= claim.day or board.boardRevision ~= claim.boardRevision then
+		return "stale"
+	end
+	local slot = board.slots[claim.slot :: number]
+	if slot ~= nil and slot.generation == claim.generation and slot.claimed then
+		return "confirmed"
+	end
+	return "stale"
+end
+
+-- Per-day counts of facts, ascending by day: each fact keeps the day it was accepted (AUD-01 F2, Blitz answers buffered
+-- until the result boundary). Non-integer days are ignored.
+function ProfileRules.factsByDay(days: { number }): { { day: number, amount: number } }
+	local counts: { [number]: number } = {}
+	local order: { number } = {}
+	for _, day in days do
+		if isInt(day, 0, MAX_TIME) then
+			if counts[day] == nil then
+				counts[day] = 0
+				table.insert(order, day)
+			end
+			counts[day] += 1
+		end
+	end
+	table.sort(order)
+	local out = {}
+	for _, day in order do
+		table.insert(out, { day = day, amount = counts[day] })
+	end
+	return out
+end
+
+-- The one finalisation guard of a run (Skill Test, AUD-01 F1): the first terminal reason wins and later calls change
+-- nothing. Returns the terminal reason and whether THIS call earned the completion: only the first call, and only when its
+-- reason is "completed" (an error-generated end or an incomplete departure never qualifies).
+function ProfileRules.finalizeRun(terminal: string?, reason: string): (string, boolean)
+	if terminal ~= nil then
+		return terminal, false
+	end
+	return reason, reason == "completed"
 end
 
 -- The ledger with the settings keys that differ between `before` and `after` recorded (newest value wins) for the next
@@ -676,7 +1249,7 @@ function ProfileRules.takeOp(ledger: Ledger, want: boolean, clock: number, wall:
 	if ledger.op ~= nil then
 		return ledger, ledger.op, false
 	end
-	if ledger.pending <= 0 and not want and next(ledger.settingsPatch) == nil then
+	if ledger.pending <= 0 and not want and next(ledger.settingsPatch) == nil and #ledger.queue == 0 then
 		return ledger, nil, false
 	end
 	local createdAtWall = if wall ~= nil and isFinite(wall) then wall else 0
@@ -690,8 +1263,10 @@ function ProfileRules.takeOp(ledger: Ledger, want: boolean, clock: number, wall:
 		createdAt = clock,
 		createdAtWall = createdAtWall,
 		settingsPatch = table.freeze(table.clone(ledger.settingsPatch)),
+		commands = table.freeze(table.clone(ledger.queue)), -- ALL queued commands, in order, frozen with the op
 	})
 	local out = table.clone(ledger)
+	out.queue = {}
 	out.nextSeq = ledger.nextSeq + 1
 	out.pending = 0
 	out.settingsPatch = {}

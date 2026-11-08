@@ -1,0 +1,66 @@
+TASK-0150 revision 1 Studio evidence (2026-11-08 UTC; AUD-20261107-TASK-0150-01 F1-F5)
+measured_sha: 84c9891 (BuildStamp "84c9891 2026-11-08T00:20:02Z" read in Edit after the Rojo plugin reconnect == HEAD of the code
+              under test; Rojo 7.7.0 via scripts/serve.sh from /Users/jg/Desktop/Rg1-worktrees/TASK-0150, port 34872)
+applies_to: games/mathshow/src/shared/ProfileRules.luau,
+            games/mathshow/src/server/Services/{ProfileService,QuestService,BlitzService,SkillTestService}.luau
+            (verify for a later head: git diff --stat 84c9891..HEAD -- <these>)
+
+Environment: private test experience ONLY ("MathShow Private Test", universe 10774566206, place 93701543861123), one Studio
+window, one Rojo server, Play (Server data model) sessions only. API access proven by a successful GetAsync("p_8757379006") in
+Play (not read back from Experience Settings). No publish, no live experience, no edit-mode DataStore writes. Test profile
+p_8757379006 (jg's account). Driven through real paths: client remotes (QuestRequest, QuestClaim, BlitzStart/BlitzAnswer,
+SkillStart/SkillAnswer), LocalPlayer:Kick() for a real departure, server workspace-attribute hooks MathShowForceSaveErrorAfterCommit
+and MathShowClockOffsetS. QuestState observed on the client through an OnClientEvent listener.
+
+Test profile before (GetAsync at Play start): version 4, xp 280, dailyEpoch 20764 (real UTC day was already 20765), play
+{20764, 80}, board rev 1 [P_H_ROUND6 6/6 unclaimed, A_M_40 40/40 unclaimed, G_E_10 10/10 claimed], bonusGranted true,
+glyphsLifetime 85, blitzBest 10, bestRank 2, 9 receipts, unknown fields flag / settings.futureToggle present.
+
+R1 Interrupted rollover, then next op and rejoin (F3): PASS
+  - MathShowForceSaveErrorAfterCommit = true, then one client QuestRequest. Console: "profile save attempt failed ... (op 1,
+    outcome=ambiguous, callbacks=1): simulated: UpdateAsync committed, then errored" then "save op 1 ... acknowledged by its
+    receipt; nothing written".
+  - Store after: xp 630 (= 280 + 150 + 200, the two complete unclaimed quests settled once; no second +100 bonus because
+    bonusGranted was already true), epoch 20765, play {20765, 0}, board rev 2 [P_E_ROUND2, A_H_80, G_M_RARE1], 10 receipts.
+  - QuestState: rev 2 pending (pending 1) -> rev 3 confirmed day 20765 xp 630. A second QuestRequest: confirmed, pending 0 (no
+    new rollover queued).
+  - Rejoin (stop + start Play): store xp 630, epoch 20765, rev 2, 10 receipts, flag kept; QuestRequest confirmed, pending 0;
+    attributes Level 5, Title "Number Rookie". Settled once, no regeneration.
+R2 Blitz across a clock-offset midnight (F2): PASS
+  - MathShowClockOffsetS set so the daily clock read 25 s before 00:00 of day 20766. BlitzStart; answers 1-2 correct; offset moved
+    to 60 s past midnight; answers 3-10 correct. BlitzResult correct = 10.
+  - QuestState / store after: epoch 20766, board rev 3 [P_H_BLITZ5 1/5, A_E_15 8/15, G_M_RARE1 0/1], play {20766, 15}, xp 645.
+    The new day's board holds exactly the 8 post-midnight answers; the finish (blitz_finish + 15 play XP) is on the day the run
+    ended. No "closed day dropped" warning, so the 2 pre-midnight answers were applied to the day-20765 board before the
+    rollover (that board is replaced by the rollover, so its progress is not readable afterwards; A_H_80 was incomplete, no XP).
+  - Not run at 81f2f8b. From its source (and the audit probe): every fact carried the start day 20765.
+  - The other board-advancement order (stored board already advanced before the flush) is spec-covered (AUD-01 F2), not run here.
+R3 Claim regression and stale identities (F5): PASS
+  - A second Blitz run (10 correct) completed A_E_15 15/15, xp 660.
+  - QuestClaim {20766, slot 2, rev 3, gen 1}: confirmed, xp 660 -> 760 (+100), slot claimed.
+  - The same claim again: confirmed, xp stays 760 (awarded 0).
+  - Yesterday's identity {20765, slot 2, rev 2, gen 1} while today's slot 2 is claimed: result "stale", xp 760 (console: "save op 5
+    ... 1 quest/play command(s) of a closed day dropped"). Not run at 81f2f8b; the audit probe showed it replied "confirmed" here.
+  - Wrong generation {20766, slot 2, rev 3, gen 2}: "stale", xp 760.
+R4 Skill leave during the finished final reveal (F1): PASS (one completion, XP once)
+  - SkillStart; question 1 (rank 0, "32 + 21 = ?") answered correctly; questions 2 and 3 answered wrong. On the reveal with
+    misses = 2 (the run is finished) the client called LocalPlayer:Kick() 0.3 s into the 3 s reveal.
+  - Store after the departure: xp 780 (= 760 + 20 Skill finish), A_E_15 still 15/15 claimed (the correct-answer fact found its
+    quest already complete), play {20766, 50}. Rejoin: xp 780, Level 5. Exactly one completion.
+  - Limitation: lastTakenAt also reached the store, so on this run SkillTestService's PlayerRemoving listener ran before
+    ProfileService released the session. This run therefore shows the completion once, but cannot reproduce the listener-order
+    loss the audit's source probe showed; the fix removes that dependence by finalising when the last answer closes the run.
+  - Error-generated termination (no problem for a rank) cannot be triggered from the client; spec only (AUD-01 F1).
+R5 Bonus regression: PASS. The R1 rollover settled 350, not 450: bonusGranted already true on the closed board, no second bonus.
+
+Restore (Play-server UpdateAsync, recorded): the run left the profile on day 20766 (a day ahead of the real clock, which would
+load as disabled until the real day catches up). Written back to the coherent state recorded after R1: version 4, xp 630,
+dailyEpoch 20765, playXpDay {20765, 0}, quests {day 20765, catalogVersion 1, boardRevision 2, [P_E_ROUND2 0, A_H_80 0,
+G_M_RARE1 0] unclaimed generation 1, bonusGranted false}; everything else kept as stored (glyphsLifetime 85, blitzBest 10,
+bestRank 2, lastTestRank 0, lastTakenAt 1794097526, flag, settings.futureToggle, 11 receipts). XP earned on the offset day
+(150) is discarded by the restore on purpose. Verified in a fresh Play: QuestState confirmed day 20765 rev 2 xp 630 pending 0,
+Level 5, no daily-disabled warning.
+
+Console: no errors; no QuestService or daily-disabled warnings beyond the ones listed above. The ContentId 203785492 warnings
+are pre-existing.
+Close-out: Play stopped, Studio window closed (no save prompt appeared), Rojo server stopped.

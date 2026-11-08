@@ -80,4 +80,7 @@ return table.freeze({
 	SettingsSave = event(Net.SettingsSave),
 	GlyphCollect = event(Net.GlyphCollect),
 	GlyphState = event(Net.GlyphState),
+	QuestRequest = event(Net.QuestRequest),
+	QuestClaim = event(Net.QuestClaim),
+	QuestState = event(Net.QuestState),
 })

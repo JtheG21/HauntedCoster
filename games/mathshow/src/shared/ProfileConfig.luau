@@ -9,5 +9,9 @@ return table.freeze({
 	CLOCK_SKEW_ALLOWANCE_S = 300, -- how far another server's os.time() may differ from ours
 	RECEIPT_TTL_S = 604800, -- 7 days: receipts exactly this old are kept, older ones pruned
 	RECEIPT_CAP = 200, -- at most this many session receipts per profile
+	XP_MAX = 100000000, -- schema v4: a stored xp total above this is damaged data (daily mutation fails closed)
+	COMMAND_QUEUE_CAP = 64, -- ordered quest/play commands waiting for the next op; more are dropped with a warning
+	SEEN_EVENT_CAP = 256, -- recent event ids remembered per session so one logical event queues once
+	MAX_EVENT_ID = 64,
 	SHUTDOWN_DEADLINE_S = 25, -- shared local drain deadline inside Roblox's 30 s BindToClose budget
 })
