@@ -3,7 +3,7 @@ id: TASK-0150
 title: "MathShow Quests XP Persistence And Services"
 type: task
 project: GAME-004
-status: review
+status: approved
 priority: medium
 risk: high
 owner: executor
@@ -111,5 +111,7 @@ Range 81f2f8b..HEAD. Owned files only: `ProfileRules.luau`, `ProfileService.luau
   actionable findings; check.sh 13/13; independent Lune probes for Skill completion/error, Blitz day attribution, rollover
   recovery, missing-XP rejection and stale claims passed. Not run by Codex: Studio or DataStore tests. Still out of scope:
   the Skill cooldown save order on a final-reveal leave.
+- [[AUD-20261107-TASK-0150-02]]: Codex's written record of that re-audit, PASS at d44a6de (sha256 d925b534...); recorded with
+  `record-audit --result pass`.
 
 ## Outcome
