@@ -25,6 +25,7 @@ local OPENABLE: { [string]: boolean } = {
 	confirm_group = true,
 	practice = true,
 	skillintro = true,
+	quests = true, -- the Daily pad (TASK-0151)
 }
 
 local started = false

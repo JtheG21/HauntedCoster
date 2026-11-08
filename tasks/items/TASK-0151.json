@@ -2,7 +2,7 @@
   "id": "TASK-0151",
   "game": "GAME-004",
   "title": "MathShow Quests XP UI",
-  "status": "backlog",
+  "status": "done",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -11,7 +11,13 @@
     "games/mathshow/src/shared/LedgerRules.luau",
     "tasks/items/TASK-0151.json",
     "03 Games/GAME-004 MathShow/06 Tasks/TASK-0151-MathShow-Quests-XP-UI.md",
-    "games/mathshow/src/client/Hub/ModePadController.luau"
+    "games/mathshow/src/client/Hub/ModePadController.luau",
+    "games/mathshow/src/shared/ModePadConfig.luau",
+    "games/mathshow/src/server/Services/ModePadService.luau",
+    "games/mathshow/src/client/init.client.luau",
+    "games/mathshow/src/client/Hud/Nameplates.luau",
+    "games/mathshow/tests/ModePadRules.spec.luau",
+    "games/mathshow/tests/LedgerRules.spec.luau"
   ],
   "depends_on": [
     "TASK-0150"
@@ -21,7 +27,152 @@
     "Menu quests panel, level badge, XP bar and Reveal toast built in code from MenuTheme; reducedMotion respected; text-fit ledger updated and green on all viewports; Studio visual check on phone and desktop."
   ],
   "evidence": [],
-  "notes": "Backlog; waiting for the Codex design review of SYS-Quests-And-XP and jg's plan rows. No plan approval yet.",
+  "notes": "Plan approved by jg (row QX-T3, 2026-11-07): QUESTS screen, level card, toasts, nameplates, Daily pad -> QUESTS. Merge after a Codex PASS on the exact head (row QX-T3M). ModeRules joins files_owned only if routing needs it.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0151-MathShow-Quests-XP-UI.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-07T16:46:41",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-07T16:46:41",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-07T17:08:35",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-07T17:11:29",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-07T17:24:48",
+      "from": "approved",
+      "to": "changes_requested",
+      "note": "changes requested by jg: Codex FAIL at 351f4d8 (AUD-20261107-TASK-0151-02), relayed by jg in chat; revision 1/2"
+    },
+    {
+      "time": "2026-11-07T17:24:48",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-07T17:24:48",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-07T17:29:27",
+      "from": "review",
+      "to": "changes_requested",
+      "note": "audit failed; revision 2/2"
+    },
+    {
+      "time": "2026-11-07T17:32:02",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-07T17:32:12",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-07T17:36:31",
+      "from": "review",
+      "to": "blocked",
+      "note": "audit failed; revision limit 2 exceeded, needs human"
+    },
+    {
+      "time": "2026-11-07T17:37:24",
+      "from": "blocked",
+      "to": "ready",
+      "note": "unblocked by jg"
+    },
+    {
+      "time": "2026-11-07T17:37:24",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-07T17:38:57",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
+    },
+    {
+      "time": "2026-11-07T17:42:07",
+      "from": "review",
+      "to": "approved",
+      "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-07T17:42:41",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
+    }
+  ],
+  "executions": [
+    {
+      "time": "2026-11-07T17:08:35",
+      "result": "pass",
+      "notes": "check.sh green; Studio TextFit 11670 rows 0 failures (5 viewports), ledger 781+320; live QUESTS via Daily pad payload, toasts, nameplate verified"
+    },
+    {
+      "time": "2026-11-07T17:24:48",
+      "result": "pass",
+      "notes": "rev 2: Codex F1/F2 fixed; check.sh green; Studio: 11 malformed pushes rejected, loading baseline gives no toast"
+    },
+    {
+      "time": "2026-11-07T17:32:12",
+      "result": "pass",
+      "notes": "rev 3 (jg approved over the 2-revision limit, 2026-11-07): catalogVersion, board revision/generation >= 1, unique slot ids; check.sh green; Studio: 6 new malformed pushes rejected, real server push and a valid lower revision accepted"
+    },
+    {
+      "time": "2026-11-07T17:38:57",
+      "result": "pass",
+      "notes": "rev 4 (jg approved, 2026-11-07): boards checked with the shared QuestRules.validate; check.sh green; Studio: 11 malformed pushes rejected, real push and a valid bonus board accepted"
+    }
+  ],
+  "audits": [
+    {
+      "time": "2026-11-07T17:11:29",
+      "result": "pass",
+      "report": "06 QA/AUD-20261107-TASK-0151-01.md"
+    },
+    {
+      "time": "2026-11-07T17:29:27",
+      "result": "fail",
+      "report": "06 QA/AUD-20261107-TASK-0151-03.md"
+    },
+    {
+      "time": "2026-11-07T17:36:31",
+      "result": "fail",
+      "report": "06 QA/AUD-20261107-TASK-0151-04.md"
+    },
+    {
+      "time": "2026-11-07T17:42:07",
+      "result": "pass",
+      "report": "06 QA/AUD-20261107-TASK-0151-05.md"
+    }
+  ],
+  "revisions": 0,
+  "merge_approved_by": "jg"
 }
