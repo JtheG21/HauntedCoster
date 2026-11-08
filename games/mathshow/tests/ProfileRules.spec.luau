@@ -1910,4 +1910,351 @@ return function(t: TestRunner.T)
 			t.truthy(deepSame(plain.quests, stored.quests))
 		end
 	)
+
+	-- ---------------------------------------------------------------------------------------------------------------
+	-- AUD-20261107-TASK-0150-01 regressions (TASK-0150 revision 1). One per finding.
+
+	-- The board slot of `kind` on `board`, or nil.
+	local function slotOf(board: any, kind: string): number?
+		for i = 1, QuestConfig.SlotCount do
+			if QuestConfig.Catalog[board.slots[i].id].kind == kind then
+				return i
+			end
+		end
+		return nil
+	end
+
+	-- Queues one intent the way QuestService.dispatch does: a rollover first when ProfileRules.needsRollover says the day is
+	-- not open, then the play award and a progress command per matching slot of that day's deterministic board.
+	local function queueIntent(
+		ledger: ProfileRules.Ledger,
+		epoch: number?,
+		day: number,
+		eventId: string,
+		play: { source: string, nominal: number }?,
+		fact: { kind: string, amount: number }?
+	): ProfileRules.Ledger
+		if ProfileRules.needsRollover(epoch, ledger, day) then
+			ledger = ProfileRules.queueCommand(ledger, { type = "rollover", newDay = day, eventId = `{eventId}:r` })
+		end
+		if play ~= nil then
+			ledger = ProfileRules.queueCommand(ledger, {
+				type = "play",
+				day = day,
+				source = play.source,
+				nominal = play.nominal,
+				eventId = `{eventId}:p`,
+			})
+		end
+		if fact ~= nil then
+			local board = QuestRules.boardFor(USER, day, QuestConfig.CatalogVersion) :: any
+			for i = 1, QuestConfig.SlotCount do
+				local slot = board.slots[i]
+				if QuestConfig.Catalog[slot.id].kind == fact.kind then
+					ledger = ProfileRules.queueCommand(ledger, {
+						type = "progress",
+						day = day,
+						catalogVersion = board.catalogVersion,
+						slotId = slot.id,
+						generation = slot.generation,
+						kind = fact.kind,
+						amount = fact.amount,
+						eventId = `{eventId}:q{i}`,
+					})
+				end
+			end
+		end
+		return ledger
+	end
+
+	local function commandsOf(ledger: ProfileRules.Ledger): ({ any }, ProfileRules.Ledger)
+		local taken, frozen = ProfileRules.takeOp(ledger, false, 0, NOON)
+		return if frozen ~= nil then frozen.commands :: any else {}, taken
+	end
+
+	t.test(
+		"AUD-01 F1: one finalisation guard: one completion across finish and final-reveal leave; error earns none",
+		function()
+			local function run(reasons: { string }): (string?, number)
+				local terminal: string? = nil
+				local earned = 0
+				for _, reason in reasons do
+					local got
+					terminal, got = ProfileRules.finalizeRun(terminal, reason)
+					if got then
+						earned += 1
+					end
+				end
+				return terminal, earned
+			end
+			-- the last answer closes the run (completed), then the player leaves during the final reveal (the shared guard again)
+			local terminal, earned = run({ "completed", "completed" })
+			t.eq(terminal, "completed")
+			t.eq(earned, 1, "normal finish plus final-reveal departure: exactly one completion")
+			local _, alone = run({ "completed" })
+			t.eq(alone, 1, "a normal finish alone earns one completion")
+			local errored, none = run({ "error" })
+			t.eq(errored, "error")
+			t.eq(none, 0, "an error-generated end earns no completion")
+			local _, after = run({ "error", "completed" })
+			t.eq(after, 0, "a later completed call cannot turn an error end into a completion")
+			local _, midRun = run({})
+			t.eq(midRun, 0, "an incomplete departure never finalises")
+		end
+	)
+
+	t.test(
+		"AUD-01 F2: a Blitz run across midnight keeps each answer's day, in both board-advancement orders",
+		function()
+			local nextDay = DAY + 1
+			local afterMidnight = nextDay * 86400 + 100
+			-- one correct answer accepted before midnight, two after; the run ends after midnight
+			local groups = ProfileRules.factsByDay({ DAY, nextDay, nextDay })
+			t.eq(#groups, 2)
+			t.eq(groups[1].day, DAY)
+			t.eq(groups[1].amount, 1)
+			t.eq(groups[2].day, nextDay)
+			t.eq(groups[2].amount, 2)
+			t.eq(#ProfileRules.factsByDay({}), 0, "no correct answer: nothing to flush")
+			t.eq(#ProfileRules.factsByDay({ NAN :: any, 1.5 }), 0, "non-integer days are ignored")
+
+			local function flush(ledger: ProfileRules.Ledger, epoch: number?): ProfileRules.Ledger
+				for _, group in groups do
+					ledger = queueIntent(
+						ledger,
+						epoch,
+						group.day,
+						`run:a:{group.day}`,
+						nil,
+						{ kind = "correct", amount = group.amount }
+					)
+				end
+				return queueIntent(
+					ledger,
+					epoch,
+					nextDay,
+					"run:f",
+					{ source = "blitz", nominal = XpConfig.PlayAward.BlitzFinish },
+					{ kind = "blitz_finish", amount = 1 }
+				)
+			end
+			local answersTomorrow = slotOf(v4(nextDay).quests, "correct") :: number
+
+			-- Order 1: the stored board has not advanced yet. The pre-midnight answer lands on yesterday's board, then one
+			-- rollover, then the post-midnight answers and the finish on today's board and today's play cap.
+			local stored = v4()
+			local commands = commandsOf(flush(ProfileRules.newLedger("A"), stored.dailyEpoch))
+			local decided = runOp(stored, "A", 1, commands, { nowWall = afterMidnight })
+			local out = wrote(t, decided)
+			t.eq(decided.results[1].type, "progress")
+			t.eq(decided.results[1].applied, true, "yesterday's answer counts on yesterday's board")
+			t.eq(decided.results[2].type, "rollover")
+			t.eq(decided.results[2].applied, true)
+			t.eq(out.dailyEpoch, nextDay)
+			t.eq(out.quests.slots[answersTomorrow].progress, 2, "today's answers on today's board")
+			t.eq(out.playXpDay.day, nextDay)
+			t.eq(out.playXpDay.amount, XpConfig.PlayAward.BlitzFinish, "the finish uses the day the run ended")
+			t.eq(decided.droppedOldDay, 0)
+
+			-- Order 2: another server already advanced the stored board to today. Only the closed-day answer is dropped.
+			local advanced = v4(nextDay)
+			local later = commandsOf(flush(ProfileRules.newLedger("B"), advanced.dailyEpoch))
+			local decided2 = runOp(advanced, "B", 1, later, { nowWall = afterMidnight })
+			local out2 = wrote(t, decided2)
+			t.eq(decided2.results[1].reason, "old_day", "the closed day's answer is dropped (accepted rule)")
+			t.eq(decided2.droppedOldDay, 1)
+			t.eq(out2.quests.slots[answersTomorrow].progress, 2, "post-midnight answers keep today")
+			t.eq(out2.playXpDay.amount, XpConfig.PlayAward.BlitzFinish)
+			t.eq(out2.xp, XpConfig.PlayAward.BlitzFinish)
+
+			-- A rollover to today only queued locally (a request after midnight) still lets yesterday's answer meet yesterday's
+			-- board: the answer is queued ahead of that rollover.
+			local ledger = ProfileRules.queueCommand(
+				ProfileRules.newLedger("C"),
+				{ type = "rollover", newDay = nextDay, eventId = "req:r" }
+			)
+			local queued = commandsOf(flush(ledger, stored.dailyEpoch))
+			t.eq(queued[1].type, "progress")
+			t.eq(queued[1].day, DAY)
+			t.eq(queued[2].type, "rollover")
+			local decided3 = runOp(stored, "C", 1, queued, { nowWall = afterMidnight })
+			t.eq(decided3.results[1].applied, true, "yesterday's answer applied before the queued rollover")
+		end
+	)
+
+	t.test(
+		"AUD-01 F3: an unconfirmed rollover never counts; the next fact or the settlement reopens the day",
+		function()
+			-- Initialisation: the first rollover's op expires on an uninitialised profile.
+			local migrated = ProfileRules.migrate({ version = 3, glyphsLifetime = 2 })
+			local ledger =
+				queueIntent(ProfileRules.newLedger("A"), nil, DAY, "g1", { source = "glyph", nominal = 1 }, nil)
+			local first, taken = commandsOf(ledger)
+			t.eq(first[1].type, "rollover")
+			local expired = ProfileRules.settle(taken, { kind = "expired" })
+			t.eq(ProfileRules.needsRollover(nil, expired, DAY), true, "an expired rollover does not open the day")
+			local again = queueIntent(expired, nil, DAY, "g2", { source = "glyph", nominal = 1 }, nil)
+			local second = commandsOf(again)
+			t.eq(#second, 2, "a fresh rollover and the new pickup; the expired op's pickup is not replayed")
+			t.eq(second[1].type, "rollover")
+			t.eq(second[2].eventId, "g2:p")
+			local opened = wrote(t, runOp(migrated, "A", 2, second))
+			t.eq(opened.dailyEpoch, DAY)
+			t.eq(opened.xp, 1)
+
+			-- Midnight: a rollover op is in flight while a new fact of the new day waits; then that op expires.
+			local nextDay = DAY + 1
+			local afterMidnight = nextDay * 86400 + 100
+			local stored = v4()
+			local l2 =
+				queueIntent(ProfileRules.newLedger("B"), DAY, nextDay, "g3", { source = "glyph", nominal = 1 }, nil)
+			local _, inFlight = commandsOf(l2)
+			inFlight = queueIntent(inFlight, DAY, nextDay, "g4", { source = "glyph", nominal = 1 }, nil)
+			t.eq(#inFlight.queue, 1, "while its rollover is in flight the new fact needs none")
+			local lost = ProfileRules.settle(inFlight, { kind = "expired" })
+			local stranded = ProfileRules.strandedDays(DAY, lost)
+			t.eq(#stranded, 1)
+			t.eq(stranded[1], nextDay)
+			local reopened =
+				ProfileRules.queueCommand(lost, { type = "rollover", newDay = nextDay, eventId = "reopen:r" })
+			t.eq(#ProfileRules.strandedDays(DAY, reopened), 0)
+			local third = commandsOf(reopened)
+			t.eq(third[1].type, "rollover", "the fresh rollover goes ahead of the waiting fact")
+			t.eq(third[2].eventId, "g4:p")
+			t.eq(#third, 2, "the expired op's own fact is not replayed")
+			local rolled = wrote(t, runOp(stored, "B", 2, third, { nowWall = afterMidnight }))
+			t.eq(rolled.dailyEpoch, nextDay)
+			t.eq(rolled.xp, 1)
+
+			-- Ambiguous: the rollover committed but the call errored. The next attempt acknowledges it from the receipt and the
+			-- session adopts the stored epoch: the old day was settled once and no new rollover is generated, here or on rejoin.
+			local base = v4()
+			local done = wrote(t, runOp(base, "A", 1, { progress(base.quests, 1) }))
+			local l3 = queueIntent(ProfileRules.newLedger("C"), DAY, nextDay, "g5", nil, nil)
+			local rollCommands, l3taken = commandsOf(l3)
+			local saveOp = qop("C", 1, rollCommands)
+			local committed = wrote(t, plan(done, saveOp, { nowWall = afterMidnight, userId = USER }))
+			t.eq(committed.xp, rewardOf(base.quests, 1), "the unclaimed complete quest is settled by the rollover")
+			local ambiguous = ProfileRules.settle(l3taken, { kind = "ambiguous" })
+			local retry = plan(committed, saveOp, { nowWall = afterMidnight, userId = USER, ambiguous = true })
+			t.eq(retry.tag, "acknowledged")
+			local resolved = ProfileRules.settle(ambiguous, { kind = "acknowledged" })
+			local adopted = ProfileRules.adopt(committed, ProfileRules.sanitize(done), 0, nil)
+			t.eq(adopted.dailyEpoch, nextDay)
+			t.eq(ProfileRules.needsRollover(adopted.dailyEpoch, resolved, nextDay), false, "no regeneration")
+			local rejoined = ProfileRules.sanitize(ProfileRules.migrate(committed))
+			t.eq(ProfileRules.needsRollover(rejoined.dailyEpoch, ProfileRules.newLedger("D"), nextDay), false)
+			t.eq(rejoined.xp, rewardOf(base.quests, 1), "settled once")
+		end
+	)
+
+	t.test(
+		"AUD-01 F4: missing xp in initialised v4 daily state fails closed; xp is never read or written as 0",
+		function()
+			local stored = v4(nil, function(s)
+				s.xp = nil
+			end)
+			t.eq(ProfileRules.dailyStatus(stored, NOON), "disabled")
+			local o = op("A", 1, 3)
+			local decided = plan(
+				stored,
+				table.freeze({
+					sessionId = o.sessionId,
+					seq = 1,
+					glyphsDelta = 3,
+					createdAt = 0,
+					createdAtWall = NOON,
+					settingsPatch = {},
+					commands = {
+						{ type = "play", day = DAY, source = "glyph", nominal = 1, eventId = eid() },
+						progress(stored.quests, 1),
+					},
+				}) :: any,
+				{ nowWall = NOON, userId = USER }
+			)
+			local out = wrote(t, decided)
+			t.eq(out.xp, nil, "xp is not reset to 0 or initialised")
+			t.truthy(deepSame(out.quests, stored.quests), "quests unchanged")
+			t.truthy(deepSame(out.playXpDay, stored.playXpDay), "cap amount unchanged")
+			t.eq(out.glyphsLifetime, 8, "other data is still saved")
+			t.eq(out.extra, "keep me")
+			for _, result in decided.results :: { ProfileRules.CommandResult } do
+				t.eq(result.applied, false)
+				t.eq(result.reason, "daily_disabled")
+			end
+			local loaded = ProfileRules.sanitize(stored)
+			t.eq(loaded.dailyDisabled, true, "sanitize: daily mutation disabled")
+			t.eq(loaded.quests, nil)
+			t.eq(ProfileRules.adopt(stored, loaded, 0, nil).dailyDisabled, true, "adopt keeps it disabled")
+			t.eq(ProfileRules.merge(loaded, {}).dailyDisabled, true, "ProfileService.get's copy reports it disabled")
+			local applied = ProfileRules.applyCommands(loaded, { { type = "rollover", newDay = DAY + 1 } }, {
+				nowWall = (DAY + 1) * 86400 + 100,
+				userId = USER,
+			})
+			t.eq(applied.dailyEpoch, nil, "memory mode applies nothing either")
+			-- genuine initialisation still starts at 0: a new profile and a migrated v3 profile
+			local opening: { any } = {
+				{ type = "rollover", newDay = DAY },
+				{ type = "play", day = DAY, source = "glyph", nominal = 1, eventId = eid() },
+			}
+			t.eq(wrote(t, runOp(nil, "N", 1, opening)).xp, 1, "new profile")
+			t.eq(wrote(t, runOp(ProfileRules.migrate({ version = 3 }), "M", 1, opening)).xp, 1, "migrated v3")
+			t.eq(
+				ProfileRules.dailyStatus({ version = 4, glyphsLifetime = 0 }, NOON),
+				"uninitialized",
+				"an unopened new profile"
+			)
+		end
+	)
+
+	t.test("AUD-01 F5: a claim is confirmed only for its own identity; stale identities report stale", function()
+		local base = v4()
+		local done = wrote(t, runOp(base, "A", 1, { progress(base.quests, 1) }))
+		local claimed = wrote(t, runOp(done, "A", 2, { claim(done.quests, 1) }))
+		local board = claimed.quests
+		t.eq(board.slots[1].claimed, true)
+		local own = claim(done.quests, 1)
+		own.eventId = nil
+		-- the claim's own command applied
+		t.eq(ProfileRules.claimOutcome(own, board, { type = "claim", applied = true, xp = 10 }), "confirmed")
+		-- a repeat of exactly this identity: zero XP, but the quest is claimed
+		local repeat2 = runOp(claimed, "B", 1, { claim(done.quests, 1) })
+		t.eq(repeat2.results[1].reason, "no_award")
+		t.eq(ProfileRules.claimOutcome(own, wrote(t, repeat2).quests, repeat2.results[1]), "confirmed")
+		t.eq(
+			ProfileRules.claimOutcome(own, board, nil),
+			"confirmed",
+			"receipt-acknowledged op: compared to the adopted board"
+		)
+		-- yesterday's claim of slot 1 while today's slot 1 is claimed: never confirmed
+		local yesterday =
+			{ type = "claim", day = DAY - 1, slot = 1, boardRevision = board.boardRevision, generation = 1 }
+		t.eq(
+			ProfileRules.claimOutcome(yesterday, board, { type = "claim", applied = false, xp = 0, reason = "old_day" }),
+			"stale"
+		)
+		t.eq(ProfileRules.claimOutcome(yesterday, board, nil), "stale", "acknowledged: the day does not match")
+		local wrongGeneration = table.clone(own)
+		wrongGeneration.generation = own.generation + 1
+		t.eq(ProfileRules.claimOutcome(wrongGeneration, board, nil), "stale")
+		local wrongRevision = table.clone(own)
+		wrongRevision.boardRevision = own.boardRevision + 1
+		t.eq(ProfileRules.claimOutcome(wrongRevision, board, nil), "stale")
+		local otherSlot = claim(done.quests, 2)
+		t.eq(
+			ProfileRules.claimOutcome(otherSlot, board, nil),
+			"stale",
+			"another slot being claimed does not confirm it"
+		)
+		t.eq(
+			ProfileRules.claimOutcome(
+				own,
+				board,
+				{ type = "claim", applied = false, xp = 0, reason = "daily_disabled" }
+			),
+			"stale",
+			"disabled state is not confirmed"
+		)
+		t.eq(ProfileRules.claimOutcome(own, nil, nil), "stale")
+	end)
 end

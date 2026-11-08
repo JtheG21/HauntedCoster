@@ -343,10 +343,12 @@ function ProfileRules.sanitizeSettings(raw: any): Settings?
 	}
 end
 
--- Is the stored v4 daily state usable? "uninitialized": no daily field at all (a migrated v3 profile), "ok": xp and all three
--- daily fields valid (QuestRules.validate: one epoch, known catalog, ranges), "disabled": anything else, which fails closed:
--- nothing is repaired, reset or re-granted. With `nowWall`, a stored epoch beyond the skew bound (XpRules.classifyDay)
--- is disabled too; an adjacent day ahead near midnight is tolerated.
+-- Is the stored v4 daily state usable? "uninitialized": no daily field at all (a migrated v3 profile or a new one), "ok": xp
+-- and all three daily fields valid (QuestRules.validate: one epoch, known catalog, ranges), "disabled": anything else, which
+-- fails closed: nothing is repaired, reset or re-granted. Initialised daily state requires a valid integer xp: a missing xp
+-- there is damaged award state, never read as 0 (AUD-20261107-TASK-0150-01 F4); xp starts at 0 only through migration or
+-- a new profile, both of which are uninitialised. With `nowWall`, a stored epoch beyond the skew bound
+-- (XpRules.classifyDay) is disabled too; an adjacent day ahead near midnight is tolerated.
 function ProfileRules.dailyStatus(raw: any, nowWall: number?): DailyStatus
 	if typeof(raw) ~= "table" then
 		return "uninitialized"
@@ -359,6 +361,9 @@ function ProfileRules.dailyStatus(raw: any, nowWall: number?): DailyStatus
 	end
 	if raw.dailyEpoch == nil and raw.playXpDay == nil and raw.quests == nil then
 		return "uninitialized"
+	end
+	if not isInt(raw.xp, 0, XP_MAX) then
+		return "disabled" -- initialised daily state without xp (F4)
 	end
 	local state: any = { dailyEpoch = raw.dailyEpoch, playXpDay = raw.playXpDay, quests = raw.quests }
 	if QuestRules.validate(state) ~= "ok" then
@@ -1029,6 +1034,25 @@ local function coalescible(last: Command, c: Command): boolean
 	return false
 end
 
+-- Where a new command goes in the queue: at the end, except that the queue stays in day order around rollovers (each
+-- command meets the board of its own day, AUD-20261107-TASK-0150-01 F2/F3). A rollover to day N goes before the first queued
+-- command of day N or later (a fresh rollover after an unconfirmed one opens the day for facts already waiting); a dated
+-- command of day d goes before the first queued rollover to a day after d (it belongs to the board that rollover closes).
+-- Relative order is otherwise kept. Returns the index to insert at (#queue + 1: append).
+local function insertAt(queue: { Command }, c: Command): number
+	for i, queued in queue do
+		if c.type == "rollover" then
+			local day = if queued.type == "rollover" then queued.newDay else queued.day
+			if day ~= nil and day >= (c.newDay :: number) then
+				return i
+			end
+		elseif queued.type == "rollover" and c.day ~= nil and (queued.newDay :: number) > (c.day :: number) then
+			return i
+		end
+	end
+	return #queue + 1
+end
+
 -- Queues one command for the NEXT op. Returns the new ledger, whether it was queued and why not. A malformed command, an
 -- event id seen recently (a logical event queues once) or a full queue changes nothing. Consecutive increments of the same
 -- quest or play source are folded into one command. Commands of an op already taken are never touched or re-queued.
@@ -1042,7 +1066,8 @@ function ProfileRules.queueCommand(ledger: Ledger, raw: any): (Ledger, boolean, 
 	end
 	local queue = ledger.queue
 	local last = queue[#queue]
-	local fold = last ~= nil and coalescible(last, c)
+	local at = insertAt(queue, c)
+	local fold = at == #queue + 1 and last ~= nil and coalescible(last, c)
 	if not fold and #queue >= QUEUE_CAP then
 		return ledger, false, "queue_full"
 	end
@@ -1057,7 +1082,7 @@ function ProfileRules.queueCommand(ledger: Ledger, raw: any): (Ledger, boolean, 
 		end
 		nextQueue[#nextQueue] = merged
 	else
-		table.insert(nextQueue, c)
+		table.insert(nextQueue, at, c)
 	end
 	out.queue = nextQueue
 	if c.eventId ~= nil then
@@ -1078,6 +1103,103 @@ end
 function ProfileRules.pendingCommands(ledger: Ledger): number
 	local op = ledger.op
 	return #ledger.queue + (if op ~= nil and op.commands ~= nil then #op.commands else 0)
+end
+
+-- Does a command of `day` need a rollover queued first? Readiness comes only from the confirmed stored epoch (`epoch`, what
+-- the session last adopted) and rollovers actually still pending: frozen in the unresolved op (they run before anything
+-- queued) or queued ahead of where a command of `day` would go (insertAt). A rollover whose op ended unconfirmed is in
+-- neither, so it never counts, and the next fact or request queues a fresh one (AUD-20261107-TASK-0150-01 F3).
+function ProfileRules.needsRollover(epoch: number?, ledger: Ledger, day: number): boolean
+	local known = epoch or -1
+	local op = ledger.op
+	if op ~= nil and op.commands ~= nil then
+		for _, c in op.commands do
+			if c.type == "rollover" and c.newDay ~= nil then
+				known = math.max(known, c.newDay)
+			end
+		end
+	end
+	for _, c in ledger.queue do
+		if c.type == "rollover" and c.newDay ~= nil and c.newDay <= day then
+			known = math.max(known, c.newDay)
+		end
+	end
+	return known < day
+end
+
+-- The days of queued commands that no confirmed epoch or pending rollover opens, ascending (AUD-01 F3). They were queued
+-- behind a rollover whose op then ended unconfirmed; a fresh rollover (queued before them by insertAt) opens their day
+-- again. Commands of the unconfirmed op itself are gone and are never replayed.
+function ProfileRules.strandedDays(epoch: number?, ledger: Ledger): { number }
+	local days: { number } = {}
+	for _, c in ledger.queue do
+		local day = c.day
+		if
+			c.type ~= "rollover"
+			and day ~= nil
+			and table.find(days, day) == nil
+			and ProfileRules.needsRollover(epoch, ledger, day)
+		then
+			table.insert(days, day)
+		end
+	end
+	table.sort(days)
+	return days
+end
+
+-- A claim's reply once its op settled (AUD-01 F5): "confirmed" only when this claim's own command applied (`result`), or
+-- when the authoritative adopted `board` shows exactly the claimed identity (day, board revision, slot generation) already
+-- claimed (a repeat claim: zero XP, the quest is claimed). Everything else, including a closed day, a wrong revision or
+-- generation, disabled daily state or another slot being claimed, is "stale".
+function ProfileRules.claimOutcome(claim: Command, board: QuestRules.Board?, result: CommandResult?): string
+	if result ~= nil then
+		if result.applied then
+			return "confirmed"
+		end
+		if result.reason ~= "no_award" then
+			return "stale" -- old_day, future_day, uninitialized, daily_disabled, invalid ...
+		end
+	end
+	if board == nil or board.day ~= claim.day or board.boardRevision ~= claim.boardRevision then
+		return "stale"
+	end
+	local slot = board.slots[claim.slot :: number]
+	if slot ~= nil and slot.generation == claim.generation and slot.claimed then
+		return "confirmed"
+	end
+	return "stale"
+end
+
+-- Per-day counts of facts, ascending by day: each fact keeps the day it was accepted (AUD-01 F2, Blitz answers buffered
+-- until the result boundary). Non-integer days are ignored.
+function ProfileRules.factsByDay(days: { number }): { { day: number, amount: number } }
+	local counts: { [number]: number } = {}
+	local order: { number } = {}
+	for _, day in days do
+		if isInt(day, 0, MAX_TIME) then
+			if counts[day] == nil then
+				counts[day] = 0
+				table.insert(order, day)
+			end
+			counts[day] += 1
+		end
+	end
+	table.sort(order)
+	local out = {}
+	for _, day in order do
+		table.insert(out, { day = day, amount = counts[day] })
+	end
+	return out
+end
+
+-- The one finalisation guard of a run (Skill Test, AUD-01 F1): the first terminal reason wins and later calls change
+-- nothing. Returns the terminal reason and whether THIS call earned the completion: only the first call, and only when its
+-- reason is "completed" (an error-generated end or an incomplete departure never qualifies).
+function ProfileRules.finalizeRun(terminal: string?, reason: string): (string, boolean)
+	if terminal ~= nil then
+		return terminal, false
+	end
+	return reason, reason == "completed"
 end
 
 -- The ledger with the settings keys that differ between `before` and `after` recorded (newest value wins) for the next

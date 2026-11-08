@@ -31,7 +31,7 @@ type Session = {
 	ended: boolean,
 	answerStamps: { number },
 	runId: string, -- quest event ids derive from it
-	startDay: number, -- the UTC day the run started: its quest facts keep this day
+	answerDays: { [number]: number }, -- question index -> the UTC day its answer was accepted (private until the result)
 }
 
 local BlitzService = {}
@@ -72,6 +72,7 @@ local function finish(player: Player, session: Session)
 	end
 	session.ended = true
 	local correct = 0
+	local correctDays: { number } = {} -- the accepted day of each correct answer (quest facts keep it, AUD-01 F2)
 	local answers: { number | boolean } = {}
 	local solutions: { number } = {}
 	for index, problem in session.problems do
@@ -80,6 +81,7 @@ local function finish(player: Player, session: Session)
 		solutions[index] = problem.answer
 		if typeof(answer) == "number" and answer == problem.answer then
 			correct += 1
+			table.insert(correctDays, session.answerDays[index])
 		end
 	end
 	local newBest = BlitzRules.isNewBest(correct, session.previousBest)
@@ -90,8 +92,9 @@ local function finish(player: Player, session: Session)
 	if not saved then
 		warn(`[MathShow] blitz best not saved for {player.Name}: {saveErr}`)
 	end
-	-- Quests / XP: correctness-dependent facts are produced only here, at the result boundary (never mid-run), once.
-	QuestService.blitzFinished(player, session.runId, correct, session.startDay)
+	-- Quests / XP: correctness-dependent facts are produced only here, at the result boundary (never mid-run), once. Each
+	-- answer keeps the day it was accepted; the finish uses the day the run ended (AUD-20261107-TASK-0150-01 F2).
+	QuestService.blitzFinished(player, session.runId, correctDays, QuestService.today())
 	local ok, err = pcall(function()
 		Remotes.BlitzResult:FireClient(player, {
 			correct = correct,
@@ -143,7 +146,7 @@ local function onStart(player: Player, raw: any)
 		ended = false,
 		answerStamps = {},
 		runId = QuestService.newId(),
-		startDay = QuestService.today(),
+		answerDays = {},
 	}
 	sessions[player] = session
 	sendState(player, session)
@@ -173,6 +176,7 @@ local function onAnswer(player: Player, raw: any)
 	end
 	session.answered = true -- before any yield: two quick answers cannot both count
 	session.answers[index] = answer
+	session.answerDays[index] = QuestService.today() -- kept private in the session; released only by finish()
 	-- The same ack whatever the answer was: nothing about correctness leaves the server until BlitzResult.
 	pcall(function()
 		Remotes.AnswerAck:FireClient(player, { questionIndex = index })

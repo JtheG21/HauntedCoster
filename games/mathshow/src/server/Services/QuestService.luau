@@ -11,6 +11,7 @@
 -- typed buffer (PRELOAD_CAP); beyond it, or for a read-only profile, they are dropped with a warning (disclosed loss).
 -- Blitz secrecy: correctness-dependent Blitz facts are not produced at all until BlitzService's existing result boundary
 -- (blitzFinished), so nothing about them can reach QuestRequest, QuestState, pending counts or Player attributes earlier.
+-- Each buffered answer keeps the day it was accepted; the finish uses the day the run ended (AUD-01 F2).
 --
 -- Remotes (server-created): QuestRequest() and QuestClaim{day, slot, boardRevision, generation}; the only reply is QuestState
 -- to the invoking player. Validation order: type -> range -> ownership (the invoking Player) -> rate -> one pending claim,
@@ -50,8 +51,7 @@ type PlayerState = {
 	revision: number,
 	buffer: { Intent },
 	bufferWarned: boolean,
-	queuedEpoch: number, -- the highest day a rollover was queued for (-1 none)
-	pendingClaim: { slot: number, eventId: string }?,
+	pendingClaim: { command: ProfileRules.Command, eventId: string }?, -- the full claimed identity (AUD-01 F5)
 	requestStamps: { number },
 	mutationStamps1: { number },
 	mutationStamps30: { number },
@@ -129,7 +129,7 @@ local function buildState(player: Player, st: PlayerState, result: string): Net.
 		xpIntoLevel = XpRules.xpIntoLevel(xp),
 		nextLevelXp = XpRules.xpForNextLevel(xp),
 		pending = ProfileService.pendingCommands(player),
-		pendingClaim = if claim ~= nil then claim.slot else nil,
+		pendingClaim = if claim ~= nil then claim.command.slot else nil,
 	}
 end
 
@@ -165,24 +165,19 @@ local function queue(player: Player, command: ProfileRules.Command): boolean
 	return ok or reason == "duplicate"
 end
 
--- Queues a rollover for `day` when neither the stored epoch nor an earlier queued rollover reaches it. False: it could not
--- be queued (the caller then drops the intent: it must never attach to a board of another day).
-local function ensureDay(
-	player: Player,
-	st: PlayerState,
-	profile: ProfileRules.Profile,
-	day: number,
-	eventId: string
-): boolean
-	local known = math.max(profile.dailyEpoch or -1, st.queuedEpoch)
-	if known >= day then
+-- Queues a rollover for `day` unless the confirmed stored epoch or a rollover still queued / in flight already opens it
+-- (ProfileService.needsRollover: derived from stored state on every call, so a rollover whose op ended unconfirmed never
+-- counts and a fresh, idempotent one is queued; AUD-20261107-TASK-0150-01 F3). False: it could not be queued (the caller
+-- then drops the intent: it must never attach to a board of another day).
+local function ensureDay(player: Player, day: number, eventId: string): boolean
+	local needed = ProfileService.needsRollover(player, day)
+	if needed == nil then
+		return false
+	end
+	if not needed then
 		return true
 	end
-	if queue(player, { type = "rollover", newDay = day, eventId = `{eventId}:r` }) then
-		st.queuedEpoch = day
-		return true
-	end
-	return false
+	return queue(player, { type = "rollover", newDay = day, eventId = `{eventId}:r` })
 end
 
 local function dispatch(player: Player, st: PlayerState, intent: Intent)
@@ -197,7 +192,7 @@ local function dispatch(player: Player, st: PlayerState, intent: Intent)
 		end
 		return
 	end
-	if not ensureDay(player, st, profile, intent.day, intent.eventId) then
+	if not ensureDay(player, intent.day, intent.eventId) then
 		return
 	end
 	local play = intent.play
@@ -321,21 +316,26 @@ function QuestService.roundFinished(runId: string, participants: { Participant }
 	end)
 end
 
--- Blitz: the run ended through the existing result boundary (call after the ended guard, never earlier). `correct` is the
--- run's correct count and `day` the day the run started. A run with no correct answer earns nothing.
-function QuestService.blitzFinished(player: Player, runId: string, correct: number, day: number?)
+-- Blitz: the run ended through the existing result boundary (call after the ended guard, never earlier). `correctDays`
+-- holds, for each correct answer, the day it was accepted (buffered privately by BlitzService until now); the answers are
+-- flushed grouped by that original day, and the finish (play XP and finish progress) uses `finishDay`, the day the run
+-- actually ended (AUD-20261107-TASK-0150-01 F2). Closed-day facts are dropped by the transform (accepted rollover rule).
+-- A run with no correct answer earns nothing.
+function QuestService.blitzFinished(player: Player, runId: string, correctDays: { number }, finishDay: number)
 	safe("blitzFinished", function()
-		if correct < 1 then
+		local groups = ProfileRules.factsByDay(correctDays)
+		if #groups == 0 then
 			return
 		end
-		local eventDay = day or QuestService.today()
+		for _, group in groups do
+			submit(player, {
+				day = group.day,
+				fact = { kind = "correct", amount = group.amount },
+				eventId = `{runId}:a:{group.day}`,
+			})
+		end
 		submit(player, {
-			day = eventDay,
-			fact = { kind = "correct", amount = correct },
-			eventId = `{runId}:a`,
-		})
-		submit(player, {
-			day = eventDay,
+			day = finishDay,
 			play = play("blitz", XpConfig.PlayAward.BlitzFinish),
 			fact = { kind = "blitz_finish", amount = 1 },
 			eventId = `{runId}:f`,
@@ -418,7 +418,7 @@ local function onRequest(player: Player)
 	local profile = ProfileService.get(player)
 	if profile ~= nil and profile.dailyDisabled ~= true then
 		local today = QuestService.today()
-		ensureDay(player, st, profile, today, `req:{QuestService.newId()}`)
+		ensureDay(player, today, `req:{QuestService.newId()}`)
 	end
 	push(player, if ProfileService.pendingCommands(player) > 0 then "pending" else "confirmed")
 end
@@ -454,8 +454,8 @@ local function onClaim(player: Player, raw: any)
 		return
 	end
 	local eventId = `claim:{QuestService.newId()}`
-	st.pendingClaim = { slot = command.slot :: number, eventId = eventId } -- marked before anything can yield
 	command.eventId = eventId
+	st.pendingClaim = { command = command, eventId = eventId } -- marked before anything can yield
 	local queued, reason = ProfileService.queueCommand(player, command)
 	if not queued then
 		st.pendingClaim = nil
@@ -475,10 +475,25 @@ local function resolveClaim(player: Player, st: PlayerState, event: ProfileServi
 	if event.outcome ~= "applied" and event.outcome ~= "acknowledged" then
 		return "unavailable" -- the op was abandoned or expired: nothing is known to have landed
 	end
+	-- The claim's own command result when the op applied (results are aligned with eventIds); an acknowledged op has none,
+	-- so the full identity is compared against the adopted stored board (AUD-20261107-TASK-0150-01 F5).
+	local index = table.find(event.eventIds, claim.eventId)
+	local result = if event.results ~= nil and index ~= nil then event.results[index] else nil
 	local profile = ProfileService.get(player)
 	local board = if profile ~= nil then profile.quests else nil
-	local slot = if board ~= nil then board.slots[claim.slot] else nil
-	return if slot ~= nil and slot.claimed then "confirmed" else "stale"
+	return ProfileRules.claimOutcome(claim.command, board, result)
+end
+
+-- After a terminal settlement: queued commands whose rollover was in an op that ended unconfirmed get a fresh rollover
+-- from the stored epoch (queued ahead of them). The unconfirmed op's own commands are never replayed (AUD-01 F3).
+local function reopenStranded(player: Player)
+	local profile = ProfileService.get(player)
+	if profile == nil or profile.dailyDisabled == true then
+		return
+	end
+	for _, day in ProfileService.strandedDays(player) do
+		ensureDay(player, day, `reopen:{QuestService.newId()}`)
+	end
 end
 
 local function onProfileEvent(event: ProfileService.Event)
@@ -496,6 +511,7 @@ local function onProfileEvent(event: ProfileService.Event)
 		refreshAttributes(player)
 		push(player, "confirmed")
 	elseif event.kind == "settled" then
+		reopenStranded(player)
 		local result = resolveClaim(player, st, event)
 		refreshAttributes(player)
 		push(player, result or (if ProfileService.pendingCommands(player) > 0 then "pending" else "confirmed"))
@@ -510,7 +526,6 @@ local function addPlayer(player: Player)
 		revision = 0,
 		buffer = {},
 		bufferWarned = false,
-		queuedEpoch = -1,
 		pendingClaim = nil,
 		requestStamps = {},
 		mutationStamps1 = {},

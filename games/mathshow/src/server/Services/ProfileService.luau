@@ -93,7 +93,7 @@ export type Event = {
 	player: Player,
 	outcome: string?, -- settled: the attempt kind (applied / acknowledged / abandoned / expired / newer_schema ...)
 	results: { ProfileRules.CommandResult }?,
-	eventIds: { string }?, -- settled: the event ids of the commands the resolved op carried
+	eventIds: { string }?, -- settled: the event ids of the commands the resolved op carried, aligned with `results`
 }
 local observers: { (Event) -> () } = {}
 local store: DataStore? = nil
@@ -358,12 +358,12 @@ end
 local function settleAttempt(session: Session, outcome: ProfileRules.Attempt, base: any, dropped: boolean)
 	local op = session.ledger.op
 	local carried = op ~= nil and op.commands ~= nil and #op.commands > 0
+	-- Index-aligned with op.commands and so with outcome.results ("" for a command without an id), so an observer can find
+	-- the result of its own command (AUD-20261107-TASK-0150-01 F5).
 	local eventIds: { string } = {}
 	if op ~= nil and op.commands ~= nil then
-		for _, command in op.commands do
-			if command.eventId ~= nil then
-				table.insert(eventIds, command.eventId)
-			end
+		for i, command in op.commands do
+			eventIds[i] = command.eventId or ""
 		end
 	end
 	local seq = if op ~= nil then op.seq else 0
@@ -605,6 +605,26 @@ end
 function ProfileService.pendingCommands(player: Player): number
 	local session = sessions[player]
 	return if session then ProfileRules.pendingCommands(session.ledger) else 0
+end
+
+-- Does a quest/play command of `day` need a rollover queued first? From the confirmed epoch and the rollovers still queued
+-- or in flight only (ProfileRules.needsRollover; AUD-20261107-TASK-0150-01 F3). Memory mode applies rollovers at once, so
+-- its epoch is current. Nil when the profile is not loaded.
+function ProfileService.needsRollover(player: Player, day: number): boolean?
+	local session = sessions[player]
+	if not session or (session.persistence ~= "saved" and session.persistence ~= "memory") then
+		return nil
+	end
+	return ProfileRules.needsRollover(session.profile.dailyEpoch, session.ledger, day)
+end
+
+-- Days of queued commands left without a rollover after an unconfirmed op (ProfileRules.strandedDays; AUD-01 F3).
+function ProfileService.strandedDays(player: Player): { number }
+	local session = sessions[player]
+	if not session or session.persistence ~= "saved" then
+		return {}
+	end
+	return ProfileRules.strandedDays(session.profile.dailyEpoch, session.ledger)
 end
 
 -- Yields until the profile has loaded (or LOAD_WAIT_SECONDS passes). Safe to call from a remote handler.
