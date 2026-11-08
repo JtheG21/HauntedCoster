@@ -3,7 +3,7 @@ id: TASK-0151
 title: "MathShow Quests XP UI"
 type: task
 project: GAME-004
-status: approved
+status: review
 priority: medium
 risk: low
 owner: executor
@@ -70,6 +70,30 @@ Menu panel, level badge, XP bar and Reveal toast. Design: [[SYS-Quests-And-XP]].
   ShowState too (last RoundState phase kept), so a mid-question join holds at once. Studio (fresh Play, synced): a push
   re-rendered the main menu to `LV 3` and selection stayed on the DAILY QUESTS hit. check.sh green.
 
+- **Revision 2 (Codex [[AUD-20261107-TASK-0151-02]] F1, F2; last revision allowed):** `Quests.parse` now checks
+  ranges, catalog and board identity before a push can replace the state or advance the revision: revision >= 1;
+  level 1..50; `nextLevelXp` = `XpRules.costOf(level)` (0 at the cap) with `xpIntoLevel` below it; day, boardRevision
+  non-negative integers; `pendingClaim` 1..3; zero or exactly 3 slots, each a known catalog id with integer generation,
+  progress 0..target and claimed only when complete; a board needs a day and board revision. A rejected push is warned
+  with its reason. Toasts compare only two usable (saved/memory) states, so the first usable state after loading or
+  unavailable is the baseline. Studio (fresh Play, Rojo synced from this worktree): 11 malformed pushes at revisions
+  1000000+ (Codex's probe, level 51, wrong need, into = need, unknown id, progress over target, claimed early, two
+  slots, no day, pendingClaim 4, fractional XP) were each rejected with a reason; a valid revision 500000 then applied
+  (LV 7); loading -> saved level 10 gave no toast; saved 10 -> 11 gave `LEVEL UP · LV 11`. check.sh green.
+
+## Handoff (Codex review, rev 2, 2026-11-07)
+- **Task:** TASK-0151 revision 2, fixes for [[AUD-20261107-TASK-0151-02]] F1-F2 (standard; rows QX-T3, QX-T3M). Receiver: Codex, delta re-review only, no edits.
+- **Workspace:** `/Users/jg/Desktop/Rg1-worktrees/TASK-0151`, branch `task/TASK-0151-quests-xp-ui` (PR #226). Range `351f4d8..HEAD`;
+  code diff only: `git diff 351f4d8..HEAD -- games/mathshow` (one file, `client/Menu/Quests.luau`). The head is this handoff commit.
+- **Inputs:** [[AUD-20261107-TASK-0151-02]], "Revision 2" above, `shared/XpRules.luau`, `shared/QuestConfig.luau`, `QuestService.buildState` (what the server really sends).
+- **Focus:**
+  - `Quests.parse`: does every field check match what `QuestService.buildState` can send (level 1..50, `nextLevelXp` = cost or 0 at the cap, `xpIntoLevel` below it, empty board while loading), so no valid push is rejected and no malformed one is accepted?
+  - `Quests.onState` + `usable`: is the first usable state after loading or unavailable always a baseline, and are claim / rate / stale replies still handled?
+  - Anything a rejected push could still change (revision, toasts, listeners)?
+- **Constraints:** no uploads, publishing, DataStore or Studio writes. Rojo is stopped and Studio is idle in Edit; nobody holds them.
+- **Known:** no non-task failures. Unverified, as before: a real claim round trip through gameplay. Revision 2 is the last under the two-attempt rule.
+- **Report back:** verdict, findings with file:line, checks run, what remains unverified.
+
 ## Handoff (Codex review, rev 1, 2026-11-07)
 - **Task:** TASK-0151 Quests XP UI (standard; rows QX-T3, QX-T3M). Receiver: Codex, independent review only, no edits.
 - **Workspace:** `/Users/jg/Desktop/Rg1-worktrees/TASK-0151`, branch `task/TASK-0151-quests-xp-ui` (PR #226). Range
@@ -87,5 +111,7 @@ Menu panel, level badge, XP bar and Reveal toast. Design: [[SYS-Quests-And-XP]].
 ## Audits
 - [[AUD-20261107-TASK-0151-01]]: PASS with findings (2 minor, 1 nit), Sonnet auditor at `fbc45b3`. F1 and F2 fixed in
   revision 1; F3 (noop handler list) kept, same pattern as ModePadController and Watching.
+- [[AUD-20261107-TASK-0151-02]]: Codex FAIL at `351f4d8`: F1 moderate (malformed state accepted, advances the
+  revision), F2 minor (level toast after a loading reply). Both fixed in revision 2.
 
 ## Outcome

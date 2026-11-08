@@ -2,7 +2,7 @@
   "id": "TASK-0151",
   "game": "GAME-004",
   "title": "MathShow Quests XP UI",
-  "status": "approved",
+  "status": "review",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -55,6 +55,24 @@
       "from": "review",
       "to": "approved",
       "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-07T17:24:48",
+      "from": "approved",
+      "to": "changes_requested",
+      "note": "changes requested by jg: Codex FAIL at 351f4d8 (AUD-20261107-TASK-0151-02), relayed by jg in chat; revision 1/2"
+    },
+    {
+      "time": "2026-11-07T17:24:48",
+      "from": "changes_requested",
+      "to": "in_progress",
+      "note": "started"
+    },
+    {
+      "time": "2026-11-07T17:24:48",
+      "from": "in_progress",
+      "to": "review",
+      "note": "execution checks passed"
     }
   ],
   "executions": [
@@ -62,6 +80,11 @@
       "time": "2026-11-07T17:08:35",
       "result": "pass",
       "notes": "check.sh green; Studio TextFit 11670 rows 0 failures (5 viewports), ledger 781+320; live QUESTS via Daily pad payload, toasts, nameplate verified"
+    },
+    {
+      "time": "2026-11-07T17:24:48",
+      "result": "pass",
+      "notes": "rev 2: Codex F1/F2 fixed; check.sh green; Studio: 11 malformed pushes rejected, loading baseline gives no toast"
     }
   ],
   "audits": [
@@ -70,5 +93,6 @@
       "result": "pass",
       "report": "06 QA/AUD-20261107-TASK-0151-01.md"
     }
-  ]
+  ],
+  "revisions": 1
 }

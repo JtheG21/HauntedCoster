@@ -15,6 +15,7 @@ local MenuCopy = require(Shared:WaitForChild("MenuCopy"))
 local Net = require(Shared:WaitForChild("Net"))
 local QuestConfig = require(Shared:WaitForChild("QuestConfig"))
 local XpConfig = require(Shared:WaitForChild("XpConfig"))
+local XpRules = require(Shared:WaitForChild("XpRules"))
 
 local MenuTheme = require(script.Parent.MenuTheme)
 local View = require(script.Parent.View)
@@ -64,33 +65,69 @@ local function isInt(v: any): boolean
 	return typeof(v) == "number" and v == v and v == math.floor(v) and math.abs(v) < 2 ^ 53
 end
 
--- Type checks only; the server is the authority on every value. Returns nil for anything malformed.
-local function parse(p: any): State?
+local function intIn(v: any, lo: number, hi: number): boolean
+	return isInt(v) and v >= lo and v <= hi
+end
+
+-- Type, range, catalog and board-identity checks: the server is the authority, but nothing it could not have sent may
+-- replace the current state (and so advance the revision). Returns nil, with the reason, for anything malformed; the
+-- caller keeps the previous state.
+local function parse(p: any): (State?, string?)
 	if typeof(p) ~= "table" then
-		return nil
+		return nil, "not a table"
 	end
 	if
-		not isInt(p.revision)
+		not intIn(p.revision, 1, 2 ^ 52)
 		or typeof(p.result) ~= "string"
 		or typeof(p.persistence) ~= "string"
 		or typeof(p.slots) ~= "table"
-		or not isInt(p.level)
-		or not isInt(p.xpIntoLevel)
-		or not isInt(p.nextLevelXp)
+		or typeof(p.bonusGranted) ~= "boolean"
 	then
-		return nil
+		return nil, "fields"
+	end
+	-- Level card: level 1..cap; need is the cost of this level (0 at the cap) and into lies below it (shared XpRules).
+	if not intIn(p.level, 1, XpConfig.LevelCap) then
+		return nil, "level"
+	end
+	local atCap = p.level == XpConfig.LevelCap
+	local need = if atCap then 0 else XpRules.costOf(p.level)
+	if p.nextLevelXp ~= need or not intIn(p.xpIntoLevel, 0, math.max(need - 1, 0)) then
+		return nil, "xp"
+	end
+	if p.day ~= nil and not intIn(p.day, 0, 2 ^ 52) then
+		return nil, "day"
+	end
+	if p.boardRevision ~= nil and not intIn(p.boardRevision, 0, 2 ^ 52) then
+		return nil, "boardRevision"
+	end
+	if p.pendingClaim ~= nil and not intIn(p.pendingClaim, 1, SLOTS) then
+		return nil, "pendingClaim"
+	end
+	-- Board: none, or exactly SLOTS known quests with a day and board revision.
+	local count = 0
+	for _ in p.slots do
+		count += 1
+	end
+	if count ~= 0 and count ~= SLOTS then
+		return nil, "slot count"
+	end
+	if count == SLOTS and (p.day == nil or p.boardRevision == nil) then
+		return nil, "board identity"
 	end
 	local slots: { Slot } = {}
-	for i, s in p.slots do
+	for i = 1, count do
+		local s = p.slots[i]
+		local quest = if typeof(s) == "table" and typeof(s.id) == "string"
+			then (QuestConfig.Catalog :: { [string]: QuestConfig.Quest })[s.id]
+			else nil
 		if
-			typeof(i) ~= "number"
-			or typeof(s) ~= "table"
-			or typeof(s.id) ~= "string"
-			or not isInt(s.generation)
-			or not isInt(s.progress)
+			quest == nil
+			or not intIn(s.generation, 0, 2 ^ 52)
+			or not intIn(s.progress, 0, quest.target)
 			or typeof(s.claimed) ~= "boolean"
+			or (s.claimed and s.progress < quest.target)
 		then
-			return nil
+			return nil, `slot {i}`
 		end
 		slots[i] = { id = s.id, generation = s.generation, progress = s.progress, claimed = s.claimed }
 	end
@@ -98,19 +135,26 @@ local function parse(p: any): State?
 		revision = p.revision,
 		result = p.result,
 		persistence = p.persistence,
-		day = if isInt(p.day) then p.day else nil,
-		boardRevision = if isInt(p.boardRevision) then p.boardRevision else nil,
+		day = p.day,
+		boardRevision = p.boardRevision,
 		slots = slots,
-		bonusGranted = p.bonusGranted == true,
+		bonusGranted = p.bonusGranted,
 		level = p.level,
 		xpIntoLevel = p.xpIntoLevel,
 		nextLevelXp = p.nextLevelXp,
-		pendingClaim = if isInt(p.pendingClaim) then p.pendingClaim else nil,
-	}
+		pendingClaim = p.pendingClaim,
+	},
+		nil
 end
 
 local function questOf(slot: Slot?): QuestConfig.Quest?
 	return if slot then (QuestConfig.Catalog :: { [string]: QuestConfig.Quest })[slot.id] else nil
+end
+
+-- A state read from a saved (or Studio memory) profile. Loading and unavailable states carry no real level or board, so
+-- they are never a baseline for toasts: the first usable state after them is.
+local function usable(s: State?): boolean
+	return s ~= nil and (s.persistence == "saved" or s.persistence == "memory")
 end
 
 local function ready(s: State?): boolean
@@ -211,6 +255,10 @@ local function announce(old: State, new: State)
 			enqueue(fill(MenuCopy.Quests.ToastLevel, { level = new.level }), "green")
 		end
 	end
+end
+
+-- A "rate" or "stale" reply to the player's own CLAIM / RETRY.
+local function actionToast(new: State)
 	local recent = os.clock() - lastAction < MenuTheme.QuestActionWindow
 	if recent and new.result == "rate" then
 		enqueue(MenuCopy.Quests.Busy, "silver")
@@ -240,9 +288,9 @@ local function notify()
 end
 
 local function onState(p: any)
-	local s = parse(p)
+	local s, why = parse(p)
 	if s == nil then
-		warn("[MathShow] Quests ignored a malformed QuestState")
+		warn(`[MathShow] Quests ignored a malformed QuestState ({why})`)
 		return
 	end
 	local old = current
@@ -251,7 +299,10 @@ local function onState(p: any)
 	end
 	current = s
 	if old then
-		announce(old, s)
+		if usable(old) and usable(s) then
+			announce(old, s)
+		end
+		actionToast(s)
 	end
 	notify()
 end
