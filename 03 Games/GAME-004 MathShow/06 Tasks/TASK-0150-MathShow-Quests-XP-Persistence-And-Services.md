@@ -3,7 +3,7 @@ id: TASK-0150
 title: "MathShow Quests XP Persistence And Services"
 type: task
 project: GAME-004
-status: approved
+status: done
 priority: medium
 risk: high
 owner: executor

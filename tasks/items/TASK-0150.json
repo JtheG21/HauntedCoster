@@ -2,7 +2,7 @@
   "id": "TASK-0150",
   "game": "GAME-004",
   "title": "MathShow Quests XP Persistence And Services",
-  "status": "approved",
+  "status": "done",
   "tier": "deep",
   "owner_agent": "codex",
   "files_owned": [
@@ -79,6 +79,12 @@
       "from": "review",
       "to": "approved",
       "note": "audit passed; merge needs human approval"
+    },
+    {
+      "time": "2026-11-07T16:40:36",
+      "from": "approved",
+      "to": "done",
+      "note": "merge approved by jg"
     }
   ],
   "executions": [
@@ -105,5 +111,6 @@
       "report": "06 QA/AUD-20261107-TASK-0150-02.md"
     }
   ],
-  "revisions": 1
+  "revisions": 1,
+  "merge_approved_by": "jg"
 }
