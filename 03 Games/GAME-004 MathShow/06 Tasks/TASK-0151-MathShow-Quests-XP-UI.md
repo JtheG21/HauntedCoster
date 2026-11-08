@@ -3,7 +3,7 @@ id: TASK-0151
 title: "MathShow Quests XP UI"
 type: task
 project: GAME-004
-status: review
+status: blocked
 priority: medium
 risk: low
 owner: executor
@@ -134,5 +134,7 @@ Menu panel, level badge, XP bar and Reveal toast. Design: [[SYS-Quests-And-XP]].
   revision), F2 minor (level toast after a loading reply). Both fixed in revision 2.
 - [[AUD-20261107-TASK-0151-03]]: Codex FAIL at `b4c808f`: F2 closed; F1 partly open (no `catalogVersion` check; zero
   board revision / generation and duplicate slots accepted). Revision limit reached; waiting for jg's decision.
+- [[AUD-20261107-TASK-0151-04]]: Codex FAIL at `4425a4e`: the -03 cases are closed; board invariants still incomplete
+  (repeated category or difficulty, bonus on incomplete quests). Waiting for jg's decision on a further revision.
 
 ## Outcome
