@@ -70,6 +70,20 @@ Menu panel, level badge, XP bar and Reveal toast. Design: [[SYS-Quests-And-XP]].
   ShowState too (last RoundState phase kept), so a mid-question join holds at once. Studio (fresh Play, synced): a push
   re-rendered the main menu to `LV 3` and selection stayed on the DAILY QUESTS hit. check.sh green.
 
+## Handoff (Codex review, rev 1, 2026-11-07)
+- **Task:** TASK-0151 Quests XP UI (standard; rows QX-T3, QX-T3M). Receiver: Codex, independent review only, no edits.
+- **Workspace:** `/Users/jg/Desktop/Rg1-worktrees/TASK-0151`, branch `task/TASK-0151-quests-xp-ui` (PR #226). Range
+  `d1314ad..HEAD` (code `2d6baaa`, `fbc45b3`, rev 1 `db12e2b`; the head is this handoff commit). Code: `git diff d1314ad..HEAD -- games/mathshow`.
+- **Inputs:** [[SYS-Quests-And-XP]], [[AUD-20261107-TASK-0151-01]], "Implementation record" above, `QuestService.luau` and `Net.luau` (TASK-0150, unchanged).
+- **Focus:**
+  - `client/Menu/Quests.luau` `claim` / `request` / `parse` / `onState`: only the server's own identity is echoed, never XP or progress; stale and malformed pushes ignored?
+  - `Quests.luau` `announce` / `pump` and the ShowState + RoundState hold: correct toasts only within one day and board; can the queue or hold get stuck?
+  - `client/Menu/init.luau` subscriber + `View.luau` `buildQuests` / `playerCard`: re-render keeps focus and does not disturb pad-opened screens (`Menu.open` / `closePadScreen`) or other screens?
+  - `client/Hud/Nameplates.luau`: fails inert, no leaks across respawn and leave; `ModePadConfig` Daily -> `quests` with `ModePadController`.
+- **Constraints:** no uploads, publishing, DataStore or Studio writes. Rojo is stopped; Studio (MathShow.rbxl) is idle in Edit and nobody holds it.
+- **Known:** no non-task failures (check.sh, validate_vault green). Unverified: a real claim round trip through gameplay, and the toast hold during a live question (code path only).
+- **Report back:** verdict, findings with file:line, checks run, what remains unverified.
+
 ## Audits
 - [[AUD-20261107-TASK-0151-01]]: PASS with findings (2 minor, 1 nit), Sonnet auditor at `fbc45b3`. F1 and F2 fixed in
   revision 1; F3 (noop handler list) kept, same pattern as ModePadController and Watching.
