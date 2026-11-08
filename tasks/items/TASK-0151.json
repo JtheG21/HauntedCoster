@@ -2,7 +2,7 @@
   "id": "TASK-0151",
   "game": "GAME-004",
   "title": "MathShow Quests XP UI",
-  "status": "backlog",
+  "status": "in_progress",
   "tier": "standard",
   "owner_agent": "claude-code",
   "files_owned": [
@@ -11,7 +11,11 @@
     "games/mathshow/src/shared/LedgerRules.luau",
     "tasks/items/TASK-0151.json",
     "03 Games/GAME-004 MathShow/06 Tasks/TASK-0151-MathShow-Quests-XP-UI.md",
-    "games/mathshow/src/client/Hub/ModePadController.luau"
+    "games/mathshow/src/client/Hub/ModePadController.luau",
+    "games/mathshow/src/shared/ModePadConfig.luau",
+    "games/mathshow/src/server/Services/ModePadService.luau",
+    "games/mathshow/src/client/init.client.luau",
+    "games/mathshow/src/client/Hud/Nameplates.luau"
   ],
   "depends_on": [
     "TASK-0150"
@@ -21,7 +25,22 @@
     "Menu quests panel, level badge, XP bar and Reveal toast built in code from MenuTheme; reducedMotion respected; text-fit ledger updated and green on all viewports; Studio visual check on phone and desktop."
   ],
   "evidence": [],
-  "notes": "Backlog; waiting for the Codex design review of SYS-Quests-And-XP and jg's plan rows. No plan approval yet.",
+  "notes": "Plan approved by jg (row QX-T3, 2026-11-07): QUESTS screen, level card, toasts, nameplates, Daily pad -> QUESTS. Merge after a Codex PASS on the exact head (row QX-T3M). ModeRules joins files_owned only if routing needs it.",
   "note_path": "03 Games/GAME-004 MathShow/06 Tasks/TASK-0151-MathShow-Quests-XP-UI.md",
-  "risk": "low"
+  "risk": "low",
+  "approved_by": "jg",
+  "history": [
+    {
+      "time": "2026-11-07T16:46:41",
+      "from": "backlog",
+      "to": "ready",
+      "note": "plan approved by jg"
+    },
+    {
+      "time": "2026-11-07T16:46:41",
+      "from": "ready",
+      "to": "in_progress",
+      "note": "started"
+    }
+  ]
 }

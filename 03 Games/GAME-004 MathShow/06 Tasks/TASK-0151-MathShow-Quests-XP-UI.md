@@ -3,7 +3,7 @@ id: TASK-0151
 title: "MathShow Quests XP UI"
 type: task
 project: GAME-004
-status: backlog
+status: in_progress
 priority: medium
 risk: low
 owner: executor
