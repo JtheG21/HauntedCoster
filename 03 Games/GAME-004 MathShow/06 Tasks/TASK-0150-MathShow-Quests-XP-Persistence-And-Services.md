@@ -107,5 +107,9 @@ Range 81f2f8b..HEAD. Owned files only: `ProfileRules.luau`, `ProfileService.luau
 - [[AUD-20261107-QUESTS-XP-DESIGN-01]]: design review, DESIGN CHANGES REQUIRED.
 - [[AUD-20261107-QUESTS-XP-DESIGN-02]]: design re-review, DESIGN CHANGES REQUIRED; replacement bullets applied (QX-D4).
 - [[AUD-20261107-TASK-0150-01]]: Codex code review of 81f2f8b, FAIL (F1-F5); revision 1 above.
+- Codex delta re-audit of revision 1 at d44a6de (2026-11-07, reported in chat, no AUD file written): PASS. F1-F5 closed, no new
+  actionable findings; check.sh 13/13; independent Lune probes for Skill completion/error, Blitz day attribution, rollover
+  recovery, missing-XP rejection and stale claims passed. Not run by Codex: Studio or DataStore tests. Still out of scope:
+  the Skill cooldown save order on a final-reveal leave.
 
 ## Outcome
